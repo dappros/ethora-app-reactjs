@@ -11,6 +11,17 @@ export function WebApp() {
                 <IconInfo />
                 Self-host option: just clone our engine from github, build and run it on your server.
             </p>
+            <div className="domain-input mb-16">
+                <input placeholder='Your App Name' type="text" className="gen-input input-medium" name="" id="domain-input" />
+                <label htmlFor="domain-input">.ethoradev.com</label>
+            </div>
+            <div className="flex mb-32">
+                <div className="domain-input">
+                    <input placeholder='Your App Name' type="text" className="gen-input input-medium" name="" id="domain-input" />
+                    <label htmlFor="domain-input">.com</label>
+                </div>
+            </div>
+
             <p className="subtitle1">Google sign-in and Firebase analytics</p>
             <p className="body2">Firebase credentials are required to allow your users to sign on via Google Account. Also this allows you to track your app usage analytics in your Firebase console. These options will be disabled if credentials are not provided.</p>
             <p className="info mb-16">

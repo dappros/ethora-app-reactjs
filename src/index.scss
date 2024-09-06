@@ -139,7 +139,7 @@ input:focus:-ms-input-placeholder {
 }
 
 .input-medium {
-    padding: 8px 12px;
+    padding: 8px 16px;
 }
 
 .gen-input-large:focus {
@@ -204,6 +204,10 @@ input:focus:-ms-input-placeholder {
 
 .ml-8 {
     margin-left: 8px;
+}
+
+.mb-0 {
+    margin-bottom: 0;
 }
 
 .flex {
