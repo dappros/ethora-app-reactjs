@@ -1,0 +1,39 @@
+.settings-appearance {
+    display: flex;
+    padding: 0 16px;
+    width: 100%;
+    .left {
+        margin-right: 40px;
+        display: flex;
+
+        .inputs {
+            width: 416px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-title {
+            color: #141414;
+            font-size: 16px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+    }
+
+    .right {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    .settings-appearance {
+        flex-direction: column;
+
+        .left {
+            justify-content: center;
+        }
+    }
+}

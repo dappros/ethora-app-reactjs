@@ -1,0 +1,14 @@
+.safari-preview {
+    width: 469px;
+    height: 284px;
+    background-image: url('../../assets/Safari.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+@media only screen and (max-width: 480px) {
+    .safari-preview {
+        width: 294px;
+        height: 178px;
+    }
+}

@@ -1,0 +1,14 @@
+.iphone-preview {
+    width: 190px;
+    height: 368px;
+    background-image: url('../../assets/iPhone-13Mini.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+@media only screen and (max-width: 480px) {
+    .iphone-preview {
+        width: 100px;
+        height: 216px;
+    }
+}

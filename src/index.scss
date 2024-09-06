@@ -1,0 +1,212 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background-color: #F5F7F9;
+}
+
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+label,
+p,
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 0;
+}
+
+ul li {
+    list-style: none;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+button:focus,
+input:focus,
+textarea:focus {
+    outline: none;
+}
+
+body {
+    width: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+}
+
+/* placeholder */
+input::-webkit-input-placeholder {
+    transition: .2s;
+    font-family: 'Open Sans', sans-serif;
+}
+
+input::-moz-placeholder {
+    transition: .2s;
+    font-family: 'Open Sans', sans-serif;
+}
+
+input:-moz-placeholder {
+    transition: .2s;
+    font-family: 'Open Sans', sans-serif;
+}
+
+input:-ms-input-placeholder {
+    transition: .2s;
+    font-family: 'Open Sans', sans-serif;
+}
+
+input:focus::-webkit-input-placeholder {
+    color: transparent;
+}
+
+input:focus::-moz-placeholder {
+    color: transparent;
+}
+
+input:focus:-moz-placeholder {
+    color: transparent;
+}
+
+input:focus:-ms-input-placeholder {
+    color: transparent;
+}
+
+.gen-primary-btn {
+    background-color: #0052CD;
+    color: #FFFFFF;
+    border-radius: 16px;
+    padding: 12px 48px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.gen-primary-btn:hover {
+    background-color: #0040B6;
+}
+
+.gen-primary-btn.disabled {
+    background-color: #D9D9D9;
+}
+
+.gen-primary-btn.middle {
+    padding: 8px 48px;
+}
+
+.gen-secondary-btn {
+    border: 1px solid #0052CD;
+    color: #0052CD;
+    border-radius: 16px;
+    padding: 12px 48px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.gen-secondary-btn.medium {
+    padding: 8px 48px;
+}
+
+.gen-secondary-btn:hover {
+    background-color: #F3F6FC;
+}
+
+.gen-input {
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 16px;
+    padding: 12px 16px;
+    background-color: #F5F7F9;
+    border: 1px solid transparent;
+}
+
+.input-large {
+    padding: 12px 16px;
+}
+
+.input-medium {
+    padding: 8px 12px;
+}
+
+.gen-input-large:focus {
+    border: 1px solid #0052CD;
+}
+
+.info {
+    background-color: #F3F6FC;
+    border-radius: 8px;
+    padding: 8px 8px 8px 32px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    svg {
+        position: absolute;
+        left: 10px;
+        path {
+            stroke: #0052CD;
+        }
+        
+    }
+}
+
+.subtitle2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #141414;
+    margin-bottom: 8px;
+}
+
+.subtitle1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #141414;
+}
+
+.caption {
+    font-size: 12px;
+    color: #8C8C8C;
+    margin-bottom: 16px;
+}
+
+.body2 {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.mb-16 {
+    margin-bottom: 16px;
+}
+
+.mb-6 {
+    margin-bottom: 6px;
+}
+
+.mb-32 {
+    margin-bottom: 32px;
+}
+
+.ml-8 {
+    margin-left: 8px;
+}
+
+.flex {
+    display: flex;
+}
+

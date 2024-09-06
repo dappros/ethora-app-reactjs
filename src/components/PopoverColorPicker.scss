@@ -1,0 +1,16 @@
+.popover-color-picker {
+    padding: 8px 16px;
+    background-color: #F5F7F9;
+    border-radius: 12px;
+
+    button {
+        display: flex;
+        width: 100%;
+
+        .left {
+            height: 24px;
+            border-radius: 8px;
+            width: 100%;
+        }
+    }
+}

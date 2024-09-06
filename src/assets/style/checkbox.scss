@@ -1,0 +1,34 @@
+.checkbox {
+    display: flex;
+    cursor: pointer;
+
+    .checkbox-input {
+        width: 16px;
+        height: 16px;
+        border: 1px solid #0052CD;
+        display: inline-block;
+        border-radius: 4px;
+    }
+
+    .checkbox-input[data-checked] {
+        background-color: #0052CD;
+        position: relative;
+    }
+
+    .checkbox-input[data-checked]:after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 8px;
+        background-image: url('../checkbox-marked.svg');
+        top: 3px;
+        left: 2px;
+    }
+
+    label {
+        font-size: 14px;
+        margin-left: 8px;
+        cursor: pointer;
+    }
+
+}

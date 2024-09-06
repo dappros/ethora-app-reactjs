@@ -1,0 +1,31 @@
+.mobile-menu-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: stretch;
+    background-color: rgba(0, 0, 0, 0.4);
+
+    .inner {
+        padding: 24px 16px;
+        background-color: white;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .mobile-menu-modal-top, .mobile-menu-modal-bottom {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

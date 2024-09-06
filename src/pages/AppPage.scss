@@ -1,0 +1,295 @@
+.app-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    background-color: #F5F7F9;
+    width: 100%;
+    max-width: 1920px;
+    padding: 16px;
+    position: relative;
+
+    .app-menu {
+        width: 80px;
+        position: fixed;
+        top: 16px;
+        min-height: 640px;
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        margin-right: 16px;
+        padding: 8px;
+        display: flex;
+    }
+
+    .app-menu-desktop {
+        top: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .menu-desktop-top,.menu-desktop-bottom {
+        display: flex;
+        flex-direction: column;
+
+        .app-menu-btn {
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .app-menu-btn.active {
+            background-color: #F3F6FC;
+            color: #0052CD;
+        }
+    }
+
+    .app-menu-mobile {
+        display: none;
+    }
+
+    .app-content {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .app-content-header {
+            margin-bottom: 16px;
+            padding-left: 32px;
+            padding-right: 32px;
+            display: flex;
+            justify-content: space-between;
+            margin-left: 96px;
+        }
+
+        .app-content-header-actions {
+            display: flex;
+        }
+
+        .app-content-header-actions a {
+            width: 200px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #0052CD;
+        }
+
+        .app-content-header-actions a:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+
+        .app-content-header-actions a:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .app-content-header-actions a.active {
+            color: #FFFFFF;
+            background-color: #0052CD;
+        }
+
+        .app-content-header-title {
+            font-size: 34px;
+            margin-right: 20px;
+        }
+    
+        .app-content-body {
+            flex: 1;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            padding: 16px;
+            margin-left: 96px;
+        }
+
+        .app-content-body-page {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .app-content-body-header {
+            margin-bottom: 33px;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+
+            .left {
+                font-size: 24px;
+            }
+
+            .right {
+                display: flex;
+            }
+
+
+        }
+
+        .app-content-body-header:after {
+            content: "";
+            position: absolute;
+            border-bottom: 1px solid #F0F0F0;
+            width: 100%;
+            bottom: -14px;
+            left: 0;
+        }
+    }
+}
+
+.primary-btn {
+    background-color: #0052CD;
+    font-size: 16px;
+    padding: 8px 31px 8px 63px;
+    border-radius: 16px;
+    color: #ffff;
+    cursor: pointer;
+    position: relative;
+}
+
+.primary-btn::before {
+    content: url('../assets/AddOutlined.svg');
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 4px;
+    left: 32px;
+}
+
+.secondary-btn {
+    border-radius: 16px;
+    border: 1px solid #0052CD;
+    color: #0052CD;
+    padding: 8px 56px 8px 24px;
+}
+
+@media only screen and (max-width: 768px) {
+    .app-page {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+
+        .app-content {
+            .app-content-header {
+                flex-direction: column;
+                margin-left: 0;
+            }
+            
+            .app-content-body {
+                margin-left: 0;
+            }
+
+            .app-content-body-page {
+                flex-direction: column-reverse;
+
+                .app-content-body-header {
+                    .left {
+                        display: none;
+                    }
+
+                    .right {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+
+        .app-menu {
+            top: 0;
+            position: relative;
+            width: 100%;
+            min-height: auto;
+            height: 72px;
+            padding: 16px;
+            border-radius: 0;
+        }
+
+        .app-menu-desktop {
+            display: none;
+        }
+
+        .app-menu-mobile {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+
+        .app-content-header-title {
+            margin-bottom: 16px;
+        }
+
+        .app-content-header-actions {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .app-content-header-actions a {
+            flex: 1;
+        }
+
+        .app-content {
+            width: calc(100% - 32px);
+            min-height: calc(100% - 32px - 72px);
+            margin: 16px;
+        }
+    }
+
+    .primary-btn {
+        padding: 20px;
+        // padding: 8px 31px 8px 63px;
+
+        .content {
+            display: none;
+        }
+    }
+
+    .primary-btn::before {
+        top: 9px;
+        left: 9px;
+    }
+}
+
+.app-menu-mobile-btn {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    border-radius: 12px;
+    width: 100%;
+
+    svg {
+        margin-right: 8px;
+    }
+}
+
+.app-menu-mobile-btn.active {
+    background-color: #F3F6FC;
+    color: #0052CD;
+}
+
+.app-menu-mobile-btn + .app-menu-mobile-btn {
+    margin-top: 9px;
+}
+
+.app-menu-mobile-btn + .app-menu-mobile-btn::before {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -5px;
+    content: "";
+    border-bottom: 1px solid #F0F0F0;
+}
