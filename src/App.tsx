@@ -23,6 +23,8 @@ import { AdminAppPage } from "./pages/Admin/App/AdminAppPage";
 import { AdminAppUsers } from "./pages/Admin/App/AdminAppUsers";
 import { AdminAppSettings } from "./pages/Admin/App/AdminAppSettings";
 import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
+import { Auth } from "./pages/Auth/Auth";
+import { ForgotPassword } from "./pages/Auth/Forgot";
 
 function App() {
   const currentApp = useAppStore(s => s.currentApp)
@@ -38,8 +40,11 @@ function App() {
       <>
         <Routes>
           <Route path="/" element={<Navigate to="/app" />} />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
+          <Route path="/auth" element = {<Auth />}>
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="forgot" element={<ForgotPassword />} />
+          </Route>
           <Route
             path="/app"
             element={

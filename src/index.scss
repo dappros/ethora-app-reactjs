@@ -8,8 +8,8 @@
     width: 100%;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    background-color: #F5F7F9;
+    // justify-content: center;
+    // background-color: #F5F7F9;
 }
 
 *::before,
@@ -91,6 +91,7 @@ input:focus:-ms-input-placeholder {
     background-color: #0052CD;
     color: #FFFFFF;
     border-radius: 16px;
+    font-size: 16px;
     padding: 12px 48px;
     cursor: pointer;
     width: 100%;
@@ -115,6 +116,7 @@ input:focus:-ms-input-placeholder {
     padding: 12px 48px;
     cursor: pointer;
     width: 100%;
+    font-size: 16px;
 }
 
 .gen-secondary-btn.medium {
@@ -144,6 +146,14 @@ input:focus:-ms-input-placeholder {
 
 .gen-input-large:focus {
     border: 1px solid #0052CD;
+}
+
+.error .gen-input-large {
+    border: 1px solid red;
+}
+
+.error .input-helper {
+    color: red;
 }
 
 .info {
@@ -190,6 +200,13 @@ input:focus:-ms-input-placeholder {
     margin-bottom: 8px;
 }
 
+.body-link {
+    color: #0052CD;
+    font-size: 14px;
+    text-decoration: underline;
+    display: inline-block;
+}
+
 .mb-16 {
     margin-bottom: 16px;
 }
@@ -202,6 +219,10 @@ input:focus:-ms-input-placeholder {
     margin-bottom: 32px;
 }
 
+.mb-24 {
+    margin-bottom: 24px;
+}
+
 .ml-8 {
     margin-left: 8px;
 }
@@ -212,5 +233,9 @@ input:focus:-ms-input-placeholder {
 
 .flex {
     display: flex;
+}
+
+.text-center {
+    text-align: center;
 }
 

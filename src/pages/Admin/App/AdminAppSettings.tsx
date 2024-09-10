@@ -11,17 +11,11 @@ import { HomeScreen } from "./SettingsTab/HomeScreen";
 import { Menu } from "./SettingsTab/Menu";
 import { Chats } from "./SettingsTab/Chats";
 import { Visibility } from "./SettingsTab/Visibility";
-import { useSwipeable } from "react-swipeable";
 
 export function AdminAppSettings() {
     let { appId } = useParams()
     const apps = useAppStore(s => s.apps)
     const app = apps.find((app) => app._id === appId)
-
-    const handlers = useSwipeable({
-        onSwipedLeft: (eventData) => console.log("Swipe Left", eventData),
-        onSwipedRight: (eventData) => console.log("Swipe Right", eventData)
-    });
 
     if (!app) {
         return null
@@ -40,7 +34,7 @@ export function AdminAppSettings() {
                 </div>
             </div>
             <TabGroup className="admin-app-settings">
-                <TabList className="tabs" {...handlers}>
+                <TabList className="tabs">
                     <Tab key="Appearance">Appearance</Tab>
                     <Tab key="Sign-on options">Sign-on options</Tab>
                     <Tab key="Web app">Web app</Tab>

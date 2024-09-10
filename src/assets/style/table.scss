@@ -1,0 +1,54 @@
+.app-table {
+    padding: 22px 24px;
+    border: 1px solid #F0F0F0;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    overflow: hidden;
+
+
+
+    .table-wrapper {
+        overflow: scroll;
+        width: 100%;
+    }
+
+    .title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        min-width: 470px;
+    }
+
+    table {
+        width: 100%;
+        display: table;
+        border-spacing: 2px;
+        border-collapse: separate;
+        box-sizing: border-box;
+        text-indent: 0;
+        text-align: left;
+        border-collapse: collapse;
+    }
+
+    thead {
+        // border-block-end: 2px solid;
+        background: whitesmoke;
+    }
+
+    th, td {
+        padding: 20px 16px;
+    }
+
+    tr.selected {
+        background-color: #E7EDF9;
+    }
+
+    tr:hover {
+        background-color: #F5F7F9;
+    }
+}
+
+.table-wrapper::-webkit-scrollbar {
+    display: none;
+}
