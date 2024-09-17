@@ -2,14 +2,33 @@ import { useState } from 'react'
 import { Checkbox, Field, Label } from '@headlessui/react'
 
 import "./SignonOptions.scss"
+import { ModelApp } from '../../../../models'
 
-export function SignonOptions() {
-    const [enableEmail, setEnableEmail] = useState(false)
-    const [enableGoogle, setEnableGoogle] = useState(false)
-    const [enableApple, setEnableApple] = useState(false)
-    const [enableFacebook, setEnableFacebook] = useState(false)
-    const [enableMetamask, setEnableMetamask] = useState(false)
-    const [enableCustom, setEnableCustom] = useState(false)
+interface Props {
+    enableEmail: boolean
+    setEnableEmail: (on: boolean) => void
+    enableGoogle: boolean
+    setEnableGoogle: (on: boolean) => void
+    enableApple: boolean
+    setEnableApple: (on: boolean) => void
+    enableFacebook: boolean
+    setEnableFacebook: (on: boolean) => void
+    enableMetamask: boolean
+    setEnableMetamask: (on: boolean) => void
+}
+
+export function SignonOptions({
+    enableEmail,
+    setEnableEmail,
+    enableGoogle,
+    setEnableGoogle,
+    enableApple,
+    setEnableApple,
+    enableFacebook,
+    setEnableFacebook,
+    enableMetamask,
+    setEnableMetamask
+}: Props) {
 
     return (
         <div className="settings-signon">
@@ -95,8 +114,7 @@ export function SignonOptions() {
             <Field className="checkbox  mb-6">
                 <Checkbox
                     className="checkbox-input"
-                    checked={enableCustom}
-                    onChange={setEnableCustom}
+                    disabled
                 >
                 </Checkbox>
                 <Label className="label">

@@ -2,7 +2,20 @@ import { Textarea } from '@headlessui/react'
 import { IconInfo } from "../../../../components/Icons/IconInfo"
 import "./WebApp.scss"
 
-export function WebApp() {
+interface Props {
+    domainName: string,
+    setDomainName: (s: string) => void,
+    firebaseWebConfigString: string,
+    setFirebaseWebConfigString: (s: string) => void
+}
+
+export function WebApp(
+    {
+        domainName, 
+        setDomainName,
+        firebaseWebConfigString,
+        setFirebaseWebConfigString
+    }: Props) {
     return (
         <div className="settings-web-app">
             <p className="subtitle1">Domain name</p>
@@ -12,7 +25,7 @@ export function WebApp() {
                 Self-host option: just clone our engine from github, build and run it on your server.
             </p>
             <div className="domain-input mb-16">
-                <input placeholder='Your App Name' type="text" className="gen-input input-medium" name="" id="domain-input" />
+                <input value={domainName} onChange={(e) => setDomainName(e.target.value)} placeholder='Your App Name' type="text" className="gen-input input-medium" name="" id="domain-input" />
                 <label htmlFor="domain-input">.ethoradev.com</label>
             </div>
             <div className="flex mb-32">
@@ -30,6 +43,8 @@ export function WebApp() {
             </p>
             <Textarea
                 className="firebase"
+                value={firebaseWebConfigString}
+                onChange={(e) => setFirebaseWebConfigString(e.target.value)}
                 placeholder='{
 apiKey: "AIzaassdcefSyDgasd.-WrjLQadoYf0ads12dscxzsi_qO4g",
 authDomain: "ethora-668e9.firebaseapp.com",

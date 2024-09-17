@@ -42,3 +42,22 @@ export function httpGetApps() {
     return http.get('/apps', {headers: {Authorization: httpTokens.token}})
 }
 
+export function httpPostFile(file: File) {
+    let fd = new FormData()
+    fd.append('files', file)
+    return http.post('/files', fd, {headers: {Authorization: httpTokens.token}})
+}
+
+export function httpGetUsers(
+    appId: string,
+    limit: number = 10,
+    offset: number = 0,
+    orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+    order: 'asc' | 'desc' = 'asc'
+) 
+{
+    return http.get(
+        `/users/${appId}?limit=${limit}&offset=${offset}&orderBy=${orderBy}&order=${order}`,
+        {headers: {Authorization: httpTokens.token}}
+    )
+}

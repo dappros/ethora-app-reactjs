@@ -10,7 +10,7 @@ type ImmerStateCreator<T> = StateCreator<
 
 export interface AppSliceInterface extends ModelState {
   doSetUser: (user: ModelCurrentUser) => void
-  doSetCurrentApp: (app: ModelCurrentApp) => void
+  doSetCurrentApp: (app: ModelApp) => void
   doAddApp: (app: ModelApp) => void
   doSetApps: (apps: Array<ModelApp>) => void
 }
@@ -27,7 +27,7 @@ export const createAppSlice: ImmerStateCreator<
       s.currentUser = user
     })
   },
-  doSetCurrentApp: (app: ModelCurrentApp | null) => {
+  doSetCurrentApp: (app: ModelApp | null) => {
     set((s) => {
       s.currentApp = app
     })

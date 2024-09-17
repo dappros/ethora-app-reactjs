@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ApplicationPreview } from "../../components/ApplicationPreview/ApplicationPreview";
 import { ApplicationStarterInf } from "../../components/ApplicationStarterInf/ApplicationStarterInf";
-import { ReadyToCreateFirstAppModal } from "../../components/modal/ReadyToCreateFirstAppModal";
+// import { ReadyToCreateFirstAppModal } from "../../components/modal/ReadyToCreateFirstAppModal";
 import { NewAppModal } from "../../components/modal/NewAppModal";
 import { useAppStore } from "../../store/useAppStore";
 

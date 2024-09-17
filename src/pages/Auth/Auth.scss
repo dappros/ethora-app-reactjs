@@ -5,7 +5,8 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    background-image: url('../../assets/BG.png');
+    background-color: var(--bg-auth-background);
+    background-image: url('../../assets/_BG.png');
     background-size: cover;
 
     .auth-page-container {

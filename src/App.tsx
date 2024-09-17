@@ -1,7 +1,7 @@
 import {
   Routes,
   Route,
-  Navigate,
+  Navigate
 } from "react-router-dom";
 import { actionGetConfig } from './actions';
 import { RequireAuth } from './components/RequireAuth';
@@ -25,13 +25,22 @@ import { AdminAppSettings } from "./pages/Admin/App/AdminAppSettings";
 import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
 import { Auth } from "./pages/Auth/Auth";
 import { ForgotPassword } from "./pages/Auth/Forgot";
+import hexToRgba from "hex-to-rgba";
 
 function App() {
   const currentApp = useAppStore(s => s.currentApp)
-  
+
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME)
   }, [])
+
+  useEffect(() => {
+    if (currentApp) {
+      const primaryColor = currentApp.primaryColor
+      document.documentElement.style.setProperty('--bg-brand-primary', primaryColor)
+      document.documentElement.style.setProperty('--bg-auth-background', hexToRgba(primaryColor, '0.05'))
+    }
+  }, [currentApp])
 
   if (!currentApp) {
     return <Loading></Loading>
@@ -57,7 +66,7 @@ function App() {
             <Route path="admin" element={<AdminAppsBillingPage />}>
               <Route path="apps" element={<AdminApps />} />
               <Route path="billing" element={<AdminBilling />} />
-              
+
             </Route>
             <Route path="admin/application" element={<AdminAppPage />}>
               <Route path=":appId" element={<AdminApp />}>

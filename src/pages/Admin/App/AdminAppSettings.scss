@@ -29,7 +29,7 @@
 
         button[data-selected] {
             background-color: #F3F6FC;
-            color: #0052CD;
+            color: var(--bg-brand-primary);
         }
     }
 
@@ -62,9 +62,9 @@
             }
 
             button[data-selected] {
-                border-bottom: 1px solid #0052CD;
+                border-bottom: 1px solid var(--bg-brand-primary);
                 background-color: #FFFFFF;
-                color: #0052CD;
+                color: var(--bg-brand-primary);
             }
 
             button + button::before {

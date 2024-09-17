@@ -54,8 +54,8 @@
         }
 
         .app-menu-btn.active {
-            background-color: #F3F6FC;
-            color: #0052CD;
+            background-color: var(--bg-auth-background);
+            color: var(--bg-brand-primary);
         }
     }
 
@@ -88,7 +88,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 1px solid #0052CD;
+            border: 1px solid var(--bg-brand-primary);
         }
 
         .app-content-header-actions a:first-child {
@@ -103,7 +103,7 @@
 
         .app-content-header-actions a.active {
             color: #FFFFFF;
-            background-color: #0052CD;
+            background-color: var(--bg-brand-primary);
         }
 
         .app-content-header-title {
@@ -156,7 +156,7 @@
 }
 
 .primary-btn {
-    background-color: #0052CD;
+    background-color: var(--bg-brand-primary);
     font-size: 16px;
     padding: 8px 31px 8px 63px;
     border-radius: 16px;
@@ -176,8 +176,8 @@
 
 .secondary-btn {
     border-radius: 16px;
-    border: 1px solid #0052CD;
-    color: #0052CD;
+    border: 1px solid var(--bg-brand-primary);
+    color: var(--bg-brand-primary);
     padding: 8px 56px 8px 24px;
 }
 
@@ -287,7 +287,7 @@
 
 .app-menu-mobile-btn.active {
     background-color: #F3F6FC;
-    color: #0052CD;
+    color: var(--bg-brand-primary);
 }
 
 .app-menu-mobile-btn + .app-menu-mobile-btn {

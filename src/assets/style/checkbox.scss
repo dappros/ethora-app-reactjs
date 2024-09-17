@@ -5,13 +5,13 @@
     .checkbox-input {
         width: 16px;
         height: 16px;
-        border: 1px solid #0052CD;
+        border: 1px solid var(--bg-brand-primary);
         display: inline-block;
         border-radius: 4px;
     }
 
     .checkbox-input[data-checked] {
-        background-color: #0052CD;
+        background-color: var(--bg-brand-primary);
         position: relative;
     }
 
@@ -23,6 +23,15 @@
         background-image: url('../checkbox-marked.svg');
         top: 3px;
         left: 2px;
+    }
+
+    .checkbox-input[data-disabled] {
+        border: 1px solid #D9D9D9;
+    }
+
+    .checkbox-input[data-disabled].checkbox-input[data-checked] {
+        background-color: #D9D9D9;
+        border: 1px solid #D9D9D9;
     }
 
     label {

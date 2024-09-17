@@ -28,16 +28,19 @@ export interface ModelApp {
     creatorId: string
     defaultAccessAssetsOpen: boolean
     defaultAccessProfileOpen: boolean
-    defaultRooms: Array<string>
+    defaultRooms: Array<{jid: string, pinned: boolean}>
     displayName: string
     domainName: string
     isAllowedNewAppCreate: boolean
     isBaseApp: boolean
     parentAppId: string
     primaryColor: string
-    secondaryColor: string
     signonOptions: Array<string>
-    logoImage?: string
+    logoImage: string
+    sublogoImage: string
+    appTagline: string
+    firebaseWebConfigString?: string
+
     stats: {
         recentlyApiCalls: number,
         recentlyFiles: number,
@@ -57,12 +60,81 @@ export interface ModelApp {
     },
     updatedAt: string
     usersCanFree: boolean
+    _id: string,
+    afterLoginPage: string,
+    availableMenuItems: {
+        chats: boolean,
+        profile: boolean,
+        settings: boolean
+    },
+    googleServicesJson: string,
+    googleServiceInfoPlist: string
+}
+
+export interface ModelUserACL {
+    appId: string
+    createdAt: string
+    updatedAt: string
+    application: {
+        appCreate: {
+            create: boolean
+        },
+        appPush: {
+            craete: boolean
+            read: boolean
+            update: boolean
+            admin: boolean
+        },
+        appSettings: {
+            admin: boolean
+            read: boolean
+            update: boolean
+        },
+        appStats: {
+            admin: boolean
+            read: boolean
+        },
+        appTokens: {
+            admin: boolean
+            create: boolean
+            read: boolean
+            update: boolean
+        },
+        appUsers: {
+            admin: boolean
+            create: boolean
+            delete: boolean
+            read: boolean
+            update: boolean
+        }
+    }
+}
+
+export interface ModelAppUser {
     _id: string
+    appId: string
+    acl: ModelUserACL
+    authMethod: string
+    createdAt: string
+    defaultWallet: {
+        walletAddress: string
+    }
+    email: string
+    firstName: string
+    lastName: string
+    homeScreen: string
+    isAgreeWithTerms: boolean
+    isAssetsOpen: boolean
+    isProfileOpen: boolean
+    lastSeen: string
+    profileImage: string
+    tags: Array<string>
+    updatedAt: string
 }
 
 export interface ModelState {
     inited: boolean
     currentUser: ModelCurrentUser | null
-    currentApp: ModelCurrentApp | null
+    currentApp: ModelApp | null
     apps: Array<ModelApp>
 }

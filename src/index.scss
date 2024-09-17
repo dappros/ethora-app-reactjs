@@ -1,3 +1,11 @@
+:root {
+    --bg-brand-primary: rgba(0, 82, 205, 1);
+    --bg-gray-disabled: #D4D4D4;
+
+    --bg-brand-primary-preview: rgba(0, 82, 205, 1);
+    --bg-auth-background: rgba(0, 82, 205, 0.05)
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -88,18 +96,40 @@ input:focus:-ms-input-placeholder {
 }
 
 .gen-primary-btn {
-    background-color: #0052CD;
+    background-color: var(--bg-brand-primary);
     color: #FFFFFF;
     border-radius: 16px;
     font-size: 16px;
     padding: 12px 48px;
     cursor: pointer;
     width: 100%;
+    overflow: hidden;
+    position: relative;
 }
 
 .gen-primary-btn:hover {
-    background-color: #0040B6;
+    filter: brightness(75%)
 }
+
+.gen-primary-btn:after {
+    content: "";
+    background: #f1f1f1;
+    display: block;
+    position: absolute;
+    padding-top: 300%;
+    padding-left: 350%;
+    margin-left: -120px !important;
+    margin-top: -120%;
+    opacity: 0;
+    transition: all 0.8s
+}
+
+.gen-primary-btn:active:after {
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    transition: 0s
+  }
 
 .gen-primary-btn.disabled {
     background-color: #D9D9D9;
@@ -110,8 +140,8 @@ input:focus:-ms-input-placeholder {
 }
 
 .gen-secondary-btn {
-    border: 1px solid #0052CD;
-    color: #0052CD;
+    border: 1px solid var(--bg-brand-primary);
+    color: var(--bg-brand-primary);
     border-radius: 16px;
     padding: 12px 48px;
     cursor: pointer;
@@ -145,7 +175,7 @@ input:focus:-ms-input-placeholder {
 }
 
 .gen-input-large:focus {
-    border: 1px solid #0052CD;
+    border: 1px solid var(--bg-brand-primary);
 }
 
 .error .gen-input-large {
@@ -154,6 +184,12 @@ input:focus:-ms-input-placeholder {
 
 .error .input-helper {
     color: red;
+}
+
+.accent-svg {
+    path {
+        stroke: var(--bg-brand-primary)
+    }
 }
 
 .info {
@@ -169,7 +205,7 @@ input:focus:-ms-input-placeholder {
         position: absolute;
         left: 10px;
         path {
-            stroke: #0052CD;
+            stroke: var(--bg-brand-primary);
         }
         
     }
@@ -201,10 +237,14 @@ input:focus:-ms-input-placeholder {
 }
 
 .body-link {
-    color: #0052CD;
+    color: var(--bg-brand-primary);
     font-size: 14px;
     text-decoration: underline;
     display: inline-block;
+}
+
+.mr-16 {
+    margin-right: 16px;
 }
 
 .mb-16 {
@@ -231,6 +271,10 @@ input:focus:-ms-input-placeholder {
     margin-bottom: 0;
 }
 
+.hidden {
+    display: none;
+}
+
 .flex {
     display: flex;
 }
@@ -238,4 +282,3 @@ input:focus:-ms-input-placeholder {
 .text-center {
     text-align: center;
 }
-

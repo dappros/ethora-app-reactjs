@@ -2,7 +2,7 @@
     display: flex;
     padding: 0 16px;
     width: 100%;
-    .left {
+    & > .left {
         margin-right: 40px;
         display: flex;
 
@@ -32,7 +32,7 @@
     .settings-appearance {
         flex-direction: column;
 
-        .left {
+        & > .left {
             justify-content: center;
         }
     }

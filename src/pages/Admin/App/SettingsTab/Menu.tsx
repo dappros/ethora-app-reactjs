@@ -1,19 +1,29 @@
 import { Checkbox, Field, Label } from "@headlessui/react"
 import "./Menu.scss"
-import { useState } from "react"
 
-export function Menu() {
-    const [enableProfile, setEnableProfile] = useState(false)
-    const [enableChats, setEnableChats] = useState(false)
-    const [enableSettings, setEnableSettings] = useState(false)
+interface MenuItems {
+    chats: boolean,
+    profile: boolean,
+    settings: boolean
+}
+
+interface Props {
+    availableMenuItems: MenuItems,
+    setAvailableMenuItems: (items: MenuItems) => void
+}
+
+export function Menu({availableMenuItems, setAvailableMenuItems}: Props) {
+    const onChange = (isOn: boolean, name: 'profile' | 'chats' | 'settings') => {
+        setAvailableMenuItems({...availableMenuItems, [name]: isOn})
+    }
     return (
         <div className="settings-menu">
             <p className="body2 mb-32">Manage items that are displayed in your App menu.</p>
             <Field className="checkbox  mb-6">
                 <Checkbox
                     className="checkbox-input"
-                    checked={enableProfile}
-                    onChange={setEnableProfile}
+                    checked={availableMenuItems.profile}
+                    onChange={(isOn) => onChange(isOn, 'profile')}
                 >
                     
                 </Checkbox>
@@ -25,8 +35,8 @@ export function Menu() {
             <Field className="checkbox  mb-6">
                 <Checkbox
                     className="checkbox-input"
-                    checked={enableChats}
-                    onChange={setEnableChats}
+                    checked={availableMenuItems.chats}
+                    onChange={(isOn) => onChange(isOn, 'chats')}
                 >
                     
                 </Checkbox>
@@ -38,8 +48,8 @@ export function Menu() {
             <Field className="checkbox  mb-6">
                 <Checkbox
                     className="checkbox-input"
-                    checked={enableSettings}
-                    onChange={setEnableSettings}
+                    checked={availableMenuItems.settings}
+                    onChange={(isOn) => onChange(isOn, 'settings')}
                 >
                     
                 </Checkbox>

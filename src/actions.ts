@@ -1,5 +1,5 @@
-import { httpGetConfig, httpLogingWithEmail, singin, httpTokens, httpCreateNewApp, httpGetApps } from "./http";
-import { ModelCurrentApp, ModelCurrentUser } from "./models";
+import { httpGetConfig, httpLogingWithEmail, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers } from "./http";
+import { ModelApp, ModelCurrentApp, ModelCurrentUser } from "./models";
 import { useAppStore } from "./store/useAppStore";
 import { sleep } from "./utils/sleep";
 
@@ -29,11 +29,35 @@ export async function  actionGetConfig(domainName?: string) {
     const state = getState()
     const {data: {result}} = await httpGetConfig(domainName)
 
-    let app: ModelCurrentApp = {
+    let app: ModelApp = {
+        afterLoginPage: result.afterLoginPage,
         appToken: result.appToken,
+        bundleId: result.bundleId,
         coinName: result.coinName,
+        coinSymbol: result.coinSymbol,
+        createdAt: result.createdAt,
+        creatorId: result.creatorId,
+        defaultAccessAssetsOpen: result.defaultAccessAssetsOpen,
+        defaultAccessProfileOpen: result.defaultAccessProfileOpen,
+        defaultRooms: result.defaultRooms,
         displayName: result.displayName,
-        domainName: result.domainName
+        domainName: result.domainName,
+        isAllowedNewAppCreate: result.isAllowedNewAppCreate,
+        isBaseApp: result.isBaseApp,
+        logoImage: result.logoImage,
+        sublogoImage: result.sublogoImage,
+        appTagline: result.appTagline,
+        signonOptions: result.signonOptions,
+        stats: result.stats,
+        systemChatAccount: result.systemChatAccount,
+        _id: result._id,
+        usersCanFree: result.usersCanFree,
+        updatedAt: result.updatedAt,
+        primaryColor: result.primaryColor,
+        parentAppId: result.parentAppId,
+        availableMenuItems: result.availableMenuItems,
+        googleServicesJson: result.googleServicesJson,
+        googleServiceInfoPlist: result.googleServiceInfoPlist
     }
 
     await sleep(2000)
@@ -78,4 +102,24 @@ export async function actionCreateApp(displayName: string) {
     const state = getState()
     const {data} = await httpCreateNewApp(displayName)
     state.doAddApp(data.app)
+}
+
+export async function actionPostFile(file: File) {
+    return httpPostFile(file)
+}
+
+export async function actionGetUsers(
+    appId: string,
+    limit: number = 10,
+    offset: number = 0,
+    orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+    order: 'asc' | 'desc' = 'asc'
+) {
+    return httpGetUsers(
+        appId,
+        limit,
+        offset,
+        orderBy,
+        order
+    )
 }

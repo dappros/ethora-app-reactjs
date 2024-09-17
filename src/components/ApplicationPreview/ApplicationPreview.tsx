@@ -39,7 +39,7 @@ export function ApplicationPreview({ app }: Props) {
                 <span className="app-created">Created {DateTime.fromISO(app.createdAt).toFormat('dd LLL yyyy')}</span>
             </div>
             <div className="inf-actions">
-                <button><IconExternalLink /></button>
+                <button><IconExternalLink className="accent-svg"/></button>
                 <button onClick={onClick} className="secondary-btn">Details</button>
             </div>
             <div className="app-stat">

@@ -1,4 +1,4 @@
-import { HexColorPicker } from "react-colorful";
+import { HexColorPicker} from "react-colorful";
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 
 import "./PopoverColorPicker.scss"
