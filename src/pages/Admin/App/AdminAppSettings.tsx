@@ -12,6 +12,9 @@ import { Menu } from "./SettingsTab/Menu";
 import { Chats } from "./SettingsTab/Chats";
 import { Visibility } from "./SettingsTab/Visibility";
 import { useState } from "react";
+import { httpUpdateApp } from "../../../http";
+import { actionUpdateApp } from "../../../actions";
+import { toast } from "react-toastify";
 
 export function AdminAppSettings() {
     let { appId } = useParams()
@@ -66,7 +69,7 @@ export function AdminAppSettings() {
         }
 
         if (tagline) {
-            body.tagline = tagline
+            body.appTagline = tagline
         }
 
         if (coinName) {
@@ -74,7 +77,7 @@ export function AdminAppSettings() {
         }
 
         if (color) {
-            body.color = color
+            body.primaryColor = color
         }
 
         if (logoImage) {
@@ -135,6 +138,15 @@ export function AdminAppSettings() {
         // home
         if (afterLoginPage) {
             body.afterLoginPage = afterLoginPage
+        }
+
+        console.log('on save body ', body)
+
+        if (appId) {
+            actionUpdateApp(appId, body)
+                .then(() => {
+                    toast("Settings applied successfully!")
+                })
         }
     }
 

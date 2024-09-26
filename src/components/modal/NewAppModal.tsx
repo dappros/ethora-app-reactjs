@@ -5,6 +5,8 @@ import { IconClose } from "../Icons/IconClose"
 
 import "./NewAppModal.scss"
 import { actionCreateApp } from "../../actions"
+import { TextInput } from "../ui/TextInput"
+import { toast } from "react-toastify"
 
 interface Props {
     onClose: () => void
@@ -15,6 +17,10 @@ export function NewAppModal({ onClose }: Props) {
 
     const onCreate = () => {
         actionCreateApp(appName)
+            .then(() => {
+                onClose()
+                toast("Application created successfully!")
+            })
     }
 
     return (
@@ -23,7 +29,12 @@ export function NewAppModal({ onClose }: Props) {
                 <div className="title">
                     Get Started with Your New App
                 </div>
-                <input type="text" value={appName} onChange={(e) => setAppName(e.target.value)} className="gen-input-large mb-16" placeholder="App Name" />
+                <TextInput 
+                    placeholder="App Name" 
+                    value={appName} 
+                    onChange={(e) => setAppName(e.target.value)}
+                    className="gen-input gen-input-large mb-16"
+                />
                 <div className="buttons">
                     <button className="gen-secondary-btn mb-16" onClick={onClose}>Cancel</button>
                     <button onClick={onCreate} className={cn("gen-primary-btn mb-16", {disabled: !appName})}>Continue</button>

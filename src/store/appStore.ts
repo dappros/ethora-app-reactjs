@@ -13,6 +13,7 @@ export interface AppSliceInterface extends ModelState {
   doSetCurrentApp: (app: ModelApp) => void
   doAddApp: (app: ModelApp) => void
   doSetApps: (apps: Array<ModelApp>) => void
+  doUpdateApp: (app: ModelApp) => void
 }
 
 export const createAppSlice: ImmerStateCreator<
@@ -41,6 +42,23 @@ export const createAppSlice: ImmerStateCreator<
   doSetApps: (apps) => {
     set((s) => {
       s.apps = apps
+    })
+  },
+  doUpdateApp: (app) => {
+    set((s) => {
+      let newApps = s.apps.concat([])
+      let index = newApps.findIndex((el) => el._id === app._id)
+
+      if (index !== -1) {
+        newApps[index] = app
+      }
+
+      if (s.currentApp?._id === app._id) {
+        s.currentApp = app
+      }
+
+      console.log('doUpdateApp newApps ', newApps)
+      s.apps = newApps
     })
   }
 });

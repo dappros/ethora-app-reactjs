@@ -1,4 +1,4 @@
-import { httpGetConfig, httpLogingWithEmail, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers } from "./http";
+import { httpGetConfig, httpLogingWithEmail, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp } from "./http";
 import { ModelApp, ModelCurrentApp, ModelCurrentUser } from "./models";
 import { useAppStore } from "./store/useAppStore";
 import { sleep } from "./utils/sleep";
@@ -66,7 +66,7 @@ export async function  actionGetConfig(domainName?: string) {
 
 export async function actionLoginWithEmail(email: string, password: string) {
     const state = getState()
-
+    
     if (!state.currentApp?.appToken) {
         throw new Error("!state.currentApp?.appToken")
     }
@@ -122,4 +122,19 @@ export async function actionGetUsers(
         orderBy,
         order
     )
+}
+
+export async function actionDeleteManyUsers(appId: string, usersIdList: Array<string>) {
+    return httpDeleteManyUsers(appId, usersIdList)
+}
+
+export async function actionResetPasswords(appId: string, usersIdList: Array<string>) {
+    return httpResetPasswords(appId, usersIdList)
+}
+
+export async function actionUpdateApp(appId: string, options: any) {
+    console.log('actionUpdateApp')
+    let response = await httpUpdateApp(appId, options)
+    const state = getState()
+    state.doUpdateApp(response.data.result)
 }

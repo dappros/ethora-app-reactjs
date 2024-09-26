@@ -26,6 +26,8 @@ import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
 import { Auth } from "./pages/Auth/Auth";
 import { ForgotPassword } from "./pages/Auth/Forgot";
 import hexToRgba from "hex-to-rgba";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const currentApp = useAppStore(s => s.currentApp)
@@ -80,6 +82,7 @@ function App() {
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ToastContainer />
       </>
     )
   }

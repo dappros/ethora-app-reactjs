@@ -10,6 +10,8 @@ export function AdminApps() {
     const [showModal, setShowModal] = useState(false)
     const apps = useAppStore(s => s.apps)
 
+    console.log(apps)
+
     const renderAppCreationModal = () => {
         return (
             <NewAppModal onClose={() => setShowModal(false)} />

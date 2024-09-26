@@ -73,6 +73,7 @@ export interface ModelApp {
 
 export interface ModelUserACL {
     appId: string
+    userId: string
     createdAt: string
     updatedAt: string
     application: {
@@ -80,7 +81,7 @@ export interface ModelUserACL {
             create: boolean
         },
         appPush: {
-            craete: boolean
+            create: boolean
             read: boolean
             update: boolean
             admin: boolean
@@ -107,6 +108,9 @@ export interface ModelUserACL {
             read: boolean
             update: boolean
         }
+    },
+    network: {
+        read: boolean
     }
 }
 

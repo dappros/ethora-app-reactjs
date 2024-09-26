@@ -11,9 +11,10 @@ interface Props {
     onClose: () => void
     acl: ModelUserACL
     setEditAcl: (a: ModelUserACL) => void
+    updateAcl: () => void
 }
 
-export function AclModal({ onClose, acl, setEditAcl }: Props) {
+export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
 
     const onChange =(isSet: boolean, path: string) => {
         let newAcl = JSON.parse(JSON.stringify(acl))
@@ -148,7 +149,7 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={acl.application.appSettings.update}
-                                                    onChange={(isSet) => onChange(isSet, "aplication.appSettings.update")}
+                                                    onChange={(isSet) => onChange(isSet, "application.appSettings.update")}
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -270,6 +271,7 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                     className="checkbox-input"
                                                     checked={false}
                                                     onChange={(isSet) => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -293,8 +295,28 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                             <Field className="checkbox  mb-6">
                                                 <Checkbox
                                                     className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    checked={acl.application.appPush.create}
+                                                    onChange={(isSet) => onChange(isSet, "application.appPush.create")}
+                                                >
+                                                </Checkbox>
+                                            </Field>
+                                        </td>
+                                        <td>
+                                            <Field className="checkbox  mb-6">
+                                                <Checkbox
+                                                    className="checkbox-input"
+                                                    checked={acl.application.appPush.read}
+                                                    onChange={(isSet) => onChange(isSet, "application.appPush.read")}
+                                                >
+                                                </Checkbox>
+                                            </Field>
+                                        </td>
+                                        <td>
+                                            <Field className="checkbox  mb-6">
+                                                <Checkbox
+                                                    className="checkbox-input"
+                                                    checked={acl.application.appPush.update}
+                                                    onChange={(isSet) => onChange(isSet, "application.appPush.update")}
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -304,7 +326,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -313,28 +336,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                             <Field className="checkbox  mb-6">
                                                 <Checkbox
                                                     className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
-                                                >
-                                                </Checkbox>
-                                            </Field>
-                                        </td>
-                                        <td>
-                                            <Field className="checkbox  mb-6">
-                                                <Checkbox
-                                                    className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
-                                                >
-                                                </Checkbox>
-                                            </Field>
-                                        </td>
-                                        <td>
-                                            <Field className="checkbox  mb-6">
-                                                <Checkbox
-                                                    className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    checked={acl.application.appPush.admin}
+                                                    onChange={(isSet) => onChange(isSet, "application.appPush.admin")}
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -349,7 +352,18 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
+                                                >
+                                                </Checkbox>
+                                            </Field>
+                                        </td>
+                                        <td>
+                                            <Field className="checkbox  mb-6">
+                                                <Checkbox
+                                                    className="checkbox-input"
+                                                    checked={acl.application.appStats.read}
+                                                    onChange={(isSet) => onChange(isSet, "application.appStats.read")}
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -359,7 +373,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -369,7 +384,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -378,18 +394,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                             <Field className="checkbox  mb-6">
                                                 <Checkbox
                                                     className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
-                                                >
-                                                </Checkbox>
-                                            </Field>
-                                        </td>
-                                        <td>
-                                            <Field className="checkbox  mb-6">
-                                                <Checkbox
-                                                    className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    checked={acl.application.appStats.admin}
+                                                    onChange={(isSet) => onChange(isSet, "application.appStats.admin")}
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -439,7 +445,18 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
+                                                >
+                                                </Checkbox>
+                                            </Field>
+                                        </td>
+                                        <td>
+                                            <Field className="checkbox  mb-6">
+                                                <Checkbox
+                                                    className="checkbox-input"
+                                                    checked={acl.network.read}
+                                                    onChange={(isSet) => onChange(isSet, "network.read")}
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -449,7 +466,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -459,7 +477,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -469,17 +488,8 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
-                                                >
-                                                </Checkbox>
-                                            </Field>
-                                        </td>
-                                        <td>
-                                            <Field className="checkbox  mb-6">
-                                                <Checkbox
-                                                    className="checkbox-input"
-                                                    checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
+                                                    disabled
                                                 >
                                                 </Checkbox>
                                             </Field>
@@ -494,7 +504,7 @@ export function AclModal({ onClose, acl, setEditAcl }: Props) {
                 </div>
                 <div className="buttons">
                     <button className="gen-secondary-btn mr-16" onClick={onClose}>Cancel</button>
-                    <button onClick={() => {}} className={classNames("gen-primary-btn")}>Update ACL</button>
+                    <button onClick={() => updateAcl()} className={classNames("gen-primary-btn")}>Update ACL</button>
                 </div>
 
                 <button className="close" onClick={() => onClose()}><IconClose /></button>

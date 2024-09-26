@@ -49,9 +49,9 @@ export function ApplicationPreview({ app }: Props) {
                         <IconInfo />
                     </div>
                     <div className="stat-data">
-                        <span className="stat-all">{app.stats.totalRegistered}</span>
+                        <span className="stat-all">{app.stats?.totalRegistered}</span>
                         <span className="stat-sep">/</span>
-                        <span className="stat-today">{app.stats.recentlyRegistered}</span>
+                        <span className="stat-today">{app.stats?.recentlyRegistered}</span>
                     </div>
                 </div>
                 <div className="stat-block">
@@ -60,9 +60,9 @@ export function ApplicationPreview({ app }: Props) {
                         <IconInfo />
                     </div>
                     <div className="stat-data">
-                        <span className="stat-all">{app.stats.totalSessions}</span>
+                        <span className="stat-all">{app.stats?.totalSessions}</span>
                         <span className="stat-sep">/</span>
-                        <span className="stat-today">{app.stats.recentlySessions}</span>
+                        <span className="stat-today">{app.stats?.recentlySessions}</span>
                     </div>
                 </div>
                 <div className="stat-block">
@@ -82,9 +82,9 @@ export function ApplicationPreview({ app }: Props) {
                         <IconInfo />
                     </div>
                     <div className="stat-data">
-                        <span className="stat-all">{app.stats.totalApiCalls}</span>
+                        <span className="stat-all">{app.stats?.totalApiCalls}</span>
                         <span className="stat-sep">/</span>
-                        <span className="stat-today">{app.stats.recentlyApiCalls}</span>
+                        <span className="stat-today">{app.stats?.recentlyApiCalls}</span>
                     </div>
                 </div>
                 <div className="stat-block">
@@ -93,9 +93,9 @@ export function ApplicationPreview({ app }: Props) {
                         <IconInfo />
                     </div>
                     <div className="stat-data">
-                        <span className="stat-all">{app.stats.totalFiles}</span>
+                        <span className="stat-all">{app.stats?.totalFiles}</span>
                         <span className="stat-sep">/</span>
-                        <span className="stat-today">{app.stats.recentlyFiles}</span>
+                        <span className="stat-today">{app.stats?.recentlyFiles}</span>
                     </div>
                 </div>
                 <div className="stat-block">
@@ -104,9 +104,9 @@ export function ApplicationPreview({ app }: Props) {
                         <IconInfo />
                     </div>
                     <div className="stat-data">
-                        <span className="stat-all">{app.stats.totalTransactions}</span>
+                        <span className="stat-all">{app.stats?.totalTransactions}</span>
                         <span className="stat-sep">/</span>
-                        <span className="stat-today">{app.stats.recentlyTransactions}</span>
+                        <span className="stat-today">{app.stats?.recentlyTransactions}</span>
                     </div>
                 </div>
             </div>
