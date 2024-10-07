@@ -1,4 +1,3 @@
-import React from "react"
 import { useNavigate } from "react-router-dom"
 import { Box, Typography } from "@mui/material"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -11,20 +10,13 @@ import { useAppStore } from "../../../../store/useAppStore"
 import { actionAfterLogin } from "../../../../actions"
 import { httpLogingWithEmail } from "../../../../http"
 import { toast } from "react-toastify"
-import { ModelCurrentUser } from "../../../../models"
-
-type TProperties = {
-  updateUser: (data: any) => void
-  signInWithGoogle: () => void
-  signInWithMetamask: () => void
-}
 
 type Inputs = {
   email: string
   password: string
 }
 
-const LoginStep: React.FC<TProperties> = ({ signInWithGoogle, signInWithMetamask }) => {
+const LoginStep = () => {
   const navigate = useNavigate()
   const config = useAppStore(s => s.currentApp)
 
@@ -143,7 +135,7 @@ const LoginStep: React.FC<TProperties> = ({ signInWithGoogle, signInWithMetamask
             fullWidth
             variant="outlined"
             startIcon={<GoogleIcon />}
-            onClick={signInWithGoogle}
+            onClick={() => {}}
             style={{
               borderColor: config?.primaryColor
                 ? config.primaryColor
@@ -161,7 +153,7 @@ const LoginStep: React.FC<TProperties> = ({ signInWithGoogle, signInWithMetamask
           <CustomButton
             variant="outlined"
             aria-label="metamask"
-            onClick={signInWithMetamask}
+            onClick={() => {}}
             style={{
               backgroundColor: config?.primaryColor
                 ? config.primaryColor

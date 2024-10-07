@@ -6,20 +6,11 @@ import LoginStep from "../Login/Steps/LoginForm"
 import { useAppStore } from "../../../store/useAppStore"
 
 interface SignInFormProps {
-  loading: boolean
   isMobile?: boolean
-  config: string[]
-  updateUser: (data: any) => void
-  signInWithGoogle: () => void
-  signInWithMetamask: () => void
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({
-  loading = false,
   isMobile = false,
-  updateUser,
-  signInWithGoogle,
-  signInWithMetamask,
 }) => {
   const navigate = useNavigate()
 
@@ -27,10 +18,6 @@ const SignInForm: React.FC<SignInFormProps> = ({
 
   if (!config) {
     return null
-  }
-
-  const setSignUpQuery = () => {
-    navigate("/register")
   }
 
   return (
@@ -76,11 +63,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
             Sign In
           </Typography>
         </Box>
-        <LoginStep
-          updateUser={updateUser}
-          signInWithGoogle={signInWithGoogle}
-          signInWithMetamask={signInWithMetamask}
-        />
+        <LoginStep />
       </Box>
       <Typography align="center" component="span" fontSize={"14px"}>
         Don't have an account?{" "}
@@ -93,7 +76,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
             cursor: "pointer",
             fontWeight: "400px",
           }}
-          onClick={setSignUpQuery}
+          onClick={() => navigate("/register")}
         >
           Sign Up
         </Typography>

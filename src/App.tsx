@@ -1,11 +1,14 @@
+import { useEffect } from "react";
 import {
   Routes,
   Route,
   Navigate
 } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import hexToRgba from "hex-to-rgba";
+
 import { actionGetConfig } from './actions';
 import { RequireAuth } from './components/RequireAuth';
-import { useEffect } from "react";
 import { useAppStore } from "./store/useAppStore";
 import { Loading } from "./components/Loading";
 import { NotFound } from "./pages/NotFound";
@@ -21,16 +24,11 @@ import { AdminAppPage } from "./pages/Admin/App/AdminAppPage";
 import { AdminAppUsers } from "./pages/Admin/App/AdminAppUsers";
 import { AdminAppSettings } from "./pages/Admin/App/AdminAppSettings";
 import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
-import hexToRgba from "hex-to-rgba";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-import { Auth } from "./pages/Auth/Auth";
-import { ForgotPassword } from "./pages/Auth/Forgot";
-import { Login } from "./pages/Auth/Login";
 import LoginComponent from "./pages/AuthPage/Login/index";
 import ForgetPassword from "./pages/AuthPage/ForgetPassword";
 import Register from "./pages/AuthPage/Register";
+
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const currentApp = useAppStore(s => s.currentApp)
