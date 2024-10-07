@@ -4,12 +4,12 @@ import { SubmitHandler, useForm } from "react-hook-form"
 
 import CustomInput from "../../Input"
 import CustomButton from "../../Button"
-import MetamaskIcon from "../../Icons/socials/metamaskIcon"
 import { useAppStore } from "../../../../store/useAppStore"
 import { actionAfterLogin } from "../../../../actions"
 import { httpLogingWithEmail } from "../../../../http"
 import { toast } from "react-toastify"
 import { GoogleButton } from "../../GoogleButton"
+import { MetamaskButton } from "../../MetamaskButton"
 
 type Inputs = {
   email: string
@@ -136,21 +136,7 @@ const LoginStep = () => {
       </Box>
       <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
         {config?.signonOptions.includes("metamask") && (
-          <CustomButton
-            variant="outlined"
-            aria-label="metamask"
-            onClick={() => {}}
-            style={{
-              backgroundColor: config?.primaryColor
-                ? config.primaryColor
-                : "#0052CD",
-              borderColor: "#0052CD",
-              color: "white",
-            }}
-          >
-            <MetamaskIcon />
-            {config?.signonOptions.length < 8 && "Continue with Metamask"}
-          </CustomButton>
+          <MetamaskButton />
         )}
       </Box>
     </Box>

@@ -1,15 +1,13 @@
-import React, { Dispatch, SetStateAction, useState } from "react"
+import React, { Dispatch, SetStateAction } from "react"
 import { Box, Typography } from "@mui/material"
 import { useFormik } from "formik"
-import GoogleIcon from "../../Icons/socials/googleIcon"
-import FacebookIcon from "../../Icons/socials/facebookIcon"
-import AppleIcon from "../../Icons/socials/appleIcon"
-import MetamaskIcon from "../../Icons/socials/metamaskIcon"
 import CustomButton from "../../Button"
 import CustomInput from "../../Input"
 import SkeletonLoader from "../../SkeletonLoader"
 import { useNavigate } from "react-router-dom"
 import { useAppStore } from "../../../../store/useAppStore"
+import { GoogleButton } from "../../GoogleButton"
+import { MetamaskButton } from "../../MetamaskButton"
 
 const validate = (values: { email: string; firstName: any; lastName: any }) => {
   const errors: Record<string, string> = {}
@@ -46,11 +44,6 @@ interface FirstStepProps {
 }
 
 const FirstStep: React.FC<FirstStepProps> = ({
-  signUpWithGoogle,
-  signUpWithApple,
-  signUpWithFacebook,
-  signUpWithMetamask,
-  setStep,
   loading = false,
   isSmallDevice = false,
 }) => {
@@ -233,40 +226,12 @@ const FirstStep: React.FC<FirstStepProps> = ({
             </Typography>
           )}
           {config?.signonOptions.includes("google") && (
-            <CustomButton
-              fullWidth
-              variant="outlined"
-              startIcon={<GoogleIcon />}
-              onClick={signUpWithGoogle}
-              style={{
-                borderColor: config?.primaryColor
-                  ? config.primaryColor
-                  : "#0052CD",
-
-                color: config?.primaryColor ? config.primaryColor : "#0052CD",
-              }}
-            >
-              Continue with Google
-            </CustomButton>
+            <GoogleButton />
           )}
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           {config?.signonOptions.includes("metamask") && (
-            <CustomButton
-              variant="outlined"
-              aria-label="metamask"
-              onClick={signUpWithMetamask}
-              style={{
-                backgroundColor: config?.primaryColor
-                  ? config.primaryColor
-                  : "#0052CD",
-                borderColor: "#0052CD",
-                color: "white",
-              }}
-            >
-              <MetamaskIcon />
-              {config?.signonOptions.length < 8 && "Continue with Metamask"}
-            </CustomButton>
+            <MetamaskButton />
           )}
         </Box>
       </SkeletonLoader>
