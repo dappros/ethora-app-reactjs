@@ -40,6 +40,15 @@ export interface ModelApp {
     sublogoImage: string
     appTagline: string
     firebaseWebConfigString?: string
+    firebaseConfigParsed?: {
+        apiKey: string,
+        authDomain: string,
+        projectId: string,
+        storageBucket: string,
+        messagingSenderId: string,
+        appId: string,
+        measurementId: string,
+    }
 
     stats: {
         recentlyApiCalls: number,

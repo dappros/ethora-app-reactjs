@@ -1,6 +1,8 @@
-import { httpGetConfig, httpLogingWithEmail, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp } from "./http";
+import { httpGetConfig, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp } from "./http";
 import { ModelApp, ModelCurrentUser } from "./models";
+import { firebase } from "./pages/AuthPage/firebase";
 import { useAppStore } from "./store/useAppStore";
+import { getFirebaseConfigFromString } from "./utils/getFbConfig";
 import { sleep } from "./utils/sleep";
 
 const getState = useAppStore.getState
@@ -57,11 +59,13 @@ export async function  actionGetConfig(domainName?: string) {
         parentAppId: result.parentAppId,
         availableMenuItems: result.availableMenuItems,
         googleServicesJson: result.googleServicesJson,
-        googleServiceInfoPlist: result.googleServiceInfoPlist
+        googleServiceInfoPlist: result.googleServiceInfoPlist,
+        firebaseConfigParsed: getFirebaseConfigFromString(result.firebaseWebConfigString)
     }
 
-    await sleep(2000)
+    await sleep(1000)
     httpTokens.appJwt = result.appToken
+    firebase.init()
     state.doSetCurrentApp(app)
 }
 

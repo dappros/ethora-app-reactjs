@@ -17,12 +17,17 @@ http.interceptors.request.use(
             return config
         }
 
-        if (config.url === '/users/login-with-email' || config.url === '/users/login') {
+        if (
+            config.url === '/users/login-with-email' 
+            || config.url === '/users/login'
+            || (config.url === '/users' && config.method === 'post')
+            || config.url?.startsWith('/users/checkEmail/')
+        ) {
             config.headers.Authorization = httpTokens.appJwt
 
             return config
-        } 
-        
+        }
+
         config.headers.Authorization = httpTokens.token
 
         return config
@@ -45,7 +50,7 @@ http.interceptors.response.use(
 
         try {
             let refreshResult = await refreshToken()
-            console.log({refreshResult})
+            console.log({ refreshResult })
             return http(request)
 
         } catch (error) {
@@ -56,15 +61,15 @@ http.interceptors.response.use(
 
 const refreshToken = async () => {
     try {
-      const response = await http.post('/users/login/refresh' ,null, {headers: {Authorization: httpTokens.refreshToken}});
-      console.log("+++++++++ ", response.data)
-      const {token, refreshToken} = response.data
-      httpTokens.token = token
-      httpTokens.refreshToken = refreshToken
-      return httpTokens
+        const response = await http.post('/users/login/refresh', null, { headers: { Authorization: httpTokens.refreshToken } });
+        console.log("+++++++++ ", response.data)
+        const { token, refreshToken } = response.data
+        httpTokens.token = token
+        httpTokens.refreshToken = refreshToken
+        return httpTokens
     } catch (error) {
-      console.error('Token refresh failed:', error);
-      throw error;
+        console.error('Token refresh failed:', error);
+        throw error;
     }
 };
 
@@ -184,3 +189,37 @@ export function httpUpdateAcl(appId: string, userId: string, acl: ModelUserACL) 
         }
     )
 }
+
+export const httpCheckEmailExist = (email: string) => {
+    return http.get(`/users/checkEmail/${email}`)
+}
+
+export const httpRegisterSocial = (
+    idToken: string,
+    accessToken: string,
+    authToken: string,
+    loginType: string,
+    signUpPlan?: string
+) => {
+    return http.post(`/users`, {
+        idToken,
+        accessToken,
+        loginType,
+        authToken: authToken,
+        signupPlan: signUpPlan,
+    })
+}
+
+export const httpLoginSocial = (
+    idToken: string,
+    accessToken: string,
+    loginType: string,
+    authToken: string = "authToken"
+) => {
+    return http.post(`/users/login`, {
+        idToken,
+        accessToken,
+        loginType,
+        authToken,
+    })
+}   

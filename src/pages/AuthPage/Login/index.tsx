@@ -55,12 +55,7 @@ export default function LoginComponent() {
       >
         <LogoContent isMobile={isMobileDevice} />
         <SignInForm
-          loading={loading}
-          config={config.signonOptions || []}
           isMobile={isMobileDevice}
-          updateUser={updateUserInfo}
-          signInWithGoogle={onGoogleClick}
-          signInWithMetamask={onMetamaskLogin}
         />
       </Box>
     </Wrapper>

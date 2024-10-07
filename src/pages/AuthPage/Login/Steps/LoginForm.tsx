@@ -4,12 +4,12 @@ import { SubmitHandler, useForm } from "react-hook-form"
 
 import CustomInput from "../../Input"
 import CustomButton from "../../Button"
-import GoogleIcon from "../../Icons/socials/googleIcon"
 import MetamaskIcon from "../../Icons/socials/metamaskIcon"
 import { useAppStore } from "../../../../store/useAppStore"
 import { actionAfterLogin } from "../../../../actions"
 import { httpLogingWithEmail } from "../../../../http"
 import { toast } from "react-toastify"
+import { GoogleButton } from "../../GoogleButton"
 
 type Inputs = {
   email: string
@@ -131,21 +131,7 @@ const LoginStep = () => {
           </Typography>
         )}
         {config?.signonOptions.includes("google") && (
-          <CustomButton
-            fullWidth
-            variant="outlined"
-            startIcon={<GoogleIcon />}
-            onClick={() => {}}
-            style={{
-              borderColor: config?.primaryColor
-                ? config.primaryColor
-                : "#0052CD",
-
-              color: config?.primaryColor ? config.primaryColor : "#0052CD",
-            }}
-          >
-            Continue with Google
-          </CustomButton>
+          <GoogleButton />
         )}
       </Box>
       <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
