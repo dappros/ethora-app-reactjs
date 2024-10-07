@@ -2,15 +2,71 @@ import axios from "axios"
 import { ModelUserACL } from "./models"
 
 export const httpTokens = {
+    appJwt: "",
     token: "",
     refreshToken: ""
 }
 
-
-
 export const http = axios.create({
     baseURL: import.meta.env.VITE_API,
 })
+
+http.interceptors.request.use(
+    (config) => {
+        if (config.url === '/users/login/refresh') {
+            return config
+        }
+
+        if (config.url === '/users/login-with-email' || config.url === '/users/login') {
+            config.headers.Authorization = httpTokens.appJwt
+
+            return config
+        } 
+        
+        config.headers.Authorization = httpTokens.token
+
+        return config
+    },
+    null
+)
+
+http.interceptors.response.use(
+    null,
+    async (error) => {
+        if (!error.response || error.response.status !== 401) {
+            return Promise.reject(error)
+        }
+        const request = error.config
+        const url = request.url
+
+        if (url === '/users/login/refresh' || url === '/users/login-with-email' || url === '/users/login') {
+            return Promise.reject(error)
+        }
+
+        try {
+            let refreshResult = await refreshToken()
+            console.log({refreshResult})
+            return http(request)
+
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+);
+
+const refreshToken = async () => {
+    try {
+      const response = await http.post('/users/login/refresh' ,null, {headers: {Authorization: httpTokens.refreshToken}});
+      console.log("+++++++++ ", response.data)
+      const {token, refreshToken} = response.data
+      httpTokens.token = token
+      httpTokens.refreshToken = refreshToken
+      return httpTokens
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      throw error;
+    }
+};
 
 export async function singin() {
     return new Promise((resolve, _reject) => {
@@ -29,20 +85,16 @@ export function httpGetConfig(domainName?: string) {
     )
 }
 
-export function httpLogingWithEmail(email: string, password: string, appJwt: string) {
-    return http.post('/users/login-with-email', { email, password }, {
-        headers: {
-            Authorization: appJwt
-        }
-    })
+export function httpLogingWithEmail(email: string, password: string) {
+    return http.post('/users/login-with-email', { email, password })
 }
 
 export function httpCreateNewApp(displayName: string) {
-    return http.post(`/apps`, { displayName }, { headers: { Authorization: httpTokens.token } })
+    return http.post(`/apps`, { displayName })
 }
 
 export function httpGetApps() {
-    return http.get('/apps', { headers: { Authorization: httpTokens.token } })
+    return http.get('/apps')
 }
 
 export function httpUpdateApp(appId: string, options: any) {
@@ -50,15 +102,14 @@ export function httpUpdateApp(appId: string, options: any) {
         `/apps/${appId}`,
         {
             ...options
-        },
-        { headers: { Authorization: httpTokens.token } }
+        }
     )
 }
 
 export function httpPostFile(file: File) {
     let fd = new FormData()
     fd.append('files', file)
-    return http.post('/files', fd, { headers: { Authorization: httpTokens.token } })
+    return http.post('/files', fd)
 }
 
 export function httpGetUsers(
@@ -69,16 +120,14 @@ export function httpGetUsers(
     order: 'asc' | 'desc' = 'asc'
 ) {
     return http.get(
-        `/users/${appId}?limit=${limit}&offset=${offset}&orderBy=${orderBy}&order=${order}`,
-        { headers: { Authorization: httpTokens.token } }
+        `/users/${appId}?limit=${limit}&offset=${offset}&orderBy=${orderBy}&order=${order}`
     )
 }
 
 export function httpDeleteManyUsers(appId: string, usersIdList: Array<string>) {
     return http.post(
         `/users/delete-many-with-app-id/${appId}`,
-        { usersIdList },
-        { headers: { Authorization: httpTokens.token } }
+        { usersIdList }
     )
 }
 
@@ -87,8 +136,7 @@ export function httpResetPasswords(appId: string, usersIdList: Array<string>) {
         `/users/reset-passwords-with-app-id/${appId}`,
         {
             usersIdList
-        },
-        { headers: { Authorization: httpTokens.token } }
+        }
     )
 }
 
@@ -99,9 +147,6 @@ export function httpCraeteUser(appId: string, { email, firstName, lastName }: { 
             email,
             firstName,
             lastName
-        },
-        {
-            headers: { Authorization: httpTokens.token }
         }
     )
 }
@@ -112,9 +157,6 @@ export function httpTagsSet(appId: string, { usersIdList, tagsList }: { usersIdL
         {
             usersIdList,
             tagsList
-        },
-        {
-            headers: { Authorization: httpTokens.token }
         }
     )
 }
@@ -139,9 +181,6 @@ export function httpUpdateAcl(appId: string, userId: string, acl: ModelUserACL) 
         `/users/acl/${appId}/${userId}`,
         {
             ..._acl
-        },
-        {
-            headers: { Authorization: httpTokens.token }
         }
     )
 }

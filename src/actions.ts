@@ -1,5 +1,5 @@
 import { httpGetConfig, httpLogingWithEmail, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp } from "./http";
-import { ModelApp, ModelCurrentApp, ModelCurrentUser } from "./models";
+import { ModelApp, ModelCurrentUser } from "./models";
 import { useAppStore } from "./store/useAppStore";
 import { sleep } from "./utils/sleep";
 
@@ -61,17 +61,13 @@ export async function  actionGetConfig(domainName?: string) {
     }
 
     await sleep(2000)
+    httpTokens.appJwt = result.appToken
     state.doSetCurrentApp(app)
 }
 
-export async function actionLoginWithEmail(email: string, password: string) {
+export async function actionAfterLogin(data: any) {
     const state = getState()
-    
-    if (!state.currentApp?.appToken) {
-        throw new Error("!state.currentApp?.appToken")
-    }
 
-    const {data} = await httpLogingWithEmail(email, password, state.currentApp?.appToken)
     httpTokens.token = data.token
     httpTokens.refreshToken = data.refreshToken
     

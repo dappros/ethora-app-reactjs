@@ -8,8 +8,6 @@ import { RequireAuth } from './components/RequireAuth';
 import { useEffect } from "react";
 import { useAppStore } from "./store/useAppStore";
 import { Loading } from "./components/Loading";
-import { Login } from "./pages/Auth/Login";
-import { Register } from "./pages/Auth/Register";
 import { NotFound } from "./pages/NotFound";
 import { AppPage } from "./pages/AppPage";
 import { ChatPage } from "./pages/ChatPage";
@@ -23,11 +21,16 @@ import { AdminAppPage } from "./pages/Admin/App/AdminAppPage";
 import { AdminAppUsers } from "./pages/Admin/App/AdminAppUsers";
 import { AdminAppSettings } from "./pages/Admin/App/AdminAppSettings";
 import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
-import { Auth } from "./pages/Auth/Auth";
-import { ForgotPassword } from "./pages/Auth/Forgot";
 import hexToRgba from "hex-to-rgba";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { Auth } from "./pages/Auth/Auth";
+import { ForgotPassword } from "./pages/Auth/Forgot";
+import { Login } from "./pages/Auth/Login";
+import LoginComponent from "./pages/AuthPage/Login/index";
+import ForgetPassword from "./pages/AuthPage/ForgetPassword";
+import Register from "./pages/AuthPage/Register";
 
 function App() {
   const currentApp = useAppStore(s => s.currentApp)
@@ -51,11 +54,9 @@ function App() {
       <>
         <Routes>
           <Route path="/" element={<Navigate to="/app" />} />
-          <Route path="/auth" element = {<Auth />}>
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="forgot" element={<ForgotPassword />} />
-          </Route>
+          <Route path="/login" element={<LoginComponent />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/resetPassword/:token?" element={<ForgetPassword />} />
           <Route
             path="/app"
             element={
