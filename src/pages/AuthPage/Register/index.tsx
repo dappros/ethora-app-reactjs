@@ -1,10 +1,7 @@
-import { useEffect, useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
 import { useMediaQuery, useTheme, Box } from "@mui/material"
 import Wrapper from "../Wrapper"
 import LogoContent from "../LogoContent"
 import SignUpForm from "../Forms/RegisterForm"
-import { FullPageSpinner } from "../FullPageSpinner"
 
 export default function Register() {
   const theme = useTheme()

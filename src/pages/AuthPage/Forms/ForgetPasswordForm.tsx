@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Box, Typography } from "@mui/material"
 
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import BackButton from "../BackButton"
 import FirstStep from "../ForgetPassword/Steps/FirstStep"
 import SecondStep from "../ForgetPassword/Steps/SecondStep"
@@ -42,10 +42,6 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
   // @ts-ignore
   const StepComponent = ({ step }) => {
     return steps[step] || <div>Step not found</div>
-  }
-
-  const setQuery = () => {
-    navigate("/login")
   }
 
   const handleBackButtonClick = () => {
@@ -161,7 +157,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
               fontSize: "14px",
               cursor: "pointer",
             }}
-            onClick={() => setQuery("signUp")}
+            onClick={() => navigate("signUp")}
           >
             Sign Up
           </Typography>

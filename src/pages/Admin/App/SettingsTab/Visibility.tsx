@@ -1,6 +1,5 @@
 import { RadioGroup, Field, Label, Radio, } from "@headlessui/react"
 import "./Visibility.scss"
-import { useState } from "react"
 
 interface Props {
     defaultAccessAssetsOpen: boolean

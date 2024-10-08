@@ -28,7 +28,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
         }
         return null
       })
-      console.log(components)
+      // @ts-ignore
       setSkeletons(components)
     }
   }, [loading, children])

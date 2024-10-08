@@ -1,6 +1,6 @@
-import React, { Dispatch, SetStateAction, useEffect } from "react"
+import React, { Dispatch, SetStateAction } from "react"
 import { useForm } from "react-hook-form"
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 
 import { Box, Typography } from "@mui/material"
 import CustomButton from "../../Button"

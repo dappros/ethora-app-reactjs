@@ -1,8 +1,6 @@
-import { useState } from 'react'
 import { Checkbox, Field, Label } from '@headlessui/react'
 
 import "./SignonOptions.scss"
-import { ModelApp } from '../../../../models'
 
 interface Props {
     enableEmail: boolean

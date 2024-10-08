@@ -6,7 +6,7 @@ interface Props {
     sublogo: string
 }
 
-export function Safari({tagline, appLogo, sublogo}: Props) {
+export function Safari({tagline, appLogo}: Props) {
     return (
         <div className="safari-preview">
             <div className="wrap">

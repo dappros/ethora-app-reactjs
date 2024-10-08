@@ -1,7 +1,7 @@
 import { Checkbox, Dialog, DialogPanel, Field } from "@headlessui/react"
 
 import "./AclModal.scss"
-import { ModelAppUser, ModelUserACL } from "../../models"
+import { ModelUserACL } from "../../models"
 import { IconClose } from "../Icons/IconClose"
 import classNames from "classnames"
 //@ts-ignore
@@ -270,7 +270,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                                                 <Checkbox
                                                     className="checkbox-input"
                                                     checked={false}
-                                                    onChange={(isSet) => { }}
+                                                    onChange={() => { }}
                                                     disabled
                                                 >
                                                 </Checkbox>

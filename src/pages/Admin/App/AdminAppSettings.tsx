@@ -12,7 +12,6 @@ import { Menu } from "./SettingsTab/Menu";
 import { Chats } from "./SettingsTab/Chats";
 import { Visibility } from "./SettingsTab/Visibility";
 import { useState } from "react";
-import { httpUpdateApp } from "../../../http";
 import { actionUpdateApp } from "../../../actions";
 import { toast } from "react-toastify";
 

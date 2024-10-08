@@ -1,5 +1,4 @@
 import { Box, CircularProgress } from "@mui/material"
-import React from "react"
 
 export const FullPageSpinner = () => {
   return (

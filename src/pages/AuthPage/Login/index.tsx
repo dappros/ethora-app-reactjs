@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
 import { useMediaQuery, useTheme, Box } from "@mui/material"
 import Wrapper from "../Wrapper"
 import LogoContent from "../LogoContent"
@@ -14,24 +13,7 @@ export default function LoginComponent() {
     return null
   }
 
-  const navigate = useNavigate()
-  const { search } = useLocation()
-  const [loading, setLoading] = useState(false)
-
-  const signUpPlan = new URLSearchParams(search).get("signUpPlan")
-
-  const onMetamaskLogin = () => {
-
-  }
-
-  const onGoogleClick = async () => {
-  }
-
-  const updateUserInfo = async (loginData: any) => {
-  }
-
-  const onFacebookClick = async (info: any) => {
-  }
+  const [loading] = useState(false)
 
   const theme = useTheme()
   const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024))

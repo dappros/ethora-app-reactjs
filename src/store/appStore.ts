@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { ModelApp, ModelCurrentApp, ModelCurrentUser, ModelState } from "../models";
+import { ModelApp, ModelCurrentUser, ModelState } from "../models";
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -18,7 +18,7 @@ export interface AppSliceInterface extends ModelState {
 
 export const createAppSlice: ImmerStateCreator<
   AppSliceInterface
-> = (set, get) => ({
+> = (set, _) => ({
   inited: false,
   currentUser: null,
   currentApp: null,

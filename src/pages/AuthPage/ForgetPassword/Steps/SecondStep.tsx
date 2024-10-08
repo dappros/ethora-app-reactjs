@@ -1,7 +1,6 @@
 import { Box, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import CustomButton from "../../Button"
-import SkeletonLoader from "../../SkeletonLoader"
 import { useNavigate } from "react-router-dom"
 import { useAppStore } from "../../../../store/useAppStore"
 

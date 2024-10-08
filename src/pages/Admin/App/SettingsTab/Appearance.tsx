@@ -1,11 +1,9 @@
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { PopoverColorPicker } from "../../../../components/PopoverColorPicker"
-import { ModelApp } from "../../../../models"
 import { AppearancePreview } from "../../../../components/AppearancePreview/AppearancePreview"
 
 import "./Appearance.scss"
 import { actionPostFile } from "../../../../actions"
-import { RgbaColor } from "react-colorful"
 
 interface Props {
     displayName: string
