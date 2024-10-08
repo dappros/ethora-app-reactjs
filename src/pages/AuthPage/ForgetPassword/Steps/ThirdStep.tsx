@@ -2,45 +2,60 @@ import { Box, Typography } from "@mui/material"
 import React, { useState } from "react"
 import CustomInput from "../../Input"
 import CustomButton from "../../Button"
-import { useFormik } from "formik"
-import { useNavigate } from "react-router-dom"
 import { useAppStore } from "../../../../store/useAppStore"
+import { useForm } from "react-hook-form"
+import { httpResetPassword } from "../../../../http"
+import { toast } from "react-toastify"
+import { useNavigate } from "react-router-dom"
 
-const validate = (values: { newPassword: string; repeatPassword: string }) => {
-  const errors: Record<string, string> = {}
+interface ThirdStepProps { }
 
-  if (!values.newPassword) {
-    errors.newPassword = "Required field"
-  } else if (values.newPassword.length < 8) {
-    errors.newPassword = "Password must be at least 8 characters"
-  }
-
-  if (!values.repeatPassword) {
-    errors.repeatPassword = "Required field"
-  } else if (values.repeatPassword !== values.newPassword) {
-    errors.repeatPassword = "Passwords don't match"
-  }
-
-  return errors
+interface Inputs {
+  newPassword: string
+  repeatPassword: string
 }
-
-interface ThirdStepProps {}
-
-const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
-  const navigate = useNavigate()
+const ThirdStep: React.FC<ThirdStepProps> = ({ }) => {
   const config = useAppStore(s => s.currentApp)
+  const [loading, setLoading] = useState(false)
 
-  const formik = useFormik({
-    initialValues: {
-      newPassword: "",
-      repeatPassword: "",
-    },
-    validate,
-    onSubmit: async (values, { resetForm, setSubmitting }) => {
-      setSubmitting(true)
-      setSubmitting(false)
-    },
-  })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>()
+
+  const navigate = useNavigate()
+
+  const onSubmit = (data: Inputs) => {
+    setLoading(true)
+    httpResetPassword(data.newPassword)
+      .then(() => {
+        toast.success("Password was successfully reset")
+        navigate("/login")
+      })
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.status === 400 &&
+          error.response.data.errors
+        ) {
+          const errors = []
+
+          for (const e of error.response.data.errors) {
+            if (e.msg) {
+              errors.push(e.msg)
+            }
+          }
+          // @ts-ignore
+          toast.error("error", errors.join(", "))
+        }
+        toast.error("error", error.response.data.error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
   return (
     <Box
       sx={{
@@ -54,7 +69,7 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
         noValidate
         autoComplete="off"
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
-        onSubmit={formik.handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <Typography
           sx={{
@@ -77,31 +92,30 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
         >
           <CustomInput
             placeholder="Enter New Password"
-            name="newPassword"
             type="password"
-            value={formik.values.newPassword}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.newPassword && Boolean(formik.errors.newPassword)
-            }
-            helperText={formik.touched.newPassword && formik.errors.newPassword}
+            {...register("newPassword", {
+              required: "Password is required",
+              minLength: {
+                value: 4,
+                message: "Password must be at least 4 characters",
+              },
+            })}
+            error={Boolean(errors.newPassword)}
+            helperText={errors.newPassword?.message}
             sx={{ flex: 1, width: "100%" }}
           />
           <CustomInput
             placeholder="Repeat New Password"
-            name="repeatPassword"
             type="password"
-            value={formik.values.repeatPassword}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.repeatPassword &&
-              Boolean(formik.errors.repeatPassword)
-            }
-            helperText={
-              formik.touched.repeatPassword && formik.errors.repeatPassword
-            }
+            {...register("repeatPassword", {
+              required: "Password is required",
+              minLength: {
+                value: 4,
+                message: "Password must be at least 4 characters",
+              },
+            })}
+            error={Boolean(errors.repeatPassword)}
+            helperText={errors.repeatPassword?.message}
             sx={{ flex: 1, width: "100%" }}
           />
         </Box>
@@ -110,8 +124,8 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
           fullWidth
           variant="contained"
           color="primary"
-          loading={formik.isSubmitting}
-          disabled={formik.isSubmitting}
+          loading={loading}
+          disabled={loading}
           style={{
             backgroundColor: config?.primaryColor
               ? config.primaryColor

@@ -19,7 +19,9 @@ export function AppearancePreview({
     sublogoImage
 }: Props) {
     useEffect(() => {
-        document.documentElement.style.setProperty('--bg-brand-primary-preview', hexToRgba(color, '0.08'))
+        document.documentElement.style.setProperty('--bg-brand-primary-preview', hexToRgba(color, '1'))
+        document.documentElement.style.setProperty('--bg-brand-preview-auth', hexToRgba(color, '0.08'))
+
     }, [color])
     
     return (

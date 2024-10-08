@@ -2,13 +2,8 @@ import { useMediaQuery, useTheme, Box } from "@mui/material"
 import Wrapper from "../Wrapper"
 import LogoContent from "../LogoContent"
 import ForgetPasswordForm from "../Forms/ForgetPasswordForm"
-import { useParams } from "react-router-dom"
 
 export default function ForgetPassword() {
-  let { token } = useParams()
-
-  console.log("token is ", token)
-  
   const theme = useTheme()
   const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024))
 

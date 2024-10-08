@@ -10,33 +10,19 @@ import ThirdStep from "../Register/Steps/ThirdStep"
 import { useAppStore } from "../../../store/useAppStore"
 
 interface SignUpFormProps {
-  loading: boolean
   isMobile?: boolean
   isSmallDevice?: boolean
-  signUpWithGoogle: () => void
-  signUpWithApple: () => void
-  signUpWithFacebook: (info: any) => void
-  signUpWithMetamask: () => void
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({
-  loading = false,
   isMobile = false,
   isSmallDevice = false,
-  signUpWithGoogle,
-  signUpWithApple,
-  signUpWithFacebook,
-  signUpWithMetamask,
 }) => {
-  const [activeStep, setActiveStep] = useState(0)
-
   const navigate = useNavigate()
   const location = useLocation()
   const config = useAppStore(s => s.currentApp)
 
-  const setSignUnQuery = () => {
-    navigate("/login")
-  }
+  const [activeStep, setActiveStep] = useState(0)
 
   useEffect(() => {
     if (location.pathname.includes("tempPassword")) {
@@ -46,16 +32,11 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
 
   const steps = [
     <FirstStep
-      signUpWithGoogle={signUpWithGoogle}
-      signUpWithApple={signUpWithApple}
-      signUpWithFacebook={signUpWithFacebook}
-      signUpWithMetamask={signUpWithMetamask}
       setStep={setActiveStep}
-      loading={loading}
       isSmallDevice={isSmallDevice}
     />,
-    <SecondStep loading={loading} />,
-    <ThirdStep loading={loading} />,
+    <SecondStep />,
+    <ThirdStep />,
   ]
 
   // @ts-ignore
@@ -138,7 +119,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             fontSize: "14px",
             cursor: "pointer",
           }}
-          onClick={setSignUnQuery}
+          onClick={() => navigate("/login")}
         >
           Sign In
         </Typography>

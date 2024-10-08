@@ -1,48 +1,46 @@
-import React, { Dispatch, SetStateAction } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { Box, Typography } from "@mui/material"
-import { useFormik } from "formik"
 import CustomButton from "../../Button"
 import CustomInput from "../../Input"
-import { useNavigate } from "react-router"
 import { useAppStore } from "../../../../store/useAppStore"
+import { useForm } from "react-hook-form"
+import { httpPostForgotPassword } from "../../../../http"
 
-const validate = (values: { email: string }) => {
-  const errors: Record<string, string> = {}
-
-  if (!values.email) {
-    errors.email = "Required field"
-  } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,4}$/i.test(values.email)) {
-    errors.email = "Invalid email address"
-  }
-
-  return errors
+interface Inputs {
+  email: string
 }
 
 interface FirstStepProps {
   setStep: Dispatch<SetStateAction<number>>
 }
 
-const FirstStep: React.FC<FirstStepProps> = ({ setStep }) => {
-  const nabigate = useNavigate()
+const FirstStep = ({ setStep }: FirstStepProps) => {
   const config = useAppStore(s => s.currentApp)
+  const [loading, setLoading] = useState(false)
 
   if (!config) {
     return null
   }
 
-  const formik = useFormik({
-    initialValues: {
-      email: "",
-    },
-    validate,
-    onSubmit: async (values, { resetForm, setSubmitting }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>()
 
-    },
-  })
-
-  const setEmailQuery = (email: string) => {
-    const params = new URLSearchParams(location.search)
-    params.set("email", email)
+  const onSubmit = async ({ email }: Inputs) => {
+    setLoading(true)
+    httpPostForgotPassword(email)
+      .then((res) => {
+        console.log(res)
+        setStep((prev) => prev + 1)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (
@@ -52,7 +50,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ setStep }) => {
         noValidate
         autoComplete="off"
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
-        onSubmit={formik.handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <Typography
           sx={{
@@ -68,22 +66,25 @@ const FirstStep: React.FC<FirstStepProps> = ({ setStep }) => {
         <CustomInput
           fullWidth
           placeholder="Email"
-          name="email"
           id="email"
           type="email"
-          value={formik.values.email}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.email && Boolean(formik.errors.email)}
-          helperText={formik.touched.email && formik.errors.email}
+          {...register("email", {
+            required: "Email is required", 
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: 'Invalid email address',
+            },
+          })}
+          error={Boolean(errors.email)}
+          helperText={errors.email?.message}
         />
         <CustomButton
           type="submit"
           fullWidth
           variant="contained"
           color="primary"
-          loading={formik.isSubmitting}
-          disabled={formik.isSubmitting}
+          loading={loading}
+          disabled={loading}
           style={{
             backgroundColor: config?.primaryColor
               ? config.primaryColor

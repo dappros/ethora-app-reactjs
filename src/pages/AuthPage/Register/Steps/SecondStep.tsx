@@ -1,15 +1,13 @@
 import { Box, Typography } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import { useEffect } from "react"
 import CustomButton from "../../Button"
 import SkeletonLoader from "../../SkeletonLoader"
 import { useNavigate } from "react-router-dom"
 import { useAppStore } from "../../../../store/useAppStore"
+import { httpResendLink } from "../../../../http"
+import { toast } from "react-toastify"
 
-interface SecondStepProps {
-  loading: boolean
-}
-
-const SecondStep: React.FC<SecondStepProps> = ({ loading }) => {
+const SecondStep = () => {
   const queryParams = new URLSearchParams(location.search)
   const email = queryParams.get("email")
   const navigate = useNavigate()
@@ -25,14 +23,18 @@ const SecondStep: React.FC<SecondStepProps> = ({ loading }) => {
     }
   }, [])
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
   const handleResend = () => {
-    setIsSubmitting(true)
+    httpResendLink(email as string)
+    .then(() => {
+      toast.success("Email has been resent")
+    })
+    .catch((_) => {
+      toast.error("An error occured")
+    })
   }
 
   return (
-    <SkeletonLoader loading={loading}>
+    <SkeletonLoader loading={false}>
       <Box
         sx={{
           display: "flex",
@@ -102,8 +104,6 @@ const SecondStep: React.FC<SecondStepProps> = ({ loading }) => {
             fullWidth
             aria-label="custom"
             onClick={handleResend}
-            disabled={isSubmitting}
-            loading={isSubmitting}
             style={{
               backgroundColor: config?.primaryColor
                 ? config.primaryColor

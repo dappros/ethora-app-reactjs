@@ -18,10 +18,14 @@ http.interceptors.request.use(
         }
 
         if (
-            config.url === '/users/login-with-email' 
+            config.url === '/users/login-with-email'
             || config.url === '/users/login'
             || (config.url === '/users' && config.method === 'post')
             || config.url?.startsWith('/users/checkEmail/')
+            || config.url === '/users/sign-up-with-email'
+            || config.url === '/users/resendLink'
+            || config.url === '/users/forgot'
+            || config.url === '/users/reset'
         ) {
             config.headers.Authorization = httpTokens.appJwt
 
@@ -222,4 +226,52 @@ export const httpLoginSocial = (
         loginType,
         authToken,
     })
-}   
+}
+
+export const httpRegisterWithEmail = (
+    email: string,
+    firstName: string,
+    lastName: string,
+    signUpPlan?: string
+) => {
+    const body = signUpPlan
+        ? {
+            email,
+            firstName,
+            lastName,
+            signupPlan: signUpPlan,
+        }
+        : {
+            email,
+            firstName,
+            lastName,
+        }
+    return http.post("/users/sign-up-with-email", body)
+}
+
+export async function httpResendLink(email: string) {
+    return await http.post(
+        "/users/resendLink",
+        {
+            email,
+        }
+    )
+}
+
+export async function httpPostForgotPassword(email: string) {
+    return await http.post(
+        "/users/forgot",
+        {
+            email,
+        }
+    )
+}
+
+export async function httpResetPassword(password: string) {
+    return await http.post(
+      "/users/reset",
+      {
+        password
+      }
+    )
+  }

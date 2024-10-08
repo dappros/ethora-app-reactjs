@@ -4,10 +4,11 @@ import MetamaskIcon from "./Icons/socials/metamaskIcon"
 
 export const MetamaskButton = () => {
     const config = useAppStore(s => s.currentApp)
+
     if (!config) return null
 
     const onMetamaskClick = () => {
-        console.log("signUpWithMetamask")
+        // result.activate(injected)
     }
 
     return (

@@ -7,28 +7,9 @@ import SignUpForm from "../Forms/RegisterForm"
 import { FullPageSpinner } from "../FullPageSpinner"
 
 export default function Register() {
-  const navigate = useNavigate()
-  const { search } = useLocation()
-  const [loading, setLoading] = useState(false)
-
-  const signUpPlan = new URLSearchParams(search).get("signUpPlan")
-
-  const onGoogleClick = async () => {
-  }
-
-  const updateUserInfo = async (loginData: any) => {
-  }
-
-  const onFacebookClick = async (info: any) => {
-  }
-
   const theme = useTheme()
   const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024))
   const isSmallDevice = useMediaQuery(theme.breakpoints.down(512))
-
-  if (loading) {
-    return <FullPageSpinner />
-  }
 
   return (
     <Wrapper>
@@ -46,15 +27,8 @@ export default function Register() {
       >
         <LogoContent isMobile={isMobileDevice} />
         <SignUpForm
-          loading={loading}
           isMobile={isMobileDevice}
           isSmallDevice={isSmallDevice}
-          signUpWithGoogle={onGoogleClick}
-          signUpWithApple={function (): void {
-            console.log("Function not implemented.")
-          }}
-          signUpWithFacebook={onFacebookClick}
-          signUpWithMetamask={() => {}}
         />
       </Box>
     </Wrapper>

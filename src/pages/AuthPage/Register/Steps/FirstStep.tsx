@@ -1,75 +1,59 @@
-import React, { Dispatch, SetStateAction } from "react"
+import React, { Dispatch, SetStateAction, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
+
 import { Box, Typography } from "@mui/material"
-import { useFormik } from "formik"
 import CustomButton from "../../Button"
 import CustomInput from "../../Input"
 import SkeletonLoader from "../../SkeletonLoader"
-import { useNavigate } from "react-router-dom"
 import { useAppStore } from "../../../../store/useAppStore"
 import { GoogleButton } from "../../GoogleButton"
 import { MetamaskButton } from "../../MetamaskButton"
-
-const validate = (values: { email: string; firstName: any; lastName: any }) => {
-  const errors: Record<string, string> = {}
-
-  if (!values.email) {
-    errors.email = "Required field"
-  } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,4}$/i.test(values.email)) {
-    errors.email = "Invalid email address"
-  }
-
-  if (!values.firstName) {
-    errors.firstName = "Required field"
-  } else if (values.firstName.length < 2) {
-    errors.firstName = "First name must be at least 2 characters"
-  }
-
-  if (!values.lastName) {
-    errors.lastName = "Required field"
-  } else if (values.lastName.length < 2) {
-    errors.lastName = "Last name must be at least 2 characters"
-  }
-
-  return errors
-}
+import { httpRegisterWithEmail } from "../../../../http"
+import { toast } from "react-toastify"
 
 interface FirstStepProps {
-  signUpWithGoogle: () => void
-  signUpWithApple: () => void
-  signUpWithFacebook: (info: any) => void
-  signUpWithMetamask: () => void
   setStep: Dispatch<SetStateAction<number>>
-  loading: boolean
   isSmallDevice?: boolean
 }
 
+type Inputs = {
+  firstName: string
+  lastName: string
+  email: string
+}
+
 const FirstStep: React.FC<FirstStepProps> = ({
-  loading = false,
   isSmallDevice = false,
+  setStep
 }) => {
-  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const config = useAppStore(s => s.currentApp)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>()
 
   if (!config) {
     return null
   }
 
-  const setEmailQuery = (email: string) => {
-    const params = new URLSearchParams(location.search)
-    params.set("email", email)
-    // history.push({ search: params.toString() })
+  const onSubmit = async({email, firstName, lastName}: Inputs) => {
+    console.log("onSubmit")
+    httpRegisterWithEmail(email, firstName, lastName)
+      .then(_ => {
+        setSearchParams({
+          ...Object.fromEntries(searchParams.entries()),
+          email: email
+        })
+        setStep((prev) => prev + 1)
+      })
+      .catch(error => {
+        toast.error(error.data.error)
+      })
   }
-
-  const formik = useFormik({
-    initialValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-    },
-    validate,
-    onSubmit: async (values, { resetForm, setSubmitting }) => {
-    },
-  })
 
   return (
     <Box
@@ -80,7 +64,7 @@ const FirstStep: React.FC<FirstStepProps> = ({
         minWidth: "320px",
       }}
     >
-      <SkeletonLoader loading={loading}>
+      <SkeletonLoader loading={false}>
         <Box
           component="form"
           noValidate
@@ -91,7 +75,7 @@ const FirstStep: React.FC<FirstStepProps> = ({
             gap: 3,
             flexWrap: "wrap",
           }}
-          onSubmit={formik.handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
         >
           <Box
             sx={{
@@ -104,56 +88,47 @@ const FirstStep: React.FC<FirstStepProps> = ({
           >
             <CustomInput
               placeholder="First Name"
-              name="firstName"
               id="firstName"
               fullWidth
-              value={formik.values.firstName}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+              {...register("firstName", { required: "First Name is required" })}
               error={
-                formik.touched.firstName && Boolean(formik.errors.firstName)
+                Boolean(errors.firstName)
               }
               helperText={
-                formik.touched.firstName && formik.errors.firstName
-                  ? String(formik.errors.firstName)
-                  : ""
+                errors.firstName?.message
               }
             />
             <CustomInput
               placeholder="Last Name"
-              name="lastName"
               id="lastName"
               fullWidth
-              value={formik.values.lastName}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+              {...register("lastName", { required: "Last Name is required" })}
+              error={Boolean(errors.lastName)}
               helperText={
-                formik.touched.lastName && formik.errors.lastName
-                  ? String(formik.errors.lastName)
-                  : ""
+                errors.lastName?.message
               }
             />
           </Box>
           <CustomInput
             fullWidth
             placeholder="Email"
-            name="email"
             id="email"
             type="email"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
+            {...register("email", {
+              required: "Email is required", 
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Invalid email address',
+              },
+            })}
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message}
           />
           <CustomButton
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
-            loading={formik.isSubmitting}
-            disabled={formik.isSubmitting}
             style={{
               backgroundColor: config?.primaryColor
                 ? config.primaryColor

@@ -19,11 +19,15 @@ export function Safari({tagline, appLogo, sublogo}: Props) {
                     </div>
                     <div className="right">
                         <div className="form">
-
+                            <div className="form-title text-center">Sign Up</div>
+                            <div className="steps">
+                                <div className="step"></div>
+                                <div className="step"></div>
+                                <div className="step"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     )

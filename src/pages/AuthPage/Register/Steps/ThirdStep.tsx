@@ -1,39 +1,28 @@
 import { Box, Typography } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import CustomInput from "../../Input"
 import CustomButton from "../../Button"
-import { useFormik } from "formik"
 import SkeletonLoader from "../../SkeletonLoader"
 import { useNavigate } from "react-router-dom"
 import { useAppStore } from "../../../../store/useAppStore"
+import { useForm } from "react-hook-form"
 
-interface ThirdStepProps {
-  loading: boolean
+interface Inputs {
+  newPassword: string
+  repeatPassword: string
 }
 
-const validate = (values: { newPassword: string; repeatPassword: string }) => {
-  const errors: Record<string, string> = {}
-
-  if (!values.newPassword) {
-    errors.newPassword = "Required field"
-  } else if (values.newPassword.length < 8) {
-    errors.newPassword = "Password must be at least 8 characters"
-  }
-
-  if (!values.repeatPassword) {
-    errors.repeatPassword = "Required field"
-  } else if (values.repeatPassword !== values.newPassword) {
-    errors.repeatPassword = "Passwords must match"
-  }
-
-  return errors
-}
-
-const ThirdStep: React.FC<ThirdStepProps> = ({ loading }) => {
+const ThirdStep = () => {
   const [userData, setUserData] = useState({
     email: "",
     tempPassword: "",
   })
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>()
 
   const navigate = useNavigate()
   const config = useAppStore((state) => state.currentApp)
@@ -54,18 +43,12 @@ const ThirdStep: React.FC<ThirdStepProps> = ({ loading }) => {
     setUserData({ email, tempPassword })
   }, [])
 
-  const formik = useFormik({
-    initialValues: {
-      newPassword: "",
-      repeatPassword: "",
-    },
-    validate,
-    onSubmit: async (values, { resetForm, setSubmitting }) => {
-    },
-  })
+  const onSubmit = async({newPassword, repeatPassword}: Inputs) => {
+    console.log(newPassword, repeatPassword)
+  }
 
   return (
-    <SkeletonLoader loading={loading}>
+    <SkeletonLoader loading={false}>
       <Box
         sx={{
           display: "flex",
@@ -77,7 +60,7 @@ const ThirdStep: React.FC<ThirdStepProps> = ({ loading }) => {
           component="form"
           noValidate
           autoComplete="off"
-          onSubmit={formik.handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           sx={{ display: "flex", flexDirection: "column", gap: 3 }}
         >
           <Typography
@@ -111,20 +94,16 @@ const ThirdStep: React.FC<ThirdStepProps> = ({ loading }) => {
             <CustomInput
               placeholder={"Enter Your Password"}
               sx={{ flex: 1, width: "100%" }}
-              name="newPassword"
-              value={formik.values.newPassword}
-              onChange={formik.handleChange}
-              error={!!formik.errors.newPassword}
-              helperText={formik.errors.newPassword}
+              {...register("newPassword", {required: "Required field"})}
+              error={!!errors.newPassword}
+              helperText={errors.newPassword?.message}
             />
             <CustomInput
               placeholder={"Repeat Your Password"}
               sx={{ flex: 1, width: "100%" }}
-              name="repeatPassword"
-              value={formik.values.repeatPassword}
-              onChange={formik.handleChange}
-              error={!!formik.errors.repeatPassword}
-              helperText={formik.errors.repeatPassword}
+              {...register("repeatPassword", {required: "Required field"})}
+              error={!!errors.repeatPassword}
+              helperText={errors.repeatPassword?.message}
             />
           </Box>
           <CustomButton
@@ -132,8 +111,6 @@ const ThirdStep: React.FC<ThirdStepProps> = ({ loading }) => {
             variant="contained"
             color="primary"
             type="submit"
-            disabled={formik.isSubmitting || !formik.isValid}
-            loading={formik.isSubmitting}
             style={{
               backgroundColor: config?.primaryColor
                 ? config.primaryColor

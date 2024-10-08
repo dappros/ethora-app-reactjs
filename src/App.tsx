@@ -27,6 +27,7 @@ import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
 import LoginComponent from "./pages/AuthPage/Login/index";
 import ForgetPassword from "./pages/AuthPage/ForgetPassword";
 import Register from "./pages/AuthPage/Register";
+import { Helmet } from "react-helmet"
 
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -50,10 +51,19 @@ function App() {
   } else {
     return (
       <>
+        <Helmet>
+          <title>{currentApp.displayName || "Dappros Platform"}</title>
+          <meta
+            property="og:title"
+            content={currentApp.displayName || "Dappros Platform"}
+          />
+        </Helmet>
         <Routes>
+
           <Route path="/" element={<Navigate to="/app" />} />
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/tempPassword" element={<Register />} />
           <Route path="/resetPassword/:token?" element={<ForgetPassword />} />
           <Route
             path="/app"

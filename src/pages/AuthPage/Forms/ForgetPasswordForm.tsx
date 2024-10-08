@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Box, Typography } from "@mui/material"
 
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import BackButton from "../BackButton"
 import FirstStep from "../ForgetPassword/Steps/FirstStep"
 import SecondStep from "../ForgetPassword/Steps/SecondStep"
@@ -19,19 +19,19 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
 }) => {
   const [activeStep, setActiveStep] = useState(0)
   const config = useAppStore(s => s.currentApp)
+  let { token } = useParams()
 
   if (!config) {
     return null
   }
 
   const navigate = useNavigate()
-  const location = useLocation()
 
   useEffect(() => {
-    if (location.pathname.split("/")?.[2]?.length > 0) {
+    if (token) {
       setActiveStep(2)
     }
-  }, [location.pathname])
+  }, [token])
 
   const steps = [
     <FirstStep setStep={setActiveStep} />,
