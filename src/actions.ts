@@ -1,6 +1,5 @@
 import { httpGetConfig, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp } from "./http";
 import { ModelApp, ModelCurrentUser } from "./models";
-import { firebase } from "./pages/AuthPage/firebase";
 import { useAppStore } from "./store/useAppStore";
 import { getFirebaseConfigFromString } from "./utils/getFbConfig";
 import { sleep } from "./utils/sleep";
