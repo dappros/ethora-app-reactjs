@@ -14,44 +14,55 @@ export const GoogleButton = () => {
     try {
       console.log("google login")
       const loginType = "google"
-      const { user, idToken, credential } = await getUserCredsFromGoogle()
+      let user, idToken, credential
+      try {
+        const creds = await getUserCredsFromGoogle()
+        user = creds.user
+        idToken = creds.idToken
+        credential = creds.credential
 
-      if (!user.providerData[0].email) {
-        toast.error("Email not provided by Google")
-        return
+      } catch (e) {
+        console.log("here ", e)
       }
 
-      const emailExist = await httpCheckEmailExist(user.providerData[0].email)
 
-      if (emailExist.data.success) {
-        console.log("new registration")
-        try {
-          await httpRegisterSocial(
+
+      if (user) {
+        if (!user.providerData[0].email) {
+          toast.error("Email not provided by Google")
+          return
+        }
+        const emailExist = await httpCheckEmailExist(user.providerData[0].email)
+
+        if (emailExist.data.success) {
+          console.log("new registration")
+          try {
+            await httpRegisterSocial(
+              idToken ?? "",
+              credential?.accessToken ?? "",
+              "",
+              loginType
+            )
+          } catch (error) {
+            toast.error("Social registration failed")
+          }
+  
+          httpLoginSocial(idToken ?? "", credential?.accessToken ?? "", loginType).then(async ({ data }) => {
+            await actionAfterLogin(data)
+            navigate("/app/admin/apps")
+          })
+        } else {
+          console.log("existing user")
+          httpLoginSocial(
             idToken ?? "",
             credential?.accessToken ?? "",
-            "",
             loginType
-          )
-        } catch (error) {
-          toast.error("Social registration failed")
+          ).then(async ({ data }) => {
+            await actionAfterLogin(data)
+            navigate("/app/admin/apps")
+          })
         }
-
-        httpLoginSocial(idToken ?? "", credential?.accessToken ?? "", loginType).then(async ({ data }) => {
-          await actionAfterLogin(data)
-          navigate("/app/admin/apps")
-        })
-      } else {
-        console.log("existing user")
-        httpLoginSocial(
-          idToken ?? "",
-          credential?.accessToken ?? "",
-          loginType
-        ).then(async ({ data }) => {
-          await actionAfterLogin(data)
-          navigate("/app/admin/apps")
-        })
       }
-
     } catch (error) {
       console.log("++ ", error)
     }
