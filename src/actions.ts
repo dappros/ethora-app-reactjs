@@ -65,7 +65,6 @@ export async function  actionGetConfig(domainName?: string) {
 
     await sleep(1000)
     httpTokens.appJwt = result.appToken
-    firebase.init()
     state.doSetCurrentApp(app)
 }
 
