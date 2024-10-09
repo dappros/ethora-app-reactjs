@@ -29,6 +29,7 @@ class Firebase {
   }
 }
 export let firebase = new Firebase()
+firebase.init()
 
 type IUser = User & { accessToken: string }
 
