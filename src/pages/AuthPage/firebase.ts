@@ -11,7 +11,6 @@ class Firebase {
   firebaseApp: FirebaseApp | null = null
   firebaseConfig: FirebaseOptions | null = null
   init() {
-    
     const config = useAppStore.getState().currentApp?.firebaseConfigParsed
     console.log("init with config ", config)
     if (!config) return;
@@ -30,13 +29,14 @@ class Firebase {
   }
 }
 export let firebase = new Firebase()
-firebase.init()
+
 
 type IUser = User & { accessToken: string }
 
 export const getUserCredsFromGoogle = async () => {
   if (!firebase) {
     firebase = new Firebase()
+    firebase.init()
   }
   const auth = getAuth(firebase.firebaseApp as FirebaseApp)
   const googleProvider = new GoogleAuthProvider()
