@@ -11,8 +11,9 @@ class Firebase {
   firebaseApp: FirebaseApp | null = null
   firebaseConfig: FirebaseOptions | null = null
   init() {
+    
     const config = useAppStore.getState().currentApp?.firebaseConfigParsed
-
+    console.log("init with config ", config)
     if (!config) return;
 
     const firebaseConfig = {
