@@ -28,11 +28,14 @@ class Firebase {
     this.firebaseApp = initializeApp(firebaseConfig)
   }
 }
-export const firebase = new Firebase()
+export let firebase = new Firebase()
 
 type IUser = User & { accessToken: string }
 
 export const getUserCredsFromGoogle = async () => {
+  if (!firebase) {
+    firebase = new Firebase()
+  }
   const auth = getAuth(firebase.firebaseApp as FirebaseApp)
   const googleProvider = new GoogleAuthProvider()
   googleProvider.addScope("https://www.googleapis.com/auth/userinfo.email")
