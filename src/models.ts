@@ -10,6 +10,11 @@ export interface ModelCurrentUser {
     refreshToken: string
     walletAddress: string
     xmppPassword: string
+    profileImage: string
+    description: string
+    defaultWallet: {
+        walletAddress: string
+    }
 }
 
 export interface ModelCurrentApp {

@@ -54,7 +54,6 @@ http.interceptors.response.use(
 
         try {
             let refreshResult = await refreshToken()
-            console.log({ refreshResult })
             return http(request)
 
         } catch (error) {
@@ -102,8 +101,14 @@ export function httpCreateNewApp(displayName: string) {
     return http.post(`/apps`, { displayName })
 }
 
-export function httpGetApps() {
-    return http.get('/apps')
+export interface GetAppsPaginator {
+    limit?: number,
+    offset?: number,
+    order?: 'asc' | 'desc',
+    orderBy?: 'displayName' | 'totalRegistered' | 'totalSessions' | 'totalApiCalls' | 'totalFiles' | 'totalTransactions' | 'createdAt'
+}
+export function httpGetApps({limit = 10, offset = 0, order = 'asc', orderBy = 'displayName'}: GetAppsPaginator) {
+    return http.get(`/apps?limit=${limit}&offset=${offset}&order=${order}&orderBy=${orderBy}`)
 }
 
 export function httpUpdateApp(appId: string, options: any) {
@@ -275,3 +280,11 @@ export async function httpResetPassword(password: string) {
       }
     )
   }
+
+export function httpUpdateUser(fd: FormData) {
+    return http.put('/users', fd)
+}
+
+export function getPublicProfile(walletAddress: string) {
+    return http.get(`/users/profile/${walletAddress}`)
+}

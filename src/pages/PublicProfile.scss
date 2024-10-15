@@ -1,0 +1,19 @@
+.public-profile {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    .content {
+        max-width: 1920px;
+        width: 100%;
+        border-radius: 16px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .name {
+        margin-top: 32px;
+    }
+}

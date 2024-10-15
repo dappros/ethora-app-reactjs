@@ -1,4 +1,4 @@
-import { httpGetConfig, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp } from "./http";
+import { httpGetConfig, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp, httpUpdateUser } from "./http";
 import { ModelApp, ModelCurrentUser } from "./models";
 import { useAppStore } from "./store/useAppStore";
 import { getFirebaseConfigFromString } from "./utils/getFbConfig";
@@ -6,25 +6,6 @@ import { sleep } from "./utils/sleep";
 
 const getState = useAppStore.getState
 
-const testUser: ModelCurrentUser = {
-    firstName: 'Test',
-    lastName: 'Lest',
-    appId: '12312',
-    homeScreen: '',
-    isAgreeWithTerms: false,
-    isAssetsOpen: false,
-    isProfileOpen: false,
-    refreshToken: 'token',
-    token: 'token',
-    walletAddress: '',
-    xmppPassword: ''
-}
-
-export async function actionSignin() {
-    const state = getState()
-    await singin()
-    state.doSetUser(testUser)
-}
 
 export async function  actionGetConfig(domainName?: string) {
     const state = getState()
@@ -84,7 +65,12 @@ export async function actionAfterLogin(data: any) {
         refreshToken: data.refreshToken,
         token: data.token,
         xmppPassword: data.user.xmppPassword,
-        walletAddress: data.user.defaultWallet.walletAddress
+        walletAddress: data.user.defaultWallet.walletAddress,
+        profileImage: data.user.profileImage,
+        description: data.user.description,
+        defaultWallet: {
+            walletAddress: data.user.defaultWallet.walletAddress
+        }
     }
     state.doSetUser(user)
     await actionBootsrap()
@@ -92,7 +78,8 @@ export async function actionAfterLogin(data: any) {
 
 export async function actionBootsrap() {
     const state = getState()
-    const {data: {apps}} = await httpGetApps()
+    const {data: {apps}} = await httpGetApps({})
+    console.log(apps.length)
     state.doSetApps(apps)
 }
 
@@ -135,4 +122,17 @@ export async function actionUpdateApp(appId: string, options: any) {
     let response = await httpUpdateApp(appId, options)
     const state = getState()
     state.doUpdateApp(response.data.result)
+}
+
+export async function actionUpdateUser(fd: FormData) {
+    let {data: {user}} = await httpUpdateUser(fd)
+    let state = getState()
+    state.doUpdateUser({firstName: user.firstName, lastName: user.lastName, description: user.description, profileImage: user.profileImage})
+    return {
+        profileImage: user.profileImage
+    }
+}
+
+export function actionLogout() {
+    return null
 }

@@ -30,6 +30,8 @@ import Register from "./pages/AuthPage/Register";
 import { Helmet } from "react-helmet"
 
 import 'react-toastify/dist/ReactToastify.css';
+import { ProfilePageEdit } from "./pages/ProfilePageEdit";
+import { PublicProfile } from "./pages/PublicProfile";
 
 function App() {
   const currentApp = useAppStore(s => s.currentApp)
@@ -87,8 +89,10 @@ function App() {
               </Route>
             </Route>
             <Route path="profile" element={<ProfilePage />}></Route>
+            <Route path="profile/edit" element={<ProfilePageEdit />}></Route>
             <Route path="settings" element={<SettingsPage />}></Route>
           </Route>
+          <Route path="/public/:address" element={<PublicProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ToastContainer />

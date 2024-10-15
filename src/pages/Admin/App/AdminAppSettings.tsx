@@ -14,6 +14,7 @@ import { Visibility } from "./SettingsTab/Visibility";
 import { useState } from "react";
 import { actionUpdateApp } from "../../../actions";
 import { toast } from "react-toastify";
+import { Api } from "./SettingsTab/Api";
 
 export function AdminAppSettings() {
     let { appId } = useParams()
@@ -171,6 +172,7 @@ export function AdminAppSettings() {
                     <Tab key="Menu">Menu</Tab>
                     <Tab key="Chats">Chats</Tab>
                     <Tab key="Visibility & Privacy">Visibility & Privacy</Tab>
+                    <Tab key="API">API</Tab>
                 </TabList>
                 <TabPanels className="tabs-content">
                     <TabPanel key="Appearance">
@@ -242,6 +244,9 @@ export function AdminAppSettings() {
                             usersCanFree={usersCanFree}
                             setUsersCanFree={setUsersCanFree}
                         />
+                    </TabPanel>
+                    <TabPanel key="API">
+                        <Api />
                     </TabPanel>
                 </TabPanels>
             </TabGroup>

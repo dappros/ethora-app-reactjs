@@ -7,9 +7,13 @@ import profileImage from "../assets/profile-image.png"
 import { IconMenuBurger } from "../components/Icons/IconMenuBurger";
 import { useState } from "react";
 import { MobileMenuModal } from "../components/modal/MobileMenuModal";
+import { ProfilePageUserIcon } from "../components/ProfilePageUserIcon";
+import { useAppStore } from "../store/useAppStore";
+import { ModelCurrentUser } from "../models";
 
 export function AppPage() {
     const [isMobileMenuVisible, setMobileMenuVisible] = useState(false)
+    const {firstName, lastName, profileImage} = useAppStore(s => s.currentUser as ModelCurrentUser)
     const toggleMobileMenu = () => {
         setMobileMenuVisible(!isMobileMenuVisible)
     }
@@ -32,7 +36,7 @@ export function AppPage() {
                         <div className="menu-desktop-bottom">
                             <NavLink to="/app/profile" className="app-menu-btn">
                                 <div className="menu-profile">
-                                    <img src={profileImage} alt="" />
+                                    <ProfilePageUserIcon width="40px" height="40px" firstName={firstName} lastName={lastName} profileImage={profileImage} />
                                 </div>
                                 <span>Profile</span>
                             </NavLink >
@@ -50,7 +54,7 @@ export function AppPage() {
                         <div>
                             <div className="menu-profile">
                                 <NavLink to="/app/profile" className="app-menu-btn">
-                                    <img src={profileImage} alt="" />
+                                    <ProfilePageUserIcon profileImage={profileImage} width="40px" height="40px" firstName={firstName} lastName={lastName} />
                                 </NavLink >
 
                             </div>

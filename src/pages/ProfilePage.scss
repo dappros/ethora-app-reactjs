@@ -1,0 +1,29 @@
+.profile-page {
+    .profile-top {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .profile-user-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 32px;
+    }
+
+    .profile-user-about {
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 32px;
+        max-width: 768px;
+        width: 100%;
+    }
+
+    .buttons {
+        margin-top: 32px;
+        max-width: 768px;
+        width: 100%;
+    }
+}
