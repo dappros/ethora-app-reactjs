@@ -3,7 +3,6 @@ import "./AppPage.scss"
 import { IconChat } from "../components/Icons/IconChat";
 import { IconAdmin } from "../components/Icons/IconAdmin";
 import { IconSettings } from "../components/Icons/IconSettings";
-import profileImage from "../assets/profile-image.png"
 import { IconMenuBurger } from "../components/Icons/IconMenuBurger";
 import { useState } from "react";
 import { MobileMenuModal } from "../components/modal/MobileMenuModal";
