@@ -3,7 +3,6 @@ import { IconClose } from "../Icons/IconClose"
 import QRCode from "react-qr-code"
 
 import "./QrModal.scss"
-import { useLocation } from "react-router-dom"
 import { TextInput } from "../ui/TextInput"
 
 interface Props {

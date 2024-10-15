@@ -53,7 +53,7 @@ http.interceptors.response.use(
         }
 
         try {
-            let refreshResult = await refreshToken()
+            await refreshToken()
             return http(request)
 
         } catch (error) {

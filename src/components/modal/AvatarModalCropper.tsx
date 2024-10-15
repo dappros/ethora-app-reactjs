@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react"
-import { IconClose } from "../Icons/IconClose"
 import ReactCrop, {
     centerCrop,
     convertToPixelCrop,

@@ -1,4 +1,4 @@
-import { httpGetConfig, singin, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp, httpUpdateUser } from "./http";
+import { httpGetConfig, httpTokens, httpCreateNewApp, httpGetApps, httpPostFile, httpGetUsers, httpDeleteManyUsers, httpResetPasswords, httpUpdateApp, httpUpdateUser } from "./http";
 import { ModelApp, ModelCurrentUser } from "./models";
 import { useAppStore } from "./store/useAppStore";
 import { getFirebaseConfigFromString } from "./utils/getFbConfig";
