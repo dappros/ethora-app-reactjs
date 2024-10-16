@@ -15,6 +15,10 @@ export interface ModelCurrentUser {
     defaultWallet: {
         walletAddress: string
     }
+    isSuperAdmin?: {
+        read: boolean
+        write: boolean
+    }
 }
 
 export interface ModelCurrentApp {

@@ -288,3 +288,7 @@ export function httpUpdateUser(fd: FormData) {
 export function getPublicProfile(walletAddress: string) {
     return http.get(`/users/profile/${walletAddress}`)
 }
+
+export function getDocuments(walletAddress: string) {
+    return http.get(`/docs/${walletAddress}`)
+  }

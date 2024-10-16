@@ -5,19 +5,33 @@ import "./ProfilePage.scss"
 import { ProfilePageUserIcon } from "../components/ProfilePageUserIcon"
 import { useAppStore } from "../store/useAppStore"
 import { ModelCurrentUser } from "../models"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { QrModal } from "../components/modal/QrModal"
 import { actionLogout } from "../actions"
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react"
+import { getDocuments } from "../http"
 
 export function ProfilePage() {
     const [showQr, setShowQr] = useState(false)
-    const { firstName, lastName, profileImage, description, defaultWallet: {walletAddress} } = useAppStore(s => s.currentUser as ModelCurrentUser)
+    const [documents, setDocuments] = useState<Array<any>>([])
+    const { firstName, lastName, profileImage, description, defaultWallet: { walletAddress } } = useAppStore(s => s.currentUser as ModelCurrentUser)
 
     const navigate = useNavigate()
 
+    useEffect(() => {
+        (async () => {
+            let {data} = await getDocuments(walletAddress)
+            // @ts-ignore
+            let items = data.results.filter((el) => el.locations[0])
+            setDocuments(items)
+            console.log({items})
+        })()
+
+    }, [])
+
     const onLogout = () => {
         actionLogout()
-        navigate("/login", {replace: true})
+        navigate("/login", { replace: true })
     }
     return (
         <>
@@ -41,12 +55,29 @@ export function ProfilePage() {
                                 <span>{description}</span>
                             </div>
                         )}
+                        <div className="profile-items">
+                            <TabGroup className="profile-items-tabgroup">
+                                <TabList className="tabs">
+                                    <Tab key="documents" className="tab">Documents</Tab>
+                                    <Tab key="collections" className="tab">Collections</Tab>
+                                </TabList>
+                                <TabPanels className="tabs-content">
+                                    <TabPanel key="documents">
+                                        documents
+                                        {documents.map((el) => (<div className="document-item" key={el._id}>{el.documentName}</div>))}
+                                    </TabPanel>
+                                    <TabPanel key="collections">
+                                        collections
+                                    </TabPanel>
+                                </TabPanels>
+                            </TabGroup>
+                        </div>
                         <button className="gen-secondary-btn buttons" onClick={() => onLogout()}>Logout</button>
                     </div>
                 </div>
             </div>
             {showQr && (
-                <QrModal walletAddress={walletAddress} onClose={() => setShowQr(false)}/>
+                <QrModal walletAddress={walletAddress} onClose={() => setShowQr(false)} />
             )}
         </>
     )

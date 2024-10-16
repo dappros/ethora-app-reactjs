@@ -70,10 +70,15 @@ export async function actionAfterLogin(data: any) {
         description: data.user.description,
         defaultWallet: {
             walletAddress: data.user.defaultWallet.walletAddress
-        }
+        },
     }
+
+    if (data.user.isSuperAdmin) {
+        user.isSuperAdmin = data.user.isSuperAdmin
+    }
+
     state.doSetUser(user)
-    await actionBootsrap()
+    // await actionBootsrap()
 }
 
 export async function actionBootsrap() {
