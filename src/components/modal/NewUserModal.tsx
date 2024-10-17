@@ -5,10 +5,12 @@ import { IconClose } from "../Icons/IconClose"
 import "./NewUserModal.scss"
 import { TextInput } from "../ui/TextInput"
 import { SubmitHandler, useForm } from "react-hook-form"
+import { Loading } from "../Loading"
 
 interface Props {
     onClose: () => void
     onSubmit: SubmitHandler<Inputs>
+    loading: boolean
 }
 
 type Inputs = {
@@ -17,7 +19,7 @@ type Inputs = {
     email: string
 }
 
-export function NewUserModal({ onClose, onSubmit }: Props) {
+export function NewUserModal({ onClose, onSubmit, loading }: Props) {
     const {register, handleSubmit} = useForm<Inputs>()
     return (
         <Dialog className="new-user-modal" open={true} onClose={() => {}}>
@@ -54,6 +56,7 @@ export function NewUserModal({ onClose, onSubmit }: Props) {
 
                 <button className="close" onClick={() => onClose()}><IconClose /></button>
             </DialogPanel>
+            {loading && (<Loading></Loading>)}
         </Dialog>
     )
 }

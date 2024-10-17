@@ -33,6 +33,7 @@ export function AdminAppUsers() {
     const [showResetPassword, setShowResetPassword] = useState(false)
     const [showDelete, setShowDelete] = useState(false)
     const [tags, setTags] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const [order, setOrder] = useState<'asc' | 'desc'>('asc')
     const [orderBy, setOrderBy] = useState<'createdAt' | 'firstName' | 'lastName' | 'email'>('createdAt')
@@ -184,6 +185,7 @@ export function AdminAppUsers() {
     }
 
     const onNewUser = ({ firstName, lastName, email }: { firstName: string, lastName: string, email: string }) => {
+        setLoading(true)
         httpCraeteUser(appId, { firstName, lastName, email })
             .then((_) => {
                 actionGetUsers(appId, itemsPerTable, currentPage * itemsPerTable, orderBy, order)
@@ -198,6 +200,7 @@ export function AdminAppUsers() {
                     })
                 
             })
+            .finally(() => setLoading(false))
     }
 
     const onResetPassword = () => {
@@ -606,7 +609,7 @@ export function AdminAppUsers() {
 
             </div>
             {editAcl && <AclModal updateAcl={updateAcl} acl={editAcl} setEditAcl={setEditAcl} onClose={() => setEditAcl(null)} />}
-            {showNewUserModal && <NewUserModal onSubmit={onNewUser} onClose={() => setShowNewUserModal(false)} />}
+            {showNewUserModal && <NewUserModal loading={loading} onSubmit={onNewUser} onClose={() => setShowNewUserModal(false)} />}
             {showDelete && (
                 <SubmitModal onClose={() => setShowDelete(false)}>
                     <div className="title">
