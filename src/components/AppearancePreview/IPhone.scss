@@ -4,6 +4,16 @@
     background-image: url('../../assets/iPhone-13Mini.png');
     background-size: cover;
     background-repeat: no-repeat;
+    position: relative;
+
+    .wrap {
+        position: absolute;
+        top: 25px;
+        left: 17px;
+        right: 17px;
+        bottom: 25px;
+        background-color: white;
+    }
 }
 
 @media only screen and (max-width: 480px) {
