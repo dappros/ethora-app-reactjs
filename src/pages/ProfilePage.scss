@@ -50,7 +50,25 @@
         padding: 10px 8px;
         border-radius: 8px;
         background-color: #F3F6FC;
+        display: flex;
+        align-items: center;
+
+        .document-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            background-color: white;
+            margin-right: 8px;
+        }
+
+        .doc-date {
+            margin-bottom: 0;
+        }
     }
+
 
     .document-item + .document-item {
         margin-top: 10px;

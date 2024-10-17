@@ -10,23 +10,27 @@ import { QrModal } from "../components/modal/QrModal"
 import { actionLogout } from "../actions"
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react"
 import { getDocuments } from "../http"
+import { CreateDocumentModal } from "../components/modal/CreateDocumentModal"
+import { IconDoc } from "../components/Icons/IconDoc"
+import { DateTime } from "luxon"
 
 export function ProfilePage() {
     const [showQr, setShowQr] = useState(false)
+    const [showNewDocModal, setShowNewDocModal] = useState(false)
     const [documents, setDocuments] = useState<Array<any>>([])
     const { firstName, lastName, profileImage, description, defaultWallet: { walletAddress } } = useAppStore(s => s.currentUser as ModelCurrentUser)
 
     const navigate = useNavigate()
 
-    useEffect(() => {
-        (async () => {
-            let {data} = await getDocuments(walletAddress)
-            // @ts-ignore
-            let items = data.results.filter((el) => el.locations[0])
-            setDocuments(items)
-            console.log({items})
-        })()
+    const componentGetDocs = async () => {
+        let {data} = await getDocuments(walletAddress)
+        // @ts-ignore
+        let items = data.results.filter((el) => el.locations[0])
+        setDocuments(items)
+    }
 
+    useEffect(() => {
+        componentGetDocs()
     }, [])
 
     const onLogout = () => {
@@ -63,8 +67,19 @@ export function ProfilePage() {
                                 </TabList>
                                 <TabPanels className="tabs-content">
                                     <TabPanel key="documents">
-                                        documents
-                                        {documents.map((el) => (<div className="document-item" key={el._id}>{el.documentName}</div>))}
+                                        <button onClick={() => setShowNewDocModal(true)} className="gen-primary-btn mb-16">Add Document</button>
+                                        {documents.map((el) => (
+                                            <div className="document-item" key={el._id}>
+                                                <div className="document-icon">
+                                                    <IconDoc />
+                                                </div>
+                                                <div className="doc-inf">
+                                                    <div className="doc-name">{el.documentName}</div>
+                                                    <div className="doc-date caption">{DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}</div>
+                                                </div>
+
+                                            </div>)
+                                        )}
                                     </TabPanel>
                                     <TabPanel key="collections">
                                         collections
@@ -78,6 +93,9 @@ export function ProfilePage() {
             </div>
             {showQr && (
                 <QrModal walletAddress={walletAddress} onClose={() => setShowQr(false)} />
+            )}
+            {showNewDocModal && (
+                <CreateDocumentModal componentGetDocs={componentGetDocs} onClose={() => setShowNewDocModal(false)}/>
             )}
         </>
     )

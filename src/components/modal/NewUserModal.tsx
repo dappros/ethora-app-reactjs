@@ -20,7 +20,7 @@ type Inputs = {
 export function NewUserModal({ onClose, onSubmit }: Props) {
     const {register, handleSubmit} = useForm<Inputs>()
     return (
-        <Dialog className="new-user-modal" open={true} onClose={onClose}>
+        <Dialog className="new-user-modal" open={true} onClose={() => {}}>
             <DialogPanel className="inner">
                 <div className="title">
                     Add New User

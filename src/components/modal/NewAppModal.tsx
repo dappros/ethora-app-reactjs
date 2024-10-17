@@ -7,6 +7,7 @@ import "./NewAppModal.scss"
 import { actionCreateApp } from "../../actions"
 import { TextInput } from "../ui/TextInput"
 import { toast } from "react-toastify"
+import { Loading } from "../Loading"
 
 interface Props {
     onClose: () => void
@@ -14,17 +15,22 @@ interface Props {
 
 export function NewAppModal({ onClose }: Props) {
     const [appName, setAppName] = useState("")
+    const [loading, setLoading] = useState(false)
 
     const onCreate = () => {
+        setLoading(true)
         actionCreateApp(appName)
             .then(() => {
                 onClose()
                 toast("Application created successfully!")
             })
+            .finally(() => {
+                setLoading(false)
+            })
     }
 
     return (
-        <Dialog className="new-app-modal" open={true} onClose={onClose}>
+        <Dialog className="new-app-modal" open={true} onClose={() => {}}>
             <DialogPanel className="inner">
                 <div className="title">
                     Get Started with Your New App
@@ -41,6 +47,9 @@ export function NewAppModal({ onClose }: Props) {
                 </div>
                 <button className="close" onClick={() => onClose()}><IconClose /></button>
             </DialogPanel>
+            {loading && (
+                <Loading />
+            )}
         </Dialog>
     )
 }

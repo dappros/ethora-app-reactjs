@@ -292,3 +292,9 @@ export function getPublicProfile(walletAddress: string) {
 export function getDocuments(walletAddress: string) {
     return http.get(`/docs/${walletAddress}`)
   }
+
+export async function postDocument(documentName: string, file: File) {
+    const filePostResutlt = await httpPostFile(file)
+    const fileLocation = filePostResutlt.data.results[0].location
+    return http.post('/docs', {documentName, files: [fileLocation]})
+}
