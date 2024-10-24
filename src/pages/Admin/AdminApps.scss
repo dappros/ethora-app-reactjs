@@ -1,6 +1,10 @@
 .admin-apps {
-    .admin-apps-pagination {
-        display: flex;
-        justify-content: flex-end;
-    }
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .admin-apps-pagination {
+    display: flex;
+    justify-content: flex-end;
+  }
 }

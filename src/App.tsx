@@ -1,14 +1,14 @@
 import { useEffect } from "react";
-import {
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
-import { ToastContainer } from 'react-toastify';
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import hexToRgba from "hex-to-rgba";
 
-import { actionGetConfig } from './actions';
-import { RequireAuth } from './components/RequireAuth';
+import {
+  actionAfterLogin,
+  actionGetConfig,
+  actionRefreshUserFromLocalStorage,
+} from "./actions";
+import { RequireAuth } from "./components/RequireAuth";
 import { useAppStore } from "./store/useAppStore";
 import { Loading } from "./components/Loading";
 import { NotFound } from "./pages/NotFound";
@@ -27,29 +27,51 @@ import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
 import LoginComponent from "./pages/AuthPage/Login/index";
 import ForgetPassword from "./pages/AuthPage/ForgetPassword";
 import Register from "./pages/AuthPage/Register";
-import { Helmet } from "react-helmet"
+import { Helmet } from "react-helmet";
 
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { ProfilePageEdit } from "./pages/ProfilePageEdit";
 import { PublicProfile } from "./pages/PublicProfile";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { localStorageConstants } from "./constants/localStorageConstants";
+import { ModelCurrentUser } from "./models";
+import { refreshToken } from "./http";
 
 function App() {
-  const currentApp = useAppStore(s => s.currentApp)
+  const currentApp = useAppStore((s) => s.currentApp);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    actionGetConfig(import.meta.env.VITE_DOMAIN_NAME)
-  }, [])
+    actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
+  }, []);
 
   useEffect(() => {
     if (currentApp) {
-      const primaryColor = currentApp.primaryColor
-      document.documentElement.style.setProperty('--bg-brand-primary', primaryColor)
-      document.documentElement.style.setProperty('--bg-auth-background', hexToRgba(primaryColor, '0.05'))
+      const primaryColor = currentApp.primaryColor;
+      document.documentElement.style.setProperty(
+        "--bg-brand-primary",
+        primaryColor
+      );
+      document.documentElement.style.setProperty(
+        "--bg-auth-background",
+        hexToRgba(primaryColor, "0.05")
+      );
     }
-  }, [currentApp])
+  }, [currentApp]);
+
+  // useEffect(() => {
+  //   const user: ModelCurrentUser = useLocalStorage(
+  //     localStorageConstants.ETHORA_USER
+  //   ).get() as ModelCurrentUser;
+
+  //   if (user) {
+  //     actionRefreshUserFromLocalStorage(user);
+  //     navigate("/app/admin/apps");
+  //   }
+  // }, [currentApp]);
 
   if (!currentApp) {
-    return <Loading></Loading>
+    return <Loading></Loading>;
   } else {
     return (
       <>
@@ -61,7 +83,6 @@ function App() {
           />
         </Helmet>
         <Routes>
-
           <Route path="/" element={<Navigate to="/app" />} />
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/register" element={<Register />} />
@@ -79,7 +100,6 @@ function App() {
             <Route path="admin" element={<AdminAppsBillingPage />}>
               <Route path="apps" element={<AdminApps />} />
               <Route path="billing" element={<AdminBilling />} />
-
             </Route>
             <Route path="admin/application" element={<AdminAppPage />}>
               <Route path=":appId" element={<AdminApp />}>
@@ -97,8 +117,8 @@ function App() {
         </Routes>
         <ToastContainer />
       </>
-    )
+    );
   }
 }
 
-export default App
+export default App;
