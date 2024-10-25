@@ -1,7 +1,7 @@
-import { IconAdmin } from "./IconAdmin";
-import { IconChat } from "./IconChat";
+import { IconAdmin } from './IconAdmin';
+import { IconChat } from './IconChat';
 
 export default {
-    IconAdmin,
-    IconChat
-}
+  IconAdmin,
+  IconChat,
+};

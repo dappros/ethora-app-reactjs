@@ -1,11 +1,11 @@
-import { Button, ButtonProps, CircularProgress } from "@mui/material"
-import React, { ReactNode } from "react"
+import { Button, ButtonProps, CircularProgress } from '@mui/material';
+import React, { ReactNode } from 'react';
 
 interface CustomButtonProps extends ButtonProps {
-  children: ReactNode
-  loading?: boolean
-  placeholder?: string
-  variant?: "contained" | "outlined"
+  children: ReactNode;
+  loading?: boolean;
+  placeholder?: string;
+  variant?: 'contained' | 'outlined';
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -13,34 +13,34 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   style,
   children,
   loading,
-  variant = "contained",
+  variant = 'contained',
   ...props
 }) => {
   return (
     <Button
       sx={{
-        borderRadius: "16px",
-        padding: "12px 16px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "8px",
-        fontFamily: "Varela Round",
-        fontSize: "16px",
-        textAlign: "center",
+        borderRadius: '16px',
+        padding: '12px 16px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '8px',
+        fontFamily: 'Varela Round',
+        fontSize: '16px',
+        textAlign: 'center',
         flex: 1,
-        backgroundColor: variant === "contained" ? "#0052CD" : "#FFFFFF",
-        color: variant === "contained" ? "#FFFFFF" : "#0052CD",
-        border: variant === "outlined" ? "1px solid #0052CD" : "none",
-        textTransform: "none",
-        "&:active": {
-          outline: "2px solid #0052CD",
+        backgroundColor: variant === 'contained' ? '#0052CD' : '#FFFFFF',
+        color: variant === 'contained' ? '#FFFFFF' : '#0052CD',
+        border: variant === 'outlined' ? '1px solid #0052CD' : 'none',
+        textTransform: 'none',
+        '&:active': {
+          outline: '2px solid #0052CD',
         },
-        "&:hover": {
-          backgroundColor: variant === "outlined" ? "#FFFFFF" : "#5d8dd6",
+        '&:hover': {
+          backgroundColor: variant === 'outlined' ? '#FFFFFF' : '#5d8dd6',
         },
-        minHeight: "48px",
-        maxHeight: "48px",
+        minHeight: '48px',
+        maxHeight: '48px',
       }}
       style={style}
       {...props}
@@ -48,13 +48,13 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       {loading ? (
         <CircularProgress
           size={24}
-          sx={{ color: variant === "contained" ? "#FFFFFF" : "#0052CD" }}
+          sx={{ color: variant === 'contained' ? '#FFFFFF' : '#0052CD' }}
         />
       ) : (
         children
       )}
     </Button>
-  )
-}
+  );
+};
 
-export default CustomButton
+export default CustomButton;

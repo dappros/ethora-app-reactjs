@@ -1,18 +1,18 @@
-import { FirebaseApp, FirebaseOptions, initializeApp } from "firebase/app"
+import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   User,
-} from "firebase/auth"
-import { useAppStore } from "../../store/useAppStore"
+} from 'firebase/auth';
+import { useAppStore } from '../../store/useAppStore';
 
 class Firebase {
-  firebaseApp: FirebaseApp | null = null
-  firebaseConfig: FirebaseOptions | null = null
+  firebaseApp: FirebaseApp | null = null;
+  firebaseConfig: FirebaseOptions | null = null;
   init() {
-    const config = useAppStore.getState().currentApp?.firebaseConfigParsed
-    console.log("init with config ", config)
+    const config = useAppStore.getState().currentApp?.firebaseConfigParsed;
+    console.log('init with config ', config);
     if (!config) return;
 
     const firebaseConfig = {
@@ -23,31 +23,28 @@ class Firebase {
       messagingSenderId: config.messagingSenderId,
       appId: config.appId,
       measurementId: config.measurementId,
-    }
-    this.firebaseConfig = firebaseConfig
-    this.firebaseApp = initializeApp(firebaseConfig)
+    };
+    this.firebaseConfig = firebaseConfig;
+    this.firebaseApp = initializeApp(firebaseConfig);
   }
 }
-export
-
-
-  type IUser = User & { accessToken: string }
+export type IUser = User & { accessToken: string };
 
 export const getUserCredsFromGoogle = async () => {
-  let firebase = new Firebase()
-  firebase.init()
-  const auth = getAuth(firebase.firebaseApp as FirebaseApp)
-  const googleProvider = new GoogleAuthProvider()
-  googleProvider.addScope("https://www.googleapis.com/auth/userinfo.email")
-  googleProvider.addScope("https://www.googleapis.com/auth/userinfo.profile")
+  let firebase = new Firebase();
+  firebase.init();
+  const auth = getAuth(firebase.firebaseApp as FirebaseApp);
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
+  googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
 
-  const res = await signInWithPopup(auth, googleProvider)
-  const user = res.user as IUser
-  const idToken = await auth?.currentUser?.getIdToken()
-  const credential = GoogleAuthProvider.credentialFromResult(res)
+  const res = await signInWithPopup(auth, googleProvider);
+  const user = res.user as IUser;
+  const idToken = await auth?.currentUser?.getIdToken();
+  const credential = GoogleAuthProvider.credentialFromResult(res);
   return {
     user,
     idToken,
     credential,
-  }
-}
+  };
+};

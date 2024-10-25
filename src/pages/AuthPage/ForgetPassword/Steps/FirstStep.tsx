@@ -1,63 +1,63 @@
-import { Dispatch, SetStateAction, useState } from "react"
-import { Box, Typography } from "@mui/material"
-import CustomButton from "../../Button"
-import CustomInput from "../../Input"
-import { useAppStore } from "../../../../store/useAppStore"
-import { useForm } from "react-hook-form"
-import { httpPostForgotPassword } from "../../../../http"
+import { Box, Typography } from '@mui/material';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { httpPostForgotPassword } from '../../../../http';
+import { useAppStore } from '../../../../store/useAppStore';
+import CustomButton from '../../Button';
+import CustomInput from '../../Input';
 
 interface Inputs {
-  email: string
+  email: string;
 }
 
 interface FirstStepProps {
-  setStep: Dispatch<SetStateAction<number>>
+  setStep: Dispatch<SetStateAction<number>>;
 }
 
 const FirstStep = ({ setStep }: FirstStepProps) => {
-  const config = useAppStore(s => s.currentApp)
-  const [loading, setLoading] = useState(false)
+  const config = useAppStore((s) => s.currentApp);
+  const [loading, setLoading] = useState(false);
 
   if (!config) {
-    return null
+    return null;
   }
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>()
+  } = useForm<Inputs>();
 
   const onSubmit = async ({ email }: Inputs) => {
-    setLoading(true)
+    setLoading(true);
     httpPostForgotPassword(email)
       .then((res) => {
-        console.log(res)
-        setStep((prev) => prev + 1)
+        console.log(res);
+        setStep((prev) => prev + 1);
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
       })
       .finally(() => {
-        setLoading(false)
-      })
-  }
+        setLoading(false);
+      });
+  };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <Box
         component="form"
         noValidate
         autoComplete="off"
-        sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
         onSubmit={handleSubmit(onSubmit)}
       >
         <Typography
           sx={{
-            textAlign: "left",
-            fontSize: "16px",
+            textAlign: 'left',
+            fontSize: '16px',
             fontWeight: 400,
-            color: "#8C8C8C",
+            color: '#8C8C8C',
           }}
         >
           Please, enter your email, and we will send you a link to reset your
@@ -68,8 +68,8 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
           placeholder="Email"
           id="email"
           type="email"
-          {...register("email", {
-            required: "Email is required", 
+          {...register('email', {
+            required: 'Email is required',
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
               message: 'Invalid email address',
@@ -88,14 +88,14 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
           style={{
             backgroundColor: config?.primaryColor
               ? config.primaryColor
-              : "#0052CD",
+              : '#0052CD',
           }}
         >
           Send Email
         </CustomButton>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default FirstStep
+export default FirstStep;

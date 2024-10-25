@@ -1,21 +1,21 @@
-import { localStorageConstants } from "./constants/localStorageConstants";
+import { localStorageConstants } from './constants/localStorageConstants';
 import {
-  httpGetConfig,
-  httpTokens,
   httpCreateNewApp,
-  httpGetApps,
-  httpPostFile,
-  httpGetUsers,
   httpDeleteManyUsers,
+  httpGetApps,
+  httpGetConfig,
+  httpGetUsers,
+  httpPostFile,
   httpResetPasswords,
+  httpTokens,
   httpUpdateApp,
   httpUpdateUser,
   refreshToken,
-} from "./http";
-import { ModelApp, ModelCurrentUser } from "./models";
-import { useAppStore } from "./store/useAppStore";
-import { getFirebaseConfigFromString } from "./utils/getFbConfig";
-import { sleep } from "./utils/sleep";
+} from './http';
+import { ModelApp, ModelCurrentUser } from './models';
+import { useAppStore } from './store/useAppStore';
+import { getFirebaseConfigFromString } from './utils/getFbConfig';
+import { sleep } from './utils/sleep';
 
 const getState = useAppStore.getState;
 
@@ -159,8 +159,8 @@ export async function actionGetUsers(
   appId: string,
   limit: number = 10,
   offset: number = 0,
-  orderBy: "email" | "createdAt" | "firstName" | "lastName" = "lastName",
-  order: "asc" | "desc" = "asc"
+  orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+  order: 'asc' | 'desc' = 'asc'
 ) {
   return httpGetUsers(appId, limit, offset, orderBy, order);
 }
@@ -180,7 +180,7 @@ export async function actionResetPasswords(
 }
 
 export async function actionUpdateApp(appId: string, options: any) {
-  console.log("actionUpdateApp");
+  console.log('actionUpdateApp');
   let response = await httpUpdateApp(appId, options);
   const state = getState();
   state.doUpdateApp(response.data.result);

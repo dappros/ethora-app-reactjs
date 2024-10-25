@@ -1,6 +1,6 @@
-import { Outlet } from "react-router-dom";
-import { Chat } from "@ethora/chat-component";
-import { useAppStore } from "../store/useAppStore";
+import { Chat } from '@ethora/chat-component';
+import { Outlet } from 'react-router-dom';
+import { useAppStore } from '../store/useAppStore';
 
 export function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
@@ -15,18 +15,18 @@ export function ChatPage() {
         <Chat
           config={{
             colors: {
-              primary: config?.primaryColor || "#fff",
-              secondary: config?.primaryColor || "#fff",
+              primary: config?.primaryColor || '#fff',
+              secondary: config?.primaryColor || '#fff',
             },
             disableMedia: true,
             disableRooms: true,
           }}
           roomJID={
-            "5f9a4603b2b5bbfa6b228b642127c56d03b778ad594c52b755e605c977303979@conference.xmpp.ethoradev.com"
+            '5f9a4603b2b5bbfa6b228b642127c56d03b778ad594c52b755e605c977303979@conference.xmpp.ethoradev.com'
           }
           MainComponentStyles={{
-            color: "white",
-            maxHeight: "768px",
+            color: 'white',
+            maxHeight: '768px',
           }}
         />
       </div>

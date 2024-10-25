@@ -1,10 +1,10 @@
-import axios from "axios";
-import { ModelUserACL } from "./models";
+import axios from 'axios';
+import { ModelUserACL } from './models';
 
 export const httpTokens = {
-  appJwt: "",
-  token: "",
-  refreshToken: "",
+  appJwt: '',
+  token: '',
+  refreshToken: '',
 };
 
 export const http = axios.create({
@@ -12,19 +12,19 @@ export const http = axios.create({
 });
 
 http.interceptors.request.use((config) => {
-  if (config.url === "/users/login/refresh") {
+  if (config.url === '/users/login/refresh') {
     return config;
   }
 
   if (
-    config.url === "/users/login-with-email" ||
-    config.url === "/users/login" ||
-    (config.url === "/users" && config.method === "post") ||
-    config.url?.startsWith("/users/checkEmail/") ||
-    config.url === "/users/sign-up-with-email" ||
-    config.url === "/users/resendLink" ||
-    config.url === "/users/forgot" ||
-    config.url === "/users/reset"
+    config.url === '/users/login-with-email' ||
+    config.url === '/users/login' ||
+    (config.url === '/users' && config.method === 'post') ||
+    config.url?.startsWith('/users/checkEmail/') ||
+    config.url === '/users/sign-up-with-email' ||
+    config.url === '/users/resendLink' ||
+    config.url === '/users/forgot' ||
+    config.url === '/users/reset'
   ) {
     config.headers.Authorization = httpTokens.appJwt;
 
@@ -44,9 +44,9 @@ http.interceptors.response.use(null, async (error) => {
   const url = request.url;
 
   if (
-    url === "/users/login/refresh" ||
-    url === "/users/login-with-email" ||
-    url === "/users/login"
+    url === '/users/login/refresh' ||
+    url === '/users/login-with-email' ||
+    url === '/users/login'
   ) {
     return Promise.reject(error);
   }
@@ -61,16 +61,16 @@ http.interceptors.response.use(null, async (error) => {
 
 export const refreshToken = async () => {
   try {
-    const response = await http.post("/users/login/refresh", null, {
+    const response = await http.post('/users/login/refresh', null, {
       headers: { Authorization: httpTokens.refreshToken },
     });
-    console.log("+++++++++ ", response.data);
+    console.log('+++++++++ ', response.data);
     const { token, refreshToken } = response.data;
     httpTokens.token = token;
     httpTokens.refreshToken = refreshToken;
     return httpTokens;
   } catch (error) {
-    console.error("Token refresh failed:", error);
+    console.error('Token refresh failed:', error);
     throw error;
   }
 };
@@ -82,7 +82,7 @@ export async function singin() {
 }
 
 export function httpGetConfig(domainName?: string) {
-  let path = "/apps/get-config";
+  let path = '/apps/get-config';
   if (domainName) {
     path += `?domainName=${domainName}`;
   }
@@ -91,7 +91,7 @@ export function httpGetConfig(domainName?: string) {
 }
 
 export function httpLogingWithEmail(email: string, password: string) {
-  return http.post("/users/login-with-email", { email, password });
+  return http.post('/users/login-with-email', { email, password });
 }
 
 export function httpCreateNewApp(displayName: string) {
@@ -101,21 +101,21 @@ export function httpCreateNewApp(displayName: string) {
 export interface GetAppsPaginator {
   limit?: number;
   offset?: number;
-  order?: "asc" | "desc";
+  order?: 'asc' | 'desc';
   orderBy?:
-    | "displayName"
-    | "totalRegistered"
-    | "totalSessions"
-    | "totalApiCalls"
-    | "totalFiles"
-    | "totalTransactions"
-    | "createdAt";
+    | 'displayName'
+    | 'totalRegistered'
+    | 'totalSessions'
+    | 'totalApiCalls'
+    | 'totalFiles'
+    | 'totalTransactions'
+    | 'createdAt';
 }
 export function httpGetApps({
   limit = 10,
   offset = 0,
-  order = "asc",
-  orderBy = "displayName",
+  order = 'asc',
+  orderBy = 'displayName',
 }: GetAppsPaginator) {
   return http.get(
     `/apps?limit=${limit}&offset=${offset}&order=${order}&orderBy=${orderBy}`
@@ -130,16 +130,16 @@ export function httpUpdateApp(appId: string, options: any) {
 
 export function httpPostFile(file: File) {
   let fd = new FormData();
-  fd.append("files", file);
-  return http.post("/files", fd);
+  fd.append('files', file);
+  return http.post('/files', fd);
 }
 
 export function httpGetUsers(
   appId: string,
   limit: number = 10,
   offset: number = 0,
-  orderBy: "email" | "createdAt" | "firstName" | "lastName" = "lastName",
-  order: "asc" | "desc" = "asc"
+  orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+  order: 'asc' | 'desc' = 'asc'
 ) {
   return http.get(
     `/users/${appId}?limit=${limit}&offset=${offset}&orderBy=${orderBy}&order=${order}`
@@ -233,7 +233,7 @@ export const httpLoginSocial = (
   idToken: string,
   accessToken: string,
   loginType: string,
-  authToken: string = "authToken"
+  authToken: string = 'authToken'
 ) => {
   return http.post(`/users/login`, {
     idToken,
@@ -261,29 +261,29 @@ export const httpRegisterWithEmail = (
         firstName,
         lastName,
       };
-  return http.post("/users/sign-up-with-email", body);
+  return http.post('/users/sign-up-with-email', body);
 };
 
 export async function httpResendLink(email: string) {
-  return await http.post("/users/resendLink", {
+  return await http.post('/users/resendLink', {
     email,
   });
 }
 
 export async function httpPostForgotPassword(email: string) {
-  return await http.post("/users/forgot", {
+  return await http.post('/users/forgot', {
     email,
   });
 }
 
 export async function httpResetPassword(password: string) {
-  return await http.post("/users/reset", {
+  return await http.post('/users/reset', {
     password,
   });
 }
 
 export function httpUpdateUser(fd: FormData) {
-  return http.put("/users", fd);
+  return http.put('/users', fd);
 }
 
 export function getPublicProfile(walletAddress: string) {
@@ -297,5 +297,5 @@ export function getDocuments(walletAddress: string) {
 export async function postDocument(documentName: string, file: File) {
   const filePostResutlt = await httpPostFile(file);
   const fileLocation = filePostResutlt.data.results[0].location;
-  return http.post("/docs", { documentName, files: [fileLocation] });
+  return http.post('/docs', { documentName, files: [fileLocation] });
 }

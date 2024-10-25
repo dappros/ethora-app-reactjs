@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 export function useLocalStorage<T>(key: string) {
   const get = (): T | null => {
     const storedValue = localStorage.getItem(key);
@@ -7,7 +5,7 @@ export function useLocalStorage<T>(key: string) {
     try {
       return JSON.parse(storedValue) as T;
     } catch (error) {
-      console.error("Failed to parse localStorage value", error);
+      console.error('Failed to parse localStorage value', error);
       return null;
     }
   };
@@ -17,7 +15,7 @@ export function useLocalStorage<T>(key: string) {
       const stringValue = JSON.stringify(value);
       localStorage.setItem(key, stringValue);
     } catch (error) {
-      console.error("Failed to store value in localStorage", error);
+      console.error('Failed to store value in localStorage', error);
     }
   };
 

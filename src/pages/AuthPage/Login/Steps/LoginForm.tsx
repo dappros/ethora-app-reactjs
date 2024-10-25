@@ -1,53 +1,53 @@
-import { useNavigate } from "react-router-dom"
-import { Box, Typography } from "@mui/material"
-import { SubmitHandler, useForm } from "react-hook-form"
+import { Box, Typography } from '@mui/material';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
-import CustomInput from "../../Input"
-import CustomButton from "../../Button"
-import { useAppStore } from "../../../../store/useAppStore"
-import { actionAfterLogin } from "../../../../actions"
-import { httpLogingWithEmail } from "../../../../http"
-import { toast } from "react-toastify"
-import { GoogleButton } from "../../GoogleButton"
-import { MetamaskButton } from "../../MetamaskButton"
+import { toast } from 'react-toastify';
+import { actionAfterLogin } from '../../../../actions';
+import { httpLogingWithEmail } from '../../../../http';
+import { useAppStore } from '../../../../store/useAppStore';
+import CustomButton from '../../Button';
+import { GoogleButton } from '../../GoogleButton';
+import CustomInput from '../../Input';
+import { MetamaskButton } from '../../MetamaskButton';
 
 type Inputs = {
-  email: string
-  password: string
-}
+  email: string;
+  password: string;
+};
 
 const LoginStep = () => {
-  const navigate = useNavigate()
-  const config = useAppStore(s => s.currentApp)
+  const navigate = useNavigate();
+  const config = useAppStore((s) => s.currentApp);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>()
+  } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = ({email, password}) => {
+  const onSubmit: SubmitHandler<Inputs> = ({ email, password }) => {
     httpLogingWithEmail(email, password)
-      .then(async ({data}) => {
-        await actionAfterLogin(data)
-        navigate("/app/admin/apps")
+      .then(async ({ data }) => {
+        await actionAfterLogin(data);
+        navigate('/app/admin/apps');
       })
       .catch((error) => {
-        toast.error(error.response.data.error)
-      })
-  }
+        toast.error(error.response.data.error);
+      });
+  };
 
   if (!config) {
-    return
+    return;
   }
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        minWidth: "320px",
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        minWidth: '320px',
       }}
     >
       <Box
@@ -56,48 +56,43 @@ const LoginStep = () => {
         noValidate
         autoComplete="off"
         sx={{
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           gap: 3,
-          flexWrap: "wrap",
+          flexWrap: 'wrap',
         }}
       >
         <CustomInput
           fullWidth
           placeholder="Email"
           type="email"
-          {...register(
-            "email", 
-            {
-              required: 'Email is required',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address',
-              },
-            }
-          )}
-          error={errors["email"]?.message ? true : false}
-          helperText={errors["email"]?.message}
+          {...register('email', {
+            required: 'Email is required',
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: 'Invalid email address',
+            },
+          })}
+          error={errors['email']?.message ? true : false}
+          helperText={errors['email']?.message}
         />
         <CustomInput
           fullWidth
           placeholder="Password"
           type="password"
-          {...register("password", 
-            { required: "Required field" })
-          }
-          error={errors["password"]?.message ? true : false}
-          helperText={errors["password"]?.message}
+          {...register('password', { required: 'Required field' })}
+          error={errors['password']?.message ? true : false}
+          helperText={errors['password']?.message}
         />
         <Typography
           style={{
-            textDecoration: "underline",
-            color: config?.primaryColor ? config.primaryColor : "#0052CD",
-            fontSize: "14px",
-            display: "inline",
-            cursor: "pointer",
+            textDecoration: 'underline',
+            color: config?.primaryColor ? config.primaryColor : '#0052CD',
+            fontSize: '14px',
+            display: 'inline',
+            cursor: 'pointer',
           }}
-          onClick={() => navigate("/resetPassword")}
+          onClick={() => navigate('/resetPassword')}
         >
           Forgot password ?
         </Typography>
@@ -109,7 +104,7 @@ const LoginStep = () => {
           style={{
             backgroundColor: config?.primaryColor
               ? config.primaryColor
-              : "#0052CD",
+              : '#0052CD',
           }}
         >
           Sign In
@@ -117,30 +112,26 @@ const LoginStep = () => {
       </Box>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "27px",
-          width: "100%",
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '27px',
+          width: '100%',
         }}
       >
         {config?.signonOptions.length > 1 && (
           <Typography
-            sx={{ width: "100%", textAlign: "center", color: "#8C8C8C" }}
+            sx={{ width: '100%', textAlign: 'center', color: '#8C8C8C' }}
           >
             or
           </Typography>
         )}
-        {config?.signonOptions.includes("google") && (
-          <GoogleButton />
-        )}
+        {config?.signonOptions.includes('google') && <GoogleButton />}
       </Box>
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-        {config?.signonOptions.includes("metamask") && (
-            <MetamaskButton />
-        )}
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+        {config?.signonOptions.includes('metamask') && <MetamaskButton />}
       </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default LoginStep
+export default LoginStep;

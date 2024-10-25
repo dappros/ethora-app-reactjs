@@ -66,7 +66,7 @@ textarea:focus {
 html,
 body {
   width: 100%;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-weight: 400;
   height: 100vh;
   // overflow: hidden;
@@ -75,22 +75,22 @@ body {
 /* placeholder */
 input::-webkit-input-placeholder {
   transition: 0.2s;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 input::-moz-placeholder {
   transition: 0.2s;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 input:-moz-placeholder {
   transition: 0.2s;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 input:-ms-input-placeholder {
   transition: 0.2s;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 input:focus::-webkit-input-placeholder {

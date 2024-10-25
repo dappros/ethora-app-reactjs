@@ -1,31 +1,28 @@
-import {
-  Dialog,
-  DialogPanel,
-} from '@headlessui/react'
+import { Dialog, DialogPanel } from '@headlessui/react';
 
-import "./MobileMenuModal.scss"
-import { IconClose } from '../Icons/IconClose'
-import { useEffect } from 'react'
-import { NavLink } from 'react-router-dom'
-import { IconSettings } from '../Icons/IconSettings'
-import { IconChat } from '../Icons/IconChat'
-import { IconAdmin } from '../Icons/IconAdmin'
+import { useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
+import { IconAdmin } from '../Icons/IconAdmin';
+import { IconChat } from '../Icons/IconChat';
+import { IconClose } from '../Icons/IconClose';
+import { IconSettings } from '../Icons/IconSettings';
+import './MobileMenuModal.scss';
 
 interface Props {
-  onClose: () => void
+  onClose: () => void;
 }
 
 export function MobileMenuModal({ onClose }: Props) {
   useEffect(() => {
     function onResize() {
-      onClose()
+      onClose();
     }
-    window.addEventListener('resize', onResize)
+    window.addEventListener('resize', onResize);
 
     return () => {
-      window.removeEventListener('resize', onResize)
-    }
-  }, [])
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
   return (
     <Dialog className="mobile-menu-modal" open={true} onClose={() => onClose()}>
       <DialogPanel className="inner">
@@ -33,22 +30,34 @@ export function MobileMenuModal({ onClose }: Props) {
           <button onClick={onClose}>
             <IconClose />
           </button>
-          <NavLink to="/app/chat" onClick={onClose} className="app-menu-mobile-btn">
+          <NavLink
+            to="/app/chat"
+            onClick={onClose}
+            className="app-menu-mobile-btn"
+          >
             <IconChat />
             <span>Chats</span>
-          </NavLink >
-          <NavLink to="/app/admin/apps" onClick={onClose} className="app-menu-mobile-btn">
+          </NavLink>
+          <NavLink
+            to="/app/admin/apps"
+            onClick={onClose}
+            className="app-menu-mobile-btn"
+          >
             <IconAdmin />
             <span>Admin</span>
-          </NavLink >
+          </NavLink>
         </div>
         <div className="mobile-menu-modal-bottom">
-          <NavLink to="/app/settings" onClick={onClose} className="app-menu-mobile-btn">
+          <NavLink
+            to="/app/settings"
+            onClick={onClose}
+            className="app-menu-mobile-btn"
+          >
             <IconSettings />
             <span>Settings</span>
-          </NavLink >
+          </NavLink>
         </div>
       </DialogPanel>
     </Dialog>
-  )
+  );
 }

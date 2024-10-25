@@ -1,41 +1,33 @@
-import { useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import hexToRgba from "hex-to-rgba";
+import hexToRgba from 'hex-to-rgba';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
-import {
-  actionAfterLogin,
-  actionGetConfig,
-  actionRefreshUserFromLocalStorage,
-} from "./actions";
-import { RequireAuth } from "./components/RequireAuth";
-import { useAppStore } from "./store/useAppStore";
-import { Loading } from "./components/Loading";
-import { NotFound } from "./pages/NotFound";
-import { AppPage } from "./pages/AppPage";
-import { ChatPage } from "./pages/ChatPage";
-import { AdminBilling } from "./pages/Admin/AdminBilling";
-import { ProfilePage } from "./pages/ProfilePage";
-import { SettingsPage } from "./pages/SettitngsPage";
-import { AdminApp } from "./pages/Admin/AdminApp";
-import { AdminAppsBillingPage } from "./pages/Admin/AdminAppsBillingPage";
-import { AdminApps } from "./pages/Admin/AdminApps";
-import { AdminAppPage } from "./pages/Admin/App/AdminAppPage";
-import { AdminAppUsers } from "./pages/Admin/App/AdminAppUsers";
-import { AdminAppSettings } from "./pages/Admin/App/AdminAppSettings";
-import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
-import LoginComponent from "./pages/AuthPage/Login/index";
-import ForgetPassword from "./pages/AuthPage/ForgetPassword";
-import Register from "./pages/AuthPage/Register";
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
+import { actionGetConfig } from './actions';
+import { Loading } from './components/Loading';
+import { RequireAuth } from './components/RequireAuth';
+import { AdminApp } from './pages/Admin/AdminApp';
+import { AdminApps } from './pages/Admin/AdminApps';
+import { AdminAppsBillingPage } from './pages/Admin/AdminAppsBillingPage';
+import { AdminBilling } from './pages/Admin/AdminBilling';
+import { AdminAppPage } from './pages/Admin/App/AdminAppPage';
+import { AdminAppSettings } from './pages/Admin/App/AdminAppSettings';
+import { AdminAppStatistics } from './pages/Admin/App/AdminAppStatistics';
+import { AdminAppUsers } from './pages/Admin/App/AdminAppUsers';
+import { AppPage } from './pages/AppPage';
+import ForgetPassword from './pages/AuthPage/ForgetPassword';
+import LoginComponent from './pages/AuthPage/Login/index';
+import Register from './pages/AuthPage/Register';
+import { ChatPage } from './pages/ChatPage';
+import { NotFound } from './pages/NotFound';
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettitngsPage';
+import { useAppStore } from './store/useAppStore';
 
-import "react-toastify/dist/ReactToastify.css";
-import { ProfilePageEdit } from "./pages/ProfilePageEdit";
-import { PublicProfile } from "./pages/PublicProfile";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-import { localStorageConstants } from "./constants/localStorageConstants";
-import { ModelCurrentUser } from "./models";
-import { refreshToken } from "./http";
+import 'react-toastify/dist/ReactToastify.css';
+import { ProfilePageEdit } from './pages/ProfilePageEdit';
+import { PublicProfile } from './pages/PublicProfile';
 
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
@@ -49,12 +41,12 @@ function App() {
     if (currentApp) {
       const primaryColor = currentApp.primaryColor;
       document.documentElement.style.setProperty(
-        "--bg-brand-primary",
+        '--bg-brand-primary',
         primaryColor
       );
       document.documentElement.style.setProperty(
-        "--bg-auth-background",
-        hexToRgba(primaryColor, "0.05")
+        '--bg-auth-background',
+        hexToRgba(primaryColor, '0.05')
       );
     }
   }, [currentApp]);
@@ -76,10 +68,10 @@ function App() {
     return (
       <>
         <Helmet>
-          <title>{currentApp.displayName || "Dappros Platform"}</title>
+          <title>{currentApp.displayName || 'Dappros Platform'}</title>
           <meta
             property="og:title"
-            content={currentApp.displayName || "Dappros Platform"}
+            content={currentApp.displayName || 'Dappros Platform'}
           />
         </Helmet>
         <Routes>

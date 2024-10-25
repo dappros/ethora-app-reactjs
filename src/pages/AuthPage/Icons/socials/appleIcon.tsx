@@ -12,7 +12,7 @@ const AppleIcon = () => {
         fill="black"
       />
     </svg>
-  )
-}
+  );
+};
 
-export default AppleIcon
+export default AppleIcon;

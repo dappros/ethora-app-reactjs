@@ -1,14 +1,14 @@
-import { Outlet, NavLink } from "react-router-dom";
-import "./AppPage.scss";
-import { IconChat } from "../components/Icons/IconChat";
-import { IconAdmin } from "../components/Icons/IconAdmin";
-import { IconSettings } from "../components/Icons/IconSettings";
-import { IconMenuBurger } from "../components/Icons/IconMenuBurger";
-import { useState } from "react";
-import { MobileMenuModal } from "../components/modal/MobileMenuModal";
-import { ProfilePageUserIcon } from "../components/ProfilePageUserIcon";
-import { useAppStore } from "../store/useAppStore";
-import { ModelCurrentUser } from "../models";
+import { useState } from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
+import { IconAdmin } from '../components/Icons/IconAdmin';
+import { IconChat } from '../components/Icons/IconChat';
+import { IconMenuBurger } from '../components/Icons/IconMenuBurger';
+import { IconSettings } from '../components/Icons/IconSettings';
+import { MobileMenuModal } from '../components/modal/MobileMenuModal';
+import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
+import { ModelCurrentUser } from '../models';
+import { useAppStore } from '../store/useAppStore';
+import './AppPage.scss';
 
 export function AppPage() {
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);

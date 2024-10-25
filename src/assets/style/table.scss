@@ -1,54 +1,53 @@
 .app-table {
-    padding: 8px;
-    border: 1px solid #F0F0F0;
-    background-color: #FFFFFF;
-    border-radius: 12px;
-    overflow: hidden;
+  padding: 8px;
+  border: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
 
+  .table-wrapper {
+    overflow: scroll;
+    width: 100%;
+  }
 
+  .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    min-width: 470px;
+  }
 
-    .table-wrapper {
-        overflow: scroll;
-        width: 100%;
-    }
+  table {
+    width: 100%;
+    display: table;
+    border-spacing: 2px;
+    border-collapse: separate;
+    box-sizing: border-box;
+    text-indent: 0;
+    text-align: left;
+    border-collapse: collapse;
+  }
 
-    .title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 22px;
-        min-width: 470px;
-    }
+  thead {
+    // border-block-end: 2px solid;
+    background: whitesmoke;
+  }
 
-    table {
-        width: 100%;
-        display: table;
-        border-spacing: 2px;
-        border-collapse: separate;
-        box-sizing: border-box;
-        text-indent: 0;
-        text-align: left;
-        border-collapse: collapse;
-    }
+  th,
+  td {
+    padding: 18px 16px;
+  }
 
-    thead {
-        // border-block-end: 2px solid;
-        background: whitesmoke;
-    }
+  tr.selected {
+    background-color: #e7edf9;
+  }
 
-    th, td {
-        padding: 18px 16px;
-    }
-
-    tr.selected {
-        background-color: #E7EDF9;
-    }
-
-    tr:hover {
-        background-color: #F5F7F9;
-    }
+  tr:hover {
+    background-color: #f5f7f9;
+  }
 }
 
 .table-wrapper::-webkit-scrollbar {
-    display: none;
+  display: none;
 }

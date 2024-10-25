@@ -1,3 +1,3 @@
 export const localStorageConstants = {
-  ETHORA_USER: "ethoraUser",
+  ETHORA_USER: 'ethoraUser',
 };

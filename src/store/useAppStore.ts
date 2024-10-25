@@ -1,10 +1,10 @@
-import create from "zustand";
-import { immer } from 'zustand/middleware/immer'
-import { createAppSlice, AppSliceInterface } from "./appStore";
+import create from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { AppSliceInterface, createAppSlice } from './appStore';
 
-export const useAppStore = create(immer<AppSliceInterface>(
-  (...a) => ({...createAppSlice(...a)})
-))
+export const useAppStore = create(
+  immer<AppSliceInterface>((...a) => ({ ...createAppSlice(...a) }))
+);
 
 declare global {
   interface Window {
@@ -12,4 +12,4 @@ declare global {
   }
 }
 
-window.useAppStore = useAppStore
+window.useAppStore = useAppStore;

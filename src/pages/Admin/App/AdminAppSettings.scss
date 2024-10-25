@@ -1,79 +1,79 @@
 .admin-app-settings {
-    min-height: calc(100vh - 182px);
+  min-height: calc(100vh - 182px);
+  display: flex;
+
+  .tabs {
+    width: 276px;
     display: flex;
+    flex-direction: column;
+    padding: 0 16px;
+    border-right: 1px solid #f0f0f0;
 
-    .tabs {
-        width: 276px;
-        display: flex;
-        flex-direction: column;
-        padding: 0 16px;
-        border-right: 1px solid #F0F0F0;
-
-        button {
-            padding: 12px 16px;
-            text-align: left;
-            border-radius: 12px;
-            margin-bottom: 18px;
-            position: relative;
-            font-size: 16px;
-        }
-
-        button + button::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            top: -9px;
-            left: 0;
-            border-top: 1px solid #F0F0F0;
-        }
-
-        button[data-selected] {
-            background-color: #F3F6FC;
-            color: var(--bg-brand-primary);
-        }
+    button {
+      padding: 12px 16px;
+      text-align: left;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      position: relative;
+      font-size: 16px;
     }
 
-    .tabs-content {
-        flex: 1;
+    button + button::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      top: -9px;
+      left: 0;
+      border-top: 1px solid #f0f0f0;
     }
 
-    .tabs-content>div {
-        width: 100%;
+    button[data-selected] {
+      background-color: #f3f6fc;
+      color: var(--bg-brand-primary);
     }
+  }
+
+  .tabs-content {
+    flex: 1;
+  }
+
+  .tabs-content > div {
+    width: 100%;
+  }
 }
 
 @media only screen and (max-width: 768px) {
-    .admin-app-settings {
-        flex-direction: column;
+  .admin-app-settings {
+    flex-direction: column;
 
-        .tabs {
-            flex-direction: row;
-            border-right: none;
-            width: 100%;
-            overflow: auto;
-            align-items: baseline;
-            -ms-overflow-style: none;
+    .tabs {
+      flex-direction: row;
+      border-right: none;
+      width: 100%;
+      overflow: auto;
+      align-items: baseline;
+      -ms-overflow-style: none;
 
-            button {
-                padding: 10px 8px;
-                flex: 1;
-                text-wrap: nowrap;
-                border-radius: 0;
-            }
+      button {
+        padding: 10px 8px;
+        flex: 1;
+        text-wrap: nowrap;
+        border-radius: 0;
+      }
 
-            button[data-selected] {
-                border-bottom: 1px solid var(--bg-brand-primary);
-                background-color: #FFFFFF;
-                color: var(--bg-brand-primary);
-            }
+      button[data-selected] {
+        border-bottom: 1px solid var(--bg-brand-primary);
+        background-color: #ffffff;
+        color: var(--bg-brand-primary);
+      }
 
-            button + button::before {
-                border-top: none;
-            }
-        }
-
-        .tabs::-webkit-scrollbar {
-            display: none;
-        }
+      button + button::before {
+        border-top: none;
+      }
     }
+
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }

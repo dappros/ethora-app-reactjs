@@ -146,7 +146,7 @@
     }
 
     .app-content-body-header:after {
-      content: "";
+      content: '';
       position: absolute;
       border-bottom: 1px solid #f0f0f0;
       width: 100%;
@@ -167,7 +167,7 @@
 }
 
 .primary-btn::before {
-  content: url("../assets/AddOutlined.svg");
+  content: url('../assets/AddOutlined.svg');
   position: absolute;
   width: 14px;
   height: 14px;
@@ -299,6 +299,6 @@
   left: 0;
   right: 0;
   top: -5px;
-  content: "";
+  content: '';
   border-bottom: 1px solid #f0f0f0;
 }

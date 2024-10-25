@@ -1,119 +1,119 @@
 .safari-preview {
-    width: 469px;
-    height: 284px;
-    background-image: url('../../assets/Safari.png');
-    background-size: cover;
-    background-repeat: no-repeat;
+  width: 469px;
+  height: 284px;
+  background-image: url('../../assets/Safari.png');
+  background-size: cover;
+  background-repeat: no-repeat;
 
-    .wrap {
-        position: absolute;
-        top: 65px;
-        left: 0;
-        right: 0;
-        bottom: 41px;
-        background-color: white;
+  .wrap {
+    position: absolute;
+    top: 65px;
+    left: 0;
+    right: 0;
+    bottom: 41px;
+    background-color: white;
 
-        .wrapwrap {
-            display: flex;
-            height: 100%;
-            background-image: url('../../assets/_BG.png');
+    .wrapwrap {
+      display: flex;
+      height: 100%;
+      background-image: url('../../assets/_BG.png');
+      background-size: cover;
+      background-color: var(--bg-brand-preview-auth);
+
+      .left {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+
+        .logo-slogan {
+          margin-left: 65px;
+
+          .logo {
+            width: 77px;
+            height: 25px;
             background-size: cover;
-            background-color: var(--bg-brand-preview-auth);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: url('../../assets/Logo\ \(2\).svg');
+          }
 
-            .left {
-                width: 50%;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                justify-content: center;
-
-                .logo-slogan {
-                    margin-left: 65px;
-
-                    .logo {
-                        width: 77px;
-                        height: 25px;
-                        background-size: cover;
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        background-image: url('../../assets/Logo\ \(2\).svg');
-                    }
-    
-                    .slogan {
-                        margin-top: 16px;
-                        font-size: 16px;
-                        font-weight: 600;
-                        width: 125px;
-                    }
-                }
-            }
-    
-            .right {
-                width: 50%;
-    
-                .form {
-                    padding: 16px;
-                    border-radius: 12px;
-                    background-color: white;
-                    width: 100%;
-                    height: 70%;
-                }
-
-                .form-title {
-                    font-size: 12px;
-                    font-weight: 600;
-                }
-
-                .steps {
-                    display: flex;
-                    gap: 10px;
-                    margin-top: 6px;
-
-                    .step {
-                        flex: 1;
-                        border-bottom: 3px solid var(--bg-brand-primary-preview);
-                    }
-                }
-
-                .inputs {
-                    width: 100%;
-                    display: grid;
-                    grid-template-columns: 50% 50%;
-                    margin-top: 12px;
-                    column-gap: 12px;
-                    row-gap: 12px;
-
-                    input {
-                        font-size: 10px;
-                        padding: 4px;
-                        border-radius: 4px;
-                        outline: none;
-                        border: 1px solid var(--bg-brand-primary-preview);
-                    }
-
-                    .full {
-                        grid-column: 1 / 3;
-                    }
-                }
-
-                .preview-primary-btn {
-                    background-color: var(--bg-brand-primary-preview);
-                    width: 100%;
-                    text-align: center;
-                    font-size: 10px;
-                    padding: 5px;
-                    margin-top: 12px;
-                    border-radius: 8px;
-                    color: white;
-                }
-            }
+          .slogan {
+            margin-top: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 125px;
+          }
         }
+      }
+
+      .right {
+        width: 50%;
+
+        .form {
+          padding: 16px;
+          border-radius: 12px;
+          background-color: white;
+          width: 100%;
+          height: 70%;
+        }
+
+        .form-title {
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .steps {
+          display: flex;
+          gap: 10px;
+          margin-top: 6px;
+
+          .step {
+            flex: 1;
+            border-bottom: 3px solid var(--bg-brand-primary-preview);
+          }
+        }
+
+        .inputs {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 50% 50%;
+          margin-top: 12px;
+          column-gap: 12px;
+          row-gap: 12px;
+
+          input {
+            font-size: 10px;
+            padding: 4px;
+            border-radius: 4px;
+            outline: none;
+            border: 1px solid var(--bg-brand-primary-preview);
+          }
+
+          .full {
+            grid-column: 1 / 3;
+          }
+        }
+
+        .preview-primary-btn {
+          background-color: var(--bg-brand-primary-preview);
+          width: 100%;
+          text-align: center;
+          font-size: 10px;
+          padding: 5px;
+          margin-top: 12px;
+          border-radius: 8px;
+          color: white;
+        }
+      }
     }
+  }
 }
 
 @media only screen and (max-width: 480px) {
-    .safari-preview {
-        width: 294px;
-        height: 178px;
-    }
+  .safari-preview {
+    width: 294px;
+    height: 178px;
+  }
 }
