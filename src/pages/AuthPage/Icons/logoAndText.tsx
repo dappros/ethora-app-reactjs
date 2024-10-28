@@ -1,10 +1,10 @@
-import React from "react"
+import React from 'react';
 
 interface LogoAndTextProps {
-  color?: string
+  color?: string;
 }
 
-const LogoAndText: React.FC<LogoAndTextProps> = ({ color = "#0052CD" }) => {
+const LogoAndText: React.FC<LogoAndTextProps> = ({ color = '#0052CD' }) => {
   return (
     <svg
       width="192"
@@ -97,7 +97,7 @@ const LogoAndText: React.FC<LogoAndTextProps> = ({ color = "#0052CD" }) => {
         mask="url(#path-2-outside-1_537_62683)"
       />
     </svg>
-  )
-}
+  );
+};
 
-export default LogoAndText
+export default LogoAndText;

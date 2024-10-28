@@ -1,13 +1,13 @@
 const Circles = () => {
   return (
-    <div style={{ width: "100vw", height: "100vh", margin: 0 }}>
+    <div style={{ width: '100vw', height: '100vh', margin: 0 }}>
       <svg
         viewBox="0 0 1025 672"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         style={{
-          width: "100%",
-          height: "100%",
+          width: '100%',
+          height: '100%',
         }}
         preserveAspectRatio="xMidYMid meet"
       >
@@ -32,7 +32,7 @@ const Circles = () => {
         />
       </svg>
     </div>
-  )
-}
+  );
+};
 
-export default Circles
+export default Circles;

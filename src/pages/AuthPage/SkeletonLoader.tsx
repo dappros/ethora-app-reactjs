@@ -1,39 +1,39 @@
-import React, { ReactNode, useEffect, useState } from "react"
-import { Skeleton } from "@mui/material"
+import { Skeleton } from '@mui/material';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 interface SkeletonLoaderProps {
-  loading: boolean
-  children: ReactNode
+  loading: boolean;
+  children: ReactNode;
 }
 
 const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   loading,
   children,
 }) => {
-  const [skeletons, setSkeletons] = useState<ReactNode[]>([])
+  const [skeletons, setSkeletons] = useState<ReactNode[]>([]);
 
   useEffect(() => {
     if (loading) {
       const components = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          const { width, height, ...restProps } = child.props
+          const { width, height, ...restProps } = child.props;
           return (
             <Skeleton
               variant="rectangular"
-              width={width || "100%"}
+              width={width || '100%'}
               height={height || 40}
               {...restProps}
             />
-          )
+          );
         }
-        return null
-      })
+        return null;
+      });
       // @ts-ignore
-      setSkeletons(components)
+      setSkeletons(components);
     }
-  }, [loading, children])
+  }, [loading, children]);
 
-  return <>{loading ? skeletons : children}</>
-}
+  return <>{loading ? skeletons : children}</>;
+};
 
-export default SkeletonLoader
+export default SkeletonLoader;

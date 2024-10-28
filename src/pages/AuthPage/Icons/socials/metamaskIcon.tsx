@@ -247,7 +247,7 @@ const MetamaskIcon = () => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};
 
-export default MetamaskIcon
+export default MetamaskIcon;

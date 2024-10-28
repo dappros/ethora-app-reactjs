@@ -1,5 +1,3 @@
 export function AdminBilling() {
-    return (
-        <div>AdminBilling</div>
-    )
+  return <div>AdminBilling</div>;
 }

@@ -1,5 +1,3 @@
-export function IPhone () {
-    return (
-        <div>IPhone</div>
-    )
+export function IPhone() {
+  return <div>IPhone</div>;
 }

@@ -32,7 +32,7 @@ const GoogleIcon = () => {
         fill="#EB4335"
       />
     </svg>
-  )
-}
+  );
+};
 
-export default GoogleIcon
+export default GoogleIcon;

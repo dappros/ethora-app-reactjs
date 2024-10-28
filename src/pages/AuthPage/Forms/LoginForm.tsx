@@ -1,50 +1,48 @@
-import React from "react"
-import { Box, Typography } from "@mui/material"
+import { Box, Typography } from '@mui/material';
+import React from 'react';
 
-import { useNavigate } from "react-router-dom"
-import LoginStep from "../Login/Steps/LoginForm"
-import { useAppStore } from "../../../store/useAppStore"
+import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '../../../store/useAppStore';
+import LoginStep from '../Login/Steps/LoginForm';
 
 interface SignInFormProps {
-  isMobile?: boolean
+  isMobile?: boolean;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({
-  isMobile = false,
-}) => {
-  const navigate = useNavigate()
+const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
+  const navigate = useNavigate();
 
-  const config = useAppStore(s => s.currentApp)
+  const config = useAppStore((s) => s.currentApp);
 
   if (!config) {
-    return null
+    return null;
   }
 
   return (
     <Box
       sx={{
-        padding: "16px",
-        borderRadius: "24px",
-        backgroundColor: "white",
-        boxShadow: isMobile ? "none" : "0px 4px 35px 0px #00000014",
-        p: isMobile ? "0px 16px" : "24px 40px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        minWidth: "300px",
-        width: "100%",
-        maxWidth: isMobile ? "486px" : "600px",
-        maxHeight: isMobile ? "732px" : "588px",
-        minHeight: isMobile ? "inherit" : "588px",
-        height: "100%",
-        justifyContent: "space-between",
+        padding: '16px',
+        borderRadius: '24px',
+        backgroundColor: 'white',
+        boxShadow: isMobile ? 'none' : '0px 4px 35px 0px #00000014',
+        p: isMobile ? '0px 16px' : '24px 40px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        minWidth: '300px',
+        width: '100%',
+        maxWidth: isMobile ? '486px' : '600px',
+        maxHeight: isMobile ? '732px' : '588px',
+        minHeight: isMobile ? 'inherit' : '588px',
+        height: '100%',
+        justifyContent: 'space-between',
       }}
     >
-      <Box sx={{ display: "flex", gap: "24px", flexDirection: "column" }}>
+      <Box sx={{ display: 'flex', gap: '24px', flexDirection: 'column' }}>
         <Box
           sx={{
-            position: "relative",
-            width: "100%",
+            position: 'relative',
+            width: '100%',
           }}
         >
           <Typography
@@ -52,11 +50,11 @@ const SignInForm: React.FC<SignInFormProps> = ({
             align="center"
             gutterBottom
             sx={{
-              fontFamily: "Varela Round",
+              fontFamily: 'Varela Round',
               fontWeight: 400,
-              fontSize: "24px",
-              height: "32px",
-              color: "#141414",
+              fontSize: '24px',
+              height: '32px',
+              color: '#141414',
               m: 0,
             }}
           >
@@ -65,24 +63,24 @@ const SignInForm: React.FC<SignInFormProps> = ({
         </Box>
         <LoginStep />
       </Box>
-      <Typography align="center" component="span" fontSize={"14px"}>
-        Don't have an account?{" "}
+      <Typography align="center" component="span" fontSize={'14px'}>
+        Don't have an account?{' '}
         <Typography
           style={{
-            textDecoration: "underline",
-            color: config?.primaryColor ? config.primaryColor : "#0052CD",
-            fontSize: "14px",
-            display: "inline",
-            cursor: "pointer",
-            fontWeight: "400px",
+            textDecoration: 'underline',
+            color: config?.primaryColor ? config.primaryColor : '#0052CD',
+            fontSize: '14px',
+            display: 'inline',
+            cursor: 'pointer',
+            fontWeight: '400px',
           }}
-          onClick={() => navigate("/register")}
+          onClick={() => navigate('/register')}
         >
           Sign Up
         </Typography>
       </Typography>
     </Box>
-  )
-}
+  );
+};
 
-export default SignInForm
+export default SignInForm;

@@ -19,7 +19,7 @@ const FacebookIcon = () => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};
 
-export default FacebookIcon
+export default FacebookIcon;

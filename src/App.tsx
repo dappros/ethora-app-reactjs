@@ -1,67 +1,80 @@
-import { useEffect } from "react";
-import {
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+import hexToRgba from 'hex-to-rgba';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import hexToRgba from "hex-to-rgba";
 
+import { Helmet } from 'react-helmet';
 import { actionGetConfig } from './actions';
+import { Loading } from './components/Loading';
 import { RequireAuth } from './components/RequireAuth';
-import { useAppStore } from "./store/useAppStore";
-import { Loading } from "./components/Loading";
-import { NotFound } from "./pages/NotFound";
-import { AppPage } from "./pages/AppPage";
-import { ChatPage } from "./pages/ChatPage";
-import { AdminBilling } from "./pages/Admin/AdminBilling";
-import { ProfilePage } from "./pages/ProfilePage";
-import { SettingsPage } from "./pages/SettitngsPage";
-import { AdminApp } from "./pages/Admin/AdminApp";
-import { AdminAppsBillingPage } from "./pages/Admin/AdminAppsBillingPage";
-import { AdminApps } from "./pages/Admin/AdminApps";
-import { AdminAppPage } from "./pages/Admin/App/AdminAppPage";
-import { AdminAppUsers } from "./pages/Admin/App/AdminAppUsers";
-import { AdminAppSettings } from "./pages/Admin/App/AdminAppSettings";
-import { AdminAppStatistics } from "./pages/Admin/App/AdminAppStatistics";
-import LoginComponent from "./pages/AuthPage/Login/index";
-import ForgetPassword from "./pages/AuthPage/ForgetPassword";
-import Register from "./pages/AuthPage/Register";
-import { Helmet } from "react-helmet"
+import { AdminApp } from './pages/Admin/AdminApp';
+import { AdminApps } from './pages/Admin/AdminApps';
+import { AdminAppsBillingPage } from './pages/Admin/AdminAppsBillingPage';
+import { AdminBilling } from './pages/Admin/AdminBilling';
+import { AdminAppPage } from './pages/Admin/App/AdminAppPage';
+import { AdminAppSettings } from './pages/Admin/App/AdminAppSettings';
+import { AdminAppStatistics } from './pages/Admin/App/AdminAppStatistics';
+import { AdminAppUsers } from './pages/Admin/App/AdminAppUsers';
+import { AppPage } from './pages/AppPage';
+import ForgetPassword from './pages/AuthPage/ForgetPassword';
+import LoginComponent from './pages/AuthPage/Login/index';
+import Register from './pages/AuthPage/Register';
+import { ChatPage } from './pages/ChatPage';
+import { NotFound } from './pages/NotFound';
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettitngsPage';
+import { useAppStore } from './store/useAppStore';
 
 import 'react-toastify/dist/ReactToastify.css';
-import { ProfilePageEdit } from "./pages/ProfilePageEdit";
-import { PublicProfile } from "./pages/PublicProfile";
+import { ProfilePageEdit } from './pages/ProfilePageEdit';
+import { PublicProfile } from './pages/PublicProfile';
 
 function App() {
-  const currentApp = useAppStore(s => s.currentApp)
+  const currentApp = useAppStore((s) => s.currentApp);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    actionGetConfig(import.meta.env.VITE_DOMAIN_NAME)
-  }, [])
+    actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
+  }, []);
 
   useEffect(() => {
     if (currentApp) {
-      const primaryColor = currentApp.primaryColor
-      document.documentElement.style.setProperty('--bg-brand-primary', primaryColor)
-      document.documentElement.style.setProperty('--bg-auth-background', hexToRgba(primaryColor, '0.05'))
+      const primaryColor = currentApp.primaryColor;
+      document.documentElement.style.setProperty(
+        '--bg-brand-primary',
+        primaryColor
+      );
+      document.documentElement.style.setProperty(
+        '--bg-auth-background',
+        hexToRgba(primaryColor, '0.05')
+      );
     }
-  }, [currentApp])
+  }, [currentApp]);
+
+  // useEffect(() => {
+  //   const user: ModelCurrentUser = useLocalStorage(
+  //     localStorageConstants.ETHORA_USER
+  //   ).get() as ModelCurrentUser;
+
+  //   if (user) {
+  //     actionRefreshUserFromLocalStorage(user);
+  //     navigate("/app/admin/apps");
+  //   }
+  // }, [currentApp]);
 
   if (!currentApp) {
-    return <Loading></Loading>
+    return <Loading></Loading>;
   } else {
     return (
       <>
         <Helmet>
-          <title>{currentApp.displayName || "Dappros Platform"}</title>
+          <title>{currentApp.displayName || 'Dappros Platform'}</title>
           <meta
             property="og:title"
-            content={currentApp.displayName || "Dappros Platform"}
+            content={currentApp.displayName || 'Dappros Platform'}
           />
         </Helmet>
         <Routes>
-
           <Route path="/" element={<Navigate to="/app" />} />
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/register" element={<Register />} />
@@ -79,7 +92,6 @@ function App() {
             <Route path="admin" element={<AdminAppsBillingPage />}>
               <Route path="apps" element={<AdminApps />} />
               <Route path="billing" element={<AdminBilling />} />
-
             </Route>
             <Route path="admin/application" element={<AdminAppPage />}>
               <Route path=":appId" element={<AdminApp />}>
@@ -97,8 +109,8 @@ function App() {
         </Routes>
         <ToastContainer />
       </>
-    )
+    );
   }
 }
 
-export default App
+export default App;
