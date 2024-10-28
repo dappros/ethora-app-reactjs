@@ -22,7 +22,7 @@ import Register from './pages/AuthPage/Register';
 import { ChatPage } from './pages/ChatPage';
 import { NotFound } from './pages/NotFound';
 import { ProfilePage } from './pages/ProfilePage';
-import { SettingsPage } from './pages/SettitngsPage';
+import { SettingsPage } from './pages/SettingsPage/SettingsPage';
 import { useAppStore } from './store/useAppStore';
 
 import 'react-toastify/dist/ReactToastify.css';
