@@ -1,76 +1,76 @@
 .profile-page {
-    .profile-top {
-        display: flex;
-        justify-content: flex-end;
+  .profile-top {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .profile-user-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+  }
+
+  .profile-user-about,
+  .profile-items {
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 32px;
+    max-width: 768px;
+    width: 100%;
+  }
+
+  .profile-items-tabgroup {
+    .tabs {
+      display: flex;
+      width: 100%;
+      margin-bottom: 32px;
     }
 
-    .profile-user-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin-top: 32px;
+    .tab {
+      width: 50%;
+      display: flex;
+      justify-content: center;
     }
 
-    .profile-user-about, .profile-items {
-        border: 1px solid var(--border-primary);
-        border-radius: 12px;
-        padding: 16px;
-        margin-top: 32px;
-        max-width: 768px;
-        width: 100%;
+    button[data-selected] {
+      color: var(--bg-brand-primary);
+      border-bottom: 1px solid var(--bg-brand-primary);
+    }
+  }
+
+  .buttons {
+    margin-top: 32px;
+    max-width: 768px;
+    width: 100%;
+  }
+
+  .document-item {
+    padding: 10px 8px;
+    border-radius: 8px;
+    background-color: #f3f6fc;
+    display: flex;
+    align-items: center;
+
+    .document-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      background-color: white;
+      margin-right: 8px;
     }
 
-    .profile-items-tabgroup {
-        .tabs {
-            display: flex;
-            width: 100%;
-            margin-bottom: 32px;
-        }
-
-        .tab {
-            width: 50%;
-            display: flex;
-            justify-content: center;
-        }
-
-        button[data-selected] {
-            color: var(--bg-brand-primary);
-            border-bottom: 1px solid var(--bg-brand-primary);
-        }
+    .doc-date {
+      margin-bottom: 0;
     }
+  }
 
-    .buttons {
-        margin-top: 32px;
-        max-width: 768px;
-        width: 100%;
-    }
-
-    .document-item {
-        padding: 10px 8px;
-        border-radius: 8px;
-        background-color: #F3F6FC;
-        display: flex;
-        align-items: center;
-
-        .document-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 8px;
-            background-color: white;
-            margin-right: 8px;
-        }
-
-        .doc-date {
-            margin-bottom: 0;
-        }
-    }
-
-
-    .document-item + .document-item {
-        margin-top: 10px;
-    }
+  .document-item + .document-item {
+    margin-top: 10px;
+  }
 }

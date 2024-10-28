@@ -1,24 +1,24 @@
 .iphone-preview {
-    width: 190px;
-    height: 368px;
-    background-image: url('../../assets/iPhone-13Mini.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    position: relative;
+  width: 190px;
+  height: 368px;
+  background-image: url('../../assets/iPhone-13Mini.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
 
-    .wrap {
-        position: absolute;
-        top: 25px;
-        left: 17px;
-        right: 17px;
-        bottom: 25px;
-        background-color: white;
-    }
+  .wrap {
+    position: absolute;
+    top: 25px;
+    left: 17px;
+    right: 17px;
+    bottom: 25px;
+    background-color: white;
+  }
 }
 
 @media only screen and (max-width: 480px) {
-    .iphone-preview {
-        width: 100px;
-        height: 216px;
-    }
+  .iphone-preview {
+    width: 100px;
+    height: 216px;
+  }
 }

@@ -1,82 +1,81 @@
 .gen-app-sorting {
+  display: flex;
+  align-items: center;
+  text-wrap: nowrap;
+
+  .label {
+    color: #8c8c8c;
+    font-size: 14px;
+    margin-right: 8px;
+  }
+
+  .app-sorting-button {
+    color: var(--bg-brand-primary);
+    font-size: 14px;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    text-wrap: nowrap;
-
-    .label {
-        color: #8C8C8C;
-        font-size: 14px;
-        margin-right: 8px;
-    }
-
-    .app-sorting-button {
-        color: var(--bg-brand-primary);
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-    }
+  }
 }
 
 .gen-app-sorting-panel {
-    .app-sorting-panel-inner {
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        background-color: white;
-        min-width: 240px;
-        width: 100%;
-        padding: 16px;
-        margin-top: 8px;
-        border-radius: 12px;
-    }
+  .app-sorting-panel-inner {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: white;
+    min-width: 240px;
+    width: 100%;
+    padding: 16px;
+    margin-top: 8px;
+    border-radius: 12px;
+  }
 
-    .app-sorting-radiogroup {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .app-sorting-radiogroup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .app-sorting-radio-outer {
-        width: 100%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        padding: 8px;
-        border-radius: 12px;
-    }
+  .app-sorting-radio-outer {
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 12px;
+  }
 
-    .app-sorting-radio-outer:hover {
-        background-color: #F5F7F9;
-    }
+  .app-sorting-radio-outer:hover {
+    background-color: #f5f7f9;
+  }
 
-    .app-sorting-button-text {
-        margin-left: 8px;
-    }
+  .app-sorting-button-text {
+    margin-left: 8px;
+  }
 
-    .app-sorting-group-title {
-        font-size: 16px;
-        font-weight: 600;
-    }
+  .app-sorting-group-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
 
-    .app-sorting-radio {
-        cursor: pointer;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        position: relative;
+  .app-sorting-radio {
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
 
-        .app-sorting-radio-input {
-            width: 24px;
-            height: 24px;
-            display: inline-block;
-            position: relative;
-            margin-right: 8px;
+    .app-sorting-radio-input {
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      position: relative;
+      margin-right: 8px;
 
-            svg {
-                path {
-                    fill: var(--bg-brand-primary);
-                }
-            }
-
+      svg {
+        path {
+          fill: var(--bg-brand-primary);
         }
+      }
     }
+  }
 }
