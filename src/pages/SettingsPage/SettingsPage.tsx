@@ -1,5 +1,9 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { BlockedUsers } from './BlockedUsers';
+import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
+import { ProfileShares } from './ProfileShares';
+import { Referrals } from './Referrals';
 import './SettingsPage.scss';
 import { Visibility } from './Visibility';
 
@@ -27,10 +31,18 @@ export function SettingsPage() {
             <TabPanel key="Visibility">
               <Visibility />
             </TabPanel>
-            <TabPanel key="Profile Shares">Profile Shares</TabPanel>
-            <TabPanel key="Document Shares">Document Shares</TabPanel>
-            <TabPanel key="Blocked Users">Blocked Users</TabPanel>
-            <TabPanel key="Referrals">Referrals</TabPanel>
+            <TabPanel key="Profile Shares">
+              <ProfileShares />
+            </TabPanel>
+            <TabPanel key="Document Shares">
+              <DocumentShares />
+            </TabPanel>
+            <TabPanel key="Blocked Users">
+              <BlockedUsers />
+            </TabPanel>
+            <TabPanel key="Referrals">
+              <Referrals />
+            </TabPanel>
           </TabPanels>
         </TabGroup>
       </div>
