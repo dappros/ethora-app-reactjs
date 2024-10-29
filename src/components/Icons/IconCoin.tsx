@@ -35,9 +35,9 @@ export function IconCoin({ width = 24, height = 24 }: Props) {
           y2="17.5"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#FFD100" />
-          <stop offset="0.505208" stop-color="#FB8E3A" />
-          <stop offset="1" stop-color="#FFD100" />
+          <stop stopColor="#FFD100" />
+          <stop offset="0.505208" stopColor="#FB8E3A" />
+          <stop offset="1" stopColor="#FFD100" />
         </linearGradient>
       </defs>
     </svg>
