@@ -30,7 +30,9 @@ export function AdminApps() {
       // @ts-ignore
       const response = await httpGetApps({
         limit: ITEMS_COUNT,
+        // @ts-ignore
         order,
+        // @ts-ignore
         orderBy,
       });
       setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
@@ -40,10 +42,11 @@ export function AdminApps() {
 
   useEffect(() => {
     (async () => {
-      // @ts-ignore
       const response = await httpGetApps({
         limit: ITEMS_COUNT,
+        // @ts-ignore
         order,
+        // @ts-ignore
         orderBy,
       });
       setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
@@ -60,11 +63,12 @@ export function AdminApps() {
   };
 
   const onPageChange = (page: number) => {
-    // @ts-ignore
     httpGetApps({
       ITEMS_COUNT,
       offset: ITEMS_COUNT * page,
+      // @ts-ignore
       order,
+      // @ts-ignore
       orderBy,
     }).then((response) => {
       const { total, apps } = response.data;

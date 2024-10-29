@@ -1,6 +1,6 @@
 import hexToRgba from 'hex-to-rgba';
 import { useEffect } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
 import { Helmet } from 'react-helmet';
@@ -31,7 +31,6 @@ import { PublicProfile } from './pages/PublicProfile';
 
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
-  const navigate = useNavigate();
 
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
