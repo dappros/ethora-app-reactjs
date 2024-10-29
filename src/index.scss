@@ -158,3 +158,19 @@ input:focus:-ms-input-placeholder {
     }
   }
 }
+
+.plate {
+  padding: 8px;
+  background-color: #f3f6fc;
+  border-radius: 8px;
+  display: flex;
+  font-size: 12px;
+
+  svg {
+    width: 50px;
+    display: inline-block;
+    path {
+      stroke: var(--bg-brand-primary) !important;
+    }
+  }
+}

@@ -303,3 +303,11 @@ export async function postDocument(documentName: string, file: File) {
 export async function applyReferalCode(id: string) {
   return http.post('/referral', { referrerId: id });
 }
+
+export function createSharedLink(data: any) {
+  return http.post('/shareLink/', data);
+}
+
+export function getSharedLinks() {
+  return http.get('/shareLink/');
+}
