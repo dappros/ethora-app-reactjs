@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import referralsImg from '../../assets/illustration.png';
+import referralsImg from '../../assets/earncoins.png';
 import { IconCoin } from '../../components/Icons/IconCoin';
 import { Loading } from '../../components/Loading';
 import { CopyInput } from '../../components/ui/CopyInput';
