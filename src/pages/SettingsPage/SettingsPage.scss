@@ -69,18 +69,20 @@
     align-items: center;
   }
 
-  span.coin {
-    display: inline;
-    width: 20px;
-    height: 20px;
-    background-image: url('../../assets/coin.png');
-    background-size: cover;
-    background-position: center;
+  .coin-span {
+    position: relative;
+    margin-right: 25px;
+
+    svg {
+      position: absolute;
+      right: -22px;
+      top: 0px;
+    }
   }
 
-  .text-with-coins {
-    display: flex;
-    align-items: center;
+  .control {
+    max-width: 512px;
+    width: 100%;
   }
 }
 

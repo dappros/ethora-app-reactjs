@@ -1,4 +1,6 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { ModelCurrentUser } from '../../models';
+import { useAppStore } from '../../store/useAppStore';
 import { BlockedUsers } from './BlockedUsers';
 import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
@@ -8,6 +10,8 @@ import './SettingsPage.scss';
 import { Visibility } from './Visibility';
 
 export function SettingsPage() {
+  const user = useAppStore((s) => s.currentUser as ModelCurrentUser);
+
   return (
     <>
       <div className="app-content-header">
@@ -41,7 +45,7 @@ export function SettingsPage() {
               <BlockedUsers />
             </TabPanel>
             <TabPanel key="Referrals">
-              <Referrals />
+              <Referrals id={user._id} />
             </TabPanel>
           </TabPanels>
         </TabGroup>

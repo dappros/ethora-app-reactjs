@@ -1,4 +1,5 @@
 export interface ModelCurrentUser {
+  _id: string;
   appId: string;
   firstName: string;
   lastName: string;

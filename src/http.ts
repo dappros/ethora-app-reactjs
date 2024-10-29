@@ -299,3 +299,7 @@ export async function postDocument(documentName: string, file: File) {
   const fileLocation = filePostResutlt.data.results[0].location;
   return http.post('/docs', { documentName, files: [fileLocation] });
 }
+
+export async function applyReferalCode(id: string) {
+  return http.post('/referral', { referrerId: id });
+}

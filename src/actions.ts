@@ -71,6 +71,7 @@ export async function actionAfterLogin(data: any) {
   httpTokens.refreshToken = data.refreshToken;
 
   const user: ModelCurrentUser = {
+    _id: data.user._id,
     appId: data.user.appId,
     firstName: data.user.firstName,
     homeScreen: data.user.homeScreen,
@@ -109,6 +110,7 @@ export async function actionRefreshUserFromLocalStorage(
   httpTokens.refreshToken = refreshed.refreshToken;
 
   const localStorageUser: ModelCurrentUser = {
+    _id: user._id,
     appId: user.appId,
     firstName: user.firstName,
     homeScreen: user.homeScreen,
