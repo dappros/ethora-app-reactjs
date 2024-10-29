@@ -17,7 +17,7 @@ export function IconDoc({ width = 16, height = 20 }: Props) {
         stroke="#0052CD"
         strokeWidth="2"
         stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
