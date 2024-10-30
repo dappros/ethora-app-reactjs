@@ -10,10 +10,10 @@ import { IconCopy } from '../../components/Icons/IconCopy';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { IconQr } from '../../components/Icons/IconQr';
 import { CreateProfileLinkModal } from '../../components/modal/CreateProfileLinkModal';
+import { QrModal } from '../../components/modal/QrModal';
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import { TextInput } from '../../components/ui/TextInput';
 import { createSharedLink, deleteSharedLink, getSharedLinks } from '../../http';
-import { QrModal } from '../../components/modal/QrModal';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = HOUR * 24;
@@ -39,7 +39,7 @@ export function ProfileShares() {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Array<ModelProfileShare>>([]);
   const [showDelete, setShowDelete] = useState<ModelProfileShare>();
-  const [showQr, setShowQr] = useState<ModelProfileShare>()
+  const [showQr, setShowQr] = useState<ModelProfileShare>();
 
   const getItems = () => {
     getSharedLinks().then(({ data }) => {
@@ -193,6 +193,7 @@ export function ProfileShares() {
                     </button>
                     <CopyToClipboard
                       text={`${window.location.origin}/public/${el.walletAddress}/${el.token}`}
+                      onCopy={() => toast.success('Copied')}
                     >
                       <button>
                         <IconCopy />
@@ -230,7 +231,10 @@ export function ProfileShares() {
             </SubmitModal>
           )}
           {showQr && (
-            <QrModal path={`${window.location.origin}/public/${showQr.walletAddress}/${showQr.token}`} onClose={() => setShowQr(undefined)} ></QrModal>
+            <QrModal
+              path={`${window.location.origin}/public/${showQr.walletAddress}/${showQr.token}`}
+              onClose={() => setShowQr(undefined)}
+            ></QrModal>
           )}
         </table>
       );
