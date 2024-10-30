@@ -75,9 +75,9 @@ export async function actionAfterLogin(data: any) {
     appId: data.user.appId,
     firstName: data.user.firstName,
     homeScreen: data.user.homeScreen,
-    isAgreeWithTerms: false,
-    isAssetsOpen: false,
-    isProfileOpen: false,
+    isAgreeWithTerms: data.user.isAgreeWithTerms,
+    isAssetsOpen: data.user.isAssetsOpen,
+    isProfileOpen: data.user.isProfileOpen,
     lastName: data.user.lastName,
     refreshToken: data.refreshToken,
     token: data.token,
@@ -198,6 +198,8 @@ export async function actionUpdateUser(fd: FormData) {
     lastName: user.lastName,
     description: user.description,
     profileImage: user.profileImage,
+    isAssetsOpen: user.isAssetsOpen,
+    isProfileOpen: user.isProfileOpen,
   });
   return {
     profileImage: user.profileImage,

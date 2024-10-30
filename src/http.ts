@@ -286,8 +286,8 @@ export function httpUpdateUser(fd: FormData) {
   return http.put('/users', fd);
 }
 
-export function getPublicProfile(walletAddress: string) {
-  return http.get(`/users/profile/${walletAddress}`);
+export function getPublicProfile(walletAddress: string, token: string = '') {
+  return http.get(`/users/profile/${walletAddress}/${token}`);
 }
 
 export function getDocuments(walletAddress: string) {
@@ -314,4 +314,8 @@ export function getSharedLinks() {
 
 export function deleteSharedLink(token: string) {
   return http.delete(`/shareLink/${token}`);
+}
+
+export function updateMe(data: any) {
+  return http.put('/users', data);
 }

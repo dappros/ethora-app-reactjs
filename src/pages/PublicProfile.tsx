@@ -16,7 +16,15 @@ export function PublicProfile() {
 
   useEffect(() => {
     if (token) {
-      alert(token);
+      getPublicProfile(address as string, token).then((resp) => {
+        setInited(true);
+        console.log(resp.data);
+        const { firstName, lastName, description, profileImage } = resp.data;
+        setFirstName(firstName);
+        setLastName(lastName);
+        setProfileImage(profileImage);
+        setDescription(description);
+      });
     } else {
       getPublicProfile(address as string).then((resp) => {
         setInited(true);

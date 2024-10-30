@@ -37,6 +37,8 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
         s.currentUser.lastName = userFieldsForUpdate.lastName;
         s.currentUser.description = userFieldsForUpdate.description;
         s.currentUser.profileImage = userFieldsForUpdate.profileImage;
+        s.currentUser.isAssetsOpen = userFieldsForUpdate.isAssetsOpen;
+        s.currentUser.isProfileOpen = userFieldsForUpdate.isProfileOpen;
       }
     });
   },
