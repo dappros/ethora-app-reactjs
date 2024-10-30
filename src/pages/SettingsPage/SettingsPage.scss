@@ -103,6 +103,44 @@
       display: flex;
     }
   }
+
+  .profile-shares-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      font-size: 12px;
+      font-weight: 400;
+      color: #71717a;
+      text-align: left;
+      background-color: #f6f8fa;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    th:first-child,
+    td:first-child {
+      padding-left: 16px;
+    }
+
+    th:last-child,
+    td:first-child {
+      padding-right: 16px;
+    }
+
+    td {
+      padding-top: 16px;
+      padding-bottom: 16px;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    td.actions {
+      button {
+        margin-right: 10px;
+      }
+    }
+  }
 }
 
 .profile-share-select {

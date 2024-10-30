@@ -311,3 +311,7 @@ export function createSharedLink(data: any) {
 export function getSharedLinks() {
   return http.get('/shareLink/');
 }
+
+export function deleteSharedLink(token: string) {
+  return http.delete(`/shareLink/${token}`);
+}

@@ -12,17 +12,21 @@ export function PublicProfile() {
   const [profileImage, setProfileImage] = useState('');
   const [_, setDescription] = useState('');
 
-  const { address } = useParams();
+  const { address, token } = useParams();
 
   useEffect(() => {
-    getPublicProfile(address as string).then((resp) => {
-      setInited(true);
-      const { firstName, lastName, description, profileImage } = resp.data;
-      setFirstName(firstName);
-      setLastName(lastName);
-      setProfileImage(profileImage);
-      setDescription(description);
-    });
+    if (token) {
+      alert(token);
+    } else {
+      getPublicProfile(address as string).then((resp) => {
+        setInited(true);
+        const { firstName, lastName, description, profileImage } = resp.data;
+        setFirstName(firstName);
+        setLastName(lastName);
+        setProfileImage(profileImage);
+        setDescription(description);
+      });
+    }
   }, []);
 
   if (!inited) {

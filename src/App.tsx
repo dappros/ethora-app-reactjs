@@ -103,7 +103,7 @@ function App() {
             <Route path="profile/edit" element={<ProfilePageEdit />}></Route>
             <Route path="settings" element={<SettingsPage />}></Route>
           </Route>
-          <Route path="/public/:address" element={<PublicProfile />} />
+          <Route path="/public/:address/:token?" element={<PublicProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ToastContainer />
