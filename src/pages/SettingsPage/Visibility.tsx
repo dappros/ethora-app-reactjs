@@ -18,7 +18,7 @@ export function Visibility() {
           doUpdateUser(data.user);
           toast.success('Saved');
         })
-        .catch((e) => {
+        .catch(() => {
           toast.error('Error');
         });
     }
