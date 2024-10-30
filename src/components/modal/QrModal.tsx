@@ -3,7 +3,6 @@ import QRCode from 'react-qr-code';
 import { IconClose } from '../Icons/IconClose';
 import { CopyInput } from '../../components/ui/CopyInput';
 
-import { TextInput } from '../ui/TextInput';
 import './QrModal.scss';
 
 interface Props {
