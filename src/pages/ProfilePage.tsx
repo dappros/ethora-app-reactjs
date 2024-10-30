@@ -120,7 +120,7 @@ export function ProfilePage() {
       </div>
       {showQr && (
         <QrModal
-          walletAddress={walletAddress}
+          path={`${window.location.origin}/public/${walletAddress}`}
           onClose={() => setShowQr(false)}
         />
       )}

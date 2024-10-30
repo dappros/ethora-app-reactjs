@@ -13,6 +13,7 @@ import { CreateProfileLinkModal } from '../../components/modal/CreateProfileLink
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import { TextInput } from '../../components/ui/TextInput';
 import { createSharedLink, deleteSharedLink, getSharedLinks } from '../../http';
+import { QrModal } from '../../components/modal/QrModal';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = HOUR * 24;
@@ -38,6 +39,7 @@ export function ProfileShares() {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Array<ModelProfileShare>>([]);
   const [showDelete, setShowDelete] = useState<ModelProfileShare>();
+  const [showQr, setShowQr] = useState<ModelProfileShare>()
 
   const getItems = () => {
     getSharedLinks().then(({ data }) => {
@@ -186,11 +188,11 @@ export function ProfileShares() {
                   </td>
                   <td>{renderExpiration(Number(el.expiration))}</td>
                   <td className="actions">
-                    <button>
+                    <button onClick={() => setShowQr(el)}>
                       <IconQr />
                     </button>
                     <CopyToClipboard
-                      text={`${window.location.protocol}//${window.location.host}/public/${el.walletAddress}/${el.token}`}
+                      text={`${window.location.origin}/public/${el.walletAddress}/${el.token}`}
                     >
                       <button>
                         <IconCopy />
@@ -226,6 +228,9 @@ export function ProfileShares() {
                 {loading && <Loading />}
               </div>
             </SubmitModal>
+          )}
+          {showQr && (
+            <QrModal path={`${window.location.origin}/public/${showQr.walletAddress}/${showQr.token}`} onClose={() => setShowQr(undefined)} ></QrModal>
           )}
         </table>
       );

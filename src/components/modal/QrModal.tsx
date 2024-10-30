@@ -1,26 +1,25 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import QRCode from 'react-qr-code';
 import { IconClose } from '../Icons/IconClose';
+import { CopyInput } from '../../components/ui/CopyInput';
 
 import { TextInput } from '../ui/TextInput';
 import './QrModal.scss';
 
 interface Props {
   onClose: () => void;
-  walletAddress: string;
+  path: string;
 }
 
-export function QrModal({ onClose, walletAddress }: Props) {
-  let url = `${window.location.origin}/public/${walletAddress}`;
-
+export function QrModal({ onClose, path }: Props) {
   return (
     <Dialog className="qr-modal" open={true} onClose={onClose}>
       <DialogPanel className="inner">
         <div className="qr">
-          <QRCode value={url} />
+          <QRCode value={path} />
         </div>
         <div>
-          <TextInput value={url} className="gen-input gen-input-large mt-16" />
+          <CopyInput value={path} />
         </div>
         <button className="close" onClick={() => onClose()}>
           <IconClose />
