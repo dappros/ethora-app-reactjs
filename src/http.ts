@@ -319,3 +319,7 @@ export function deleteSharedLink(token: string) {
 export function updateMe(data: any) {
   return http.put('/users', data);
 }
+
+export function getShareDoc(token: string) {
+  return http.get(`/docs/share/${token}`);
+}

@@ -28,6 +28,7 @@ import { useAppStore } from './store/useAppStore';
 import 'react-toastify/dist/ReactToastify.css';
 import { ProfilePageEdit } from './pages/ProfilePageEdit';
 import { PublicProfile } from './pages/PublicProfile';
+import { ShareDocument } from './pages/ShareDucument';
 
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
@@ -104,6 +105,7 @@ function App() {
             <Route path="settings" element={<SettingsPage />}></Route>
           </Route>
           <Route path="/public/:address/:token?" element={<PublicProfile />} />
+          <Route path="/share/document/:token?" element={<ShareDocument />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ToastContainer />
