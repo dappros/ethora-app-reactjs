@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Loading } from '../../../../components/Loading';
 import { setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import CustomInput from '../../Input';
 import SkeletonLoader from '../../SkeletonLoader';
-import { Loading } from '../../../../components/Loading';
 
 interface Inputs {
   newPassword: string;

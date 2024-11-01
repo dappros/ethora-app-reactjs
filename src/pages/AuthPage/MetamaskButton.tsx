@@ -4,7 +4,9 @@ import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
 
 function isMobileDevice() {
-  return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
 }
 
 export const MetamaskButton = () => {
@@ -18,10 +20,19 @@ export const MetamaskButton = () => {
       // TODO
     } else {
       // @ts-ignore
-      if (typeof window.ethereum !== "undefined" ) {
-
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          // @ts-ignore
+          const accounts = window.ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+          // window.ethereum.request({method: ""})
+          console.log(accounts[0]);
+        } catch (e) {
+          console.error('error ', e);
+        }
       } else {
-        toast.info("Install Metamask first!")
+        toast.info('Install Metamask first!');
       }
     }
   };
