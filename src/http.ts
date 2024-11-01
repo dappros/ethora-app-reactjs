@@ -323,3 +323,18 @@ export function updateMe(data: any) {
 export function getShareDoc(token: string) {
   return http.get(`/docs/share/${token}`);
 }
+
+export function getExportMyData() {
+  return http.get('/users/exportData', { responseType: 'arraybuffer' });
+}
+
+export function deleteMe() {
+  return http.delete('/users');
+}
+
+export function setPermanentPassword(tempPassword: string, password: string) {
+  return http.post('/users/set-permanent-password-with-temp-password', {
+    tempPassword,
+    password,
+  });
+}

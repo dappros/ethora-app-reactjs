@@ -2,6 +2,8 @@ import { Box, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import CustomInput from '../../Input';
@@ -17,6 +19,9 @@ const ThirdStep = () => {
     email: '',
     tempPassword: '',
   });
+  const queryParams = new URLSearchParams(window.location.search);
+  const tempPassword = queryParams.get('tempPassword') || '';
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -44,7 +49,20 @@ const ThirdStep = () => {
   }, []);
 
   const onSubmit = async ({ newPassword, repeatPassword }: Inputs) => {
-    console.log(newPassword, repeatPassword);
+    if (newPassword !== repeatPassword) {
+      toast.error('Password do not match!');
+      return;
+    }
+    setLoading(true);
+    setPermanentPassword(tempPassword, newPassword)
+      .then(() => {
+        toast.success('Success');
+        navigate('/');
+      })
+      .catch(() => {
+        toast.error('Error');
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
