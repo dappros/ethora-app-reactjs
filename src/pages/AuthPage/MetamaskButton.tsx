@@ -1,6 +1,11 @@
+import { toast } from 'react-toastify';
 import { useAppStore } from '../../store/useAppStore';
 import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
+
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
 
 export const MetamaskButton = () => {
   const config = useAppStore((s) => s.currentApp);
@@ -9,6 +14,16 @@ export const MetamaskButton = () => {
 
   const onMetamaskClick = () => {
     // result.activate(injected)
+    if (isMobileDevice()) {
+      // TODO
+    } else {
+      // @ts-ignore
+      if (typeof window.ethereum !== "undefined" ) {
+
+      } else {
+        toast.info("Install Metamask first!")
+      }
+    }
   };
 
   return (
