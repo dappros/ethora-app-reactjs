@@ -8,6 +8,7 @@ import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import CustomInput from '../../Input';
 import SkeletonLoader from '../../SkeletonLoader';
+import { Loading } from '../../../../components/Loading';
 
 interface Inputs {
   newPassword: string;
@@ -139,6 +140,7 @@ const ThirdStep = () => {
           </CustomButton>
         </Box>
       </Box>
+      {loading && <Loading />}
     </SkeletonLoader>
   );
 };
