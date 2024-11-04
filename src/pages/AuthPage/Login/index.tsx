@@ -33,7 +33,6 @@ export default function LoginComponent() {
           flexDirection: isMobileDevice ? 'column' : 'row',
           gap: isMobileDevice ? '20px' : '16px',
           alignItems: 'center',
-          fontFamily: 'Open Sans'
         }}
       >
         <LogoContent isMobile={isMobileDevice} />
