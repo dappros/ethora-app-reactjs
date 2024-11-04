@@ -20,6 +20,7 @@ export default function Register() {
           gap: isMobileDevice ? '20px' : '16px',
           justifyContent: isMobileDevice ? 'start' : 'center',
           alignItems: 'center',
+          // fontFamily: 'Verela',
         }}
       >
         <LogoContent isMobile={isMobileDevice} />

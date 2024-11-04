@@ -18,6 +18,7 @@ export default function ForgetPassword() {
           flexDirection: isMobileDevice ? 'column' : 'row',
           gap: isMobileDevice ? '20px' : '16px',
           alignItems: 'center',
+          fontFamily: 'Verdana',
         }}
       >
         <LogoContent isMobile={isMobileDevice} />
