@@ -239,7 +239,6 @@ export function ProfileShares() {
             )}
           </table>
         </div>
-
       );
     }
   };
