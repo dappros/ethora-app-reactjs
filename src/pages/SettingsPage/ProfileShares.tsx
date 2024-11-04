@@ -169,74 +169,77 @@ export function ProfileShares() {
   const renderItems = () => {
     if (items.length) {
       return (
-        <table className="profile-shares-table">
-          <thead>
-            <tr>
-              <th>Memo</th>
-              <th>Creation Date</th>
-              <th>Expired Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((el) => {
-              return (
-                <tr key={el._id}>
-                  <td>{el.memo ? el.memo : '-'}</td>
-                  <td>
-                    {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
-                  </td>
-                  <td>{renderExpiration(Number(el.expiration))}</td>
-                  <td className="actions">
-                    <button onClick={() => setShowQr(el)}>
-                      <IconQr />
-                    </button>
-                    <CopyToClipboard
-                      text={`${window.location.origin}/public/${el.walletAddress}/${el.token}`}
-                      onCopy={() => toast.success('Copied')}
-                    >
-                      <button>
-                        <IconCopy />
+        <div className="profile-shares-table-outer">
+          <table className="profile-shares-table">
+            <thead>
+              <tr>
+                <th>Memo</th>
+                <th>Creation Date</th>
+                <th>Expired Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((el) => {
+                return (
+                  <tr key={el._id}>
+                    <td>{el.memo ? el.memo : '-'}</td>
+                    <td>
+                      {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
+                    </td>
+                    <td>{renderExpiration(Number(el.expiration))}</td>
+                    <td className="actions">
+                      <button onClick={() => setShowQr(el)}>
+                        <IconQr />
                       </button>
-                    </CopyToClipboard>
-                    <button onClick={() => setShowDelete(el)}>
-                      <IconDelete />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          {showDelete && (
-            <SubmitModal onClose={() => setShowDelete(undefined)}>
-              <div className="title">Delete Share Link</div>
-              <p className="text-center mb-32">
-                {`Are you sure you want to delete share link?`}
-              </p>
-              <div className="buttons">
-                <button
-                  onClick={() => setShowDelete(undefined)}
-                  className="gen-secondary-btn medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={onDelete}
-                  className="gen-primary-btn medium danger"
-                >
-                  Submit
-                </button>
-                {loading && <Loading />}
-              </div>
-            </SubmitModal>
-          )}
-          {showQr && (
-            <QrModal
-              path={`${window.location.origin}/public/${showQr.walletAddress}/${showQr.token}`}
-              onClose={() => setShowQr(undefined)}
-            ></QrModal>
-          )}
-        </table>
+                      <CopyToClipboard
+                        text={`${window.location.origin}/public/${el.walletAddress}/${el.token}`}
+                        onCopy={() => toast.success('Copied')}
+                      >
+                        <button>
+                          <IconCopy />
+                        </button>
+                      </CopyToClipboard>
+                      <button onClick={() => setShowDelete(el)}>
+                        <IconDelete />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            {showDelete && (
+              <SubmitModal onClose={() => setShowDelete(undefined)}>
+                <div className="title">Delete Share Link</div>
+                <p className="text-center mb-32">
+                  {`Are you sure you want to delete share link?`}
+                </p>
+                <div className="buttons">
+                  <button
+                    onClick={() => setShowDelete(undefined)}
+                    className="gen-secondary-btn medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={onDelete}
+                    className="gen-primary-btn medium danger"
+                  >
+                    Submit
+                  </button>
+                  {loading && <Loading />}
+                </div>
+              </SubmitModal>
+            )}
+            {showQr && (
+              <QrModal
+                path={`${window.location.origin}/public/${showQr.walletAddress}/${showQr.token}`}
+                onClose={() => setShowQr(undefined)}
+              ></QrModal>
+            )}
+          </table>
+        </div>
+
       );
     }
   };
@@ -252,22 +255,6 @@ export function ProfileShares() {
         <div className="card-header">
           <div className="subtitle1">List of shares</div>
           <div className="actions">
-            {/* <Sorting
-              className="mr-16"
-              order={order}
-              setOrder={setOrder}
-              orderBy={orderBy}
-              setOrderBy={setOrderBy}
-              orderByList={[
-                { key: 'displayName', title: 'Display Name' },
-                { key: 'totalRegistered', title: 'Registered' },
-                { key: 'totalSessions', title: 'Sessions' },
-                { key: 'totalApiCalls', title: 'API' },
-                { key: 'totalFiles', title: 'Files' },
-                { key: 'totalTransactions', title: 'Transactions' },
-                { key: 'createdAt', title: 'Date' },
-              ]}
-            /> */}
             <button
               onClick={() => setShowNew(true)}
               className="gen-primary-btn"

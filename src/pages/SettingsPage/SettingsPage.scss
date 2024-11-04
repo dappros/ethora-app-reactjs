@@ -34,8 +34,10 @@
   }
 
   .tabs-content {
-    flex: 1;
+    // flex: 1;
+    width: calc(100vw - 276px - 200px);
     margin-left: 16px;
+    overflow: hidden;
   }
 
   .tabs-content > div {
@@ -86,6 +88,8 @@
   }
 
   .profile-shares {
+    width: 100%;
+    overflow: hidden;
     .card {
       padding: 16px 8px;
       border-radius: 12px;
@@ -104,8 +108,19 @@
     }
   }
 
-  .profile-shares-table {
+  .profile-shares-table-outer {
     width: 100%;
+    overflow: auto;
+  }
+
+  .profile-shares-table-outer::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-shares-table {
+    table-layout:fixed;
+    width: 100%;
+    min-width: 800px;
     border-collapse: collapse;
 
     th {
@@ -181,8 +196,8 @@
       }
     }
 
-    .tabs::-webkit-scrollbar {
-      display: none;
+    .tabs-content {
+      width: 100%;
     }
   }
 }
