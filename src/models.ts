@@ -88,6 +88,7 @@ export interface ModelApp {
   };
   googleServicesJson: string;
   googleServiceInfoPlist: string;
+  appSecret: string;
 }
 
 export interface ModelUserACL {

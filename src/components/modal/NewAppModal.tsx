@@ -37,15 +37,15 @@ export function NewAppModal({ onClose }: Props) {
           placeholder="App Name"
           value={appName}
           onChange={(e) => setAppName(e.target.value)}
-          className="gen-input gen-input-large mb-16"
+          className="gen-input gen-input-large mbc-16"
         />
         <div className="buttons">
-          <button className="gen-secondary-btn mb-16" onClick={onClose}>
+          <button className="gen-secondary-btn mbc-16" onClick={onClose}>
             Cancel
           </button>
           <button
             onClick={onCreate}
-            className={cn('gen-primary-btn mb-16', { disabled: !appName })}
+            className={cn('gen-primary-btn mbc-16', { disabled: !appName })}
           >
             Continue
           </button>

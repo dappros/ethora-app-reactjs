@@ -23,12 +23,12 @@ export function WebApp({
         domain name available for Free plan users and 1st level domain name for
         Business plan users.
       </p>
-      <p className="info mb-16">
+      <p className="info mbc-16">
         <IconInfo />
         Self-host option: just clone our engine from github, build and run it on
         your server.
       </p>
-      <div className="domain-input mb-16">
+      <div className="domain-input mbc-16">
         <input
           value={domainName}
           onChange={(e) => setDomainName(e.target.value)}
@@ -40,7 +40,7 @@ export function WebApp({
         />
         <label htmlFor="domain-input">.ethoradev.com</label>
       </div>
-      <div className="flex mb-32">
+      <div className="flex mbc-32">
         <div className="domain-input">
           <input
             placeholder="Your App Name"
@@ -60,7 +60,7 @@ export function WebApp({
         in your Firebase console. These options will be disabled if credentials
         are not provided.
       </p>
-      <p className="info mb-16">
+      <p className="info mbc-16">
         <IconInfo />
         Copy paste the configuration from your Firebase Console
       </p>

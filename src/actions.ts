@@ -57,6 +57,7 @@ export async function actionGetConfig(domainName?: string) {
     firebaseConfigParsed: getFirebaseConfigFromString(
       result.firebaseWebConfigString
     ),
+    appSecret: '',
   };
 
   await sleep(1000);

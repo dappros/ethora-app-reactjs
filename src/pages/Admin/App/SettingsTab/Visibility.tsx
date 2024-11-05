@@ -24,7 +24,7 @@ export function Visibility({
         These are the default permissions to be applied to all Users created in
         your App. 
       </div>
-      <div className="body2 mb-32">
+      <div className="body2 mbc-32">
         Keep the recommended settings if you are not sure and you can come back
         to this later.
       </div>
@@ -42,7 +42,7 @@ export function Visibility({
         value={defaultAccessProfileOpen}
         onChange={setDefaultAccessProfileOpen}
         aria-label="Server size"
-        className="mb-32"
+        className="mbc-32"
       >
         <Field className="radio-button">
           <Radio value={true} className="radio-button-input"></Radio>
@@ -70,7 +70,7 @@ export function Visibility({
       <div className="caption mb-0">
         By default, other Users can see one’s Assets in one’s Profile. 
       </div>
-      <div className="caption mb-16">
+      <div className="caption mbc-16">
         Alternative, more restricted setting, is where Assets are hidden.
         Profile will only display items such as name, photo, description, but no
         Assets. Users will still be able to share their Assets with others, but
@@ -78,7 +78,7 @@ export function Visibility({
         individually for each Asset.
       </div>
       <RadioGroup
-        className="mb-32"
+        className="mbc-32"
         value={defaultAccessAssetsOpen}
         onChange={setDefaultAccessAssetsOpen}
         aria-label="Server size"
@@ -110,7 +110,7 @@ export function Visibility({
         account.
       </div>
       <RadioGroup
-        className="mb-32"
+        className="mbc-32"
         value={usersCanFree}
         onChange={setUsersCanFree}
         aria-label="Server size"

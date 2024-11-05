@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { AppearancePreview } from '../../../../components/AppearancePreview/AppearancePreview';
+// import { AppearancePreview } from '../../../../components/AppearancePreview/AppearancePreview';
 import { PopoverColorPicker } from '../../../../components/PopoverColorPicker';
 
 import { actionPostFile } from '../../../../actions';
@@ -29,9 +29,7 @@ export function Appearance({
   setCoinName,
   color,
   setColor,
-  logoImage,
   setLogoImage,
-  sublogoImage,
   setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
@@ -72,13 +70,13 @@ export function Appearance({
             placeholder="Enter App's Name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="gen-input input-medium mb-32"
+            className="gen-input input-medium mbc-32"
             type="text"
           />
           <div className="input-title">Tagline</div>
           <input
             placeholder="Enter Tagline of Your App"
-            className="gen-input input-medium mb-32"
+            className="gen-input input-medium mbc-32"
             type="text"
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
@@ -86,16 +84,16 @@ export function Appearance({
           <div className="input-title">Coin Name</div>
           <input
             placeholder="Enter Coin Name"
-            className="gen-input input-medium mb-32"
+            className="gen-input input-medium mbc-32"
             type="text"
             value={coinName}
             onChange={(e) => setCoinName(e.target.value)}
           />
           <div className="input-title">Color</div>
-          <div className="mb-32">
+          <div className="mbc-32">
             <PopoverColorPicker color={color} onChange={onChangeColor} />
           </div>
-          <div className="input-title mb-16">Logo</div>
+          <div className="input-title mbc-16">Logo</div>
           <div className="flex">
             <p className="subtitle2">Primary Logo</p>
             <div className="caption ml-8">
@@ -111,7 +109,7 @@ export function Appearance({
           />
           <button
             onClick={() => logoRef.current?.click()}
-            className="gen-secondary-btn mb-16"
+            className="gen-secondary-btn mbc-16"
           >
             Add logo
           </button>
@@ -135,12 +133,12 @@ export function Appearance({
         </div>
       </div>
       <div className="right">
-        <AppearancePreview
+        {/* <AppearancePreview
           color={color}
           logoImage={logoImage}
           sublogoImage={sublogoImage}
           tagline={tagline}
-        />
+        /> */}
       </div>
     </div>
   );

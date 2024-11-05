@@ -37,7 +37,7 @@ export function Visibility() {
 
   return (
     <>
-      <div className="subtitle1 mb-16">Profile Visiblility</div>
+      <div className="subtitle1 mbc-16">Profile Visiblility</div>
       <RadioGroup
         value={isProfileOpen}
         onChange={(value) => {
@@ -57,12 +57,12 @@ export function Visibility() {
           <Radio value={false} className="radio-button-input"></Radio>
           <Label className="body2 radio-button-label">Restricted</Label>
         </Field>
-        <p className="caption mb-32">
+        <p className="caption mbc-32">
           Only users with your permission or temporary secure link can see your
           profile
         </p>
       </RadioGroup>
-      <div className="subtitle1 mb-16">Documents Visiblility</div>
+      <div className="subtitle1 mbc-16">Documents Visiblility</div>
       <RadioGroup
         value={isAssetsOpen}
         onChange={(value) => {
@@ -81,7 +81,7 @@ export function Visibility() {
           <Radio value={false} className="radio-button-input"></Radio>
           <Label className="body2 radio-button-label">Individual</Label>
         </Field>
-        <p className="caption mb-32">
+        <p className="caption mbc-32">
           You need to share each document individually before others can see
           them
         </p>

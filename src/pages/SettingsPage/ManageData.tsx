@@ -89,7 +89,7 @@ export function ManageData() {
       {warning && (
         <SubmitModal onClose={() => setWarning(false)}>
           <div className="title">Warning</div>
-          <p className="text-center mb-32">
+          <p className="text-center mbc-32">
             {`Are you sure you want to delete your all data from the platform?`}
           </p>
           <div className="buttons">

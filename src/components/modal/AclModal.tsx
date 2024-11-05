@@ -28,7 +28,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         <div className="title">ACL Editing</div>
         <div className="inner-wrap">
           <div className="subtitle1">Applications</div>
-          <div className="app-table mb-32">
+          <div className="app-table mbc-32">
             <div className="table-wrapper">
               <table>
                 <thead>
@@ -398,7 +398,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
             </div>
           </div>
           <div className="subtitle1">Networks</div>
-          <div className="app-table mb-32">
+          <div className="app-table mbc-32">
             <div className="table-wrapper">
               <table>
                 <thead>

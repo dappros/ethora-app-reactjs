@@ -6,6 +6,7 @@ import { getPublicProfile } from '../http';
 import './PublicProfile.scss';
 
 export function PublicProfile() {
+  console.log('PublicProfile');
   const [inited, setInited] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -15,6 +16,7 @@ export function PublicProfile() {
   const { address, token } = useParams();
 
   useEffect(() => {
+    console.log({ address, token });
     if (token) {
       getPublicProfile(address as string, token).then((resp) => {
         setInited(true);
@@ -35,7 +37,7 @@ export function PublicProfile() {
         setDescription(description);
       });
     }
-  }, []);
+  }, [token]);
 
   if (!inited) {
     return <Loading />;

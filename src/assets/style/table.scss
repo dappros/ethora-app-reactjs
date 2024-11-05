@@ -20,6 +20,8 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
+    min-width: 1200px;
     display: table;
     border-spacing: 2px;
     border-collapse: separate;

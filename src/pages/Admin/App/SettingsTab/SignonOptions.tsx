@@ -29,7 +29,7 @@ export function SignonOptions({
 }: Props) {
   return (
     <div className="settings-signon">
-      <p className="mb-32">
+      <p className="mbc-32">
         Choose which sign on options to enable in your App. This controls how
         your Users create new accounts and login.
       </p>
@@ -45,7 +45,7 @@ export function SignonOptions({
           checked={enableEmail}
           onChange={setEnableEmail}
         ></Checkbox>
-        <Label className="label mb-32">Email + Password</Label>
+        <Label className="label mbc-32">Email + Password</Label>
       </Field>
       <p className="subtitle1">Social Sign-On</p>
       <p className="caption">
@@ -72,7 +72,7 @@ export function SignonOptions({
         ></Checkbox>
         <Label className="label">Apple</Label>
       </Field>
-      <p className="caption mb-16px">
+      <p className="caption mbc-16px">
         Make sure to add your App Firebase settings for this to work.
       </p>
       <Field className="checkbox  mb-6">
@@ -83,7 +83,7 @@ export function SignonOptions({
         ></Checkbox>
         <Label className="label">Facebook</Label>
       </Field>
-      <p className="caption mb-16px">
+      <p className="caption mbc-16px">
         Make sure to add your App Firebase settings for this to work.
       </p>
       <Field className="checkbox  mb-6">
@@ -94,12 +94,12 @@ export function SignonOptions({
         ></Checkbox>
         <Label className="label">Metamask</Label>
       </Field>
-      <p className="caption mb-32">
+      <p className="caption mbc-32">
         Web3 projects will benefit from signing in with their existing crypto
         wallet. 
       </p>
       <p className="subtitle1">Custom backend integration</p>
-      <p className="caption mb-16">
+      <p className="caption mbc-16">
         Some projects prefer to create accounts for Users programmatically,
         connecting their existing legacy software with Ethora. In this case,
         your legacy software will control accounts via our Users API (or a

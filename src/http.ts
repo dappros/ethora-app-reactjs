@@ -287,7 +287,11 @@ export function httpUpdateUser(fd: FormData) {
 }
 
 export function getPublicProfile(walletAddress: string, token: string = '') {
-  return http.get(`/users/profile/${walletAddress}/${token}`);
+  if (token) {
+    return http.get(`/users/profile/${walletAddress}/${token}`);
+  } else {
+    return http.get(`/users/profile/${walletAddress}`);
+  }
 }
 
 export function getDocuments(walletAddress: string) {

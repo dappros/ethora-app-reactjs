@@ -1,8 +1,6 @@
 import { InputHTMLAttributes, forwardRef } from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { IconCopy } from '../Icons/IconCopy';
 
-import { toast } from 'react-toastify';
+import { CopyButton } from '../CopyButton';
 import './CopyInput.scss';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
@@ -15,14 +13,7 @@ export const CopyInput = forwardRef<HTMLInputElement, Props>(
     return (
       <div style={{ position: 'relative' }} className="CopyInput">
         <input value={value} disabled {...rest} ref={ref} />
-        <CopyToClipboard
-          onCopy={() => toast.success('Copied')}
-          text={value as string}
-        >
-          <button>
-            <IconCopy />
-          </button>
-        </CopyToClipboard>
+        <CopyButton value={value as string} />
       </div>
     );
   }

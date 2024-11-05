@@ -44,7 +44,7 @@ export function Chats() {
 
   return (
     <div className="settings-chats">
-      <p className="subtitle1 mb-16">New Chats</p>
+      <p className="subtitle1 mbc-16">New Chats</p>
       <Field className="checkbox mb-6">
         <Checkbox
           className="checkbox-input"
@@ -53,7 +53,7 @@ export function Chats() {
         ></Checkbox>
         <Label className="label">Allow Users to create new Chats</Label>
       </Field>
-      <p className="caption mb-32">
+      <p className="caption mbc-32">
         When enabled, your Users can create new Chats and invite other Users
         there. When disabled, only pre-existing Chats or Chats created by your
         business can be used.

@@ -90,21 +90,21 @@ export function ProfileShares() {
             setShowNew(false);
           }}
         >
-          <h2 className="title mb-32">Create a Profile Sharing link</h2>
-          <p className="text-center mb-32">
+          <h2 className="title mbc-32">Create a Profile Sharing link</h2>
+          <p className="text-center mbc-32">
             Send this link to your trusted contact(s) so they can access your
             profile when you're in Restricted mode.
           </p>
-          <div className="plate mb-32">
+          <div className="plate mbc-32">
             <IconInfo />
             You'll be able to remove this link any time if you change your mind.
           </div>
-          <div className="subtitle1 mb-32">Expiration</div>
+          <div className="subtitle1 mbc-32">Expiration</div>
           <div className="caption">
             If you set this, this link will only be valid for the given period
             of time.
           </div>
-          <Field className="profile-share-select-field mb-32">
+          <Field className="profile-share-select-field mbc-32">
             <Select
               className="profile-share-select"
               onChange={(e) => setExpirationTime(Number(e.target.value))}
@@ -116,23 +116,26 @@ export function ProfileShares() {
               <option value={MONTH}>1 month</option>
             </Select>
           </Field>
-          <div className="subtitle1 mb-16">Memo</div>
-          <div className="caption mb-16">
+          <div className="subtitle1 mbc-16">Memo</div>
+          <div className="caption mbc-16">
             Add an optional note so that you remember who you shared this with.
           </div>
           <TextInput
             onChange={(e) => setMemo(e.target.value)}
             placeholder="Add note"
-            className="gen-input gen-input-large mb-32"
+            className="gen-input gen-input-large mbc-32"
           />
           <div className="buttons">
             <button
               onClick={() => setShowNew(false)}
-              className="gen-secondary-btn mb-16"
+              className="gen-secondary-btn mbc-16"
             >
               Cancel
             </button>
-            <button onClick={doCreateNewLink} className="gen-primary-btn mb-16">
+            <button
+              onClick={doCreateNewLink}
+              className="gen-primary-btn mbc-16"
+            >
               Continue
             </button>
           </div>
@@ -211,7 +214,7 @@ export function ProfileShares() {
             {showDelete && (
               <SubmitModal onClose={() => setShowDelete(undefined)}>
                 <div className="title">Delete Share Link</div>
-                <p className="text-center mb-32">
+                <p className="text-center mbc-32">
                   {`Are you sure you want to delete share link?`}
                 </p>
                 <div className="buttons">
@@ -245,7 +248,7 @@ export function ProfileShares() {
 
   return (
     <div className="profile-shares">
-      <div className="subtitle1 mb-16">Current Profile Shares</div>
+      <div className="subtitle1 mbc-16">Current Profile Shares</div>
       <div className="caption">
         Listed below are your currently active profile sharing links. You can
         share or delete them.
