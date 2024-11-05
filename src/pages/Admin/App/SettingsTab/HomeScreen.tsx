@@ -10,7 +10,7 @@ interface Props {
 export function HomeScreen({ afterLoginPage, setAfterLoginPage }: Props) {
   return (
     <div className="settings-home-screen">
-      <div className="body2 mb-32">
+      <div className="body2 mbc-32">
         Choose which screen your Users will see immediately after log in.
       </div>
       <RadioGroup

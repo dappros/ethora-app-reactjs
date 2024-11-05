@@ -265,7 +265,7 @@ export function AdminAppSettings() {
             />
           </TabPanel>
           <TabPanel key="API">
-            <Api />
+            <Api app={app} />
           </TabPanel>
         </TabPanels>
       </TabGroup>

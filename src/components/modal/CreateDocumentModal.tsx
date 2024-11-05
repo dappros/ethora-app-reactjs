@@ -63,13 +63,15 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
           placeholder="Document Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="gen-input gen-input-large mb-16"
+          className="gen-input gen-input-large mbc-16"
         />
         <button className="gen-secondary-btn" onClick={onFileUpload}>
           <IconPaperclip />
         </button>
-        {!file && <div className="mt-16 mb-16 text-center">No file chosen</div>}
-        {file && <div className="mt-16 mb-16 text-center">{file.name}</div>}
+        {!file && (
+          <div className="mt-16 mbc-16 text-center">No file chosen</div>
+        )}
+        {file && <div className="mt-16 mbc-16 text-center">{file.name}</div>}
         <input
           onChange={onChange}
           type="file"
@@ -77,10 +79,10 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
           className="hidden"
         ></input>
         <div className="buttons">
-          <button className="gen-secondary-btn mb-16" onClick={onClose}>
+          <button className="gen-secondary-btn mbc-16" onClick={onClose}>
             Cancel
           </button>
-          <button onClick={onCreate} className={cn('gen-primary-btn mb-16')}>
+          <button onClick={onCreate} className={cn('gen-primary-btn mbc-16')}>
             Create
           </button>
         </div>

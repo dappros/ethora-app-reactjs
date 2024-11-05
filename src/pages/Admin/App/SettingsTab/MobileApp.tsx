@@ -48,15 +48,15 @@ export function MobileApp({
       <div className="form-controls">
         <input
           type="text"
-          className="gen-input input-medium mb-16"
+          className="gen-input input-medium mbc-16"
           placeholder="Bundle ID"
           value={bundleId}
           onChange={(e) => setBundleId(e.target.value)}
         />
-        <button className="gen-secondary-btn mb-32">
+        <button className="gen-secondary-btn mbc-32">
           Prepare React Native Build
         </button>
-        <div className="subtitle1 mb-16">Android build</div>
+        <div className="subtitle1 mbc-16">Android build</div>
         <div className="subtitle2">Google Services JSON</div>
         <input
           type="file"
@@ -68,14 +68,14 @@ export function MobileApp({
           }
         />
         <button
-          className="gen-secondary-btn mb-16"
+          className="gen-secondary-btn mbc-16"
           onClick={() => googleJsonRef.current?.click()}
         >
           Upload
         </button>
         {/* <div className="subtitle2">Firebase server key (for push notifications)</div>
-                <input type="text" placeholder="Firebase Server Key" className="gen-input input-medium mb-32"/> */}
-        <div className="subtitle1 mb-16">IOS build</div>
+                <input type="text" placeholder="Firebase Server Key" className="gen-input input-medium mbc-32"/> */}
+        <div className="subtitle1 mbc-16">IOS build</div>
         <div className="subtitle2">Google Services PLIST</div>
         <input
           type="file"
@@ -88,12 +88,12 @@ export function MobileApp({
         />
         <button
           onClick={() => plistFileRef.current?.click()}
-          className="gen-secondary-btn mb-16"
+          className="gen-secondary-btn mbc-16"
         >
           Upload
         </button>
         {/* <div className="subtitle2">Push Notifications Certificate (Apple)</div>
-                <button className="gen-secondary-btn mb-16">Upload</button> */}
+                <button className="gen-secondary-btn mbc-16">Upload</button> */}
       </div>
     </div>
   );

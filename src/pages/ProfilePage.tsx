@@ -85,7 +85,7 @@ export function ProfilePage() {
                   <TabPanel key="documents">
                     <button
                       onClick={() => setShowNewDocModal(true)}
-                      className="gen-primary-btn mb-16"
+                      className="gen-primary-btn mbc-16"
                     >
                       Add Document
                     </button>

@@ -47,10 +47,10 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
             </div>
           </div>
           <div className="buttons">
-            <button className="gen-secondary-btn mb-16" onClick={onClose}>
+            <button className="gen-secondary-btn mbc-16" onClick={onClose}>
               Cancel
             </button>
-            <button onClick={() => {}} className={cn('gen-primary-btn mb-16')}>
+            <button onClick={() => {}} className={cn('gen-primary-btn mbc-16')}>
               Continue
             </button>
           </div>

@@ -1,10 +1,46 @@
 .settings-api {
   padding: 0 16px;
   width: 100%;
+}
 
-  .tablo {
-    padding: 16px 8px;
-    border-radius: 12px;
-    border: 1px solid #f0f0f0;
+.table-table {
+  tr {
+    @apply h-0 border-0;
+  }
+
+  & th:not(:last-child):not(:empty):after {
+    transition: opacity 0.2s;
+    position: absolute;
+    content: '';
+    display: block;
+
+    width: 1px;
+    right: 0;
+    top: 12px;
+    bottom: 8px;
+    @apply bg-gray-200;
+    opacity: 1;
+  }
+
+  & td {
+    height: 50px;
+  }
+
+  & tr:hover {
+    @apply bg-gray-100;
+  }
+
+  & td:not(:last-child):not(:empty):after {
+    transition: opacity 0.2s;
+    position: absolute;
+    content: '';
+    display: block;
+
+    width: 1px;
+    right: 0;
+    top: 12px;
+    bottom: 8px;
+    @apply bg-gray-200;
+    opacity: 1;
   }
 }

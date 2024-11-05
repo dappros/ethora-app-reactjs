@@ -535,7 +535,7 @@ export function AdminAppUsers() {
           </div>
         </div>
       </div>
-      <div className="app-table mb-16">
+      <div className="app-table mbc-16">
         <div className="table-wrapper">
           <table>
             <thead>
@@ -694,7 +694,7 @@ export function AdminAppUsers() {
       {showDelete && (
         <SubmitModal onClose={() => setShowDelete(false)}>
           <div className="title">Delete user</div>
-          <p className="text-center mb-32">
+          <p className="text-center mbc-32">
             {`Are you sure you want to delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
           </p>
           <div className="buttons">
@@ -717,7 +717,7 @@ export function AdminAppUsers() {
       {showResetPassword && (
         <SubmitModal onClose={() => setShowResetPassword(false)}>
           <div className="title">Password Reset</div>
-          <p className="text-center mb-32">
+          <p className="text-center mbc-32">
             {`Are you sure you want to force a password reset for ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
           </p>
           <div className="buttons">
