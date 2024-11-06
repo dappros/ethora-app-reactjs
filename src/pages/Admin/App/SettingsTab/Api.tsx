@@ -24,45 +24,52 @@ export const Api = ({ app }: Props) => {
         invalidate access for your application code until it’s updated with new
         credentials.
       </p>
-      <Plate>
-        <Table wrapper={false} className="table-table" compactView>
-          <Table.THead rowClassName="border-0 font-inter font-normal text-xs">
-            <Table.THeadCell
-              className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-l-xl"
-              title="Key"
-            >
-              Key
-            </Table.THeadCell>
-            <Table.THeadCell
-              className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-r-xl"
-              title="Secret"
-            >
-              Secret
-            </Table.THeadCell>
-          </Table.THead>
-          <Table.TBody>
-            <Table.TRow>
-              <Table.TCell
-                className="h-0 relative border-0 py-3 rounded-l-xl"
-                title="Дата"
+      <div className="w-full ove"></div>
+      <Plate className="w-full overflow-auto p-4">
+        <div className="table-table-outer w-full overflow-auto">
+          <Table
+            wrapper={false}
+            className="table-table w-full min-w-[600px] table-fixed"
+            compactView
+          >
+            <Table.THead rowClassName="border-0 font-inter font-normal text-xs">
+              <Table.THeadCell
+                className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-l-xl"
+                title="Key"
               >
-                <div className="flex justify-items-center">
-                  <span className="mr-2">{app._id}</span>
-                  <CopyButton value={app._id} />
-                </div>
-              </Table.TCell>
-              <Table.TCell
-                className="h-0 relative border-0 py-3 rounded-r-xl"
+                Key
+              </Table.THeadCell>
+              <Table.THeadCell
+                className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-r-xl"
                 title="Secret"
               >
-                <div className="flex justify-items-center">
-                  <Secret className="mr-2" value={app.appSecret} />
-                  <CopyButton value={app.appSecret} />
-                </div>
-              </Table.TCell>
-            </Table.TRow>
-          </Table.TBody>
-        </Table>
+                Secret
+              </Table.THeadCell>
+            </Table.THead>
+            <Table.TBody>
+              <Table.TRow>
+                <Table.TCell
+                  className="h-0 relative border-0 py-3 rounded-l-xl"
+                  title="Дата"
+                >
+                  <div className="flex justify-items-center">
+                    <span className="mr-2">{app._id}</span>
+                    <CopyButton value={app._id} />
+                  </div>
+                </Table.TCell>
+                <Table.TCell
+                  className="h-0 relative border-0 py-3 rounded-r-xl"
+                  title="Secret"
+                >
+                  <div className="flex justify-items-center">
+                    <Secret className="mr-2" value={app.appSecret} />
+                    <CopyButton value={app.appSecret} />
+                  </div>
+                </Table.TCell>
+              </Table.TRow>
+            </Table.TBody>
+          </Table>
+        </div>
       </Plate>
     </div>
   );

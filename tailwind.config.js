@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         'gray-50': '#FCFCFC',
-        'gray-100': '#F5F5F5',
+        'gray-100': '#F5F7F9',
         'gray-200': '#F0F0F0',
         'gray-300': '#D9D9D9',
         'gray-400': '#BFBFBF',

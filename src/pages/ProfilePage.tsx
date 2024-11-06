@@ -8,6 +8,7 @@ import { IconEdit } from '../components/Icons/IconEdit';
 import { IconQr } from '../components/Icons/IconQr';
 import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
+import { Plate } from '../components/Plate';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
 import { getDocuments } from '../http';
 import { ModelCurrentUser } from '../models';
@@ -48,10 +49,11 @@ export function ProfilePage() {
       <div className="app-content-header">
         <div className="app-content-header-title">Profile</div>
       </div>
-      <div className="app-content-body">
+      {/* app-content-body */}
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)]">
         <div className="profile-page">
           <div className="profile-top">
-            <button onClick={() => setShowQr(true)}>
+            <button className="mr-4" onClick={() => setShowQr(true)}>
               <IconQr />
             </button>
             <button onClick={() => navigate('/app/profile/edit')}>
@@ -66,10 +68,10 @@ export function ProfilePage() {
           <div className="profile-user-info">
             <span className="h2">{`${firstName} ${lastName}`}</span>
             {description && (
-              <div className="profile-user-about">
-                <div className="mb-8">About</div>
+              <Plate className="max-w-[768px] p-4">
+                <div className="">About</div>
                 <span>{description}</span>
-              </div>
+              </Plate>
             )}
             <div className="profile-items">
               <TabGroup className="profile-items-tabgroup">

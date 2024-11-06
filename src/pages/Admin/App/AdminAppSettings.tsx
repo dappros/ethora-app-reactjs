@@ -181,7 +181,7 @@ export function AdminAppSettings() {
         </div>
       </div>
       <TabGroup className="admin-app-settings">
-        <TabList className="tabs">
+        <TabList className="tabs min-w-40 w-full max-w-[276px]">
           <Tab key="Appearance">Appearance</Tab>
           <Tab key="Sign-on options">Sign-on options</Tab>
           <Tab key="Web app">Web app</Tab>

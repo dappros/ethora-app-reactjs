@@ -10,7 +10,8 @@ export function ChatPage() {
       <div className="app-content-header">
         <div className="app-content-header-title">Chats</div>
       </div>
-      <div className="app-content-body">
+      {/* app-content-body */}
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)]">
         <Outlet />
         <Chat
           config={{
