@@ -1,10 +1,12 @@
 import { useParams } from 'react-router-dom';
 import { useAppStore } from '../../../store/useAppStore';
 
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { TabGroup, TabPanel, TabPanels } from '@headlessui/react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../../actions';
+import { IconExternalLink } from '../../../components/Icons/IconExternalLink';
+import { TablistSettings } from '../../../components/TabListSettings';
 import './AdminAppSettings.scss';
 import { Api } from './SettingsTab/Api';
 import { Appearance } from './SettingsTab/Appearance';
@@ -171,28 +173,40 @@ export function AdminAppSettings() {
   };
 
   return (
-    <div className="app-content-body-page">
-      <div className="app-content-body-header">
-        <div className="left">Settings</div>
-        <div className="right">
-          <button onClick={onSave} className="gen-secondary-btn medium">
+    // app-content-body-page
+    <div className="flex flex-col-reverse md:flex-col">
+      {/* app-content-body-header */}
+      <div className="flex md:justify-between md:pb-4 md:border-b border-b-gray-200 mb-4">
+        <div className="font-varela hidden md:block text-[24px] ml-4 ">
+          Settings
+        </div>
+        <div className="md:max-w-[240px] w-full flex">
+          <button onClick={() => {}} className="mr-[24px]">
+            <IconExternalLink color={app.primaryColor} />
+          </button>
+          <button
+            onClick={onSave}
+            className="border w-full inline-block border-brand-500 rounded-xl px-4 py-2 font-varela text-brand-500 md:max-w-[184px]"
+          >
             Save
           </button>
         </div>
       </div>
       <TabGroup className="admin-app-settings">
-        <TabList className="tabs min-w-40 w-full max-w-[276px]">
-          <Tab key="Appearance">Appearance</Tab>
-          <Tab key="Sign-on options">Sign-on options</Tab>
-          <Tab key="Web app">Web app</Tab>
-          <Tab key="Mobile app">Mobile app</Tab>
-          <Tab key="Home screen">Home screen</Tab>
-          <Tab key="Menu">Menu</Tab>
-          <Tab key="Chats">Chats</Tab>
-          <Tab key="Visibility & Privacy">Visibility & Privacy</Tab>
-          <Tab key="API">API</Tab>
-        </TabList>
-        <TabPanels className="tabs-content">
+        <TablistSettings
+          items={[
+            'Appearance',
+            'Sign-on options',
+            'Web app',
+            'Mobile app',
+            'Home screen',
+            'Menu',
+            'Chats',
+            'Visibility & Privacy',
+            'API',
+          ]}
+        />
+        <TabPanels className="tabs-content ">
           <TabPanel key="Appearance">
             <Appearance
               displayName={displayName}

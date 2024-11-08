@@ -21,6 +21,7 @@ export function AppPage() {
 
   return (
     <div className="app-page-outer">
+      {/* app-page */}
       <div className="app-page">
         <div className="app-menu">
           <div className="app-menu-desktop">

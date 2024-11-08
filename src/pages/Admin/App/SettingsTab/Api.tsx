@@ -1,8 +1,7 @@
-import { Table } from '@alfalab/core-components-table';
 import { CopyButton } from '../../../../components/CopyButton';
 import { Plate } from '../../../../components/Plate';
-
 import { Secret } from '../../../../components/Secret';
+import { TableHead } from '../../../../components/TableHead';
 import { ModelApp } from '../../../../models';
 import './Api.scss';
 
@@ -26,50 +25,31 @@ export const Api = ({ app }: Props) => {
       </p>
       <div className="w-full ove"></div>
       <Plate className="w-full overflow-auto p-4">
-        <div className="table-table-outer w-full overflow-auto">
-          <Table
-            wrapper={false}
-            className="table-table w-full min-w-[600px] table-fixed"
-            compactView
-          >
-            <Table.THead rowClassName="border-0 font-inter font-normal text-xs">
-              <Table.THeadCell
-                className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-l-xl"
-                title="Key"
-              >
-                Key
-              </Table.THeadCell>
-              <Table.THeadCell
-                className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-r-xl"
-                title="Secret"
-              >
-                Secret
-              </Table.THeadCell>
-            </Table.THead>
-            <Table.TBody>
-              <Table.TRow>
-                <Table.TCell
-                  className="h-0 relative border-0 py-3 rounded-l-xl"
-                  title="Дата"
-                >
-                  <div className="flex justify-items-center">
-                    <span className="mr-2">{app._id}</span>
-                    <CopyButton value={app._id} />
-                  </div>
-                </Table.TCell>
-                <Table.TCell
-                  className="h-0 relative border-0 py-3 rounded-r-xl"
-                  title="Secret"
-                >
-                  <div className="flex justify-items-center">
-                    <Secret className="mr-2" value={app.appSecret} />
-                    <CopyButton value={app.appSecret} />
-                  </div>
-                </Table.TCell>
-              </Table.TRow>
-            </Table.TBody>
-          </Table>
-        </div>
+        <table className="w-full box-border min-w-[600px] table-fixed">
+          <TableHead columns={['Key', 'Secret']} />
+          {/* <thead className='border-0 border-collapse font-inter font-normal text-xs'>
+            <tr>
+              <th className="py-2 relative after:content-[''] after:absolute after:right-0 after:top-[5px] after:bottom-[5px] after:bg-gray-200 after:w-[1px] font-normal border-0 text-gray-500 bg-gray-50 rounded-l-xl">Key</th>
+              <th className="py-2 font-normal relative border-0 text-gray-500 bg-gray-50 rounded-r-xl">Secret</th>
+            </tr>
+          </thead> */}
+          <tbody>
+            <tr>
+              <td className="h-0 relative border-0 py-3 rounded-l-xl">
+                <div className="flex justify-items-center">
+                  <span className="mr-2">{app._id}</span>
+                  <CopyButton value={app._id} />
+                </div>
+              </td>
+              <td className="h-0 relative border-0 py-3 rounded-r-xl">
+                <div className="flex justify-items-center">
+                  <Secret className="mr-2" value={app.appSecret} />
+                  <CopyButton value={app.appSecret} />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </Plate>
     </div>
   );
