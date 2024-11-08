@@ -10,7 +10,7 @@ export function AdminAppsBillingPage() {
           <NavLink to="/app/admin/billing">Billing</NavLink>
         </div>
       </div>
-      <div className="app-content-body">
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)]">
         <Outlet />
       </div>
     </>

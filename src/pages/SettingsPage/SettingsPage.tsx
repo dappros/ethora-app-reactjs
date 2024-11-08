@@ -1,7 +1,7 @@
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { TabGroup, TabPanel, TabPanels } from '@headlessui/react';
+import { TablistSettings } from '../../components/TabListSettings';
 import { ModelCurrentUser } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
-import { BlockedUsers } from './BlockedUsers';
 import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
@@ -18,16 +18,20 @@ export function SettingsPage() {
         <div className="app-content-header-title">Settings</div>
         <div className="app-content-header-actions"></div>
       </div>
-      <div className="app-content-body ">
-        <TabGroup className="settings-page-tabs settings-page">
-          <TabList className="tabs">
-            <Tab key="Manage Data">Manage Data</Tab>
-            <Tab key="Visibility">Visibility</Tab>
-            <Tab key="Profile Shares">Profile Shares</Tab>
-            <Tab key="Document Shares">Document Shares</Tab>
-            <Tab key="Blocked Users">Blocked Users</Tab>
-            <Tab key="Referrals">Referrals</Tab>
-          </TabList>
+      {/* .app-content-body */}
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)]">
+        {/* .settings-page */}
+        {/* <TabGroup className="settings-page-tabs settings-page"></TabGroup> */}
+        <TabGroup className="ettings-page-tabs settings-page">
+          <TablistSettings
+            items={[
+              'Manage Data',
+              'Visibility',
+              'Profile Shares',
+              'Document Shares',
+              'Referrals',
+            ]}
+          />
           <TabPanels className="tabs-content">
             <TabPanel key="Manage Data">
               <ManageData />
@@ -40,9 +44,6 @@ export function SettingsPage() {
             </TabPanel>
             <TabPanel key="Document Shares">
               <DocumentShares />
-            </TabPanel>
-            <TabPanel key="Blocked Users">
-              <BlockedUsers />
             </TabPanel>
             <TabPanel key="Referrals">
               <Referrals id={user._id} />

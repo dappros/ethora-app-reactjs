@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         'gray-50': '#FCFCFC',
-        'gray-100': '#F5F5F5',
+        'gray-100': '#F5F7F9',
         'gray-200': '#F0F0F0',
         'gray-300': '#D9D9D9',
         'gray-400': '#BFBFBF',
@@ -21,7 +21,8 @@ export default {
         'brand-200': '#C2D1F0',
         'brand-300': '#99B4E6',
         'brand-400': '#437ED4',
-        'brand-500': '#0052CD',
+        // 'brand-500': '#0052CD',
+        'brand-500': 'var(--bg-brand-primary)',
         'brand-600': '#004AC2',
         'brand-700': '#0040B6',
         'brand-800': '#0035AB',

@@ -44,3 +44,7 @@
     opacity: 1;
   }
 }
+
+.table-table-outer::-webkit-scrollbar {
+  display: none;
+}

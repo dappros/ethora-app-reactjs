@@ -78,7 +78,8 @@ export function ProfilePageEdit() {
       <div className="app-content-header">
         <div className="app-content-header-title">Profile</div>
       </div>
-      <div className="app-content-body">
+      {/* .app-content-body */}
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)]">
         <div className="profile-page-edit">
           <div className="profile-top">
             <button
@@ -103,19 +104,19 @@ export function ProfilePageEdit() {
           <div className="form">
             <form onSubmit={handleSubmit(onSubmit)} action="">
               <TextInput
-                className="gen-input gen-input-large mb-24"
+                className="gen-input gen-input-large mb-8"
                 placeholder="First Name"
                 type="text"
                 {...register('firstName', { required: true, value: fName })}
               />
               <TextInput
-                className="gen-input gen-input-large mb-24"
+                className="gen-input gen-input-large mb-8"
                 placeholder="Last Name"
                 type="text"
                 {...register('lastName', { required: true, value: lName })}
               />
               <TextInput
-                className="gen-input gen-input-large mb-24"
+                className="gen-input gen-input-large mb-8"
                 placeholder="About"
                 type="text"
                 {...register('description', { value: descr })}
