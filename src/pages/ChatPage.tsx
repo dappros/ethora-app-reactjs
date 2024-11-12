@@ -19,7 +19,7 @@ export function ChatPage() {
               primary: config?.primaryColor || '#fff',
               secondary: '#fff',
             },
-            roomListStiles: {
+            roomListStyles: {
               color: config?.primaryColor,
               maxHeight: 'calc(100%)',
               height: 'calc(100%)',
