@@ -17,17 +17,21 @@ export function ChatPage() {
           config={{
             colors: {
               primary: config?.primaryColor || '#fff',
-              secondary: config?.primaryColor || '#fff',
+              secondary: '#fff',
             },
-            disableMedia: true,
-            disableRooms: true,
-          }}
-          roomJID={
-            '5f9a4603b2b5bbfa6b228b642127c56d03b778ad594c52b755e605c977303979@conference.xmpp.ethoradev.com'
-          }
-          MainComponentStyles={{
-            color: 'white',
-            maxHeight: '768px',
+            roomListStiles: {
+              color: config?.primaryColor,
+              maxHeight: 'calc(100%)',
+              height: 'calc(100%)',
+              borderRadius: '16px 0px 0px 16px',
+              maxWidth: 432,
+            },
+            chatRoomStyles: {
+              color: config?.primaryColor,
+              maxHeight: 'calc(100%)',
+              height: 'calc(100%)',
+              borderRadius: '0px 16px 16px 0px',
+            },
           }}
         />
       </div>
