@@ -37,6 +37,7 @@ export function ChatPage() {
               height: 'calc(100%)',
               borderRadius: '0px 16px 16px 0px',
             },
+            // setRoomJidInPath: true,
           }}
           MainComponentStyles={{
             color: 'white',
