@@ -50,7 +50,7 @@ export function ProfilePage() {
         <div className="app-content-header-title">Profile</div>
       </div>
       {/* app-content-body */}
-      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)]">
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)] md:max-w-[1800px]">
         <div className="profile-page">
           <div className="profile-top">
             <button className="mr-4" onClick={() => setShowQr(true)}>

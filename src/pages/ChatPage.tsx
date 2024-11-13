@@ -1,5 +1,4 @@
 import { Chat } from '@ethora/chat-component';
-import { Outlet } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 
 export function ChatPage() {
@@ -11,8 +10,7 @@ export function ChatPage() {
         <div className="app-content-header-title">Chats</div>
       </div>
       {/* app-content-body */}
-      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)] max-h-[calc(100vh-96px)] overflow-auto">
-        <Outlet />
+      <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full h-[calc(100vh-100px)] md:w-[calc(100vw-166px)] md:max-w-[1800px]">
         <Chat
           config={{
             colors: {

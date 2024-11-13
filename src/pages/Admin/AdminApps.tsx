@@ -129,7 +129,7 @@ export function AdminApps() {
   };
 
   return (
-    <div className="admin-apps">
+    <div className="admin-apps ">
       <div className="app-content-body-header">
         <div className="left">Apps</div>
         <div className="right">
