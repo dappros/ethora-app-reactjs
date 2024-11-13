@@ -41,10 +41,6 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-
-    button + button {
-      margin-left: 16px;
-    }
   }
 
   .app-name {
@@ -143,7 +139,7 @@
     }
 
     .app-stat {
-      grid-template-columns: auto auto;
+      grid-template-columns: 1fr 1fr;
     }
 
     .stat-block {

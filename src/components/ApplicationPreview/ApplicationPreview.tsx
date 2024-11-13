@@ -5,6 +5,7 @@ import { IconInfo } from '../Icons/IconInfo';
 
 import { ModelApp } from '../../models';
 import './ApplicationPreview.scss';
+import { IconArrowRight } from '../Icons/IconArrowRight';
 
 interface Props {
   app: ModelApp;
@@ -27,7 +28,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
   const renderLogo = () => {
     if (app.logoImage) {
       return (
+        // logo
         <div className="logo">
+          {/* logo-content */}
           <div
             className="logo-content"
             style={{ backgroundImage: `url(${app.logoImage})` }}
@@ -45,6 +48,7 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
     }
   };
   return (
+    // application-preview
     <div className="application-preview">
       {renderLogo()}
       <div className="inf-title">
@@ -54,11 +58,12 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
         </span>
       </div>
       <div className="inf-actions">
-        <button onClick={onExternalClick} className="mr-[24px]">
+        <button onClick={onExternalClick} className="mr-[27px]">
           <IconExternalLink color={primaryColor} />
         </button>
-        <button onClick={onClick} className="secondary-btn">
-          Details
+        <button onClick={onClick} className="border flex justify-center border-brand-500 rounded-xl py-2 w-full md:max-w-[128px] font-varela text-brand-500">
+          <span className="mr-2">Details</span>
+          <IconArrowRight stroke={primaryColor} />
         </button>
       </div>
       <div className="app-stat">
