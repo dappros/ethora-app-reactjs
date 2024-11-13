@@ -131,7 +131,7 @@ export function AdminApps() {
   return (
     <div className="admin-apps ">
       <div className="app-content-body-header">
-        <div className="left">Apps</div>
+        <div className="left font-varena">Apps</div>
         <div className="right">
           {renderSorting()}
           <button className="primary-btn" onClick={() => setShowModal(true)}>
