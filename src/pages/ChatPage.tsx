@@ -17,6 +17,7 @@ export function ChatPage() {
               primary: config?.primaryColor || '#fff',
               secondary: '#fff',
             },
+            // @ts-ignore
             roomListStyles: {
               color: config?.primaryColor,
               maxHeight: 'calc(100%)',
