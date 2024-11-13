@@ -8,12 +8,20 @@ import './ApplicationPreview.scss';
 
 interface Props {
   app: ModelApp;
+  primaryColor: string;
 }
 
-export function ApplicationPreview({ app }: Props) {
+export function ApplicationPreview({ app, primaryColor }: Props) {
   const navigate = useNavigate();
   const onClick = () => {
     navigate(`/app/admin/application/${app._id}/settings`);
+  };
+
+  const onExternalClick = () => {
+    window.open(
+      `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+      '_blank'
+    );
   };
 
   const renderLogo = () => {
@@ -46,8 +54,8 @@ export function ApplicationPreview({ app }: Props) {
         </span>
       </div>
       <div className="inf-actions">
-        <button>
-          <IconExternalLink className="accent-svg" />
+        <button onClick={onExternalClick} className="mr-[24px]">
+          <IconExternalLink color={primaryColor} />
         </button>
         <button onClick={onClick} className="secondary-btn">
           Details

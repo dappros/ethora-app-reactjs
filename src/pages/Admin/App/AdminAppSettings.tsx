@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../../actions';
 import { IconExternalLink } from '../../../components/Icons/IconExternalLink';
 import { TablistSettings } from '../../../components/TabListSettings';
+import { ModelApp } from '../../../models';
 import './AdminAppSettings.scss';
 import { Api } from './SettingsTab/Api';
 import { Appearance } from './SettingsTab/Appearance';
@@ -21,6 +22,7 @@ import { WebApp } from './SettingsTab/WebApp';
 export function AdminAppSettings() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
+  const currentApp = useAppStore((s) => s.currentApp as ModelApp);
   const app = apps.find((app) => app._id === appId);
 
   if (!app) {
@@ -172,6 +174,13 @@ export function AdminAppSettings() {
     }
   };
 
+  const onExternalClick = () => {
+    window.open(
+      `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+      '_blank'
+    );
+  };
+
   return (
     // app-content-body-page
     <div className="flex flex-col-reverse md:flex-col">
@@ -181,8 +190,8 @@ export function AdminAppSettings() {
           Settings
         </div>
         <div className="md:max-w-[240px] w-full flex">
-          <button onClick={() => {}} className="mr-[24px]">
-            <IconExternalLink color={app.primaryColor} />
+          <button onClick={onExternalClick} className="mr-[24px]">
+            <IconExternalLink color={currentApp.primaryColor} />
           </button>
           <button
             onClick={onSave}

@@ -8,6 +8,7 @@ import { useAppStore } from '../../store/useAppStore';
 
 import { Sorting } from '../../components/Sorting';
 import { httpGetApps } from '../../http';
+import { ModelApp } from '../../models';
 import './AdminApps.scss';
 
 const ITEMS_COUNT = 5;
@@ -18,6 +19,7 @@ export function AdminApps() {
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
+  const currentApp = useAppStore((s) => s.currentApp as ModelApp);
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('createdAt');
@@ -142,7 +144,13 @@ export function AdminApps() {
           <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
         )}
         {apps.map((app) => {
-          return <ApplicationPreview app={app} key={app._id} />;
+          return (
+            <ApplicationPreview
+              primaryColor={currentApp.primaryColor}
+              app={app}
+              key={app._id}
+            />
+          );
         })}
       </div>
       {renderPagination()}

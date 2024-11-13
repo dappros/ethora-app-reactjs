@@ -17,13 +17,16 @@ export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
     setAvailableMenuItems({ ...availableMenuItems, [name]: isOn });
   };
   return (
-    <div className="settings-menu">
+    // settings-menu
+    <div className="">
       <p className="body2 mbc-32">
         Manage items that are displayed in your App menu.
       </p>
-      <Field className="checkbox  mb-6">
+      {/* checkbox */}
+      <Field className="">
+        {/* checkbox-input */}
         <Checkbox
-          className="checkbox-input"
+          className=""
           checked={availableMenuItems.profile}
           onChange={(isOn) => onChange(isOn, 'profile')}
         ></Checkbox>
