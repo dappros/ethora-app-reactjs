@@ -4,8 +4,8 @@ import { IconExternalLink } from '../Icons/IconExternalLink';
 import { IconInfo } from '../Icons/IconInfo';
 
 import { ModelApp } from '../../models';
-import './ApplicationPreview.scss';
 import { IconArrowRight } from '../Icons/IconArrowRight';
+import './ApplicationPreview.scss';
 
 interface Props {
   app: ModelApp;
@@ -61,7 +61,10 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
         <button onClick={onExternalClick} className="mr-[27px]">
           <IconExternalLink color={primaryColor} />
         </button>
-        <button onClick={onClick} className="border flex justify-center border-brand-500 rounded-xl py-2 w-full md:max-w-[128px] font-varela text-brand-500">
+        <button
+          onClick={onClick}
+          className="border flex justify-center border-brand-500 rounded-xl py-2 w-full md:max-w-[128px] font-varela text-brand-500"
+        >
           <span className="mr-2">Details</span>
           <IconArrowRight stroke={primaryColor} />
         </button>
