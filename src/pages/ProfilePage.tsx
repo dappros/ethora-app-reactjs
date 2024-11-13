@@ -47,7 +47,7 @@ export function ProfilePage() {
   return (
     <>
       <div className="app-content-header">
-        <div className="app-content-header-title">Profile</div>
+        <div className="font-varena text-[34px] leading-tight">Profile</div>
       </div>
       {/* app-content-body */}
       <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)] md:max-w-[1800px]">

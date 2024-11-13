@@ -15,13 +15,10 @@ export function SettingsPage() {
   return (
     <>
       <div className="app-content-header">
-        <div className="app-content-header-title">Settings</div>
+        <div className="font-varena text-[34px] leading-tight">Settings</div>
         <div className="app-content-header-actions"></div>
       </div>
-      {/* .app-content-body */}
       <div className="bg-white rounded-2xl md:ml-[96px] p-4 w-full md:w-[calc(100vw-166px)] md:max-w-[1800px]">
-        {/* .settings-page */}
-        {/* <TabGroup className="settings-page-tabs settings-page"></TabGroup> */}
         <TabGroup className="ettings-page-tabs settings-page">
           <TablistSettings
             items={[
