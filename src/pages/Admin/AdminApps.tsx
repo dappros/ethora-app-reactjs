@@ -6,6 +6,7 @@ import ReactPaginate from 'react-paginate';
 import { NewAppModal } from '../../components/modal/NewAppModal';
 import { useAppStore } from '../../store/useAppStore';
 
+import { IconAdd } from '../../components/Icons/IconAdd';
 import { Sorting } from '../../components/Sorting';
 import { httpGetApps } from '../../http';
 import { ModelApp } from '../../models';
@@ -131,11 +132,15 @@ export function AdminApps() {
   return (
     <div className="admin-apps ">
       <div className="app-content-body-header">
-        <div className="left font-varena">Apps</div>
-        <div className="right">
+        <div className="font-varena text-[24px]">Apps</div>
+        <div className="w-full flex justify-end">
           {renderSorting()}
-          <button className="primary-btn" onClick={() => setShowModal(true)}>
-            <span className="content">Create App</span>
+          <button
+            className="bg-brand-500 flex justify-center leading-relaxed items-center text-white font-varela text-sm p-2 rounded-xl w-full max-w-[184px]"
+            onClick={() => setShowModal(true)}
+          >
+            <IconAdd color="white" className="mr-2" />
+            <span>Create App</span>
           </button>
         </div>
       </div>
