@@ -37,7 +37,7 @@ export function NewAppModal({ onClose }: Props) {
       onClose={() => {}}
     >
       {/* inner */}
-      <DialogPanel className="p-8 bg-white rounded-3xl w-full max-w-[640px]">
+      <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8">
         <div className="relative mb-8">
           <div className="text-center font-varela text-2xl">
             Get Started with Your New App
