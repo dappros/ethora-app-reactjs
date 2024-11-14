@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { PopoverColorPicker } from '../../../../components/PopoverColorPicker';
 
 import { actionPostFile } from '../../../../actions';
+import SafariImage from '../../../../assets/safari.png';
 import './Appearance.scss';
 
 interface Props {
@@ -62,43 +63,48 @@ export function Appearance({
   };
 
   return (
-    <div className="settings-appearance">
-      <div className="left">
-        <div className="inputs">
-          <div className="input-title">Display Name</div>
+    // settings-appearance
+    <div className="grid grid-rows-2 2xl:grid-cols-2 gap-[40px] p-4 ">
+      <div className="">
+        {/* inputs */}
+        <div className="">
+          {/* input-title */}
+          <div className="font-sans font-medium text-base mb-4">
+            Display Name
+          </div>
           <input
             placeholder="Enter App's Name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="gen-input input-medium mbc-32"
+            className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
             type="text"
           />
-          <div className="input-title">Tagline</div>
+          <div className="font-sans font-medium text-base mb-4">Tagline</div>
           <input
             placeholder="Enter Tagline of Your App"
-            className="gen-input input-medium mbc-32"
+            className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
             type="text"
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
           />
-          <div className="input-title">Coin Name</div>
+          <div className="font-sans font-medium text-base mb-4">Coin Name</div>
           <input
             placeholder="Enter Coin Name"
-            className="gen-input input-medium mbc-32"
+            className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
             type="text"
             value={coinName}
             onChange={(e) => setCoinName(e.target.value)}
           />
-          <div className="input-title">Color</div>
-          <div className="mbc-32">
+          <div className="font-sans font-medium text-base mb-4">Color</div>
+          <div className="mb-4">
             <PopoverColorPicker color={color} onChange={onChangeColor} />
           </div>
-          <div className="input-title mbc-16">Logo</div>
-          <div className="flex">
-            <p className="subtitle2">Primary Logo</p>
-            <div className="caption ml-8">
+          <div className="font-sans font-medium text-base mb-4">Logo</div>
+          <div className="flex items-center justify-between">
+            <span className="inline-block">Primary Logo</span>
+            <span className="text-xs inline-block ml-auto text-gray-500">
               (Recommended size: 500px x 500px)
-            </div>
+            </span>
           </div>
           <input
             type="file"
@@ -132,7 +138,13 @@ export function Appearance({
           </button>
         </div>
       </div>
-      <div className="right">
+      <div className="border border-black flex justify-center items-center bg-safari">
+        {/* className="w-[469px] h-[285px] border border-black bg-center bg-cover" */}
+        <div
+          className="w-[469px] h-[285px] border border-black bg-center bg-cover"
+          style={{ backgroundImage: `url(${SafariImage})` }}
+        ></div>
+        {/* <img src={SafariImage} alt="" /> */}
         {/* <AppearancePreview
           color={color}
           logoImage={logoImage}

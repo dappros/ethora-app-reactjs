@@ -6,7 +6,7 @@ interface Props {
 
 export function TablistSettings({ items }: Props) {
   return (
-    <TabList className="hide-scroll mb-4 md:mb-0 flex border-b border-gray-200 overflow-auto md:flex-col md:px-4 md:border-r md:border-gray-200 min-w-40 w-full md:max-w-[276px]">
+    <TabList className="hide-scroll mb-4 md:mb-0 flex border-b border-gray-200 md:border-b-0 overflow-auto md:flex-col md:px-4 md:border-r md:border-gray-200 md:w-[308px]">
       {items.map((key) => {
         return (
           <div key={key} className="md:border-b md:mb-2 md:border-gray-200">

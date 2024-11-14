@@ -201,7 +201,8 @@ export function AdminAppSettings() {
           </button>
         </div>
       </div>
-      <TabGroup className="admin-app-settings">
+      {/* admin-app-settings */}
+      <TabGroup className="grid grid-rows-1  md:grid-cols-[308px_1fr]">
         <TablistSettings
           items={[
             'Appearance',
@@ -215,7 +216,8 @@ export function AdminAppSettings() {
             'API',
           ]}
         />
-        <TabPanels className="tabs-content ">
+        {/* tabs-content */}
+        <TabPanels>
           <TabPanel key="Appearance">
             <Appearance
               displayName={displayName}
