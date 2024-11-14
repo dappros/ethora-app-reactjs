@@ -57,14 +57,6 @@ export function AdminApps() {
     })();
   }, [order, orderBy]);
 
-  const renderAppCreationModal = () => {
-    return <NewAppModal onClose={() => setShowModal(false)} />;
-    // if app.length === 0
-    // return (
-    //     <ReadyToCreateFirstAppModal onClose={() => setShowModal(false)} />
-    // )
-  };
-
   const onPageChange = (page: number) => {
     httpGetApps({
       ITEMS_COUNT,
@@ -159,7 +151,7 @@ export function AdminApps() {
         })}
       </div>
       {renderPagination()}
-      {showModal && renderAppCreationModal()}
+      <NewAppModal show={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 }

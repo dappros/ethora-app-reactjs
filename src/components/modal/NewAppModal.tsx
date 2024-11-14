@@ -10,9 +10,10 @@ import { TextInput } from '../ui/TextInput';
 
 interface Props {
   onClose: () => void;
+  show: boolean;
 }
 
-export function NewAppModal({ onClose }: Props) {
+export function NewAppModal({ onClose, show }: Props) {
   const [appName, setAppName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,8 +31,9 @@ export function NewAppModal({ onClose }: Props) {
 
   return (
     <Dialog
-      className="fixed inset-x-0 inset-y-0 z-50 flex justify-center items-center bg-black/50"
-      open={true}
+      className="fixed inset-x-0 inset-y-0 z-50 flex justify-center items-center bg-black/50 transition duration-300 ease-out data-[closed]:opacity-0"
+      open={show}
+      transition
       onClose={() => {}}
     >
       <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8">
