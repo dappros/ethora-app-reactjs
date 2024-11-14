@@ -132,7 +132,7 @@ export function AdminApps() {
             onClick={() => setShowModal(true)}
           >
             <IconAdd color="white" className="mr-2" />
-            <span>Create App</span>
+            <span className="leading-none">Create App</span>
           </button>
         </div>
       </div>

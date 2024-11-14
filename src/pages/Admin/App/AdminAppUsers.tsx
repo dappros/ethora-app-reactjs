@@ -572,7 +572,7 @@ export function AdminAppUsers() {
                   Attribution
                 </th>
                 <th scope="column" className="caption">
-                  Arcions
+                  Actions
                 </th>
               </tr>
             </thead>
