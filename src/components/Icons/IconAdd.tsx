@@ -2,7 +2,7 @@ interface Props {
   width?: number;
   height?: number;
   color?: string;
-  className: string;
+  className?: string;
 }
 
 export function IconAdd({
