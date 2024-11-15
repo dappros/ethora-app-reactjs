@@ -134,7 +134,7 @@ export const AdminAppStatistics = (): ReactElement => {
       value: graphStatisticsCont[selectedTab.value],
       period: formattedPeriod
     }
-  }, [selectedTab.name, timePeriod, dates]);
+  }, [timePeriod, selectedTab.name, selectedTab.value, graphStatisticsCont, dates.startDate, dates.endDate]);
 
   const handleOptionClick = (option: string) => {
     setTimePeriod(option);
