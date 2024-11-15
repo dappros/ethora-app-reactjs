@@ -2,6 +2,10 @@ import { ReactElement, useEffect, useMemo, useState } from "react";
 import classNames from "classnames";
 import { useParams } from "react-router-dom";
 import { format, subDays, subHours } from "date-fns";
+import { DateRange } from 'react-date-range';
+
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 // Components
 import { LineChartLocal } from "../../../components/Statistics/LineChartLocal";
@@ -12,26 +16,33 @@ import { httpGetGraphStatistic } from "../../../http";
 // Icons
 import downloadIcon from "../../../assets/icons/Download.svg";
 
-// Daa
+// Данные
 const tabs: Record<string, string>[] = [
-  {name: "Users", value: "user"},
-  {name: "Sessions", value: "sessions"},
-  {name: "Chats", value: "chats"},
-  {name: "API calls", value: "apiCalls"},
-  {name: "Assets", value: "issuance"},
-  {name: "Transactions", value: "transactions"},
+  { name: "Users", value: "user" },
+  { name: "Sessions", value: "sessions" },
+  { name: "Chats", value: "chats" },
+  { name: "API calls", value: "apiCalls" },
+  { name: "Assets", value: "issuance" },
+  { name: "Transactions", value: "transactions" },
 ];
-const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
+const timePeriods = ["24 hours", "7 days", "30 days", "Select period"];
 
 export const AdminAppStatistics = (): ReactElement => {
   const { appId } = useParams<string>();
 
   const [graphStatistics, setGraphStatistics] = useState<Record<string, { value: number, name: string }[]>>({});
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
-  const [timePeriod, setTimePeriod] = useState<string>('7 days');
+  const [timePeriod, setTimePeriod] = useState<string>("7 days");
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [customStartDate, setCustomStartDate] = useState<string | null>(null);
-  const [customEndDate, setCustomEndDate] = useState<string | null>(null);
+  const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
+  
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection'
+    }
+  ]);
 
   const calculateDates = (period: string) => {
     const endDate = new Date();
@@ -63,18 +74,18 @@ export const AdminAppStatistics = (): ReactElement => {
       const result: Record<string, { value: number, name: string }[]> = {};
       for(const d in data) {
         if (typeof data[d] === "number") continue;
-        const converded = [];
-        
+        const converted = [];
+
         for (const [index, value] of data[d].y.entries()) {
-          converded.push({
+          converted.push({
             value: value,
             name: format(new Date(data[d].x[index]), "yyyy-MM-dd"),
           });
         }
-        
-        result[d] = converded;
+
+        result[d] = converted;
       }
-      
+
       return result;
     };
 
@@ -90,33 +101,39 @@ export const AdminAppStatistics = (): ReactElement => {
   };
 
   const statistics = useMemo(() => {
+    let formattedPeriod = timePeriod;
+
+    if (timePeriod !== "Select period") {
+      const startDateFormatted = format(new Date(dates.startDate), "dd MMM yyyy");
+      const endDateFormatted = format(new Date(dates.endDate), "dd MMM yyyy");
+      formattedPeriod = `${timePeriod} (${startDateFormatted} - ${endDateFormatted})`;
+    }
+
     return {
       title: selectedTab.name,
       value: 1024,
-      period: timePeriod
+      period: formattedPeriod
     }
-  }, [selectedTab.name, timePeriod]);
+  }, [selectedTab.name, timePeriod, dates]);
 
   const handleOptionClick = (option: string) => {
     setTimePeriod(option);
     setIsOpen(false);
 
     if (option === "Select period") {
-      setCustomStartDate(null);
-      setCustomEndDate(null);
+      setCustomRangeVisible(true);
     } else {
       setDates(calculateDates(option));
+      setCustomRangeVisible(false);
     }
   };
 
   const handleApplyCustomPeriod = () => {
-    if (customStartDate && customEndDate) {
-      setDates({
-        startDate: customStartDate,
-        endDate: customEndDate,
-      });
-      setIsOpen(false);
-    }
+    setDates({
+      startDate: dateRange[0].startDate.toISOString() ?? new Date(),
+      endDate: dateRange[0].endDate.toISOString() ?? new Date(),
+    });
+    setCustomRangeVisible(false);
   };
 
   useEffect(() => {
@@ -133,10 +150,7 @@ export const AdminAppStatistics = (): ReactElement => {
           <div className="relative w-64">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`
-                w-full h-10 px-4 flex justify-between items-center
-                bg-gray-100 text-gray-950 border border-brand-500 rounded-xl focus:outline-none  
-              `}
+              className={`w-full h-10 px-4 flex justify-between items-center bg-gray-100 text-gray-950 border border-brand-500 rounded-xl focus:outline-none`}
             >
               <span>{timePeriod}</span>
               <span className={`transform transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}>
@@ -166,42 +180,38 @@ export const AdminAppStatistics = (): ReactElement => {
               </div>
             )}
 
-            {timePeriod === "Select period" && (
-              <div className="z-10 p-4 absolute bg-white border border-gray-200 rounded-xl">
-                <label>
-                  Start Date:
-                  <input
-                    type="date"
-                    value={customStartDate ? format(new Date(customStartDate), "yyyy-MM-dd") : ""}
-                    onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="block w-full mt-1 p-2 border rounded"
-                  />
-                </label>
-                <label className="mt-2">
-                  End Date:
-                  <input
-                    type="date"
-                    value={customEndDate ? format(new Date(customEndDate), "yyyy-MM-dd") : ""}
-                    onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="block w-full mt-1 p-2 border rounded"
-                  />
-                </label>
-                <button
-                  onClick={handleApplyCustomPeriod}
-                  className="mt-4 w-full bg-brand-500 text-white py-2 rounded"
-                >
-                  Apply
-                </button>
+            {customRangeVisible && (
+              <div className="absolute top-16 z-20 bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
+                <DateRange
+                  editableDateInputs={true}
+                  onChange={item => setDateRange([{
+                    startDate: item.selection.startDate ?? new Date(),
+                    endDate: item.selection.endDate ?? new Date(),
+                    key: 'selection'
+                  }])}
+                  moveRangeOnFirstSelection={false}
+                  ranges={dateRange}
+                />
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={() => setCustomRangeVisible(false)}
+                    className="bg-gray-200 px-4 py-2 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleApplyCustomPeriod}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    Apply
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
           <div className="flex justify-end">
-            <button className={`
-              flex items-center
-              px-7 py-2  text-white
-              border border-brand-500 rounded-xl
-            `}>
+            <button className="flex items-center px-2 sm:px-7 py-2 text-white border border-brand-500 rounded-xl">
               <img src={downloadIcon} alt="Download" />
               <span className="text-brand-500 pl-3 hidden xs:block">Export CSV</span>
             </button>
@@ -223,7 +233,7 @@ export const AdminAppStatistics = (): ReactElement => {
               >
                 <div className={classNames(
                   "w-full py-3 px-4 p-2 rounded-lg cursor-pointer",
-                  selectedTab.name === tab.name ? 'md:bg-gray-150' : 'md:hover:bg-gray-100',
+                  selectedTab.name === tab.name ? 'md:bg-brand-150' : 'md:hover:bg-gray-100',
                 )}>
                   <span className={classNames(
                     "text-sm md:text-base whitespace-nowrap",
@@ -237,19 +247,19 @@ export const AdminAppStatistics = (): ReactElement => {
 
         <div className="md:w-3/4 md:pl-4">
           <div className="flex items-center space-x-2">
-            <span className="text-3xl font-bold">{statistics.value}</span>
-            <span className="text-sm text-gray-500">{statistics.title.toLowerCase()}</span>
+          <div>
+            <span className="text-4xl font-bold text-brand-500">{statistics.value}</span>
           </div>
-          <p className="text-gray-500 text-sm mt-1">For {statistics.period}</p>
-
-   
-
-          <div className="mt-6 bg-gray-100 rounded-lg h-48 xs:h-[400px] flex items-center justify-center">
+          <div>
+            <span className="text-sm text-gray-500">{statistics.title.toLowerCase()}</span>
+            <p className="text-gray-500 text-sm">For {statistics.period}</p>
+          </div>
+          </div>
+          <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center">
             <LineChartLocal data={graphStatistics[selectedTab.value] || []} name={selectedTab.name} />
           </div>
-    
         </div>
       </div>
     </>
   );
-}
+};
