@@ -128,6 +128,18 @@ export function httpUpdateApp(appId: string, options: any) {
   });
 }
 
+export function httpGetGraphStatistic(
+  appId: string,
+  startDate: string,
+  endDate: string
+) {
+  const params = new URLSearchParams();
+  params.append("startDate", startDate);
+  params.append("endDate", endDate);
+
+  return http.get(`/apps/graph-statistic/${appId}?${params}`);
+}
+
 export function httpPostFile(file: File) {
   let fd = new FormData();
   fd.append('files', file);
