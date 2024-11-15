@@ -18,6 +18,7 @@ export default {
 
         'brand-50': '#F3F4FC',
         'brand-100': '#E7EAF9',
+        'brand-150': '#F3F6FC',
         'brand-200': '#C2D1F0',
         'brand-300': '#99B4E6',
         'brand-400': '#437ED4',
@@ -63,6 +64,16 @@ export default {
         inter: ['Inter'],
       },
     },
+    screens: {
+      'xs': '480px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    }
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar-hide'),
+  ],
 };
