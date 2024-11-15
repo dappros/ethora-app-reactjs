@@ -11,16 +11,16 @@ import 'react-date-range/dist/theme/default.css';
 import { LineChartLocal } from "../../../components/Statistics/LineChartLocal";
 
 // Http
-import { httpGetGraphStatistic } from "../../../http";
+import { httpGetGraphStatistic, httpWithAuth } from "../../../http";
 
 // Icons
 import downloadIcon from "../../../assets/icons/Download.svg";
 
-// Данные
+// Data
 const tabs: Record<string, string>[] = [
-  { name: "Users", value: "user" },
+  { name: "Users", value: "user", disabled: "disabled" },
   { name: "Sessions", value: "sessions" },
-  { name: "Chats", value: "chats" },
+  { name: "Chats", value: "chats", disabled: "disabled"  },
   { name: "API calls", value: "apiCalls" },
   { name: "Assets", value: "issuance" },
   { name: "Transactions", value: "transactions" },
@@ -31,10 +31,13 @@ export const AdminAppStatistics = (): ReactElement => {
   const { appId } = useParams<string>();
 
   const [graphStatistics, setGraphStatistics] = useState<Record<string, { value: number, name: string }[]>>({});
-  const [selectedTab, setSelectedTab] = useState(tabs[0]);
+  const [graphStatisticsCont, setGraphStatisticsCount] = useState<Record<string, number>>({});
+  const [selectedTab, setSelectedTab] = useState(tabs[1]);
   const [timePeriod, setTimePeriod] = useState<string>("7 days");
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
+
+  console.log("graphStatisticsCont", graphStatisticsCont)
   
   const [dateRange, setDateRange] = useState([
     {
@@ -73,7 +76,24 @@ export const AdminAppStatistics = (): ReactElement => {
     const convert = (data: Record<string, { x: number[], y: number[] } | number>) => {
       const result: Record<string, { value: number, name: string }[]> = {};
       for(const d in data) {
-        if (typeof data[d] === "number") continue;
+        if (typeof data[d] === "number") {
+          if( d === "apiCallCount") {
+            setGraphStatisticsCount((count) => {
+              return {
+                ...count,
+                apiCalls: data[d] as number
+              }
+            });
+            continue;
+          }
+          setGraphStatisticsCount((count) => {
+            return {
+              ...count,
+              [d.slice(0, -5)]: data[d] as number
+            }
+          });
+          continue;
+        };
         const converted = [];
 
         for (const [index, value] of data[d].y.entries()) {
@@ -111,7 +131,7 @@ export const AdminAppStatistics = (): ReactElement => {
 
     return {
       title: selectedTab.name,
-      value: 1024,
+      value: graphStatisticsCont[selectedTab.value],
       period: formattedPeriod
     }
   }, [selectedTab.name, timePeriod, dates]);
@@ -135,7 +155,18 @@ export const AdminAppStatistics = (): ReactElement => {
     });
     setCustomRangeVisible(false);
   };
+  
+  const onUploadCsv = async () => {
+    const response = await httpWithAuth(dates.startDate, dates.endDate);
 
+    const dataUrl = "data:text/csv," + response.data;
+    const filename = "api.csv";
+
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = filename;
+    link.click();
+  };
   useEffect(() => {
     getData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,7 +242,10 @@ export const AdminAppStatistics = (): ReactElement => {
           </div>
 
           <div className="flex justify-end">
-            <button className="flex items-center px-2 sm:px-7 py-2 text-white border border-brand-500 rounded-xl">
+            <button
+              onClick={onUploadCsv}
+              className="flex items-center px-2 sm:px-7 py-2 text-white border border-brand-500 rounded-xl"
+            >
               <img src={downloadIcon} alt="Download" />
               <span className="text-brand-500 pl-3 hidden xs:block">Export CSV</span>
             </button>
@@ -229,16 +263,20 @@ export const AdminAppStatistics = (): ReactElement => {
                   "pb-2",
                   index !== tabs.length - 1 && "md:border-b border-gray-200"
                 )}
-                onClick={() => setSelectedTab(tab)}
+                onClick={() => !tab.disabled && setSelectedTab(tab)}
               >
                 <div className={classNames(
                   "w-full py-3 px-4 p-2 rounded-lg cursor-pointer",
-                  selectedTab.name === tab.name ? 'md:bg-brand-150' : 'md:hover:bg-gray-100',
+                  selectedTab.name === tab.name ? "md:bg-brand-150" : "",
+                  tab.disabled ? "cursor-not-allowed bg-gray-100" : "",
                 )}>
                   <span className={classNames(
                     "text-sm md:text-base whitespace-nowrap",
-                    selectedTab.name === tab.name ? "text-brand-500 font-semibold" : "text-gray-500 md:text-gray-950"
-                  )}>{tab.name}</span>
+                    selectedTab.name === tab.name ? "text-brand-500 font-semibold" : "text-gray-500 md:text-gray-950",
+                    tab.disabled ? "text-gray-400 md:text-gray-400" : ""
+                  )}>
+                    {tab.name}
+                  </span>
                 </div>
               </li>
             ))}
@@ -256,7 +294,7 @@ export const AdminAppStatistics = (): ReactElement => {
           </div>
           </div>
           <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center">
-            <LineChartLocal data={graphStatistics[selectedTab.value] || []} name={selectedTab.name} />
+            <LineChartLocal data={graphStatistics[selectedTab.value]} name={selectedTab.name} />
           </div>
         </div>
       </div>
