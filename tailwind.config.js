@@ -56,6 +56,7 @@ export default {
 
         black: '#121219',
         white: '#ffffff',
+        preview: 'var(--bg-brand-preview-auth)',
       },
       fontFamily: {
         sans: ['Open Sans'],

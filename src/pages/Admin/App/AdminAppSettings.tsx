@@ -202,7 +202,8 @@ export function AdminAppSettings() {
         </div>
       </div>
       {/* admin-app-settings */}
-      <TabGroup className="grid grid-rows-1  md:grid-cols-[308px_1fr]">
+      {/* grid-cols-[1fr_minmax(500px,_1fr)] */}
+      <TabGroup className="grid overflow-hidden grid-rows-1  lg:grid-cols-[minmax(200px,308px),_1fr]">
         <TablistSettings
           items={[
             'Appearance',
