@@ -1,0 +1,93 @@
+.rdrDateRangeWrapper {
+  background-color: #ffffff;
+  width: 250px;
+  border-bottom: 1px solid #DCE0E5;
+}
+
+.rdrMonth {
+  width: 250px;
+}
+
+.rdrMonthAndYearWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #374151;
+  padding-top: 0;;
+  width: 100%;
+}
+
+.rdrNextPrevButton {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+  color: #4f46e5;
+  cursor: pointer;
+  margin: 0;
+}
+
+.rdrNextPrevButton:hover {
+  color: #4338ca;
+}
+
+.rdrWeekDay {
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: bold;
+  color: #6b7280;
+}
+
+.rdrDay {
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.rdrDay:hover {
+  background-color: #f3f4f6;
+}
+
+.rdrDayStartPreview,
+.rdrDayEndPreview,
+.rdrDayInRange,
+.rdrDayStartEdge,
+.rdrDayEndEdge {
+  background-color: #E1E7F0 !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+}
+
+.rdrDayPassive {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.custom-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.custom-footer button {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.rdrDateDisplay {
+  display: none;
+  padding: 0;
+  margin: 0;
+}

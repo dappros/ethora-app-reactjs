@@ -16,6 +16,9 @@ import { httpGetGraphStatistic, httpWithAuth } from "../http";
 // Icons
 import downloadIcon from "../assets/icons/Download.svg";
 
+// Styles
+import "./AppStatistics.scss";
+
 // Data
 const tabs: Record<string, string>[] = [
   { name: "Users", value: "user", disabled: "disabled" },
@@ -145,12 +148,26 @@ export const AppStatistics = (): ReactElement => {
     }
   };
 
+  const handleOpenDateRange = () => {
+    if (customRangeVisible) {
+      setIsOpen(false);
+      setCustomRangeVisible(false);
+      return;
+    };
+
+    setIsOpen(!isOpen)
+  }
+
   const handleApplyCustomPeriod = () => {
-    setDates({
-      startDate: DateTime.fromJSDate(dateRange[0].startDate).toISO()!,
-      endDate: DateTime.fromJSDate(dateRange[0].endDate).toISO()!,
-    });
-    setCustomRangeVisible(false);
+    if (dateRange[0].startDate && dateRange[0].endDate) {
+      setDates({
+        startDate: DateTime.fromJSDate(dateRange[0].startDate).toISO()!,
+        endDate: DateTime.fromJSDate(dateRange[0].endDate).toISO()!,
+      });
+  
+      setTimePeriod(`${DateTime.fromJSDate(dateRange[0].startDate).toFormat("dd MMM yyyy")} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat("dd MMM yyyy")}`);
+      setCustomRangeVisible(false);
+    }
   };
   
   const onUploadCsv = async () => {
@@ -164,6 +181,7 @@ export const AppStatistics = (): ReactElement => {
     link.download = filename;
     link.click();
   };
+
   useEffect(() => {
     getData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -177,13 +195,17 @@ export const AppStatistics = (): ReactElement => {
         <div className="flex items-center gap-4 justify-between md:justify-end w-full">
           <div className="relative w-64">
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={handleOpenDateRange}
               className={`w-full h-10 px-4 flex justify-between items-center bg-gray-100 text-gray-950 border border-brand-500 rounded-xl focus:outline-none`}
             >
-              <span>{timePeriod}</span>
-              <span className={`transform transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}>
-                &#9662;
-              </span>
+            <span>
+              {customRangeVisible && dateRange[0].startDate && dateRange[0].endDate
+                ? `${DateTime.fromJSDate(dateRange[0].startDate).toFormat("dd MMM yyyy")} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat("dd MMM yyyy")}`
+                : timePeriod}
+            </span>
+            <span className={`transform transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}>
+              &#9662;
+            </span>
             </button>
 
             {isOpen && (
@@ -209,7 +231,7 @@ export const AppStatistics = (): ReactElement => {
             )}
 
             {customRangeVisible && (
-              <div className="absolute top-16 z-20 bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
+              <div className="absolute top-16 z-20 bg-white border border-gray-200 rounded-xl p-3 pt-0 shadow-lg">
                 <DateRange
                   editableDateInputs={true}
                   onChange={item => setDateRange([{
@@ -220,16 +242,16 @@ export const AppStatistics = (): ReactElement => {
                   moveRangeOnFirstSelection={false}
                   ranges={dateRange}
                 />
-                <div className="flex justify-between mt-4">
+                <div className="flex justify-between mt-4 gap-2">
                   <button
                     onClick={() => setCustomRangeVisible(false)}
-                    className="bg-gray-200 px-4 py-2 rounded-lg"
+                    className="border border-gray-300 px-4 py-2 rounded-xl flex-1"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleApplyCustomPeriod}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-xl flex-1"
                   >
                     Apply
                   </button>
