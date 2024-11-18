@@ -170,7 +170,7 @@ export const AppStatistics = (): ReactElement => {
   }, [appId, dates]);
 
   return (
-    <>
+    <div className="h-full w-full">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold hidden md:block">Statistics</h2>
 
@@ -258,7 +258,8 @@ export const AppStatistics = (): ReactElement => {
                 key={tab.name}
                 className={classNames(
                   "pb-2",
-                  index !== tabs.length - 1 && "md:border-b border-gray-200"
+                  selectedTab.name === tab.name ? "border-b md:border-b-0 border-brand-150" : "",
+                  index !== tabs.length - 1 && "md:border-b md:border-gray-200",
                 )}
                 onClick={() => !tab.disabled && setSelectedTab(tab)}
               >
@@ -295,6 +296,6 @@ export const AppStatistics = (): ReactElement => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
