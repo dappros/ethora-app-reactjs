@@ -1,6 +1,5 @@
 import { Textarea } from '@headlessui/react';
 import { IconInfo } from '../../components/Icons/IconInfo';
-import './WebApp.scss';
 
 interface Props {
   domainName: string;
@@ -19,7 +18,7 @@ export function WebApp({
 }: Props) {
   return (
     <div className="">
-      <p className="font-sans text-[16px] font-medium mb-2">Domain name</p>
+      <p className="font-sans text-[16px] font-semibold mb-2">Domain name</p>
       <p className="font-sans text-sm mb-2">
         Your web app is hosted in our cloud with a complimentary 2nd level
         domain name available for Free plan users and 1st level domain name for
@@ -51,32 +50,43 @@ export function WebApp({
           .ethoradev.com
         </label>
       </div>
-      <div className="flex mbc-32">
-        <div className="domain-input">
+      <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
+        <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">
           <input
             placeholder="Your App Name"
             type="text"
-            className="gen-input input-medium"
+            className="p-2  w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-300"
             name=""
             id="domain-input"
           />
-          <label htmlFor="domain-input">.com</label>
+          <label className="text-gray-500 tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl" htmlFor="domain-input">.com</label>
+        </div>
+        <div className="flex items-center">
+          <button className="text-brand-500 font-varela text-[16px] mr-[20px]">Upgrade to Business</button>
+          <span>
+            to unlock
+          </span>
         </div>
       </div>
 
-      <p className="subtitle1">Google sign-in and Firebase analytics</p>
-      <p className="body2">
+
+      <p className="font-sans text-base font-semibold mb-2">Google sign-in and Firebase analytics</p>
+      <p className="font-sans text-sm leading-relaxed mb-4">
         Firebase credentials are required to allow your users to sign on via
         Google Account. Also this allows you to track your app usage analytics
         in your Firebase console. These options will be disabled if credentials
         are not provided.
       </p>
-      <p className="info mbc-16">
-        <IconInfo />
-        Copy paste the configuration from your Firebase Console
+      <p className="p-2 flex rounded-[8px] bg-brand-150 mb-2">
+        <div className="mr-2">
+          <IconInfo stroke={primaryColor} />
+        </div>
+        <span className="font-sans text-[12px]">
+          Copy paste the configuration from your Firebase Console
+        </span>
       </p>
       <Textarea
-        className="firebase"
+        className="rounded-xl border w-full max-w-[540px] p-2 border-gray-500"
         value={firebaseWebConfigString}
         onChange={(e) => setFirebaseWebConfigString(e.target.value)}
         placeholder='{
