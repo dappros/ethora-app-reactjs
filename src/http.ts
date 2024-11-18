@@ -140,6 +140,13 @@ export function httpGetGraphStatistic(
   return http.get(`/apps/graph-statistic/${appId}?${params}`);
 }
 
+export function httpWithAuth(
+  startDate: string,
+  endDate: string
+) {
+  return http.get(`/analysis/apis-csv?startDate=${startDate}&endDate=${endDate}`);
+}
+
 export function httpPostFile(file: File) {
   let fd = new FormData();
   fd.append('files', file);
