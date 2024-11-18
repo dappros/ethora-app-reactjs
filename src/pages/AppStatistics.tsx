@@ -240,11 +240,12 @@ export const AppStatistics = (): ReactElement => {
 
           <div className="flex justify-end">
             <button
+              disabled
               onClick={onUploadCsv}
-              className="flex items-center px-2 sm:px-7 py-2 text-white border border-brand-500 rounded-xl"
+              className="flex items-center px-2 sm:px-7 py-2 bg-gray-100 border border-gray-300 rounded-xl"
             >
               <img src={downloadIcon} alt="Download" />
-              <span className="text-brand-500 pl-3 hidden xs:block">Export CSV</span>
+              <span className="text-gray-300 pl-3 hidden xs:block">Export CSV</span>
             </button>
           </div>
         </div>
@@ -258,8 +259,9 @@ export const AppStatistics = (): ReactElement => {
                 key={tab.name}
                 className={classNames(
                   "pb-2",
-                  selectedTab.name === tab.name ? "border-b md:border-b-0 border-brand-150" : "",
+                  selectedTab.name === tab.name && "border-b-2 border-brand-500",
                   index !== tabs.length - 1 && "md:border-b md:border-gray-200",
+                  index === tabs.length - 1 && "md:border-0"
                 )}
                 onClick={() => !tab.disabled && setSelectedTab(tab)}
               >
