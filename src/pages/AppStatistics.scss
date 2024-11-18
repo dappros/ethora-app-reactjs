@@ -95,3 +95,25 @@
 .rdrMonthPicker {
   background-color: #ffffff;
 }
+
+.rdrDayToday {
+  background-color: #ffffff;
+  border: 1px solid #EA670C;
+  border-radius: 5px;
+}
+
+.rdrInRange {
+  background-color: #E7EDF9;
+  color: #000000;
+}
+
+.rdrStartEdge {
+  background-color: #347b9f;
+  border: none;
+
+}
+
+.rdrEndEdge {
+  border: none;
+  background-color: #347b9f;
+}
