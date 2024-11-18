@@ -1,0 +1,56 @@
+.ready-to-create-first-app-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4);
+
+  .inner {
+    padding: 32px 64px;
+    background-color: white;
+    border-radius: 24px;
+    position: relative;
+    max-width: 512px;
+    width: 100%;
+    margin: 0 12px;
+  }
+
+  .img-div {
+    margin-bottom: 32px;
+    max-width: 400px;
+    height: 240px;
+    width: 100%;
+    background-image: url('../../assets/ready-to-create.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .title {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  p {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+
+  .buttons button:first-child {
+    margin-bottom: 10px;
+  }
+
+  .close {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+  }
+}

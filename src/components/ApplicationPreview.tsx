@@ -1,0 +1,161 @@
+import { DateTime } from 'luxon';
+import { useNavigate } from 'react-router-dom';
+import { ModelApp } from '../models';
+import { IconArrowRight } from './Icons/IconArrowRight';
+import { IconExternalLink } from './Icons/IconExternalLink';
+import { IconInfo } from './Icons/IconInfo';
+
+interface Props {
+  app: ModelApp;
+  primaryColor: string;
+}
+
+export function ApplicationPreview({ app, primaryColor }: Props) {
+  const navigate = useNavigate();
+  const onClick = () => {
+    navigate(`/app/admin/apps/${app._id}/settings`);
+  };
+
+  const onExternalClick = () => {
+    window.open(
+      `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+      '_blank'
+    );
+  };
+
+  const renderLogo = () => {
+    if (app.logoImage) {
+      return (
+        // logo
+        <div
+          className="w-[120px] h-[120px] rounded-xl flex justify-center items-center bg-contain bg-no-repeat bg-center"
+          style={{ backgroundImage: `url(${app.logoImage})` }}
+        ></div>
+      );
+    } else {
+      return (
+        <div className="w-[120px] h-[120px] rounded-xl bg-gray-100 flex justify-center items-center">
+          <span className="text-gray-500 font-varela text-[18px]">
+            {app.displayName}
+          </span>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="grid grid-rows-[auto,_1fr] md:grid-cols-[auto,_1fr] gap-x-4 p-4 rounded-xl border border-gray-200 mb-4">
+      <div className="flex justify-center items-center">{renderLogo()}</div>
+      <div className="flex flex-col gap-8">
+        {/* app title */}
+        <div className="flex justify-center md:justify-between items-center">
+          <div className="md:ml-[40px]">
+            <div className="font-varela text-[18px] text-center md:text-left">
+              {app.displayName}
+            </div>
+            <div className="font-sans text-[12px] text-gray-500">
+              Created {DateTime.fromISO(app.createdAt).toFormat('dd LLL yyyy')}
+            </div>
+          </div>
+          <div className="hidden md:flex items-ceter justify-center">
+            <button onClick={onExternalClick} className="mr-4">
+              <IconExternalLink color={primaryColor} />
+            </button>
+            <button
+              onClick={onClick}
+              className="flex justify-center items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
+            >
+              <span className="text-brand-500 font-varela text-sm mr-2">
+                Details
+              </span>
+              <IconArrowRight stroke={primaryColor} />
+            </button>
+          </div>
+        </div>
+        {/* stat */}
+        <div className="grid grid-cols-2 gap-x-[33px] gap-y-4 grid-rows-3 md:grid-cols-3 md:grid-rows-2 lg:grid-cols-6 lg:grid-rows-1">
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">Users</span>
+              <IconInfo />
+            </div>
+            <div>
+              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">368</span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">Sessions</span>
+              <IconInfo />
+            </div>
+            <div>
+              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">368</span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">Chats</span>
+              <IconInfo />
+            </div>
+            <div>
+              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">368</span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">API</span>
+              <IconInfo />
+            </div>
+            <div>
+              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">368</span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">Files</span>
+              <IconInfo />
+            </div>
+            <div>
+              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">368</span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">Web3</span>
+              <IconInfo />
+            </div>
+            <div>
+              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">368</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex md:hidden">
+          <button onClick={onExternalClick} className="mr-4">
+            <IconExternalLink color={primaryColor} />
+          </button>
+          <button
+            onClick={onClick}
+            className="flex justify-center items-center p-2 rounded-xl w-full h-[40px] border border-brand-500"
+          >
+            <span className="text-brand-500 font-varela text-sm mr-2">
+              Details
+            </span>
+            <IconArrowRight stroke={primaryColor} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

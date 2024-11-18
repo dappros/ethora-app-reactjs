@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-brand-primary: rgba(0, 82, 205, 1);
+  --bg-gray-disabled: #d4d4d4;
+
+  --bg-brand-primary-preview: rgba(0, 82, 205, 1);
+  --bg-brand-preview-auth: rgba(0, 82, 205, 0.05);
+  --bg-auth-background: rgba(0, 82, 205, 0.05);
+  --border-primary: #f0f0f0;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}

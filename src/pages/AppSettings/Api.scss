@@ -1,0 +1,50 @@
+.settings-api {
+  padding: 0 16px;
+  width: 100%;
+}
+
+.table-table {
+  tr {
+    @apply h-0 border-0;
+  }
+
+  & th:not(:last-child):not(:empty):after {
+    transition: opacity 0.2s;
+    position: absolute;
+    content: '';
+    display: block;
+
+    width: 1px;
+    right: 0;
+    top: 12px;
+    bottom: 8px;
+    @apply bg-gray-200;
+    opacity: 1;
+  }
+
+  & td {
+    height: 50px;
+  }
+
+  & tr:hover {
+    @apply bg-gray-100;
+  }
+
+  & td:not(:last-child):not(:empty):after {
+    transition: opacity 0.2s;
+    position: absolute;
+    content: '';
+    display: block;
+
+    width: 1px;
+    right: 0;
+    top: 12px;
+    bottom: 8px;
+    @apply bg-gray-200;
+    opacity: 1;
+  }
+}
+
+.table-table-outer::-webkit-scrollbar {
+  display: none;
+}
