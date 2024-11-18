@@ -37,8 +37,6 @@ export const AdminAppStatistics = (): ReactElement => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
 
-  console.log("graphStatisticsCont", graphStatisticsCont)
-  
   const [dateRange, setDateRange] = useState([
     {
       startDate: new Date(),
