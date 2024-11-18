@@ -233,6 +233,7 @@ export const AppStatistics = (): ReactElement => {
             {customRangeVisible && (
               <div className="absolute top-16 z-20 bg-white border border-gray-200 rounded-xl p-3 pt-0 shadow-lg">
                 <DateRange
+                  maxDate={new Date()}
                   editableDateInputs={true}
                   onChange={item => setDateRange([{
                     startDate: item.selection.startDate ?? new Date(),
