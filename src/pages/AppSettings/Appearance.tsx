@@ -75,7 +75,7 @@ export function Appearance({
     // grid-rows-2 md:grid-cols-[1fr_minmax(500px,_1fr)] gap-[40px] p-4
     <>
       <div className="appearance-left">
-        <div className="font-sans font-medium text-base mb-4">Display Name</div>
+        <div className="font-sans font-semibold text-base mb-4">Display Name</div>
         <input
           placeholder="Enter App's Name"
           value={displayName}
@@ -83,7 +83,7 @@ export function Appearance({
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
           type="text"
         />
-        <div className="font-sans font-medium text-base mb-4">Tagline</div>
+        <div className="font-sans font-semibold text-base mb-4">Tagline</div>
         <input
           placeholder="Enter Tagline of Your App"
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
@@ -91,7 +91,7 @@ export function Appearance({
           value={tagline}
           onChange={(e) => setTagline(e.target.value)}
         />
-        <div className="font-sans font-medium text-base mb-4">Coin Name</div>
+        <div className="font-sans font-semibold text-base mb-4">Coin Name</div>
         <input
           placeholder="Enter Coin Name"
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
@@ -99,13 +99,13 @@ export function Appearance({
           value={coinName}
           onChange={(e) => setCoinName(e.target.value)}
         />
-        <div className="font-sans font-medium text-base mb-4">Color</div>
+        <div className="font-sans font-semibold text-base mb-4">Color</div>
         <div className="mb-4">
           <PopoverColorPicker color={color} onChange={onChangeColor} />
         </div>
-        <div className="font-sans font-medium text-base mb-4">Logo</div>
+        <div className="font-sans font-semibold text-base mb-4">Logo</div>
         <div className="flex items-center mb-2">
-          <span className="font-sans font-medium text-base">Primary Logo</span>
+          <span className="font-sans font-semibold text-base">Primary Logo</span>
           <span className="text-xs inline-block ml-auto text-gray-500">
             (Recommended size: 500px x 500px)
           </span>
@@ -125,7 +125,7 @@ export function Appearance({
         </button>
 
         <div className="flex items-center mb-2">
-          <p className="mr-2 font-sans font-medium text-base">Submark logo</p>
+          <p className="mr-2 font-sans font-semibold text-base">Submark logo</p>
           <div className="text-xs inline-block text-gray-500">(optional)</div>
         </div>
         <input
