@@ -44,7 +44,7 @@ export function AdminApp() {
           </NavLink>
         </div>
       </div>
-      <div className="bg-white rounded-2xl p-4">
+      <div className="bg-white rounded-2xl p-4 overflow-hidden">
         <Outlet />
       </div>
     </div>

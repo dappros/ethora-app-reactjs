@@ -170,7 +170,7 @@ export const AppStatistics = (): ReactElement => {
   }, [appId, dates]);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full overflow-hidden">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold hidden md:block">Statistics</h2>
 
