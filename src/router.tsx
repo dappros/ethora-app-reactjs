@@ -6,7 +6,7 @@ import { AdminApp } from './pages/AdminApp';
 import AdminApps from './pages/AdminApps';
 import AdminBilling from './pages/AdminBilling';
 import { AppSettings } from './pages/AppSettings/AppSettings';
-import AppStatistics from './pages/AppStatistics';
+import { AppStatistics } from './pages/AppStatistics';
 import AppUsers from './pages/AppUsers';
 import LoginComponent from './pages/AuthPage/Login';
 import Chat from './pages/Chat';
