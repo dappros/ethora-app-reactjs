@@ -86,7 +86,7 @@ export function WebApp({
         </span>
       </p>
       <Textarea
-        className="rounded-xl border w-full p-2 h-[196px] text-gray-500 border-gray-500"
+        className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500"
         value={firebaseWebConfigString}
         onChange={(e) => setFirebaseWebConfigString(e.target.value)}
         placeholder='{

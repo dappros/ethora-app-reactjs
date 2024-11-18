@@ -170,8 +170,8 @@ export const AppStatistics = (): ReactElement => {
   }, [appId, dates]);
 
   return (
-    <>
-      <div className="flex items-center justify-between">
+    <div className="h-full border border-black">
+      {/* <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold hidden md:block">Statistics</h2>
 
         <div className="flex items-center gap-4 justify-between md:justify-end w-full">
@@ -294,7 +294,7 @@ export const AppStatistics = (): ReactElement => {
             <LineChartLocal data={graphStatistics[selectedTab.value]} name={selectedTab.name} />
           </div>
         </div>
-      </div>
-    </>
+      </div> */}
+    </div>
   );
 };
