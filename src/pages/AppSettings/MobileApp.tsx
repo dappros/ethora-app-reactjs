@@ -1,12 +1,15 @@
 import { useRef } from 'react';
 import { actionPostFile } from '../../actions';
-import './MobileApp.scss';
+import { IconDownload } from '../../components/Icons/IconDownload';
+import { IconUpload } from '../../components/Icons/IconUpload';
+// import './MobileApp.scss';
 
 interface Props {
   bundleId: string;
   setBundleId: (s: string) => void;
   setGoogleServicesJson: (s: string) => void;
   setGoogleServiceInfoPlist: (s: string) => void;
+  primaryColor: string;
 }
 
 export function MobileApp({
@@ -14,6 +17,7 @@ export function MobileApp({
   setBundleId,
   setGoogleServicesJson,
   setGoogleServiceInfoPlist,
+  primaryColor
 }: Props) {
   const googleJsonRef = useRef<HTMLInputElement>(null);
   const plistFileRef = useRef<HTMLInputElement>(null);
@@ -39,25 +43,26 @@ export function MobileApp({
   };
 
   return (
-    <div className="settings-mobile">
-      <div className="subtitle1">Mobile App</div>
-      <div className="caption">
+    <div>
+      <div className="font-semibold font-sans text-[16px] mb-2">Mobile App</div>
+      <div className="text-gray-500 font-sans text-[12px] mb-4">
         Please enter Bundle ID. Bundle ID should be unique to identify your app
         for Appstore and other purposes.
       </div>
-      <div className="form-controls">
+      <div className="max-w-[416px] w-full">
         <input
           type="text"
-          className="gen-input input-medium mbc-16"
+          className="w-full py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
           placeholder="Bundle ID"
           value={bundleId}
           onChange={(e) => setBundleId(e.target.value)}
         />
-        <button className="gen-secondary-btn mbc-32">
-          Prepare React Native Build
+        <button className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8">
+          <IconDownload stroke={primaryColor}></IconDownload>
+          <span className="ml-2">Prepare React Native Build</span>
         </button>
-        <div className="subtitle1 mbc-16">Android build</div>
-        <div className="subtitle2">Google Services JSON</div>
+        <div className="font-semibold font-sans text-[16px] mb-4">Android build</div>
+        <div className="font-semibold font-sans text-[14px] mb-2">Google Services JSON</div>
         <input
           type="file"
           ref={googleJsonRef}
@@ -68,15 +73,17 @@ export function MobileApp({
           }
         />
         <button
-          className="gen-secondary-btn mbc-16"
+          className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8"
           onClick={() => googleJsonRef.current?.click()}
         >
-          Upload
+          <IconUpload stroke={primaryColor}></IconUpload>
+          <span className='ml-2'>Upload</span>
+
         </button>
-        {/* <div className="subtitle2">Firebase server key (for push notifications)</div>
-                <input type="text" placeholder="Firebase Server Key" className="gen-input input-medium mbc-32"/> */}
-        <div className="subtitle1 mbc-16">IOS build</div>
-        <div className="subtitle2">Google Services PLIST</div>
+        <div className="font-semibold text-sm mb-2">Firebase server key (for push notifications)</div>
+        <input type="text" placeholder="Firebase Server Key" className="w-full py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-8" />
+        <div className="font-semibold text-[16px] mb-4">IOS build</div>
+        <div className="font-semibold text-sm mb-2">Google Services PLIST</div>
         <input
           type="file"
           ref={plistFileRef}
@@ -88,12 +95,16 @@ export function MobileApp({
         />
         <button
           onClick={() => plistFileRef.current?.click()}
-          className="gen-secondary-btn mbc-16"
+          className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4"
         >
-          Upload
+          <IconUpload stroke={primaryColor}></IconUpload>
+          <span className='ml-2'>Upload</span>
         </button>
-        {/* <div className="subtitle2">Push Notifications Certificate (Apple)</div>
-                <button className="gen-secondary-btn mbc-16">Upload</button> */}
+        <div className="font-semibold text-sm mb-2">Push Notifications Certificate (Apple)</div>
+        <button className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4">
+          <IconUpload stroke={primaryColor}></IconUpload>
+          <span className='ml-2'>Upload</span>
+        </button>
       </div>
     </div>
   );

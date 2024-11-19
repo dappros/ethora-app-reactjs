@@ -1,5 +1,6 @@
 import { Field, Label, Radio, RadioGroup } from '@headlessui/react';
-import './Visibility.scss';
+import { RadioButton } from '../../components/RadioButton';
+import { IconInfo } from '../../components/Icons/IconInfo';
 
 interface Props {
   defaultAccessAssetsOpen: boolean;
@@ -19,58 +20,52 @@ export function Visibility({
   setUsersCanFree,
 }: Props) {
   return (
-    <div className="settings-visibility">
-      <div className="body2">
+    <div className="">
+      <div className="font-sans text-sm">
         These are the default permissions to be applied to all Users created in
         your App. 
       </div>
-      <div className="body2 mbc-32">
+      <div className="font-sans text-sm mb-8">
         Keep the recommended settings if you are not sure and you can come back
         to this later.
       </div>
-      <div className="subtitle1">Profiles Visibility</div>
-      <div className="caption mb-0">
+      <div className="text-base font-semibold font-sans mb-2">Profiles Visibility</div>
+      <p className="text-gray-500 text-sm font-sans">
         By default, User profiles can be viewed by any other Users and bots
         after they follow a correct link, a QR code or tap on it in the Chat. 
-      </div>
-      <div className="caption">
+      </p>
+      <p className="text-gray-500 text-sm font-sans mb-4">
         For tighter security and business logic driven sharing, you can disable
         this. Your Users will still be able to share their profiles with others,
         but they will have to do it explicitly via a special sharing link. 
-      </div>
+      </p>
+
       <RadioGroup
         value={defaultAccessProfileOpen}
         onChange={setDefaultAccessProfileOpen}
-        aria-label="Server size"
-        className="mbc-32"
+        className="flex flex-col mb-8"
       >
-        <Field className="radio-button">
-          <Radio value={true} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">
-            User Profiles can be viewed by others
-          </Label>
-        </Field>
-        <Field className="radio-button">
-          <Radio value={false} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">
-            User Profiles need to be explicitly shared by the User for others to
-            see
-          </Label>
-        </Field>
+        <RadioButton
+          className="mb-4"
+          value={true}
+          label="User Profiles can be viewed by others"
+        />
+        <RadioButton className="mb-2" value={false} label="User Profiles need to be explicitly shared by the User for others to see" />
       </RadioGroup>
-      <div className="subtitle1">Assets Visibility</div>
-      <div className="caption mb-0">
+
+      <div className="text-base font-semibold font-sans mb-2">Assets Visibility</div>
+      <div className="text-gray-500 text-sm font-sans">
         Assets are Documents, Files, Media, Tokens (depending on what your App
         supports), stored within Users wallets.
       </div>
-      <div className="caption mb-0">
+      <div className="text-gray-500 text-sm font-sans">
         Depending on your App settings, Users either upload/create Assets
         themselves or these are managed by your own business logic via API.
       </div>
-      <div className="caption mb-0">
+      <div className="text-gray-500 text-sm font-sans">
         By default, other Users can see one’s Assets in one’s Profile. 
       </div>
-      <div className="caption mbc-16">
+      <div className="text-gray-500 text-sm font-sans mb-4">
         Alternative, more restricted setting, is where Assets are hidden.
         Profile will only display items such as name, photo, description, but no
         Assets. Users will still be able to share their Assets with others, but
@@ -78,55 +73,42 @@ export function Visibility({
         individually for each Asset.
       </div>
       <RadioGroup
-        className="mbc-32"
         value={defaultAccessAssetsOpen}
         onChange={setDefaultAccessAssetsOpen}
-        aria-label="Server size"
+        className="flex flex-col mb-8"
       >
-        <Field className="radio-button">
-          <Radio value={true} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">
-            All User’s Assets can be viewed by all who can view User’s Profile
-          </Label>
-        </Field>
-        <Field className="radio-button">
-          <Radio value={false} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">
-            User’s Assets are hidden. User has to explicitly share each Asset
-            individually via a sharing link for others to see.
-          </Label>
-        </Field>
+        <RadioButton
+          className="mb-4"
+          value={true}
+          label="All User’s Assets can be viewed by all who can view User’s Profile"
+        />
+        <RadioButton className="mb-2" value={false} label="User’s Assets are hidden. User has to explicitly share each Asset
+            individually via a sharing link for others to see." />
       </RadioGroup>
-      <div className="subtitle1">App-locked accounts</div>
-      <div className="caption mb-0">
+
+      <div className="text-base font-semibold font-sans mb-2">App-locked accounts</div>
+      <div className="text-gray-500 text-sm font-sans">
         By default, your User accounts are App locked. This means that your
         Users can NOT sign on into other Apps within your Organization or any
         other Apps within the Server.
       </div>
-      <div className="caption">
+      <div className="text-gray-500 text-sm font-sans mb-4">
         You may switch this setting to Unlocked if you want your Users to have
         self-sovereign accounts which makes them free to login into other Apps
         in the Server, discover their content and fully control their own
         account.
       </div>
       <RadioGroup
-        className="mbc-32"
         value={usersCanFree}
         onChange={setUsersCanFree}
-        aria-label="Server size"
+        className="mb-8"
       >
-        <Field className="radio-button">
-          <Radio value={false} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">
-            All User accounts are tied to your App
-          </Label>
-        </Field>
-        <Field className="radio-button">
-          <Radio value={true} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">
-            User accounts are unlocked (self-sovereign)
-          </Label>
-        </Field>
+        <RadioButton
+          className="mb-4"
+          value={true}
+          label="All User accounts are tied to your App"
+        />
+        <RadioButton className="mb-2" value={false} label="User accounts are unlocked (self-sovereign)" />
       </RadioGroup>
     </div>
   );

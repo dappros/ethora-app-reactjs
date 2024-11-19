@@ -9,6 +9,12 @@ import { useAppStore } from '../../store/useAppStore';
 import { Appearance } from './Appearance';
 import { SignonOptions } from './SignonOptions';
 import { WebApp } from './WebApp';
+import { MobileApp } from './MobileApp';
+import { HomeScreen } from './HomeScreen';
+import { Menu } from './Menu';
+import { Chats } from './Chats';
+import { Visibility } from './Visibility';
+import { Api } from './Api';
 
 export function AppSettings() {
   let { appId } = useParams();
@@ -200,22 +206,74 @@ export function AppSettings() {
               Appearance
             </Tab>
           </div>
-          <div className="lg:border-b md:mb-2 lg:border-gray-200">
+          <div className="md:border-b md:mb-2 md:border-gray-200">
             <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 lg:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
               key="Sign-on options"
             >
               Sign-on options
             </Tab>
           </div>
-          <div className="lg:border-b md:mb-2 lg:border-gray-200">
+          <div className="md:border-b md:mb-2 md:border-gray-200">
             <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 lg:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
               key="Web app"
             >
               Web app
             </Tab>
           </div>
+          <div className="md:border-b md:mb-2 md:border-gray-200">
+            <Tab
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              key="Mobile app"
+            >
+              Mobile app
+            </Tab>
+          </div>
+          <div className="md:border-b md:mb-2 md:border-gray-200">
+            <Tab
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              key="Home screen"
+            >
+              Home screen
+            </Tab>
+          </div>
+          <div className="md:border-b md:mb-2 md:border-gray-200">
+            <Tab
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              key="Menu"
+            >
+              Menu
+            </Tab>
+          </div>
+
+          <div className="md:border-b md:mb-2 md:border-gray-200">
+            <Tab
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              key="Chats"
+            >
+              Chats
+            </Tab>
+          </div>
+
+          <div className="md:border-b md:mb-2 md:border-gray-200">
+            <Tab
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              key="Visibility & Privacy"
+            >
+              Visibility & Privacy
+            </Tab>
+          </div>
+
+          <div className="md:mb-2">
+            <Tab
+              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
+              key="API"
+            >
+              API
+            </Tab>
+          </div>
+
         </TabList>
         <TabPanels className="h-full">
           <TabPanel
@@ -263,6 +321,48 @@ export function AppSettings() {
               primaryColor={app.primaryColor}
             />
           </TabPanel>
+          <TabPanel key="Mobile app" className="grid grid-rows-1 md:ml-4 h-full ">
+            <MobileApp
+              bundleId={bundleId}
+              setBundleId={setBundleId}
+              setGoogleServicesJson={setGoogleServicesJson}
+              setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
+              primaryColor={app.primaryColor}
+            />
+          </TabPanel>
+          <TabPanel key="Home screen" className="grid grid-rows-1 md:ml-4 h-full ">
+            <HomeScreen
+              afterLoginPage={afterLoginPage}
+              setAfterLoginPage={setAfterLoginPage}
+              primaryColor={app.primaryColor}
+            />
+          </TabPanel>
+          <TabPanel key="Menu" className="grid grid-rows-1 md:ml-4 h-full ">
+            <Menu
+              availableMenuItems={availableMenuItems}
+              setAvailableMenuItems={setAvailableMenuItems}
+            />
+          </TabPanel>
+
+          <TabPanel key="Chats" className="grid grid-rows-1 md:ml-4 h-full">
+            <Chats />
+          </TabPanel>
+
+          <TabPanel key="Visibility & Privacy" className="grid grid-rows-1 md:ml-4 h-full">
+            <Visibility
+              defaultAccessAssetsOpen={defaultAccessAssetsOpen}
+              setDefaultAccessAssetsOpen={setDefaultAccessAssetsOpen}
+              defaultAccessProfileOpen={defaultAccessProfileOpen}
+              setDefaultAccessProfileOpen={setDefaultAccessProfileOpen}
+              usersCanFree={usersCanFree}
+              setUsersCanFree={setUsersCanFree}
+            />
+          </TabPanel>
+
+          <TabPanel key="API" className="grid grid-rows-1 md:ml-4 h-full">
+            <Api app={app} />
+          </TabPanel>
+
         </TabPanels>
       </TabGroup>
     </div>
