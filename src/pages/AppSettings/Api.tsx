@@ -1,8 +1,8 @@
 import cn from 'classnames';
-import { ModelApp } from '../../models';
-import './Api.scss';
 import { CopyButton } from '../../components/CopyButton';
 import { Secret } from '../../components/Secret';
+import { ModelApp } from '../../models';
+import './Api.scss';
 
 interface Props {
   app: ModelApp;
@@ -11,7 +11,9 @@ interface Props {
 export const Api = ({ app }: Props) => {
   return (
     <div className="">
-      <div className="font-semibold font-sans text-normal mb-4">App Access Key</div>
+      <div className="font-semibold font-sans text-normal mb-4">
+        App Access Key
+      </div>
       <p className="text-gray-500 text-sm font-sans">
         For accessing Ethora API and infrastructure, your App uses a Key and
         Secret pair. With this key pair, your applications can generate JWT
@@ -28,12 +30,16 @@ export const Api = ({ app }: Props) => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#FCFCFC]">
-                <th className="w-1/2 r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap rounded-l-lg">Key</th>
-                <th className="w-1/2 px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap rounded-r-lg">Secret</th>
+                <th className="w-1/2 r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap rounded-l-lg">
+                  Key
+                </th>
+                <th className="w-1/2 px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap rounded-r-lg">
+                  Secret
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr className={cn("hover:!bg-[#F5F7F9]")}>
+              <tr className={cn('hover:!bg-[#F5F7F9]')}>
                 <td className="r-delimiter px-4 py-[20px] font-sans font-normal text-sm rounded-l-lg">
                   <div className="flex justify-items-center">
                     <span className="mr-2">{app._id}</span>

@@ -1,6 +1,5 @@
-import { Field, Label, Radio, RadioGroup } from '@headlessui/react';
+import { RadioGroup } from '@headlessui/react';
 import { RadioButton } from '../../components/RadioButton';
-import { IconInfo } from '../../components/Icons/IconInfo';
 
 interface Props {
   defaultAccessAssetsOpen: boolean;
@@ -29,7 +28,9 @@ export function Visibility({
         Keep the recommended settings if you are not sure and you can come back
         to this later.
       </div>
-      <div className="text-base font-semibold font-sans mb-2">Profiles Visibility</div>
+      <div className="text-base font-semibold font-sans mb-2">
+        Profiles Visibility
+      </div>
       <p className="text-gray-500 text-sm font-sans">
         By default, User profiles can be viewed by any other Users and bots
         after they follow a correct link, a QR code or tap on it in the Chat. 
@@ -50,10 +51,16 @@ export function Visibility({
           value={true}
           label="User Profiles can be viewed by others"
         />
-        <RadioButton className="mb-2" value={false} label="User Profiles need to be explicitly shared by the User for others to see" />
+        <RadioButton
+          className="mb-2"
+          value={false}
+          label="User Profiles need to be explicitly shared by the User for others to see"
+        />
       </RadioGroup>
 
-      <div className="text-base font-semibold font-sans mb-2">Assets Visibility</div>
+      <div className="text-base font-semibold font-sans mb-2">
+        Assets Visibility
+      </div>
       <div className="text-gray-500 text-sm font-sans">
         Assets are Documents, Files, Media, Tokens (depending on what your App
         supports), stored within Users wallets.
@@ -82,11 +89,17 @@ export function Visibility({
           value={true}
           label="All User’s Assets can be viewed by all who can view User’s Profile"
         />
-        <RadioButton className="mb-2" value={false} label="User’s Assets are hidden. User has to explicitly share each Asset
-            individually via a sharing link for others to see." />
+        <RadioButton
+          className="mb-2"
+          value={false}
+          label="User’s Assets are hidden. User has to explicitly share each Asset
+            individually via a sharing link for others to see."
+        />
       </RadioGroup>
 
-      <div className="text-base font-semibold font-sans mb-2">App-locked accounts</div>
+      <div className="text-base font-semibold font-sans mb-2">
+        App-locked accounts
+      </div>
       <div className="text-gray-500 text-sm font-sans">
         By default, your User accounts are App locked. This means that your
         Users can NOT sign on into other Apps within your Organization or any
@@ -108,7 +121,11 @@ export function Visibility({
           value={true}
           label="All User accounts are tied to your App"
         />
-        <RadioButton className="mb-2" value={false} label="User accounts are unlocked (self-sovereign)" />
+        <RadioButton
+          className="mb-2"
+          value={false}
+          label="User accounts are unlocked (self-sovereign)"
+        />
       </RadioGroup>
     </div>
   );

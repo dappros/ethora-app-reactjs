@@ -1,5 +1,5 @@
-import { useAppStore } from "../store/useAppStore";
 import { Chat } from '@ethora/chat-component';
+import { useAppStore } from '../store/useAppStore';
 
 export default function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
@@ -35,5 +35,5 @@ export default function ChatPage() {
         />
       </div>
     </div>
-  )
+  );
 }

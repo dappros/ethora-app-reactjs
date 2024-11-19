@@ -1,7 +1,7 @@
 .rdrDateRangeWrapper {
   background-color: #ffffff;
   width: 250px;
-  border-bottom: 1px solid #DCE0E5;
+  border-bottom: 1px solid #dce0e5;
 }
 
 .rdrMonth {
@@ -15,7 +15,7 @@
   font-size: 14px;
   font-weight: bold;
   color: #374151;
-  padding-top: 0;;
+  padding-top: 0;
   width: 100%;
 }
 
@@ -61,7 +61,7 @@
 .rdrDayInRange,
 .rdrDayStartEdge,
 .rdrDayEndEdge {
-  background-color: #E1E7F0 !important;
+  background-color: #e1e7f0 !important;
   color: #ffffff !important;
   border-radius: 4px !important;
 }
@@ -98,19 +98,18 @@
 
 .rdrDayToday {
   background-color: #ffffff;
-  border: 1px solid #EA670C;
+  border: 1px solid #ea670c;
   border-radius: 5px;
 }
 
 .rdrInRange {
-  background-color: #E7EDF9;
+  background-color: #e7edf9;
   color: #000000;
 }
 
 .rdrStartEdge {
   background-color: #347b9f;
   border: none;
-
 }
 
 .rdrEndEdge {

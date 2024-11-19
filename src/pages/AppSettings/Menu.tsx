@@ -1,6 +1,6 @@
 import { Checkbox, Field, Label } from '@headlessui/react';
-import './Menu.scss';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
+import './Menu.scss';
 
 interface MenuItems {
   chats: boolean;
@@ -48,9 +48,7 @@ export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">
-          Chats
-        </Label>
+        <Label className="cursor-pointer font-sans text-sm">Chats</Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
         Shows a list of Chats including your default Pinned Chats and also group
@@ -65,9 +63,7 @@ export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">
-          Settings
-        </Label>
+        <Label className="cursor-pointer font-sans text-sm">Settings</Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
         This is where your User can manage their visibility and privacy

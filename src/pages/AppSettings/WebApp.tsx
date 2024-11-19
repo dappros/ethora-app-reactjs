@@ -59,18 +59,24 @@ export function WebApp({
             name=""
             id="domain-input"
           />
-          <label className="text-gray-500 tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl" htmlFor="domain-input">.com</label>
+          <label
+            className="text-gray-500 tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl"
+            htmlFor="domain-input"
+          >
+            .com
+          </label>
         </div>
         <div className="flex items-center">
-          <button className="text-brand-500 font-varela text-[16px] mr-[20px]">Upgrade to Business</button>
-          <span>
-            to unlock
-          </span>
+          <button className="text-brand-500 font-varela text-[16px] mr-[20px]">
+            Upgrade to Business
+          </button>
+          <span>to unlock</span>
         </div>
       </div>
 
-
-      <p className="font-sans text-base font-semibold mb-2">Google sign-in and Firebase analytics</p>
+      <p className="font-sans text-base font-semibold mb-2">
+        Google sign-in and Firebase analytics
+      </p>
       <p className="font-sans text-sm leading-relaxed mb-4">
         Firebase credentials are required to allow your users to sign on via
         Google Account. Also this allows you to track your app usage analytics

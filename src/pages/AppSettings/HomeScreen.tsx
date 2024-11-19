@@ -1,8 +1,8 @@
 import { RadioGroup } from '@headlessui/react';
 
+import { IconInfo } from '../../components/Icons/IconInfo';
 import { RadioButton } from '../../components/RadioButton';
 import './HomeScreen.scss';
-import { IconInfo } from '../../components/Icons/IconInfo';
 
 interface Props {
   afterLoginPage: string;
@@ -10,7 +10,11 @@ interface Props {
   primaryColor: string;
 }
 
-export function HomeScreen({ afterLoginPage, setAfterLoginPage, primaryColor }: Props) {
+export function HomeScreen({
+  afterLoginPage,
+  setAfterLoginPage,
+  primaryColor,
+}: Props) {
   return (
     <div className="">
       <div className="text-sm text-gray-950 mb-8">
@@ -36,7 +40,9 @@ export function HomeScreen({ afterLoginPage, setAfterLoginPage, primaryColor }: 
             <IconInfo stroke={primaryColor} />
           </div>
           <span className="font-sans text-[12px]">
-            Good for: <span className="font-bold">digital wallet</span> use case where quick access to User’s documents, assets or QR pass is important. 
+            Good for: <span className="font-bold">digital wallet</span> use case
+            where quick access to User’s documents, assets or QR pass is
+            important. 
           </span>
         </p>
         <RadioButton className="mb-2" value="chats" label="List of Chats" />
@@ -49,7 +55,8 @@ export function HomeScreen({ afterLoginPage, setAfterLoginPage, primaryColor }: 
             <IconInfo stroke={primaryColor} />
           </div>
           <span className="font-sans text-[12px]">
-            Good for: <span className="font-bold">community</span> use case where quick access to multiple conversations is important.
+            Good for: <span className="font-bold">community</span> use case
+            where quick access to multiple conversations is important.
           </span>
         </p>
       </RadioGroup>

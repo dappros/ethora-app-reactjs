@@ -17,7 +17,7 @@ export function MobileApp({
   setBundleId,
   setGoogleServicesJson,
   setGoogleServiceInfoPlist,
-  primaryColor
+  primaryColor,
 }: Props) {
   const googleJsonRef = useRef<HTMLInputElement>(null);
   const plistFileRef = useRef<HTMLInputElement>(null);
@@ -61,8 +61,12 @@ export function MobileApp({
           <IconDownload stroke={primaryColor}></IconDownload>
           <span className="ml-2">Prepare React Native Build</span>
         </button>
-        <div className="font-semibold font-sans text-[16px] mb-4">Android build</div>
-        <div className="font-semibold font-sans text-[14px] mb-2">Google Services JSON</div>
+        <div className="font-semibold font-sans text-[16px] mb-4">
+          Android build
+        </div>
+        <div className="font-semibold font-sans text-[14px] mb-2">
+          Google Services JSON
+        </div>
         <input
           type="file"
           ref={googleJsonRef}
@@ -77,11 +81,16 @@ export function MobileApp({
           onClick={() => googleJsonRef.current?.click()}
         >
           <IconUpload stroke={primaryColor}></IconUpload>
-          <span className='ml-2'>Upload</span>
-
+          <span className="ml-2">Upload</span>
         </button>
-        <div className="font-semibold text-sm mb-2">Firebase server key (for push notifications)</div>
-        <input type="text" placeholder="Firebase Server Key" className="w-full py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-8" />
+        <div className="font-semibold text-sm mb-2">
+          Firebase server key (for push notifications)
+        </div>
+        <input
+          type="text"
+          placeholder="Firebase Server Key"
+          className="w-full py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-8"
+        />
         <div className="font-semibold text-[16px] mb-4">IOS build</div>
         <div className="font-semibold text-sm mb-2">Google Services PLIST</div>
         <input
@@ -98,12 +107,14 @@ export function MobileApp({
           className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4"
         >
           <IconUpload stroke={primaryColor}></IconUpload>
-          <span className='ml-2'>Upload</span>
+          <span className="ml-2">Upload</span>
         </button>
-        <div className="font-semibold text-sm mb-2">Push Notifications Certificate (Apple)</div>
+        <div className="font-semibold text-sm mb-2">
+          Push Notifications Certificate (Apple)
+        </div>
         <button className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4">
           <IconUpload stroke={primaryColor}></IconUpload>
-          <span className='ml-2'>Upload</span>
+          <span className="ml-2">Upload</span>
         </button>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import { Checkbox, Field, Label } from '@headlessui/react';
+import cn from 'classnames';
 import { useState } from 'react';
-import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { IconAdd } from '../../components/Icons/IconAdd';
-import cn from "classnames"
+import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 
 const chatsData = [
   {
@@ -95,16 +95,30 @@ export function Chats() {
                     </Checkbox>
                   </Field>
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Chat Name</th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">Type</th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">Visibility</th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-left whitespace-nowrap">Comment</th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                  Chat Name
+                </th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                  Type
+                </th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                  Visibility
+                </th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-left whitespace-nowrap">
+                  Comment
+                </th>
               </tr>
             </thead>
             <tbody>
               {chatsData.map((el, index) => {
                 return (
-                  <tr key={el.jid} className={cn("", {"!bg-[#E7EDF9]": rowsSelected[index], "hover:!bg-[#F5F7F9]": !rowsSelected[index]})}>
+                  <tr
+                    key={el.jid}
+                    className={cn('', {
+                      '!bg-[#E7EDF9]': rowsSelected[index],
+                      'hover:!bg-[#F5F7F9]': !rowsSelected[index],
+                    })}
+                  >
                     <td className="pl-4 py-2 w-[32px] rounded-l-lg">
                       <Field className="flex items-center cursor-pointer">
                         <Checkbox
@@ -116,10 +130,18 @@ export function Chats() {
                         </Checkbox>
                       </Field>
                     </td>
-                    <td className="px-4 py-[20px] font-sans font-normal text-sm">{el.title}</td>
-                    <td className="px-4 font-sans font-normal text-sm text-center">Public</td>
-                    <td className="px-4 font-sans font-normal text-sm text-center">Visible</td>
-                    <td className="px-4 rounded-r-lg font-sans font-normal text-sm">You may replace this with your own hidden Chat.</td>
+                    <td className="px-4 py-[20px] font-sans font-normal text-sm">
+                      {el.title}
+                    </td>
+                    <td className="px-4 font-sans font-normal text-sm text-center">
+                      Public
+                    </td>
+                    <td className="px-4 font-sans font-normal text-sm text-center">
+                      Visible
+                    </td>
+                    <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
+                      You may replace this with your own hidden Chat.
+                    </td>
                   </tr>
                 );
               })}

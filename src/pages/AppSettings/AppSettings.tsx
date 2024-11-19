@@ -6,15 +6,15 @@ import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { ModelApp } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
+import { Api } from './Api';
 import { Appearance } from './Appearance';
-import { SignonOptions } from './SignonOptions';
-import { WebApp } from './WebApp';
-import { MobileApp } from './MobileApp';
+import { Chats } from './Chats';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
-import { Chats } from './Chats';
+import { MobileApp } from './MobileApp';
+import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
-import { Api } from './Api';
+import { WebApp } from './WebApp';
 
 export function AppSettings() {
   let { appId } = useParams();
@@ -273,7 +273,6 @@ export function AppSettings() {
               API
             </Tab>
           </div>
-
         </TabList>
         <TabPanels className="h-full">
           <TabPanel
@@ -321,7 +320,10 @@ export function AppSettings() {
               primaryColor={app.primaryColor}
             />
           </TabPanel>
-          <TabPanel key="Mobile app" className="grid grid-rows-1 md:ml-4 h-full ">
+          <TabPanel
+            key="Mobile app"
+            className="grid grid-rows-1 md:ml-4 h-full "
+          >
             <MobileApp
               bundleId={bundleId}
               setBundleId={setBundleId}
@@ -330,7 +332,10 @@ export function AppSettings() {
               primaryColor={app.primaryColor}
             />
           </TabPanel>
-          <TabPanel key="Home screen" className="grid grid-rows-1 md:ml-4 h-full ">
+          <TabPanel
+            key="Home screen"
+            className="grid grid-rows-1 md:ml-4 h-full "
+          >
             <HomeScreen
               afterLoginPage={afterLoginPage}
               setAfterLoginPage={setAfterLoginPage}
@@ -348,7 +353,10 @@ export function AppSettings() {
             <Chats />
           </TabPanel>
 
-          <TabPanel key="Visibility & Privacy" className="grid grid-rows-1 md:ml-4 h-full">
+          <TabPanel
+            key="Visibility & Privacy"
+            className="grid grid-rows-1 md:ml-4 h-full"
+          >
             <Visibility
               defaultAccessAssetsOpen={defaultAccessAssetsOpen}
               setDefaultAccessAssetsOpen={setDefaultAccessAssetsOpen}
@@ -362,7 +370,6 @@ export function AppSettings() {
           <TabPanel key="API" className="grid grid-rows-1 md:ml-4 h-full">
             <Api app={app} />
           </TabPanel>
-
         </TabPanels>
       </TabGroup>
     </div>

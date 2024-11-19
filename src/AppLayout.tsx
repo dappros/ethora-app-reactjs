@@ -4,13 +4,13 @@ import { useAppStore } from './store/useAppStore';
 
 export default function AppLayout() {
   const user = useAppStore((s) => s.currentUser);
-  // const navigate = 
+  // const navigate =
 
-  console.log("user is ", user)
+  console.log('user is ', user);
 
   if (!user) {
-    console.log("no user")
-    return (<Navigate to="/login2" replace></Navigate>);
+    console.log('no user');
+    return <Navigate to="/login2" replace></Navigate>;
   } else {
     return (
       <div className="bg-gray-100 w-full min-h-screen flex justify-center">
@@ -28,6 +28,4 @@ export default function AppLayout() {
       </div>
     );
   }
-
-
 }
