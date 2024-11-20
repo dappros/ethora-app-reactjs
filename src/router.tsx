@@ -12,6 +12,7 @@ import LoginComponent from './pages/AuthPage/Login';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import { Error404Page } from './pages/ErrorPage/Error404Page';
 
 export const router = createBrowserRouter(
   [
@@ -82,6 +83,10 @@ export const router = createBrowserRouter(
           ],
         },
       ],
+    },
+    {
+      path: '*',
+      element: <Error404Page/>,
     },
   ],
   {

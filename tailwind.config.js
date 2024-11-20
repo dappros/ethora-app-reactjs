@@ -28,6 +28,7 @@ export default {
         'brand-600': '#004AC2',
         'brand-700': '#0040B6',
         'brand-800': '#0035AB',
+        'brand-850': '#0035AB',
         'brand-900': '#002398',
         'brand-950': '#001766',
 
