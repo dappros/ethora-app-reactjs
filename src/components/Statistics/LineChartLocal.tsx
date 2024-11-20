@@ -1,16 +1,16 @@
-import { ReactElement } from "react";
+import { ReactElement } from 'react';
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer 
-} from "recharts";
+} from 'recharts';
 
 interface LineChartLocalProps {
-  data: {value: number, name: string}[];
+  data: { value: number; name: string }[];
   name: string;
 }
 
@@ -18,8 +18,8 @@ export const LineChartLocal = (props: LineChartLocalProps): ReactElement => {
   const { data } = props;
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
-      <ResponsiveContainer width="100%" height="100%"> 
+    <div style={{ width: '100%', height: '100%' }}>
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
           margin={{

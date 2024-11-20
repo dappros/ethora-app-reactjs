@@ -75,7 +75,9 @@ export function Appearance({
     // grid-rows-2 md:grid-cols-[1fr_minmax(500px,_1fr)] gap-[40px] p-4
     <>
       <div className="appearance-left">
-        <div className="font-sans font-semibold text-base mb-4">Display Name</div>
+        <div className="font-sans font-semibold text-base mb-4">
+          Display Name
+        </div>
         <input
           placeholder="Enter App's Name"
           value={displayName}
@@ -105,7 +107,9 @@ export function Appearance({
         </div>
         <div className="font-sans font-semibold text-base mb-4">Logo</div>
         <div className="flex items-center mb-2">
-          <span className="font-sans font-semibold text-base">Primary Logo</span>
+          <span className="font-sans font-semibold text-base">
+            Primary Logo
+          </span>
           <span className="text-xs inline-block ml-auto text-gray-500">
             (Recommended size: 500px x 500px)
           </span>

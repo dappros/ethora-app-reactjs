@@ -15,3 +15,29 @@
 .hide-scroll::-webkit-scrollbar {
   display: none;
 }
+
+table th,
+table td {
+  position: relative;
+}
+
+table th.r-delimiter::after {
+  content: '';
+  position: absolute;
+  height: 60%;
+  border-right: 1px solid #f0f0f0;
+  right: 0;
+}
+
+table td.r-delimiter::after {
+  content: '';
+  position: absolute;
+  height: 32px;
+  border-right: 1px solid #f0f0f0;
+  right: 0;
+  top: 15px;
+}
+
+tr:nth-child(2) {
+  background-color: #fcfcfc;
+}

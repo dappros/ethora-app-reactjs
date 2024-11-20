@@ -1,51 +1,55 @@
-import { ReactElement, useEffect, useMemo, useState } from "react";
-import classNames from "classnames";
-import { useParams } from "react-router-dom";
+import classNames from 'classnames';
+import { DateTime, Duration } from 'luxon';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-date-range';
-import { DateTime, Duration } from "luxon";
+import { useParams } from 'react-router-dom';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
 // Components
-import { LineChartLocal } from "../components/Statistics/LineChartLocal";
+import { LineChartLocal } from '../components/Statistics/LineChartLocal';
 
 // Http
-import { httpGetGraphStatistic, httpWithAuth } from "../http";
+import { httpGetGraphStatistic, httpWithAuth } from '../http';
 
 // Icons
-import downloadIcon from "../assets/icons/Download.svg";
+import downloadIcon from '../assets/icons/Download.svg';
 
 // Styles
-import "./AppStatistics.scss";
+import './AppStatistics.scss';
 
 // Data
 const tabs: Record<string, string>[] = [
-  { name: "Users", value: "user", disabled: "disabled" },
-  { name: "Sessions", value: "sessions" },
-  { name: "Chats", value: "chats", disabled: "disabled"  },
-  { name: "API calls", value: "apiCalls" },
-  { name: "Assets", value: "issuance" },
-  { name: "Transactions", value: "transactions" },
+  { name: 'Users', value: 'user', disabled: 'disabled' },
+  { name: 'Sessions', value: 'sessions' },
+  { name: 'Chats', value: 'chats', disabled: 'disabled' },
+  { name: 'API calls', value: 'apiCalls' },
+  { name: 'Assets', value: 'issuance' },
+  { name: 'Transactions', value: 'transactions' },
 ];
-const timePeriods = ["24 hours", "7 days", "30 days", "Select period"];
+const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
 
 export const AppStatistics = (): ReactElement => {
   const { appId } = useParams<string>();
 
-  const [graphStatistics, setGraphStatistics] = useState<Record<string, { value: number, name: string }[]>>({});
-  const [graphStatisticsCont, setGraphStatisticsCount] = useState<Record<string, number>>({});
+  const [graphStatistics, setGraphStatistics] = useState<
+    Record<string, { value: number; name: string }[]>
+  >({});
+  const [graphStatisticsCont, setGraphStatisticsCount] = useState<
+    Record<string, number>
+  >({});
   const [selectedTab, setSelectedTab] = useState(tabs[1]);
-  const [timePeriod, setTimePeriod] = useState<string>("7 days");
+  const [timePeriod, setTimePeriod] = useState<string>('7 days');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
 
   const [dateRange, setDateRange] = useState([
     {
-      startDate:  DateTime.now().toJSDate(),
-      endDate:  DateTime.now().toJSDate(),
-      key: 'selection'
-    }
+      startDate: DateTime.now().toJSDate(),
+      endDate: DateTime.now().toJSDate(),
+      key: 'selection',
+    },
   ]);
 
   const calculateDates = (period: string) => {
@@ -53,18 +57,18 @@ export const AppStatistics = (): ReactElement => {
     let startDate;
 
     switch (period) {
-      case "24 hours":
+      case '24 hours':
         startDate = endDate.minus(Duration.fromObject({ hours: 24 }));
         break;
-      case "7 days":
+      case '7 days':
         startDate = endDate.minus(Duration.fromObject({ days: 7 }));
         break;
-      case "30 days":
+      case '30 days':
         startDate = endDate.minus(Duration.fromObject({ days: 30 }));
 
         break;
       default:
-        startDate = DateTime.now().startOf("month");
+        startDate = DateTime.now().startOf('month');
     }
 
     return { startDate: startDate.toISO(), endDate: endDate.toISO() };
@@ -73,33 +77,35 @@ export const AppStatistics = (): ReactElement => {
   const [dates, setDates] = useState(() => calculateDates(timePeriod));
 
   const getData = async () => {
-    const convert = (data: Record<string, { x: number[], y: number[] } | number>) => {
-      const result: Record<string, { value: number, name: string }[]> = {};
-      for(const d in data) {
-        if (typeof data[d] === "number") {
-          if( d === "apiCallCount") {
+    const convert = (
+      data: Record<string, { x: number[]; y: number[] } | number>
+    ) => {
+      const result: Record<string, { value: number; name: string }[]> = {};
+      for (const d in data) {
+        if (typeof data[d] === 'number') {
+          if (d === 'apiCallCount') {
             setGraphStatisticsCount((count) => {
               return {
                 ...count,
-                apiCalls: data[d] as number
-              }
+                apiCalls: data[d] as number,
+              };
             });
             continue;
           }
           setGraphStatisticsCount((count) => {
             return {
               ...count,
-              [d.slice(0, -5)]: data[d] as number
-            }
+              [d.slice(0, -5)]: data[d] as number,
+            };
           });
           continue;
-        };
+        }
         const converted = [];
 
         for (const [index, value] of data[d].y.entries()) {
           converted.push({
             value: value,
-            name: DateTime.fromMillis(data[d].x[index]).toFormat("yyyy-MM-dd"),
+            name: DateTime.fromMillis(data[d].x[index]).toFormat('yyyy-MM-dd'),
           });
         }
 
@@ -111,10 +117,14 @@ export const AppStatistics = (): ReactElement => {
 
     try {
       if (appId) {
-        const { data } = await httpGetGraphStatistic(appId, dates.startDate, dates.endDate);
+        const { data } = await httpGetGraphStatistic(
+          appId,
+          dates.startDate,
+          dates.endDate
+        );
         const response = convert(data);
         setGraphStatistics(response);
-      };
+      }
     } catch (error) {
       console.error(error);
     }
@@ -123,24 +133,35 @@ export const AppStatistics = (): ReactElement => {
   const statistics = useMemo(() => {
     let formattedPeriod = timePeriod;
 
-    if (timePeriod !== "Select period") {
-      const startDateFormatted = DateTime.fromISO(dates.startDate).toFormat("dd MMM yyyy");
-      const endDateFormatted = DateTime.fromISO(dates.endDate).toFormat("dd MMM yyyy");
+    if (timePeriod !== 'Select period') {
+      const startDateFormatted = DateTime.fromISO(dates.startDate).toFormat(
+        'dd MMM yyyy'
+      );
+      const endDateFormatted = DateTime.fromISO(dates.endDate).toFormat(
+        'dd MMM yyyy'
+      );
       formattedPeriod = `${timePeriod} (${startDateFormatted} - ${endDateFormatted})`;
     }
 
     return {
       title: selectedTab.name,
       value: graphStatisticsCont[selectedTab.value],
-      period: formattedPeriod
-    }
-  }, [timePeriod, selectedTab.name, selectedTab.value, graphStatisticsCont, dates.startDate, dates.endDate]);
+      period: formattedPeriod,
+    };
+  }, [
+    timePeriod,
+    selectedTab.name,
+    selectedTab.value,
+    graphStatisticsCont,
+    dates.startDate,
+    dates.endDate,
+  ]);
 
   const handleOptionClick = (option: string) => {
     setTimePeriod(option);
     setIsOpen(false);
 
-    if (option === "Select period") {
+    if (option === 'Select period') {
       setCustomRangeVisible(true);
     } else {
       setDates(calculateDates(option));
@@ -153,10 +174,10 @@ export const AppStatistics = (): ReactElement => {
       setIsOpen(false);
       setCustomRangeVisible(false);
       return;
-    };
+    }
 
-    setIsOpen(!isOpen)
-  }
+    setIsOpen(!isOpen);
+  };
 
   const handleApplyCustomPeriod = () => {
     if (dateRange[0].startDate && dateRange[0].endDate) {
@@ -164,19 +185,21 @@ export const AppStatistics = (): ReactElement => {
         startDate: DateTime.fromJSDate(dateRange[0].startDate).toISO()!,
         endDate: DateTime.fromJSDate(dateRange[0].endDate).toISO()!,
       });
-  
-      setTimePeriod(`${DateTime.fromJSDate(dateRange[0].startDate).toFormat("dd MMM yyyy")} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat("dd MMM yyyy")}`);
+
+      setTimePeriod(
+        `${DateTime.fromJSDate(dateRange[0].startDate).toFormat('dd MMM yyyy')} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat('dd MMM yyyy')}`
+      );
       setCustomRangeVisible(false);
     }
   };
-  
+
   const onUploadCsv = async () => {
     const response = await httpWithAuth(dates.startDate, dates.endDate);
 
-    const dataUrl = "data:text/csv," + response.data;
-    const filename = "api.csv";
+    const dataUrl = 'data:text/csv,' + response.data;
+    const filename = 'api.csv';
 
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = dataUrl;
     link.download = filename;
     link.click();
@@ -184,7 +207,7 @@ export const AppStatistics = (): ReactElement => {
 
   useEffect(() => {
     getData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId, dates]);
 
   return (
@@ -198,14 +221,18 @@ export const AppStatistics = (): ReactElement => {
               onClick={handleOpenDateRange}
               className={`w-full h-10 px-4 flex justify-between items-center bg-gray-100 text-gray-950 border border-brand-500 rounded-xl focus:outline-none`}
             >
-            <span>
-              {customRangeVisible && dateRange[0].startDate && dateRange[0].endDate
-                ? `${DateTime.fromJSDate(dateRange[0].startDate).toFormat("dd MMM yyyy")} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat("dd MMM yyyy")}`
-                : timePeriod}
-            </span>
-            <span className={`transform transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}>
-              &#9662;
-            </span>
+              <span>
+                {customRangeVisible &&
+                dateRange[0].startDate &&
+                dateRange[0].endDate
+                  ? `${DateTime.fromJSDate(dateRange[0].startDate).toFormat('dd MMM yyyy')} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat('dd MMM yyyy')}`
+                  : timePeriod}
+              </span>
+              <span
+                className={`transform transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+              >
+                &#9662;
+              </span>
             </button>
 
             {isOpen && (
@@ -215,8 +242,10 @@ export const AppStatistics = (): ReactElement => {
                     key={option}
                     onClick={() => handleOptionClick(option)}
                     className={classNames(
-                      "px-4 py-2 cursor-pointer hover:bg-gray-100 flex items-center",
-                      option === timePeriod ? "text-brand-500 font-semibold" : "text-gray-700"
+                      'px-4 py-2 cursor-pointer hover:bg-gray-100 flex items-center',
+                      option === timePeriod
+                        ? 'text-brand-500 font-semibold'
+                        : 'text-gray-700'
                     )}
                   >
                     <div className="w-4 mr-2 flex items-center justify-center">
@@ -235,11 +264,15 @@ export const AppStatistics = (): ReactElement => {
                 <DateRange
                   maxDate={new Date()}
                   editableDateInputs={true}
-                  onChange={item => setDateRange([{
-                    startDate: item.selection.startDate ?? new Date(),
-                    endDate: item.selection.endDate ?? new Date(),
-                    key: 'selection'
-                  }])}
+                  onChange={(item) =>
+                    setDateRange([
+                      {
+                        startDate: item.selection.startDate ?? new Date(),
+                        endDate: item.selection.endDate ?? new Date(),
+                        key: 'selection',
+                      },
+                    ])
+                  }
                   moveRangeOnFirstSelection={false}
                   ranges={dateRange}
                 />
@@ -268,7 +301,9 @@ export const AppStatistics = (): ReactElement => {
               className="flex items-center px-2 sm:px-7 py-2 bg-gray-100 border border-gray-300 rounded-xl"
             >
               <img src={downloadIcon} alt="Download" />
-              <span className="text-gray-300 pl-3 hidden xs:block">Export CSV</span>
+              <span className="text-gray-300 pl-3 hidden xs:block">
+                Export CSV
+              </span>
             </button>
           </div>
         </div>
@@ -281,23 +316,30 @@ export const AppStatistics = (): ReactElement => {
               <li
                 key={tab.name}
                 className={classNames(
-                  "pb-2",
-                  selectedTab.name === tab.name && "border-b-2 border-brand-500",
-                  index !== tabs.length - 1 && "md:border-b md:border-gray-200",
-                  index === tabs.length - 1 && "md:border-0"
+                  'pb-2',
+                  selectedTab.name === tab.name &&
+                    'border-b-2 border-brand-500',
+                  index !== tabs.length - 1 && 'md:border-b md:border-gray-200',
+                  index === tabs.length - 1 && 'md:border-0'
                 )}
                 onClick={() => !tab.disabled && setSelectedTab(tab)}
               >
-                <div className={classNames(
-                  "w-full py-3 px-4 p-2 rounded-lg cursor-pointer",
-                  selectedTab.name === tab.name ? "md:bg-brand-150" : "",
-                  tab.disabled ? "cursor-not-allowed bg-gray-100" : "",
-                )}>
-                  <span className={classNames(
-                    "text-sm md:text-base whitespace-nowrap",
-                    selectedTab.name === tab.name ? "text-brand-500 font-semibold" : "text-gray-500 md:text-gray-950",
-                    tab.disabled ? "text-gray-400 md:text-gray-400" : ""
-                  )}>
+                <div
+                  className={classNames(
+                    'w-full py-3 px-4 p-2 rounded-lg cursor-pointer',
+                    selectedTab.name === tab.name ? 'md:bg-brand-150' : '',
+                    tab.disabled ? 'cursor-not-allowed bg-gray-100' : ''
+                  )}
+                >
+                  <span
+                    className={classNames(
+                      'text-sm md:text-base whitespace-nowrap',
+                      selectedTab.name === tab.name
+                        ? 'text-brand-500 font-semibold'
+                        : 'text-gray-500 md:text-gray-950',
+                      tab.disabled ? 'text-gray-400 md:text-gray-400' : ''
+                    )}
+                  >
                     {tab.name}
                   </span>
                 </div>
@@ -308,16 +350,23 @@ export const AppStatistics = (): ReactElement => {
 
         <div className="md:w-3/4 md:pl-4">
           <div className="flex items-center space-x-2">
-          <div>
-            <span className="text-4xl font-bold text-brand-500">{statistics.value}</span>
-          </div>
-          <div>
-            <span className="text-sm text-gray-500">{statistics.title.toLowerCase()}</span>
-            <p className="text-gray-500 text-sm">For {statistics.period}</p>
-          </div>
+            <div>
+              <span className="text-4xl font-bold text-brand-500">
+                {statistics.value}
+              </span>
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">
+                {statistics.title.toLowerCase()}
+              </span>
+              <p className="text-gray-500 text-sm">For {statistics.period}</p>
+            </div>
           </div>
           <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center">
-            <LineChartLocal data={graphStatistics[selectedTab.value]} name={selectedTab.name} />
+            <LineChartLocal
+              data={graphStatistics[selectedTab.value]}
+              name={selectedTab.name}
+            />
           </div>
         </div>
       </div>
