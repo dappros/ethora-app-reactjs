@@ -111,7 +111,7 @@ export const BillingModalChangePlan = (props: BillingModalChangePlanProps): Reac
               onClick={() => handleSelectPlan(plan.id)}
               className={classNames(
                 "relative flex flex-col justify-between border rounded-xl",
-                "w-1/4 h-5/6 cursor-pointer transition-all duration-300 bg-white",
+                "w-1/3 h-5/6 cursor-pointer transition-all duration-300 bg-white",
                 selectedPlan === plan.id ? "scale-110" : ""
               )}
             >
@@ -129,7 +129,7 @@ export const BillingModalChangePlan = (props: BillingModalChangePlanProps): Reac
               </Box>
 
               <Box className={classNames(
-                "bg-brand-500 pb-4 px-4 rounded-b-xl rounded-t-3xl pt-4",
+                "pb-4 px-4 rounded-b-xl rounded-t-3xl pt-4",
                 selectedPlan === plan.id
                   ? "bg-yellow-800"
                   : "bg-brand-250"

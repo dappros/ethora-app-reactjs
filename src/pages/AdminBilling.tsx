@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { Box, Button, Stack, Typography } from "@mui/material";
 
@@ -6,7 +6,10 @@ import { stripePromise } from "../../stripeConfig";
 
 import { BillingBoxContainer } from "../components/Billing/BillingBoxContainer";
 import { BillingHistoryTable } from "../components/Billing/BillingHistoryTable";
-import { BillingModalChangePlan } from "../components/Billing/BillingModalChangePlan";
+import { BillingModalChangePlan } from "../components/Billing/Modal/BillingModalChangePlan";
+import { BillingModalChangeInfo } from "../components/Billing/Modal/BillingModalChangeInfo";
+import { BillingModalCheckoutForm } from "../components/Billing/Modal/BillingModalCheckoutForm";
+import { Appearance } from "@stripe/stripe-js";
 
 
 export const AdminBilling = () => {
@@ -22,22 +25,36 @@ export const AdminBilling = () => {
     ],
   });
   const [openChangePlan, setOpenChangePlan] = useState<boolean>(false);
+  const [openChangeInfo, setOpenChangeInfo] = useState<boolean>(false);
+  const [openCheckoutForm, setOpenCheckoutForm] = useState<boolean>(false);
 
-  const handlePlanChange = () => {
-    alert("Redirect to plan change page");
-  };
+  const [clientSecret, setClientSecret] = useState("");
+  const [dpmCheckerLink, setDpmCheckerLink] = useState("");
 
-  const handleCardUpdate = () => {
-    alert("Redirect to card update page");
-  };
+  // useEffect(() => {
+  //   // Create PaymentIntent as soon as the page loads
+  //   fetch("/create-payment-intent", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ items: [{ id: "xl-tshirt", amount: 1000 }] }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setClientSecret(data.clientSecret);
+  //       // [DEV] For demo purposes only
+  //       setDpmCheckerLink(data.dpmCheckerLink);
+  //     });
+  // }, []);
 
-  const handleEditInfo = () => {
-    alert("Edit billing info");
+  const appearance: Appearance = {
+    theme: 'stripe',
   };
+  // Enable the skeleton loader UI for optimal loading.
+  const loader = 'auto';
 
   return (
     <Elements stripe={stripePromise}>
-      <Stack spacing={2} className="container mx-auto p-6">
+      <Stack spacing={2} className="container mx-auto p-6 w-full overflow-hidden">
         <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           <BillingBoxContainer title="Plan Details">
@@ -80,7 +97,7 @@ export const AdminBilling = () => {
                 size="small"
                 variant="contained"
                 className="bg-brand-500 w-52"
-                onClick={handleCardUpdate}
+                onClick={() => setOpenCheckoutForm(true)}
               >
                 Update card details
               </Button>
@@ -90,13 +107,15 @@ export const AdminBilling = () => {
 
         <BillingBoxContainer
           title="Billing Info"
-          titleButton={<Button
-            size="small"
-            variant="contained"
-            className="bg-brand-500 w-16"
-           >
-             Edit
-           </Button>}
+          titleButton={
+            <Button
+              onClick={() => setOpenChangeInfo(true)}
+              size="small"
+              variant="contained"
+              className="bg-brand-500 w-16"
+            >
+              Edit
+            </Button>}
         >
         <Box className="flex items-center justify-between">
             <Box>
@@ -119,6 +138,8 @@ export const AdminBilling = () => {
       </Stack>
 
       <BillingModalChangePlan isOpen={openChangePlan} handleClose={() => setOpenChangePlan(false)}/>
+      <BillingModalChangeInfo isOpen={openChangeInfo} handleClose={() => setOpenChangeInfo(false)}/>
+      <BillingModalCheckoutForm isOpen={openCheckoutForm} handleClose={() => setOpenCheckoutForm(false)}/>
     </Elements>
   );
 }
