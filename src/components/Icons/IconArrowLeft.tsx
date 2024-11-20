@@ -1,9 +1,10 @@
 interface Props {
   width?: number;
   height?: number;
+  stroke?: string;
 }
 
-export function IconArrowLeft({ width = 16, height = 10 }: Props) {
+export function IconArrowLeft({ width = 16, height = 10, stroke="#8C8C8C" }: Props) {
   return (
     <svg
       width={width}
@@ -14,7 +15,7 @@ export function IconArrowLeft({ width = 16, height = 10 }: Props) {
     >
       <path
         d="M1 5H15M1 5L5 1M1 5L5 9"
-        stroke="#8C8C8C"
+        stroke={stroke}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
