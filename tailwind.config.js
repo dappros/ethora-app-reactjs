@@ -20,6 +20,7 @@ export default {
         'brand-100': '#E7EAF9',
         'brand-150': '#F3F6FC',
         'brand-200': '#C2D1F0',
+        'brand-250': '#C6DFFA',
         'brand-300': '#99B4E6',
         'brand-400': '#437ED4',
         // 'brand-500': '#0052CD',
@@ -27,6 +28,7 @@ export default {
         'brand-600': '#004AC2',
         'brand-700': '#0040B6',
         'brand-800': '#0035AB',
+        'brand-850': '#0035AB',
         'brand-900': '#002398',
         'brand-950': '#001766',
 
@@ -53,6 +55,8 @@ export default {
         'red-800': '#C62828',
         'red-900': '#B71C1C',
         'red-950': '#8E0000',
+
+        'yellow-800': '#FFD001',
 
         black: '#121219',
         white: '#ffffff',

@@ -4,7 +4,7 @@ import AppLayout from './AppLayout';
 import Admin from './pages/Admin';
 import { AdminApp } from './pages/AdminApp';
 import AdminApps from './pages/AdminApps';
-import AdminBilling from './pages/AdminBilling';
+import { AdminBilling } from './pages/AdminBilling';
 import { AppSettings } from './pages/AppSettings/AppSettings';
 import { AppStatistics } from './pages/AppStatistics';
 import AppUsers from './pages/AppUsers';
@@ -12,6 +12,7 @@ import LoginComponent from './pages/AuthPage/Login';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import { Error404Page } from './pages/ErrorPage/Error404Page';
 
 export const router = createBrowserRouter(
   [
@@ -82,6 +83,10 @@ export const router = createBrowserRouter(
           ],
         },
       ],
+    },
+    {
+      path: '*',
+      element: <Error404Page/>,
     },
   ],
   {

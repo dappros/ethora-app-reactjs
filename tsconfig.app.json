@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "stripeConfig.d.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.js"]
 }
