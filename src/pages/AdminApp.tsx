@@ -9,7 +9,7 @@ export function AdminApp() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full grid grid-rows-[auto,_1fr]">
+    <div className="h-full overflow-hidden grid grid-rows-[auto,_1fr]">
       <div className="mb-4 flex md:flex-row flex-col md:justify-between">
         <div className="flex mb-4 md:mb-0">
           <button

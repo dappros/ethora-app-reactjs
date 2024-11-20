@@ -16,7 +16,7 @@ export default function AppLayout() {
       <div className="bg-gray-100 w-full min-h-screen flex justify-center">
         <div className="min-h-screen max-w-[1920px] w-full md:p-4">
           {/* app content */}
-          <div className="h-full grid grid-rows-[72px,_1fr] md:grid-rows-1 md:grid-cols-[80px,_1fr] md:gap-4">
+          <div className="h-full overflow-hidden grid grid-rows-[72px,_1fr] md:grid-rows-1 md:grid-cols-[80px,_1fr] md:gap-4">
             {/* menu */}
             <AppMenu />
             {/* router content */}
