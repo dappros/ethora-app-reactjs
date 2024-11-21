@@ -29,7 +29,7 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
         <Typography className="pb-8">{description}</Typography>
         <CustomButton
           variant="contained"
-          startIcon={<IconArrowLeft />}
+          startIcon={<IconArrowLeft stroke="#ffffff"/>}
           style={{padding: "2px 48px"}}
           onClick={()=> navigate(-1)}
         >
