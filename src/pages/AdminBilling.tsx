@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Elements } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 

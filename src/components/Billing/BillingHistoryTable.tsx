@@ -1,4 +1,3 @@
-import { Button } from '@mui/material';
 import { ReactElement } from 'react';
 
 interface BillingHistoryTableProps {
