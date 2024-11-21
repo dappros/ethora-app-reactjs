@@ -39,6 +39,7 @@ function App() {
         const response = await httpGetOneUser();
         if(response.status === 200) {
           localStorage.setItem('token', response.data.token);
+          sessionStorage.setItem('refreshToken', response.data.refreshToken);
           await actionAfterLogin(response.data);
           
           const savedPath = localStorage.getItem("lastPath");

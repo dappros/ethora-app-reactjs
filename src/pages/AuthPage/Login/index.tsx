@@ -8,7 +8,6 @@ import Wrapper from '../Wrapper';
 
 export default function LoginComponent() {
   const config = useAppStore((s) => s.currentApp);
-  const token = localStorage.getItem('token');
 
   if (!config) {
     return null;
