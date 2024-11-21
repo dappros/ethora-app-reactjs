@@ -1,40 +1,16 @@
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
 import { useAppStore } from './store/useAppStore';
 import { useEffect } from 'react';
-import { httpGetOneUser } from './http';
-import { actionAfterLogin } from './actions';
 
 export default function AppLayout() {
   const user = useAppStore((s) => s.currentUser);
-  const navigate = useNavigate();
   const location = useLocation();
-  const token = localStorage.getItem('token');
+
 
   useEffect(() => {
     localStorage.setItem("lastPath", location.pathname);
   }, [location]);
-
-  useEffect(() => {
-    const example = async () => {
-      if(token) {
-        const response = await httpGetOneUser();
-        if(response.status === 200) {
-          localStorage.setItem('token', response.data.token);
-          await actionAfterLogin(response.data);
-          const savedPath = localStorage.getItem("lastPath");
-          if (savedPath) {
-            navigate(savedPath);
-          } else {
-            navigate('/app/admin/apps');
-          }
-        }
-      }
-    };
-
-    example();
-  }, []);
-
 
   if (!user) {
     return <Navigate to="/login" replace></Navigate>;
