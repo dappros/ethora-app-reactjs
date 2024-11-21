@@ -5,7 +5,7 @@ import { ModelUserACL } from '../../models';
 import { IconClose } from '../Icons/IconClose';
 import './AclModal.scss';
 //@ts-ignore
-import {set} from 'lodash';
+import { set } from 'lodash';
 import { IconCheckbox } from '../Icons/IconCheckbox';
 
 interface Props {
@@ -629,6 +629,118 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
           Here you can assign or remove User’s access to infrastructure level objects, above the context of any Apps. Available for Enterprise Plan.
         </div>
 
+        <div className="mb-8">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-[#FCFCFC]">
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                  Name
+                </th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                  Create
+                </th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                  Read
+                </th>
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                  Update
+                </th>
+
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                  Delete
+                </th>
+
+                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                  Admin
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
+                  Statistics
+                </td>
+                <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
+
+                  <div className="flex justify-center">
+                    <Field className="flex items-center cursor-pointer">
+                      <Checkbox
+                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                        checked={false}
+                        onChange={() => { }}
+                        disabled
+                      >
+                        <IconCheckbox className="hidden group-data-[checked]:block" />
+                      </Checkbox>
+                    </Field>
+                  </div>
+
+                </td>
+                <td className="px-4 font-sans font-normal text-sm text-center">
+
+                  <div className="flex justify-center">
+                    <Field className="flex items-center cursor-pointer">
+                      <Checkbox
+                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                        checked={acl.network.read}
+                        onChange={(isSet) => onChange(isSet, 'network.read')}
+                      >
+                        <IconCheckbox className="hidden group-data-[checked]:block" />
+                      </Checkbox>
+                    </Field>
+                  </div>
+
+                </td>
+                <td className="px-4 font-sans font-normal text-sm text-center">
+
+                  <div className="flex justify-center">
+                    <Field className="flex items-center cursor-pointer">
+                      <Checkbox
+                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                        checked={false}
+                        onChange={() => { }}
+                        disabled
+                      >
+                        <IconCheckbox className="hidden group-data-[checked]:block" />
+                      </Checkbox>
+                    </Field>
+                  </div>
+
+                </td>
+                <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
+                  <div className="flex justify-center">
+                    <Field className="flex items-center cursor-pointer">
+                      <Checkbox
+                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                        checked={false}
+                        onChange={() => { }}
+                        disabled
+                      >
+                        <IconCheckbox className="hidden group-data-[checked]:block" />
+                      </Checkbox>
+                    </Field>
+                  </div>
+                </td>
+
+                <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
+                  <div className="flex justify-center">
+                    <Field className="flex items-center cursor-pointer">
+                      <Checkbox
+                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                        checked={false}
+                        onChange={() => { }}
+                        disabled
+                      >
+                        <IconCheckbox className="hidden group-data-[checked]:block" />
+                      </Checkbox>
+                    </Field>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <div className="grid grid-cols-2 gap-8">
           <button className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500" onClick={onClose}>
             Cancel
@@ -640,8 +752,6 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
             Update ACL
           </button>
         </div>
-
-
       </DialogPanel>
     </Dialog>
   );

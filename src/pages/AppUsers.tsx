@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { IconAdd } from "../components/Icons/IconAdd";
-import { Checkbox, Field } from "@headlessui/react";
+import { Checkbox, Field, Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import { IconCheckbox } from "../components/Icons/IconCheckbox";
 import cn from "classnames";
 import { useEffect, useState } from "react";
@@ -11,24 +11,13 @@ import { toast } from "react-toastify";
 import { IconDelete } from "../components/Icons/IconDelete";
 import { DateTime } from "luxon";
 import { IconSettings } from "../components/Icons/IconSettings";
+import ReactPaginate from 'react-paginate';
 
 import "./AppUsers.scss"
 import { SubmitModal } from "../components/modal/SubmitModal";
 import { AclModal } from "../components/modal/AclModal";
 import { NewUserModal } from "../components/modal/NewUserModal";
-
-const chatsData = [
-  {
-    title: 'chat1',
-    pinned: true,
-    jid: '123',
-  },
-  {
-    title: 'chat2',
-    pinned: false,
-    jid: '345',
-  },
-];
+import { IconArrowDown } from "../components/Icons/IconArrowDown";
 
 export default function AppUsers() {
   let { appId } = useParams();
@@ -391,7 +380,7 @@ export default function AppUsers() {
           There are no users yet, or you can add them by clicking the 'Add User' button
         </div>
 
-        <div className="overflow-x-auto relative">
+        <div className="overflow-x-auto relative mb-4">
           {renderActionsForSelected()}
           <table className="border-collapse w-full min-w-[1200px] table-fixed">
             <thead>
@@ -486,6 +475,70 @@ export default function AppUsers() {
               })}
             </tbody>
           </table>
+
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mx-8 my-[12px]">
+          <div className="flex justify-between md:justify-start items-center">
+            <div className="text-[#71717A] text-xs mr-8 whitespace-nowrap">
+              {renderFrom()} to {renderTo()} of {total}
+            </div>
+            <div className="flex">
+              <div className="text-[#71717A] mr-8">show</div>
+              <Menu>
+                <MenuButton className="flex mr-4">
+                  <span className="text-brand-500 mr-4 font-semibold">{itemsPerTable}</span>
+                  <IconArrowDown />
+                </MenuButton>
+                <MenuItems anchor="bottom" className="bg-white">
+                  <div className="">
+                    <MenuItem>
+                      <div
+                        onClick={() => setItemsPerTable(10)}
+                        className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                      >
+                        {10}
+                      </div>
+                    </MenuItem>
+                    <MenuItem>
+                      <div
+                        onClick={() => setItemsPerTable(15)}
+                        className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                      >
+                        {15}
+                      </div>
+                    </MenuItem>
+                    <MenuItem>
+                      <div
+                        onClick={() => setItemsPerTable(25)}
+                        className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                      >
+                        {25}
+                      </div>
+                    </MenuItem>
+                  </div>
+                </MenuItems>
+              </Menu>
+              <div className="text-[#71717A]">users</div>
+            </div>
+
+          </div>
+          <div className="flex justify-center md:justify-end md:items-center">
+            <ReactPaginate
+              className="paginate"
+              onPageActive={(...args) => {
+                console.log({ args });
+              }}
+              onPageChange={(selectedItem) => onPageChange(selectedItem.selected)}
+              breakLabel="..."
+              nextLabel=""
+              pageRangeDisplayed={3}
+              pageCount={pageCount}
+              previousLabel=""
+              renderOnZeroPageCount={null}
+              forcePage={currentPage}
+            />
+          </div>
         </div>
       </div>
       {showManageTags && (
