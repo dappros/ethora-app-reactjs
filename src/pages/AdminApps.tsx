@@ -74,7 +74,7 @@ export default function AdminApps() {
         <div className="flex justify-between items-center px-4">
           <div className="font-varela text-[18px] md:text-2xl">Apps</div>
           <div>
-            <button className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela">
+            <button onClick={() => setShowModal(true)} className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela">
               <IconAdd color="white" className="md:mr-2" />
               <span className="hidden md:block">Create App</span>
             </button>
