@@ -63,7 +63,10 @@ http.interceptors.response.use(null, async (error) => {
 export const refreshToken = async () => {
   try {
     const response = await http.post('/users/login/refresh', null, {
-      headers: { Authorization: httpTokens.refreshToken || sessionStorage.getItem('refreshToken') },
+      headers: {
+        Authorization:
+          httpTokens.refreshToken || sessionStorage.getItem('refreshToken'),
+      },
     });
     const { token, refreshToken } = response.data;
     httpTokens.token = token;
