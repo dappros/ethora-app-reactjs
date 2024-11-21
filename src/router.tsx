@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppHelmet from './AppHelmet';
 import AppLayout from './AppLayout';
@@ -14,75 +15,82 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 
+const App = lazy(() => import('./App'));
+
 export const router = createBrowserRouter(
   [
     {
-      path: '/',
-      Component: AppHelmet,
+      Component: App,
       children: [
         {
-          path: '/login',
-          Component: LoginComponent,
-        },
-        {
-          path: '/app',
-          element: <AppLayout />,
+          path: '/',
+          Component: AppHelmet,
           children: [
             {
-              index: true,
-              element: <Navigate to="/app/admin" />,
+              path: '/login',
+              Component: LoginComponent,
             },
             {
-              path: 'chat',
-              Component: Chat,
-            },
-            {
-              path: 'admin',
-              Component: Admin,
+              path: '/app',
+              element: <AppLayout />,
               children: [
                 {
                   index: true,
-                  element: <Navigate to="/app/admin/apps" />,
+                  element: <Navigate to="/app/admin" />,
                 },
                 {
-                  path: 'apps',
-                  Component: AdminApps,
+                  path: 'chat',
+                  Component: Chat,
                 },
                 {
-                  path: 'billing',
-                  Component: AdminBilling,
+                  path: 'admin',
+                  Component: Admin,
+                  children: [
+                    {
+                      index: true,
+                      element: <Navigate to="/app/admin/apps" />,
+                    },
+                    {
+                      path: 'apps',
+                      Component: AdminApps,
+                    },
+                    {
+                      path: 'billing',
+                      Component: AdminBilling,
+                    },
+                  ],
                 },
-              ],
-            },
-            {
-              path: 'admin/apps/:appId',
-              Component: AdminApp,
-              children: [
+                {
+                  path: 'admin/apps/:appId',
+                  Component: AdminApp,
+                  children: [
+                    {
+                      path: 'settings',
+                      Component: AppSettings,
+                    },
+                    {
+                      path: 'users',
+                      Component: AppUsers,
+                    },
+                    {
+                      path: 'statistics',
+                      Component: AppStatistics,
+                    },
+                  ],
+                },
+                {
+                  path: 'profile',
+                  Component: Profile,
+                },
                 {
                   path: 'settings',
-                  Component: AppSettings,
-                },
-                {
-                  path: 'users',
-                  Component: AppUsers,
-                },
-                {
-                  path: 'statistics',
-                  Component: AppStatistics,
+                  Component: Settings,
                 },
               ],
-            },
-            {
-              path: 'profile',
-              Component: Profile,
-            },
-            {
-              path: 'settings',
-              Component: Settings,
             },
           ],
         },
-      ],
+      ]
     },
     {
       path: '*',

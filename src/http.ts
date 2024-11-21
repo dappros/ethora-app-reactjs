@@ -31,7 +31,7 @@ http.interceptors.request.use((config) => {
     return config;
   }
 
-  config.headers.Authorization = localStorage.getItem('token') || httpTokens.token;
+  config.headers.Authorization = httpTokens.token || localStorage.getItem('token');
 
   return config;
 }, null);
@@ -64,7 +64,6 @@ export const refreshToken = async () => {
     const response = await http.post('/users/login/refresh', null, {
       headers: { Authorization: httpTokens.refreshToken },
     });
-    console.log('+++++++++ ', response.data);
     const { token, refreshToken } = response.data;
     httpTokens.token = token;
     localStorage.setItem('token', token);
