@@ -11,9 +11,9 @@ import { AppStatistics } from './pages/AppStatistics';
 import AppUsers from './pages/AppUsers';
 import LoginComponent from './pages/AuthPage/Login';
 import Chat from './pages/Chat';
+import { Error404Page } from './pages/ErrorPage/Error404Page';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import { Error404Page } from './pages/ErrorPage/Error404Page';
 
 const App = lazy(() => import('./App'));
 
@@ -90,11 +90,11 @@ export const router = createBrowserRouter(
             },
           ],
         },
-      ]
+      ],
     },
     {
       path: '*',
-      element: <Error404Page/>,
+      element: <Error404Page />,
     },
   ],
   {

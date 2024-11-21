@@ -1,35 +1,49 @@
-import { useEffect, useState } from "react";
-import { Elements } from "@stripe/react-stripe-js";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from '@mui/material';
+import { Elements } from '@stripe/react-stripe-js';
+import { useState } from 'react';
 
-import { stripePromise } from "../../stripeConfig";
+import { stripePromise } from '../../stripeConfig';
 
-import { BillingBoxContainer } from "../components/Billing/BillingBoxContainer";
-import { BillingHistoryTable } from "../components/Billing/BillingHistoryTable";
-import { BillingModalChangePlan } from "../components/Billing/Modal/BillingModalChangePlan";
-import { BillingModalChangeInfo } from "../components/Billing/Modal/BillingModalChangeInfo";
-import { BillingModalCheckoutForm } from "../components/Billing/Modal/BillingModalCheckoutForm";
-import { Appearance } from "@stripe/stripe-js";
-
+import { Appearance } from '@stripe/stripe-js';
+import { BillingBoxContainer } from '../components/Billing/BillingBoxContainer';
+import { BillingHistoryTable } from '../components/Billing/BillingHistoryTable';
+import { BillingModalChangeInfo } from '../components/Billing/Modal/BillingModalChangeInfo';
+import { BillingModalChangePlan } from '../components/Billing/Modal/BillingModalChangePlan';
+import { BillingModalCheckoutForm } from '../components/Billing/Modal/BillingModalCheckoutForm';
 
 export const AdminBilling = () => {
   const [billingInfo, setBillingInfo] = useState({
-    plan: "Business Plan",
-    price: "$199/month",
-    card: "**** 4212",
-    address: "519 S Lincoln Street, Carmichael, Texas - 20423, Japan",
+    plan: 'Business Plan',
+    price: '$199/month',
+    card: '**** 4212',
+    address: '519 S Lincoln Street, Carmichael, Texas - 20423, Japan',
     history: [
-      { date: "21 July 2024", amount: "$199.00", status: "Paid", invoice: "Download" },
-      { date: "21 June 2024", amount: "$199.00", status: "Paid", invoice: "Download" },
-      { date: "21 May 2024", amount: "$199.00", status: "Paid", invoice: "Download" },
+      {
+        date: '21 July 2024',
+        amount: '$199.00',
+        status: 'Paid',
+        invoice: 'Download',
+      },
+      {
+        date: '21 June 2024',
+        amount: '$199.00',
+        status: 'Paid',
+        invoice: 'Download',
+      },
+      {
+        date: '21 May 2024',
+        amount: '$199.00',
+        status: 'Paid',
+        invoice: 'Download',
+      },
     ],
   });
   const [openChangePlan, setOpenChangePlan] = useState<boolean>(false);
   const [openChangeInfo, setOpenChangeInfo] = useState<boolean>(false);
   const [openCheckoutForm, setOpenCheckoutForm] = useState<boolean>(false);
 
-  const [clientSecret, setClientSecret] = useState("");
-  const [dpmCheckerLink, setDpmCheckerLink] = useState("");
+  const [clientSecret, setClientSecret] = useState('');
+  const [dpmCheckerLink, setDpmCheckerLink] = useState('');
 
   // useEffect(() => {
   //   // Create PaymentIntent as soon as the page loads
@@ -54,9 +68,11 @@ export const AdminBilling = () => {
 
   return (
     <Elements stripe={stripePromise}>
-      <Stack spacing={2} className="container mx-auto p-6 w-full overflow-hidden">
+      <Stack
+        spacing={2}
+        className="container mx-auto p-6 w-full overflow-hidden"
+      >
         <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
           <BillingBoxContainer title="Plan Details">
             <Box className="sm:flex items-end justify-between">
               <Box className="flex items-center gap-2 pb-4 sm:pb-0">
@@ -70,7 +86,7 @@ export const AdminBilling = () => {
                   className="text-xs text-white bg-green-500 px-4 py-1 rounded-full"
                 >
                   Active
-                </Typography >
+                </Typography>
               </Box>
               <button
                 className="bg-brand-500 px-7 py-2 text-white text-xs rounded-lg"
@@ -111,29 +127,38 @@ export const AdminBilling = () => {
               Edit
             </button>}
         >
-        <Box className="flex items-center justify-between">
+          <Box className="flex items-center justify-between">
             <Box>
               <p className="text-sm text-gray-600">
-                Person/Company Name: <span className="font-medium">John Doe</span>
+                Person/Company Name:{' '}
+                <span className="font-medium">John Doe</span>
               </p>
               <p className="text-sm text-gray-600">
-                Billing address: 519 S Lincoln Street, Carmichael, Texas - 20423,
-                Japan
+                Billing address: 519 S Lincoln Street, Carmichael, Texas -
+                20423, Japan
               </p>
             </Box>
           </Box>
         </BillingBoxContainer>
 
-
         <Box className="mt-6 p-6 border rounded-lg shadow bg-white">
           <h2 className="text-lg font-semibold mb-4">History</h2>
-          <BillingHistoryTable history={billingInfo.history}/> 
+          <BillingHistoryTable history={billingInfo.history} />
         </Box>
       </Stack>
 
-      <BillingModalChangePlan isOpen={openChangePlan} handleClose={() => setOpenChangePlan(false)}/>
-      <BillingModalChangeInfo isOpen={openChangeInfo} handleClose={() => setOpenChangeInfo(false)}/>
-      <BillingModalCheckoutForm isOpen={openCheckoutForm} handleClose={() => setOpenCheckoutForm(false)}/>
+      <BillingModalChangePlan
+        isOpen={openChangePlan}
+        handleClose={() => setOpenChangePlan(false)}
+      />
+      <BillingModalChangeInfo
+        isOpen={openChangeInfo}
+        handleClose={() => setOpenChangeInfo(false)}
+      />
+      <BillingModalCheckoutForm
+        isOpen={openCheckoutForm}
+        handleClose={() => setOpenCheckoutForm(false)}
+      />
     </Elements>
   );
-}
+};

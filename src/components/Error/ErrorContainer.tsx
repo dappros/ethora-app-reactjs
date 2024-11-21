@@ -1,8 +1,8 @@
-import { ReactElement } from "react";
-import { Box, Container, Typography } from "@mui/material";
-import CustomButton from "../../pages/AuthPage/Button";
-import { useNavigate } from "react-router-dom";
-import { IconArrowLeft } from "../Icons/IconArrowLeft";
+import { Box, Container, Typography } from '@mui/material';
+import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
+import CustomButton from '../../pages/AuthPage/Button';
+import { IconArrowLeft } from '../Icons/IconArrowLeft';
 
 interface ErrorContainerProps {
   status: string;
@@ -12,12 +12,7 @@ interface ErrorContainerProps {
 }
 
 export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
-  const {
-    status,
-    title,
-    description,
-    image,
-  } = props;
+  const { status, title, description, image } = props;
 
   const navigate = useNavigate();
 
@@ -29,15 +24,15 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
         <Typography className="pb-8">{description}</Typography>
         <CustomButton
           variant="contained"
-          startIcon={<IconArrowLeft stroke="#ffffff"/>}
-          style={{padding: "2px 48px"}}
-          onClick={()=> navigate(-1)}
+          startIcon={<IconArrowLeft stroke="#ffffff" />}
+          style={{ padding: '2px 48px' }}
+          onClick={() => navigate(-1)}
         >
           Go Back
         </CustomButton>
       </Box>
       <Box>
-        <img src={image} alt="Error"/>
+        <img src={image} alt="Error" />
       </Box>
     </Container>
   );

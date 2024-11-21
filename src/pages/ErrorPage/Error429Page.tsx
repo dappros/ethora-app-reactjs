@@ -1,5 +1,5 @@
-import { ErrorContainer } from "../../components/Error/ErrorContainer";
-import images from "../../assets/error/429.png";
+import images from '../../assets/error/429.png';
+import { ErrorContainer } from '../../components/Error/ErrorContainer';
 
 export const Error429Page = () => {
   return (

@@ -1,12 +1,11 @@
-import { Checkbox, Dialog, DialogPanel, Field } from '@headlessui/react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 
-import classNames from 'classnames';
 import { ModelUserACL } from '../../models';
 import { IconClose } from '../Icons/IconClose';
 import './AclModal.scss';
 //@ts-ignore
 import { set } from 'lodash';
-import { IconCheckbox } from '../Icons/IconCheckbox';
+import { CheckboxApp } from '../CheckboxApp';
 
 interface Props {
   onClose: () => void;
@@ -15,23 +14,8 @@ interface Props {
   updateAcl: () => void;
 }
 
-const chatsData = [
-  {
-    title: 'chat1',
-    pinned: true,
-    jid: '123',
-  },
-  {
-    title: 'chat2',
-    pinned: false,
-    jid: '345',
-  },
-];
-
-
-
 export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
-  console.log({acl})
+  console.log({ acl });
   const onChange = (isSet: boolean, path: string) => {
     let newAcl = JSON.parse(JSON.stringify(acl));
     set(newAcl, path, isSet);
@@ -40,12 +24,14 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
   };
 
   return (
-    <Dialog className="fixed inset-0 flex justify-center items-center bg-black/30" open={true} onClose={() => { }}>
+    <Dialog
+      className="fixed inset-0 flex justify-center items-center bg-black/30"
+      open={true}
+      onClose={() => {}}
+    >
       <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px]">
         <div className="font-varela text-[24px] text-center relative flex justify-center items-center mb-8">
-          <span>
-            ACL Editing
-          </span>
+          <span>ACL Editing</span>
           <button className="absolute top-0 right-0" onClick={() => onClose()}>
             <IconClose />
           </button>
@@ -56,7 +42,8 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         </div>
 
         <div className="font-sans text-xs text-[#8C8C8C] mb-4">
-          Here you can assign or remove User’s access rights to certain objects within the current App.
+          Here you can assign or remove User’s access rights to certain objects
+          within the current App.
         </div>
 
         <div className="mb-8">
@@ -86,91 +73,41 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
               </tr>
             </thead>
             <tbody>
-
-
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
                   Create Apps
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appCreate.create}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appCreate.create')
-                        }
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appCreate.create}
+                      disabled
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appCreate.create')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => {}}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => {}}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        disabled
-                        onChange={() => { }}
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} disabled onChange={() => {}} />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => {}}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} disabled onChange={() => {}} />
                   </div>
-
                 </td>
               </tr>
 
@@ -179,85 +116,40 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                   Settings
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appSettings.read}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appSettings.read')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appSettings.read}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appSettings.read')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appSettings.update}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appSettings.update')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appSettings.update}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appSettings.update')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        disabled
-                        onChange={() => { }}
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} disabled onChange={() => {}} />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appSettings.admin}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appSettings.admin')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} disabled onChange={() => {}} />
                   </div>
-
                 </td>
               </tr>
 
@@ -266,87 +158,55 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                   Users
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appUsers.create}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appUsers.create')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appUsers.create}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appUsers.create')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appUsers.read}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appUsers.read')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appUsers.read}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appUsers.read')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appUsers.update}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appUsers.update')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appUsers.update}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appUsers.update')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appUsers.delete}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appUsers.delete')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appUsers.delete}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appUsers.delete')
+                      }
+                    />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appUsers.admin}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appUsers.admin')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appUsers.admin}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appUsers.admin')
+                      }
+                    />
                   </div>
-
                 </td>
               </tr>
 
@@ -355,260 +215,137 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                   Tokens
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appTokens.create}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appTokens.create')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appTokens.create}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appTokens.create')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appTokens.read}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appTokens.read')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appTokens.read}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appTokens.read')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appTokens.update}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appTokens.update')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appTokens.update}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appTokens.update')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appTokens.admin}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appTokens.admin')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appTokens.admin}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appTokens.admin')
+                      }
+                    />
                   </div>
-
                 </td>
               </tr>
-
-
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
                   Push Notifications
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appPush.create}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appPush.create')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appPush.create}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appPush.create')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appPush.read}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appPush.read')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appPush.read}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appPush.read')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appPush.update}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appPush.update')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appPush.update}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appPush.update')
+                      }
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.application.appPush.admin}
-                        onChange={(isSet) =>
-                          onChange(isSet, 'application.appPush.admin')
-                        }
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.application.appPush.admin}
+                      onChange={(isSet) =>
+                        onChange(isSet, 'application.appPush.admin')
+                      }
+                    />
                   </div>
-
                 </td>
               </tr>
-
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
                   Statistics
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.network.read}
-                        onChange={(isSet) => onChange(isSet, 'network.read')}
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.network.read}
+                      onChange={(isSet) => onChange(isSet, 'network.read')}
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
               </tr>
             </tbody>
@@ -621,7 +358,8 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         </div>
 
         <div className="font-sans text-xs text-[#8C8C8C] mb-4">
-          Here you can assign or remove User’s access to infrastructure level objects, above the context of any Apps. Available for Enterprise Plan.
+          Here you can assign or remove User’s access to infrastructure level
+          objects, above the context of any Apps. Available for Enterprise Plan.
         </div>
 
         <div className="mb-8">
@@ -656,79 +394,32 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                   Statistics
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={acl.network.read}
-                        onChange={(isSet) => onChange(isSet, 'network.read')}
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp
+                      checked={acl.network.read}
+                      onChange={(isSet) => onChange(isSet, 'network.read')}
+                    />
                   </div>
-
                 </td>
                 <td className="px-4 font-sans font-normal text-sm text-center">
-
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
-
                 </td>
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
 
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <Field className="flex items-center cursor-pointer">
-                      <Checkbox
-                        className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                        checked={false}
-                        onChange={() => { }}
-                        disabled
-                      >
-                        <IconCheckbox className="hidden group-data-[checked]:block" />
-                      </Checkbox>
-                    </Field>
+                    <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
               </tr>
@@ -737,7 +428,10 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         </div>
 
         <div className="grid grid-cols-2 gap-8">
-          <button className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500" onClick={onClose}>
+          <button
+            className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button

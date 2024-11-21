@@ -31,7 +31,8 @@ http.interceptors.request.use((config) => {
     return config;
   }
 
-  config.headers.Authorization = httpTokens.token || localStorage.getItem('token');
+  config.headers.Authorization =
+    httpTokens.token || localStorage.getItem('token');
 
   return config;
 }, null);
@@ -62,7 +63,10 @@ http.interceptors.response.use(null, async (error) => {
 export const refreshToken = async () => {
   try {
     const response = await http.post('/users/login/refresh', null, {
-      headers: { Authorization: httpTokens.refreshToken || sessionStorage.getItem('refreshToken') },
+      headers: {
+        Authorization:
+          httpTokens.refreshToken || sessionStorage.getItem('refreshToken'),
+      },
     });
     const { token, refreshToken } = response.data;
     httpTokens.token = token;

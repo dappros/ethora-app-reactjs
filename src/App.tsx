@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
-import { useAppStore } from './store/useAppStore';
 import { httpGetOneUser } from './http';
+import { useAppStore } from './store/useAppStore';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -35,21 +35,21 @@ function App() {
 
   useEffect(() => {
     const example = async () => {
-      if(token) {
+      if (token) {
         const response = await httpGetOneUser();
-        if(response.status === 200) {
+        if (response.status === 200) {
           localStorage.setItem('token', response.data.token);
           sessionStorage.setItem('refreshToken', response.data.refreshToken);
           await actionAfterLogin(response.data);
-          
-          const savedPath = localStorage.getItem("lastPath");
+
+          const savedPath = localStorage.getItem('lastPath');
           if (savedPath) {
             navigate(savedPath);
           } else {
             navigate('/app/admin/apps');
           }
         }
-      } else { 
+      } else {
         navigate('/login');
       }
     };
@@ -62,7 +62,7 @@ function App() {
   } else {
     return (
       <>
-        <Outlet/>
+        <Outlet />
       </>
     );
   }
