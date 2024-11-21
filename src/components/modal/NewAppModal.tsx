@@ -6,7 +6,7 @@ import { IconClose } from '../Icons/IconClose';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
 import { Loading } from '../Loading';
-import { TextInput } from '../ui/TextInput';
+// import { TextInput } from '../ui/TextInput';
 
 interface Props {
   onClose: () => void;
@@ -45,12 +45,12 @@ export function NewAppModal({ onClose, show }: Props) {
             <IconClose />
           </button>
         </div>
-        <TextInput
+        {/* <TextInput
           placeholder="App Name"
           value={appName}
           onChange={(e) => setAppName(e.target.value)}
           className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-8"
-        />
+        /> */}
         <div className="flex gap-8 items-start">
           <button
             className="w-1/2 border border-brand-500 rounded-2xl py-3"

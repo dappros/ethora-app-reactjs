@@ -4,6 +4,7 @@ import { IconAdd } from '../components/Icons/IconAdd';
 import { httpGetApps } from '../http';
 import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
+import { NewAppModal } from '../components/modal/NewAppModal';
 
 const ITEMS_COUNT = 5;
 
@@ -90,6 +91,7 @@ export default function AdminApps() {
           />
         ))}
       </div>
+      {showModal && <NewAppModal show={showModal} onClose={() => setShowModal(false)} />}
     </>
   );
 }
