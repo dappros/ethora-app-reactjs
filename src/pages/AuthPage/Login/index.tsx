@@ -14,10 +14,6 @@ export default function LoginComponent() {
     return null;
   }
 
-  if (token) {
-    return null;
-  }
-
   const [loading] = useState(false);
 
   const theme = useTheme();
