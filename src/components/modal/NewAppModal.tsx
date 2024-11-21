@@ -6,6 +6,8 @@ import { IconClose } from '../Icons/IconClose';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
 import { Loading } from '../Loading';
+import firstAppModalPic from '../../assets/first_app_modal_pic.png'
+import { SubmitHandler, useForm } from 'react-hook-form';
 // import { TextInput } from '../ui/TextInput';
 
 interface Props {
@@ -13,11 +15,16 @@ interface Props {
   show: boolean;
 }
 
-export function NewAppModal({ onClose, show }: Props) {
-  const [appName, setAppName] = useState('');
-  const [loading, setLoading] = useState(false);
+type Inputs = {
+  appName: string;
+};
 
-  const onCreate = () => {
+export function NewAppModal({ onClose, show }: Props) {
+  const [loading, setLoading] = useState(false);
+  const [next, setNext] = useState(false)
+  const { register, handleSubmit } = useForm<Inputs>();
+
+  const onSubmit: SubmitHandler<Inputs> = ({ appName }) => {
     setLoading(true);
     actionCreateApp(appName)
       .then(() => {
@@ -34,38 +41,76 @@ export function NewAppModal({ onClose, show }: Props) {
       className="fixed inset-x-0 inset-y-0 z-50 flex justify-center items-center bg-black/50 transition duration-300 ease-out data-[closed]:opacity-0"
       open={show}
       transition
-      onClose={() => {}}
+      onClose={() => { }}
     >
-      <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8">
-        <div className="relative mb-8">
-          <div className="text-center font-varela text-2xl">
-            Get Started with Your New App
-          </div>
-          <button className="absolute top-0 right-0 " onClick={() => onClose()}>
+      {
+        !next && (
+          <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8 relative">
+            <button className="absolute top-[15px] right-[15px] " onClick={() => onClose()}>
+              <IconClose />
+            </button>
+            <div className="mb-[24px] md:mb-8">
+              <div className="max:w-[400px] h-[140px] md:h-[240px] w-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${firstAppModalPic})` }}>
+
+              </div>
+            </div>
+            <p className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
+              Ready to Create Your First App?
+            </p>
+            <p className="font-sans text-sm text-center">
+              Welcome to our platform!
+            </p>
+            <p className="font-sans text-sm text-center mb-[24px] md:mb-8">
+              In just a few steps, you can launch your first app. Start building it now and take advantage of web3 technologies and integrated tools to grow your business or community.
+            </p>
+            <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
+              <button
+                className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+                onClick={onClose}
+              >
+                View Demo
+              </button>
+              <button
+                onClick={() => setNext(true)}
+                className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+              >
+                Create App
+              </button>
+            </div>
+          </DialogPanel>
+        )
+      }
+      {next && (
+        <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8 relative">
+          <button className="absolute top-[15px] right-[15px] " onClick={() => onClose()}>
             <IconClose />
           </button>
-        </div>
-        {/* <TextInput
-          placeholder="App Name"
-          value={appName}
-          onChange={(e) => setAppName(e.target.value)}
-          className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-8"
-        /> */}
-        <div className="flex gap-8 items-start">
-          <button
-            className="w-1/2 border border-brand-500 rounded-2xl py-3"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onCreate}
-            className={cn('gen-primary-btn w-1/2', { disabled: !appName })}
-          >
-            Continue
-          </button>
-        </div>
-      </DialogPanel>
+          <div className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
+            Get Started with Your New App
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} >
+            <input type="text"
+              placeholder="App Name"
+              {...register('appName', { required: true })}
+              className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-[24px] md:mb-8 outline-none"
+            />
+            <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
+              <button
+                className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+              >
+                Continue
+              </button>
+            </div>
+          </form>
+        </DialogPanel>
+      )}
+
       {loading && <Loading />}
     </Dialog>
   );
