@@ -10,7 +10,7 @@ interface BillingBoxContainerProps {
 export const BillingBoxContainer = (props: BillingBoxContainerProps): ReactElement => {
   const { title, children, titleButton } = props;
   return (
-    <Box className="w-full flex flex-col justify-between p-6 border rounded-lg shadow bg-white">
+    <Box className="w-full flex flex-col justify-between p-4 border rounded-lg shadow bg-white">
       <Box className="flex justify-between items-center border-b-2 border-gray-200 pb-2 mb-4">
         <Typography variant="h6" className="text-lg font-semibold mb-2">{title}</Typography>
         {titleButton && titleButton}

@@ -72,19 +72,17 @@ export const AdminBilling = () => {
                   Active
                 </Typography >
               </Box>
-              <Button
-                size="small"
-                variant="contained"
-                className="bg-brand-500 w-32"
+              <button
+                className="bg-brand-500 px-7 py-2 text-white text-xs rounded-lg"
                 onClick={() => setOpenChangePlan(true)}
               >
                 Change plan
-              </Button>
+              </button>
             </Box>
           </BillingBoxContainer>
 
           <BillingBoxContainer title="Payment Method">
-            <Box className="sm:flex items-end justify-between">
+            <Box className="sm:flex items-center justify-between">
               <Box className="flex items-center pb-4 sm:pb-0">
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
@@ -93,14 +91,12 @@ export const AdminBilling = () => {
                 />
                 <p className="text-sm text-gray-600">Ending with 4212</p>
               </Box>
-              <Button
-                size="small"
-                variant="contained"
-                className="bg-brand-500 w-52"
+              <button
+                className="bg-brand-500 px-6 py-2 text-white text-xs rounded-lg"
                 onClick={() => setOpenCheckoutForm(true)}
               >
                 Update card details
-              </Button>
+              </button>
             </Box>
           </BillingBoxContainer>
         </Box>
@@ -108,14 +104,12 @@ export const AdminBilling = () => {
         <BillingBoxContainer
           title="Billing Info"
           titleButton={
-            <Button
+            <button
               onClick={() => setOpenChangeInfo(true)}
-              size="small"
-              variant="contained"
-              className="bg-brand-500 w-16"
+              className="bg-brand-500 px-4 py-1 text-white text-xs rounded-lg"
             >
               Edit
-            </Button>}
+            </button>}
         >
         <Box className="flex items-center justify-between">
             <Box>

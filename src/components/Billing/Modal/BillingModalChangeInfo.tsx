@@ -131,6 +131,7 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               {...register("timezone", { required: "Timezone is required" })}
               error={!!errors.timezone}
               helperText={errors.timezone?.message}
+              className="focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500"
             >
               {timezones.map((timezone) => (
                 <MenuItem key={timezone} value={timezone}>
@@ -141,16 +142,15 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
           </Box>  
 
           <Box className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 py-8">
-            <Button
+            <button
               onClick={handleClose}
-              variant="outlined"
-              className="w-full sm:w-auto"
+              className="bg-white border border-brand-500  px-7 py-2 text-brand-500 text-sm rounded-lg"
             >
               Cancel
-            </Button>
-            <Button type="submit" variant="contained" color="primary" className="w-full sm:w-auto">
+            </button>
+            <button className="bg-brand-500 px-7 py-2 text-white text-sm rounded-lg">
               Save changes
-            </Button>
+            </button>
           </Box>
         </form>
       </Box>
