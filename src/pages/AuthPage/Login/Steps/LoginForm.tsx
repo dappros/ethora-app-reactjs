@@ -30,6 +30,7 @@ const LoginStep = () => {
     httpLogingWithEmail(email, password)
       .then(async ({ data }) => {
         await actionAfterLogin(data);
+        localStorage.setItem('token', data.token);
         navigate('/app/admin/apps');
       })
       .catch((error) => {

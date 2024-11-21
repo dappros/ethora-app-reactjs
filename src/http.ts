@@ -31,7 +31,7 @@ http.interceptors.request.use((config) => {
     return config;
   }
 
-  config.headers.Authorization = httpTokens.token;
+  config.headers.Authorization = localStorage.getItem('token') || httpTokens.token;
 
   return config;
 }, null);
@@ -67,6 +67,7 @@ export const refreshToken = async () => {
     console.log('+++++++++ ', response.data);
     const { token, refreshToken } = response.data;
     httpTokens.token = token;
+    localStorage.setItem('token', token);
     httpTokens.refreshToken = refreshToken;
     return httpTokens;
   } catch (error) {
@@ -92,6 +93,10 @@ export function httpGetConfig(domainName?: string) {
 
 export function httpLogingWithEmail(email: string, password: string) {
   return http.post('/users/login-with-email', { email, password });
+}
+
+export function httpGetOneUser() {
+  return http.get('/users/me');
 }
 
 export function httpCreateNewApp(displayName: string) {
