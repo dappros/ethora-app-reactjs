@@ -5,6 +5,7 @@ import { httpGetApps } from '../http';
 import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
 import { NewAppModal } from '../components/modal/NewAppModal';
+import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 
 const ITEMS_COUNT = 5;
 
@@ -83,6 +84,7 @@ export default function AdminApps() {
       </div>
       {/* apps list */}
       <div className="">
+        <ApplicationStarterInf onClose={() => {}} />
         {apps.map((app) => (
           <ApplicationPreview
             key={app._id}
