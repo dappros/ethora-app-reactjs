@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Elements } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 
@@ -141,7 +141,7 @@ export const AdminBilling = () => {
           </Box>
         </BillingBoxContainer>
 
-        <Box className="mt-6 p-6 border rounded-lg shadow bg-white">
+        <Box className="mt-6 p-4 border rounded-lg shadow bg-white">
           <h2 className="text-lg font-semibold mb-4">History</h2>
           <BillingHistoryTable history={billingInfo.history} />
         </Box>

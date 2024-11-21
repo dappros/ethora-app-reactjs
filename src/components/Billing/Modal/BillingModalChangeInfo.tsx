@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Checkbox,
   FormControlLabel,
   MenuItem,
@@ -147,7 +146,6 @@ export const BillingModalChangeInfo = ({
               {...register('timezone', { required: 'Timezone is required' })}
               error={!!errors.timezone}
               helperText={errors.timezone?.message}
-              className="focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500"
             >
               {timezones.map((timezone) => (
                 <MenuItem key={timezone} value={timezone}>
@@ -157,7 +155,7 @@ export const BillingModalChangeInfo = ({
             </TextField>
           </Box>
 
-          <Box className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 py-8">
+          <Box className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2 py-8">
             <button
               onClick={handleClose}
               className="bg-white border border-brand-500  px-7 py-2 text-brand-500 text-sm rounded-lg"
