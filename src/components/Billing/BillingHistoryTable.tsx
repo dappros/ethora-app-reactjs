@@ -11,7 +11,7 @@ export const BillingHistoryTable = (
   const { history } = props;
 
   return (
-    <table className="w-full">
+    <table className="w-full overflow-x-auto scrollbar-hide">
       <thead>
         <tr>
           <th className="text-sm text-gray-600 text-left">Date</th>
@@ -32,13 +32,12 @@ export const BillingHistoryTable = (
             <td className="text-sm text-green-500 text-center">
               {entry.status}
             </td>
-            <td className="text-sm text-blue-500 text-center">
-              <Button
-                variant="text"
-                className="text-blue-500 font-semibold underline"
+            <td className="text-sm text-center">
+              <button
+                className="text-brand-500 font-semibold"
               >
                 {entry.invoice}
-              </Button>
+              </button>
             </td>
           </tr>
         ))}
