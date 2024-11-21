@@ -1,11 +1,11 @@
-import { Modal } from "@mui/material";
-import { FormEvent, ReactElement, useState } from "react";
+import { Modal } from '@mui/material';
 import {
   PaymentElement,
+  useElements,
   useStripe,
-  useElements
-} from "@stripe/react-stripe-js";
-import { Layout } from "@stripe/stripe-js";
+} from '@stripe/react-stripe-js';
+import { Layout } from '@stripe/stripe-js';
+import { FormEvent, ReactElement, useState } from 'react';
 
 interface BillingModalChangePlanProps {
   isOpen: boolean;
@@ -13,7 +13,9 @@ interface BillingModalChangePlanProps {
   dpmCheckerLink?: string;
 }
 
-export const BillingModalCheckoutForm = (props: BillingModalChangePlanProps): ReactElement => {
+export const BillingModalCheckoutForm = (
+  props: BillingModalChangePlanProps
+): ReactElement => {
   const { isOpen, handleClose, dpmCheckerLink } = props;
 
   const stripe = useStripe();
@@ -37,7 +39,7 @@ export const BillingModalCheckoutForm = (props: BillingModalChangePlanProps): Re
       elements,
       confirmParams: {
         // Make sure to change this to your payment completion page
-        return_url: "http://localhost:3000/complete",
+        return_url: 'http://localhost:3000/complete',
       },
     });
 
@@ -46,19 +48,19 @@ export const BillingModalCheckoutForm = (props: BillingModalChangePlanProps): Re
     // your `return_url`. For some payment methods like iDEAL, your customer will
     // be redirected to an intermediate site first to authorize the payment, then
     // redirected to the `return_url`.
-    if (error.type === "card_error" || error.type === "validation_error") {
+    if (error.type === 'card_error' || error.type === 'validation_error') {
       setMessage(error.message);
     } else {
-      setMessage("An unexpected error occurred.");
+      setMessage('An unexpected error occurred.');
     }
 
     setIsLoading(false);
   };
 
-  const paymentElementOptions: {layout: Layout} = {
-    layout: "accordion"
-  }
-  
+  const paymentElementOptions: { layout: Layout } = {
+    layout: 'accordion',
+  };
+
   return (
     <Modal
       open={isOpen}
@@ -68,10 +70,17 @@ export const BillingModalCheckoutForm = (props: BillingModalChangePlanProps): Re
     >
       <>
         <form id="payment-form" onSubmit={handleSubmit}>
-          <PaymentElement id="payment-element" options={paymentElementOptions} />
+          <PaymentElement
+            id="payment-element"
+            options={paymentElementOptions}
+          />
           <button disabled={isLoading || !stripe || !elements} id="submit">
             <span id="button-text">
-              {isLoading ? <div className="spinner" id="spinner"></div> : "Pay now"}
+              {isLoading ? (
+                <div className="spinner" id="spinner"></div>
+              ) : (
+                'Pay now'
+              )}
             </span>
           </button>
           {/* Show any error or success messages */}
@@ -80,8 +89,16 @@ export const BillingModalCheckoutForm = (props: BillingModalChangePlanProps): Re
         {/* [DEV]: Display dynamic payment methods annotation and integration checker */}
         <div id="dpm-annotation">
           <p>
-            Payment methods are dynamically displayed based on customer location, order amount, and currency.&nbsp;
-            <a href={dpmCheckerLink} target="_blank" rel="noopener noreferrer" id="dpm-integration-checker">Preview payment methods by transaction</a>
+            Payment methods are dynamically displayed based on customer
+            location, order amount, and currency.&nbsp;
+            <a
+              href={dpmCheckerLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="dpm-integration-checker"
+            >
+              Preview payment methods by transaction
+            </a>
           </p>
         </div>
       </>

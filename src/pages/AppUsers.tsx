@@ -1,23 +1,34 @@
-import { useParams } from "react-router-dom";
-import { IconAdd } from "../components/Icons/IconAdd";
-import { Checkbox, Field, Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
-import { IconCheckbox } from "../components/Icons/IconCheckbox";
-import cn from "classnames";
-import { useEffect, useState } from "react";
-import { actionDeleteManyUsers, actionGetUsers, actionResetPasswords } from "../actions";
-import { ModelAppUser, ModelUserACL } from "../models";
-import { httpCraeteUser, httpTagsSet, httpUpdateAcl } from "../http";
-import { toast } from "react-toastify";
-import { IconDelete } from "../components/Icons/IconDelete";
-import { DateTime } from "luxon";
-import { IconSettings } from "../components/Icons/IconSettings";
+import {
+  Checkbox,
+  Field,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from '@headlessui/react';
+import cn from 'classnames';
+import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
+import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import {
+  actionDeleteManyUsers,
+  actionGetUsers,
+  actionResetPasswords,
+} from '../actions';
+import { IconAdd } from '../components/Icons/IconAdd';
+import { IconCheckbox } from '../components/Icons/IconCheckbox';
+import { IconDelete } from '../components/Icons/IconDelete';
+import { IconSettings } from '../components/Icons/IconSettings';
+import { httpCraeteUser, httpTagsSet, httpUpdateAcl } from '../http';
+import { ModelAppUser, ModelUserACL } from '../models';
 
-import "./AppUsers.scss"
-import { SubmitModal } from "../components/modal/SubmitModal";
-import { AclModal } from "../components/modal/AclModal";
-import { NewUserModal } from "../components/modal/NewUserModal";
-import { IconArrowDown } from "../components/Icons/IconArrowDown";
+import { IconArrowDown } from '../components/Icons/IconArrowDown';
+import { AclModal } from '../components/modal/AclModal';
+import { NewUserModal } from '../components/modal/NewUserModal';
+import { SubmitModal } from '../components/modal/SubmitModal';
+import './AppUsers.scss';
 
 export default function AppUsers() {
   let { appId } = useParams();
@@ -351,7 +362,6 @@ export default function AppUsers() {
             <div className="mr-2">
               <IconDelete />
             </div>
-
             Delete
           </button>
         </div>
@@ -368,8 +378,10 @@ export default function AppUsers() {
           Users
         </div>
         <div className="flex w-full md:w-auto items-center justify-end">
-
-          <button onClick={() => setShowNewUserModal(true)} className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela">
+          <button
+            onClick={() => setShowNewUserModal(true)}
+            className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+          >
             <IconAdd color="white" className="md:mr-2" />
             <span className="hidden md:block">Add User</span>
           </button>
@@ -377,7 +389,8 @@ export default function AppUsers() {
       </div>
       <div className="overflow-hidden">
         <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
-          There are no users yet, or you can add them by clicking the 'Add User' button
+          There are no users yet, or you can add them by clicking the 'Add User'
+          button
         </div>
 
         <div className="overflow-x-auto relative mb-4">
@@ -427,7 +440,10 @@ export default function AppUsers() {
                 return (
                   <tr
                     key={el._id}
-                    className={cn("", { "!bg-[#E7EDF9]": rowsSelected[index], "hover:!bg-[#F5F7F9]": !rowsSelected[index] })}
+                    className={cn('', {
+                      '!bg-[#E7EDF9]': rowsSelected[index],
+                      'hover:!bg-[#F5F7F9]': !rowsSelected[index],
+                    })}
                   >
                     <td className="pl-4 py-2 w-[32px] rounded-l-lg">
                       <Field className="flex items-center cursor-pointer">
@@ -447,7 +463,7 @@ export default function AppUsers() {
                       {el.lastName}
                     </td>
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      { }
+                      {}
                     </td>
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
                       {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
@@ -455,8 +471,8 @@ export default function AppUsers() {
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
                       {el.lastSeen
                         ? DateTime.fromISO(el.lastSeen).toFormat(
-                          'dd LLL yyyy t'
-                        )
+                            'dd LLL yyyy t'
+                          )
                         : '-'}
                     </td>
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
@@ -475,7 +491,6 @@ export default function AppUsers() {
               })}
             </tbody>
           </table>
-
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mx-8 my-[12px]">
@@ -487,7 +502,9 @@ export default function AppUsers() {
               <div className="text-[#71717A] mr-8">show</div>
               <Menu>
                 <MenuButton className="flex mr-4">
-                  <span className="text-brand-500 mr-4 font-semibold">{itemsPerTable}</span>
+                  <span className="text-brand-500 mr-4 font-semibold">
+                    {itemsPerTable}
+                  </span>
                   <IconArrowDown />
                 </MenuButton>
                 <MenuItems anchor="bottom" className="bg-white">
@@ -521,7 +538,6 @@ export default function AppUsers() {
               </Menu>
               <div className="text-[#71717A]">users</div>
             </div>
-
           </div>
           <div className="flex justify-center md:justify-end md:items-center">
             <ReactPaginate
@@ -529,7 +545,9 @@ export default function AppUsers() {
               onPageActive={(...args) => {
                 console.log({ args });
               }}
-              onPageChange={(selectedItem) => onPageChange(selectedItem.selected)}
+              onPageChange={(selectedItem) =>
+                onPageChange(selectedItem.selected)
+              }
               breakLabel="..."
               nextLabel=""
               pageRangeDisplayed={3}
@@ -544,9 +562,17 @@ export default function AppUsers() {
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
           <div className="title">Tags</div>
-          <div className="text-center mb-4 font-varela text-[18px]">Add Tags</div>
+          <div className="text-center mb-4 font-varela text-[18px]">
+            Add Tags
+          </div>
           <div>
-            <input type="text" placeholder="Tags" className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]" value={tags} onChange={(e) => setTags(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Tags"
+              className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+            />
           </div>
           <div className="buttons">
             <button
@@ -555,7 +581,10 @@ export default function AppUsers() {
             >
               Cancel
             </button>
-            <button onClick={onTagsSumbmit} className="w-full py-[12px] rounded-xl bg-brand-500 text-white">
+            <button
+              onClick={onTagsSumbmit}
+              className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+            >
               Submit
             </button>
           </div>

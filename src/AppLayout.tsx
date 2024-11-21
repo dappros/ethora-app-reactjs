@@ -1,15 +1,14 @@
+import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
 import { useAppStore } from './store/useAppStore';
-import { useEffect } from 'react';
 
 export default function AppLayout() {
   const user = useAppStore((s) => s.currentUser);
   const location = useLocation();
 
-
   useEffect(() => {
-    localStorage.setItem("lastPath", location.pathname);
+    localStorage.setItem('lastPath', location.pathname);
   }, [location]);
 
   if (!user) {

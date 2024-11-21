@@ -10,7 +10,7 @@ export default function AppHelmet() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if(!token) {
+    if (!token) {
       navigate('/login');
     }
   }, []);

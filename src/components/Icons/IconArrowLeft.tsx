@@ -4,7 +4,11 @@ interface Props {
   stroke?: string;
 }
 
-export function IconArrowLeft({ width = 16, height = 10, stroke="#8C8C8C" }: Props) {
+export function IconArrowLeft({
+  width = 16,
+  height = 10,
+  stroke = '#8C8C8C',
+}: Props) {
   return (
     <svg
       width={width}

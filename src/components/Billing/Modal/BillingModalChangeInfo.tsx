@@ -1,16 +1,24 @@
-import { ReactElement } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Box, Modal, TextField, Button, FormControlLabel, Checkbox, MenuItem } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+  Modal,
+  TextField,
+} from '@mui/material';
+import { ReactElement } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "90%",
-  maxWidth: "800px",
-  bgcolor: "background.paper",
-  borderRadius: "15px",
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '90%',
+  maxWidth: '800px',
+  bgcolor: 'background.paper',
+  borderRadius: '15px',
   boxShadow: 24,
   pb: 0,
 };
@@ -32,17 +40,24 @@ interface BillingInfoModalProps {
 }
 
 const timezones = [
-  "Pacific Time (PT)",
-  "Mountain Time (MT)",
-  "Central Time (CT)",
-  "Eastern Time (ET)",
+  'Pacific Time (PT)',
+  'Mountain Time (MT)',
+  'Central Time (CT)',
+  'Eastern Time (ET)',
 ];
 
-export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModalProps): ReactElement => {
-  const { register, handleSubmit, formState: { errors } } = useForm<BillingInfoFormInputs>();
+export const BillingModalChangeInfo = ({
+  isOpen,
+  handleClose,
+}: BillingInfoModalProps): ReactElement => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<BillingInfoFormInputs>();
 
   const onSubmit: SubmitHandler<BillingInfoFormInputs> = (data) => {
-    console.log("Form Data:", data);
+    console.log('Form Data:', data);
     handleClose();
   };
 
@@ -58,13 +73,12 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
           Billing Address
         </h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 px-6">
-
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
             <TextField
               size="small"
               label="Address"
               fullWidth
-              {...register("address", { required: "Address is required" })}
+              {...register('address', { required: 'Address is required' })}
               error={!!errors.address}
               helperText={errors.address?.message}
             />
@@ -72,7 +86,7 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               size="small"
               label="City"
               fullWidth
-              {...register("city", { required: "City is required" })}
+              {...register('city', { required: 'City is required' })}
               error={!!errors.city}
               helperText={errors.city?.message}
             />
@@ -83,7 +97,7 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               size="small"
               label="Country"
               fullWidth
-              {...register("country", { required: "Country is required" })}
+              {...register('country', { required: 'Country is required' })}
               error={!!errors.country}
               helperText={errors.country?.message}
             />
@@ -91,7 +105,9 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               size="small"
               label="State / Province / Region"
               fullWidth
-              {...register("state", { required: "State/Province/Region is required" })}
+              {...register('state', {
+                required: 'State/Province/Region is required',
+              })}
               error={!!errors.state}
               helperText={errors.state?.message}
             />
@@ -99,16 +115,16 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               size="small"
               label="Postal / Zip Code"
               fullWidth
-              {...register("zipCode", { required: "Postal/Zip Code is required" })}
+              {...register('zipCode', {
+                required: 'Postal/Zip Code is required',
+              })}
               error={!!errors.zipCode}
               helperText={errors.zipCode?.message}
             />
           </Box>
 
           <FormControlLabel
-            control={
-              <Checkbox {...register("isCompany")} />
-            }
+            control={<Checkbox {...register('isCompany')} />}
             label="I'm purchasing for a company"
           />
 
@@ -117,7 +133,7 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               size="small"
               label="Phone (optional)"
               fullWidth
-              {...register("phone")}
+              {...register('phone')}
             />
           </Box>
 
@@ -128,7 +144,7 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
               select
               fullWidth
               defaultValue={timezones[0]}
-              {...register("timezone", { required: "Timezone is required" })}
+              {...register('timezone', { required: 'Timezone is required' })}
               error={!!errors.timezone}
               helperText={errors.timezone?.message}
             >
@@ -138,7 +154,7 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
                 </MenuItem>
               ))}
             </TextField>
-          </Box>  
+          </Box>
 
           <Box className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 py-8">
             <Button
@@ -148,7 +164,12 @@ export const BillingModalChangeInfo = ({ isOpen, handleClose }: BillingInfoModal
             >
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="primary" className="w-full sm:w-auto">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className="w-full sm:w-auto"
+            >
               Save changes
             </Button>
           </Box>

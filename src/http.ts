@@ -31,7 +31,8 @@ http.interceptors.request.use((config) => {
     return config;
   }
 
-  config.headers.Authorization = httpTokens.token || localStorage.getItem('token');
+  config.headers.Authorization =
+    httpTokens.token || localStorage.getItem('token');
 
   return config;
 }, null);

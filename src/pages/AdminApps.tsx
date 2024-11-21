@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ApplicationPreview } from '../components/ApplicationPreview';
+import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
+import { NewAppModal } from '../components/modal/NewAppModal';
 import { httpGetApps } from '../http';
 import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import { NewAppModal } from '../components/modal/NewAppModal';
-import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 
 const ITEMS_COUNT = 5;
 
@@ -74,7 +74,10 @@ export default function AdminApps() {
         <div className="flex justify-between items-center px-4">
           <div className="font-varela text-[18px] md:text-2xl">Apps</div>
           <div>
-            <button onClick={() => setShowModal(true)} className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+            >
               <IconAdd color="white" className="md:mr-2" />
               <span className="hidden md:block">Create App</span>
             </button>
@@ -84,7 +87,14 @@ export default function AdminApps() {
       </div>
       {/* apps list */}
       <div className="">
-        <ApplicationStarterInf onClose={() => {}} />
+        {showStarterInf && (
+          <ApplicationStarterInf
+            onClose={() => {
+              setShowStarterInf(false);
+            }}
+          />
+        )}
+
         {apps.map((app) => (
           <ApplicationPreview
             key={app._id}
@@ -93,7 +103,9 @@ export default function AdminApps() {
           />
         ))}
       </div>
-      {showModal && <NewAppModal show={showModal} onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <NewAppModal show={showModal} onClose={() => setShowModal(false)} />
+      )}
     </>
   );
 }
