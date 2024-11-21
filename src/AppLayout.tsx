@@ -1,16 +1,43 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
 import { useAppStore } from './store/useAppStore';
+import { useEffect } from 'react';
+import { httpGetOneUser } from './http';
+import { actionAfterLogin } from './actions';
 
 export default function AppLayout() {
   const user = useAppStore((s) => s.currentUser);
-  // const navigate =
+  const navigate = useNavigate();
+  const location = useLocation();
+  const token = localStorage.getItem('token');
 
-  console.log('user is ', user);
+  useEffect(() => {
+    localStorage.setItem("lastPath", location.pathname);
+  }, [location]);
+
+  useEffect(() => {
+    const example = async () => {
+      if(token) {
+        const response = await httpGetOneUser();
+        if(response.status === 200) {
+          localStorage.setItem('token', response.data.token);
+          await actionAfterLogin(response.data);
+          const savedPath = localStorage.getItem("lastPath");
+          if (savedPath) {
+            navigate(savedPath);
+          } else {
+            navigate('/app/admin/apps');
+          }
+        }
+      }
+    };
+
+    example();
+  }, []);
+
 
   if (!user) {
-    console.log('no user');
-    return <Navigate to="/login2" replace></Navigate>;
+    return <Navigate to="/login" replace></Navigate>;
   } else {
     return (
       <div className="bg-gray-100 w-full min-h-screen flex justify-center">

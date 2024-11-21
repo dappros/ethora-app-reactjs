@@ -7,9 +7,12 @@ import { useAppStore } from './store/useAppStore';
 export default function AppHelmet() {
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
   const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    navigate('/login');
+    if(!token) {
+      navigate('/login');
+    }
   }, []);
 
   return (
