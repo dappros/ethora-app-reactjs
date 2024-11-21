@@ -24,37 +24,38 @@ export function MobileMenuModal({ onClose }: Props) {
     };
   }, []);
   return (
-    <Dialog className="mobile-menu-modal" open={true} onClose={() => onClose()}>
-      <DialogPanel className="inner">
-        <div className="mobile-menu-modal-top">
-          <button onClick={onClose}>
-            <IconClose />
-          </button>
+    <Dialog className="fixed inset-0 bg-black/30 flex justify-start items-stretch " open={true} onClose={() => onClose()}>
+      <DialogPanel className="bg-white relative rounded-r-xl p-4 w-8/12 flex flex-col justify-between">
+        <button className="absolute top-[24px] left-[16px]" onClick={onClose}>
+          <IconClose />
+        </button>
+        <div className="mt-[72px]">
+
           <NavLink
             to="/app/chat"
             onClick={onClose}
-            className="app-menu-mobile-btn"
+            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >
             <IconChat />
-            <span>Chats</span>
+            <span className="ml-2 group-aria-[current=page]:text-brand-500">Chats</span>
           </NavLink>
           <NavLink
             to="/app/admin/apps"
             onClick={onClose}
-            className="app-menu-mobile-btn"
+            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >
             <IconAdmin />
-            <span>Admin</span>
+            <span className="ml-2 group-aria-[current=page]:text-brand-500">Admin</span>
           </NavLink>
         </div>
-        <div className="mobile-menu-modal-bottom">
+        <div className="">
           <NavLink
             to="/app/settings"
             onClick={onClose}
-            className="app-menu-mobile-btn"
+            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >
             <IconSettings />
-            <span>Settings</span>
+            <span className="ml-2 group-aria-[current=page]:text-brand-500 font-sans ">Settings</span>
           </NavLink>
         </div>
       </DialogPanel>
