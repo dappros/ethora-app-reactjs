@@ -37,31 +37,28 @@ export function Visibility() {
   }, [isAssetsOpen]);
 
   return (
-    <>
-      <div className="subtitle1 mbc-16">Profile Visiblility</div>
+    <div className="md:ml-4">
+      <div className="font-sans font-semibold text-[16px] mb-4">Profile Visiblility</div>
       <RadioGroup
         value={isProfileOpen}
         onChange={(value) => {
           setIsProfileOpen(value);
         }}
         aria-label="Server size"
+        className="mb-8"
       >
-        <RadioButton value={true} label="Open (default)" />
-        <p className="caption">
+        <RadioButton value={true} label="Open (default)" className="mb-2" />
+        <p className="font-sans text-[12px] text-[#8C8C8C] mb-4">
           Your profile can be viewed by anyone who follows your profile link or
           QR code
         </p>
-        <RadioButton value={false} label="Restricted" />
-        {/* <Field className="radio-button">
-          <Radio value={false} className="radio-button-input"></Radio>
-          <Label className="body2 radio-button-label">Restricted</Label>
-        </Field> */}
-        <p className="caption mbc-32">
+        <RadioButton value={false} label="Restricted" className="mb-2" />
+        <p className="font-sans text-[12px] text-[#8C8C8C]">
           Only users with your permission or temporary secure link can see your
           profile
         </p>
       </RadioGroup>
-      <div className="subtitle1 mbc-16">Documents Visiblility</div>
+      <div className="font-sans font-semibold text-[16px] mb-4">Documents Visiblility</div>
       <RadioGroup
         value={isAssetsOpen}
         onChange={(value) => {
@@ -69,16 +66,16 @@ export function Visibility() {
         }}
         aria-label="Server size"
       >
-        <RadioButton value={true} label="Full (default)" />
-        <p className="caption">
+        <RadioButton value={true} label="Full (default)" className="mb-2" />
+        <p className="font-sans text-[12px] text-[#8C8C8C] mb-4">
           Show all Documents to those who can see your profile
         </p>
-        <RadioButton value={false} label="Individual" />
-        <p className="caption mbc-32">
+        <RadioButton value={false} label="Individual" className="mb-2" />
+        <p className="font-sans text-[12px] text-[#8C8C8C]">
           You need to share each document individually before others can see
           them
         </p>
       </RadioGroup>
-    </>
+    </div>
   );
 }

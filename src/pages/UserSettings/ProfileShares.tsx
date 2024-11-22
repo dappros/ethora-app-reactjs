@@ -1,4 +1,4 @@
-import { Field, Select } from '@headlessui/react';
+import { Dialog, DialogPanel, Field, Select } from '@headlessui/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { IconInfo } from '../../components/Icons/IconInfo';
@@ -12,8 +12,9 @@ import { IconQr } from '../../components/Icons/IconQr';
 import { CreateProfileLinkModal } from '../../components/modal/CreateProfileLinkModal';
 import { QrModal } from '../../components/modal/QrModal';
 import { SubmitModal } from '../../components/modal/SubmitModal';
-import { TextInput } from '../../components/ui/TextInput';
 import { createSharedLink, deleteSharedLink, getSharedLinks } from '../../http';
+import { IconAdd } from '../../components/Icons/IconAdd';
+import { IconClose } from '../../components/Icons/IconClose';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = HOUR * 24;
@@ -85,62 +86,80 @@ export function ProfileShares() {
   const renderNewModal = () => {
     if (showNew) {
       return (
-        <CreateProfileLinkModal
-          onClose={() => {
-            setShowNew(false);
-          }}
-        >
-          <h2 className="title mbc-32">Create a Profile Sharing link</h2>
-          <p className="text-center mbc-32">
-            Send this link to your trusted contact(s) so they can access your
-            profile when you're in Restricted mode.
-          </p>
-          <div className="plate mbc-32">
-            <IconInfo />
-            You'll be able to remove this link any time if you change your mind.
-          </div>
-          <div className="subtitle1 mbc-32">Expiration</div>
-          <div className="caption">
-            If you set this, this link will only be valid for the given period
-            of time.
-          </div>
-          <Field className="profile-share-select-field mbc-32">
-            <Select
-              className="profile-share-select"
-              onChange={(e) => setExpirationTime(Number(e.target.value))}
-            >
-              <option value="-1">No Expiration</option>
-              <option value={HOUR}>1 hour</option>
-              <option value={DAY}>1 day</option>
-              <option value={WEEK}>1 week</option>
-              <option value={MONTH}>1 month</option>
-            </Select>
-          </Field>
-          <div className="subtitle1 mbc-16">Memo</div>
-          <div className="caption mbc-16">
-            Add an optional note so that you remember who you shared this with.
-          </div>
-          <TextInput
-            onChange={(e) => setMemo(e.target.value)}
-            placeholder="Add note"
-            className="gen-input gen-input-large mbc-32"
-          />
-          <div className="buttons">
-            <button
-              onClick={() => setShowNew(false)}
-              className="gen-secondary-btn mbc-16"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={doCreateNewLink}
-              className="gen-primary-btn mbc-16"
-            >
-              Continue
-            </button>
-          </div>
-          {loading && <Loading />}
-        </CreateProfileLinkModal>
+        <>
+          <Dialog
+            className="fixed inset-0 flex justify-center items-center bg-black/30"
+            open={true}
+            onClose={() => {
+              setShowNew(false);
+            }}
+          >
+            <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px] m-4 flex flex-col items-center">
+              <h2 className="font-varela text-[24px] mb-8 text-center pl-2">Create a Profile Sharing link</h2>
+              <div className="max-w-[512px] w-full">
+                <p className="font-sans text-[14px] text-center mb-8">
+                  Send this link to your trusted contact(s) so they can access your
+                  profile when you're in Restricted mode.
+                </p>
+                <div className="p-2 bg-[#F3F6FC] rounded-lg grid grid-cols-[16px,_1fr] gap-2 items-center mb-8">
+                  <IconInfo />
+                  <span className="text-[12px]">
+                    You'll be able to remove this link any time if you change your mind.
+                  </span>
+                </div>
+
+                <h3 className="font-semibold text-[16px] text-left mb-4">Expiration</h3>
+                <div className="text-[12px] text-[#8C8C8C] mb-4">
+                  If you set this, this link will only be valid for the given period of time.
+                </div>
+                <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
+                  <Select
+                    className="w-full bg-[#F5F7F9]"
+                    onChange={(e) => setExpirationTime(Number(e.target.value))}
+                  >
+                    <option value="-1">No Expiration</option>
+                    <option value={HOUR}>1 hour</option>
+                    <option value={DAY}>1 day</option>
+                    <option value={WEEK}>1 week</option>
+                    <option value={MONTH}>1 month</option>
+                  </Select>
+                </Field>
+                <div className="font-semibold text-[16px] text-left mb-4">Memo</div>
+                <div className="text-[12px] text-[#8C8C8C] mb-4">
+                  Add an optional note so that you remember who you shared this with.
+                </div>
+                <input
+                  type="text"
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="Add note"
+                  className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+                />
+                <div className="flex gap-8">
+                  <button
+                    onClick={() => setShowNew(false)}
+                    className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={doCreateNewLink}
+                    className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+
+              {loading && <Loading />}
+              <button
+                className="absolute top-[24px] right-[24px] md:top-[32px] md:right-[32px]"
+                onClick={() => setShowNew(false)}
+              >
+                <IconClose />
+              </button>
+            </DialogPanel>
+          </Dialog>
+        </>
       );
     }
   };
@@ -247,21 +266,22 @@ export function ProfileShares() {
   };
 
   return (
-    <div className="profile-shares">
-      <div className="subtitle1 mbc-16">Current Profile Shares</div>
-      <div className="caption">
+    <div className="md:ml-4">
+      <div className="font-sans font-semibold text-[16px] mb-2">Current Profile Shares</div>
+      <div className="text-[#8C8C8C] text-[12px] mb-4">
         Listed below are your currently active profile sharing links. You can
         share or delete them.
       </div>
-      <div className="card">
-        <div className="card-header">
-          <div className="subtitle1">List of shares</div>
+      <div className="border border-[#F0F0F0] rounded-xl p-4">
+        <div className="flex justify-between items-center">
+          <div className="font-sans font-semibold text-[16px]">List of shares</div>
           <div className="actions">
             <button
               onClick={() => setShowNew(true)}
-              className="gen-primary-btn"
+              className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
             >
-              + Add New Share
+              <IconAdd color="white" className="md:mr-2" />
+              <span className="hidden md:block">Add New Share</span>
             </button>
           </div>
         </div>

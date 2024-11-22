@@ -1,9 +1,9 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import QRCode from 'react-qr-code';
-import { CopyInput } from '../../components/ui/CopyInput';
-import { IconClose } from '../Icons/IconClose';
 
 import './QrModal.scss';
+import { CopyInput } from '../CopyInput';
+import { IconClose } from '../Icons/IconClose';
 
 interface Props {
   onClose: () => void;

@@ -53,22 +53,20 @@ export function ManageData() {
   };
 
   return (
-    <>
-      <div className="subtitle1 mb-8">Download your data</div>
-      <div className="caption mb-8">
+    <div className="md:ml-4">
+      <p className="font-sans text-regular font-semibold mb-2">Download your data</p>
+      <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
         You own your data. Tap the button below to download a copy of your data
       </div>
-      <div className="manage-btn mb-8">
-        <button className="gen-secondary-btn" onClick={onDownloadMyData}>
-          Download My Data
-        </button>
-      </div>
-      <div className="subtitle1 mb-8">Delete your data</div>
-      <div className="caption mb-8">
+      <button className="mb-8 rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2" onClick={onDownloadMyData}>
+        Download My Data
+      </button>
+      <div className="font-sans text-regular font-semibold mb-2">Delete your data</div>
+      <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
         Use this only if you want to permanently delete your account & data from
         our system.
       </div>
-      <div className="plate mb-8">
+      <div className="bg-[#F3F6FC] p-2 rounded-lg grid grid-cols-[16px,_1fr] gap-2 font-sans text-[12px] mb-4">
         <IconInfo />
         <p>
           Due to the immutable nature of distributed ledger technology, network
@@ -78,30 +76,28 @@ export function ManageData() {
           storage etc will be removed. Any of your digital assets will be lost.
         </p>
       </div>
-      <div className="manage-btn">
-        <button
-          className="gen-secondary-btn danger"
-          onClick={() => setWarning(true)}
-        >
-          Delete My Data
-        </button>
-      </div>
+      <button 
+        className="mb-8 rounded-xl border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2" 
+        onClick={() => setWarning(true)}
+      >
+        Delete My Account
+      </button>
       {warning && (
         <SubmitModal onClose={() => setWarning(false)}>
-          <div className="title">Warning</div>
-          <p className="text-center mbc-32">
+          <p className="font-varela text-[24px] text-center mb-8">Delete Account</p>
+          <p className="font-sans text-[14px] mb-8">
             {`Are you sure you want to delete your all data from the platform?`}
           </p>
-          <div className="buttons">
+          <div className="flex gap-8">
             <button
               onClick={() => setWarning(false)}
-              className="gen-secondary-btn medium"
+              className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
             >
               Cancel
             </button>
             <button
               onClick={() => onDelete()}
-              className="gen-primary-btn medium danger"
+              className="rounded-xl bg-red-600 border max-w-[416px] w-full text-center text-white p-2"
             >
               Submit
             </button>
@@ -109,6 +105,6 @@ export function ManageData() {
         </SubmitModal>
       )}
       {loading && <Loading />}
-    </>
+    </div>
   );
 }

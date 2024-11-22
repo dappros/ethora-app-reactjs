@@ -2,7 +2,6 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { IconClose } from '../Icons/IconClose';
 
 import { ReactNode } from 'react';
-import './SubmitModal.scss';
 
 interface Props {
   onClose: () => void;
@@ -11,10 +10,10 @@ interface Props {
 
 export function SubmitModal({ onClose, children }: Props) {
   return (
-    <Dialog className="submit-modal" open={true} onClose={onClose}>
-      <DialogPanel className="inner">
+    <Dialog className="fixed inset-0 flex justify-center items-center bg-black/30" open={true} onClose={onClose}>
+      <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px] m-4">
         {children}
-        <button className="close" onClick={() => onClose()}>
+        <button className="absolute top-[36px] right-[36px]" onClick={() => onClose()}>
           <IconClose />
         </button>
       </DialogPanel>

@@ -1,7 +1,17 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import TabApp from "../../components/TabApp";
+import { ManageData } from "./ManageData";
+import { Visibility } from "./Visibility";
+import { ProfileShares } from "./ProfileShares";
+import { DocumentShares } from "./DocumentShares";
+import { BlockedUsers } from "./BlockedUsers";
+import { Referrals } from "./Referrals";
+import { useAppStore } from "../../store/useAppStore";
+import { ModelCurrentUser } from "../../models";
 
 export default function UserSettings() {
+  const user = useAppStore((s) => s.currentUser as ModelCurrentUser);
+
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">
@@ -21,35 +31,44 @@ export default function UserSettings() {
           </TabList>
           <TabPanels className="h-full">
             <TabPanel
-              key="Appearance"
-              className="grid grid-rows-[auto,_368px] lg:grid-rows-1 lg:gap-x-[40px] lg:grid-cols-[416px,_1fr] md:ml-4 h-full "
+              key="Manage Data"
+              className=""
             >
-              app
+              <ManageData />
             </TabPanel>
             <TabPanel
-              key="Sign-on options"
+              key="Visiblility"
+              className="h-full "
+            >
+              <Visibility />
+            </TabPanel>
+            <TabPanel key="Profile Shares" className="h-full ">
+              <ProfileShares />
+            </TabPanel>
+            {/* <TabPanel
+              key="Visiblility"
               className="grid grid-rows-1 md:ml-4 h-full "
             >
-              sig
+              <Visibility />
             </TabPanel>
-            <TabPanel key="Web app" className="grid grid-rows-1 md:ml-4 h-full ">
-              web
+            <TabPanel key="Profile Shares" className="grid grid-rows-1 md:ml-4 h-full ">
+              <ProfileShares />
             </TabPanel>
             <TabPanel
-              key="Mobile app"
+              key="Document Shares"
               className="grid grid-rows-1 md:ml-4 h-full "
             >
-              mob
+              <DocumentShares />
             </TabPanel>
             <TabPanel
-              key="Home screen"
+              key="Blocked Users"
               className="grid grid-rows-1 md:ml-4 h-full "
             >
-              home
+              <BlockedUsers />
             </TabPanel>
-            <TabPanel key="Menu" className="grid grid-rows-1 md:ml-4 h-full ">
-              menu
-            </TabPanel>
+            <TabPanel key="Referrals" className="grid grid-rows-1 md:ml-4 h-full ">
+              <Referrals id={user._id} />
+            </TabPanel> */}
           </TabPanels>
         </TabGroup>
       </div>
