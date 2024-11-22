@@ -80,9 +80,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="font-sans text-sm">{app.stats.totalRegistered}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">368</span>
+              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyRegistered}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -91,9 +91,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="font-sans text-sm">{app.stats.totalSessions}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">368</span>
+              <span className="text-green-600 font-sans text-sm">{app.stats.recentlySessions}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -102,9 +102,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="font-sans text-sm">-</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">368</span>
+              <span className="text-green-600 font-sans text-sm">-</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -113,9 +113,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="font-sans text-sm">{app.stats.totalApiCalls}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">368</span>
+              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyApiCalls}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -124,9 +124,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="font-sans text-sm">{app.stats.totalFiles}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">368</span>
+              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyFiles}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -135,9 +135,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">1 987</span>{' '}
+              <span className="font-sans text-sm">{app.stats.totalTransactions}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">368</span>
+              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyTransactions}</span>
             </div>
           </div>
         </div>
