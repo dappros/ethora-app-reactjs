@@ -15,6 +15,7 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
+import TabApp from '../../components/TabApp';
 
 export function AppSettings() {
   let { appId } = useParams();
@@ -198,81 +199,15 @@ export function AppSettings() {
       </div>
       <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr]">
         <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0  border-b border-gray-200 md:px-4 md:border-b-0 overflow-auto  md:border-r md:border-gray-200">
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Appearance"
-            >
-              Appearance
-            </Tab>
-          </div>
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Sign-on options"
-            >
-              Sign-on options
-            </Tab>
-          </div>
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Web app"
-            >
-              Web app
-            </Tab>
-          </div>
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Mobile app"
-            >
-              Mobile app
-            </Tab>
-          </div>
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Home screen"
-            >
-              Home screen
-            </Tab>
-          </div>
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Menu"
-            >
-              Menu
-            </Tab>
-          </div>
-
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Chats"
-            >
-              Chats
-            </Tab>
-          </div>
-
-          <div className="md:border-b md:mb-2 md:border-gray-200">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="Visibility & Privacy"
-            >
-              Visibility & Privacy
-            </Tab>
-          </div>
-
-          <div className="md:mb-2">
-            <Tab
-              className="py-[10px] border-b-brand-500 px-[8px] data-[selected]:border-b data-[selected]:text-brand-500 md:py-3 whitespace-nowrap md:min-w-[115px] md:data-[selected]:border-b-0 md:rounded-xl md:mb-2 md:w-full md:px-4 md:text-left md:text-base md:hover:bg-gray-100 md:data-[selected]:bg-brand-100"
-              key="API"
-            >
-              API
-            </Tab>
-          </div>
+          <TabApp text="Appearance" />
+          <TabApp text="Sign-on options" />
+          <TabApp text="Web app" />
+          <TabApp text="Mobile app" />
+          <TabApp text="Home screen" />
+          <TabApp text="Menu" />
+          <TabApp text="Chats" />
+          <TabApp text="Visibility & Privacy" />
+          <TabApp text="API" last />
         </TabList>
         <TabPanels className="h-full">
           <TabPanel
