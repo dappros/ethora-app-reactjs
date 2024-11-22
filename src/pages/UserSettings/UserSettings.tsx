@@ -1,7 +1,7 @@
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import TabApp from "../components/TabApp";
+import { TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import TabApp from "../../components/TabApp";
 
-export default function Settings() {
+export default function UserSettings() {
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">

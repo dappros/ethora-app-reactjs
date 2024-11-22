@@ -13,7 +13,7 @@ import LoginComponent from './pages/AuthPage/Login';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
+import UserSettings from './pages/UserSettings/UserSettings';
 
 const App = lazy(() => import('./App'));
 
@@ -84,7 +84,7 @@ export const router = createBrowserRouter(
                 },
                 {
                   path: 'settings',
-                  Component: Settings,
+                  Component: UserSettings,
                 },
               ],
             },
