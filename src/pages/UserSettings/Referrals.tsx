@@ -4,9 +4,8 @@ import { toast } from 'react-toastify';
 import referralsImg from '../../assets/earncoins.png';
 import { IconCoin } from '../../components/Icons/IconCoin';
 import { Loading } from '../../components/Loading';
-import { CopyInput } from '../../components/ui/CopyInput';
-import { TextInput } from '../../components/ui/TextInput';
 import { applyReferalCode } from '../../http';
+import { CopyInput } from '../../components/CopyInput';
 
 interface Props {
   id: string;
@@ -28,40 +27,43 @@ export function Referrals({ id }: Props) {
       .finally(() => setLoading(false));
   };
   return (
-    <div className="referrals">
-      <img className="mbc-32" src={referralsImg} alt="" />
-      <div className="text-with-coins subtitle1 mbc-32">
+    <div className="referrals flex flex-col items-center">
+      <img className="mb-8" src={referralsImg} alt="" />
+      <div className="text-center font-semibold mb-8 text-[16px]">
         Gift friends{' '}
-        <span className="coin-span">
+        <span className="relative inline-flex mr-[25px]">
           25
-          <IconCoin />
+          <div className="absolute right-[-22px]">
+            <IconCoin />
+          </div>
         </span>
         and receive{' '}
-        <span className="coin-span">
+        <span className="relative inline-flex mr-[25px]">
           25
-          <IconCoin />
+          <div className="absolute right-[-22px]">
+            <IconCoin />
+          </div>
         </span>
         . Send friends invite with your personal invitation code.
       </div>
-      <div className="subtitle1 mbc-16">Your invitation code</div>
-      <div className="control mbc-32">
+      <div className="text-center text-[16px] mb-4">Your invitation code</div>
+      <div className="max-w-[512px] w-full mb-8">
         <CopyInput value={id} />
       </div>
-      <div className="subtitle1 mbc-16">
+      <div className="text-regular font-semibold mb-4">
         Or enter your referral code to earn coins
       </div>
-      <div className="control">
+      <div className="max-w-[512px] w-full mb-8">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="control mbc-16">
-            <TextInput
-              placeholder="Your referral code"
-              className="gen-input gen-input-large mbc-16"
-              {...register('referrerId', { required: true })}
-            />
+          <div className="">
+          <input 
+            type="text"
+            placeholder='Your referral code'
+            className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+            {...register('referrerId', { required: true })}
+          />
           </div>
-          <div className="control">
-            <button className="gen-primary-btn">Earn Coins</button>
-          </div>
+          <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white">Earn Coins</button>
         </form>
       </div>
       {loading && <Loading />}

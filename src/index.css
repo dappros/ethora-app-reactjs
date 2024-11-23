@@ -12,12 +12,12 @@
   --border-primary: #f0f0f0;
 }
 
-/* .hide-scroll::-webkit-scrollbar {
+.hide-scroll::-webkit-scrollbar {
   display: none;
-} */
+}
 
 
-* {
+.thin-scroll {
   scrollbar-width: thin; /* Make the scrollbar thinner */
   scrollbar-color: #D9D9D9 transparent; /* Color of the thumb and track */
 }

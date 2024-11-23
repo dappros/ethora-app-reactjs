@@ -52,30 +52,16 @@ export default function UserSettings() {
             >
               <DocumentShares />
             </TabPanel>
-            {/* <TabPanel
-              key="Visiblility"
-              className="grid grid-rows-1 md:ml-4 h-full "
-            >
-              <Visibility />
-            </TabPanel>
-            <TabPanel key="Profile Shares" className="grid grid-rows-1 md:ml-4 h-full ">
-              <ProfileShares />
-            </TabPanel>
-            <TabPanel
-              key="Document Shares"
-              className="grid grid-rows-1 md:ml-4 h-full "
-            >
-              <DocumentShares />
-            </TabPanel>
             <TabPanel
               key="Blocked Users"
               className="grid grid-rows-1 md:ml-4 h-full "
             >
-              <BlockedUsers />
+              {/* <BlockedUsers /> */}
             </TabPanel>
+
             <TabPanel key="Referrals" className="grid grid-rows-1 md:ml-4 h-full ">
               <Referrals id={user._id} />
-            </TabPanel> */}
+            </TabPanel>
           </TabPanels>
         </TabGroup>
       </div>
