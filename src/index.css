@@ -49,3 +49,11 @@ tr:nth-child(even) {
 .brand-path-fill {
   fill: var(--bg-brand-primary) !important;
 }
+
+.active .brand-path-fill-if-active {
+  fill: var(--bg-brand-primary) !important;
+}
+
+.active .brand-path-stroke-if-active {
+  stroke: var(--bg-brand-primary) !important;
+}

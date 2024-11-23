@@ -3,9 +3,9 @@ import profileImage from '../assets/profile-image.png';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconChat } from './Icons/IconChat';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
-import { IconSettings } from './Icons/IconSettings';
 import { useState } from 'react';
 import { MobileMenuModal } from './modal/MobileMenuModal';
+import { IconSettingsMenu } from './Icons/IconSettingsMenu';
 
 export function AppMenu() {
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
@@ -50,7 +50,7 @@ export function AppMenu() {
           to="/app/settings"
           className="hidden flex-col items-center justify-center md:flex md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
-          <IconSettings />
+          <IconSettingsMenu />
           <div className="hidden md:block text-center font-sans text-sm">
             Settings
           </div>
