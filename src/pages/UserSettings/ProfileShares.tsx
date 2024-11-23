@@ -9,13 +9,11 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { IconCopy } from '../../components/Icons/IconCopy';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { IconQr } from '../../components/Icons/IconQr';
-import { CreateProfileLinkModal } from '../../components/modal/CreateProfileLinkModal';
 import { QrModal } from '../../components/modal/QrModal';
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import { createSharedLink, deleteSharedLink, getSharedLinks } from '../../http';
 import { IconAdd } from '../../components/Icons/IconAdd';
 import { IconClose } from '../../components/Icons/IconClose';
-import cn from 'classnames'
 
 const HOUR = 60 * 60 * 1000;
 const DAY = HOUR * 24;
@@ -192,7 +190,7 @@ export function ProfileShares() {
   const renderItems = () => {
     if (items.length) {
       return (
-        <div className="profile-shares-table-outer">
+        <div className="w-full overflow-auto hide-scroll">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#FCFCFC]">
@@ -209,12 +207,12 @@ export function ProfileShares() {
                     key={el._id}
                     className="hover:!bg-[#F5F7F9]"
                   >
-                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl">{el.memo ? el.memo : '-'}</td>
-                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm">
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl whitespace-nowrap">{el.memo ? el.memo : '-'}</td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">
                       {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
                     </td>
-                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm">{renderExpiration(Number(el.expiration))}</td>
-                    <td className="px-4 py-[12px] font-sans font-normal text-sm rounded-r-xl text-center">
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">{renderExpiration(Number(el.expiration))}</td>
+                    <td className="px-4 py-[12px] font-sans font-normal text-sm rounded-r-xl text-center whitespace-nowrap">
                       <div className="inline-flex justify-between">
                         <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowQr(el)}>
                           <IconQr />
@@ -232,7 +230,6 @@ export function ProfileShares() {
                           <IconDelete />
                         </button>
                       </div>
-
                     </td>
                   </tr>
                 );
@@ -283,7 +280,7 @@ export function ProfileShares() {
       <div className="border border-[#F0F0F0] rounded-xl p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="font-sans font-semibold text-[16px]">List of shares</div>
-          <div className="actions">
+          <div className="">
             <button
               onClick={() => setShowNew(true)}
               className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"

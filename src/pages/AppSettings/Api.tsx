@@ -10,7 +10,7 @@ interface Props {
 
 export const Api = ({ app }: Props) => {
   return (
-    <div className="">
+    <div className="overflow-hidden">
       <div className="font-semibold font-sans text-normal mb-4">
         App Access Key
       </div>
@@ -26,7 +26,7 @@ export const Api = ({ app }: Props) => {
       </p>
 
       <div className="p-4 border border-gray-200 rounded-xl">
-        <div className="mx-2">
+        <div className="mx-2 hidden-scroll overflow-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#FCFCFC]">
@@ -46,7 +46,7 @@ export const Api = ({ app }: Props) => {
                     <CopyButton value={app._id} />
                   </div>
                 </td>
-                <td className=" px-4 font-sans font-normal text-sm text-center rounded-r-lg">
+                <td className=" px-4 font-sans font-normal text-sm text-center rounded-r-lg whitespace-nowrap">
                   <div className="flex justify-items-center">
                     <Secret className="mr-2" value={app.appSecret} />
                     <CopyButton value={app.appSecret} />

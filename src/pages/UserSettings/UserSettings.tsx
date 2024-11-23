@@ -29,7 +29,7 @@ export default function UserSettings() {
             <TabApp text="Blocked Users" />
             <TabApp text="Referrals" last />
           </TabList>
-          <TabPanels className="h-full">
+          <TabPanels className="h-full overflow-hidden">
             <TabPanel
               key="Manage Data"
               className=""
@@ -42,8 +42,15 @@ export default function UserSettings() {
             >
               <Visibility />
             </TabPanel>
-            <TabPanel key="Profile Shares" className="h-full ">
+            <TabPanel key="Profile Shares" className="h-full overflow-hidden ">
               <ProfileShares />
+            </TabPanel>
+            {/* grid grid-rows-1 md:ml-4 h-full  */}
+            <TabPanel
+              key="Document Shares"
+              className=""
+            >
+              <DocumentShares />
             </TabPanel>
             {/* <TabPanel
               key="Visiblility"

@@ -187,7 +187,7 @@ export function AppSettings() {
         </div>
         <div className="flex w-full md:w-auto items-center">
           <button onClick={onExternalClick} className="mr-4">
-            <IconExternalLink color={app.primaryColor} />
+            <IconExternalLink />
           </button>
           <button
             onClick={onSave}
@@ -209,7 +209,7 @@ export function AppSettings() {
           <TabApp text="Visibility & Privacy" />
           <TabApp text="API" last />
         </TabList>
-        <TabPanels className="h-full">
+        <TabPanels className="h-full overflow-hidden">
           <TabPanel
             key="Appearance"
             className="grid grid-rows-[auto,_368px] xl:grid-rows-1 xl:gap-x-[40px] xl:grid-cols-[416px,_1fr] md:ml-4 h-full "
@@ -284,7 +284,7 @@ export function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="Chats" className="grid grid-rows-1 md:ml-4 h-full">
+          <TabPanel key="Chats" className="grid overflow-hidden grid-rows-1 md:ml-4 h-full">
             <Chats />
           </TabPanel>
 

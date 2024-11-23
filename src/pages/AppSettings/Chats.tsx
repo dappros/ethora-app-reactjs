@@ -45,7 +45,7 @@ export function Chats() {
   };
 
   return (
-    <div>
+    <div className="overflow-hidden">
       <p className="font-semibold font-sans text-[16px] mb-2">New Chats</p>
 
       <Field className="flex items-center cursor-pointer mb-2">
@@ -80,7 +80,7 @@ export function Chats() {
             </button>
           </div>
         </div>
-        <div className="mx-2">
+        <div className="mx-2 overflow-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#FCFCFC]">
@@ -130,16 +130,16 @@ export function Chats() {
                         </Checkbox>
                       </Field>
                     </td>
-                    <td className="px-4 py-[20px] font-sans font-normal text-sm">
+                    <td className="px-4 py-[20px] font-sans font-normal text-sm  whitespace-nowrap">
                       {el.title}
                     </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center">
+                    <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                       Public
                     </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center">
+                    <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                       Visible
                     </td>
-                    <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
+                    <td className="px-4 rounded-r-lg font-sans font-normal text-sm  whitespace-nowrap">
                       You may replace this with your own hidden Chat.
                     </td>
                   </tr>

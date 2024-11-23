@@ -106,14 +106,14 @@ export function MobileApp({
           onClick={() => plistFileRef.current?.click()}
           className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4"
         >
-          <IconUpload stroke={primaryColor}></IconUpload>
+          <IconUpload></IconUpload>
           <span className="ml-2">Upload</span>
         </button>
         <div className="font-semibold text-sm mb-2">
           Push Notifications Certificate (Apple)
         </div>
         <button className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4">
-          <IconUpload stroke={primaryColor}></IconUpload>
+          <IconUpload></IconUpload>
           <span className="ml-2">Upload</span>
         </button>
       </div>

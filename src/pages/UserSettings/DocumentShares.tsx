@@ -1,4 +1,4 @@
-import { Field, Select } from '@headlessui/react';
+import { Dialog, DialogPanel, Field, Select } from '@headlessui/react';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -11,7 +11,6 @@ import { Loading } from '../../components/Loading';
 import { CreateProfileLinkModal } from '../../components/modal/CreateProfileLinkModal';
 import { QrModal } from '../../components/modal/QrModal';
 import { SubmitModal } from '../../components/modal/SubmitModal';
-import { TextInput } from '../../components/ui/TextInput';
 import {
   createSharedLink,
   deleteSharedLink,
@@ -20,6 +19,8 @@ import {
 } from '../../http';
 import { ModelCurrentUser } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
+import { IconAdd } from '../../components/Icons/IconAdd';
+import { IconClose } from '../../components/Icons/IconClose';
 
 interface ModelProfileShare {
   createdAt: string;
@@ -136,85 +137,111 @@ export function DocumentShares() {
   const renderNewModal = () => {
     if (showNew) {
       return (
-        <CreateProfileLinkModal
-          onClose={() => {
-            setShowNew(false);
-          }}
-        >
-          <h2 className="title mbc-32">Create a Profile Sharing link</h2>
-          <p className="text-center mbc-32">
-            Send this link to your trusted contact(s) so they can access your
-            profile when you're in Restricted mode.
-          </p>
-          <div className="plate mbc-32">
-            <IconInfo />
-            You'll be able to remove this link any time if you change your mind.
-          </div>
-          <div className="subtitle1 mbc-32">Expiration</div>
-          <div className="caption">
-            If you set this, this link will only be valid for the given period
-            of time.
-          </div>
-          <div className="subtitle1 mbc-32">Document</div>
-          <Field className="profile-share-select-field mbc-32">
-            <Select
-              className="profile-share-select"
-              onChange={(e) => {
-                setDocumentForShare(e.target.value);
-              }}
-            >
-              <option value="-1">Choose Document</option>
-              {documents.map((el) => {
-                return (
-                  <option key={el._id} value={el._id}>
-                    <span>
-                      <span>{el.documentName}</span>
+        <>
+          <Dialog
+            className="fixed inset-0 flex justify-center items-center bg-black/30"
+            open={true}
+            onClose={() => {
+              setShowNew(false);
+            }}
+          >
+            <DialogPanel className="p-8 bg-white grid grid-rows-[1fr,_48px]  rounded-2xl h-[calc(100vh-32px)] relative w-full max-w-[640px] m-4">
+              <div className="grid overflow-auto grid-rows-[96px,_1fr]">
+                <div>
+                  <h2 className="font-varela text-[24px] text-center pl-2">
+                    Create a Document Sharing link
+                  </h2>
+                </div>
+                <div className="overflow-auto">
+                  <p className="font-sans text-[14px] text-center mb-8">
+                    Send this link to your trusted contact(s) so they can access your
+                    profile when you're in Restricted mode.
+                  </p>
+                  <div className="p-2 bg-[#F3F6FC] rounded-lg grid grid-cols-[16px,_1fr] gap-2 items-center mb-8">
+                    <IconInfo />
+                    <span className="text-[12px]">
+                      You'll be able to remove this link any time if you change your mind.
                     </span>
-                  </option>
-                );
-              })}
-            </Select>
-          </Field>
-          <div className="caption">
-            Choose the Document you would like to share.
-          </div>
-          <Field className="profile-share-select-field mbc-32">
-            <Select
-              className="profile-share-select"
-              onChange={(e) => setExpirationTime(Number(e.target.value))}
-            >
-              <option value="-1">No Expiration</option>
-              <option value={HOUR}>1 hour</option>
-              <option value={DAY}>1 day</option>
-              <option value={WEEK}>1 week</option>
-              <option value={MONTH}>1 month</option>
-            </Select>
-          </Field>
-          <div className="subtitle1 mbc-16">Memo</div>
-          <div className="caption mbc-16">
-            Add an optional note so that you remember who you shared this with.
-          </div>
-          <TextInput
-            onChange={(e) => setMemo(e.target.value)}
-            placeholder="Add note"
-            className="gen-input gen-input-large mbc-32"
-          />
-          <div className="buttons">
-            <button
-              onClick={() => setShowNew(false)}
-              className="gen-secondary-btn mbc-16"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={doCreateNewLink}
-              className="gen-primary-btn mbc-16"
-            >
-              Continue
-            </button>
-          </div>
-          {loading && <Loading />}
-        </CreateProfileLinkModal>
+                  </div>
+
+                  <h3 className="font-semibold text-[16px] text-left mb-4">Expiration</h3>
+                  <div className="text-[12px] text-[#8C8C8C] mb-4">
+                    If you set this, this link will only be valid for the given period of time.
+                  </div>
+                  <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
+                    <Select
+                      className="w-full bg-[#F5F7F9]"
+                      onChange={(e) => setExpirationTime(Number(e.target.value))}
+                    >
+                      <option value="-1">No Expiration</option>
+                      <option value={HOUR}>1 hour</option>
+                      <option value={DAY}>1 day</option>
+                      <option value={WEEK}>1 week</option>
+                      <option value={MONTH}>1 month</option>
+                    </Select>
+                  </Field>
+
+
+                  <h3 className="font-semibold text-[16px] text-left mb-4">Document</h3>
+                  <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
+                    <Select
+                      className="w-full bg-[#F5F7F9]"
+                      onChange={(e) => {
+                        setDocumentForShare(e.target.value);
+                      }}
+                    >
+                      <option value="-1">Choose Document</option>
+                      {documents.map((el) => {
+                        return (
+                          <option key={el._id} value={el._id}>
+                            <span>
+                              <span>{el.documentName}</span>
+                            </span>
+                          </option>
+                        );
+                      })}
+                    </Select>
+                  </Field>
+
+                  <div className="font-semibold text-[16px] text-left mb-4">Memo</div>
+                  <div className="text-[12px] text-[#8C8C8C] mb-4">
+                    Add an optional note so that you remember who you shared this with.
+                  </div>
+                  <input
+                    type="text"
+                    onChange={(e) => setMemo(e.target.value)}
+                    placeholder="Add note"
+                    className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-8">
+                <button
+                  onClick={() => setShowNew(false)}
+                  className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={doCreateNewLink}
+                  className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+                >
+                  Continue
+                </button>
+              </div>
+
+
+              {loading && <Loading />}
+              <button
+                className="absolute top-[24px] right-[24px] md:top-[32px] md:right-[32px]"
+                onClick={() => setShowNew(false)}
+              >
+                <IconClose />
+              </button>
+            </DialogPanel>
+          </Dialog>
+        </>
+
       );
     }
   };
@@ -222,102 +249,111 @@ export function DocumentShares() {
   const renderItems = () => {
     if (items.length) {
       return (
-        <table className="profile-shares-table">
-          <thead>
-            <tr>
-              <th>Document Name</th>
-              <th>Memo</th>
-              <th>Creation Date</th>
-              <th>Expired Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((el) => {
-              return (
-                <tr key={el._id}>
-                  <td>{el.targetRecordId}</td>
-                  <td>{el.memo ? el.memo : '-'}</td>
-                  <td>
-                    {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
-                  </td>
-                  <td>{renderExpiration(Number(el.expiration))}</td>
-                  <td className="actions">
-                    <button onClick={() => setShowQr(el)}>
-                      <IconQr />
-                    </button>
-                    <CopyToClipboard
-                      text={`${import.meta.env.VITE_API}/docs/share/${el.token}`}
-                      onCopy={() => toast.success('Copied')}
-                    >
-                      <button>
-                        <IconCopy />
-                      </button>
-                    </CopyToClipboard>
-                    <button onClick={() => setShowDelete(el)}>
-                      <IconDelete />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          {showDelete && (
-            <SubmitModal onClose={() => setShowDelete(undefined)}>
-              <div className="title">Delete Share Link</div>
-              <p className="text-center mbc-32">
-                {`Are you sure you want to delete share link?`}
-              </p>
-              <div className="buttons">
-                <button
-                  onClick={() => setShowDelete(undefined)}
-                  className="gen-secondary-btn medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => onDelete()}
-                  className="gen-primary-btn medium danger"
-                >
-                  Submit
-                </button>
-                {loading && <Loading />}
-              </div>
-            </SubmitModal>
-          )}
-          {showQr && (
-            <QrModal
-              path={`${import.meta.env.VITE_API}/docs/share/${showQr.token}`}
-              onClose={() => setShowQr(undefined)}
-            ></QrModal>
-          )}
-        </table>
+        <div className="w-full overflow-auto hide-scroll">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-[#FCFCFC]">
+                <th className="rounded-l-lg r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Document Name</th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Memo</th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Creation Date</th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Expired Date</th>
+                <th className="rounded-r-lg  px-4 py-2 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((el) => {
+                return (
+                  <tr
+                    key={el._id}
+                    className="hover:!bg-[#F5F7F9]"
+                  >
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl whitespace-nowrap">{el.targetRecordId}</td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap" >{el.memo ? el.memo : '-'}</td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">
+                      {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
+                    </td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">{renderExpiration(Number(el.expiration))}</td>
+                    <td className="px-4 py-[12px] text-center font-sans font-normal text-sm whitespace-nowrap rounded-r-xl">
+                      <div className="inline-flex justify-between">
+                        <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowQr(el)}>
+                          <IconQr />
+                        </button>
+                        <CopyToClipboard
+                          text={`${import.meta.env.VITE_API}/docs/share/${el.token}`}
+                          onCopy={() => toast.success('Copied')}
+                        >
+                          <button className="w-[32px] h-[32px] flex items-center justify center">
+                            <IconCopy />
+                          </button>
+                        </CopyToClipboard>
+                        <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowDelete(el)}>
+                          <IconDelete />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            {showDelete && (
+              <SubmitModal onClose={() => setShowDelete(undefined)}>
+                <div className="font-varela text-[24px] text-center mb-8">Delete Share Link</div>
+                <p className="font-sans text-[14px] mb-8 text-center">
+                  {`Are you sure you want to delete share link?`}
+                </p>
+                <div className="flex gap-8">
+                  <button
+                    onClick={() => setShowDelete(undefined)}
+                    className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => onDelete()}
+                    className="rounded-xl bg-red-600 border max-w-[416px] w-full text-center text-white p-2"
+                  >
+                    Submit
+                  </button>
+                  {loading && <Loading />}
+                </div>
+              </SubmitModal>
+            )}
+            {showQr && (
+              <QrModal
+                path={`${import.meta.env.VITE_API}/docs/share/${showQr.token}`}
+                onClose={() => setShowQr(undefined)}
+              ></QrModal>
+            )}
+          </table>
+        </div>
+
       );
     }
   };
 
   return (
-    <div className="profile-shares">
-      <div className="subtitle1 mbc-16">Current Document Shares</div>
-      <div className="caption">
+    <div className="document-shares md:ml-4">
+      <div className="font-sans font-semibold text-[16px] mb-2">Current Document Shares</div>
+      <div className="text-[#8C8C8C] text-[12px] mb-4">
         Listed below are your currently active document sharing links. You can
         share or delete them.
       </div>
-      <div className="card">
-        <div className="card-header">
-          <div className="subtitle1">List of shares</div>
-          <div className="actions">
+      <div className="border border-[#F0F0F0] rounded-xl p-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="font-sans font-semibold text-[16px]">List of shares</div>
+          <div className="">
             {' '}
             <button
               onClick={() => setShowNew(true)}
-              className="gen-primary-btn"
+              className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
             >
-              + Add New Share
+              <IconAdd color="white" className="md:mr-2" />
+              <span className="hidden md:block">Add New Share</span>
             </button>
           </div>
         </div>
         {!items.length && (
-          <div className="plate">
+          <div className="bg-[#F3F6FC] py-[16px] font-sans text-[14px] px-[16px] rounded-xl">
             There are no shares yet, or you can add them by clicking the “Add
             New Share” button
           </div>

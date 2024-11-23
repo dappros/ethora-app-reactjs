@@ -18,40 +18,40 @@ export function AppMenu() {
       <div className="hidden md:flex flex-col">
         <NavLink
           to="/app/chat"
-          className="flex flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <IconChat />
-          <div className="text-center font-sans text-sm">Chats</div>
+          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">Chats</div>
         </NavLink>
         <div className="my-2 border-b border-b-gray-200"></div>
         <NavLink
           to="/app/admin"
-          className="flex flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <IconAdmin />
-          <div className="text-center font-sans text-sm">Admin</div>
+          <div className="text-center group-aria-[current=page]:text-brand-500 font-sans text-sm">Admin</div>
         </NavLink>
       </div>
       <div>
         <NavLink
           to="/app/profile"
-          className="flex flex-col items-center md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+          className="flex hover:bg-[#F5F7F9] group flex-col items-center md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <div
             className="bg-cover w-[40px] h-[40px] rounded-full"
             style={{ backgroundImage: `url(${profileImage})` }}
           ></div>
-          <div className="hidden md:block text-center font-sans text-sm">
+          <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-sm ">
             Profile
           </div>
         </NavLink>
         <div className="hidden md:block my-2 border-b border-b-gray-200"></div>
         <NavLink
           to="/app/settings"
-          className="hidden flex-col items-center justify-center md:flex md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+          className="hidden group hover:bg-[#F5F7F9] flex-col items-center justify-center md:flex md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <IconSettingsMenu />
-          <div className="hidden md:block text-center font-sans text-sm">
+          <div className="hidden md:block text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
             Settings
           </div>
         </NavLink>
