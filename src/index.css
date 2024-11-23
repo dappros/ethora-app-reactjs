@@ -38,6 +38,14 @@ table td.r-delimiter::after {
   top: 15px;
 }
 
-tr:nth-child(2) {
+tr:nth-child(even) {
   background-color: #fcfcfc;
+}
+
+.brand-path-stroke {
+  stroke: var(--bg-brand-primary) !important;
+}
+
+.brand-path-fill {
+  fill: var(--bg-brand-primary) !important;
 }

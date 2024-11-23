@@ -15,6 +15,7 @@ import { SubmitModal } from '../../components/modal/SubmitModal';
 import { createSharedLink, deleteSharedLink, getSharedLinks } from '../../http';
 import { IconAdd } from '../../components/Icons/IconAdd';
 import { IconClose } from '../../components/Icons/IconClose';
+import cn from 'classnames'
 
 const HOUR = 60 * 60 * 1000;
 const DAY = HOUR * 24;
@@ -192,39 +193,46 @@ export function ProfileShares() {
     if (items.length) {
       return (
         <div className="profile-shares-table-outer">
-          <table className="profile-shares-table">
+          <table className="w-full border-collapse">
             <thead>
-              <tr>
-                <th>Memo</th>
-                <th>Creation Date</th>
-                <th>Expired Date</th>
-                <th>Action</th>
+              <tr className="bg-[#FCFCFC]">
+                <th className="rounded-l-lg r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Memo</th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Creation Date</th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Expired Date</th>
+                <th className="rounded-r-lg text-center px-4 py-2 text-gray-500 font-normal font-inter text-xs whitespace-nowrap">Action</th>
               </tr>
             </thead>
             <tbody>
               {items.map((el) => {
                 return (
-                  <tr key={el._id}>
-                    <td>{el.memo ? el.memo : '-'}</td>
-                    <td>
+                  <tr
+                    key={el._id}
+                    className="hover:!bg-[#F5F7F9]"
+                  >
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl">{el.memo ? el.memo : '-'}</td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm">
                       {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
                     </td>
-                    <td>{renderExpiration(Number(el.expiration))}</td>
-                    <td className="actions">
-                      <button onClick={() => setShowQr(el)}>
-                        <IconQr />
-                      </button>
-                      <CopyToClipboard
-                        text={`${window.location.origin}/public/${el.walletAddress}/${el.token}`}
-                        onCopy={() => toast.success('Copied')}
-                      >
-                        <button>
-                          <IconCopy />
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm">{renderExpiration(Number(el.expiration))}</td>
+                    <td className="px-4 py-[12px] font-sans font-normal text-sm rounded-r-xl text-center">
+                      <div className="inline-flex justify-between">
+                        <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowQr(el)}>
+                          <IconQr />
                         </button>
-                      </CopyToClipboard>
-                      <button onClick={() => setShowDelete(el)}>
-                        <IconDelete />
-                      </button>
+                        <div></div>
+                        <CopyToClipboard
+                          text={`${window.location.origin}/public/${el.walletAddress}/${el.token}`}
+                          onCopy={() => toast.success('Copied')}
+                        >
+                          <button className="w-[32px] h-[32px] flex items-center justify center">
+                            <IconCopy />
+                          </button>
+                        </CopyToClipboard>
+                        <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowDelete(el)}>
+                          <IconDelete />
+                        </button>
+                      </div>
+
                     </td>
                   </tr>
                 );
@@ -232,20 +240,20 @@ export function ProfileShares() {
             </tbody>
             {showDelete && (
               <SubmitModal onClose={() => setShowDelete(undefined)}>
-                <div className="title">Delete Share Link</div>
-                <p className="text-center mbc-32">
+                <div className="font-varela text-[24px] text-center mb-8">Delete Share Link</div>
+                <p className="font-sans text-[14px] mb-8 text-center">
                   {`Are you sure you want to delete share link?`}
                 </p>
-                <div className="buttons">
+                <div className="flex gap-8">
                   <button
                     onClick={() => setShowDelete(undefined)}
-                    className="gen-secondary-btn medium"
+                    className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={onDelete}
-                    className="gen-primary-btn medium danger"
+                    className="rounded-xl bg-red-600 border max-w-[416px] w-full text-center text-white p-2"
                   >
                     Submit
                   </button>
@@ -273,7 +281,7 @@ export function ProfileShares() {
         share or delete them.
       </div>
       <div className="border border-[#F0F0F0] rounded-xl p-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-4">
           <div className="font-sans font-semibold text-[16px]">List of shares</div>
           <div className="actions">
             <button
@@ -287,7 +295,7 @@ export function ProfileShares() {
         </div>
 
         {!items.length && (
-          <div className="plate">
+          <div className="bg-[#F3F6FC] py-[16px] font-sans text-[14px] px-[16px] rounded-xl">
             There are no shares yet, or you can add them by clicking the “Add
             New Share” button
           </div>

@@ -212,7 +212,7 @@ export function AppSettings() {
         <TabPanels className="h-full">
           <TabPanel
             key="Appearance"
-            className="grid grid-rows-[auto,_368px] xl:grid-rows-1 xl:gap-x-[40px] xl:grid-cols-[416px,_1fr] xl:ml-4 h-full "
+            className="grid grid-rows-[auto,_368px] xl:grid-rows-1 xl:gap-x-[40px] xl:grid-cols-[416px,_1fr] md:ml-4 h-full "
           >
             <Appearance
               displayName={displayName}

@@ -409,25 +409,25 @@ export default function AppUsers() {
                     </Checkbox>
                   </Field>
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
                   First Name
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                   Last Name
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                   Tags
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                   Creation Date
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                   Seen Date
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                   Auth method
                 </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                   Attribution
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
