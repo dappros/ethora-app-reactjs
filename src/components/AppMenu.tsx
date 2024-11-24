@@ -11,7 +11,8 @@ export function AppMenu() {
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   return (
-    <div className="bg-white p-2 flex justify-between items-center md:rounded-2xl md:self-start md:min-h-[640px] md:flex-col">
+    // md:min-h-[640px]
+    <div className="bg-white md:fixed p-2 flex justify-between items-center md:rounded-2xl md:self-start md:h-[calc(100vh-32px)]  md:flex-col">
       <button onClick={() => setMobileMenuVisible(!isMobileMenuVisible)} className="md:hidden">
         <IconMenuBurger />
       </button>

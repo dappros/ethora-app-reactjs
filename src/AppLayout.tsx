@@ -20,9 +20,12 @@ export default function AppLayout() {
           {/* app content */}
           <div className="h-full grid grid-rows-[72px,_1fr] md:grid-rows-1 md:grid-cols-[80px,_1fr] md:gap-4">
             {/* menu */}
-            <AppMenu />
+            <div className="h-full overflow-hidden">
+              <AppMenu />
+            </div>
+
             {/* router content */}
-            <div className="p-4 md:p-0">
+            <div className="p-4 overflow-auto md:p-0">
               <Outlet />
             </div>
           </div>
