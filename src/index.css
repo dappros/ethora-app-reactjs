@@ -12,6 +12,10 @@
   --border-primary: #f0f0f0;
 }
 
+body {
+  background-color: #F5F7F9;
+}
+
 .hide-scroll::-webkit-scrollbar {
   display: none;
 }
