@@ -1,17 +1,19 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { Elements } from '@stripe/react-stripe-js';
-import { useState } from 'react';
+// import { useState } from 'react';
 
 import { stripePromise } from '../../stripeConfig';
 
-import { Appearance } from '@stripe/stripe-js';
+// import { Appearance } from '@stripe/stripe-js';
 import { BillingBoxContainer } from '../components/Billing/BillingBoxContainer';
 import { BillingHistoryTable } from '../components/Billing/BillingHistoryTable';
 import { BillingModalChangeInfo } from '../components/Billing/Modal/BillingModalChangeInfo';
 import { BillingModalChangePlan } from '../components/Billing/Modal/BillingModalChangePlan';
 import { BillingModalCheckoutForm } from '../components/Billing/Modal/BillingModalCheckoutForm';
+import { useState } from 'react';
 
-export const AdminBilling = () => {
+export function AdminBilling() {
+  // @ts-ignore
   const [billingInfo, setBillingInfo] = useState({
     plan: 'Business Plan',
     price: '$199/month',
@@ -42,8 +44,8 @@ export const AdminBilling = () => {
   const [openChangeInfo, setOpenChangeInfo] = useState<boolean>(false);
   const [openCheckoutForm, setOpenCheckoutForm] = useState<boolean>(false);
 
-  const [clientSecret, setClientSecret] = useState('');
-  const [dpmCheckerLink, setDpmCheckerLink] = useState('');
+  // const [clientSecret, setClientSecret] = useState('');
+  // const [dpmCheckerLink, setDpmCheckerLink] = useState('');
 
   // useEffect(() => {
   //   // Create PaymentIntent as soon as the page loads
@@ -60,11 +62,11 @@ export const AdminBilling = () => {
   //     });
   // }, []);
 
-  const appearance: Appearance = {
-    theme: 'stripe',
-  };
+  // const appearance: Appearance = {
+  //   theme: 'stripe',
+  // };
   // Enable the skeleton loader UI for optimal loading.
-  const loader = 'auto';
+  // const loader = 'auto';
 
   return (
     <Elements stripe={stripePromise}>
@@ -161,4 +163,4 @@ export const AdminBilling = () => {
       />
     </Elements>
   );
-};
+}

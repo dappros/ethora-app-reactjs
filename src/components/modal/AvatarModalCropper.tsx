@@ -8,7 +8,7 @@ import ReactCrop, {
   PixelCrop,
 } from 'react-image-crop';
 
-import './AvatarModalCropper.scss';
+// import './AvatarModalCropper.scss';
 
 const ASPECT_RATIO = 1;
 const MIN_DIMENSION = 150;
@@ -98,30 +98,33 @@ export function AvatarModalCropper({ onClose, image, setProfileImage }: Props) {
   };
 
   return (
-    <Dialog className="avatar-modal-cropper" open={true} onClose={onClose}>
-      <DialogPanel className="inner">
-        <ReactCrop
-          crop={crop}
-          onChange={(_, percentCrop) => setCrop(percentCrop)}
-          circularCrop
-          keepSelection
-          aspect={ASPECT_RATIO}
-          minWidth={MIN_DIMENSION}
-        >
-          <img
-            ref={imgRef}
-            src={image}
-            alt="Upload"
-            style={{ maxHeight: '70vh' }}
-            onLoad={onImageLoad}
-          />
-        </ReactCrop>
+    <Dialog className="fixed inset-0 flex justify-center items-center bg-black/30" open={true} onClose={onClose}>
+      <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px] m-4">
+        <div className="flex justify-center items-cente">
+          <ReactCrop
+            crop={crop}
+            onChange={(_, percentCrop) => setCrop(percentCrop)}
+            circularCrop
+            keepSelection
+            aspect={ASPECT_RATIO}
+            minWidth={MIN_DIMENSION}
+          >
+            <img
+              ref={imgRef}
+              src={image}
+              alt="Upload"
+              style={{ maxHeight: '70vh' }}
+              onLoad={onImageLoad}
+            />
+          </ReactCrop>
+        </div>
+
         <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-        <div className="buttons">
-          <button className="gen-secondary-btn" onClick={() => onClose()}>
+        <div className="flex gap-8 mt-8">
+          <button className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2" onClick={() => onClose()}>
             Cancel
           </button>
-          <button className="gen-primary-btn" onClick={() => onCrop()}>
+          <button className="rounded-xl bg-brand-500 border max-w-[416px] w-full text-center text-white p-2" onClick={() => onCrop()}>
             Done
           </button>
         </div>

@@ -10,8 +10,11 @@ import { ProfilePageUserIcon } from "../components/ProfilePageUserIcon";
 import { IconLogout } from "../components/Icons/IconLogout";
 
 export default function Profile() {
+  // @ts-ignore
   const [showQr, setShowQr] = useState(false);
+  // @ts-ignore
   const [showNewDocModal, setShowNewDocModal] = useState(false);
+  // @ts-ignore
   const [documents, setDocuments] = useState<Array<any>>([]);
   const {
     firstName,
@@ -70,7 +73,7 @@ export default function Profile() {
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
               <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">About</p>
-              <p className="text-black text-regular">Voluptatem aut 🚀</p>
+              <p className="text-black text-regular">{description}</p>
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
 

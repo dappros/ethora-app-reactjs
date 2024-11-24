@@ -3,7 +3,6 @@ import cn from 'classnames';
 import { IconClose } from '../Icons/IconClose';
 
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { TextInput } from '../ui/TextInput';
 import './ResetPasswordUserModal.scss';
 
 interface Props {
@@ -17,6 +16,7 @@ type Inputs = {
 };
 
 export function ResetPasswordUserModal({ onClose }: Props) {
+  // @ts-ignore
   const { register, handleSubmit } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = ({ firstName, lastName, email }) => {
@@ -29,23 +29,23 @@ export function ResetPasswordUserModal({ onClose }: Props) {
         <div className="title">Reset password</div>
         <form onSubmit={handleSubmit(onSubmit)} action="">
           <div className="form">
-            <TextInput
+            {/* <TextInput
               className="gen-input gen-input-large mb-24 fname"
               placeholder="First Name"
               {...register('firstName', { required: true })}
-            />
-            <TextInput
+            /> */}
+            {/* <TextInput
               className="gen-input gen-input-large mb-24 lname"
               placeholder="Last Name"
               {...register('lastName', { required: true })}
-            />
+            /> */}
             <div className="email">
-              <TextInput
+              {/* <TextInput
                 className="gen-input gen-input-large mb-24"
                 placeholder="Email"
                 type="email"
                 {...register('email', { required: true })}
-              />
+              /> */}
             </div>
           </div>
           <div className="buttons">

@@ -84,7 +84,7 @@ export function ProfilePageUserIcon({
           <div className="dimmed">
             <Menu>
               <MenuButton>
-                <IconEdit stroke="white" />
+                <IconEdit stroke="white" pathClassName="none" />
               </MenuButton>
               <MenuItems
                 anchor="bottom start"

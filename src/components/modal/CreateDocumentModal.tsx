@@ -4,7 +4,6 @@ import { useRef, useState } from 'react';
 import { IconClose } from '../Icons/IconClose';
 
 import { toast } from 'react-toastify';
-import { TextInput } from '../ui/TextInput';
 
 import { postDocument } from '../../http';
 import { IconPaperclip } from '../Icons/IconPaperclip';
@@ -20,6 +19,7 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
   const [loading, setLoading] = useState(false);
+  // @ts-ignore
   const [name, setName] = useState('');
 
   const onCreate = () => {
@@ -59,12 +59,12 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
     <Dialog className="create-document-modal" open={true} onClose={() => {}}>
       <DialogPanel className="inner">
         <div className="title">New Document</div>
-        <TextInput
+        {/* <TextInput
           placeholder="Document Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="gen-input gen-input-large mbc-16"
-        />
+        /> */}
         <button className="gen-secondary-btn" onClick={onFileUpload}>
           <IconPaperclip />
         </button>

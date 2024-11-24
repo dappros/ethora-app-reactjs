@@ -1,10 +1,9 @@
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
-import { ModelApp } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
@@ -20,7 +19,6 @@ import TabApp from '../../components/TabApp';
 export function AppSettings() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
-  const currentApp = useAppStore((s) => s.currentApp as ModelApp);
   const app = apps.find((app) => app._id === appId);
 
   if (!app) {

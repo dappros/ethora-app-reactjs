@@ -5,8 +5,8 @@ import { NavLink } from 'react-router-dom';
 import { IconAdmin } from '../Icons/IconAdmin';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
-import { IconSettings } from '../Icons/IconSettings';
 import './MobileMenuModal.scss';
+import { IconSettingsMenu } from '../Icons/IconSettingsMenu';
 
 interface Props {
   onClose: () => void;
@@ -24,7 +24,7 @@ export function MobileMenuModal({ onClose }: Props) {
     };
   }, []);
   return (
-    <Dialog className="fixed inset-0 bg-black/30 flex justify-start items-stretch " open={true} onClose={() => onClose()}>
+    <Dialog className="fixed inset-0 bg-black/30 flex z-50 justify-start items-stretch " open={true} onClose={() => onClose()}>
       <DialogPanel className="bg-white relative rounded-r-xl p-4 w-8/12 flex flex-col justify-between">
         <button className="absolute top-[24px] left-[16px]" onClick={onClose}>
           <IconClose />
@@ -54,7 +54,7 @@ export function MobileMenuModal({ onClose }: Props) {
             onClick={onClose}
             className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >
-            <IconSettings />
+            <IconSettingsMenu />
             <span className="ml-2 group-aria-[current=page]:text-brand-500 font-sans ">Settings</span>
           </NavLink>
         </div>

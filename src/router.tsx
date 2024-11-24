@@ -14,6 +14,7 @@ import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 import Profile from './pages/Profile';
 import UserSettings from './pages/UserSettings/UserSettings';
+import { ProfileEdit } from './pages/ProfileEdit';
 
 const App = lazy(() => import('./App'));
 
@@ -36,7 +37,7 @@ export const router = createBrowserRouter(
               children: [
                 {
                   index: true,
-                  element: <Navigate to="/app/admin" />,
+                  element: <Navigate to="/app/admin/apps" />,
                 },
                 {
                   path: 'chat',
@@ -81,6 +82,10 @@ export const router = createBrowserRouter(
                 {
                   path: 'profile',
                   Component: Profile,
+                },
+                {
+                  path: 'profile/edit',
+                  Component: ProfileEdit
                 },
                 {
                   path: 'settings',

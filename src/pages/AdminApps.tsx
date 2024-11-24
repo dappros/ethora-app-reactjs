@@ -13,14 +13,17 @@ export default function AdminApps() {
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const apps = useAppStore((s) => s.apps);
+  // @ts-ignore
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
-
+// @ts-ignore
   const [order, setOrder] = useState('asc');
+  // @ts-ignore
   const [orderBy, setOrderBy] = useState('createdAt');
-
+// @ts-ignore
   const [currentPage, setCurrentPage] = useState(0);
+  // @ts-ignore
   const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
@@ -52,6 +55,7 @@ export default function AdminApps() {
     })();
   }, [order, orderBy]);
 
+  // @ts-ignore
   const onPageChange = (page: number) => {
     httpGetApps({
       ITEMS_COUNT,

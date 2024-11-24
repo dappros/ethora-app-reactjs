@@ -8,7 +8,6 @@ import { IconDelete } from '../../components/Icons/IconDelete';
 import { IconInfo } from '../../components/Icons/IconInfo';
 import { IconQr } from '../../components/Icons/IconQr';
 import { Loading } from '../../components/Loading';
-import { CreateProfileLinkModal } from '../../components/modal/CreateProfileLinkModal';
 import { QrModal } from '../../components/modal/QrModal';
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import {

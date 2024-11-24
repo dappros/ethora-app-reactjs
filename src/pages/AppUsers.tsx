@@ -288,16 +288,19 @@ export default function AppUsers() {
     });
   };
 
+    // @ts-ignore
   const onOrderChange = (value: 'asc' | 'desc') => {
     setOrder(value);
   };
 
+    // @ts-ignore
   const onSortByChange = (value: string) => {
     console.log('onSortByChange ', value);
     // @ts-ignore
     setOrderBy(value);
   };
 
+    // @ts-ignore
   const renderOrder = (value: 'asc' | 'desc') => {
     if (value === 'asc') {
       return '(A-Z)';
@@ -306,6 +309,7 @@ export default function AppUsers() {
     }
   };
 
+  // @ts-ignore
   const renderOrderBy = (value: string) => {
     if (value === 'createdAt') {
       return 'Creation Date';

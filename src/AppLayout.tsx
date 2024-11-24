@@ -23,7 +23,7 @@ export default function AppLayout() {
             <AppMenu />
             {/* router content */}
             <div className="h-full p-4 md:p-0">
-              <Outlet />
+                <Outlet />
             </div>
           </div>
         </div>

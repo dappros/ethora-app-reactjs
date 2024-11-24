@@ -15,6 +15,9 @@ function App() {
   const currentApp = useAppStore((s) => s.currentApp);
   const token = localStorage.getItem('token');
 
+
+  console.log("location ", location)
+
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
   }, []);
@@ -46,7 +49,7 @@ function App() {
           if (savedPath) {
             navigate(savedPath);
           } else {
-            navigate('/app/admin/apps');
+            navigate('/app/admin/apps/list');
           }
         }
       } else {
@@ -61,9 +64,7 @@ function App() {
     return <Loading></Loading>;
   } else {
     return (
-      <>
-        <Outlet />
-      </>
+      <Outlet />
     );
   }
 }

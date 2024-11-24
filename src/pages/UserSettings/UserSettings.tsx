@@ -4,7 +4,6 @@ import { ManageData } from "./ManageData";
 import { Visibility } from "./Visibility";
 import { ProfileShares } from "./ProfileShares";
 import { DocumentShares } from "./DocumentShares";
-import { BlockedUsers } from "./BlockedUsers";
 import { Referrals } from "./Referrals";
 import { useAppStore } from "../../store/useAppStore";
 import { ModelCurrentUser } from "../../models";
