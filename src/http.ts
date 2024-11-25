@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ModelUserACL } from './models';
+import { actionLogout } from './actions';
 
 export const httpTokens = {
   appJwt: '',
@@ -56,6 +57,7 @@ http.interceptors.response.use(null, async (error) => {
     await refreshToken();
     return http(request);
   } catch (error) {
+    actionLogout()
     return Promise.reject(error);
   }
 });
