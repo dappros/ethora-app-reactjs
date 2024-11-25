@@ -1,5 +1,4 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
-import cn from 'classnames';
 import { useRef, useState } from 'react';
 import { IconClose } from '../Icons/IconClose';
 
