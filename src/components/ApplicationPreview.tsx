@@ -12,6 +12,7 @@ interface Props {
 
 export function ApplicationPreview({ app, primaryColor }: Props) {
   const navigate = useNavigate();
+  const numberFormatter = new Intl.NumberFormat('en-US')
   const onClick = () => {
     navigate(`/app/admin/apps/${app._id}/settings`);
   };
@@ -91,9 +92,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">{app.stats.totalSessions}</span>{' '}
+              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalSessions)}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{app.stats.recentlySessions}</span>
+              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlySessions)}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -113,9 +114,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">{app.stats.totalApiCalls}</span>{' '}
+              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalApiCalls)}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyApiCalls}</span>
+              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyApiCalls)}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -124,9 +125,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">{app.stats.totalFiles}</span>{' '}
+              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalFiles)}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyFiles}</span>
+              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyFiles)}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -135,9 +136,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               <IconInfo />
             </div>
             <div>
-              <span className="font-sans text-sm">{app.stats.totalTransactions}</span>{' '}
+              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalTransactions)}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyTransactions}</span>
+              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyTransactions)}</span>
             </div>
           </div>
         </div>
