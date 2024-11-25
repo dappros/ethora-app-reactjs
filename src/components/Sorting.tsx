@@ -78,11 +78,9 @@ export function Sorting({
               aria-label="Server size"
             >
               {orderItemList.map((el) => (
-                // <CloseButton className=" p-2">
-                //                   </CloseButton>
                 <Field className="flex">
-                  <Label className="cursor-pointer w-full">
-                    <CloseButton className="flex w-full items-center justify-between relative">
+                  <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
+                    <CloseButton className="flex w-full items-center justify-between relative ">
                       <div>
                         <Radio value={el.key} className="">
                           {(props) => {
@@ -103,7 +101,7 @@ export function Sorting({
 
               ))}
             </RadioGroup>
-            <Field className="app-sorting-group-title mb-8">Sort</Field>
+            <Field className="font-semibold text-regular mb-2">Sort</Field>
             <RadioGroup
               className="flex flex-col"
               value={orderBy}
@@ -114,21 +112,27 @@ export function Sorting({
             >
               {orderByList.map((el) => {
                 return (
-                  <CloseButton key={el.key} className="flex justify-between p-2">
-                    <Field className="flex relative">
-                      <Radio value={el.key} className="">
-                        {(props) => {
-                          return (
-                            <div className="absolute left-0">
-                              {props.checked && <IconMarked />}
-                            </div>
-                          );
-                        }}
-                      </Radio>
-                      <Label className="ml-8">{el.title}</Label>
-                    </Field>
-                    <IconAdd />
-                  </CloseButton>
+                  <Field className="flex">
+                    <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
+                      <CloseButton className="flex w-full items-center justify-between relative">
+                        <div>
+                          <Radio value={el.key} className="">
+                            {(props) => {
+                              return (
+                                <div className="absolute left-0">
+                                  {props.checked && <IconMarked />}
+                                </div>
+                              );
+                            }}
+                          </Radio>
+                          <div className="ml-8 font-sans text-[14px]">{el.title}</div>
+                        </div>
+                        <div className="w-[24px] h-[24px] flex justify-center items-center">
+                          <IconAdd />
+                        </div>
+                      </CloseButton>
+                    </Label>
+                  </Field>
                 );
               })}
             </RadioGroup>

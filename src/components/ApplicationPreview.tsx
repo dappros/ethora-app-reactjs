@@ -29,9 +29,10 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
       return (
         // logo
         <div
-          className="w-[120px] h-[120px] rounded-xl flex justify-center items-center bg-contain bg-no-repeat bg-center"
+          className="w-[120px] h-[120px] rounded-xl flex justify-center bg-gray-100 items-center bg-contain bg-no-repeat bg-center"
           style={{ backgroundImage: `url(${app.logoImage})` }}
         ></div>
+
       );
     } else {
       return (
