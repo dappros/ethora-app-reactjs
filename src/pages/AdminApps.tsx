@@ -6,6 +6,7 @@ import { NewAppModal } from '../components/modal/NewAppModal';
 import { httpGetApps } from '../http';
 import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
+import { Sorting } from '../components/Sorting';
 
 const ITEMS_COUNT = 5;
 
@@ -72,12 +73,38 @@ export default function AdminApps() {
     });
   };
 
+  const renderSorting = () => {
+    if (currentUser?.isSuperAdmin) {
+      return (
+        <Sorting
+          className="mr-4"
+          order={order}
+          setOrder={setOrder}
+          orderBy={orderBy}
+          setOrderBy={setOrderBy}
+          orderByList={[
+            { key: 'displayName', title: 'Display Name' },
+            { key: 'totalRegistered', title: 'Registered' },
+            { key: 'totalSessions', title: 'Sessions' },
+            { key: 'totalApiCalls', title: 'API' },
+            { key: 'totalFiles', title: 'Files' },
+            { key: 'totalTransactions', title: 'Transactions' },
+            { key: 'createdAt', title: 'Date' },
+          ]}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
+
   return (
     <div id="admin-apps">
       <div>
         <div className="flex justify-between items-center px-4">
           <div className="font-varela text-[18px] md:text-2xl">Apps</div>
-          <div>
+          <div className="flex items-center">
+            {renderSorting()}
             <button
               onClick={() => setShowModal(true)}
               className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
