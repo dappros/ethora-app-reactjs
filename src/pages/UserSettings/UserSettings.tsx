@@ -18,7 +18,8 @@ export default function UserSettings() {
           Settings
         </div>
       </div>
-      <div className="rounded-2xl bg-white px-4 py-4 h-full overflow-hidden">
+      {/* overflow-hidden */}
+      <div className="rounded-2xl bg-white px-4 py-4 h-full ">
         <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr]">
           <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0  border-b border-gray-200 md:px-4 md:border-b-0 overflow-auto  md:border-r md:border-gray-200">
             <TabApp text="Manage Data" />

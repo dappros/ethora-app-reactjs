@@ -8,6 +8,11 @@ import { getDocuments } from "../http";
 import { actionLogout } from "../actions";
 import { ProfilePageUserIcon } from "../components/ProfilePageUserIcon";
 import { IconLogout } from "../components/Icons/IconLogout";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import { IconDoc } from "../components/Icons/IconDoc";
+import { DateTime } from "luxon";
+import { QrModal } from "../components/modal/QrModal";
+import { CreateDocumentModal } from "../components/modal/CreateDocumentModal";
 
 export default function Profile() {
   // @ts-ignore
@@ -49,7 +54,7 @@ export default function Profile() {
           Profile
         </div>
       </div>
-      <div className="rounded-2xl bg-white px-4 h-full grid grid-rows-[72px,_1fr] overflow-hidden">
+      <div className="rounded-2xl bg-white px-4 h-full grid grid-rows-[72px,_1fr]">
         <div className="flex justify-end">
           <button className="mr-4" onClick={() => setShowQr(true)}>
             <IconQr />
@@ -76,9 +81,45 @@ export default function Profile() {
               <p className="text-black text-regular">{description}</p>
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
+                <TabGroup className="px-2">
+                  <TabList className="h-[44px] flex mb-4">
+                    <Tab key="documents" className="border-b border-b-[#F0F0F0] w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500">
+                      Documents
+                    </Tab>
+                    <Tab key="collections" className="border-b border-b-[#F0F0F0] w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500">
+                      Collections
+                    </Tab>
+                  </TabList>
+                  <TabPanels className="">
+                    <TabPanel key="">
+                      <button
+                        onClick={() => setShowNewDocModal(true)}
+                        className="w-full bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
+                      >
+                        Add Document
+                      </button>
+                      {documents.map((el) => (
+                        <div className="bg-[#F3F6FC] rounded-lg p-2 mb-4 flex" key={el._id}>
+                          <div className="w-[40px] h-[40px] bg-white rounded-lg flex items-center justify-center">
+                            <IconDoc />
+                          </div>
+                          <div className="ml-2">
+                            <div className="text-[14px]">{el.documentName}</div>
+                            <div className="text-[#8C8C8C] text-[12px]">
+                              {DateTime.fromISO(el.createdAt).toFormat(
+                                'dd LLL yyyy t'
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </TabPanel>
+                    <TabPanel key="collections">collections</TabPanel>
+                  </TabPanels>
+                </TabGroup>
 
             </div>
-            <div className="border border-[#F0F0F0] rounded-xl p-4 text-center">
+            <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
               <button
                 className="text-[#F44336] font-varela text-regular inline-flex items-center"
                 onClick={() => onLogout()}
@@ -92,6 +133,18 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      {showQr && (
+        <QrModal
+          path={`${window.location.origin}/public/${walletAddress}`}
+          onClose={() => setShowQr(false)}
+        />
+      )}
+      {showNewDocModal && (
+        <CreateDocumentModal
+          componentGetDocs={componentGetDocs}
+          onClose={() => setShowNewDocModal(false)}
+        />
+      )}
     </div>
   )
 }

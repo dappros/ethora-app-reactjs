@@ -56,37 +56,41 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
   };
 
   return (
-    <Dialog className="create-document-modal" open={true} onClose={() => {}}>
-      <DialogPanel className="inner">
-        <div className="title">New Document</div>
-        {/* <TextInput
-          placeholder="Document Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="gen-input gen-input-large mbc-16"
-        /> */}
-        <button className="gen-secondary-btn" onClick={onFileUpload}>
-          <IconPaperclip />
-        </button>
-        {!file && (
-          <div className="mt-16 mbc-16 text-center">No file chosen</div>
-        )}
-        {file && <div className="mt-16 mbc-16 text-center">{file.name}</div>}
+    <Dialog className="fixed inset-0 flex justify-center items-center bg-black/30" open={true} onClose={() => { }}>
+      <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px] m-4">
+        <div className="ont-varela text-[24px] text-center mb-8">New Document</div>
         <input
-          onChange={onChange}
-          type="file"
-          ref={inputRef}
-          className="hidden"
-        ></input>
-        <div className="buttons">
-          <button className="gen-secondary-btn mbc-16" onClick={onClose}>
+          type="text"
+          value={name}
+          placeholder='Document title'
+          onChange={(e) => setName(e.target.value)}
+          className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+        />
+        <div className="flex flex-col items-center">
+          <button className="hover:bg-gray-200 p-4 rounded-xl" onClick={onFileUpload}>
+            <IconPaperclip />
+          </button>
+          {!file && (
+            <div className="">No file chosen</div>
+          )}
+          {file && <div className="">{file.name}</div>}
+          <input
+            onChange={onChange}
+            type="file"
+            ref={inputRef}
+            className="hidden"
+          ></input>
+        </div>
+
+        <div className="flex gap-8 mt-8">
+          <button className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500" onClick={onClose}>
             Cancel
           </button>
-          <button onClick={onCreate} className={cn('gen-primary-btn mbc-16')}>
+          <button onClick={onCreate} className="w-full py-[12px] rounded-xl bg-brand-500 text-white">
             Create
           </button>
         </div>
-        <button className="close" onClick={() => onClose()}>
+        <button className="absolute top-[36px] right-[36px]" onClick={() => onClose()}>
           <IconClose />
         </button>
       </DialogPanel>

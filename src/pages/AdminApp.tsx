@@ -9,7 +9,8 @@ export function AdminApp() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full overflow-hidden grid grid-rows-[auto,_1fr]">
+    // overflow-hidden
+    <div className="h-full  grid grid-rows-[auto,_1fr]">
       <div className="mb-4 flex md:flex-row flex-col md:justify-between">
         <div className="flex mb-4 md:mb-0">
           <button
@@ -44,7 +45,8 @@ export function AdminApp() {
           </NavLink>
         </div>
       </div>
-      <div className="bg-white rounded-2xl p-4 overflow-hidden">
+      {/* overflow-hidden */}
+      <div className="bg-white rounded-2xl p-4 ">
         <Outlet />
       </div>
     </div>

@@ -208,5 +208,8 @@ export async function actionUpdateUser(fd: FormData) {
 }
 
 export function actionLogout() {
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('refreshToken');
+  localStorage.removeItem(localStorageConstants.ETHORA_USER);
   return null;
 }

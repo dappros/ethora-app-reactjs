@@ -15,6 +15,8 @@ import { Error404Page } from './pages/ErrorPage/Error404Page';
 import Profile from './pages/Profile';
 import UserSettings from './pages/UserSettings/UserSettings';
 import { ProfileEdit } from './pages/ProfileEdit';
+import Register from './pages/AuthPage/Register';
+import ForgetPassword from './pages/AuthPage/ForgetPassword';
 
 const App = lazy(() => import('./App'));
 
@@ -30,6 +32,18 @@ export const router = createBrowserRouter(
             {
               path: '/login',
               Component: LoginComponent,
+            },
+            {
+              path: '/register',
+              Component: Register,
+            },
+            {
+              path: '/tempPassword',
+              Component: Register,
+            },
+            {
+              path: '/resetPassword/:token?',
+              Component: ForgetPassword,
             },
             {
               path: '/app',

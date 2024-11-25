@@ -1,14 +1,20 @@
 import { NavLink } from 'react-router-dom';
-import profileImage from '../assets/profile-image.png';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconChat } from './Icons/IconChat';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
 import { useState } from 'react';
 import { MobileMenuModal } from './modal/MobileMenuModal';
 import { IconSettingsMenu } from './Icons/IconSettingsMenu';
+import { ProfilePageUserIcon } from './ProfilePageUserIcon';
+import { useAppStore } from '../store/useAppStore';
 
 export function AppMenu() {
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const currentUser = useAppStore(s => s.currentUser)
+
+  if (!currentUser) {
+    return
+  }
 
   return (
     // md:min-h-[640px]
@@ -38,10 +44,19 @@ export function AppMenu() {
           to="/app/profile"
           className="flex hover:bg-[#F5F7F9] group flex-col items-center md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
-          <div
+          <ProfilePageUserIcon 
+            firstName={currentUser.firstName} 
+            lastName={currentUser.lastName} 
+            profileImage={currentUser.profileImage} 
+            width='40px' 
+            height='40px'
+            className='border border-brand-500 rounded-full'
+            small={true}
+          />
+          {/* <div
             className="bg-cover w-[40px] h-[40px] rounded-full"
             style={{ backgroundImage: `url(${profileImage})` }}
-          ></div>
+          ></div> */}
           <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-sm ">
             Profile
           </div>

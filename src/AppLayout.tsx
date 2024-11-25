@@ -25,7 +25,7 @@ export default function AppLayout() {
             </div>
 
             {/* router content */}
-            <div className="p-4 overflow-auto md:p-0">
+            <div className="p-4 min-h-[calc(100vh-72px)] md:p-0">
               <Outlet />
             </div>
           </div>

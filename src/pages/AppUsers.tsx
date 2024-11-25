@@ -376,7 +376,8 @@ export default function AppUsers() {
   };
 
   return (
-    <div className="admin-app-users h-full w-full overflow-hidden grid grid-rows-[57px,_1fr] gap-y-[16px]">
+    // overflow-hidden
+    <div className="admin-app-users h-full w-full  grid grid-rows-[57px,_1fr] gap-y-[16px]">
       <div className="md:row-start-1 flex w-full md:justify-between items-center border-b border-b-gray-200">
         <div className="ml-4 hidden md:block font-varela text-[24px]">
           Users

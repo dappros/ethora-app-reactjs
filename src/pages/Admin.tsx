@@ -33,7 +33,7 @@ export default function Admin() {
           </NavLink>
         </div>
       </div>
-      <div className="rounded-2xl bg-white p-4 grid grid-rows-[auto,_1fr]">
+      <div id="admin" className="rounded-2xl bg-white p-4 grid grid-rows-[auto,_1fr]">
         <Outlet />
       </div>
     </div>

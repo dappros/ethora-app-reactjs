@@ -73,7 +73,7 @@ export default function AdminApps() {
   };
 
   return (
-    <>
+    <div id="admin-apps">
       <div>
         <div className="flex justify-between items-center px-4">
           <div className="font-varela text-[18px] md:text-2xl">Apps</div>
@@ -110,6 +110,6 @@ export default function AdminApps() {
       {showModal && (
         <NewAppModal show={showModal} onClose={() => setShowModal(false)} />
       )}
-    </>
+    </div>
   );
 }
