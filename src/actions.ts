@@ -212,5 +212,6 @@ export function actionLogout() {
   localStorage.removeItem('token');
   sessionStorage.removeItem('refreshToken');
   localStorage.removeItem(localStorageConstants.ETHORA_USER);
+  window.location.pathname = '/login'
   return null;
 }
