@@ -53,7 +53,9 @@ function App() {
           }
         }
       } else {
-        navigate('/login');
+        if (!location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
+          navigate('/login');
+        }
       }
     };
 

@@ -11,7 +11,6 @@ export default function AppHelmet() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    console.log("pathname = ", location.pathname)
     if (!location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
       if (!token ) {
         navigate('/login');

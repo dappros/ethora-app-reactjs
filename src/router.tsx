@@ -38,7 +38,7 @@ export const router = createBrowserRouter(
               Component: Register,
             },
             {
-              path: '/tempPassword',
+              path: '/tempPassword/',
               Component: Register,
             },
             {
