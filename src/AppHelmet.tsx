@@ -12,7 +12,7 @@ export default function AppHelmet() {
 
   useEffect(() => {
     console.log("pathname = ", location.pathname)
-    if (location.pathname !== '/tempPassword') {
+    if (!location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
       if (!token ) {
         navigate('/login');
       }
