@@ -29,6 +29,7 @@ import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import './AppUsers.scss';
+import { Sorting } from '../components/Sorting';
 
 export default function AppUsers() {
   let { appId } = useParams();
@@ -46,10 +47,8 @@ export default function AppUsers() {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-  const [orderBy, setOrderBy] = useState<
-    'createdAt' | 'firstName' | 'lastName' | 'email'
-  >('createdAt');
+  const [order, setOrder] = useState<string>('asc');
+  const [orderBy, setOrderBy] = useState<string>('createdAt');
 
   const [editAcl, setEditAcl] = useState<ModelUserACL | null>(null);
 
@@ -60,6 +59,7 @@ export default function AppUsers() {
           appId,
           itemsPerTable,
           currentPage * itemsPerTable,
+          // @ts-ignore
           orderBy,
           order
         ).then((response) => {
@@ -102,6 +102,7 @@ export default function AppUsers() {
   }, [items]);
 
   useEffect(() => {
+    // @ts-ignore
     actionGetUsers(appId, itemsPerTable, 0, orderBy, order).then((response) => {
       const { total, items } = response.data;
       setItems(items);
@@ -115,6 +116,7 @@ export default function AppUsers() {
       appId,
       itemsPerTable,
       page * itemsPerTable,
+      // @ts-ignore
       orderBy,
       order
     ).then((response) => {
@@ -132,6 +134,7 @@ export default function AppUsers() {
       appId,
       itemsPerTable,
       0 * itemsPerTable,
+      // @ts-ignore
       orderBy,
       order
     ).then((response) => {
@@ -150,6 +153,7 @@ export default function AppUsers() {
       appId,
       itemsPerTable,
       currentPage * itemsPerTable,
+      // @ts-ignore
       orderBy,
       order
     ).then((response) => {
@@ -202,6 +206,7 @@ export default function AppUsers() {
         appId,
         itemsPerTable,
         currentPage * itemsPerTable,
+        // @ts-ignore
         orderBy,
         order
       ).then((response) => {
@@ -233,6 +238,7 @@ export default function AppUsers() {
           appId,
           itemsPerTable,
           currentPage * itemsPerTable,
+          // @ts-ignore
           orderBy,
           order
         ).then((response) => {
@@ -271,6 +277,7 @@ export default function AppUsers() {
         appId,
         itemsPerTable,
         currentPage * itemsPerTable,
+        // @ts-ignore
         orderBy,
         order
       ).then((response) => {
@@ -288,19 +295,19 @@ export default function AppUsers() {
     });
   };
 
-    // @ts-ignore
+  // @ts-ignore
   const onOrderChange = (value: 'asc' | 'desc') => {
     setOrder(value);
   };
 
-    // @ts-ignore
+  // @ts-ignore
   const onSortByChange = (value: string) => {
     console.log('onSortByChange ', value);
     // @ts-ignore
     setOrderBy(value);
   };
 
-    // @ts-ignore
+  // @ts-ignore
   const renderOrder = (value: 'asc' | 'desc') => {
     if (value === 'asc') {
       return '(A-Z)';
@@ -383,9 +390,23 @@ export default function AppUsers() {
           Users
         </div>
         <div className="flex w-full md:w-auto items-center justify-end">
+          <Sorting
+            className=""
+            order={order}
+            setOrder={setOrder}
+            orderBy={orderBy}
+            orderByList={[
+              { key: 'createdAt', title: 'Creation Date' },
+              { key: 'firstName', title: 'First Name' },
+              { key: 'lastName', title: 'Last Name' },
+              { key: 'email', title: 'Email' }
+            ]}
+
+            setOrderBy={setOrderBy}
+          />
           <button
             onClick={() => setShowNewUserModal(true)}
-            className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+            className="flex ml-4 items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
           >
             <IconAdd color="white" className="md:mr-2" />
             <span className="hidden md:block">Add User</span>
@@ -393,10 +414,12 @@ export default function AppUsers() {
         </div>
       </div>
       <div className="overflow-hidden">
-        <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
-          There are no users yet, or you can add them by clicking the 'Add User'
-          button
-        </div>
+        {!items.length && (
+          <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
+            There are no users yet, or you can add them by clicking the 'Add User'
+            button
+          </div>
+        )}
 
         <div className="overflow-x-auto relative mb-4">
           {renderActionsForSelected()}
@@ -468,7 +491,7 @@ export default function AppUsers() {
                       {el.lastName}
                     </td>
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      {}
+                      { }
                     </td>
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
                       {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
@@ -476,8 +499,8 @@ export default function AppUsers() {
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
                       {el.lastSeen
                         ? DateTime.fromISO(el.lastSeen).toFormat(
-                            'dd LLL yyyy t'
-                          )
+                          'dd LLL yyyy t'
+                        )
                         : '-'}
                     </td>
                     <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">

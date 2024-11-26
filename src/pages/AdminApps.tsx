@@ -7,6 +7,7 @@ import { httpGetApps } from '../http';
 import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
 import { Sorting } from '../components/Sorting';
+import ReactPaginate from 'react-paginate';
 
 const ITEMS_COUNT = 5;
 
@@ -18,11 +19,11 @@ export default function AdminApps() {
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
-// @ts-ignore
+  // @ts-ignore
   const [order, setOrder] = useState('asc');
   // @ts-ignore
   const [orderBy, setOrderBy] = useState('createdAt');
-// @ts-ignore
+  // @ts-ignore
   const [currentPage, setCurrentPage] = useState(0);
   // @ts-ignore
   const [pageCount, setPageCount] = useState(0);
@@ -133,6 +134,24 @@ export default function AdminApps() {
             primaryColor={currentApp.primaryColor}
           />
         ))}
+        {currentUser?.isSuperAdmin && (
+          <ReactPaginate
+            className="paginate"
+            onPageActive={(...args) => {
+              console.log({ args });
+            }}
+            onPageChange={(selectedItem) =>
+              onPageChange(selectedItem.selected)
+            }
+            breakLabel="..."
+            nextLabel=""
+            pageRangeDisplayed={3}
+            pageCount={pageCount}
+            previousLabel=""
+            renderOnZeroPageCount={null}
+            forcePage={currentPage}
+          />
+        )}
       </div>
       {showModal && (
         <NewAppModal show={showModal} onClose={() => setShowModal(false)} />
