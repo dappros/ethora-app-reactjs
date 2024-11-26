@@ -71,6 +71,9 @@ export async function actionAfterLogin(data: any) {
   httpTokens.token = data.token;
   httpTokens.refreshToken = data.refreshToken;
 
+  localStorage.setItem('token', data.token);
+  sessionStorage.setItem('refreshToken', data.refreshToken);
+
   const user: ModelCurrentUser = {
     _id: data.user._id,
     appId: data.user.appId,
