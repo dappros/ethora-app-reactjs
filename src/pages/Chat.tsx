@@ -37,6 +37,7 @@ export default function ChatPage() {
               enabled: true,
               user: currentUser,
             },
+            disableRoomMenu: true,
           }}
         />
       </div>
