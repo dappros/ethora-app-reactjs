@@ -5,6 +5,7 @@ import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
+import { sleep } from './utils/sleep';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -34,8 +35,10 @@ function App() {
   }, [currentApp]);
 
   useEffect(() => {
+    // alert("here ++")
     const example = async () => {
       if (token) {
+        sleep(1000)
         const response = await httpGetOneUser();
         if (response.status === 200) {
 
@@ -56,7 +59,7 @@ function App() {
     };
 
     example();
-  }, [token]);
+  }, []);
 
   if (!currentApp) {
     return <Loading></Loading>;

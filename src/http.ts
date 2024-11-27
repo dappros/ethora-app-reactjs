@@ -7,14 +7,14 @@ export const httpTokens = {
   _token: localStorage.getItem('token-538') || '',
   _refreshToken: localStorage.getItem('refreshToken-538') || '',
   set refreshToken(token: string) {
-    console.log("set refresh = ", token)
+    localStorage.setItem('refreshToken-538', token);
     this._refreshToken = token
   },
   get refreshToken() {
     return this._refreshToken
   },
   set token(newToken: string) {
-    console.log("set token = ", newToken)
+    localStorage.setItem('token-538', newToken);
     this._token = newToken
   },
   get token() {
@@ -87,8 +87,7 @@ export const refreshToken = async () => {
     httpTokens.token = token;
     httpTokens.refreshToken = refreshToken;
 
-    localStorage.setItem('token-538', token);
-    localStorage.setItem('refreshToken-538', refreshToken);
+
     return httpTokens;
   } catch (error) {
     actionLogout()

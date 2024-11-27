@@ -58,7 +58,7 @@ export function ManageData() {
       <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
         You own your data. Tap the button below to download a copy of your data
       </div>
-      <button className="mb-8 rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2" onClick={onDownloadMyData}>
+      <button className="mb-8 rounded-xl hover:bg-brand-hover border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2" onClick={onDownloadMyData}>
         Download My Data
       </button>
       <div className="font-sans text-regular font-semibold mb-2">Delete your data</div>
@@ -77,7 +77,7 @@ export function ManageData() {
         </p>
       </div>
       <button 
-        className="mb-8 rounded-xl border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2" 
+        className="mb-8 rounded-xl hover:bg-brand-hover border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2" 
         onClick={() => setWarning(true)}
       >
         Delete My Account
