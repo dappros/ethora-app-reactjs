@@ -60,12 +60,12 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
             </div>
           </div>
           <div className="hidden md:flex items-ceter justify-center">
-            <button onClick={onExternalClick} className="mr-4">
+            <button onClick={onExternalClick} className="mr-4 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover">
               <IconExternalLink color={primaryColor} />
             </button>
             <button
               onClick={onClick}
-              className="flex justify-center items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
+              className="flex justify-center hover:bg-brand-hover items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
             >
               <span className="text-brand-500 font-varela text-sm mr-2">
                 Details
