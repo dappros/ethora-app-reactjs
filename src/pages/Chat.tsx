@@ -38,6 +38,8 @@ export default function ChatPage() {
               user: currentUser,
             },
             disableRoomMenu: true,
+            defaultRooms: config?.defaultRooms,
+            disableRefresh: true,
           }}
         />
       </div>
