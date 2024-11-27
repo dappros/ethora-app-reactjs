@@ -8,7 +8,7 @@ export default function AppHelmet() {
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
   const navigate = useNavigate();
   const location = useLocation();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token-538');
 
   useEffect(() => {
     if (!location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {

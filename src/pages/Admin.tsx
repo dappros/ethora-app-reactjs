@@ -13,7 +13,7 @@ export default function Admin() {
             className={({ isActive }) =>
               cn(
                 'w-1/2 border flex items-center justify-center rounded-l-xl border-brand-500 font-sans text-base',
-                { 'bg-brand-500 text-white': isActive }
+                { 'bg-brand-500 text-white': isActive, 'hover:bg-brand-hover': !isActive }
               )
             }
             to="/app/admin/apps"
@@ -24,7 +24,7 @@ export default function Admin() {
             className={({ isActive }) =>
               cn(
                 'w-1/2 border flex items-center justify-center rounded-r-xl border-brand-500 font-sans text-base',
-                { 'bg-brand-500 text-white': isActive }
+                { 'bg-brand-500 text-white': isActive, 'hover:bg-brand-hover': !isActive }
               )
             }
             to="/app/admin/billing"

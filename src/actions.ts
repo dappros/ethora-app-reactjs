@@ -71,8 +71,8 @@ export async function actionAfterLogin(data: any) {
   httpTokens.token = data.token;
   httpTokens.refreshToken = data.refreshToken;
 
-  localStorage.setItem('token', data.token);
-  sessionStorage.setItem('refreshToken', data.refreshToken);
+  localStorage.setItem('token-538', data.token);
+  localStorage.setItem('refreshToken-538', data.refreshToken);
 
   const user: ModelCurrentUser = {
     _id: data.user._id,
@@ -99,7 +99,6 @@ export async function actionAfterLogin(data: any) {
   }
 
   state.doSetUser(user);
-  localStorage.setItem(localStorageConstants.ETHORA_USER, JSON.stringify(user));
   // await actionBootsrap()
 }
 
@@ -212,9 +211,6 @@ export async function actionUpdateUser(fd: FormData) {
 
 export function actionLogout() {
   localStorage.clear()
-  localStorage.removeItem('token');
-  sessionStorage.removeItem('refreshToken');
-  localStorage.removeItem(localStorageConstants.ETHORA_USER);
   window.location.pathname = '/login'
   return null;
 }

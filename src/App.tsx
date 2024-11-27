@@ -13,10 +13,7 @@ export function Fallback() {
 function App() {
   const navigate = useNavigate();
   const currentApp = useAppStore((s) => s.currentApp);
-  const token = localStorage.getItem('token');
-
-
-  console.log("location ", location)
+  const token = localStorage.getItem('token-538');
 
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
@@ -59,7 +56,7 @@ function App() {
     };
 
     example();
-  }, []);
+  }, [token]);
 
   if (!currentApp) {
     return <Loading></Loading>;

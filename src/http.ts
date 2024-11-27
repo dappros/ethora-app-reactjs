@@ -4,8 +4,8 @@ import { actionLogout } from './actions';
 
 export const httpTokens = {
   appJwt: '',
-  _token: localStorage.getItem('token') || '',
-  _refreshToken: sessionStorage.getItem('refreshToken') || '',
+  _token: localStorage.getItem('token-538') || '',
+  _refreshToken: localStorage.getItem('refreshToken-538') || '',
   set refreshToken(token: string) {
     console.log("set refresh = ", token)
     this._refreshToken = token
@@ -87,8 +87,8 @@ export const refreshToken = async () => {
     httpTokens.token = token;
     httpTokens.refreshToken = refreshToken;
 
-    localStorage.setItem('token', token);
-    sessionStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('token-538', token);
+    localStorage.setItem('refreshToken-538', refreshToken);
     return httpTokens;
   } catch (error) {
     actionLogout()
