@@ -195,8 +195,8 @@ export function AppSettings() {
           </button>
         </div>
       </div>
-      <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr]">
-        <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0  border-b border-gray-200 md:px-4 md:border-b-0 overflow-auto  md:border-r md:border-gray-200">
+      <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr] px-4">
+        <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0  border-b border-gray-200 md:border-b-0 md:pr-4 overflow-auto  md:border-r md:border-gray-200">
           <TabApp text="Appearance" />
           <TabApp text="Sign-on options" />
           <TabApp text="Web app" />
