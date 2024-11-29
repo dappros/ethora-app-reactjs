@@ -18,6 +18,7 @@ import downloadIcon from '../assets/icons/Download.svg';
 
 // Styles
 import './AppStatistics.scss';
+import { Loading } from '../components/Loading';
 
 // Data
 const tabs: Record<string, string>[] = [
@@ -43,6 +44,7 @@ export const AppStatistics = (): ReactElement => {
   const [timePeriod, setTimePeriod] = useState<string>('7 days');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [dateRange, setDateRange] = useState([
     {
@@ -76,57 +78,64 @@ export const AppStatistics = (): ReactElement => {
 
   const [dates, setDates] = useState(() => calculateDates(timePeriod));
 
-  const getData = async () => {
-    const convert = (
-      data: Record<string, { x: number[]; y: number[] } | number>
-    ) => {
-      const result: Record<string, { value: number; name: string }[]> = {};
-      for (const d in data) {
-        if (typeof data[d] === 'number') {
-          if (d === 'apiCallCount') {
-            setGraphStatisticsCount((count) => {
-              return {
-                ...count,
-                apiCalls: data[d] as number,
-              };
-            });
-            continue;
-          }
+  const convert = (
+    data: Record<string, { x: number[]; y: number[] } | number>
+  ) => {
+    const result: Record<string, { value: number; name: string }[]> = {};
+    for (const d in data) {
+      if (typeof data[d] === 'number') {
+        if (d === 'apiCallCount') {
           setGraphStatisticsCount((count) => {
             return {
               ...count,
-              [d.slice(0, -5)]: data[d] as number,
+              apiCalls: data[d] as number,
             };
           });
           continue;
         }
-        const converted = [];
+        setGraphStatisticsCount((count) => {
+          return {
+            ...count,
+            [d.slice(0, -5)]: data[d] as number,
+          };
+        });
+        continue;
+      }
+      const converted = [];
 
-        for (const [index, value] of data[d].y.entries()) {
-          converted.push({
-            value: value,
-            name: DateTime.fromMillis(data[d].x[index]).toFormat('yyyy-MM-dd'),
-          });
-        }
-
-        result[d] = converted;
+      for (const [index, value] of data[d].y.entries()) {
+        converted.push({
+          value: value,
+          name: DateTime.fromMillis(data[d].x[index]).toFormat('yyyy-MM-dd'),
+        });
       }
 
-      return result;
-    };
+      result[d] = converted;
+    }
+
+    return result;
+  };
+
+  console.log('loading', isLoading);
+
+  const getData = async () => {
+    setIsLoading(true);
 
     try {
       if (appId) {
-        const { data } = await httpGetGraphStatistic(
+        const response = await httpGetGraphStatistic(
           appId,
           dates.startDate,
           dates.endDate
         );
-        const response = convert(data);
-        setGraphStatistics(response);
+        console.log('response---!!!---', response);
+        const result = convert(response.data);
+        setGraphStatistics(result);
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error(error);
+        setIsLoading(false);
+        console.error(error);
     }
   };
 
@@ -349,24 +358,32 @@ export const AppStatistics = (): ReactElement => {
         </div>
 
         <div className="md:w-3/4 md:pl-4">
-          <div className="flex items-center space-x-2">
+          <div className={classNames(
+            "flex items-center space-x-2",
+            isLoading? "opacity-40" : "opacity-100"
+          )}>
             <div>
-              <span className="text-4xl font-bold text-brand-500">
-                {statistics.value}
+              <span className={classNames(
+                "text-4xl font-bold ",
+                isLoading? "text-gray-500" : "text-brand-500"
+              )}>
+                {statistics.value && statistics.value.toLocaleString("en-US")}
               </span>
             </div>
             <div>
               <span className="text-sm text-gray-500">
-                {statistics.title.toLowerCase()}
+                {statistics.title}
               </span>
               <p className="text-gray-500 text-sm">For {statistics.period}</p>
             </div>
           </div>
-          <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center">
-            <LineChartLocal
+          <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center relative">
+            {isLoading
+              ? <Loading style='absolute'/>
+              : <LineChartLocal
               data={graphStatistics[selectedTab.value]}
               name={selectedTab.name}
-            />
+            />}
           </div>
         </div>
       </div>

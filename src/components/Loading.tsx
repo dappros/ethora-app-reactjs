@@ -1,8 +1,8 @@
 import './Loading.scss';
 
-export function Loading() {
+export function Loading({style}:{style?: string}) {
   return (
-    <div className="loading">
+    <div className={`loading ${style}`}>
       <span className="loader"></span>
     </div>
   );
