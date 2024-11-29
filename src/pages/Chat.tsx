@@ -12,7 +12,7 @@ export default function ChatPage() {
           Chats
         </div>
       </div>
-      <div className="rounded-2xl bg-white p-4 overflow-hidden">
+      <div className="rounded-2xl bg-white py-4 px-0 overflow-hidden">
         <Chat
           config={{
             colors: {
@@ -40,6 +40,8 @@ export default function ChatPage() {
             disableRoomMenu: true,
             defaultRooms: config?.defaultRooms,
             disableRefresh: true,
+            betaChatsLoading: true,
+            setRoomJidInPath: true,
           }}
         />
       </div>
