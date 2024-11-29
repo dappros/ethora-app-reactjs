@@ -5,6 +5,7 @@ import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
+import { sleep } from './utils/sleep';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -13,10 +14,7 @@ export function Fallback() {
 function App() {
   const navigate = useNavigate();
   const currentApp = useAppStore((s) => s.currentApp);
-  const token = localStorage.getItem('token');
-
-
-  console.log("location ", location)
+  const token = localStorage.getItem('token-538');
 
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
@@ -37,23 +35,26 @@ function App() {
   }, [currentApp]);
 
   useEffect(() => {
+    // alert("here ++")
     const example = async () => {
       if (token) {
+        sleep(1000)
         const response = await httpGetOneUser();
         if (response.status === 200) {
-          localStorage.setItem('token', response.data.token);
-          sessionStorage.setItem('refreshToken', response.data.refreshToken);
+
           await actionAfterLogin(response.data);
 
           const savedPath = localStorage.getItem('lastPath');
           if (savedPath) {
             navigate(savedPath);
           } else {
-            navigate('/app/admin/apps/list');
+            navigate('/app/admin/apps');
           }
         }
       } else {
-        navigate('/login');
+        if (!location.pathname.startsWith('/tempPassword') || !location.pathname.startsWith('/resetPassword')) {
+          navigate('/login');
+        }
       }
     };
 

@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
-    "@ethora/chat-component": "^24.11.25",
+    "@ethora/chat-component": "^24.11.29",
     "@emotion/styled": "^11.13.0",
     "@headlessui/react": "^2.1.8",
     "@mui/icons-material": "^6.1.1",

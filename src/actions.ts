@@ -96,7 +96,6 @@ export async function actionAfterLogin(data: any) {
   }
 
   state.doSetUser(user);
-  localStorage.setItem(localStorageConstants.ETHORA_USER, JSON.stringify(user));
   // await actionBootsrap()
 }
 
@@ -209,9 +208,6 @@ export async function actionUpdateUser(fd: FormData) {
 
 export function actionLogout() {
   localStorage.clear()
-  localStorage.removeItem('token');
-  sessionStorage.removeItem('refreshToken');
-  localStorage.removeItem(localStorageConstants.ETHORA_USER);
   window.location.pathname = '/login'
   return null;
 }

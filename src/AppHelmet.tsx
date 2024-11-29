@@ -1,17 +1,20 @@
 import { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ModelApp } from './models';
 import { useAppStore } from './store/useAppStore';
 
 export default function AppHelmet() {
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const location = useLocation();
+  const token = localStorage.getItem('token-538');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
+    if (!location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
+      if (!token ) {
+        navigate('/login');
+      }
     }
   }, []);
 

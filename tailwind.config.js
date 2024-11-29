@@ -57,6 +57,7 @@ export default {
         'red-950': '#8E0000',
 
         'yellow-800': '#FFD001',
+        'brand-hover': 'var(--bg-auth-background)',
 
         black: '#121219',
         white: '#ffffff',

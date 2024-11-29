@@ -4,6 +4,7 @@ import { ModelApp } from '../models';
 import { IconArrowRight } from './Icons/IconArrowRight';
 import { IconExternalLink } from './Icons/IconExternalLink';
 import { IconInfo } from './Icons/IconInfo';
+import { Tooltip } from './Tooltip';
 
 interface Props {
   app: ModelApp;
@@ -60,12 +61,12 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
             </div>
           </div>
           <div className="hidden md:flex items-ceter justify-center">
-            <button onClick={onExternalClick} className="mr-4">
+            <button onClick={onExternalClick} className="mr-4 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover">
               <IconExternalLink color={primaryColor} />
             </button>
             <button
               onClick={onClick}
-              className="flex justify-center items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
+              className="flex justify-center hover:bg-brand-hover items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
             >
               <span className="text-brand-500 font-varela text-sm mr-2">
                 Details
@@ -79,7 +80,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Users</span>
-              <IconInfo />
+              <Tooltip title="Users registered (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
             </div>
             <div>
               <span className="font-sans text-sm">{app.stats.totalRegistered}</span>{' '}
@@ -90,7 +93,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Sessions</span>
-              <IconInfo />
+              <Tooltip title="User sessions (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
             </div>
             <div>
               <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalSessions)}</span>{' '}
@@ -101,7 +106,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Chats</span>
-              <IconInfo />
+              <Tooltip title="Chat messages (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
             </div>
             <div>
               <span className="font-sans text-sm">-</span>{' '}
@@ -112,7 +119,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">API</span>
-              <IconInfo />
+              <Tooltip title="API calls (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
             </div>
             <div>
               <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalApiCalls)}</span>{' '}
@@ -123,7 +132,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Files</span>
-              <IconInfo />
+              <Tooltip title="Files (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
             </div>
             <div>
               <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalFiles)}</span>{' '}
@@ -134,7 +145,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Web3</span>
-              <IconInfo />
+              <Tooltip title="Blockchain transactions (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
             </div>
             <div>
               <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalTransactions)}</span>{' '}

@@ -4,9 +4,24 @@ import { actionLogout } from './actions';
 
 export const httpTokens = {
   appJwt: '',
-  token: '',
-  refreshToken: '',
+  _token: localStorage.getItem('token-538') || '',
+  _refreshToken: localStorage.getItem('refreshToken-538') || '',
+  set refreshToken(token: string) {
+    localStorage.setItem('refreshToken-538', token);
+    this._refreshToken = token
+  },
+  get refreshToken() {
+    return this._refreshToken
+  },
+  set token(newToken: string) {
+    localStorage.setItem('token-538', newToken);
+    this._token = newToken
+  },
+  get token() {
+    return this._token;
+  }
 };
+
 
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API,
@@ -32,8 +47,7 @@ http.interceptors.request.use((config) => {
     return config;
   }
 
-  config.headers.Authorization =
-    httpTokens.token || localStorage.getItem('token');
+  config.headers.Authorization = httpTokens.token;
 
   return config;
 }, null);
@@ -57,7 +71,6 @@ http.interceptors.response.use(null, async (error) => {
     await refreshToken();
     return http(request);
   } catch (error) {
-    actionLogout()
     return Promise.reject(error);
   }
 });
@@ -67,16 +80,17 @@ export const refreshToken = async () => {
     const response = await http.post('/users/login/refresh', null, {
       headers: {
         Authorization:
-          httpTokens.refreshToken || sessionStorage.getItem('refreshToken'),
+          httpTokens.refreshToken,
       },
     });
     const { token, refreshToken } = response.data;
     httpTokens.token = token;
-    localStorage.setItem('token', token);
-    sessionStorage.setItem('refreshToken', refreshToken);
     httpTokens.refreshToken = refreshToken;
+
+
     return httpTokens;
   } catch (error) {
+    actionLogout()
     console.error('Token refresh failed:', error);
     throw error;
   }
