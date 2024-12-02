@@ -1,6 +1,53 @@
 import { Chat } from '@ethora/chat-component';
-import { useAppStore } from '../store/useAppStore';
+import React from 'react';
 import { refreshToken } from '../http';
+import { useAppStore } from '../store/useAppStore';
+
+interface ChatComponentProps {
+  config: any;
+  currentUser: any;
+}
+
+const MemoizedChat = React.memo(function ChatComponent({
+  config,
+  currentUser,
+}: ChatComponentProps) {
+  return (
+    <Chat
+      config={{
+        colors: {
+          primary: config?.primaryColor || '#fff',
+          secondary: '#fff',
+        },
+        // @ts-ignorex
+        roomListStyles: {
+          color: config?.primaryColor,
+          maxHeight: 'calc(100%)',
+          height: 'calc(100%)',
+          borderRadius: '16px 0px 0px 16px',
+          border: 'none',
+        },
+        chatRoomStyles: {
+          color: config?.primaryColor,
+          maxHeight: 'calc(100%)',
+          height: 'calc(100%)',
+          borderRadius: '0px 16px 16px 0px',
+        },
+        userLogin: {
+          enabled: true,
+          user: currentUser,
+        },
+        disableRoomMenu: true,
+        defaultRooms: config?.defaultRooms,
+        refreshTokens: {
+          refreshFunction: refreshToken,
+          enabled: true,
+        },
+        setRoomJidInPath: true,
+      }}
+    />
+  );
+});
 
 export default function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
@@ -14,39 +61,7 @@ export default function ChatPage() {
         </div>
       </div>
       <div className="rounded-2xl bg-white py-4 px-0 overflow-hidden">
-        <Chat
-          config={{
-            colors: {
-              primary: config?.primaryColor || '#fff',
-              secondary: '#fff',
-            },
-            // @ts-ignorex
-            roomListStyles: {
-              color: config?.primaryColor,
-              maxHeight: 'calc(100%)',
-              height: 'calc(100%)',
-              borderRadius: '16px 0px 0px 16px',
-              border: 'none',
-            },
-            chatRoomStyles: {
-              color: config?.primaryColor,
-              maxHeight: 'calc(100%)',
-              height: 'calc(100%)',
-              borderRadius: '0px 16px 16px 0px',
-            },
-            userLogin: {
-              enabled: true,
-              user: currentUser,
-            },
-            disableRoomMenu: true,
-            defaultRooms: config?.defaultRooms,
-            disableRefresh: {
-              refreshFunction: refreshToken,
-              disable: true,
-            },
-            setRoomJidInPath: true,
-          }}
-        />
+        <MemoizedChat config={config} currentUser={currentUser} />
       </div>
     </div>
   );
