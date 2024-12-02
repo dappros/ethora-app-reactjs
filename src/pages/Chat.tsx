@@ -1,6 +1,6 @@
 import { Chat } from '@ethora/chat-component';
 import React from 'react';
-import { refreshToken } from '../http';
+import { httpTokens, refreshToken } from '../http';
 import { useAppStore } from '../store/useAppStore';
 
 interface ChatComponentProps {
@@ -12,6 +12,16 @@ const MemoizedChat = React.memo(function ChatComponent({
   config,
   currentUser,
 }: ChatComponentProps) {
+  const handleChangeTokens = async () => {
+    const { token, refreshToken: refresh } = await refreshToken();
+
+    localStorage.setItem('refreshToken-538', refresh);
+    localStorage.setItem('token-538', token);
+
+    httpTokens.token = token;
+    httpTokens.refreshToken = refresh;
+  };
+
   return (
     <Chat
       config={{
@@ -40,7 +50,7 @@ const MemoizedChat = React.memo(function ChatComponent({
         disableRoomMenu: true,
         defaultRooms: config?.defaultRooms,
         refreshTokens: {
-          refreshFunction: refreshToken,
+          refreshFunction: handleChangeTokens,
           enabled: true,
         },
         setRoomJidInPath: true,
