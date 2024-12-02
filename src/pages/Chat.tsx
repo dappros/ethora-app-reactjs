@@ -1,5 +1,6 @@
 import { Chat } from '@ethora/chat-component';
 import { useAppStore } from '../store/useAppStore';
+import { refreshToken } from '../http';
 
 export default function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
@@ -19,7 +20,7 @@ export default function ChatPage() {
               primary: config?.primaryColor || '#fff',
               secondary: '#fff',
             },
-            // @ts-ignore
+            // @ts-ignorex
             roomListStyles: {
               color: config?.primaryColor,
               maxHeight: 'calc(100%)',
@@ -39,8 +40,10 @@ export default function ChatPage() {
             },
             disableRoomMenu: true,
             defaultRooms: config?.defaultRooms,
-            disableRefresh: true,
-            betaChatsLoading: true,
+            disableRefresh: {
+              refreshFunction: refreshToken,
+              disable: true,
+            },
             setRoomJidInPath: true,
           }}
         />

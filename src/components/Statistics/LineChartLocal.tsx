@@ -34,7 +34,7 @@ export const LineChartLocal = (props: LineChartLocalProps): ReactElement => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis
-            domain={[0, 'dataMax + 10000']}
+            // domain={[0, 'dataMax + 10000']}
             // label={{
             //   value: name,
             //   angle: -90,

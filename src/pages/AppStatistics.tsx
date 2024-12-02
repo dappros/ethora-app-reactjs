@@ -45,7 +45,6 @@ export const AppStatistics = (): ReactElement => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [statisticValue, setStatisticValue] = useState<string>('');
 
   const [dateRange, setDateRange] = useState([
     {
@@ -127,7 +126,6 @@ export const AppStatistics = (): ReactElement => {
           dates.startDate,
           dates.endDate
         );
-        console.log('response---!!!---', response);
         const result = convert(response.data);
         setGraphStatistics(result);
         setIsLoading(false);
@@ -164,6 +162,10 @@ export const AppStatistics = (): ReactElement => {
     dates.startDate,
     dates.endDate,
   ]);
+
+  const statisticValue = useMemo(() => {
+    return statistics.value && statistics.value.toLocaleString("en-US")
+  }, [statistics.value]);
 
   const handleOptionClick = (option: string) => {
     setTimePeriod(option);
@@ -217,16 +219,6 @@ export const AppStatistics = (): ReactElement => {
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId, dates]);
-
-  useEffect(() => {
-    if (statistics.value) {
-      const roundedValue = Math.ceil(statistics.value / 1000) * 1000;
-      statistics.value.toLocaleString("en-US")
-      setStatisticValue(roundedValue.toLocaleString("en-US"));
-    } else {
-      setStatisticValue('0');
-    }
-  }, [statistics.value]);
 
   return (
     <div className="h-full w-full overflow-hidden">
@@ -376,8 +368,7 @@ export const AppStatistics = (): ReactElement => {
                 "text-4xl font-bold ",
                 isLoading? "text-gray-500" : "text-brand-500"
               )}>
-                {statistics.value &&
-                  statisticValue}
+                {statisticValue}
               </span>
             </div>
             <div>
