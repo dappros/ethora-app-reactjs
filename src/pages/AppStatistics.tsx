@@ -116,8 +116,6 @@ export const AppStatistics = (): ReactElement => {
     return result;
   };
 
-  console.log('loading', isLoading);
-
   const getData = async () => {
     setIsLoading(true);
 
