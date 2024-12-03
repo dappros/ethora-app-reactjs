@@ -203,7 +203,7 @@ export function AppSettings() {
           <TabApp text="Mobile app" />
           <TabApp text="Home screen" />
           <TabApp text="Menu" />
-          <TabApp text="Chats" />
+          <TabApp text="Chats" disabled />
           <TabApp text="Visibility & Privacy" />
           <TabApp text="API" last />
         </TabList>
