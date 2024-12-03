@@ -67,7 +67,7 @@ export function WebApp({
           </label>
         </div>
         <div className="flex items-center">
-          <button className="text-brand-500 font-varela text-[16px] mr-[20px]">
+          <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300">
             Upgrade to Business
           </button>
           <span>to unlock</span>
