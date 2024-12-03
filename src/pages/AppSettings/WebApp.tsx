@@ -47,7 +47,7 @@ export function WebApp({
           className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl"
           htmlFor="domain-input"
         >
-          .ethoradev.com
+          .ethora.com
         </label>
       </div>
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
