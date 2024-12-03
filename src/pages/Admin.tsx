@@ -2,6 +2,7 @@ import cn from 'classnames';
 import { NavLink, Outlet } from 'react-router-dom';
 
 export default function Admin() {
+  const isProd = import.meta.env.VITE_SITE_IS_PRODUCTION
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">
@@ -24,9 +25,14 @@ export default function Admin() {
             className={({ isActive }) =>
               cn(
                 'w-1/2 border flex items-center justify-center rounded-r-xl border-brand-500 font-sans text-base',
-                { 'bg-brand-500 text-white': isActive, 'hover:bg-brand-hover': !isActive }
+                { 
+                  'bg-brand-500 text-white': isActive, 
+                  'hover:bg-brand-hover': !isActive,
+                  'cursor-not-allowed pointer-events-none text-gray-300 border-gray-300': isProd === "true"
+                }
               )
             }
+            
             to="/app/admin/billing"
           >
             Billing
