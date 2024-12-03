@@ -117,7 +117,7 @@ export function ProfilePageUserIcon({
                 className="profile-icon-menu-items"
               >
                 <MenuItem>
-                  <button onClick={() => {}}>
+                  <button className="pointer-events-none text-gray-300" onClick={() => {}}>
                     <span>Make photo</span>
                     <IconCamera />
                   </button>
