@@ -26,7 +26,7 @@ export default function UserSettings() {
             <TabApp text="Visiblility" />
             <TabApp text="Profile Shares" />
             <TabApp text="Document Shares" />
-            <TabApp text="Blocked Users" />
+            <TabApp text="Blocked Users" disabled />
             <TabApp text="Referrals" last />
           </TabList>
           <TabPanels className="h-full overflow-hidden">
