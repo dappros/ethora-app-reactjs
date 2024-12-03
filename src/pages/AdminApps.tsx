@@ -154,7 +154,7 @@ export default function AdminApps() {
         )}
       </div>
       {showModal && (
-        <NewAppModal show={showModal} onClose={() => setShowModal(false)} />
+        <NewAppModal haveApps={!!apps.length} show={showModal} onClose={() => setShowModal(false)} />
       )}
     </div>
   );

@@ -12,15 +12,16 @@ import { Loading } from '../Loading';
 interface Props {
   onClose: () => void;
   show: boolean;
+  haveApps: boolean;
 }
 
 type Inputs = {
   appName: string;
 };
 
-export function NewAppModal({ onClose, show }: Props) {
+export function NewAppModal({ onClose, show, haveApps }: Props) {
   const [loading, setLoading] = useState(false);
-  const [next, setNext] = useState(false);
+  const [next, setNext] = useState(haveApps);
   const { register, handleSubmit } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = ({ appName }) => {
