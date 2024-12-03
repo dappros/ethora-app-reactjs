@@ -30,14 +30,15 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
       return (
         // logo
         <div
-          className="w-[120px] h-[120px] rounded-xl flex justify-center bg-gray-100 items-center bg-contain bg-no-repeat bg-center"
+          onClick={onClick}
+          className="w-[120px] h-[120px] rounded-xl flex justify-center bg-gray-100 items-center bg-contain bg-no-repeat bg-center cursor-pointer"
           style={{ backgroundImage: `url(${app.logoImage})` }}
         ></div>
 
       );
     } else {
       return (
-        <div className="w-[120px] h-[120px] rounded-xl bg-gray-100 flex justify-center items-center">
+        <div onClick={onClick} className="w-[120px] h-[120px] rounded-xl bg-gray-100 flex justify-center items-center cursor-pointer">
           <span className="text-gray-500 font-varela text-[18px]">
             {app.displayName}
           </span>
@@ -53,7 +54,7 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
         {/* app title */}
         <div className="flex justify-center md:justify-between items-center">
           <div className="md:ml-[40px]">
-            <div className="font-varela text-[18px] text-center md:text-left">
+            <div onClick={onClick} className="font-varela text-[18px] text-center md:text-left cursor-pointer">
               {app.displayName}
             </div>
             <div className="font-sans text-[12px] text-gray-500">
