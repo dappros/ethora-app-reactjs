@@ -86,7 +86,7 @@ export default function Profile() {
                     <Tab key="documents" className="border-b border-b-[#F0F0F0] w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500">
                       Documents
                     </Tab>
-                    <Tab key="collections" className="border-b border-b-[#F0F0F0] w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500">
+                    <Tab key="collections" className="border-b border-b-[#F0F0F0] w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500 pointer-events-none text-gray-300">
                       Collections
                     </Tab>
                   </TabList>
