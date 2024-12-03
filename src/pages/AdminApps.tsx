@@ -119,7 +119,7 @@ export default function AdminApps() {
       </div>
       {/* apps list */}
       <div className="">
-        {showStarterInf && (
+        {(showStarterInf && !apps.length) && (
           <ApplicationStarterInf
             onClose={() => {
               setShowStarterInf(false);
