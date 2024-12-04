@@ -54,7 +54,7 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
         {/* app title */}
         <div className="flex justify-center md:justify-between items-center">
           <div className="md:ml-[40px]">
-            <div onClick={onClick} className="font-varela text-[18px] text-center md:text-left cursor-pointer">
+            <div onClick={onClick} className="font-varela text-[18px] text-brand-500 hover:text-brand-darker text-center md:text-left cursor-pointer">
               {app.displayName}
             </div>
             <div className="font-sans text-[12px] text-gray-500">
