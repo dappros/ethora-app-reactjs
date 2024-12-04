@@ -57,7 +57,7 @@ export function MobileApp({
           value={bundleId}
           onChange={(e) => setBundleId(e.target.value)}
         />
-        <button className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8">
+        <button className="w-full rounded-xl hover:bg-brand-hover border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8">
           <IconDownload stroke={primaryColor}></IconDownload>
           <span className="ml-2">Prepare React Native Build</span>
         </button>
@@ -77,7 +77,7 @@ export function MobileApp({
           }
         />
         <button
-          className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8"
+          className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8"
           onClick={() => googleJsonRef.current?.click()}
         >
           <IconUpload stroke={primaryColor}></IconUpload>
@@ -104,7 +104,7 @@ export function MobileApp({
         />
         <button
           onClick={() => plistFileRef.current?.click()}
-          className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4"
+          className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4"
         >
           <IconUpload></IconUpload>
           <span className="ml-2">Upload</span>
@@ -112,7 +112,7 @@ export function MobileApp({
         <div className="font-semibold text-sm mb-2">
           Push Notifications Certificate (Apple)
         </div>
-        <button className="w-full rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4">
+        <button className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4">
           <IconUpload></IconUpload>
           <span className="ml-2">Upload</span>
         </button>

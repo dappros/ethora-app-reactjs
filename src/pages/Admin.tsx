@@ -13,7 +13,7 @@ export default function Admin() {
           <NavLink
             className={({ isActive }) =>
               cn(
-                'w-1/2 border flex items-center justify-center rounded-l-xl border-brand-500 font-sans text-base',
+                'w-1/2 border flex items-center hover:bg-brand-darker justify-center rounded-l-xl border-brand-500 font-sans text-base',
                 { 'bg-brand-500 text-white': isActive, 'hover:bg-brand-hover': !isActive }
               )
             }

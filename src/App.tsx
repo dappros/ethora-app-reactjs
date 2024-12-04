@@ -37,9 +37,9 @@ function App() {
         if (match) {
           let arr = match.map(Number)
           let [r, g, b, a] = arr
-          r = Math.ceil(r * 0.7)
-          g = Math.ceil(g * 0.7)
-          b = Math.ceil(b * 0.7)
+          r = Math.ceil(r * 0.8)
+          g = Math.ceil(g * 0.8)
+          b = Math.ceil(b * 0.8)
           let newColor = `rgba(${r},${g},${b},${a})`
           console.log({newColor})
           document.documentElement.style.setProperty(

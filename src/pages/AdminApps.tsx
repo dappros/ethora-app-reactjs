@@ -108,7 +108,7 @@ export default function AdminApps() {
             {renderSorting()}
             <button
               onClick={() => setShowModal(true)}
-              className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+              className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
             >
               <IconAdd color="white" className="md:mr-2" />
               <span className="hidden md:block">Create App</span>
