@@ -421,171 +421,179 @@ export default function AppUsers() {
           </div>
         )}
 
-        <div className="overflow-x-auto relative mb-4">
-          {renderActionsForSelected()}
-          <table className="border-collapse w-full min-w-[1200px] table-fixed">
-            <thead>
-              <tr className="bg-[#FCFCFC]">
-                <th className="pl-4 py-2 w-[32px] rounded-l-lg">
-                  <Field className="flex items-center cursor-pointer">
-                    <Checkbox
-                      className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                      checked={allRowsSelected}
-                      onChange={onSelectAllRows}
-                    >
-                      <IconCheckbox className="hidden group-data-[checked]:block" />
-                    </Checkbox>
-                  </Field>
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  First Name
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Last Name
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Tags
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Creation Date
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Seen Date
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Auth method
-                </th>
-                <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Attribution
-                </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((el, index) => {
-                return (
-                  <tr
-                    key={el._id}
-                    className={cn('', {
-                      '!bg-[#E7EDF9]': rowsSelected[index],
-                      'hover:!bg-[#F5F7F9]': !rowsSelected[index],
-                    })}
-                  >
-                    <td className="pl-4 py-2 w-[32px] rounded-l-lg">
+        {!!items.length && (
+          <>
+            <div className="overflow-x-auto relative mb-4">
+              {renderActionsForSelected()}
+              <table className="border-collapse w-full min-w-[1200px] table-fixed">
+                <thead>
+                  <tr className="bg-[#FCFCFC]">
+                    <th className="pl-4 py-2 w-[32px] rounded-l-lg">
                       <Field className="flex items-center cursor-pointer">
                         <Checkbox
                           className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                          checked={rowsSelected[index]}
-                          onChange={(isSet) => setSelect(isSet, index)}
+                          checked={allRowsSelected}
+                          onChange={onSelectAllRows}
                         >
                           <IconCheckbox className="hidden group-data-[checked]:block" />
                         </Checkbox>
                       </Field>
-                    </td>
-                    <td className="px-4 py-[20px] text-left font-sans font-normal text-sm whitespace-nowrap">
-                      {el.firstName}
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      {el.lastName}
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      { }
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      {el.lastSeen
-                        ? DateTime.fromISO(el.lastSeen).toFormat(
-                          'dd LLL yyyy t'
-                        )
-                        : '-'}
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                      {el.authMethod}
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center">
-                      -
-                    </td>
-                    <td className="px-4 rounded-r-lg font-sans font-normal text-sm text-center whitespace-nowrap">
-                      <button onClick={() => setEditAcl(el.acl)}>
-                        <IconSettings width={16} height={16} />
-                      </button>
-                    </td>
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                      First Name
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                      Last Name
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                      Tags
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      Creation Date
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      Seen Date
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      Auth method
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      Attribution
+                    </th>
+                    <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      Actions
+                    </th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {items.map((el, index) => {
+                    return (
+                      <tr
+                        key={el._id}
+                        className={cn('', {
+                          '!bg-[#E7EDF9]': rowsSelected[index],
+                          'hover:!bg-[#F5F7F9]': !rowsSelected[index],
+                        })}
+                      >
+                        <td className="pl-4 py-2 w-[32px] rounded-l-lg">
+                          <Field className="flex items-center cursor-pointer">
+                            <Checkbox
+                              className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                              checked={rowsSelected[index]}
+                              onChange={(isSet) => setSelect(isSet, index)}
+                            >
+                              <IconCheckbox className="hidden group-data-[checked]:block" />
+                            </Checkbox>
+                          </Field>
+                        </td>
+                        <td className="px-4 py-[20px] text-left font-sans font-normal text-sm whitespace-nowrap">
+                          {el.firstName}
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          {el.lastName}
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          { }
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          {el.lastSeen
+                            ? DateTime.fromISO(el.lastSeen).toFormat(
+                              'dd LLL yyyy t'
+                            )
+                            : '-'}
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          {el.authMethod}
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center">
+                          -
+                        </td>
+                        <td className="px-4 rounded-r-lg font-sans font-normal text-sm text-center whitespace-nowrap">
+                          <button onClick={() => setEditAcl(el.acl)}>
+                            <IconSettings width={16} height={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mx-8 my-[12px]">
+              <div className="flex justify-between md:justify-start items-center">
+                <div className="text-[#71717A] text-xs mr-8 whitespace-nowrap">
+                  {renderFrom()} to {renderTo()} of {total}
+                </div>
+                <div className="flex">
+                  <div className="text-[#71717A] mr-8">show</div>
+                  <Menu>
+                    <MenuButton className="flex mr-4">
+                      <span className="text-brand-500 mr-4 font-semibold">
+                        {itemsPerTable}
+                      </span>
+                      <IconArrowDown />
+                    </MenuButton>
+                    <MenuItems anchor="bottom" className="bg-white">
+                      <div className="">
+                        <MenuItem>
+                          <div
+                            onClick={() => setItemsPerTable(10)}
+                            className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                          >
+                            {10}
+                          </div>
+                        </MenuItem>
+                        <MenuItem>
+                          <div
+                            onClick={() => setItemsPerTable(15)}
+                            className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                          >
+                            {15}
+                          </div>
+                        </MenuItem>
+                        <MenuItem>
+                          <div
+                            onClick={() => setItemsPerTable(25)}
+                            className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                          >
+                            {25}
+                          </div>
+                        </MenuItem>
+                      </div>
+                    </MenuItems>
+                  </Menu>
+                  <div className="text-[#71717A]">users</div>
+                </div>
+              </div>
+              <div className="flex justify-center md:justify-end md:items-center">
+                <ReactPaginate
+                  className="paginate"
+                  onPageActive={(...args) => {
+                    console.log({ args });
+                  }}
+                  onPageChange={(selectedItem) =>
+                    onPageChange(selectedItem.selected)
+                  }
+                  breakLabel="..."
+                  nextLabel=""
+                  pageRangeDisplayed={3}
+                  pageCount={pageCount}
+                  previousLabel=""
+                  renderOnZeroPageCount={null}
+                  forcePage={currentPage}
+                />
+              </div>
+            </div>
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mx-8 my-[12px]">
-          <div className="flex justify-between md:justify-start items-center">
-            <div className="text-[#71717A] text-xs mr-8 whitespace-nowrap">
-              {renderFrom()} to {renderTo()} of {total}
-            </div>
-            <div className="flex">
-              <div className="text-[#71717A] mr-8">show</div>
-              <Menu>
-                <MenuButton className="flex mr-4">
-                  <span className="text-brand-500 mr-4 font-semibold">
-                    {itemsPerTable}
-                  </span>
-                  <IconArrowDown />
-                </MenuButton>
-                <MenuItems anchor="bottom" className="bg-white">
-                  <div className="">
-                    <MenuItem>
-                      <div
-                        onClick={() => setItemsPerTable(10)}
-                        className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
-                      >
-                        {10}
-                      </div>
-                    </MenuItem>
-                    <MenuItem>
-                      <div
-                        onClick={() => setItemsPerTable(15)}
-                        className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
-                      >
-                        {15}
-                      </div>
-                    </MenuItem>
-                    <MenuItem>
-                      <div
-                        onClick={() => setItemsPerTable(25)}
-                        className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
-                      >
-                        {25}
-                      </div>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </Menu>
-              <div className="text-[#71717A]">users</div>
-            </div>
-          </div>
-          <div className="flex justify-center md:justify-end md:items-center">
-            <ReactPaginate
-              className="paginate"
-              onPageActive={(...args) => {
-                console.log({ args });
-              }}
-              onPageChange={(selectedItem) =>
-                onPageChange(selectedItem.selected)
-              }
-              breakLabel="..."
-              nextLabel=""
-              pageRangeDisplayed={3}
-              pageCount={pageCount}
-              previousLabel=""
-              renderOnZeroPageCount={null}
-              forcePage={currentPage}
-            />
-          </div>
-        </div>
+          </>
+
+        )}
+
+
+
       </div>
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
