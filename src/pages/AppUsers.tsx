@@ -596,7 +596,7 @@ export default function AppUsers() {
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
           <div className="font-varela text-[24px] text-center mb-8">Tags</div>
-          <div className="text-center mb-4 font-varela text-[18px]">
+          <div className="font-sans text-[14px] mb-8 text-center">
             Add Tags
           </div>
           <div>
@@ -608,16 +608,16 @@ export default function AppUsers() {
               onChange={(e) => setTags(e.target.value)}
             />
           </div>
-          <div className="buttons">
+          <div className="flex gap-8">
             <button
               onClick={() => setShowManageTags(false)}
-              className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+              className="rounded-xl hover:bg-brand-hover border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
             >
               Cancel
             </button>
             <button
               onClick={onTagsSumbmit}
-              className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+              className="rounded-xl hover:bg-brand-darker  bg-brand-500 border max-w-[416px] w-full text-center text-white p-2"
             >
               Submit
             </button>
@@ -626,20 +626,20 @@ export default function AppUsers() {
       )}
       {showResetPassword && (
         <SubmitModal onClose={() => setShowResetPassword(false)}>
-          <div className="title">Password Reset</div>
-          <p className="text-center mb-8">
+          <div className="font-varela text-[24px] text-center mb-8">Password Reset</div>
+          <p className="font-sans text-[14px] mb-8 text-center">
             {`Are you sure you want to force a password reset for ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
           </p>
-          <div className="buttons">
+          <div className="flex gap-8">
             <button
               onClick={() => setShowResetPassword(false)}
-              className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+              className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
             >
               Cancel
             </button>
             <button
               onClick={onResetPassword}
-              className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+              className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white"
             >
               Submit
             </button>
@@ -648,20 +648,20 @@ export default function AppUsers() {
       )}
       {showDelete && (
         <SubmitModal onClose={() => setShowDelete(false)}>
-          <div className="title">Delete user</div>
-          <p className="text-center mb-8">
+          <div className="font-varela text-[24px] text-center mb-8">Delete user</div>
+          <p className="font-sans text-[14px] mb-8 text-center">
             {`Are you sure you want to delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
           </p>
-          <div className="buttons">
+          <div className="flex gap-8">
             <button
               onClick={() => setShowDelete(false)}
-              className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+              className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
             >
               Cancel
             </button>
             <button
               onClick={onDelete}
-              className="w-full py-[12px] rounded-xl bg-red-600 text-white"
+              className="w-full py-[12px] rounded-xl bg-red-600 hover:bg-red-700 text-white"
             >
               Submit
             </button>
