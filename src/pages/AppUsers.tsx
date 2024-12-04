@@ -406,7 +406,7 @@ export default function AppUsers() {
           />
           <button
             onClick={() => setShowNewUserModal(true)}
-            className="flex ml-4 items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+            className="flex ml-4 hover:bg-brand-darker items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
           >
             <IconAdd color="white" className="md:mr-2" />
             <span className="hidden md:block">Add User</span>
