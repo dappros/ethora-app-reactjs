@@ -349,8 +349,10 @@ export default function AppUsers() {
     let length = selectedIndexes.length;
 
     if (length > 0) {
+      // 
       return (
-        <div className="shadow px-[16px] py-[12px] grid grid-cols-4 gap-[16px] items-center z-50 translate-x-1/2 bg-white rounded-xl fixed bottom-[30px]">
+        
+        <div className="shadow px-[16px] py-[12px] grid grid-cols-4 gap-[16px] items-center z-50 transform -translate-x-1/2 bg-white rounded-xl fixed left-[50%] bottom-[30px]">
           <div className="whitespace-nowrap text-sm">
             Selected {length} of {itemsPerTable} users
           </div>
@@ -593,7 +595,7 @@ export default function AppUsers() {
       </div>
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
-          <div className="title">Tags</div>
+          <div className="font-varela text-[24px] text-center mb-8">Tags</div>
           <div className="text-center mb-4 font-varela text-[18px]">
             Add Tags
           </div>
