@@ -63,7 +63,7 @@ export function Referrals({ id }: Props) {
             {...register('referrerId', { required: true })}
           />
           </div>
-          <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white">Earn Coins</button>
+          <button className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white">Earn Coins</button>
         </form>
       </div>
       {loading && <Loading />}

@@ -283,7 +283,7 @@ export function ProfileShares() {
           <div className="">
             <button
               onClick={() => setShowNew(true)}
-              className="flex items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+              className="flex items-center hover:bg-brand-darker justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
             >
               <IconAdd color="white" className="md:mr-2" />
               <span className="hidden md:block">Add New Share</span>
