@@ -6,6 +6,7 @@ import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
 import { sleep } from './utils/sleep';
+import { navigateToUserPage } from './utils/navigateToUserPage';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -60,17 +61,21 @@ function App() {
         if (response.status === 200) {
 
           await actionAfterLogin(response.data);
+          console.log(currentApp?.afterLoginPage)
+          navigateToUserPage(navigate, currentApp?.afterLoginPage)
+          // currentApp?.afterLoginPage === 'chats'
+          // navigate()
 
-          const savedPath = localStorage.getItem('lastPath');
-          if (savedPath) {
-            if (savedPath === '/app/chat') {
-              navigate('/app/admin/apps')
-              return
-            }
-            navigate(savedPath);
-          } else {
-            navigate('/app/admin/apps');
-          }
+          // const savedPath = localStorage.getItem('lastPath');
+          // if (savedPath) {
+          //   if (savedPath === '/app/chat') {
+          //     navigate('/app/admin/apps')
+          //     return
+          //   }
+          //   navigate(savedPath);
+          // } else {
+          //   navigate('/app/admin/apps');
+          // }
         }
       } else {
         if (!location.pathname.startsWith('/tempPassword') || !location.pathname.startsWith('/resetPassword')) {

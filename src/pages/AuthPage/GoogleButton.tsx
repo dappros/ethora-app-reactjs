@@ -10,6 +10,7 @@ import { useAppStore } from '../../store/useAppStore';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
+import { navigateToUserPage } from '../../utils/navigateToUserPage';
 
 export const GoogleButton = () => {
   const config = useAppStore.getState().currentApp;
@@ -56,7 +57,7 @@ export const GoogleButton = () => {
             loginType
           ).then(async ({ data }) => {
             await actionAfterLogin(data);
-            navigate('/app/admin/apps');
+            navigateToUserPage(navigate, config?.afterLoginPage);
           });
         } else {
           console.log('existing user');
@@ -66,7 +67,7 @@ export const GoogleButton = () => {
             loginType
           ).then(async ({ data }) => {
             await actionAfterLogin(data);
-            navigate('/app/admin/apps');
+            navigateToUserPage(navigate, config?.afterLoginPage);
           });
         }
       }

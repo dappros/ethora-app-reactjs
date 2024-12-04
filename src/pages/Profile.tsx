@@ -94,7 +94,7 @@ export default function Profile() {
                     <TabPanel key="">
                       <button
                         onClick={() => setShowNewDocModal(true)}
-                        className="w-full bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
+                        className="w-full hover:bg-brand-darker bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
                       >
                         Add Document
                       </button>
