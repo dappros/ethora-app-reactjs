@@ -16,7 +16,7 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import TabApp from '../../components/TabApp';
 
-export function AppSettings() {
+export default function AppSettings() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
   const app = apps.find((app) => app._id === appId);

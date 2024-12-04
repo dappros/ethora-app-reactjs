@@ -12,7 +12,7 @@ import { BillingModalChangePlan } from '../components/Billing/Modal/BillingModal
 import { BillingModalCheckoutForm } from '../components/Billing/Modal/BillingModalCheckoutForm';
 import { useState } from 'react';
 
-export function AdminBilling() {
+export default function AdminBilling() {
   // @ts-ignore
   const [billingInfo, setBillingInfo] = useState({
     plan: 'Business Plan',
