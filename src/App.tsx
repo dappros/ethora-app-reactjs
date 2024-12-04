@@ -63,6 +63,10 @@ function App() {
 
           const savedPath = localStorage.getItem('lastPath');
           if (savedPath) {
+            if (savedPath === '/app/chat') {
+              navigate('/app/admin/apps')
+              return
+            }
             navigate(savedPath);
           } else {
             navigate('/app/admin/apps');
