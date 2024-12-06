@@ -1,64 +1,76 @@
-import { Modal } from '@mui/material';
+import { Button, Modal } from '@mui/material';
 import {
-  PaymentElement,
+  CardCvcElement,
+  CardExpiryElement,
+  CardNumberElement,
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import { Layout } from '@stripe/stripe-js';
-import { FormEvent, ReactElement, useState } from 'react';
+import { StripeCardNumberElementOptions } from '@stripe/stripe-js';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { IconArrowLeft } from '../../Icons/IconArrowLeft';
 
-interface BillingModalChangePlanProps {
+interface BillingModalProps {
   isOpen: boolean;
   handleClose: () => void;
-  dpmCheckerLink?: string;
+  clientSecret: string;
 }
 
-export const BillingModalCheckoutForm = (
-  props: BillingModalChangePlanProps
-): ReactElement => {
-  const { isOpen, handleClose, dpmCheckerLink } = props;
-
+export const BillingModalCheckoutForm = ({
+  isOpen,
+  handleClose,
+  clientSecret,
+}: BillingModalProps): React.ReactElement => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
 
-  const [message, setMessage] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const CARD_ELEMENT_OPTIONS: StripeCardNumberElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: '#fa755a',
+      },
+    },
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
-      // Stripe.js hasn't yet loaded.
-      // Make sure to disable form submission until Stripe.js has loaded.
+      setMessage('Stripe.js has not loaded yet.');
       return;
     }
 
-    setIsLoading(true);
+    const cardElement = elements.getElement(CardNumberElement);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        // Make sure to change this to your payment completion page
-        return_url: 'http://localhost:3000/complete',
+    const { error } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: cardElement!,
+        billing_details: {
+          name,
+        },
       },
     });
 
-    // This point will only be reached if there is an immediate error when
-    // confirming the payment. Otherwise, your customer will be redirected to
-    // your `return_url`. For some payment methods like iDEAL, your customer will
-    // be redirected to an intermediate site first to authorize the payment, then
-    // redirected to the `return_url`.
-    if (error.type === 'card_error' || error.type === 'validation_error') {
-      setMessage(error.message);
-    } else {
-      setMessage('An unexpected error occurred.');
+    if (error) {
+      setMessage(error.message!);
+      return;
     }
 
-    setIsLoading(false);
-  };
-
-  const paymentElementOptions: { layout: Layout } = {
-    layout: 'accordion',
+    setMessage('Payment successful!');
+    navigate('/app/admin/billing');
   };
 
   return (
@@ -67,41 +79,72 @@ export const BillingModalCheckoutForm = (
       onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
+      className="relative"
     >
-      <>
-        <form id="payment-form" onSubmit={handleSubmit}>
-          <PaymentElement
-            id="payment-element"
-            options={paymentElementOptions}
-          />
-          <button disabled={isLoading || !stripe || !elements} id="submit">
-            <span id="button-text">
-              {isLoading ? (
-                <div className="spinner" id="spinner"></div>
-              ) : (
-                'Pay now'
-              )}
-            </span>
-          </button>
-          {/* Show any error or success messages */}
-          {message && <div id="payment-message">{message}</div>}
-        </form>
-        {/* [DEV]: Display dynamic payment methods annotation and integration checker */}
-        <div id="dpm-annotation">
-          <p>
-            Payment methods are dynamically displayed based on customer
-            location, order amount, and currency.&nbsp;
-            <a
-              href={dpmCheckerLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              id="dpm-integration-checker"
-            >
-              Preview payment methods by transaction
-            </a>
-          </p>
+      <div className="bg-white flex flex-col justify-center items-center w-full h-full px-4">
+        <div className="absolute top-2 left-2">
+          <Button
+            variant="text"
+            startIcon={<IconArrowLeft stroke="black" />}
+            className="px-12 py-1 text-black"
+            sx={{ color: 'black' }}
+            onClick={handleClose}
+          >
+            Go Back
+          </Button>
         </div>
-      </>
+        <div className="flex flex-col justify-center items-center max-w-lg w-full p-4 border rounded-lg shadow-lg">
+          <h2 className="text-center pb-4 font-bold text-xl">Payment</h2>
+          <form onSubmit={handleSubmit} className="w-full space-y-4">
+            <label className="block">
+              Full name
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="block w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+              />
+            </label>
+
+            <div>
+              <label className="block">Card Number</label>
+              <div className="border border-gray-300 rounded-lg p-2 mt-2">
+                <CardNumberElement options={CARD_ELEMENT_OPTIONS} />
+              </div>
+            </div>
+
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <label className="block">Expiration Date</label>
+                <div className="border border-gray-300 rounded-lg p-2 mt-2">
+                  <CardExpiryElement options={CARD_ELEMENT_OPTIONS} />
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <label className="block">CVC</label>
+                <div className="border border-gray-300 rounded-lg p-2 mt-2">
+                  <CardCvcElement options={CARD_ELEMENT_OPTIONS} />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition duration-200"
+            >
+              Submit Payment
+            </button>
+
+            {message && (
+              <div className="mt-4 p-4 bg-gray-100 border border-gray-200 rounded-lg text-gray-800 text-sm whitespace-pre-wrap">
+                {message}
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
     </Modal>
   );
 };

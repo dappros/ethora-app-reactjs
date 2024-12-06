@@ -5,18 +5,19 @@ import AppLayout from './AppLayout';
 import Admin from './pages/Admin';
 import { AdminApp } from './pages/AdminApp';
 import AdminApps from './pages/AdminApps';
-import { AdminBilling } from './pages/AdminBilling';
 import { AppSettings } from './pages/AppSettings/AppSettings';
 import { AppStatistics } from './pages/AppStatistics';
 import AppUsers from './pages/AppUsers';
+import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
+import Register from './pages/AuthPage/Register';
+import { AdminBilling } from './pages/Billing/AdminBilling';
+import BillingModule from './pages/Billing/BillingModule';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 import Profile from './pages/Profile';
-import UserSettings from './pages/UserSettings/UserSettings';
 import { ProfileEdit } from './pages/ProfileEdit';
-import Register from './pages/AuthPage/Register';
-import ForgetPassword from './pages/AuthPage/ForgetPassword';
+import UserSettings from './pages/UserSettings/UserSettings';
 
 const App = lazy(() => import('./App'));
 
@@ -71,7 +72,13 @@ export const router = createBrowserRouter(
                     },
                     {
                       path: 'billing',
-                      Component: AdminBilling,
+                      Component: BillingModule,
+                      children: [
+                        {
+                          index: true,
+                          Component: AdminBilling,
+                        },
+                      ],
                     },
                   ],
                 },
@@ -99,7 +106,7 @@ export const router = createBrowserRouter(
                 },
                 {
                   path: 'profile/edit',
-                  Component: ProfileEdit
+                  Component: ProfileEdit,
                 },
                 {
                   path: 'settings',

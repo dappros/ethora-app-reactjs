@@ -86,6 +86,7 @@ export async function actionAfterLogin(data: any) {
     walletAddress: data.user.defaultWallet.walletAddress,
     profileImage: data.user.profileImage,
     description: data.user.description,
+    signupPlan: data.user.signupPlan,
     defaultWallet: {
       walletAddress: data.user.defaultWallet.walletAddress,
     },
@@ -124,6 +125,7 @@ export async function actionRefreshUserFromLocalStorage(
     walletAddress: user.defaultWallet.walletAddress,
     profileImage: user.profileImage,
     description: user.description,
+    signupPlan: user.signupPlan,
     defaultWallet: {
       walletAddress: user.defaultWallet.walletAddress,
     },

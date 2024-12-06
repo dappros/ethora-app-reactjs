@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { ModelApp, ModelCurrentUser, ModelState } from '../models';
+import { ModalStripe, ModalStripeConfig, ModalStripeSubscription, ModelApp, ModelCurrentUser, ModelState } from '../models';
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -16,6 +16,9 @@ export interface AppSliceInterface extends ModelState {
   doUpdateApp: (app: ModelApp) => void;
   doUpdateUser: (userFieldsForUpdate: any) => void;
   doClearState: () => void;
+  doSetStripeConfig: (app: ModalStripeConfig) => void;
+  doSetStripeSubscription: (app: ModalStripeSubscription) => void;
+  doSetStripeSecretKey: (app: Record<string, string>) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -26,6 +29,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   currentUser: null,
   currentApp: null,
   apps: [],
+  stripe: {} as ModalStripe,
   doSetUser: (user: ModelCurrentUser | null) => {
     set((s) => {
       s.currentUser = user;
@@ -45,6 +49,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
         s.currentUser.profileImage = userFieldsForUpdate.profileImage;
         s.currentUser.isAssetsOpen = userFieldsForUpdate.isAssetsOpen;
         s.currentUser.isProfileOpen = userFieldsForUpdate.isProfileOpen;
+        s.currentUser.signupPlan = userFieldsForUpdate.signupPlan;
       }
     });
   },
@@ -55,7 +60,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   },
   doAddApp: (app) => {
     set((s) => {
-      let newApps = s.apps.concat([app]);
+      const newApps = s.apps.concat([app]);
       s.apps = newApps;
     });
   },
@@ -66,8 +71,8 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   },
   doUpdateApp: (app) => {
     set((s) => {
-      let newApps = s.apps.concat([]);
-      let index = newApps.findIndex((el) => el._id === app._id);
+      const newApps = s.apps.concat([]);
+      const index = newApps.findIndex((el) => el._id === app._id);
 
       if (index !== -1) {
         newApps[index] = app;
@@ -80,5 +85,20 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
       console.log('doUpdateApp newApps ', newApps);
       s.apps = newApps;
     });
+  },
+  doSetStripeConfig: (app) => {
+    set((s) => {
+      s.stripe.config = app;
+    })
+  },
+  doSetStripeSubscription: (app) => {
+    set((s) => {
+      s.stripe.subscription = app;
+    })
+  },
+  doSetStripeSecretKey: (app) => {
+    set((s) => {
+      s.stripe.secretKey = app;
+    })
   },
 });

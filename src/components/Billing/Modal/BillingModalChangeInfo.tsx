@@ -1,16 +1,10 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  MenuItem,
-  Modal,
-  TextField,
-} from '@mui/material';
-import { ReactElement } from 'react';
+import { Box, Modal, TextField } from '@mui/material';
+import { BillingDetails } from '@stripe/stripe-js';
+import { ReactElement, useEffect, useMemo } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -22,43 +16,48 @@ const style = {
   pb: 0,
 };
 
-interface BillingInfoFormInputs {
-  address: string;
-  city: string;
-  country: string;
-  state: string;
-  zipCode: string;
-  isCompany: boolean;
-  phone?: string;
-  timezone: string;
-}
-
 interface BillingInfoModalProps {
+  details?: BillingDetails;
   isOpen: boolean;
   handleClose: () => void;
 }
 
-const timezones = [
-  'Pacific Time (PT)',
-  'Mountain Time (MT)',
-  'Central Time (CT)',
-  'Eastern Time (ET)',
-];
-
 export const BillingModalChangeInfo = ({
+  details,
   isOpen,
   handleClose,
 }: BillingInfoModalProps): ReactElement => {
+  const defaultValues = useMemo(
+    () => ({
+      address: {
+        city: details?.address.city || '',
+        country: details?.address.country || '',
+        line1: details?.address.line1 || '',
+        state: details?.address.state || '',
+        postal_code: details?.address.postal_code || '',
+        // isCompany: false,
+        // timezone: timezones[0],
+      },
+      phone: details?.phone || '',
+    }),
+    [details]
+  );
+
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<BillingInfoFormInputs>();
+  } = useForm<BillingDetails>({ defaultValues });
 
-  const onSubmit: SubmitHandler<BillingInfoFormInputs> = (data) => {
+  const onSubmit: SubmitHandler<BillingDetails> = (data) => {
     console.log('Form Data:', data);
     handleClose();
   };
+
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   return (
     <Modal
@@ -77,17 +76,17 @@ export const BillingModalChangeInfo = ({
               size="small"
               label="Address"
               fullWidth
-              {...register('address', { required: 'Address is required' })}
-              error={!!errors.address}
-              helperText={errors.address?.message}
+              {...register('address.line1')}
+              error={!!errors.address?.line1}
+              helperText={errors.address?.line1?.message}
             />
             <TextField
               size="small"
               label="City"
               fullWidth
-              {...register('city', { required: 'City is required' })}
-              error={!!errors.city}
-              helperText={errors.city?.message}
+              {...register('address.city')}
+              error={!!errors.address?.city}
+              helperText={errors.address?.city?.message}
             />
           </Box>
 
@@ -96,36 +95,32 @@ export const BillingModalChangeInfo = ({
               size="small"
               label="Country"
               fullWidth
-              {...register('country', { required: 'Country is required' })}
-              error={!!errors.country}
-              helperText={errors.country?.message}
+              {...register('address.country')}
+              error={!!errors.address?.country}
+              helperText={errors.address?.country?.message}
             />
             <TextField
               size="small"
               label="State / Province / Region"
               fullWidth
-              {...register('state', {
-                required: 'State/Province/Region is required',
-              })}
-              error={!!errors.state}
-              helperText={errors.state?.message}
+              {...register('address.state')}
+              error={!!errors.address?.state}
+              helperText={errors.address?.state?.message}
             />
             <TextField
               size="small"
               label="Postal / Zip Code"
               fullWidth
-              {...register('zipCode', {
-                required: 'Postal/Zip Code is required',
-              })}
-              error={!!errors.zipCode}
-              helperText={errors.zipCode?.message}
+              {...register('address.postal_code')}
+              error={!!errors.address?.postal_code}
+              helperText={errors.address?.postal_code?.message}
             />
           </Box>
 
-          <FormControlLabel
+          {/* <FormControlLabel
             control={<Checkbox {...register('isCompany')} />}
             label="I'm purchasing for a company"
-          />
+          /> */}
 
           <Box className="pb-2">
             <TextField
@@ -133,17 +128,19 @@ export const BillingModalChangeInfo = ({
               label="Phone (optional)"
               fullWidth
               {...register('phone')}
+              error={!!errors.phone}
+              helperText={errors.phone?.message}
             />
           </Box>
 
-          <Box className="md:w-1/2 pb-2">
+          {/* <Box className="md:w-1/2 pb-2">
             <TextField
               size="small"
               label="Timezone"
               select
               fullWidth
               defaultValue={timezones[0]}
-              {...register('timezone', { required: 'Timezone is required' })}
+              {...register('timezone')}
               error={!!errors.timezone}
               helperText={errors.timezone?.message}
             >
@@ -153,7 +150,7 @@ export const BillingModalChangeInfo = ({
                 </MenuItem>
               ))}
             </TextField>
-          </Box>
+          </Box> */}
 
           <Box className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2 py-8">
             <button

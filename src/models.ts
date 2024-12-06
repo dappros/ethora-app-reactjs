@@ -1,3 +1,5 @@
+import { BillingDetails } from "@stripe/stripe-js";
+
 export interface ModelCurrentUser {
   _id: string;
   appId: string;
@@ -13,6 +15,7 @@ export interface ModelCurrentUser {
   xmppPassword: string;
   profileImage: string;
   description: string;
+  signupPlan: string;
   defaultWallet: {
     walletAddress: string;
   };
@@ -156,9 +159,108 @@ export interface ModelAppUser {
   updatedAt: string;
 }
 
+export interface ModalStripePrice {
+  amount?: number;
+  active: boolean;
+  billing_scheme: string;
+  created: number;
+  currency: string;
+  id: string;
+  livemode: boolean;
+  lookup_key: string;
+  nickname: string | null;
+  object: string;
+  product: {
+    active: boolean;
+    attributes: string[];
+    created: number;
+    default_price: string;
+    description: string;
+    id: string;
+    livemode: boolean;
+    name: string;
+    object: string;
+    type: string;
+    updated: number
+  };
+  recurring: {
+    interval: string;
+    interval_count: number;
+    usage_type: string;
+  };
+  unit_amount: number;
+  unit_amount_decimal: string;
+}
+
+export interface ModalStripeConfig {
+  publishableKey?: string;
+  prices?: ModalStripePrice[];
+}
+
+
+export interface ModalStripeSubscriptionData {
+  canceled_at: number;
+  created: number;
+  current_period_end: number;
+  current_period_start: number;
+  ended_at: number;
+  id: string;
+  status: string;
+  customer: string;
+  billing: string;
+  billing_cycle_anchor: number;
+  cancel_at_period_end: boolean;
+  collection_method: string;
+  description: string | null;
+  discount: string | null;
+  default_payment_method: {
+    allow_redisplay: string;
+    billing_details: BillingDetails;
+    card: {
+      brand: string;
+      checks: {
+        address_line1_check: string | null;
+        address_postal_code_check: string | null;
+        cvc_check: string;
+      };
+      country: string;
+      display_brand: string;
+      exp_month: number;
+      exp_year: number;
+      fingerprint: string;
+      funding: string;
+      last4: string;
+    };
+    created: number;
+    customer: string;
+    id: string;
+    livemode: boolean;
+    type: string;
+  };
+  invoice_customer_balance_settings: {
+    consume_applied_balance_on_void: boolean;
+  };
+  plan: ModalStripePrice;
+  latest_invoice: string;
+};
+
+export interface ModalStripeSubscription {
+  data: ModalStripeSubscriptionData[];
+  has_more: boolean;
+  object: string;
+  url: string;
+}
+
+export interface ModalStripe {
+  config: ModalStripeConfig;
+  subscription: ModalStripeSubscription;
+  secretKey: Record<string, string>;
+}
+
 export interface ModelState {
   inited: boolean;
   currentUser: ModelCurrentUser | null;
   currentApp: ModelApp | null;
   apps: Array<ModelApp>;
+  stripe: ModalStripe;
 }
