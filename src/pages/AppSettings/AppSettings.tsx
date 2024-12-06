@@ -16,7 +16,7 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import TabApp from '../../components/TabApp';
 
-export function AppSettings() {
+export default function AppSettings() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
   const app = apps.find((app) => app._id === appId);
@@ -184,12 +184,12 @@ export function AppSettings() {
           Settings
         </div>
         <div className="flex w-full md:w-auto items-center">
-          <button onClick={onExternalClick} className="mr-4">
+          <button onClick={onExternalClick} className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover">
             <IconExternalLink />
           </button>
           <button
             onClick={onSave}
-            className="border border-brand-500 w-full md:w-[184px] p-2 rounded-xl text-brand-500"
+            className="border border-brand-500 hover:bg-brand-hover w-full md:w-[184px] p-2 rounded-xl text-brand-500"
           >
             Save
           </button>

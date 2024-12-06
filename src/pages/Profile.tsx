@@ -56,12 +56,15 @@ export default function Profile() {
       </div>
       <div className="rounded-2xl bg-white px-4 h-full grid grid-rows-[72px,_1fr]">
         <div className="flex justify-end">
-          <button className="mr-4" onClick={() => setShowQr(true)}>
-            <IconQr />
-          </button>
-          <button onClick={() => navigate('/app/profile/edit')}>
-            <IconEdit />
-          </button>
+          <div className="flex items-center justify-center">
+            <button className="mr-4 rounded-xl w-[40px] h-[40px] flex items-center justify-center hover:bg-brand-hover" onClick={() => setShowQr(true)}>
+              <IconQr />
+            </button>
+            <button className="w-[40px] rounded-xl h-[40px] flex items-center justify-center hover:bg-brand-hover" onClick={() => navigate('/app/profile/edit')}>
+              <IconEdit />
+            </button>
+          </div>
+
         </div>
         <div className="flex justify-center">
           <div className="max-w-[800px] w-full flex px-[16px] flex-col gap-8">
@@ -94,7 +97,7 @@ export default function Profile() {
                     <TabPanel key="">
                       <button
                         onClick={() => setShowNewDocModal(true)}
-                        className="w-full bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
+                        className="w-full hover:bg-brand-darker bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
                       >
                         Add Document
                       </button>
@@ -121,7 +124,7 @@ export default function Profile() {
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
               <button
-                className="text-[#F44336] font-varela text-regular inline-flex items-center"
+                className="text-[#F44336] p-4 w-full rounded-xl hover:bg-brand-hover font-varela text-regular inline-flex items-center justify-center"
                 onClick={() => onLogout()}
               >
                 <IconLogout />

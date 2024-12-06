@@ -10,6 +10,7 @@ import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import CustomInput from '../../Input';
 import { MetamaskButton } from '../../MetamaskButton';
+import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 
 type Inputs = {
   email: string;
@@ -30,7 +31,9 @@ const LoginStep = () => {
     httpLogingWithEmail(email, password)
       .then(async ({ data }) => {
         await actionAfterLogin(data);
-        navigate('/app/admin/apps');
+        if (config?.afterLoginPage) {
+          navigateToUserPage(navigate, config.afterLoginPage as string)
+        }
       })
       .catch((error) => {
         toast.error(error.response.data.error);

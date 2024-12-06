@@ -49,14 +49,14 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
           </div>
           <div className="buttons">
             <button
-              className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+              className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               onClick={() => {}}
-              className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+              className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white"
             >
               Continue
             </button>

@@ -77,7 +77,7 @@ export function NewAppModal({ onClose, show, haveApps }: Props) {
             </button>
             <button
               onClick={() => setNext(true)}
-              className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
+              className="w-full py-[12px] rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
             >
               Create App
             </button>
@@ -104,12 +104,12 @@ export function NewAppModal({ onClose, show, haveApps }: Props) {
             />
             <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
               <button
-                className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
+                className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500 hover:bg-brand-hover"
                 onClick={onClose}
               >
                 Cancel
               </button>
-              <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white">
+              <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white hover:bg-brand-darker">
                 Continue
               </button>
             </div>

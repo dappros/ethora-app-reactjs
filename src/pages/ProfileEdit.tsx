@@ -24,7 +24,7 @@ type Inputs = {
   description: string;
 };
 
-export function ProfileEdit() {
+export default function ProfileEdit() {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm<Inputs>();
   const profileImage_ = useAppStore((s) => s.currentUser?.profileImage);

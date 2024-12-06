@@ -123,7 +123,7 @@ export function Appearance({
         />
         <button
           onClick={() => logoRef.current?.click()}
-          className="w-full p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
+          className="w-full hover:bg-brand-hover p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
         >
           Add logo
         </button>
@@ -140,7 +140,7 @@ export function Appearance({
         />
         <button
           onClick={() => sublogoRef.current?.click()}
-          className="w-full p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
+          className="w-full p-2 hover:bg-brand-hover border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
         >
           Add logo
         </button>

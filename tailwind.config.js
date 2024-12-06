@@ -62,6 +62,7 @@ export default {
         black: '#121219',
         white: '#ffffff',
         preview: 'var(--bg-brand-preview-auth)',
+        'brand-darker': 'var(--brand-darker)'
       },
       fontFamily: {
         sans: ['Open Sans'],

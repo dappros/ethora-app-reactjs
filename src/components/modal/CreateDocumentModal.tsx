@@ -82,10 +82,10 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
         </div>
 
         <div className="flex gap-8 mt-8">
-          <button className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500" onClick={onClose}>
+          <button className="w-full rounded-xl hover:bg-brand-hover border py-[12px] border-brand-500 text-brand-500" onClick={onClose}>
             Cancel
           </button>
-          <button onClick={onCreate} className="w-full py-[12px] rounded-xl bg-brand-500 text-white">
+          <button onClick={onCreate} className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white">
             Create
           </button>
         </div>

@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { useAppStore } from '../store/useAppStore';
 
-export function AdminApp() {
+export default function AdminApp() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
   const app = apps.find((app) => app._id === appId);
