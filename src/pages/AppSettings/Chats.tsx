@@ -75,9 +75,7 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
       }
     });
 
-    let length = selectedIndexes.length;
-
-    if (length > 0) {
+    if (someSelected || allRowsSelected) {
       // 
       return (
         <div className="shadow px-[16px] py-[12px] flex gap-[16px] items-center justify-center z-50 transform -translate-x-1/2 bg-white rounded-xl fixed left-[50%] bottom-[30px]">
@@ -148,6 +146,8 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
     for (const room of selectedRooms) {
       await deleteDefaultRooms(appId, room.jid)
     }
+    setSomeSelected(false)
+    setAllRowsSelected(false)
     setShowLoading(false)
     setShowDelete(false)
     const { data } = await getDefaultRooms(appId)
@@ -191,10 +191,19 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
           </div>
         </div>
         <div className="mx-2 overflow-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#FCFCFC]">
-                <th className="pl-4 py-2 w-[32px] rounded-l-lg">
+
+          {!defaultChatRooms.length && (
+            <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
+              There are no chats yet, or you can add them by clicking the 'Add New Chat'
+              button
+            </div>
+          )}
+
+          {!!defaultChatRooms.length && (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#FCFCFC]">
+                  <th className="pl-4 py-2 w-[32px] rounded-l-lg">
                     <Field className="flex items-center cursor-pointer">
                       <Checkbox
                         className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
@@ -209,42 +218,45 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
                         )}
                       </Checkbox>
                     </Field>
-                </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Chat Name
-                </th>
-                <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Created By
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {defaultChatRooms.map((el, index) => {
-                return (
-                  <tr key={el.jid} className="hover:!bg-[#F5F7F9]">
-                    <td className="pl-4 py-2 w-[32px] rounded-l-lg">
-                      <Field className="flex items-center cursor-pointer">
-                        <Checkbox
-                          className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-                          checked={rowsSelected[index]}
-                          onChange={(isSet) => setSelect(isSet, index)}
-                        >
-                          <IconCheckbox className="hidden group-data-[checked]:block" />
-                        </Checkbox>
-                      </Field>
-                    </td>
-                    <td className="px-4 py-[20px] font-sans font-normal text-sm  whitespace-nowrap">
-                      {el.title}
-                    </td>
-                    <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
-                      {el.creator}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot></tfoot>
-          </table>
+                  </th>
+                  <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                    Chat Name
+                  </th>
+                  <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                    Created By
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {defaultChatRooms.map((el, index) => {
+                  return (
+                    <tr key={el.jid} className="hover:!bg-[#F5F7F9]">
+                      <td className="pl-4 py-2 w-[32px] rounded-l-lg">
+                        <Field className="flex items-center cursor-pointer">
+                          <Checkbox
+                            className="group size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+                            checked={rowsSelected[index]}
+                            onChange={(isSet) => setSelect(isSet, index)}
+                          >
+                            <IconCheckbox className="hidden group-data-[checked]:block" />
+                          </Checkbox>
+                        </Field>
+                      </td>
+                      <td className="px-4 py-[20px] font-sans font-normal text-sm  whitespace-nowrap">
+                        {el.title}
+                      </td>
+                      <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
+                        {el.creator}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot></tfoot>
+            </table>
+          )}
+
+
         </div>
       </div>
       {renderActionsForSelected()}
