@@ -5,15 +5,12 @@ import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { ModelAppDefaulRooom } from '../../models';
 import { IconClose } from '../../components/Icons/IconClose';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { createAppChat, deleteDefaultRooms, getDefaultRooms, httpGetConfig } from '../../http';
+import { createAppChat, deleteDefaultRooms, getDefaultRooms } from '../../http';
 import { Loading } from '../../components/Loading';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { SubmitModal } from '../../components/modal/SubmitModal';
-import { de } from 'date-fns/locale';
-import { se } from 'date-fns/locale';
 import { toast } from 'react-toastify';
 import { IconMinus } from '../../components/Icons/IconMinus';
-import { set } from 'date-fns';
 
 interface Props {
   allowUsersToCreateRooms: boolean
