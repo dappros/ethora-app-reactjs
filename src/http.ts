@@ -409,3 +409,25 @@ export function postStripeCreateCustomer(testClockId: string) {
     testClockId 
   });
 };
+
+export function createAppChat(appId: string, title: string, pinned: boolean) {
+  return http.post(`/apps/create-app-chat/${appId}`, {
+    title,
+    pinned,
+  });
+}
+
+export function getDefaultRooms(appId: string) {
+  return http.get(`/apps/get-default-rooms/app-id/${appId}`);
+}
+
+export function deleteDefaultRooms(appId: string, chatJid: string) {
+  return http.delete(
+    `/apps/delete-app-chat/${appId}`,
+    {
+      data: {
+        chatJid,
+      },
+    }
+  );
+}

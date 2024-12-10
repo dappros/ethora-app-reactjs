@@ -58,6 +58,7 @@ export async function actionGetConfig(domainName?: string) {
       result.firebaseWebConfigString
     ),
     appSecret: '',
+    allowUsersToCreateRooms: result.allowUsersToCreateRooms,
   };
 
   await sleep(1000);
