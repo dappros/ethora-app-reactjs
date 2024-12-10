@@ -29,6 +29,13 @@ export interface ModelCurrentApp {
   domainName: string;
 }
 
+export interface ModelAppDefaulRooom {
+  jid: string;
+  pinned: boolean;
+  title: string;
+  creator: string;
+}
+
 export interface ModelApp {
   appToken: string;
   bundleId: string;
@@ -38,7 +45,7 @@ export interface ModelApp {
   creatorId: string;
   defaultAccessAssetsOpen: boolean;
   defaultAccessProfileOpen: boolean;
-  defaultRooms: Array<{ jid: string; pinned: boolean }>;
+  defaultRooms: Array<ModelAppDefaulRooom>;
   displayName: string;
   domainName: string;
   isAllowedNewAppCreate: boolean;
@@ -89,6 +96,7 @@ export interface ModelApp {
   googleServicesJson: string;
   googleServiceInfoPlist: string;
   appSecret: string;
+  allowUsersToCreateRooms: boolean
 }
 
 export interface ModelUserACL {

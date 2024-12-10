@@ -15,6 +15,7 @@ import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import TabApp from '../../components/TabApp';
+import { ModelAppDefaulRooom } from '../../models';
 
 export default function AppSettings() {
   let { appId } = useParams();
@@ -80,6 +81,11 @@ export default function AppSettings() {
     app.defaultAccessProfileOpen
   );
   const [usersCanFree, setUsersCanFree] = useState(app.usersCanFree);
+
+  // chats
+  const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(app.allowUsersToCreateRooms);
+
+  const [defaultChatRooms, setDefaultChatRooms] = useState<Array<ModelAppDefaulRooom>>(app.defaultRooms);
 
   const onSave = () => {
     let body: any = {};
@@ -161,6 +167,8 @@ export default function AppSettings() {
       body.afterLoginPage = afterLoginPage;
     }
 
+    body.allowUsersToCreateRooms = allowUsersToCreateRooms
+
     console.log('on save body ', body);
 
     if (appId) {
@@ -203,7 +211,7 @@ export default function AppSettings() {
           <TabApp text="Mobile app" />
           <TabApp text="Home screen" />
           <TabApp text="Menu" />
-          <TabApp text="Chats" disabled />
+          <TabApp text="Chats" />
           <TabApp text="Visibility & Privacy" />
           <TabApp text="API" last />
         </TabList>
@@ -283,7 +291,13 @@ export default function AppSettings() {
           </TabPanel>
 
           <TabPanel key="Chats" className="grid overflow-hidden grid-rows-1 md:ml-4 h-full">
-            <Chats />
+            <Chats
+              allowUsersToCreateRooms={allowUsersToCreateRooms}
+              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
+              defaultChatRooms={defaultChatRooms}
+              setDefaultChatRooms={setDefaultChatRooms}
+              appId={appId as string}
+            />
           </TabPanel>
 
           <TabPanel
