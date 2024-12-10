@@ -29,7 +29,6 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   const [showCreate, setShowCreate] = useState(false);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
   const [rowsSelected, setRowsSelected] = useState(
