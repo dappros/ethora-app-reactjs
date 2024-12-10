@@ -388,18 +388,24 @@ export function setPermanentPassword(tempPassword: string, password: string) {
 
 export function getStripeSubscription() {
   return http.get('/stripe/subscriptions');
-}
+};
 
 export function getStripeConfig() {
   return http.get('/stripe/config');
+};
+
+export function getStripeInvoices(subscriptionId?: string) {
+  return http.get(`/stripe/invoices?subscriptionId=${subscriptionId}`);
 }
 
 export function postStripeSubscription(priceId: string) {
   return http.post('/stripe/subscriptions', {
     priceId,
   });
-}
+};
 
-export function postStripeCreateCustomer() {
-  return http.post('/stripe/create-customer');
-}
+export function postStripeCreateCustomer(testClockId: string) {
+  return http.post('/stripe/create-customer', {
+    testClockId 
+  });
+};

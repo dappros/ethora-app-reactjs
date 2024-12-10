@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Typography } from '@mui/material';
 import classNames from 'classnames';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 interface Plan {
   id: string;
@@ -26,7 +26,7 @@ const plans: Plan[] = [
     ],
   },
   {
-    id: 'business',
+    id: 'business_monthly',
     title: 'Business',
     required: '* Powering SMEs',
     price: '199$ / month',
@@ -64,11 +64,17 @@ interface BillingPlanListProps {
 
 export const BillingPlanList: FC<BillingPlanListProps> = (props) => {
   const { defaultValue, handleChoosePlan } = props;
-  const [selectedPlan, setSelectedPlan] = useState<string>(defaultValue || '');
+  const [selectedPlan, setSelectedPlan] = useState<string>('');
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);
   };
+
+  useEffect(() => {
+    if (defaultValue) {
+      setSelectedPlan(defaultValue);
+    }
+  }, [defaultValue]);
 
   return (
     <>

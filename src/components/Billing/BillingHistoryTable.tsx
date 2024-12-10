@@ -1,10 +1,11 @@
 import classNames from 'classnames';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement } from 'react';
+import { Link } from 'react-router-dom';
 import { getCurrencySymbol } from '../../constants/currency';
-import { ModalStripeSubscriptionData } from '../../models';
+import { StripeInvoice } from '../../models';
 
 interface BillingHistoryTableProps {
-  history?: ModalStripeSubscriptionData[] | null;
+  history?: StripeInvoice[] | null;
   secretKey?: string;
 }
 
@@ -24,26 +25,9 @@ export const BillingHistoryTable = (
     return formattedDate;
   };
 
-  const downloadInvoice = async (invoiceId: string) => {
-    console.log('invoiceId', invoiceId);
-    // const stripe = new Stripe(secretKey);
-    // try {
-    //   const invoice = await stripe.invoices.retrieve(invoiceId);
-
-    //   if (invoice.invoice_pdf) {
-    //     console.log('Invoice PDF URL:', invoice.invoice_pdf);
-    //     return invoice.invoice_pdf;
-    //   } else {
-    //     console.log('PDF URL not available for this invoice.');
-    //   }
-    // } catch (error) {
-    //   console.error('Error retrieving invoice:', error);
-    // }
-  };
-
-  const memoHistory = useMemo(() => {
-    return history && history.filter((his) => his.status !== 'incomplete');
-  }, [history]);
+  // const memoHistory = useMemo(() => {
+  //   return history && history.filter((his) => his.status !== 'incomplete');
+  // }, [history]);
 
   return (
     <table className="w-full overflow-x-auto scrollbar-hide">
@@ -56,33 +40,39 @@ export const BillingHistoryTable = (
         </tr>
       </thead>
       <tbody>
-        {memoHistory &&
-          memoHistory.map((entry, index) => (
+        {history &&
+          history.map((entry, index) => (
             <tr key={index}>
               <td className="text-sm text-gray-900 font-medium py-2 text-left">
-                {getDate(entry.current_period_start)}
+                {getDate(entry.created)}
               </td>
               <td className="text-sm text-gray-900 font-medium text-center">
-                {getCurrencySymbol(entry.plan.currency)}
-                {entry.plan.amount! / 100}
+                {getCurrencySymbol(entry.currency)}
+                {entry.amount_due! / 100}
               </td>
               <td
                 className={classNames(
                   'text-sm  text-center',
-                  entry.status === 'active'
-                    ? ' text-green-500'
-                    : 'text-gray-800'
+                  entry.status === 'paid' ? ' text-green-500' : 'text-gray-800'
                 )}
               >
                 {entry.status}
               </td>
               <td className="text-sm text-center">
-                <button
+                {entry.invoice_pdf && (
+                  <Link
+                    to={entry.invoice_pdf}
+                    className="text-brand-500 font-semibold"
+                  >
+                    Download
+                  </Link>
+                )}
+                {/* <button
                   className="text-brand-500 font-semibold"
                   onClick={() => downloadInvoice(entry.latest_invoice)}
                 >
                   {entry.latest_invoice && 'Download'}
-                </button>
+                </button> */}
               </td>
             </tr>
           ))}

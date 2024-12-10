@@ -8,23 +8,22 @@ import {
 } from '@stripe/react-stripe-js';
 import { StripeCardNumberElementOptions } from '@stripe/stripe-js';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import poweredStripe from '../../../assets/icons/PoweredStripe.svg';
+import { useStripePayment } from '../../../hooks/useStripe';
 import { IconArrowLeft } from '../../Icons/IconArrowLeft';
 
 interface BillingModalProps {
   isOpen: boolean;
   handleClose: () => void;
-  clientSecret: string;
 }
 
 export const BillingModalCheckoutForm = ({
   isOpen,
   handleClose,
-  clientSecret,
 }: BillingModalProps): React.ReactElement => {
   const stripe = useStripe();
   const elements = useElements();
-  const navigate = useNavigate();
+  const { choosePlan, secretKey } = useStripePayment();
 
   const [name, setName] = useState<string>('');
   const [message, setMessage] = useState<string>('');
@@ -43,6 +42,7 @@ export const BillingModalCheckoutForm = ({
         color: '#fa755a',
       },
     },
+    showIcon: true,
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,9 +53,16 @@ export const BillingModalCheckoutForm = ({
       return;
     }
 
+    await choosePlan();
+
     const cardElement = elements.getElement(CardNumberElement);
 
-    const { error } = await stripe.confirmCardPayment(clientSecret, {
+    if (secretKey && !secretKey.clientSecret) {
+      setMessage('Stripe.js has not loaded yet.');
+      return;
+    }
+
+    const { error } = await stripe.confirmCardPayment(secretKey.clientSecret, {
       payment_method: {
         card: cardElement!,
         billing_details: {
@@ -70,7 +77,7 @@ export const BillingModalCheckoutForm = ({
     }
 
     setMessage('Payment successful!');
-    navigate('/app/admin/billing');
+    window.location.reload();
   };
 
   return (
@@ -96,8 +103,15 @@ export const BillingModalCheckoutForm = ({
         <div className="flex flex-col justify-center items-center max-w-lg w-full p-4 border rounded-lg shadow-lg">
           <h2 className="text-center pb-4 font-bold text-xl">Payment</h2>
           <form onSubmit={handleSubmit} className="w-full space-y-4">
+            <div>
+              <label className="block">Card Number</label>
+              <div className="border border-gray-300 rounded-lg p-2 mt-2">
+                <CardNumberElement options={CARD_ELEMENT_OPTIONS} />
+              </div>
+            </div>
+
             <label className="block">
-              Full name
+              Cardholder name
               <input
                 type="text"
                 id="name"
@@ -107,16 +121,9 @@ export const BillingModalCheckoutForm = ({
               />
             </label>
 
-            <div>
-              <label className="block">Card Number</label>
-              <div className="border border-gray-300 rounded-lg p-2 mt-2">
-                <CardNumberElement options={CARD_ELEMENT_OPTIONS} />
-              </div>
-            </div>
-
-            <div className="flex space-x-4">
+            <div className="sm:flex gap-4">
               <div className="flex-1">
-                <label className="block">Expiration Date</label>
+                <label className="block">Card expiry Date</label>
                 <div className="border border-gray-300 rounded-lg p-2 mt-2">
                   <CardExpiryElement options={CARD_ELEMENT_OPTIONS} />
                 </div>
@@ -130,9 +137,46 @@ export const BillingModalCheckoutForm = ({
               </div>
             </div>
 
+            <div className="terms-container">
+              <label className="block text-sm">
+                <input type="checkbox" className="mr-2" required />I have read &
+                accept the{' '}
+                <a
+                  href="https://stripe.com/legal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-500 underline hover:text-brand-800"
+                >
+                  Terms of Service
+                </a>
+                .
+              </label>
+              <div className="flex items-center justify-between py-2">
+                <p className="text-xs text-gray-600">
+                  Payment transactions are secure and encrypted, and we don’t
+                  store credit card details. All payments are processed by
+                  Stripe. See Stripe’s{' '}
+                  <a
+                    href="https://stripe.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    privacy policy
+                  </a>
+                  .
+                </p>
+                <img
+                  className="max-w-40 max-h-40"
+                  src={poweredStripe}
+                  alt="Stripe"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
-              className="w-full py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition duration-200"
+              className="w-full py-2 text-white bg-brand-500 hover:bg-brand-600 rounded-lg transition duration-200"
             >
               Submit Payment
             </button>

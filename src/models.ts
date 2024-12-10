@@ -1,4 +1,5 @@
 import { BillingDetails } from "@stripe/stripe-js";
+import Stripe from 'stripe';
 
 export interface ModelCurrentUser {
   _id: string;
@@ -190,12 +191,12 @@ export interface ModalStripePrice {
   };
   unit_amount: number;
   unit_amount_decimal: string;
-}
+};
 
 export interface ModalStripeConfig {
   publishableKey?: string;
   prices?: ModalStripePrice[];
-}
+};
 
 
 export interface ModalStripeSubscriptionData {
@@ -249,13 +250,23 @@ export interface ModalStripeSubscription {
   has_more: boolean;
   object: string;
   url: string;
-}
+};
+
+export interface ModalStripeInvoices {
+  account_name: string;
+  amount_due: number;
+  amount_paid: number;
+};
+
+export type StripeInvoice = Stripe.Invoice;
 
 export interface ModalStripe {
   config: ModalStripeConfig;
   subscription: ModalStripeSubscription;
   secretKey: Record<string, string>;
-}
+  invoices: StripeInvoice[];
+  loading: boolean;
+};
 
 export interface ModelState {
   inited: boolean;
@@ -263,4 +274,4 @@ export interface ModelState {
   currentApp: ModelApp | null;
   apps: Array<ModelApp>;
   stripe: ModalStripe;
-}
+};

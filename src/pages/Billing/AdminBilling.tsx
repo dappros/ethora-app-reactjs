@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material';
 import classNames from 'classnames';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BillingBoxContainer } from '../../components/Billing/BillingBoxContainer';
 import { BillingHistoryTable } from '../../components/Billing/BillingHistoryTable';
 import { BillingInfoText } from '../../components/Billing/BillingInfoText';
@@ -9,78 +9,59 @@ import { BillingModalChangePlan } from '../../components/Billing/Modal/BillingMo
 import { BillingModalCheckoutForm } from '../../components/Billing/Modal/BillingModalCheckoutForm';
 import { BillingPlanList } from '../../components/Billing/Modal/BillingPlanList';
 import { getCurrencySymbol } from '../../constants/currency';
-import { useStripe } from '../../hooks/useStripe';
-import { postStripeCreateCustomer, postStripeSubscription } from '../../http';
+import { useStripePayment } from '../../hooks/useStripe';
 import { useAppStore } from '../../store/useAppStore';
 
 export function AdminBilling() {
-  const stripe = useStripe();
+  const stripe = useStripePayment();
   const user = useAppStore((s) => s.currentUser);
   const [openChangePlan, setOpenChangePlan] = useState<boolean>(false);
   const [openChangeInfo, setOpenChangeInfo] = useState<boolean>(false);
   const [openCheckoutForm, setOpenCheckoutForm] = useState<boolean>(false);
-  const [secretKey, setSecretKey] = useState<Record<string, string>>({});
 
   const handleChoosePlan = async (id: string) => {
-    if (id === 'business' && stripe.prices) {
-      try {
-        await postStripeCreateCustomer();
-        const response = await postStripeSubscription(stripe.prices[1].id);
-
-        setSecretKey(response.data);
-        setOpenCheckoutForm(true);
-      } catch (error) {
-        console.error(error);
-      }
+    if (id === 'business_monthly' || id === 'business_annual') {
+      setOpenCheckoutForm(true);
     }
   };
-
-  const activeSubscription = useMemo(() => {
-    return (
-      stripe.subscription &&
-      stripe.subscription.data &&
-      stripe.subscription.data.filter((sub) => sub.status === 'active')[0]
-    );
-  }, [stripe.subscription]);
 
   const activePrice = useMemo(() => {
     return (
       stripe.subscription &&
       stripe.subscription.data &&
       stripe.prices &&
-      activeSubscription &&
+      stripe.activeSubscription &&
       stripe.prices.filter(
-        (price) => price.id === activeSubscription.plan.id
+        (price) => price.id === stripe.activeSubscription.plan.id
       )[0]
     );
-  }, [stripe.subscription, stripe.prices, activeSubscription]);
+  }, [stripe.subscription, stripe.prices, stripe.activeSubscription]);
 
-  console.log('activeSubscription', activeSubscription);
+  console.log('activeSubscription', stripe.activeSubscription);
   console.log('activePrice', activePrice);
-  console.log('subscription', stripe.subscription);
-  console.log('prices', stripe.prices);
-  console.log('secretKey', secretKey);
+  console.log('invoices!!!!', stripe.invoices);
+  console.log('user', user);
 
-  useEffect(() => {
-    const getSecretKey = async () => {
-      if (stripe.prices) {
-        try {
-          await postStripeCreateCustomer();
-          const response = await postStripeSubscription(stripe.prices[1].id);
+  // useEffect(() => {
+  //   const getSecretKey = async () => {
+  //     if (stripe.prices) {
+  //       try {
+  //         await postStripeCreateCustomer();
+  //         const response = await postStripeSubscription(stripe.prices[1].id);
 
-          setSecretKey(response.data);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    };
+  //         setSecretKey(response.data);
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     }
+  //   };
 
-    getSecretKey();
-  }, [stripe.prices]);
+  //   getSecretKey();
+  // }, [stripe.prices]);
 
   return (
     <>
-      {user && !activeSubscription ? (
+      {user && !stripe.activeSubscription ? (
         <Box className="flex items-center justify-center h-full">
           <BillingPlanList
             defaultValue={user.signupPlan}
@@ -112,12 +93,12 @@ export function AdminBilling() {
                       variant="caption"
                       className={classNames(
                         'text-xs text-white px-4 py-1 rounded-full',
-                        activeSubscription.status === 'active'
+                        stripe.activeSubscription.status === 'active'
                           ? 'bg-green-500'
                           : 'bg-gray-400'
                       )}
                     >
-                      {activeSubscription.status}
+                      {stripe.activeSubscription.status}
                     </Typography>
                   </Box>
                   <button
@@ -139,7 +120,10 @@ export function AdminBilling() {
                     />
                     <p className="text-sm text-gray-600">
                       Ending with{' '}
-                      {activeSubscription.default_payment_method.card.last4}
+                      {
+                        stripe.activeSubscription.default_payment_method.card
+                          .last4
+                      }
                     </p>
                   </Box>
                   <button
@@ -169,7 +153,7 @@ export function AdminBilling() {
                     Person/Company Name:{' '}
                     <span className="font-medium">
                       {
-                        activeSubscription.default_payment_method
+                        stripe.activeSubscription.default_payment_method
                           .billing_details.name
                       }
                     </span>
@@ -177,7 +161,7 @@ export function AdminBilling() {
                   <p className="text-sm text-gray-600">
                     <BillingInfoText
                       billingDetails={
-                        activeSubscription.default_payment_method
+                        stripe.activeSubscription.default_payment_method
                           .billing_details
                       }
                     />
@@ -188,31 +172,27 @@ export function AdminBilling() {
 
             <Box className="mt-6 p-4 border rounded-lg shadow bg-white">
               <h2 className="text-lg font-semibold mb-4">History</h2>
-              <BillingHistoryTable
-                history={stripe.subscription.data || null}
-                secretKey={secretKey.clientSecret}
-              />
+              <BillingHistoryTable history={stripe.invoices || null} />
             </Box>
           </Stack>
         </>
       )}
 
       <BillingModalChangePlan
-        defaultValue={user && user.signupPlan}
+        defaultValue={activePrice && activePrice.lookup_key}
         handleChoosePlan={handleChoosePlan}
         isOpen={openChangePlan}
         handleClose={() => setOpenChangePlan(false)}
       />
       <BillingModalChangeInfo
         details={
-          activeSubscription &&
-          activeSubscription.default_payment_method.billing_details
+          stripe.activeSubscription &&
+          stripe.activeSubscription.default_payment_method.billing_details
         }
         isOpen={openChangeInfo}
         handleClose={() => setOpenChangeInfo(false)}
       />
       <BillingModalCheckoutForm
-        clientSecret={secretKey.clientSecret}
         isOpen={openCheckoutForm}
         handleClose={() => setOpenCheckoutForm(false)}
       />
