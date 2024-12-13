@@ -6,7 +6,6 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import { StripeCardNumberElementOptions } from '@stripe/stripe-js';
 import React, { useState } from 'react';
 import poweredStripe from '../../../assets/icons/PoweredStripe.svg';
 import { useStripePayment } from '../../../hooks/useStripe';
@@ -27,23 +26,6 @@ export const BillingModalCheckoutForm = ({
 
   const [name, setName] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-
-  const CARD_ELEMENT_OPTIONS: StripeCardNumberElementOptions = {
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#424770',
-        fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
-        '::placeholder': {
-          color: '#aab7c4',
-        },
-      },
-      invalid: {
-        color: '#fa755a',
-      },
-    },
-    showIcon: true,
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,7 +88,7 @@ export const BillingModalCheckoutForm = ({
             <div>
               <label className="block">Card Number</label>
               <div className="border border-gray-300 rounded-lg p-2 mt-2">
-                <CardNumberElement options={CARD_ELEMENT_OPTIONS} />
+                <CardNumberElement options={{ showIcon: true }} />
               </div>
             </div>
 
@@ -125,14 +107,14 @@ export const BillingModalCheckoutForm = ({
               <div className="flex-1">
                 <label className="block">Card expiry Date</label>
                 <div className="border border-gray-300 rounded-lg p-2 mt-2">
-                  <CardExpiryElement options={CARD_ELEMENT_OPTIONS} />
+                  <CardExpiryElement />
                 </div>
               </div>
 
               <div className="flex-1">
                 <label className="block">CVC</label>
                 <div className="border border-gray-300 rounded-lg p-2 mt-2">
-                  <CardCvcElement options={CARD_ELEMENT_OPTIONS} />
+                  <CardCvcElement />
                 </div>
               </div>
             </div>
