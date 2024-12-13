@@ -1,7 +1,7 @@
-import AddIcon from '@mui/icons-material/Add';
 import { Box, Typography } from '@mui/material';
 import classNames from 'classnames';
 import { FC, useEffect, useState } from 'react';
+import { ButtonChosePlan } from '../ButtonChosePlan';
 
 interface Plan {
   id: string;
@@ -84,8 +84,9 @@ export const BillingPlanList: FC<BillingPlanListProps> = (props) => {
             key={plan.id}
             onClick={() => handleSelectPlan(plan.id)}
             className={classNames(
-              'relative flex flex-col justify-between border rounded-xl',
-              'w-full md:w-1/3 h-5/6 cursor-pointer transition-all duration-300 bg-white',
+              'relative justify-between border rounded-xl',
+              'w-full md:max-w-60 min-w-44 md:h-5/6 cursor-pointer transition-all duration-300 bg-white',
+              'flex md:flex-col flex-row',
               selectedPlan === plan.id ? 'scale-105 md:scale-110' : ''
             )}
           >
@@ -100,39 +101,43 @@ export const BillingPlanList: FC<BillingPlanListProps> = (props) => {
                 {plan.title}
               </Typography>
               <p className="text-xl font-semibold mt-2">{plan.price}</p>
+              {defaultValue !== plan.id && (
+                <ButtonChosePlan
+                  className="md:hidden block bg-brand-500 text-white"
+                  handleChoosePlan={() => handleChoosePlan(plan.id)}
+                />
+              )}
             </Box>
 
             <Box
               className={classNames(
-                'pb-4 px-4 rounded-b-xl rounded-t-3xl pt-4',
+                'pb-4 px-2 sm:px-4 rounded-b-xl rounded-t-xl md:rounded-t-3xl pt-4',
                 selectedPlan === plan.id ? 'bg-yellow-800' : 'bg-brand-250'
               )}
             >
-              <Box className="pl-4">
+              {/* <Box className="pl-4">
                 {plan.description && (
                   <Typography>{plan.description}</Typography>
                 )}
                 {plan.icon && <AddIcon fontSize="small" />}
-              </Box>
+              </Box> */}
               <ul className=" space-y-1 list-disc pl-4">
                 {plan.features.map((feature, index) => (
                   <li
                     key={index}
-                    className=" text-sm text-gray-900 font-bold py-1"
+                    className="text-xs sm:text-sm text-gray-900 font-bold py-1"
                   >
                     {feature}
                   </li>
                 ))}
               </ul>
               <Box className=" flex justify-center items-center">
-                <button
-                  onClick={() => handleChoosePlan(plan.id)}
-                  className={
-                    'text-center mt-8 px-4 py-2 bg-white shadow-2xl text-brand-500 rounded-full font-semibold transition'
-                  }
-                >
-                  Choose plan
-                </button>
+                {defaultValue !== plan.id && (
+                  <ButtonChosePlan
+                    className="hidden md:block bg-white text-brand-500"
+                    handleChoosePlan={() => handleChoosePlan(plan.id)}
+                  />
+                )}
               </Box>
             </Box>
           </Box>

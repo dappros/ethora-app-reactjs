@@ -42,23 +42,6 @@ export function AdminBilling() {
   console.log('invoices!!!!', stripe.invoices);
   console.log('user', user);
 
-  // useEffect(() => {
-  //   const getSecretKey = async () => {
-  //     if (stripe.prices) {
-  //       try {
-  //         await postStripeCreateCustomer();
-  //         const response = await postStripeSubscription(stripe.prices[1].id);
-
-  //         setSecretKey(response.data);
-  //       } catch (error) {
-  //         console.error(error);
-  //       }
-  //     }
-  //   };
-
-  //   getSecretKey();
-  // }, [stripe.prices]);
-
   return (
     <>
       {user && !stripe.activeSubscription ? (
@@ -102,7 +85,7 @@ export function AdminBilling() {
                     </Typography>
                   </Box>
                   <button
-                    className="bg-brand-500 px-7 py-2 text-white text-xs rounded-lg"
+                    className="bg-brand-500 px-5 xl:px-7 py-2 text-white text-xs rounded-lg"
                     onClick={() => setOpenChangePlan(true)}
                   >
                     Change plan

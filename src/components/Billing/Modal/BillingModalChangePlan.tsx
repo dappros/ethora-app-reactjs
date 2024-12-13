@@ -8,11 +8,9 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: '85%',
-  height: '67%',
   borderRadius: '25px',
   bgcolor: 'background.paper',
   boxShadow: 24,
-  px: 8,
   py: 0,
 };
 
@@ -43,7 +41,7 @@ export const BillingModalChangePlan = (
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={style}>
+      <Box sx={style} className="h-[85%] xs:h-[75%] sm:h-[70%] lg:h-[67%]">
         <Box sx={styleBgColor} className="bg-brand-500  h-1/2 w-full" />
         <BillingPlanList
           defaultValue={defaultValue}

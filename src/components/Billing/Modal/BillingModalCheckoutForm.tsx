@@ -58,7 +58,7 @@ export const BillingModalCheckoutForm = ({
     const cardElement = elements.getElement(CardNumberElement);
 
     if (secretKey && !secretKey.clientSecret) {
-      setMessage('Stripe.js has not loaded yet.');
+      setMessage('Warring.');
       return;
     }
 

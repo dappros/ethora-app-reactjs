@@ -394,6 +394,10 @@ export function getStripeConfig() {
   return http.get('/stripe/config');
 };
 
+export function getStripeAllCards() {
+  return http.get('/stripe/customer');
+};
+
 export function getStripeInvoices(subscriptionId?: string) {
   return http.get(`/stripe/invoices?subscriptionId=${subscriptionId}`);
 }
