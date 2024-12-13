@@ -2,7 +2,7 @@ import cn from 'classnames';
 import { NavLink, Outlet } from 'react-router-dom';
 
 export default function Admin() {
-  const isProd = import.meta.env.VITE_SITE_IS_PRODUCTION
+  // const isProd = import.meta.env.VITE_SITE_IS_PRODUCTION
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">
