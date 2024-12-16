@@ -72,6 +72,7 @@ export const useStripePayment = () => {
   const choosePlan = async () => {
     if (prices) {
       try {
+        // await postStripeCreateCustomer('clock_1QU7WtCGz8uPG7vAW54Cb8Qg');
         await postStripeCreateCustomer('clock_1QU7WtCGz8uPG7vAW54Cb8Qg');
         const response = await postStripeSubscription(prices[1].id);
 
