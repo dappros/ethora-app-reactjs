@@ -37,10 +37,12 @@ export function AdminBilling() {
     );
   }, [stripe.subscription, stripe.prices, stripe.activeSubscription]);
 
+  console.log('subscription----<>----', stripe.subscription);
   console.log('activeSubscription', stripe.activeSubscription);
-  console.log('activePrice', activePrice);
+  console.log('prices________', stripe.prices);
   console.log('invoices!!!!', stripe.invoices);
   console.log('user', user);
+  console.log('STRIPE>>>>>>>---', stripe.secretKey);
 
   return (
     <>

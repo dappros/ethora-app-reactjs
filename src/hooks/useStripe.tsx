@@ -75,7 +75,9 @@ export const useStripePayment = () => {
         await postStripeCreateCustomer('clock_1QU7WtCGz8uPG7vAW54Cb8Qg');
         const response = await postStripeSubscription(prices[1].id);
 
-        state.doSetStripeSecretKey(response.data);
+        console.log('RESPONSEEEEEE', response.data);
+        state.doSetStripeSecretKey(response.data.clientSecret);
+        return response.data.clientSecret;
       } catch (error) {
         console.error(error);
       }

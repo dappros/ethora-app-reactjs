@@ -22,7 +22,7 @@ export const BillingModalCheckoutForm = ({
 }: BillingModalProps): React.ReactElement => {
   const stripe = useStripe();
   const elements = useElements();
-  const { choosePlan, secretKey } = useStripePayment();
+  const { choosePlan } = useStripePayment();
 
   const [name, setName] = useState<string>('');
   const [message, setMessage] = useState<string>('');
@@ -35,31 +35,28 @@ export const BillingModalCheckoutForm = ({
       return;
     }
 
-    await choosePlan();
+    const clientSecret = await choosePlan();
 
     const cardElement = elements.getElement(CardNumberElement);
 
-    if (secretKey && !secretKey.clientSecret) {
-      setMessage('Warring.');
-      return;
-    }
-
-    const { error } = await stripe.confirmCardPayment(secretKey.clientSecret, {
-      payment_method: {
-        card: cardElement!,
-        billing_details: {
-          name,
+    if (clientSecret) {
+      const { error } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement!,
+          billing_details: {
+            name,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      setMessage(error.message!);
-      return;
+      if (error) {
+        setMessage(error.message!);
+        return;
+      }
+
+      setMessage('Payment successful!');
+      window.location.reload();
     }
-
-    setMessage('Payment successful!');
-    window.location.reload();
   };
 
   return (
