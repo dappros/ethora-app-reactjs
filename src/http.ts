@@ -408,7 +408,7 @@ export function postStripeSubscription(priceId: string) {
   });
 };
 
-export function postStripeCreateCustomer(testClockId: string) {
+export function postStripeCreateCustomer(testClockId?: string) {
   return http.post('/stripe/create-customer', {
     testClockId 
   });
