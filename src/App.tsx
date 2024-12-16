@@ -5,7 +5,6 @@ import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
-import { sleep } from './utils/sleep';
 import { navigateToUserPage } from './utils/navigateToUserPage';
 
 export function Fallback() {
