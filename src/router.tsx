@@ -18,7 +18,7 @@ const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
 import Register from './pages/AuthPage/Register';
 import ForgetPassword from './pages/AuthPage/ForgetPassword';
 
-const App = lazy(() => import('./App'));
+import App from './App'
 
 export const router = createBrowserRouter(
   [

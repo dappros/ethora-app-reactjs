@@ -11,11 +11,13 @@ export default function AppHelmet() {
   const token = localStorage.getItem('token-538');
 
   useEffect(() => {
-    if (!location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
       if (!token ) {
-        navigate('/login');
+        if (location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
+          return
+        } else {
+          navigate('/login');
+        }
       }
-    }
   }, []);
 
   return (
