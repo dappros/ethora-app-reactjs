@@ -5,7 +5,6 @@ import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
-import { sleep } from './utils/sleep';
 import { navigateToUserPage } from './utils/navigateToUserPage';
 
 export function Fallback() {
@@ -56,29 +55,20 @@ function App() {
     // alert("here ++")
     const example = async () => {
       if (token) {
-        sleep(1000)
-        const response = await httpGetOneUser();
-        if (response.status === 200) {
-
-          await actionAfterLogin(response.data);
-          console.log(currentApp?.afterLoginPage)
+        // sleep(1000)
+        try {
+          const { data } = await httpGetOneUser();
+          await actionAfterLogin(data);
           navigateToUserPage(navigate, currentApp?.afterLoginPage)
-          // currentApp?.afterLoginPage === 'chats'
-          // navigate()
-
-          // const savedPath = localStorage.getItem('lastPath');
-          // if (savedPath) {
-          //   if (savedPath === '/app/chat') {
-          //     navigate('/app/admin/apps')
-          //     return
-          //   }
-          //   navigate(savedPath);
-          // } else {
-          //   navigate('/app/admin/apps');
-          // }
+        } catch (e) {
+          if (!location.pathname.startsWith('/tempPassword') || !location.pathname.startsWith('/resetPassword')) {
+            navigate('/login');
+          }
         }
       } else {
-        if (!location.pathname.startsWith('/tempPassword') || !location.pathname.startsWith('/resetPassword')) {
+        if (location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
+          return
+        } else {
           navigate('/login');
         }
       }

@@ -19,7 +19,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
 
-const App = lazy(() => import('./App'));
+import App from './App'
 
 export const router = createBrowserRouter(
   [
