@@ -1,3 +1,4 @@
+import { BillingDetails } from '@stripe/stripe-js';
 import { useCallback, useMemo } from 'react';
 import { stripePromise } from '../../stripeConfig';
 import {
@@ -6,6 +7,7 @@ import {
   getStripeSubscription,
   postStripeCreateCustomer,
   postStripeSubscription,
+  postStripeUpdateDetails,
 } from '../http';
 import { useAppStore } from '../store/useAppStore';
 
@@ -76,12 +78,29 @@ export const useStripePayment = () => {
         await postStripeCreateCustomer();
         const response = await postStripeSubscription(prices[1].id);
 
-        console.log('RESPONSEEEEEE', response.data);
         state.doSetStripeSecretKey(response.data.clientSecret);
         return response.data.clientSecret;
       } catch (error) {
         console.error(error);
       }
+    }
+  };
+
+  const updateDetails = async (data: BillingDetails) => {
+    if (!activeSubscription) {
+      return;
+    }
+
+    try {
+      const response = await postStripeUpdateDetails(
+        activeSubscription.default_payment_method.id,
+        data
+      );
+
+      console.log('postStripeUpdateDetails', response.data.results);
+      return;
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -92,6 +111,7 @@ export const useStripePayment = () => {
     secretKey,
     choosePlan,
     subscription,
+    updateDetails,
     publishableKey,
     activeSubscription,
     getStripeConfigStore,

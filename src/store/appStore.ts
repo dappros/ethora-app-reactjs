@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { ModalStripe, ModalStripeConfig, ModalStripeSubscription, ModelApp, ModelCurrentUser, ModelState, StripeInvoice } from '../models';
+import { DefaultPaymentMethod, ModalStripe, ModalStripeConfig, ModalStripeSubscription, ModelApp, ModelCurrentUser, ModelState, StripeInvoice } from '../models';
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -21,6 +21,7 @@ export interface AppSliceInterface extends ModelState {
   doSetStripeSecretKey: (app: Record<string, string>) => void;
   doSetStripeLoading: (app: boolean) => void;
   doSetStripeInvoices: (app: StripeInvoice[]) => void;
+  doSetStripeUpdateDetails: (app: DefaultPaymentMethod, id: string) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -96,6 +97,15 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   doSetStripeSubscription: (app) => {
     set((s) => {
       s.stripe.subscription = app;
+    })
+  },
+  doSetStripeUpdateDetails: (app, id) => {
+    set((s) => {
+      s.stripe.subscription.data.map((sub) => {
+        if (sub.default_payment_method.id === id) {
+          sub.default_payment_method = app;
+        }
+      });
     })
   },
   doSetStripeSecretKey: (app) => {

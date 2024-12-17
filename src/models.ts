@@ -206,24 +206,8 @@ export interface ModalStripeConfig {
   prices?: ModalStripePrice[];
 };
 
-
-export interface ModalStripeSubscriptionData {
-  canceled_at: number;
-  created: number;
-  current_period_end: number;
-  current_period_start: number;
-  ended_at: number;
-  id: string;
-  status: string;
-  customer: string;
-  billing: string;
-  billing_cycle_anchor: number;
-  cancel_at_period_end: boolean;
-  collection_method: string;
-  description: string | null;
-  discount: string | null;
-  default_payment_method: {
-    allow_redisplay: string;
+export interface DefaultPaymentMethod {
+  allow_redisplay: string;
     billing_details: BillingDetails;
     card: {
       brand: string;
@@ -245,7 +229,24 @@ export interface ModalStripeSubscriptionData {
     id: string;
     livemode: boolean;
     type: string;
-  };
+};
+
+export interface ModalStripeSubscriptionData {
+  canceled_at: number;
+  created: number;
+  current_period_end: number;
+  current_period_start: number;
+  ended_at: number;
+  id: string;
+  status: string;
+  customer: string;
+  billing: string;
+  billing_cycle_anchor: number;
+  cancel_at_period_end: boolean;
+  collection_method: string;
+  description: string | null;
+  discount: string | null;
+  default_payment_method: DefaultPaymentMethod;
   invoice_customer_balance_settings: {
     consume_applied_balance_on_void: boolean;
   };

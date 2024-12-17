@@ -1,7 +1,21 @@
-import { Box, Modal, TextField } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+  TextField,
+} from '@mui/material';
 import { BillingDetails } from '@stripe/stripe-js';
+import countries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
 import { ReactElement, useEffect, useMemo } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import Flag from 'react-world-flags';
+import { useStripePayment } from '../../../hooks/useStripe';
+
+countries.registerLocale(enLocale);
 
 const style = {
   position: 'absolute' as const,
@@ -27,6 +41,8 @@ export const BillingModalChangeInfo = ({
   isOpen,
   handleClose,
 }: BillingInfoModalProps): ReactElement => {
+  const { updateDetails } = useStripePayment();
+
   const defaultValues = useMemo(
     () => ({
       address: {
@@ -43,15 +59,25 @@ export const BillingModalChangeInfo = ({
     [details]
   );
 
+  const countryList = useMemo(() => {
+    return Object.entries(countries.getNames('en')).map(([code, name]) => ({
+      code,
+      name,
+    }));
+  }, []);
+
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
+    setValue,
     formState: { errors },
   } = useForm<BillingDetails>({ defaultValues });
 
   const onSubmit: SubmitHandler<BillingDetails> = (data) => {
     console.log('Form Data:', data);
+    updateDetails(data);
     handleClose();
   };
 
@@ -91,14 +117,83 @@ export const BillingModalChangeInfo = ({
           </Box>
 
           <Box className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-2">
-            <TextField
+            {/* <TextField
               size="small"
               label="Country"
               fullWidth
               {...register('address.country')}
               error={!!errors.address?.country}
               helperText={errors.address?.country?.message}
-            />
+            /> */}
+            <FormControl fullWidth size="small">
+              <InputLabel id="country-select-label">Country</InputLabel>
+              <Select
+                size="small"
+                label="Country"
+                labelId="country-select-label"
+                id="country-select"
+                value={getValues('address.country') || ''}
+                onChange={(e) => {
+                  setValue('address.country', e.target.value, {
+                    shouldValidate: true,
+                  });
+                }}
+                displayEmpty
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                      maxWidth: 'inherit',
+                      borderRadius: 10,
+                    },
+                  },
+                  anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  },
+                  transformOrigin: {
+                    vertical: 'top',
+                    horizontal: 'left',
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {countryList.map((country) => (
+                  <MenuItem
+                    key={country.code}
+                    value={country.code}
+                    sx={{
+                      display: 'flex',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Flag
+                        code={country.code}
+                        style={{ width: 24, height: 16, marginRight: 8 }}
+                      />
+                      <span
+                        style={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {country.name}
+                      </span>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <TextField
               size="small"
               label="State / Province / Region"

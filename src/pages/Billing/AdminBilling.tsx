@@ -37,12 +37,12 @@ export function AdminBilling() {
     );
   }, [stripe.subscription, stripe.prices, stripe.activeSubscription]);
 
-  console.log('subscription----<>----', stripe.subscription);
-  console.log('activeSubscription', stripe.activeSubscription);
-  console.log('prices________', stripe.prices);
-  console.log('invoices!!!!', stripe.invoices);
-  console.log('user', user);
-  console.log('STRIPE>>>>>>>---', stripe.secretKey);
+  // console.log('subscription----<>----', stripe.subscription);
+  // console.log('activeSubscription', stripe.activeSubscription);
+  // console.log('prices________', stripe.prices);
+  // console.log('invoices!!!!', stripe.invoices);
+  // console.log('user', user);
+  // console.log('STRIPE>>>>>>>---', stripe.secretKey);
 
   return (
     <>
@@ -63,17 +63,19 @@ export function AdminBilling() {
               <BillingBoxContainer title="Plan Details">
                 <Box className="sm:flex items-end justify-between">
                   <Box className="flex items-center gap-2 pb-4 sm:pb-0">
-                    <Box>
-                      <p className="text-sm text-gray-800">Current Plan</p>
-                      <p className="text-lg font-bold">
-                        {activePrice.product.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {getCurrencySymbol(activePrice.currency)}
-                        {activePrice.unit_amount / 100} /{' '}
-                        {activePrice.recurring.interval}
-                      </p>
-                    </Box>
+                    {activePrice && (
+                      <Box>
+                        <p className="text-sm text-gray-800">Current Plan</p>
+                        <p className="text-lg font-bold">
+                          {activePrice.product.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {getCurrencySymbol(activePrice.currency)}
+                          {activePrice.unit_amount / 100} /{' '}
+                          {activePrice.recurring.interval}
+                        </p>
+                      </Box>
+                    )}
                     <Typography
                       variant="caption"
                       className={classNames(

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { ModelUserACL } from './models';
 import { actionLogout } from './actions';
+import { BillingDetails } from '@stripe/stripe-js';
 
 export const httpTokens = {
   appJwt: '',
@@ -395,12 +396,17 @@ export function getStripeConfig() {
 };
 
 export function getStripeAllCards() {
-  return http.get('/stripe/customer');
+  return http.get('/stripe/cards');
 };
+
+// export function getStripeAllCards() {
+//   return http.get('/stripe/customer');
+// };
+
 
 export function getStripeInvoices(subscriptionId?: string) {
   return http.get(`/stripe/invoices?subscriptionId=${subscriptionId}`);
-}
+};
 
 export function postStripeSubscription(priceId: string) {
   return http.post('/stripe/subscriptions', {
@@ -412,6 +418,10 @@ export function postStripeCreateCustomer(testClockId?: string) {
   return http.post('/stripe/create-customer', {
     testClockId 
   });
+};
+
+export function postStripeUpdateDetails(pmId: string, data: BillingDetails) {
+  return http.put(`/stripe/billing-details/${pmId}`, data);
 };
 
 export function createAppChat(appId: string, title: string, pinned: boolean) {
