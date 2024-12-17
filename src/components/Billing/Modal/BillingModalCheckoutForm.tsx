@@ -1,4 +1,4 @@
-import { Button, Modal } from '@mui/material';
+import { Button, CircularProgress, Modal } from '@mui/material';
 import {
   CardCvcElement,
   CardExpiryElement,
@@ -6,6 +6,7 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
+import classNames from 'classnames';
 import React, { useState } from 'react';
 import poweredStripe from '../../../assets/icons/PoweredStripe.svg';
 import { useStripePayment } from '../../../hooks/useStripe';
@@ -26,12 +27,16 @@ export const BillingModalCheckoutForm = ({
 
   const [name, setName] = useState<string>('');
   const [message, setMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setMessage('');
+    setIsLoading(true);
 
     if (!stripe || !elements) {
       setMessage('Stripe.js has not loaded yet.');
+      setIsLoading(false);
       return;
     }
 
@@ -56,7 +61,11 @@ export const BillingModalCheckoutForm = ({
 
       setMessage('Payment successful!');
       window.location.reload();
+    } else {
+      setMessage('Failed to process data');
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -155,9 +164,20 @@ export const BillingModalCheckoutForm = ({
 
             <button
               type="submit"
-              className="w-full py-2 text-white bg-brand-500 hover:bg-brand-600 rounded-lg transition duration-200"
+              disabled={isLoading}
+              className={classNames(
+                'w-full py-2 text-white bg-brand-500 hover:bg-brand-600 rounded-lg transition duration-200',
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              )}
             >
-              Submit Payment
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <CircularProgress size={20} style={{ color: 'white' }} />{' '}
+                  <span className="ml-2">Processing...</span>
+                </div>
+              ) : (
+                'Submit Payment'
+              )}
             </button>
 
             {message && (
