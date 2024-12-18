@@ -2,6 +2,7 @@ import { BillingDetails } from '@stripe/stripe-js';
 import { useCallback, useMemo } from 'react';
 import { stripePromise } from '../../stripeConfig';
 import {
+  deleteStripePayment,
   getStripeConfig,
   getStripeInvoices,
   getStripeSubscription,
@@ -86,23 +87,32 @@ export const useStripePayment = () => {
     }
   };
 
-  const updateDetails = async (data: BillingDetails) => {
-    if (!activeSubscription) {
-      return;
-    }
+  const updateDetails = useCallback(
+    async (data: BillingDetails) => {
+      if (!activeSubscription) {
+        return;
+      }
 
-    try {
-      const response = await postStripeUpdateDetails(
-        activeSubscription.default_payment_method.id,
-        data
-      );
+      try {
+        const response = await postStripeUpdateDetails(
+          activeSubscription.default_payment_method.id,
+          data
+        );
 
-      console.log('postStripeUpdateDetails', response.data.results);
-      return;
-    } catch (error) {
-      console.error(error);
+        console.log('postStripeUpdateDetails', response.data.results);
+        return;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [activeSubscription]
+  );
+
+  const deleteSubscription = useCallback(async () => {
+    if (activeSubscription.default_payment_method.id) {
+      await deleteStripePayment(activeSubscription.default_payment_method.id);
     }
-  };
+  }, [activeSubscription]);
 
   return {
     prices,
@@ -114,6 +124,7 @@ export const useStripePayment = () => {
     updateDetails,
     publishableKey,
     activeSubscription,
+    deleteSubscription,
     getStripeConfigStore,
     getStripeInvoicesStore,
     getStripeSubscriptionStore,

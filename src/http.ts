@@ -424,6 +424,10 @@ export function postStripeUpdateDetails(pmId: string, data: BillingDetails) {
   return http.put(`/stripe/billing-details/${pmId}`, data);
 };
 
+export function deleteStripePayment(cardId: string) {
+  return http.delete(`/stripe/payment-methods/${cardId}`);
+};
+
 export function createAppChat(appId: string, title: string, pinned: boolean) {
   return http.post(`/apps/create-app-chat/${appId}`, {
     title,

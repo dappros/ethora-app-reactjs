@@ -19,9 +19,13 @@ export function AdminBilling() {
   const [openChangeInfo, setOpenChangeInfo] = useState<boolean>(false);
   const [openCheckoutForm, setOpenCheckoutForm] = useState<boolean>(false);
 
-  const handleChoosePlan = async (id: string) => {
+  const handleChoosePlan = (id: string) => {
     if (id === 'business_monthly' || id === 'business_annual') {
       setOpenCheckoutForm(true);
+    }
+
+    if (id === 'free') {
+      stripe.deleteSubscription();
     }
   };
 
@@ -38,7 +42,7 @@ export function AdminBilling() {
   }, [stripe.subscription, stripe.prices, stripe.activeSubscription]);
 
   // console.log('subscription----<>----', stripe.subscription);
-  // console.log('activeSubscription', stripe.activeSubscription);
+  console.log('activeSubscription', stripe.activeSubscription);
   // console.log('prices________', stripe.prices);
   // console.log('invoices!!!!', stripe.invoices);
   // console.log('user', user);
@@ -59,45 +63,45 @@ export function AdminBilling() {
             spacing={2}
             className="container mx-auto p-6 w-full overflow-hidden"
           >
-            <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BillingBoxContainer title="Plan Details">
-                <Box className="sm:flex items-end justify-between">
-                  <Box className="flex items-center gap-2 pb-4 sm:pb-0">
-                    {activePrice && (
-                      <Box>
-                        <p className="text-sm text-gray-800">Current Plan</p>
-                        <p className="text-lg font-bold">
-                          {activePrice.product.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {getCurrencySymbol(activePrice.currency)}
-                          {activePrice.unit_amount / 100} /{' '}
-                          {activePrice.recurring.interval}
-                        </p>
-                      </Box>
+            {/* <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6"> */}
+            <BillingBoxContainer title="Plan Details">
+              <Box className="sm:flex items-end justify-between">
+                <Box className="flex items-center gap-2 pb-4 sm:pb-0">
+                  {activePrice && (
+                    <Box>
+                      <p className="text-sm text-gray-800">Current Plan</p>
+                      <p className="text-lg font-bold">
+                        {activePrice.product.name}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {getCurrencySymbol(activePrice.currency)}
+                        {activePrice.unit_amount / 100} /{' '}
+                        {activePrice.recurring.interval}
+                      </p>
+                    </Box>
+                  )}
+                  <Typography
+                    variant="caption"
+                    className={classNames(
+                      'text-xs text-white px-4 py-1 rounded-full',
+                      stripe.activeSubscription.status === 'active'
+                        ? 'bg-green-500'
+                        : 'bg-gray-400'
                     )}
-                    <Typography
-                      variant="caption"
-                      className={classNames(
-                        'text-xs text-white px-4 py-1 rounded-full',
-                        stripe.activeSubscription.status === 'active'
-                          ? 'bg-green-500'
-                          : 'bg-gray-400'
-                      )}
-                    >
-                      {stripe.activeSubscription.status}
-                    </Typography>
-                  </Box>
-                  <button
-                    className="bg-brand-500 px-5 xl:px-7 py-2 text-white text-xs rounded-lg"
-                    onClick={() => setOpenChangePlan(true)}
                   >
-                    Change plan
-                  </button>
+                    {stripe.activeSubscription.status}
+                  </Typography>
                 </Box>
-              </BillingBoxContainer>
+                <button
+                  className="bg-brand-500 px-5 xl:px-7 py-2 text-white text-xs rounded-lg"
+                  onClick={() => setOpenChangePlan(true)}
+                >
+                  Change plan
+                </button>
+              </Box>
+            </BillingBoxContainer>
 
-              <BillingBoxContainer title="Payment Method">
+            {/* <BillingBoxContainer title="Payment Method">
                 <Box className="sm:flex items-center justify-between">
                   <Box className="flex items-center pb-4 sm:pb-0">
                     <img
@@ -105,13 +109,15 @@ export function AdminBilling() {
                       alt="Visa"
                       className="h-6 mr-3"
                     />
-                    <p className="text-sm text-gray-600">
-                      Ending with{' '}
-                      {
-                        stripe.activeSubscription.default_payment_method.card
-                          .last4
-                      }
-                    </p>
+                    {stripe.activeSubscription.default_payment_method?.card && (
+                      <p className="text-sm text-gray-600">
+                        Ending with{' '}
+                        {
+                          stripe.activeSubscription.default_payment_method.card
+                            .last4
+                        }
+                      </p>
+                    )}
                   </Box>
                   <button
                     className="bg-brand-500 px-6 py-2 text-white text-xs rounded-lg"
@@ -120,8 +126,8 @@ export function AdminBilling() {
                     Update card details
                   </button>
                 </Box>
-              </BillingBoxContainer>
-            </Box>
+              </BillingBoxContainer> */}
+            {/* </Box> */}
 
             <BillingBoxContainer
               title="Billing Info"
@@ -141,7 +147,7 @@ export function AdminBilling() {
                     <span className="font-medium">
                       {
                         stripe.activeSubscription.default_payment_method
-                          .billing_details.name
+                          ?.billing_details.name
                       }
                     </span>
                   </p>
@@ -149,7 +155,7 @@ export function AdminBilling() {
                     <BillingInfoText
                       billingDetails={
                         stripe.activeSubscription.default_payment_method
-                          .billing_details
+                          ?.billing_details
                       }
                     />
                   </p>
@@ -174,7 +180,7 @@ export function AdminBilling() {
       <BillingModalChangeInfo
         details={
           stripe.activeSubscription &&
-          stripe.activeSubscription.default_payment_method.billing_details
+          stripe.activeSubscription.default_payment_method?.billing_details
         }
         isOpen={openChangeInfo}
         handleClose={() => setOpenChangeInfo(false)}
