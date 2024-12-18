@@ -22,7 +22,7 @@ const BillingModule = () => {
     }
   }, [stripe.activeSubscription]);
 
-  if (stripe.loading) {
+  if (stripe.loading || stripe.subscription === undefined) {
     return <Loading style="absolute" />;
   }
 
