@@ -19,8 +19,6 @@ export function AdminBilling() {
   const [openChangeInfo, setOpenChangeInfo] = useState<boolean>(false);
   const [openCheckoutForm, setOpenCheckoutForm] = useState<boolean>(false);
 
-  console.log('stripe', stripe.activeSubscription);
-
   const handleChoosePlan = (id: string) => {
     if (id === 'business_monthly' || id === 'business_annual') {
       setOpenCheckoutForm(true);
