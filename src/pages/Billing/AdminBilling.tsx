@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { useMemo, useState } from 'react';
 import { BillingBoxContainer } from '../../components/Billing/BillingBoxContainer';
 import { BillingHistoryTable } from '../../components/Billing/BillingHistoryTable';
-import { BillingInfoText } from '../../components/Billing/BillingInfoText';
+import { BillingInfoDetails } from '../../components/Billing/BillingInfoDetails';
 import { BillingModalChangeInfo } from '../../components/Billing/Modal/BillingModalChangeInfo';
 import { BillingModalChangePlan } from '../../components/Billing/Modal/BillingModalChangePlan';
 import { BillingModalCheckoutForm } from '../../components/Billing/Modal/BillingModalCheckoutForm';
@@ -40,13 +40,6 @@ export function AdminBilling() {
       )[0]
     );
   }, [stripe.subscription, stripe.prices, stripe.activeSubscription]);
-
-  // console.log('subscription----<>----', stripe.subscription);
-  console.log('activeSubscription', stripe.activeSubscription);
-  // console.log('prices________', stripe.prices);
-  // console.log('invoices!!!!', stripe.invoices);
-  // console.log('user', user);
-  // console.log('STRIPE>>>>>>>---', stripe.secretKey);
 
   return (
     <>
@@ -130,39 +123,17 @@ export function AdminBilling() {
             {/* </Box> */}
 
             {stripe.activeSubscription.default_payment_method && (
-              <BillingBoxContainer
-                title="Billing Info"
-                titleButton={
-                  <button
-                    onClick={() => setOpenChangeInfo(true)}
-                    className="bg-brand-500 px-4 py-1 text-white text-xs rounded-lg"
-                  >
-                    Edit
-                  </button>
+              <BillingInfoDetails
+                name={
+                  stripe.activeSubscription.default_payment_method
+                    .billing_details.name
                 }
-              >
-                <Box className="flex items-center justify-between">
-                  <Box>
-                    <p className="text-sm text-gray-600">
-                      Person/Company Name:{' '}
-                      <span className="font-medium">
-                        {
-                          stripe.activeSubscription.default_payment_method
-                            ?.billing_details.name
-                        }
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      <BillingInfoText
-                        billingDetails={
-                          stripe.activeSubscription.default_payment_method
-                            ?.billing_details
-                        }
-                      />
-                    </p>
-                  </Box>
-                </Box>
-              </BillingBoxContainer>
+                billingDetails={
+                  stripe.activeSubscription.default_payment_method
+                    .billing_details
+                }
+                setOpenChangeInfo={() => setOpenChangeInfo(true)}
+              />
             )}
 
             <Box className="mt-6 p-4 border rounded-lg shadow bg-white">
@@ -181,8 +152,7 @@ export function AdminBilling() {
       />
       <BillingModalChangeInfo
         details={
-          stripe.activeSubscription &&
-          stripe.activeSubscription.default_payment_method?.billing_details
+          stripe.activeSubscription?.default_payment_method?.billing_details
         }
         isOpen={openChangeInfo}
         handleClose={() => setOpenChangeInfo(false)}

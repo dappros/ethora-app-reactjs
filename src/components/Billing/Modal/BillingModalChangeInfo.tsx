@@ -1,19 +1,11 @@
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-} from '@mui/material';
+import { Box, Modal, TextField } from '@mui/material';
 import { BillingDetails } from '@stripe/stripe-js';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import { ReactElement, useEffect, useMemo } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import Flag from 'react-world-flags';
 import { useStripePayment } from '../../../hooks/useStripe';
+import { CountrySelect } from '../CountrySelect';
 
 countries.registerLocale(enLocale);
 
@@ -51,8 +43,6 @@ export const BillingModalChangeInfo = ({
         line1: details?.address.line1 || '',
         state: details?.address.state || '',
         postal_code: details?.address.postal_code || '',
-        // isCompany: false,
-        // timezone: timezones[0],
       },
       phone: details?.phone || '',
     }),
@@ -75,9 +65,25 @@ export const BillingModalChangeInfo = ({
     formState: { errors },
   } = useForm<BillingDetails>({ defaultValues });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const removeEmptyFields = <T extends Record<string, any>>(obj: T): T => {
+    return Object.entries(obj)
+      .filter(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([_, value]) => value !== '' && value !== null && value !== undefined
+      )
+      .reduce((acc, [key, value]) => {
+        acc[key as keyof T] =
+          typeof value === 'object' && !Array.isArray(value)
+            ? removeEmptyFields(value)
+            : value;
+        return acc;
+      }, {} as T);
+  };
+
   const onSubmit: SubmitHandler<BillingDetails> = (data) => {
-    console.log('Form Data:', data);
-    updateDetails(data);
+    console.log('Form Data:', removeEmptyFields(data));
+    updateDetails(removeEmptyFields(data));
     handleClose();
   };
 
@@ -117,82 +123,11 @@ export const BillingModalChangeInfo = ({
           </Box>
 
           <Box className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-2">
-            {/* <TextField
-              size="small"
-              label="Country"
-              fullWidth
-              {...register('address.country')}
-              error={!!errors.address?.country}
-              helperText={errors.address?.country?.message}
-            /> */}
-            <FormControl fullWidth size="small">
-              <InputLabel id="country-select-label">Country</InputLabel>
-              <Select
-                size="small"
-                label="Country"
-                labelId="country-select-label"
-                id="country-select"
-                value={getValues('address.country') || ''}
-                onChange={(e) => {
-                  setValue('address.country', e.target.value, {
-                    shouldValidate: true,
-                  });
-                }}
-                displayEmpty
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200,
-                      maxWidth: 'inherit',
-                      borderRadius: 10,
-                    },
-                  },
-                  anchorOrigin: {
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  },
-                  transformOrigin: {
-                    vertical: 'top',
-                    horizontal: 'left',
-                  },
-                }}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {countryList.map((country) => (
-                  <MenuItem
-                    key={country.code}
-                    value={country.code}
-                    sx={{
-                      display: 'flex',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                      }}
-                    >
-                      <Flag
-                        code={country.code}
-                        style={{ width: 24, height: 16, marginRight: 8 }}
-                      />
-                      <span
-                        style={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {country.name}
-                      </span>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <CountrySelect
+              getValues={getValues}
+              setValue={setValue}
+              countryList={countryList}
+            />
 
             <TextField
               size="small"
@@ -227,25 +162,6 @@ export const BillingModalChangeInfo = ({
               helperText={errors.phone?.message}
             />
           </Box>
-
-          {/* <Box className="md:w-1/2 pb-2">
-            <TextField
-              size="small"
-              label="Timezone"
-              select
-              fullWidth
-              defaultValue={timezones[0]}
-              {...register('timezone')}
-              error={!!errors.timezone}
-              helperText={errors.timezone?.message}
-            >
-              {timezones.map((timezone) => (
-                <MenuItem key={timezone} value={timezone}>
-                  {timezone}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box> */}
 
           <Box className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2 py-8">
             <button
