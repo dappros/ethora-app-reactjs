@@ -129,39 +129,41 @@ export function AdminBilling() {
               </BillingBoxContainer> */}
             {/* </Box> */}
 
-            <BillingBoxContainer
-              title="Billing Info"
-              titleButton={
-                <button
-                  onClick={() => setOpenChangeInfo(true)}
-                  className="bg-brand-500 px-4 py-1 text-white text-xs rounded-lg"
-                >
-                  Edit
-                </button>
-              }
-            >
-              <Box className="flex items-center justify-between">
-                <Box>
-                  <p className="text-sm text-gray-600">
-                    Person/Company Name:{' '}
-                    <span className="font-medium">
-                      {
-                        stripe.activeSubscription.default_payment_method
-                          ?.billing_details.name
-                      }
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <BillingInfoText
-                      billingDetails={
-                        stripe.activeSubscription.default_payment_method
-                          ?.billing_details
-                      }
-                    />
-                  </p>
+            {stripe.activeSubscription.default_payment_method && (
+              <BillingBoxContainer
+                title="Billing Info"
+                titleButton={
+                  <button
+                    onClick={() => setOpenChangeInfo(true)}
+                    className="bg-brand-500 px-4 py-1 text-white text-xs rounded-lg"
+                  >
+                    Edit
+                  </button>
+                }
+              >
+                <Box className="flex items-center justify-between">
+                  <Box>
+                    <p className="text-sm text-gray-600">
+                      Person/Company Name:{' '}
+                      <span className="font-medium">
+                        {
+                          stripe.activeSubscription.default_payment_method
+                            ?.billing_details.name
+                        }
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <BillingInfoText
+                        billingDetails={
+                          stripe.activeSubscription.default_payment_method
+                            ?.billing_details
+                        }
+                      />
+                    </p>
+                  </Box>
                 </Box>
-              </Box>
-            </BillingBoxContainer>
+              </BillingBoxContainer>
+            )}
 
             <Box className="mt-6 p-4 border rounded-lg shadow bg-white">
               <h2 className="text-lg font-semibold mb-4">History</h2>
