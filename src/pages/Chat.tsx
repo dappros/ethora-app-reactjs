@@ -36,6 +36,7 @@ const MemoizedChat = React.memo(function ChatComponent({
           height: 'calc(100%)',
           borderRadius: '16px 0px 0px 16px',
           border: 'none',
+          padding: '16px',
         },
         chatRoomStyles: {
           color: config?.primaryColor,
@@ -70,7 +71,7 @@ export default function ChatPage() {
           Chats
         </div>
       </div>
-      <div className="rounded-2xl bg-white py-4 px-0 overflow-hidden">
+      <div className="rounded-2xl bg-white px-0 overflow-hidden">
         <MemoizedChat config={config} currentUser={currentUser} />
       </div>
     </div>
