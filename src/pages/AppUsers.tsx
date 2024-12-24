@@ -24,15 +24,20 @@ import { IconSettings } from '../components/Icons/IconSettings';
 import { httpCraeteUser, httpTagsSet, httpUpdateAcl } from '../http';
 import { ModelAppUser, ModelUserACL } from '../models';
 
+import classNames from 'classnames';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { SubmitModal } from '../components/modal/SubmitModal';
-import './AppUsers.scss';
 import { Sorting } from '../components/Sorting';
+import './AppUsers.scss';
+import AppleIcon from './AuthPage/Icons/socials/appleIcon';
+import EmailIcon from './AuthPage/Icons/socials/emailIcon';
+import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
+import { MetamaskButton } from './AuthPage/MetamaskButton';
 
 export default function AppUsers() {
-  let { appId } = useParams();
+  const { appId } = useParams();
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [items, setItems] = useState<Array<ModelAppUser>>([]);
   const [rowsSelected, setRowsSelected] = useState(items.map((_el) => false));
@@ -337,6 +342,19 @@ export default function AppUsers() {
     return value;
   };
 
+  const renderAuthMethodIcon = (name: string) => {
+    switch (name) {
+      case 'facebook':
+        return <FacebookIcon />;
+      case 'apple':
+        return <AppleIcon />;
+      case 'metamask':
+        return <MetamaskButton />;
+      default:
+        return <EmailIcon />;
+    }
+  };
+
   const renderActionsForSelected = () => {
     let selectedIndexes = [];
 
@@ -349,34 +367,51 @@ export default function AppUsers() {
     let length = selectedIndexes.length;
 
     if (length > 0) {
-      // 
+      //
       return (
-        
-        <div className="shadow px-[16px] py-[12px] grid grid-cols-4 gap-[16px] items-center z-50 transform -translate-x-1/2 bg-white rounded-xl fixed left-[50%] bottom-[30px]">
-          <div className="whitespace-nowrap text-sm">
+        <div
+          className={classNames(
+            'gap-0 md:gap-[16px] items-center z-50 transform -translate-x-1/2 rounded-xl fixed left-[50%]',
+            'bottom-[205px] 2xl:bottom-[30px] flex flex-col-reverse md:flex-row',
+            'shadow-none md:shadow-lg px-0 md:px-[16px] py-0 md:py-[12px] bg-none md:bg-white'
+          )}
+        >
+          <div
+            className={classNames(
+              'whitespace-nowrap text-sm mt-2 md:mt-0 bg-white',
+              'p-[22px] md:p-0 shadow-lg md:shadow-none rounded-xl md:rounded-none'
+            )}
+          >
             Selected {length} of {itemsPerTable} users
           </div>
-          <button
-            className="text-brand-500 font-varela text-base"
-            onClick={() => setShowManageTags(true)}
+          <div
+            className={classNames(
+              'flex flex-col md:flex-row gap-[16px] bg-white',
+              'py-[8px] md:py-0 px-[16px] md:px-0 shadow-lg md:shadow-none rounded-xl md:rounded-none'
+            )}
           >
-            Manage Tags
-          </button>
-          <button
-            className="text-brand-500 font-varela text-base"
-            onClick={() => setShowResetPassword(true)}
-          >
-            Reset Password
-          </button>
-          <button
-            className="text-brand-500 flex font-varela text-base items-center justify-center"
-            onClick={() => setShowDelete(true)}
-          >
-            <div className="mr-2">
-              <IconDelete />
-            </div>
-            Delete
-          </button>
+            <button
+              className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+              onClick={() => setShowManageTags(true)}
+            >
+              Manage Tags
+            </button>
+            <button
+              className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+              onClick={() => setShowResetPassword(true)}
+            >
+              Reset Password
+            </button>
+            <button
+              className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
+              onClick={() => setShowDelete(true)}
+            >
+              <div className="mr-2">
+                <IconDelete />
+              </div>
+              Delete
+            </button>
+          </div>
         </div>
       );
     } else {
@@ -401,9 +436,8 @@ export default function AppUsers() {
               { key: 'createdAt', title: 'Creation Date' },
               { key: 'firstName', title: 'First Name' },
               { key: 'lastName', title: 'Last Name' },
-              { key: 'email', title: 'Email' }
+              { key: 'email', title: 'Email' },
             ]}
-
             setOrderBy={setOrderBy}
           />
           <button
@@ -418,15 +452,15 @@ export default function AppUsers() {
       <div className="overflow-hidden">
         {!items.length && (
           <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
-            There are no users yet, or you can add them by clicking the 'Add User'
-            button
+            There are no users yet, or you can add them by clicking the 'Add
+            User' button
           </div>
         )}
         {!!items.length && (
           <>
             <div className="overflow-x-auto relative mb-4">
               {renderActionsForSelected()}
-              <table className="border-collapse w-full min-w-[1200px] table-fixed">
+              <table className="border-collapse w-full min-w-[1200px] table-auto">
                 <thead>
                   <tr className="bg-[#FCFCFC]">
                     <th className="pl-4 py-2 w-[32px] rounded-l-lg">
@@ -447,14 +481,22 @@ export default function AppUsers() {
                       Last Name
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                      Email
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                       Tags
                     </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                    {/* <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                       Creation Date
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                       Seen Date
+                    </th> */}
+
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      Creation Date/Seen Date
                     </th>
+
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                       Auth method
                     </th>
@@ -494,20 +536,38 @@ export default function AppUsers() {
                           {el.lastName}
                         </td>
                         <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          { }
+                          {el.email}
                         </td>
                         <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
+                          <div className="flex items-center gap-1 justify-center">
+                            {el.tags.slice(0, 3).map((e, index) => (
+                              <div
+                                key={`${e}_${index}`}
+                                className="px-4 py-1 bg-brand-150 text-brand-500 rounded-2xl"
+                              >
+                                {e}
+                              </div>
+                            ))}
+                          </div>
                         </td>
                         <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          {el.lastSeen
-                            ? DateTime.fromISO(el.lastSeen).toFormat(
+                          <div>
+                            {DateTime.fromISO(el.createdAt).toFormat(
                               'dd LLL yyyy t'
-                            )
-                            : '-'}
+                            )}
+                          </div>
+                          <div>
+                            {el.lastSeen
+                              ? DateTime.fromISO(el.lastSeen).toFormat(
+                                  'dd LLL yyyy t'
+                                )
+                              : '-'}
+                          </div>
                         </td>
                         <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          {el.authMethod}
+                          <div className="flex items-center justify-center">
+                            {renderAuthMethodIcon(el.authMethod)}
+                          </div>
                         </td>
                         <td className="px-4 font-sans font-normal text-sm text-center">
                           -
@@ -588,17 +648,13 @@ export default function AppUsers() {
                 />
               </div>
             </div>
-
           </>
-
         )}
       </div>
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
           <div className="font-varela text-[24px] text-center mb-8">Tags</div>
-          <div className="font-sans text-[14px] mb-8 text-center">
-            Add Tags
-          </div>
+          <div className="font-sans text-[14px] mb-8 text-center">Add Tags</div>
           <div>
             <input
               type="text"
@@ -626,7 +682,9 @@ export default function AppUsers() {
       )}
       {showResetPassword && (
         <SubmitModal onClose={() => setShowResetPassword(false)}>
-          <div className="font-varela text-[24px] text-center mb-8">Password Reset</div>
+          <div className="font-varela text-[24px] text-center mb-8">
+            Password Reset
+          </div>
           <p className="font-sans text-[14px] mb-8 text-center">
             {`Are you sure you want to force a password reset for ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
           </p>
@@ -648,7 +706,9 @@ export default function AppUsers() {
       )}
       {showDelete && (
         <SubmitModal onClose={() => setShowDelete(false)}>
-          <div className="font-varela text-[24px] text-center mb-8">Delete user</div>
+          <div className="font-varela text-[24px] text-center mb-8">
+            Delete user
+          </div>
           <p className="font-sans text-[14px] mb-8 text-center">
             {`Are you sure you want to delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
           </p>
