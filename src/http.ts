@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { ModelUserACL } from './models';
 import { actionLogout } from './actions';
+import { ModelUserACL } from './models';
 
 export const httpTokens = {
   appJwt: '',
@@ -8,20 +8,19 @@ export const httpTokens = {
   _refreshToken: localStorage.getItem('refreshToken-538') || '',
   set refreshToken(token: string) {
     localStorage.setItem('refreshToken-538', token);
-    this._refreshToken = token
+    this._refreshToken = token;
   },
   get refreshToken() {
-    return this._refreshToken
+    return this._refreshToken;
   },
   set token(newToken: string) {
     localStorage.setItem('token-538', newToken);
-    this._token = newToken
+    this._token = newToken;
   },
   get token() {
     return this._token;
-  }
+  },
 };
-
 
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API,
@@ -79,18 +78,16 @@ export const refreshToken = async () => {
   try {
     const response = await http.post('/users/login/refresh', null, {
       headers: {
-        Authorization:
-          httpTokens.refreshToken,
+        Authorization: httpTokens.refreshToken,
       },
     });
     const { token, refreshToken } = response.data;
     httpTokens.token = token;
     httpTokens.refreshToken = refreshToken;
 
-
     return httpTokens;
   } catch (error) {
-    actionLogout()
+    actionLogout();
     console.error('Token refresh failed:', error);
     throw error;
   }
@@ -398,12 +395,26 @@ export function getDefaultRooms(appId: string) {
 }
 
 export function deleteDefaultRooms(appId: string, chatJid: string) {
-  return http.delete(
-    `/apps/delete-app-chat/${appId}`,
+  return http.delete(`/apps/delete-app-chat/${appId}`, {
+    data: {
+      chatJid,
+    },
+  });
+}
+
+export const sendHSFormData = async (
+  appId: string,
+  formId: string,
+  hubspotData: any
+) => {
+  await fetch(
+    `https://api.hsforms.com/submissions/v3/integration/submit/${appId}/${formId}`,
     {
-      data: {
-        chatJid,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify(hubspotData),
     }
   );
-}
+};

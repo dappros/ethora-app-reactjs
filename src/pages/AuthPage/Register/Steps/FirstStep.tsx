@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Box, Typography } from '@mui/material';
 import { toast } from 'react-toastify';
-import { httpRegisterWithEmail } from '../../../../http';
+import { httpRegisterWithEmail, sendHSFormData } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
@@ -42,17 +42,34 @@ const FirstStep: React.FC<FirstStepProps> = ({
 
   const onSubmit = async ({ email, firstName, lastName }: Inputs) => {
     console.log('onSubmit');
-    httpRegisterWithEmail(email, firstName, lastName)
-      .then((_) => {
-        setSearchParams({
-          ...Object.fromEntries(searchParams.entries()),
-          email: email,
-        });
-        setStep((prev) => prev + 1);
-      })
-      .catch((error) => {
-        toast.error(error.data.error);
+
+    try {
+      await httpRegisterWithEmail(email, firstName, lastName).then(async () => {
+        const website = window.location.origin;
+
+        const hubspotData = {
+          fields: [
+            { name: 'firstname', value: firstName },
+            { name: 'lastname', value: lastName },
+            { name: 'email', value: email },
+            { name: 'website', value: website },
+          ],
+        };
+
+        await sendHSFormData(
+          '4732608',
+          '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
+          hubspotData
+        );
       });
+      setSearchParams({
+        ...Object.fromEntries(searchParams.entries()),
+        email: email,
+      });
+      setStep((prev) => prev + 1);
+    } catch (error) {
+      toast.error('Something went wrong with registration');
+    }
   };
 
   return (
