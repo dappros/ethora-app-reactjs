@@ -1,0 +1,51 @@
+.app-table {
+  padding: 8px;
+  border: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .table-wrapper {
+    overflow: scroll;
+    width: 100%;
+  }
+
+  .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    min-width: 470px;
+  }
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+    min-width: 1200px;
+    display: table;
+    border-spacing: 2px;
+    border-collapse: separate;
+    box-sizing: border-box;
+    text-indent: 0;
+    text-align: left;
+    border-collapse: collapse;
+  }
+
+  thead {
+    // border-block-end: 2px solid;
+    background: whitesmoke;
+  }
+
+  th,
+  td {
+    padding: 18px 16px;
+  }
+
+  tr.selected {
+    background-color: #e7edf9;
+  }
+
+  tr:hover {
+    background-color: #f5f7f9;
+  }
+}

@@ -1,0 +1,17 @@
+.profile-page-edit {
+  .profile-top {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .form {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+  }
+
+  form {
+    max-width: 768px;
+    width: 100%;
+  }
+}

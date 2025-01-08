@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-brand-primary: rgba(0, 82, 205, 1);
+  --bg-gray-disabled: #d4d4d4;
+
+  --bg-brand-primary-preview: rgba(0, 82, 205, 1);
+  --bg-brand-preview-auth: rgba(0, 82, 205, 0.05);
+  --bg-auth-background: rgba(0, 82, 205, 0.05);
+  --border-primary: #f0f0f0;
+}
+
+body {
+  background-color: #F5F7F9;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+
+.thin-scroll {
+  scrollbar-width: thin; /* Make the scrollbar thinner */
+  scrollbar-color: #D9D9D9 transparent; /* Color of the thumb and track */
+}
+
+
+table th,
+table td {
+  position: relative;
+}
+
+table th.r-delimiter::after {
+  content: '';
+  position: absolute;
+  height: 60%;
+  border-right: 1px solid #f0f0f0;
+  right: 0;
+}
+
+table td.r-delimiter::after {
+  content: '';
+  position: absolute;
+  height: 32px;
+  border-right: 1px solid #f0f0f0;
+  right: 0;
+  top: 15px;
+}
+
+tr:nth-child(even) {
+  background-color: #fcfcfc;
+}
+
+.brand-path-stroke {
+  stroke: var(--bg-brand-primary) !important;
+}
+
+.brand-path-fill {
+  fill: var(--bg-brand-primary) !important;
+}
+
+.active .brand-path-fill-if-active {
+  fill: var(--bg-brand-primary) !important;
+}
+
+.active .brand-path-stroke-if-active {
+  stroke: var(--bg-brand-primary) !important;
+}
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
