@@ -27,29 +27,29 @@ const MemoizedChat = React.memo(function ChatComponent({
       config={{
         colors: {
           primary: config?.primaryColor || '#fff',
-          secondary: '#fff',
+          secondary: config?.secondaryColor || '#141414',
         },
         // @ts-ignorex
         roomListStyles: {
-          color: config?.primaryColor,
           maxHeight: 'calc(100%)',
           height: 'calc(100%)',
           borderRadius: '16px 0px 0px 16px',
           border: 'none',
           padding: '16px',
+          color: '#141414',
         },
         chatRoomStyles: {
-          color: config?.primaryColor,
           maxHeight: 'calc(100%)',
           height: 'calc(100%)',
           borderRadius: '0px 16px 16px 0px',
+          color: '#141414',
         },
         userLogin: {
           enabled: true,
           user: currentUser,
         },
         disableRoomMenu: true,
-        defaultRooms: config?.defaultRooms,
+        defaultRooms: config?.defaultRooms || [],
         refreshTokens: {
           refreshFunction: handleChangeTokens,
           enabled: true,
