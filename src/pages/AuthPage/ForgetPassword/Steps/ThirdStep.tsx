@@ -26,9 +26,22 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
 
   const navigate = useNavigate();
 
+  const getTokenFromUrl = (): string | null => {
+    const url = window.location.href;
+    const match = url.match(/resetPassword\/([a-f0-9]{24})/);
+    return match ? match[1] : null;
+  };
+
   const onSubmit = (data: Inputs) => {
     setLoading(true);
-    httpResetPassword(data.newPassword)
+    const token = getTokenFromUrl();
+    if (!token) {
+      toast.error('Bad reset url. Try reset again');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+    httpResetPassword(token, data.newPassword)
       .then(() => {
         toast.success('Password was successfully reset');
         navigate('/login');

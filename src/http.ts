@@ -316,8 +316,9 @@ export async function httpPostForgotPassword(email: string) {
   });
 }
 
-export async function httpResetPassword(password: string) {
+export async function httpResetPassword(token: string, password: string) {
   return await http.post('/users/reset', {
+    token,
     password,
   });
 }
