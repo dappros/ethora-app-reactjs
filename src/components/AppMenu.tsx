@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconChat } from './Icons/IconChat';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
@@ -9,8 +9,11 @@ import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { useAppStore } from '../store/useAppStore';
 
 export function AppMenu() {
+  const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
-  const currentUser = useAppStore(s => s.currentUser)
+  const currentUser = useAppStore(s => s.currentUser);
+
+  console.log('currentUser',currentUser)
 
   if (!currentUser) {
     return
@@ -22,6 +25,11 @@ export function AppMenu() {
       <button onClick={() => setMobileMenuVisible(!isMobileMenuVisible)} className="md:hidden">
         <IconMenuBurger />
       </button>
+        {location.pathname.includes('app/chat') && (
+          <div className="font-varela text-[24px] leading-none">
+            Chats
+          </div>
+        )}
       <div className="hidden md:flex flex-col">
         <NavLink
           to="/app/chat"

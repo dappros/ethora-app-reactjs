@@ -259,6 +259,7 @@ export default function AppSettings() {
               firebaseWebConfigString={firebaseWebConfigString}
               setFirebaseWebConfigString={setFirebaseWebConfigString}
               primaryColor={app.primaryColor}
+              onExternalClick={onExternalClick}
             />
           </TabPanel>
           <TabPanel
