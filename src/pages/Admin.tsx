@@ -6,7 +6,7 @@ export default function Admin() {
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
-      <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Admin
         </div>
