@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import TabApp from '../../components/TabApp';
-import { httpGetApp } from '../../http';
 import { ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { Api } from './Api';
@@ -205,17 +204,6 @@ export default function AppSettings() {
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
     setDefaultChatRooms(app.defaultRooms);
   }, [app]);
-
-  useEffect(() => {
-    if (!appId || app) return;
-
-    const getApp = async () => {
-      const response = await httpGetApp(appId);
-      setApp(response.data.result);
-    };
-
-    getApp();
-  }, [appId, app]);
 
   if (!app) {
     return <div></div>;

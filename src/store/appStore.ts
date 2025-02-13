@@ -12,6 +12,7 @@ export interface AppSliceInterface extends ModelState {
   doSetUser: (user: ModelCurrentUser) => void;
   doSetCurrentApp: (app: ModelApp) => void;
   doAddApp: (app: ModelApp) => void;
+  doSetApp: (apps: ModelApp) => void;
   doSetApps: (apps: Array<ModelApp>) => void;
   doUpdateApp: (app: ModelApp) => void;
   doUpdateUser: (userFieldsForUpdate: any) => void;
@@ -62,6 +63,14 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   doSetApps: (apps) => {
     set((s) => {
       s.apps = apps;
+    });
+  },
+  doSetApp: (app) => {
+    set((s) => {
+      if(s.apps.some((ap) => ap._id === app._id)) {
+        return;
+      }
+      s.apps = [...s.apps, app];
     });
   },
   doUpdateApp: (app) => {
