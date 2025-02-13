@@ -57,10 +57,9 @@ export function Appearance({
     }
 
     actionPostFile(file).then((resp) => {
-      console.log('resp', resp.data.results[0].location)
-      setLogoImage(resp.data.results[0].location)
-    }
-    );
+      console.log('resp', resp.data.results[0].location);
+      setLogoImage(resp.data.results[0].location);
+    });
   };
 
   const postSublogo = (file: File | null) => {
@@ -69,10 +68,9 @@ export function Appearance({
     }
 
     actionPostFile(file).then((resp) => {
-      console.log('resp', resp.data.results[0].location)
-      setSublogoImage(resp.data.results[0].location)
-    }
-    );
+      console.log('resp', resp.data.results[0].location);
+      setSublogoImage(resp.data.results[0].location);
+    });
   };
 
   return (
@@ -162,11 +160,13 @@ export function Appearance({
                 style={{ backgroundImage: `url(${BG})` }}
               >
                 <div className="max-w-[170px]">
-                  {logoImage && (<img
-                    src={logoImage}
-                    alt="Primary Logo"
-                    className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
-                  />)}
+                  {logoImage && (
+                    <img
+                      src={logoImage}
+                      alt="Primary Logo"
+                      className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
+                    />
+                  )}
                   <p className="break-words">{tagline}</p>
                 </div>
                 <div className=" w-[220px] h-[220px] bg-white rounded-xl p-3">
@@ -262,11 +262,13 @@ export function Appearance({
                 className="h-[45px] bg-cover bg-center flex justify-center items-center p-2"
                 style={{ backgroundImage: '' }}
               >
-                {logoImage && (<img
-                  src={logoImage}
-                  alt="Primary Logo"
-                  className="max-w-[60px] max-h-[43px] min-h-[40px] object-contain"
-                />)}
+                {logoImage && (
+                  <img
+                    src={logoImage}
+                    alt="Primary Logo"
+                    className="max-w-[60px] max-h-[43px] min-h-[40px] object-contain"
+                  />
+                )}
               </div>
               <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
               <div className="grid grid-cols-3 gap-2 mb-2">

@@ -1,9 +1,12 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
+import TabApp from '../../components/TabApp';
+import { httpGetApp } from '../../http';
+import { ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
@@ -14,81 +17,60 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
-import TabApp from '../../components/TabApp';
-import { ModelAppDefaulRooom } from '../../models';
 
 export default function AppSettings() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
-  const app = apps.find((app) => app._id === appId);
-
-  if (!app) {
-    return null;
-  }
+  const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
   // appearance tab
-  const [displayName, setDisplayName] = useState(app.displayName);
-  const [tagline, setTagline] = useState(app.appTagline);
-  const [coinName, setCoinName] = useState(app.coinName);
-  const [color, setColor] = useState(app.primaryColor);
-  const [logoImage, setLogoImage] = useState(app.logoImage);
-  const [sublogoImage, setSublogoImage] = useState(app.sublogoImage);
+  const [displayName, setDisplayName] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [coinName, setCoinName] = useState('');
+  const [color, setColor] = useState('');
+  const [logoImage, setLogoImage] = useState('');
+  const [sublogoImage, setSublogoImage] = useState('');
 
   // signon tab
-  const [enableEmail, setEnableEmail] = useState(
-    app.signonOptions.includes('email')
-  );
-  const [enableGoogle, setEnableGoogle] = useState(
-    app.signonOptions.includes('google')
-  );
-  const [enableApple, setEnableApple] = useState(
-    app.signonOptions.includes('apple')
-  );
-  const [enableFacebook, setEnableFacebook] = useState(
-    app.signonOptions.includes('facebook')
-  );
-  const [enableMetamask, setEnableMetamask] = useState(
-    app.signonOptions.includes('metamask')
-  );
+  const [enableEmail, setEnableEmail] = useState(false);
+  const [enableGoogle, setEnableGoogle] = useState(false);
+  const [enableApple, setEnableApple] = useState(false);
+  const [enableFacebook, setEnableFacebook] = useState(false);
+  const [enableMetamask, setEnableMetamask] = useState(false);
 
   // web app
-  const [domainName, setDomainName] = useState(app.domainName);
-  const [firebaseWebConfigString, setFirebaseWebConfigString] = useState(
-    app.firebaseWebConfigString ? app.firebaseWebConfigString : ''
-  );
+  const [domainName, setDomainName] = useState('');
+  const [firebaseWebConfigString, setFirebaseWebConfigString] = useState('');
 
   // mobile app
-  const [bundleId, setBundleId] = useState(app.bundleId);
-  const [googleServicesJson, setGoogleServicesJson] = useState(
-    app.googleServicesJson
-  );
-  const [googleServiceInfoPlist, setGoogleServiceInfoPlist] = useState(
-    app.googleServiceInfoPlist
-  );
+  const [bundleId, setBundleId] = useState('');
+  const [googleServicesJson, setGoogleServicesJson] = useState('');
+  const [googleServiceInfoPlist, setGoogleServiceInfoPlist] = useState('');
 
-  const [availableMenuItems, setAvailableMenuItems] = useState(
-    app.availableMenuItems
-  );
+  const [availableMenuItems, setAvailableMenuItems] = useState({
+    chats: false,
+    profile: false,
+    settings: false,
+  });
 
   // home
-  const [afterLoginPage, setAfterLoginPage] = useState(app.afterLoginPage);
+  const [afterLoginPage, setAfterLoginPage] = useState('');
 
   // visibility
-  const [defaultAccessAssetsOpen, setDefaultAccessAssetsOpen] = useState(
-    app.defaultAccessAssetsOpen
-  );
-  const [defaultAccessProfileOpen, setDefaultAccessProfileOpen] = useState(
-    app.defaultAccessProfileOpen
-  );
-  const [usersCanFree, setUsersCanFree] = useState(app.usersCanFree);
+  const [defaultAccessAssetsOpen, setDefaultAccessAssetsOpen] = useState(false);
+  const [defaultAccessProfileOpen, setDefaultAccessProfileOpen] =
+    useState(false);
+  const [usersCanFree, setUsersCanFree] = useState(false);
 
   // chats
-  const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(app.allowUsersToCreateRooms);
+  const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
 
-  const [defaultChatRooms, setDefaultChatRooms] = useState<Array<ModelAppDefaulRooom>>(app.defaultRooms);
+  const [defaultChatRooms, setDefaultChatRooms] = useState<
+    Array<ModelAppDefaulRooom>
+  >([]);
 
   const onSave = () => {
-    let body: any = {};
+    const body: any = {};
 
     // appearance
     if (displayName) {
@@ -116,7 +98,7 @@ export default function AppSettings() {
     }
 
     // signon
-    let signonOptions = [];
+    const signonOptions = [];
 
     if (enableEmail) {
       signonOptions.push('email');
@@ -167,7 +149,7 @@ export default function AppSettings() {
       body.afterLoginPage = afterLoginPage;
     }
 
-    body.allowUsersToCreateRooms = allowUsersToCreateRooms
+    body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
     console.log('on save body ', body);
 
@@ -185,6 +167,60 @@ export default function AppSettings() {
     );
   };
 
+  useEffect(() => {
+    if (apps) {
+      const result = apps.find((app) => app._id === appId);
+      if (result) {
+        setApp(result);
+      }
+    }
+  }, [apps, appId]);
+
+  useEffect(() => {
+    if (!app) return;
+
+    setDisplayName(app.displayName || '');
+    setTagline(app.appTagline || '');
+    setCoinName(app.coinName || '');
+    setColor(app.primaryColor || '');
+    setLogoImage(app.logoImage);
+    setSublogoImage(app.sublogoImage);
+    setEnableEmail(app.signonOptions.includes('email'));
+    setEnableGoogle(app.signonOptions.includes('google'));
+    setEnableApple(app.signonOptions.includes('apple'));
+    setEnableFacebook(app.signonOptions.includes('facebook'));
+    setEnableMetamask(app.signonOptions.includes('metamask'));
+    setDomainName(app.domainName);
+    setFirebaseWebConfigString(
+      app.firebaseWebConfigString ? app.firebaseWebConfigString : ''
+    );
+    setBundleId(app.bundleId);
+    setGoogleServicesJson(app.googleServicesJson);
+    setGoogleServiceInfoPlist(app.googleServiceInfoPlist);
+    setAvailableMenuItems(app.availableMenuItems);
+    setAfterLoginPage(app.afterLoginPage);
+    setDefaultAccessAssetsOpen(app.defaultAccessAssetsOpen);
+    setDefaultAccessProfileOpen(app.defaultAccessProfileOpen);
+    setUsersCanFree(app.usersCanFree);
+    setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
+    setDefaultChatRooms(app.defaultRooms);
+  }, [app]);
+
+  useEffect(() => {
+    if (!appId || app) return;
+
+    const getApp = async () => {
+      const response = await httpGetApp(appId);
+      setApp(response.data.result);
+    };
+
+    getApp();
+  }, [appId, app]);
+
+  if (!app) {
+    return <div></div>;
+  }
+
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] md:grid-rows-[57px,_1fr] gap-y-[16px]">
       <div className="row-start-2 border-b-0 md:row-start-1 flex w-full md:justify-between items-center md:border-b border-b-gray-200">
@@ -192,7 +228,10 @@ export default function AppSettings() {
           Settings
         </div>
         <div className="flex w-full md:w-auto items-center">
-          <button onClick={onExternalClick} className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover">
+          <button
+            onClick={onExternalClick}
+            className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover"
+          >
             <IconExternalLink />
           </button>
           <button
@@ -291,7 +330,10 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="Chats" className="grid overflow-hidden grid-rows-1 md:ml-4 h-full">
+          <TabPanel
+            key="Chats"
+            className="grid overflow-hidden grid-rows-1 md:ml-4 h-full"
+          >
             <Chats
               allowUsersToCreateRooms={allowUsersToCreateRooms}
               setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}

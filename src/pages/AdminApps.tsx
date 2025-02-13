@@ -152,7 +152,7 @@ export default function AdminApps() {
             pageClassName="px-3 py-2 hover:bg-gray-200"
             previousClassName="px-3 py-2 hover:bg-gray-200"
             nextClassName="px-3 py-2 hover:bg-gray-200"
-            disabledClassName="text-gray-300 cursor-not-allowed"
+            disabledClassName="text-grey-300 cursor-not-allowed"
             breakClassName="px-3 py-2"
           />
         )}

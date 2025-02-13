@@ -5,7 +5,6 @@ import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
-import { navigateToUserPage } from './utils/navigateToUserPage';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -31,17 +30,17 @@ function App() {
         '--bg-auth-background',
         hexToRgba(primaryColor, '0.05')
       );
-      let res = hexToRgba(primaryColor)
+      let res = hexToRgba(primaryColor);
       if (res) {
-        let match = res.match(/\d+(\.\d+)?/g)
+        let match = res.match(/\d+(\.\d+)?/g);
         if (match) {
-          let arr = match.map(Number)
-          let [r, g, b, a] = arr
-          r = Math.ceil(r * 0.8)
-          g = Math.ceil(g * 0.8)
-          b = Math.ceil(b * 0.8)
-          let newColor = `rgba(${r},${g},${b},${a})`
-          console.log({newColor})
+          let arr = match.map(Number);
+          let [r, g, b, a] = arr;
+          r = Math.ceil(r * 0.8);
+          g = Math.ceil(g * 0.8);
+          b = Math.ceil(b * 0.8);
+          let newColor = `rgba(${r},${g},${b},${a})`;
+          console.log({ newColor });
           document.documentElement.style.setProperty(
             '--brand-darker',
             newColor
@@ -59,15 +58,21 @@ function App() {
         try {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
-          navigateToUserPage(navigate, currentApp?.afterLoginPage)
+          // navigateToUserPage(navigate, currentApp?.afterLoginPage);
         } catch (e) {
-          if (!location.pathname.startsWith('/tempPassword') || !location.pathname.startsWith('/resetPassword')) {
+          if (
+            !location.pathname.startsWith('/tempPassword') ||
+            !location.pathname.startsWith('/resetPassword')
+          ) {
             navigate('/login');
           }
         }
       } else {
-        if (location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
-          return
+        if (
+          location.pathname.startsWith('/tempPassword') ||
+          location.pathname.startsWith('/resetPassword')
+        ) {
+          return;
         } else {
           navigate('/login');
         }
@@ -80,9 +85,7 @@ function App() {
   if (!currentApp) {
     return <Loading></Loading>;
   } else {
-    return (
-      <Outlet />
-    );
+    return <Outlet />;
   }
 }
 
