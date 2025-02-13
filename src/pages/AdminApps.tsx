@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
+import ReactPaginate from 'react-paginate';
 import { ApplicationPreview } from '../components/ApplicationPreview';
 import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { NewAppModal } from '../components/modal/NewAppModal';
+import { Sorting } from '../components/Sorting';
 import { httpGetApps } from '../http';
 import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import { Sorting } from '../components/Sorting';
-import ReactPaginate from 'react-paginate';
 
 const ITEMS_COUNT = 5;
 
@@ -119,7 +119,7 @@ export default function AdminApps() {
       </div>
       {/* apps list */}
       <div className="">
-        {(showStarterInf && !apps.length) && (
+        {showStarterInf && !apps.length && (
           <ApplicationStarterInf
             onClose={() => {
               setShowStarterInf(false);
@@ -136,25 +136,33 @@ export default function AdminApps() {
         ))}
         {currentUser?.isSuperAdmin && (
           <ReactPaginate
-            className="paginate"
+            className="flex items-center justify-center gap-2 mt-4 text-gray-500"
             onPageActive={(...args) => {
               console.log({ args });
             }}
-            onPageChange={(selectedItem) =>
-              onPageChange(selectedItem.selected)
-            }
+            onPageChange={(selectedItem) => onPageChange(selectedItem.selected)}
             breakLabel="..."
-            nextLabel=""
-            pageRangeDisplayed={3}
+            nextLabel="Next ➝"
+            pageRangeDisplayed={2}
             pageCount={pageCount}
-            previousLabel=""
+            previousLabel="⬅ Prev"
             renderOnZeroPageCount={null}
             forcePage={currentPage}
+            activeClassName="text-brand-500 font-bold px-3 py-2 rounded"
+            pageClassName="px-3 py-2 hover:bg-gray-200"
+            previousClassName="px-3 py-2 hover:bg-gray-200"
+            nextClassName="px-3 py-2 hover:bg-gray-200"
+            disabledClassName="text-gray-300 cursor-not-allowed"
+            breakClassName="px-3 py-2"
           />
         )}
       </div>
       {showModal && (
-        <NewAppModal haveApps={!!apps.length} show={showModal} onClose={() => setShowModal(false)} />
+        <NewAppModal
+          haveApps={!!apps.length}
+          show={showModal}
+          onClose={() => setShowModal(false)}
+        />
       )}
     </div>
   );
