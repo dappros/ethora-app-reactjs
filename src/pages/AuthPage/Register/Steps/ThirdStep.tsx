@@ -58,7 +58,7 @@ const ThirdStep = () => {
     setPermanentPassword(tempPassword, newPassword)
       .then(() => {
         toast.success('Success');
-        navigate('/');
+        navigate('/login');
       })
       .catch(() => {
         toast.error('Error');
