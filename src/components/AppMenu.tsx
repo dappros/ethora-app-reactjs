@@ -1,42 +1,53 @@
+import { useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAppStore } from '../store/useAppStore';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconChat } from './Icons/IconChat';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
-import { useState } from 'react';
-import { MobileMenuModal } from './modal/MobileMenuModal';
 import { IconSettingsMenu } from './Icons/IconSettingsMenu';
+import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
-import { useAppStore } from '../store/useAppStore';
 
 export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
-  const currentUser = useAppStore(s => s.currentUser);
+  const currentUser = useAppStore((s) => s.currentUser);
 
-  console.log('currentUser',currentUser)
+  const getPageTitle = useMemo(() => {
+    const parts = location.pathname.split('/').filter(Boolean);
+
+    if (parts.length > 1) {
+      return parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+    }
+
+    return 'Ethora';
+  }, [location.pathname]);
 
   if (!currentUser) {
-    return
+    return;
   }
 
   return (
     // md:min-h-[640px]
     <div className="bg-white md:fixed p-2 flex justify-between items-center md:rounded-2xl md:self-start md:h-[calc(100vh-32px)]  md:flex-col">
-      <button onClick={() => setMobileMenuVisible(!isMobileMenuVisible)} className="md:hidden">
+      <button
+        onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}
+        className="md:hidden"
+      >
         <IconMenuBurger />
       </button>
-        {location.pathname.includes('app/chat') && (
-          <div className="font-varela text-[24px] leading-none">
-            Chats
-          </div>
-        )}
+      <div className="font-varela text-[24px] leading-none md:hidden block">
+        {getPageTitle}
+      </div>
       <div className="hidden md:flex flex-col">
         <NavLink
           to="/app/chat"
           className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <IconChat />
-          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">Chats</div>
+          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
+            Chats
+          </div>
         </NavLink>
         <div className="my-2 border-b border-b-gray-200"></div>
         <NavLink
@@ -44,7 +55,9 @@ export function AppMenu() {
           className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <IconAdmin />
-          <div className="text-center group-aria-[current=page]:text-brand-500 font-sans text-sm">Admin</div>
+          <div className="text-center group-aria-[current=page]:text-brand-500 font-sans text-sm">
+            Admin
+          </div>
         </NavLink>
       </div>
       <div>
@@ -52,13 +65,13 @@ export function AppMenu() {
           to="/app/profile"
           className="flex hover:bg-[#F5F7F9] group flex-col items-center md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
-          <ProfilePageUserIcon 
-            firstName={currentUser.firstName} 
-            lastName={currentUser.lastName} 
-            profileImage={currentUser.profileImage} 
-            width='40px' 
-            height='40px'
-            className='border border-brand-500 rounded-full'
+          <ProfilePageUserIcon
+            firstName={currentUser.firstName}
+            lastName={currentUser.lastName}
+            profileImage={currentUser.profileImage}
+            width="40px"
+            height="40px"
+            className="border border-brand-500 rounded-full"
             small={true}
           />
           {/* <div
