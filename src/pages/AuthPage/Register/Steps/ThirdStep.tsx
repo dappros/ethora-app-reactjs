@@ -23,6 +23,7 @@ const ThirdStep = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const tempPassword = queryParams.get('tempPassword') || '';
   const [loading, setLoading] = useState(false);
+  const [maskPassword, setMaskPassword] = useState<string>('');
 
   const {
     register,
@@ -48,6 +49,17 @@ const ThirdStep = () => {
 
     setUserData({ email, tempPassword });
   }, []);
+
+  useEffect(() => {
+    if (typeof userData.tempPassword !== 'string') return;
+    if (!userData.tempPassword) return;
+    if (userData.tempPassword.length <= 6) return;
+
+    setMaskPassword(
+      '*'.repeat(userData.tempPassword.length - 6) +
+        userData.tempPassword.slice(-6)
+    );
+  }, [userData.tempPassword]);
 
   const onSubmit = async ({ newPassword, repeatPassword }: Inputs) => {
     if (newPassword !== repeatPassword) {
@@ -107,10 +119,12 @@ const ThirdStep = () => {
               helperText={
                 'You can find the temporary password in the verification email.'
               }
-              value={userData.tempPassword}
+              value={maskPassword}
               disabled
+              isDisabledPassword
             />
             <CustomInput
+              type="password"
               placeholder={'Enter Your Password'}
               sx={{ flex: 1, width: '100%' }}
               {...register('newPassword', { required: 'Required field' })}
@@ -118,6 +132,7 @@ const ThirdStep = () => {
               helperText={errors.newPassword?.message}
             />
             <CustomInput
+              type="password"
               placeholder={'Repeat Your Password'}
               sx={{ flex: 1, width: '100%' }}
               {...register('repeatPassword', { required: 'Required field' })}
