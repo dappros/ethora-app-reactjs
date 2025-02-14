@@ -144,6 +144,12 @@ export function httpGetApps({
   );
 }
 
+export function httpGetApp(id: string) {
+  return http.get(
+    `/apps/${id}`
+  );
+}
+
 export function httpUpdateApp(appId: string, options: any) {
   return http.put(`/apps/${appId}`, {
     ...options,

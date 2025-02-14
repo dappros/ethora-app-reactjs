@@ -1,12 +1,31 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
+import { httpGetApp } from '../http';
 import { useAppStore } from '../store/useAppStore';
 
 export default function AdminApp() {
   let { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
+  const doSetApp = useAppStore((s) => s.doSetApp);
   const app = apps.find((app) => app._id === appId);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!appId || app) return;
+
+    const getApp = async () => {
+      try {
+        const response = await httpGetApp(appId);
+        console.log('AdminApp', response.data.result);
+        doSetApp(response.data.result);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getApp();
+  }, [appId, app, doSetApp]);
 
   return (
     // overflow-hidden

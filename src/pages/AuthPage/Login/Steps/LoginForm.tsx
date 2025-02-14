@@ -6,11 +6,11 @@ import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
 import { httpLogingWithEmail } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
+import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import CustomInput from '../../Input';
 import { MetamaskButton } from '../../MetamaskButton';
-import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 
 type Inputs = {
   email: string;
@@ -32,7 +32,7 @@ const LoginStep = () => {
       .then(async ({ data }) => {
         await actionAfterLogin(data);
         if (config?.afterLoginPage) {
-          navigateToUserPage(navigate, config.afterLoginPage as string)
+          navigateToUserPage(navigate, config.afterLoginPage as string);
         }
       })
       .catch((error) => {

@@ -1,5 +1,6 @@
 import { Textarea } from '@headlessui/react';
 import { IconInfo } from '../../components/Icons/IconInfo';
+import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 
 interface Props {
   domainName: string;
@@ -7,6 +8,7 @@ interface Props {
   firebaseWebConfigString: string;
   setFirebaseWebConfigString: (s: string) => void;
   primaryColor: string;
+  onExternalClick: () => void;
 }
 
 export function WebApp({
@@ -15,6 +17,7 @@ export function WebApp({
   firebaseWebConfigString,
   setFirebaseWebConfigString,
   primaryColor,
+  onExternalClick,
 }: Props) {
   return (
     <div className="">
@@ -33,7 +36,7 @@ export function WebApp({
           on your server.
         </span>
       </p>
-      <div className="flex w-full max-w-[459px] relative mb-4">
+      <div className="flex w-full max-w-[459px] relative mb-4 items-center">
         <input
           value={domainName}
           onChange={(e) => setDomainName(e.target.value)}
@@ -43,12 +46,16 @@ export function WebApp({
           name=""
           id="domain-input"
         />
-        <label
+        {/* <button onClick={onExternalClick} className='cursor-pointer'> */}
+        <button
           className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl"
-          htmlFor="domain-input"
         >
           .ethora.com
-        </label>
+        </button>
+        {/* </button> */}
+        <button onClick={onExternalClick} className="ml-4 w-[40px] h-[40px] p-2 flex items-center justify-center rounded-xl hover:bg-brand-hover">
+          <IconExternalLink />
+        </button>
       </div>
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">

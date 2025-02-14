@@ -34,7 +34,7 @@ import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
 import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
-import { MetamaskButton } from './AuthPage/MetamaskButton';
+import MetamaskIcon from './AuthPage/Icons/socials/metamaskIcon';
 
 export default function AppUsers() {
   const { appId } = useParams();
@@ -349,7 +349,7 @@ export default function AppUsers() {
       case 'apple':
         return <AppleIcon />;
       case 'metamask':
-        return <MetamaskButton />;
+        return <MetamaskIcon />;
       default:
         return <EmailIcon />;
     }

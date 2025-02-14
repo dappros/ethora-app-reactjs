@@ -34,6 +34,7 @@ export function Appearance({
   coinName,
   setCoinName,
   color,
+  logoImage,
   setColor,
   setLogoImage,
   setSublogoImage,
@@ -55,9 +56,10 @@ export function Appearance({
       return;
     }
 
-    actionPostFile(file).then((resp) =>
-      setLogoImage(resp.data.results[0].location)
-    );
+    actionPostFile(file).then((resp) => {
+      console.log('resp', resp.data.results[0].location);
+      setLogoImage(resp.data.results[0].location);
+    });
   };
 
   const postSublogo = (file: File | null) => {
@@ -65,9 +67,10 @@ export function Appearance({
       return;
     }
 
-    actionPostFile(file).then((resp) =>
-      setSublogoImage(resp.data.results[0].location)
-    );
+    actionPostFile(file).then((resp) => {
+      console.log('resp', resp.data.results[0].location);
+      setSublogoImage(resp.data.results[0].location);
+    });
   };
 
   return (
@@ -153,10 +156,19 @@ export function Appearance({
           >
             <div className="absolute w-full h-[262px]  bg-white bottom-0">
               <div
-                className="w-full grid grid-cols-[2fr,_3fr] place-items-center h-full bg-preview bg-cover px-[48px]"
+                className="w-full grid grid-cols-[2fr,_3fr] place-items-center h-full bg-preview bg-cover px-[20px]"
                 style={{ backgroundImage: `url(${BG})` }}
               >
-                <div className="">{tagline}</div>
+                <div className="max-w-[170px]">
+                  {logoImage && (
+                    <img
+                      src={logoImage}
+                      alt="Primary Logo"
+                      className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
+                    />
+                  )}
+                  <p className="break-words">{tagline}</p>
+                </div>
                 <div className=" w-[220px] h-[220px] bg-white rounded-xl p-3">
                   <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
                   <div className="grid grid-cols-3 gap-2 mb-2">
@@ -247,9 +259,17 @@ export function Appearance({
           >
             <div className="absolute inset-4 top-[26px] px-2 rounded-xl bg-white">
               <div
-                className="h-[43px] bg-cover bg-center"
+                className="h-[45px] bg-cover bg-center flex justify-center items-center p-2"
                 style={{ backgroundImage: '' }}
-              ></div>
+              >
+                {logoImage && (
+                  <img
+                    src={logoImage}
+                    alt="Primary Logo"
+                    className="max-w-[60px] max-h-[43px] min-h-[40px] object-contain"
+                  />
+                )}
+              </div>
               <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
               <div className="grid grid-cols-3 gap-2 mb-2">
                 <div className="border" style={{ borderColor: color }}></div>
