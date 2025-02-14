@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -24,6 +24,8 @@ const ThirdStep = () => {
   const tempPassword = queryParams.get('tempPassword') || '';
   const [loading, setLoading] = useState(false);
   const [maskPassword, setMaskPassword] = useState<string>('');
+
+  const newPasswordRef = useRef<HTMLInputElement | null>(null);
 
   const {
     register,
@@ -60,6 +62,12 @@ const ThirdStep = () => {
         userData.tempPassword.slice(-6)
     );
   }, [userData.tempPassword]);
+
+  useEffect(() => {
+    if (newPasswordRef.current) {
+      newPasswordRef.current.focus();
+    }
+  }, []);
 
   const onSubmit = async ({ newPassword, repeatPassword }: Inputs) => {
     if (newPassword !== repeatPassword) {
@@ -114,6 +122,7 @@ const ThirdStep = () => {
             }}
           >
             <CustomInput
+              inputRef={newPasswordRef}
               placeholder={'Enter temporary password'}
               sx={{ flex: 1, width: '100%' }}
               helperText={
