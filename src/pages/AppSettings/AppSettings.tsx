@@ -160,10 +160,12 @@ export default function AppSettings() {
   };
 
   const onExternalClick = () => {
-    window.open(
-      `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
-      '_blank'
-    );
+    if (app) {
+      window.open(
+        `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+        '_blank'
+      );
+    }
   };
 
   useEffect(() => {
