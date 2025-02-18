@@ -23,10 +23,10 @@ export default function AppHelmet() {
   return (
     <>
       <Helmet>
-        <title>{currentApp.displayName || 'Dappros Platform'}</title>
+        <title>{currentApp.displayName || 'Ethora - Web3 super app engine'}</title>
         <meta
           property="og:title"
-          content={currentApp.displayName || 'Dappros Platform'}
+          content={currentApp.displayName || 'Ethora - Web3 super app engine'}
         />
       </Helmet>
       <Outlet />
