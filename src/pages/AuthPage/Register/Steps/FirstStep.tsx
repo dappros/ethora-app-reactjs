@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 
 import { Box, Typography } from '@mui/material';
+import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 import CustomInput from '../../../../components/input/Input';
 import { httpRegisterWithEmail, sendHSFormData } from '../../../../http';
@@ -67,8 +68,11 @@ const FirstStep: React.FC<FirstStepProps> = ({
         email: email,
       });
       setStep((prev) => prev + 1);
-    } catch (error) {
-      toast.warning('An account with this email already exists.');
+    } catch (error: AxiosError | any) {
+      toast.error(
+        error?.response?.data?.error ||
+          'An account with this email already exists.'
+      );
     }
   };
 
