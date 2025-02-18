@@ -4,11 +4,11 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Box, Typography } from '@mui/material';
 import { toast } from 'react-toastify';
+import CustomInput from '../../../../components/input/Input';
 import { httpRegisterWithEmail, sendHSFormData } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
-import CustomInput from '../../Input';
 import { MetamaskButton } from '../../MetamaskButton';
 import SkeletonLoader from '../../SkeletonLoader';
 
@@ -68,7 +68,7 @@ const FirstStep: React.FC<FirstStepProps> = ({
       });
       setStep((prev) => prev + 1);
     } catch (error) {
-      toast.error('Something went wrong with registration');
+      toast.warning('An account with this email already exists.');
     }
   };
 

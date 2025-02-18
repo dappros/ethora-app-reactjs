@@ -1,10 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import CustomInput from '../../../../components/input/Input';
 import { httpPostForgotPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
-import CustomInput from '../../Input';
 
 interface Inputs {
   email: string;

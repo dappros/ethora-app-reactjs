@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
+import CustomInput from '../../../../components/input/Input';
+import PasswordInput from '../../../../components/input/PasswordInput';
 import { httpLogingWithEmail } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
-import CustomInput from '../../Input';
 import { MetamaskButton } from '../../MetamaskButton';
 
 type Inputs = {
@@ -79,10 +80,9 @@ const LoginStep = () => {
           error={errors['email']?.message ? true : false}
           helperText={errors['email']?.message}
         />
-        <CustomInput
+        <PasswordInput
           fullWidth
           placeholder="Password"
-          type="password"
           {...register('password', { required: 'Required field' })}
           error={errors['password']?.message ? true : false}
           helperText={errors['password']?.message}

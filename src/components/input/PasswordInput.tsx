@@ -10,7 +10,7 @@ import { styled } from '@mui/material/styles';
 import React, { HTMLInputTypeAttribute, useEffect, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 
-interface CustomInputProps extends Omit<TextFieldProps, 'variant'> {
+interface PasswordInputProps extends Omit<TextFieldProps, 'variant'> {
   isDisabledPassword?: boolean;
 }
 
@@ -51,58 +51,58 @@ const StyledTextField = styled(TextField)(({ theme, config }) => ({
   position: 'relative',
 }));
 
-const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
+const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
   (props, ref) => {
+    const { isDisabledPassword, placeholder, value } = props;
     const config = useAppStore((s) => s.currentApp);
     const [showPassword, setShowPassword] = useState(false);
     const [type, setType] = useState<HTMLInputTypeAttribute | undefined>(
-      props.type
+      'password'
     );
 
     useEffect(() => {
-      if (props.type === 'email') return;
+      if (type === 'email') return;
       setType(showPassword ? 'text' : 'password');
-    }, [showPassword, props.type]);
+    }, [showPassword, type]);
 
-    const inputType = props.isDisabledPassword ? 'text' : type;
+    const inputType = isDisabledPassword ? 'text' : type;
 
     return (
       <StyledTextField
         key={inputType}
         ref={ref}
         variant="outlined"
-        placeholder={props.placeholder}
+        placeholder={placeholder}
         type={inputType}
-        value={props.value}
+        value={value}
         // @ts-ignore
         config={{ primaryColor: config?.primaryColor }} // Pass config to StyledTextField
         {...props}
         InputProps={{
           ...props.InputProps,
           type: inputType,
-          readOnly: props.isDisabledPassword,
-          inputMode: props.isDisabledPassword ? 'none' : undefined,
-          onCopy: (e) => props.isDisabledPassword && e.preventDefault(),
-          onCut: (e) => props.isDisabledPassword && e.preventDefault(),
-          onContextMenu: (e) => props.isDisabledPassword && e.preventDefault(),
-          onSelect: (e) => props.isDisabledPassword && e.preventDefault(),
+          readOnly: isDisabledPassword,
+          inputMode: isDisabledPassword ? 'none' : undefined,
+          onCopy: (e) => isDisabledPassword && e.preventDefault(),
+          onCut: (e) => isDisabledPassword && e.preventDefault(),
+          onContextMenu: (e) => isDisabledPassword && e.preventDefault(),
+          onSelect: (e) => isDisabledPassword && e.preventDefault(),
           style: {
             minWidth: '40px',
-            userSelect: props.isDisabledPassword ? 'none' : 'auto',
-            cursor: props.isDisabledPassword ? 'default' : 'text',
+            userSelect: isDisabledPassword ? 'none' : 'auto',
+            cursor: isDisabledPassword ? 'default' : 'text',
           },
-          endAdornment:
-            props.type === 'password' && !props.isDisabledPassword ? (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ) : null,
+          endAdornment: !isDisabledPassword ? (
+            <InputAdornment position="end">
+              <IconButton onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <Visibility /> : <VisibilityOff />}
+              </IconButton>
+            </InputAdornment>
+          ) : null,
         }}
       />
     );
   }
 );
 
-export default CustomInput;
+export default PasswordInput;

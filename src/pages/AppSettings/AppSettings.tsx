@@ -18,7 +18,7 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 
 export default function AppSettings() {
-  let { appId } = useParams();
+  const { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
@@ -69,6 +69,7 @@ export default function AppSettings() {
   >([]);
 
   const onSave = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body: any = {};
 
     // appearance

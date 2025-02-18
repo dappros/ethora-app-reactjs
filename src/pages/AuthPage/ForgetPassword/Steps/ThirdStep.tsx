@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import PasswordInput from '../../../../components/input/PasswordInput';
 import { httpResetPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
-import CustomInput from '../../Input';
 
 interface ThirdStepProps {}
 
@@ -103,9 +103,8 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
             flexDirection: 'column',
           }}
         >
-          <CustomInput
+          <PasswordInput
             placeholder="Enter New Password"
-            type="password"
             {...register('newPassword', {
               required: 'Password is required',
               minLength: {
@@ -117,9 +116,8 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
             helperText={errors.newPassword?.message}
             sx={{ flex: 1, width: '100%' }}
           />
-          <CustomInput
+          <PasswordInput
             placeholder="Repeat New Password"
-            type="password"
             {...register('repeatPassword', {
               required: 'Password is required',
               minLength: {

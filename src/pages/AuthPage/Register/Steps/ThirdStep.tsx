@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import CustomInput from '../../../../components/input/Input';
+import PasswordInput from '../../../../components/input/PasswordInput';
 import { Loading } from '../../../../components/Loading';
 import { setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
-import CustomInput from '../../Input';
 import SkeletonLoader from '../../SkeletonLoader';
 
 interface Inputs {
@@ -121,7 +122,7 @@ const ThirdStep = () => {
               flexDirection: 'column',
             }}
           >
-            <CustomInput
+            <PasswordInput
               inputRef={newPasswordRef}
               placeholder={'Enter temporary password'}
               sx={{ flex: 1, width: '100%' }}
