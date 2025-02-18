@@ -1,19 +1,19 @@
-import { TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import TabApp from "../../components/TabApp";
-import { ManageData } from "./ManageData";
-import { Visibility } from "./Visibility";
-import { ProfileShares } from "./ProfileShares";
-import { DocumentShares } from "./DocumentShares";
-import { Referrals } from "./Referrals";
-import { useAppStore } from "../../store/useAppStore";
-import { ModelCurrentUser } from "../../models";
+import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import TabApp from '../../components/TabApp';
+import { ModelCurrentUser } from '../../models';
+import { useAppStore } from '../../store/useAppStore';
+import { DocumentShares } from './DocumentShares';
+import { ManageData } from './ManageData';
+import { ProfileShares } from './ProfileShares';
+import { Referrals } from './Referrals';
+import { Visibility } from './Visibility';
 
 export default function UserSettings() {
   const user = useAppStore((s) => s.currentUser as ModelCurrentUser);
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
-      <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Settings
         </div>
@@ -30,26 +30,17 @@ export default function UserSettings() {
             <TabApp text="Referrals" last />
           </TabList>
           <TabPanels className="h-full overflow-hidden">
-            <TabPanel
-              key="Manage Data"
-              className=""
-            >
+            <TabPanel key="Manage Data" className="">
               <ManageData />
             </TabPanel>
-            <TabPanel
-              key="Visiblility"
-              className="h-full "
-            >
+            <TabPanel key="Visiblility" className="h-full ">
               <Visibility />
             </TabPanel>
             <TabPanel key="Profile Shares" className="h-full overflow-hidden ">
               <ProfileShares />
             </TabPanel>
             {/* grid grid-rows-1 md:ml-4 h-full  */}
-            <TabPanel
-              key="Document Shares"
-              className=""
-            >
+            <TabPanel key="Document Shares" className="">
               <DocumentShares />
             </TabPanel>
             <TabPanel
@@ -59,12 +50,15 @@ export default function UserSettings() {
               {/* <BlockedUsers /> */}
             </TabPanel>
 
-            <TabPanel key="Referrals" className="grid grid-rows-1 md:ml-4 h-full ">
+            <TabPanel
+              key="Referrals"
+              className="grid grid-rows-1 md:ml-4 h-full "
+            >
               <Referrals id={user._id} />
             </TabPanel>
           </TabPanels>
         </TabGroup>
       </div>
     </div>
-  )
+  );
 }

@@ -2,23 +2,23 @@ import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppHelmet from './AppHelmet';
 import AppLayout from './AppLayout';
+import { AppStatistics } from './pages/AppStatistics';
+import ForgetPassword from './pages/AuthPage/ForgetPassword';
+import LoginComponent from './pages/AuthPage/Login';
+import Register from './pages/AuthPage/Register';
+import { Error404Page } from './pages/ErrorPage/Error404Page';
 const Admin = lazy(() => import('./pages/Admin'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
-import { AppStatistics } from './pages/AppStatistics';
 const AppUsers = lazy(() => import('./pages/AppUsers'));
-import LoginComponent from './pages/AuthPage/Login';
 const Chat = lazy(() => import('./pages/Chat'));
-import { Error404Page } from './pages/ErrorPage/Error404Page';
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
-import Register from './pages/AuthPage/Register';
-import ForgetPassword from './pages/AuthPage/ForgetPassword';
 
-import App from './App'
+import App from './App';
 
 export const router = createBrowserRouter(
   [
@@ -73,33 +73,34 @@ export const router = createBrowserRouter(
                       path: 'billing',
                       Component: AdminBilling,
                     },
+                    {
+                      path: 'apps/:appId',
+                      Component: AdminApp,
+                      children: [
+                        {
+                          path: 'settings',
+                          Component: AppSettings,
+                        },
+                        {
+                          path: 'users',
+                          Component: AppUsers,
+                        },
+                        {
+                          path: 'statistics',
+                          Component: AppStatistics,
+                        },
+                      ],
+                    },
                   ],
                 },
-                {
-                  path: 'admin/apps/:appId',
-                  Component: AdminApp,
-                  children: [
-                    {
-                      path: 'settings',
-                      Component: AppSettings,
-                    },
-                    {
-                      path: 'users',
-                      Component: AppUsers,
-                    },
-                    {
-                      path: 'statistics',
-                      Component: AppStatistics,
-                    },
-                  ],
-                },
+
                 {
                   path: 'profile',
                   Component: Profile,
                 },
                 {
                   path: 'profile/edit',
-                  Component: ProfileEdit
+                  Component: ProfileEdit,
                 },
                 {
                   path: 'settings',
