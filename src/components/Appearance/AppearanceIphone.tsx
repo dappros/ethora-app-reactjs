@@ -5,6 +5,7 @@ import GoogleIcon from '../../pages/AuthPage/Icons/socials/googleIcon';
 import MetamaskIcon from '../../pages/AuthPage/Icons/socials/metamaskIcon';
 
 const inputPlaceholder = ['First Name', 'Last Name', 'Email'];
+const socialImage = [FacebookIcon, AppleIcon, MetamaskIcon];
 
 interface AppearanceIphoneProps {
   color: string;
@@ -17,7 +18,7 @@ export const AppearanceIphone = ({
 }: AppearanceIphoneProps) => {
   return (
     <div
-      className=" max-w-full h-[368px] absolute top-[-40px] right-[-40px] relavite"
+      className=" max-w-full h-[368px] absolute top-[-40px] right-[-40px] "
       // style={{ backgroundImage: `url(${IPhoneMiniImage})` }}
     >
       <img
@@ -81,24 +82,15 @@ export const AppearanceIphone = ({
           <span>Continue with Google</span>
         </button>
         <div className="grid grid-cols-3 gap-2 mb-2">
-          <button
-            className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-            style={{ borderColor: color, color: color }}
-          >
-            <FacebookIcon width={12} height={12} />
-          </button>
-          <button
-            className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-            style={{ borderColor: color, color: color }}
-          >
-            <AppleIcon width={12} height={12} />
-          </button>
-          <button
-            className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-            style={{ borderColor: color, color: color }}
-          >
-            <MetamaskIcon width={12} height={12} />
-          </button>
+          {socialImage.map((Image, index) => (
+            <button
+              key={index}
+              className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
+              style={{ borderColor: color, color: color }}
+            >
+              <Image width={12} height={12} />
+            </button>
+          ))}
         </div>
         <div className="text-[8px] text-center text">
           <span className="mr-1">Already have an account?</span>

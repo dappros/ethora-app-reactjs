@@ -18,8 +18,8 @@ export const AppearanceRightImage = ({
   logoImage,
 }: AppearanceRightImageProps) => {
   return (
-    <div className="appearance-right flex justify-center items-center overflow-hidden relative">
-      <div className="relative ">
+    <div className="w-full appearance-right flex justify-center items-center overflow-hidden relative">
+      <div className="relative">
         <div
           className={classNames(
             'bg-center bg-cover relative',

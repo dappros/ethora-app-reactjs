@@ -213,12 +213,12 @@ export default function AppSettings() {
   }
 
   return (
-    <div className="h-full grid grid-rows-[1fr,_57px] md:grid-rows-[57px,_1fr] gap-y-[16px]">
-      <div className="row-start-2 border-b-0 md:row-start-1 flex w-full md:justify-between items-center md:border-b border-b-gray-200">
-        <div className="ml-4 hidden md:block font-varela text-[24px]">
+    <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
+      <div className="row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
+        <div className="ml-4 hidden lg:block font-varela text-[24px]">
           Settings
         </div>
-        <div className="flex w-full md:w-auto items-center">
+        <div className="flex w-full lg:w-auto items-center">
           <button
             onClick={onExternalClick}
             className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover"
@@ -227,14 +227,14 @@ export default function AppSettings() {
           </button>
           <button
             onClick={onSave}
-            className="border bg-brand-500 hover:bg-brand-400 w-full md:w-[184px] p-2 rounded-xl text-white"
+            className="border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white"
           >
             Save
           </button>
         </div>
       </div>
-      <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr] px-4">
-        <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0  border-b border-gray-200 md:border-b-0 md:pr-4 overflow-auto  md:border-r md:border-gray-200">
+      <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] lg:grid-rows-1 lg:grid-cols-[308px,_1fr] px-4">
+        <TabList className="flex flex-row lg:flex-col hide-scroll lg:mb-0  border-b border-gray-200 lg:border-b-0 lg:pr-4 overflow-auto  lg:border-r lg:border-gray-200">
           <TabApp text="Appearance" />
           <TabApp text="Sign-on options" />
           <TabApp text="Web app" />
@@ -248,7 +248,7 @@ export default function AppSettings() {
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
             key="Appearance"
-            className="grid grid-rows-[auto,_368px] xl:grid-rows-1 xl:gap-x-[40px] xl:grid-cols-[416px,_1fr] md:ml-4 h-full "
+            className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
             <Appearance
               displayName={displayName}
@@ -267,7 +267,7 @@ export default function AppSettings() {
           </TabPanel>
           <TabPanel
             key="Sign-on options"
-            className="grid grid-rows-1 md:ml-4 h-full "
+            className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <SignonOptions
               enableEmail={enableEmail}
@@ -282,7 +282,7 @@ export default function AppSettings() {
               setEnableMetamask={setEnableMetamask}
             />
           </TabPanel>
-          <TabPanel key="Web app" className="grid grid-rows-1 md:ml-4 h-full ">
+          <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
             <WebApp
               domainName={domainName}
               setDomainName={setDomainName}
@@ -294,7 +294,7 @@ export default function AppSettings() {
           </TabPanel>
           <TabPanel
             key="Mobile app"
-            className="grid grid-rows-1 md:ml-4 h-full "
+            className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <MobileApp
               bundleId={bundleId}
@@ -306,7 +306,7 @@ export default function AppSettings() {
           </TabPanel>
           <TabPanel
             key="Home screen"
-            className="grid grid-rows-1 md:ml-4 h-full "
+            className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <HomeScreen
               afterLoginPage={afterLoginPage}
@@ -314,7 +314,7 @@ export default function AppSettings() {
               primaryColor={app.primaryColor}
             />
           </TabPanel>
-          <TabPanel key="Menu" className="grid grid-rows-1 md:ml-4 h-full ">
+          <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
             <Menu
               availableMenuItems={availableMenuItems}
               setAvailableMenuItems={setAvailableMenuItems}
@@ -323,7 +323,7 @@ export default function AppSettings() {
 
           <TabPanel
             key="Chats"
-            className="grid overflow-hidden grid-rows-1 md:ml-4 h-full"
+            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
           >
             <Chats
               allowUsersToCreateRooms={allowUsersToCreateRooms}
@@ -336,7 +336,7 @@ export default function AppSettings() {
 
           <TabPanel
             key="Visibility & Privacy"
-            className="grid grid-rows-1 md:ml-4 h-full"
+            className="grid grid-rows-1 lg:ml-4 h-full"
           >
             <Visibility
               defaultAccessAssetsOpen={defaultAccessAssetsOpen}
@@ -348,7 +348,7 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="API" className="grid grid-rows-1 md:ml-4 h-full">
+          <TabPanel key="API" className="grid grid-rows-1 lg:ml-4 h-full">
             <Api app={app} />
           </TabPanel>
         </TabPanels>
