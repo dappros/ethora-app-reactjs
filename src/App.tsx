@@ -1,10 +1,11 @@
 import hexToRgba from 'hex-to-rgba';
 import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { actionAfterLogin, actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
+import { navigateToUserPage } from './utils/navigateToUserPage';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -12,6 +13,7 @@ export function Fallback() {
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const currentApp = useAppStore((s) => s.currentApp);
   const token = localStorage.getItem('token-538');
 
@@ -58,7 +60,8 @@ function App() {
         try {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
-          // navigateToUserPage(navigate, currentApp?.afterLoginPage);
+          const lastPath = localStorage.getItem('lastPath');
+          navigateToUserPage(navigate, lastPath);
         } catch (e) {
           if (
             !location.pathname.startsWith('/tempPassword') ||

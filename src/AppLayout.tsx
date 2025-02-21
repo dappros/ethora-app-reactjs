@@ -6,8 +6,10 @@ import { useAppStore } from './store/useAppStore';
 export default function AppLayout() {
   const user = useAppStore((s) => s.currentUser);
   const location = useLocation();
-  
+
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
+
+  // useTrackUrl();
 
   useEffect(() => {
     localStorage.setItem('lastPath', location.pathname);
@@ -40,7 +42,7 @@ export default function AppLayout() {
             <div className="h-full overflow-hidden">
               <AppMenu />
             </div>
-           {/* router content */}
+            {/* router content */}
             <div className="p-4 min-h-[calc(100vh-72px)] md:p-0">
               <Outlet />
             </div>
@@ -48,5 +50,5 @@ export default function AppLayout() {
         </div>
       </div>
     </Suspense>
- );
+  );
 }
