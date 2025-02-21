@@ -227,7 +227,7 @@ export default function AppSettings() {
           </button>
           <button
             onClick={onSave}
-            className="border border-brand-500 hover:bg-brand-hover w-full md:w-[184px] p-2 rounded-xl text-brand-500"
+            className="border bg-brand-500 hover:bg-brand-400 w-full md:w-[184px] p-2 rounded-xl text-white"
           >
             Save
           </button>

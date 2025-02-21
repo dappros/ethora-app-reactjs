@@ -149,7 +149,14 @@ export function Appearance({
         </button>
       </div>
       <div className="appearance-right flex justify-center items-center overflow-hidden">
-        <div className="relative ">
+        <div
+          className="relative origin-top scale-[min(1,calc(100vw/1400))]"
+          style={{
+            width: '469px',
+            height: '285px',
+            transformOrigin: 'top left',
+          }}
+        >
           <div
             className="w-[469px] h-[285px] bg-center bg-cover relative"
             style={{ backgroundImage: `url(${SafariImage})` }}

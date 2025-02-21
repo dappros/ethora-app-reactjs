@@ -1,4 +1,6 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Button } from '@mui/material';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +12,7 @@ import { IconQr } from '../components/Icons/IconQr';
 import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
-import { getDocuments } from '../http';
+import { deleteDocuments, getDocuments } from '../http';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -42,9 +44,38 @@ export default function Profile() {
     componentGetDocs();
   }, []);
 
+  console.log('documents', documents);
+
+  const handleDeleteDocument = (id: string) => {
+    deleteDocuments(id);
+  };
+
   const onLogout = () => {
     actionLogout();
     navigate('/login', { replace: true });
+  };
+
+  const isImage = (fileName: string) => {
+    return /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+  };
+
+  const isPDF = (contentType: string, fileUrl: string) => {
+    return (
+      contentType === 'application/pdf' ||
+      fileUrl.toLowerCase().endsWith('.pdf')
+    );
+  };
+
+  const PDFPreview = ({ fileUrl }: { fileUrl: string }) => {
+    return (
+      <div className="w-[100px] h-[120px] overflow-hidden border rounded-lg">
+        <Worker
+          workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}
+        >
+          <Viewer fileUrl={fileUrl} />
+        </Worker>
+      </div>
+    );
   };
 
   return (
@@ -116,20 +147,45 @@ export default function Profile() {
                     </button>
                     {documents.map((el) => (
                       <div
-                        className="bg-[#F3F6FC] rounded-lg p-2 mb-4 flex"
+                        className="bg-[#F3F6FC] rounded-lg p-2 mb-4 flex items-center justify-between"
                         key={el._id}
                       >
-                        <div className="w-[40px] h-[40px] bg-white rounded-lg flex items-center justify-center">
-                          <IconDoc />
-                        </div>
-                        <div className="ml-2">
-                          <div className="text-[14px]">{el.documentName}</div>
-                          <div className="text-[#8C8C8C] text-[12px]">
-                            {DateTime.fromISO(el.createdAt).toFormat(
-                              'dd LLL yyyy t'
+                        <div className="flex items-center">
+                          <div className="w-[40px] h-[40px] bg-white rounded-lg flex items-center justify-center">
+                            {isImage(el.contentTypes[0]) ? (
+                              <img
+                                src={el.fileUrl}
+                                alt={el.documentName}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            ) : isPDF(el.contentTypes[0], el.locations[0]) ? (
+                              <PDFPreview fileUrl={el.locations[0]} />
+                            ) : (
+                              //   <a
+                              //   href={el.locations[0]}
+                              //   target="_blank"
+                              //   rel="noopener noreferrer"
+                              // >
+                              //   <IconDoc />
+                              // </a>
+                              <IconDoc />
                             )}
                           </div>
+                          <div className="ml-2">
+                            <div className="text-[14px]">{el.documentName}</div>
+                            <div className="text-[#8C8C8C] text-[12px]">
+                              {DateTime.fromISO(el.createdAt).toFormat(
+                                'dd LLL yyyy t'
+                              )}
+                            </div>
+                          </div>
                         </div>
+                        <Button
+                          color="error"
+                          onClick={() => handleDeleteDocument(el._id)}
+                        >
+                          <DeleteIcon />
+                        </Button>
                       </div>
                     ))}
                   </TabPanel>
