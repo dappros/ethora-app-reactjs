@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
 import { ApplicationPreview } from '../components/ApplicationPreview';
 import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
@@ -11,70 +11,55 @@ import { useAppStore } from '../store/useAppStore';
 
 const ITEMS_COUNT = 5;
 
+type OrderByType =
+  | 'createdAt'
+  | 'displayName'
+  | 'totalRegistered'
+  | 'totalSessions'
+  | 'totalApiCalls'
+  | 'totalFiles'
+  | 'totalTransactions';
+
 export default function AdminApps() {
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const apps = useAppStore((s) => s.apps);
-  // @ts-ignore
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
-  // @ts-ignore
-  const [order, setOrder] = useState('asc');
-  // @ts-ignore
-  const [orderBy, setOrderBy] = useState('createdAt');
-  // @ts-ignore
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
   const [currentPage, setCurrentPage] = useState(0);
-  // @ts-ignore
   const [pageCount, setPageCount] = useState(0);
 
-  useEffect(() => {
-    (async function () {
-      // @ts-ignore
+  const fetchApps = useCallback(
+    async (page = 0) => {
       const response = await httpGetApps({
         limit: ITEMS_COUNT,
-        // @ts-ignore
+        offset: ITEMS_COUNT * page,
         order,
-        // @ts-ignore
         orderBy,
       });
-      setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
-      doSetApps(response.data.apps);
-    })();
-  }, []);
 
-  useEffect(() => {
-    (async () => {
-      const response = await httpGetApps({
-        limit: ITEMS_COUNT,
-        // @ts-ignore
-        order,
-        // @ts-ignore
-        orderBy,
-      });
-      setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
-      doSetApps(response.data.apps);
-    })();
-  }, [order, orderBy]);
-
-  // @ts-ignore
-  const onPageChange = (page: number) => {
-    httpGetApps({
-      ITEMS_COUNT,
-      offset: ITEMS_COUNT * page,
-      // @ts-ignore
-      order,
-      // @ts-ignore
-      orderBy,
-    }).then((response) => {
-      const { total, apps } = response.data;
       setCurrentPage(page);
-      setPageCount(Math.ceil(total / ITEMS_COUNT));
-      doSetApps(apps);
-    });
-  };
+      setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
+      doSetApps(response.data.apps);
+    },
+    [order, orderBy, doSetApps]
+  );
 
-  const renderSorting = () => {
+  useEffect(() => {
+    fetchApps();
+  }, [fetchApps]);
+
+  const onPageChange = useCallback(
+    (page: number) => {
+      fetchApps(page);
+    },
+    [fetchApps]
+  );
+
+  const renderSorting = useCallback(() => {
     if (currentUser?.isSuperAdmin) {
       return (
         <Sorting
@@ -97,7 +82,7 @@ export default function AdminApps() {
     } else {
       return null;
     }
-  };
+  }, [order, orderBy, currentUser]);
 
   return (
     <div id="admin-apps">

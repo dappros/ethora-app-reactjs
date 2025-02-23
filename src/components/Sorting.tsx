@@ -12,6 +12,15 @@ import { IconAdd } from './Icons/IconAdd';
 import { IconArrowDown } from './Icons/IconArrowDown';
 import { IconMarked } from './Icons/IconMarked';
 
+type OrderByType =
+  | 'createdAt'
+  | 'displayName'
+  | 'totalRegistered'
+  | 'totalSessions'
+  | 'totalApiCalls'
+  | 'totalFiles'
+  | 'totalTransactions';
+
 interface OrderItem {
   key: string;
   title: string;
@@ -20,9 +29,9 @@ interface OrderItem {
 interface Props {
   orderByList: Array<OrderItem>;
   order: string;
-  setOrder: (s: string) => void;
+  setOrder: (s: 'asc' | 'desc') => void;
   orderBy: string;
-  setOrderBy: (s: string) => void;
+  setOrderBy: (s: OrderByType) => void;
   className: string;
 }
 
@@ -72,7 +81,7 @@ export function Sorting({
             <RadioGroup
               className="flex flex-col"
               value={order}
-              onChange={(value) => {
+              onChange={(value: 'asc' | 'desc') => {
                 setOrder(value);
               }}
               aria-label="Server size"
@@ -98,14 +107,13 @@ export function Sorting({
                     </CloseButton>
                   </Label>
                 </Field>
-
               ))}
             </RadioGroup>
             <Field className="font-semibold text-regular mb-2">Sort</Field>
             <RadioGroup
               className="flex flex-col"
               value={orderBy}
-              onChange={(value) => {
+              onChange={(value: OrderByType) => {
                 setOrderBy(value);
               }}
               aria-label="Server size"
@@ -125,7 +133,9 @@ export function Sorting({
                               );
                             }}
                           </Radio>
-                          <div className="ml-8 font-sans text-[14px]">{el.title}</div>
+                          <div className="ml-8 font-sans text-[14px]">
+                            {el.title}
+                          </div>
                         </div>
                         <div className="w-[24px] h-[24px] flex justify-center items-center">
                           <IconAdd />
