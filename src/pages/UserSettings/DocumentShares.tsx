@@ -3,6 +3,8 @@ import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { toast } from 'react-toastify';
+import { IconAdd } from '../../components/Icons/IconAdd';
+import { IconClose } from '../../components/Icons/IconClose';
 import { IconCopy } from '../../components/Icons/IconCopy';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { IconInfo } from '../../components/Icons/IconInfo';
@@ -18,8 +20,6 @@ import {
 } from '../../http';
 import { ModelCurrentUser } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
-import { IconAdd } from '../../components/Icons/IconAdd';
-import { IconClose } from '../../components/Icons/IconClose';
 
 interface ModelProfileShare {
   createdAt: string;
@@ -32,6 +32,7 @@ interface ModelProfileShare {
   walletAddress: string;
   _id: string;
   targetRecordId: string;
+  documentName: string;
 }
 
 const HOUR = 60 * 60 * 1000;
@@ -49,7 +50,7 @@ export function DocumentShares() {
   const user = useAppStore((s) => s.currentUser as ModelCurrentUser);
   const [expirationTime, setExpirationTime] = useState(-1);
   const [memo, setMemo] = useState('');
-  const [documentForShare, setDocumentForShare] = useState('');
+  const [documentForShare, setDocumentForShare] = useState<string>('');
 
   useEffect(() => {
     console.log({ documentForShare });
@@ -72,9 +73,8 @@ export function DocumentShares() {
   };
 
   const componentGetDocs = async () => {
-    let { data } = await getDocuments(user.defaultWallet.walletAddress);
-    // @ts-ignore
-    let items = data.results.filter((el) => el.locations[0]);
+    const { data } = await getDocuments(user.defaultWallet.walletAddress);
+    const items = data.results.filter((el) => el.locations[0]);
     setDocuments(items);
   };
 
@@ -84,7 +84,9 @@ export function DocumentShares() {
 
   const getItems = () => {
     getSharedLinks().then(({ data }) => {
-      let items = data.items.filter((el: any) => el.resource === 'document');
+      const items = data.items.filter(
+        (el: ModelProfileShare) => el.resource === 'document'
+      );
       console.log({ items });
       setItems(items);
     });
@@ -99,7 +101,7 @@ export function DocumentShares() {
   };
 
   const doCreateNewLink = () => {
-    let body: any = {
+    const body: Record<string, string | number> = {
       memo: memo,
       resource: 'document',
     };
@@ -112,7 +114,10 @@ export function DocumentShares() {
       body.expiration = Date.now() + expirationTime;
     }
 
-    body.documentId = documentForShare;
+    const documentArrayInfo = documentForShare.split(',');
+
+    body.documentId = documentArrayInfo[0];
+    body.documentName = documentArrayInfo[1];
 
     setLoading(true);
     createSharedLink(body)
@@ -153,24 +158,30 @@ export function DocumentShares() {
                 </div>
                 <div className="overflow-auto">
                   <p className="font-sans text-[14px] text-center mb-8">
-                    Send this link to your trusted contact(s) so they can access your
-                    profile when you're in Restricted mode.
+                    Send this link to your trusted contact(s) so they can access
+                    your profile when you're in Restricted mode.
                   </p>
                   <div className="p-2 bg-[#F3F6FC] rounded-lg grid grid-cols-[16px,_1fr] gap-2 items-center mb-8">
                     <IconInfo />
                     <span className="text-[12px]">
-                      You'll be able to remove this link any time if you change your mind.
+                      You'll be able to remove this link any time if you change
+                      your mind.
                     </span>
                   </div>
 
-                  <h3 className="font-semibold text-[16px] text-left mb-4">Expiration</h3>
+                  <h3 className="font-semibold text-[16px] text-left mb-4">
+                    Expiration
+                  </h3>
                   <div className="text-[12px] text-[#8C8C8C] mb-4">
-                    If you set this, this link will only be valid for the given period of time.
+                    If you set this, this link will only be valid for the given
+                    period of time.
                   </div>
                   <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                     <Select
                       className="w-full bg-[#F5F7F9]"
-                      onChange={(e) => setExpirationTime(Number(e.target.value))}
+                      onChange={(e) =>
+                        setExpirationTime(Number(e.target.value))
+                      }
                     >
                       <option value="-1">No Expiration</option>
                       <option value={HOUR}>1 hour</option>
@@ -180,19 +191,24 @@ export function DocumentShares() {
                     </Select>
                   </Field>
 
-
-                  <h3 className="font-semibold text-[16px] text-left mb-4">Document</h3>
+                  <h3 className="font-semibold text-[16px] text-left mb-4">
+                    Document
+                  </h3>
                   <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                     <Select
                       className="w-full bg-[#F5F7F9]"
                       onChange={(e) => {
+                        console.log('value', e.target.value.split(','));
                         setDocumentForShare(e.target.value);
                       }}
                     >
                       <option value="-1">Choose Document</option>
                       {documents.map((el) => {
                         return (
-                          <option key={el._id} value={el._id}>
+                          <option
+                            key={el._id}
+                            value={[el._id, el.documentName]}
+                          >
                             <span>
                               <span>{el.documentName}</span>
                             </span>
@@ -202,9 +218,12 @@ export function DocumentShares() {
                     </Select>
                   </Field>
 
-                  <div className="font-semibold text-[16px] text-left mb-4">Memo</div>
+                  <div className="font-semibold text-[16px] text-left mb-4">
+                    Memo
+                  </div>
                   <div className="text-[12px] text-[#8C8C8C] mb-4">
-                    Add an optional note so that you remember who you shared this with.
+                    Add an optional note so that you remember who you shared
+                    this with.
                   </div>
                   <input
                     type="text"
@@ -229,7 +248,6 @@ export function DocumentShares() {
                 </button>
               </div>
 
-
               {loading && <Loading />}
               <button
                 className="absolute top-[24px] right-[24px] md:top-[32px] md:right-[32px]"
@@ -240,7 +258,6 @@ export function DocumentShares() {
             </DialogPanel>
           </Dialog>
         </>
-
       );
     }
   };
@@ -252,29 +269,45 @@ export function DocumentShares() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#FCFCFC]">
-                <th className="rounded-l-lg r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Document Name</th>
-                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Memo</th>
-                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Creation Date</th>
-                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">Expired Date</th>
-                <th className="rounded-r-lg  px-4 py-2 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">Action</th>
+                <th className="rounded-l-lg r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                  Document Name
+                </th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                  Memo
+                </th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                  Creation Date
+                </th>
+                <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                  Expired Date
+                </th>
+                <th className="rounded-r-lg  px-4 py-2 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
               {items.map((el) => {
                 return (
-                  <tr
-                    key={el._id}
-                    className="hover:!bg-[#F5F7F9]"
-                  >
-                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl whitespace-nowrap">{el.targetRecordId}</td>
-                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap" >{el.memo ? el.memo : '-'}</td>
+                  <tr key={el._id} className="hover:!bg-[#F5F7F9]">
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl whitespace-nowrap">
+                      {el.targetRecordId}
+                    </td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">
+                      {el.memo ? el.memo : '-'}
+                    </td>
                     <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">
                       {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}
                     </td>
-                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">{renderExpiration(Number(el.expiration))}</td>
+                    <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">
+                      {renderExpiration(Number(el.expiration))}
+                    </td>
                     <td className="px-4 py-[12px] text-center font-sans font-normal text-sm whitespace-nowrap rounded-r-xl">
                       <div className="inline-flex justify-between">
-                        <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowQr(el)}>
+                        <button
+                          className="w-[32px] h-[32px] flex items-center justify center"
+                          onClick={() => setShowQr(el)}
+                        >
                           <IconQr />
                         </button>
                         <CopyToClipboard
@@ -285,7 +318,10 @@ export function DocumentShares() {
                             <IconCopy />
                           </button>
                         </CopyToClipboard>
-                        <button className="w-[32px] h-[32px] flex items-center justify center" onClick={() => setShowDelete(el)}>
+                        <button
+                          className="w-[32px] h-[32px] flex items-center justify center"
+                          onClick={() => setShowDelete(el)}
+                        >
                           <IconDelete />
                         </button>
                       </div>
@@ -296,7 +332,9 @@ export function DocumentShares() {
             </tbody>
             {showDelete && (
               <SubmitModal onClose={() => setShowDelete(undefined)}>
-                <div className="font-varela text-[24px] text-center mb-8">Delete Share Link</div>
+                <div className="font-varela text-[24px] text-center mb-8">
+                  Delete Share Link
+                </div>
                 <p className="font-sans text-[14px] mb-8 text-center">
                   {`Are you sure you want to delete share link?`}
                 </p>
@@ -325,21 +363,24 @@ export function DocumentShares() {
             )}
           </table>
         </div>
-
       );
     }
   };
 
   return (
     <div className="document-shares md:ml-4">
-      <div className="font-sans font-semibold text-[16px] mb-2">Current Document Shares</div>
+      <div className="font-sans font-semibold text-[16px] mb-2">
+        Current Document Shares
+      </div>
       <div className="text-[#8C8C8C] text-[12px] mb-4">
         Listed below are your currently active document sharing links. You can
         share or delete them.
       </div>
       <div className="border border-[#F0F0F0] rounded-xl p-4">
         <div className="flex justify-between items-center mb-4">
-          <div className="font-sans font-semibold text-[16px]">List of shares</div>
+          <div className="font-sans font-semibold text-[16px]">
+            List of shares
+          </div>
           <div className="">
             {' '}
             <button

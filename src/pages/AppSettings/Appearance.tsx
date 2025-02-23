@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { Tooltip } from '@mui/material';
 import hexToRgba from 'hex-to-rgba';
 import { actionPostFile } from '../../actions';
 import { AppearanceRightImage } from '../../components/Appearance/AppearanceRightImage';
@@ -31,6 +33,7 @@ export function Appearance({
   logoImage,
   setColor,
   setLogoImage,
+  sublogoImage,
   setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
@@ -90,7 +93,19 @@ export function Appearance({
           value={tagline}
           onChange={(e) => setTagline(e.target.value)}
         />
-        <div className="font-sans font-semibold text-base mb-4">Coin Name</div>
+        <div className="flex items-center mb-4">
+          <div className="font-sans font-semibold text-base">Coin Name</div>
+          <Tooltip
+            title="The name of the in-app currency or token used for transactions and rewards."
+            arrow
+            placement="top"
+          >
+            <HelpOutlineIcon
+              sx={{ width: '20px', height: '20px' }}
+              className=" ml-2 text-gray-500 cursor-pointer"
+            />
+          </Tooltip>
+        </div>
         <input
           placeholder="Enter Coin Name"
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
@@ -128,7 +143,26 @@ export function Appearance({
         <div className="flex items-center mb-2">
           <p className="mr-2 font-sans font-semibold text-base">Submark logo</p>
           <div className="text-xs inline-block text-gray-500">(optional)</div>
+          <Tooltip
+            title="An additional logo used for icons and small branding spaces"
+            placement="top"
+            arrow
+          >
+            <HelpOutlineIcon
+              sx={{ width: '20px', height: '20px' }}
+              className=" ml-2 text-gray-500 cursor-pointer"
+            />
+          </Tooltip>
         </div>
+        {sublogoImage && (
+          <div className="w-fit bg-gray-100 p-2 rounded-xl flex mb-2">
+            <img
+              src={sublogoImage}
+              alt="Primary Logo"
+              className="max-w-[40px] max-h-[40px] object-contain"
+            />
+          </div>
+        )}
         <input
           type="file"
           ref={sublogoRef}
@@ -147,203 +181,6 @@ export function Appearance({
         tagline={tagline}
         logoImage={logoImage}
       />
-
-      {/* <div className="appearance-right flex justify-center items-center overflow-hidden relative">
-      <div className="relative ">
-        <div
-          className={classNames(
-            'bg-center bg-cover relative',
-            'w-[469px] h-[285px]'
-          )}
-          style={{ backgroundImage: `url(${SafariImage})` }}
-        >
-          <div className="absolute w-full h-[262px]  bg-white bottom-0">
-            <div
-              className="w-full grid grid-cols-[2fr,_3fr] place-items-center h-full bg-preview bg-cover px-[20px]"
-              style={{ backgroundImage: `url(${BG})` }}
-            >
-              <div className="max-w-[170px]">
-                {logoImage && (
-                  <img
-                    src={logoImage}
-                    alt="Primary Logo"
-                    className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
-                  />
-                )}
-                <p className="break-words">{tagline}</p>
-              </div>
-              <div
-                className={classNames(
-                  'bg-white rounded-xl p-3',
-                  '2xl:w-[220px] 2xl:h-[220px], xl:w-[180px] xl:h-[180px]'
-                )}
-              >
-                <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  <div className="border" style={{ borderColor: color }}></div>
-                  <div className="border" style={{ borderColor: color }}></div>
-                  <div className="border" style={{ borderColor: color }}></div>
-                </div>
-                <div className="flex gap-3 mb-1">
-                  <input
-                    type="text"
-                    value="Gloria"
-                    className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-                  />
-                  <input
-                    type="text"
-                    value="Mayer"
-                    className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-                  />
-                </div>
-                <input
-                  type="text"
-                  value="GloriaMayer@gmail.com"
-                  className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-                />
-                <button
-                  className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"
-                  style={{ backgroundColor: color }}
-                >
-                  Sign Up
-                </button>
-                <div className="text-[6px] mb-2">
-                  <span>
-                    By clicking the "Sign Up" button, you agree to our
-                  </span>
-                  <span>Terms & Conditions.</span>
-                </div>
-                <button
-                  className="border w-full rounded-xl py-[3px] text-[9px] mb-2 flex align-center justify-center"
-                  style={{ borderColor: color, color: color }}
-                >
-                  <div className="mr-2">
-                    <GoogleIcon width={10} height={10} />
-                  </div>
-                  <span>Continue with Google</span>
-                </button>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                    style={{ borderColor: color, color: color }}
-                  >
-                    <FacebookIcon width={12} height={12} />
-                  </button>
-                  <button
-                    className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                    style={{ borderColor: color, color: color }}
-                  >
-                    <AppleIcon width={12} height={12} />
-                  </button>
-                  <button
-                    className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                    style={{ borderColor: color, color: color }}
-                  >
-                    <MetamaskIcon width={12} height={12} />
-                  </button>
-                </div>
-                <div className="text-[8px] text-center text">
-                  <span className="mr-1">Already have an account?</span>
-                  <a href="#" style={{ color: color }}>
-                    Sign In
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="w-[191px] h-[368px] absolute top-[-40px] right-[-40px] relavite"
-          style={{ backgroundImage: `url(${IPhoneMiniImage})` }}
-        >
-          <div className="absolute inset-4 top-[26px] px-2 rounded-xl bg-white">
-            <div
-              className="h-[45px] bg-cover bg-center flex justify-center items-center p-2"
-              style={{ backgroundImage: '' }}
-            >
-              {logoImage && (
-                <img
-                  src={logoImage}
-                  alt="Primary Logo"
-                  className="max-w-[60px] max-h-[43px] min-h-[40px] object-contain"
-                />
-              )}
-            </div>
-            <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
-            <div className="grid grid-cols-3 gap-2 mb-2">
-              <div className="border" style={{ borderColor: color }}></div>
-              <div className="border" style={{ borderColor: color }}></div>
-              <div className="border" style={{ borderColor: color }}></div>
-            </div>
-            <input
-              type="text"
-              placeholder="First Name"
-              className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-            />
-            <input
-              type="text"
-              placeholder="Email"
-              className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-            />
-            <button
-              className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"
-              style={{ backgroundColor: color }}
-            >
-              Sign Up
-            </button>
-            <div className="text-[6px] mb-2">
-              <div className="text-center color-gray-500">
-                By clicking the "Sign Up" button, you agree to our
-              </div>
-              <div className="text-center" style={{ color: color }}>
-                Terms & Conditions.
-              </div>
-            </div>
-            <div className="text-center color text-[6px] mb-2">or</div>
-            <button
-              className="border w-full rounded-xl py-[3px] text-[9px] mb-2 flex align-center justify-center"
-              style={{ borderColor: color, color: color }}
-            >
-              <div className="mr-2">
-                <GoogleIcon width={10} height={10} />
-              </div>
-              <span>Continue with Google</span>
-            </button>
-            <div className="grid grid-cols-3 gap-2 mb-2">
-              <button
-                className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                style={{ borderColor: color, color: color }}
-              >
-                <FacebookIcon width={12} height={12} />
-              </button>
-              <button
-                className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                style={{ borderColor: color, color: color }}
-              >
-                <AppleIcon width={12} height={12} />
-              </button>
-              <button
-                className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                style={{ borderColor: color, color: color }}
-              >
-                <MetamaskIcon width={12} height={12} />
-              </button>
-            </div>
-            <div className="text-[8px] text-center text">
-              <span className="mr-1">Already have an account?</span>
-              <a href="#" style={{ color: color }}>
-                Sign In
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> */}
     </>
   );
 }
