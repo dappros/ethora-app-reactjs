@@ -9,21 +9,37 @@ export default function AppHelmet() {
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token-538');
+  const lastPath = localStorage.getItem('lastPath') || '/app/admin/apps';
 
   useEffect(() => {
-      if (!token ) {
-        if (location.pathname.startsWith('/tempPassword') || location.pathname.startsWith('/resetPassword')) {
-          return
-        } else {
-          navigate('/login');
-        }
+    if (!token) {
+      if (
+        location.pathname.startsWith('/tempPassword') ||
+        location.pathname.startsWith('/resetPassword') ||
+        location.pathname === '/register'
+      ) {
+        return;
+      } else {
+        navigate('/login');
       }
+    }
   }, []);
+
+  useEffect(() => {
+    if (
+      token &&
+      (location.pathname === '/login' || location.pathname === '/')
+    ) {
+      navigate(lastPath, { replace: true });
+    }
+  }, [token, location.pathname, navigate, lastPath]);
 
   return (
     <>
       <Helmet>
-        <title>{currentApp.displayName || 'Ethora - Web3 super app engine'}</title>
+        <title>
+          {currentApp.displayName || 'Ethora - Web3 super app engine'}
+        </title>
         <meta
           property="og:title"
           content={currentApp.displayName || 'Ethora - Web3 super app engine'}

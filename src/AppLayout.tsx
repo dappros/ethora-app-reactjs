@@ -1,35 +1,18 @@
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
 import { useAppStore } from './store/useAppStore';
 
 export default function AppLayout() {
-  const user = useAppStore((s) => s.currentUser);
   const location = useLocation();
-
-  const [redirectPath, setRedirectPath] = useState<string | null>(null);
-
-  // useTrackUrl();
-
-  useEffect(() => {
-    localStorage.setItem('lastPath', location.pathname);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    const lastPath = localStorage.getItem('lastPath');
-    if (lastPath && lastPath !== location.pathname) {
-      setRedirectPath(lastPath);
-    }
-  }, []);
+  const user = useAppStore((s) => s.currentUser);
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (redirectPath) {
-    const path = redirectPath;
-    setRedirectPath(null);
-    return <Navigate to={path} replace />;
+  if (location.pathname !== '/login') {
+    localStorage.setItem('lastPath', location.pathname + location.search);
   }
 
   return (

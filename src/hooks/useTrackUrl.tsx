@@ -1,31 +1,48 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export const useTrackUrl = () => {
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('savedUrl', location.pathname + location.search);
-  }, [location]);
+    const token = localStorage.getItem('token-538');
+    const lastPath = localStorage.getItem('lastPath');
 
-  useEffect(() => {
-    const handlePopState = () => {
-      const savedUrl = localStorage.getItem('savedUrl');
-
+    if (!token) {
       if (
-        savedUrl &&
-        savedUrl !== window.location.pathname + window.location.search
+        location.pathname.startsWith('/tempPassword') ||
+        location.pathname.startsWith('/resetPassword') ||
+        location.pathname === '/register'
       ) {
-        console.log('window.location.pathname:', window.location.pathname);
-        navigate(savedUrl);
+        return;
+      } else {
+        navigate('/login');
       }
-    };
+    }
 
-    window.addEventListener('popstate', handlePopState);
+    if (location.pathname === '/') {
+      navigate(lastPath || '/app/admin/apps', { replace: true });
+      return;
+    }
 
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [navigate]);
+    if (token && location.pathname === '/login') {
+      navigate(lastPath || '/app/admin/apps', { replace: true });
+      return;
+    }
+
+    if (isFirstLoad) {
+      setIsFirstLoad(false);
+    }
+  }, [navigate, location.pathname, isFirstLoad]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token-538');
+    const lastPath = localStorage.getItem('lastPath');
+
+    if (token && location.pathname === '/login') {
+      navigate(lastPath || '/app/admin/apps', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 };
