@@ -43,9 +43,10 @@ export default function Profile() {
   const navigate = useNavigate();
 
   const componentGetDocs = async () => {
-    let { data } = await getDocuments(walletAddress);
-    // @ts-ignore
-    let items = data.results.filter((el) => el.locations[0]);
+    const { data } = await getDocuments(walletAddress);
+    const items = data.results.filter(
+      (el: { locations: unknown[] }) => el.locations[0]
+    );
     setDocuments(items);
   };
 
@@ -217,7 +218,7 @@ export default function Profile() {
               <IconClose />
             </button>
             <div className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
-              Delete Share Link
+              Delete Document
             </div>
             <p className="font-sans text-[14px] mb-8 text-center">
               Are you sure you want to delete document?

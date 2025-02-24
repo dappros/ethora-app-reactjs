@@ -74,7 +74,9 @@ export function DocumentShares() {
 
   const componentGetDocs = async () => {
     const { data } = await getDocuments(user.defaultWallet.walletAddress);
-    const items = data.results.filter((el) => el.locations[0]);
+    const items = data.results.filter(
+      (el: { locations: unknown[] }) => el.locations[0]
+    );
     setDocuments(items);
   };
 
