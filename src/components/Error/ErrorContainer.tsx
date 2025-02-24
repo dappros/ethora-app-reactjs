@@ -9,10 +9,11 @@ interface ErrorContainerProps {
   title: string;
   description: string;
   image: string;
+  navigateUrl?: string;
 }
 
 export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
-  const { status, title, description, image } = props;
+  const { status, title, description, image, navigateUrl } = props;
 
   const navigate = useNavigate();
 
@@ -26,7 +27,11 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
           variant="contained"
           startIcon={<IconArrowLeft stroke="#ffffff" />}
           style={{ padding: '2px 48px' }}
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            navigateUrl
+              ? navigate(navigateUrl, { replace: true })
+              : navigate(-1)
+          }
         >
           Go Back
         </CustomButton>

@@ -351,6 +351,10 @@ export async function postDocument(documentName: string, file: File) {
   return http.post('/docs', { documentName, files: [fileLocation] });
 }
 
+export function deleteDocuments(id: string) {
+  return http.delete(`/docs/${id}`);
+}
+
 export async function applyReferalCode(id: string) {
   return http.post('/referral', { referrerId: id });
 }

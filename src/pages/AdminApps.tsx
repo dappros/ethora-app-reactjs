@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactPaginate from 'react-paginate';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { ApplicationPreview } from '../components/ApplicationPreview';
 import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
@@ -11,78 +12,103 @@ import { useAppStore } from '../store/useAppStore';
 
 const ITEMS_COUNT = 5;
 
+type OrderByType =
+  | 'createdAt'
+  | 'displayName'
+  | 'totalRegistered'
+  | 'totalSessions'
+  | 'totalApiCalls'
+  | 'totalFiles'
+  | 'totalTransactions';
+
 export default function AdminApps() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const apps = useAppStore((s) => s.apps);
-  // @ts-ignore
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
-  // @ts-ignore
-  const [order, setOrder] = useState('asc');
-  // @ts-ignore
-  const [orderBy, setOrderBy] = useState('createdAt');
-  // @ts-ignore
-  const [currentPage, setCurrentPage] = useState(0);
-  // @ts-ignore
+
+  const limit = useMemo(
+    () => Number(searchParams.get('limit')) || ITEMS_COUNT,
+    [searchParams]
+  );
+  const page = useMemo(
+    () => Number(searchParams.get('page')) || 0,
+    [searchParams]
+  );
+  const order = useMemo(
+    () => (searchParams.get('order') as 'asc' | 'desc') || 'asc',
+    [searchParams]
+  );
+  const orderBy = useMemo(
+    () => (searchParams.get('orderBy') as OrderByType) || 'createdAt',
+    [searchParams]
+  );
+
   const [pageCount, setPageCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(page);
 
   useEffect(() => {
-    (async function () {
-      // @ts-ignore
-      const response = await httpGetApps({
-        limit: ITEMS_COUNT,
-        // @ts-ignore
-        order,
-        // @ts-ignore
-        orderBy,
-      });
-      setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
-      doSetApps(response.data.apps);
-    })();
-  }, []);
+    setCurrentPage(page);
+  }, [page]);
 
-  useEffect(() => {
-    (async () => {
-      const response = await httpGetApps({
-        limit: ITEMS_COUNT,
-        // @ts-ignore
-        order,
-        // @ts-ignore
-        orderBy,
-      });
-      setPageCount(Math.ceil(response.data.total / ITEMS_COUNT));
-      doSetApps(response.data.apps);
-    })();
-  }, [order, orderBy]);
-
-  // @ts-ignore
-  const onPageChange = (page: number) => {
-    httpGetApps({
-      ITEMS_COUNT,
-      offset: ITEMS_COUNT * page,
-      // @ts-ignore
+  const fetchApps = useCallback(async () => {
+    const response = await httpGetApps({
+      limit,
+      offset: limit * page,
       order,
-      // @ts-ignore
       orderBy,
-    }).then((response) => {
-      const { total, apps } = response.data;
-      setCurrentPage(page);
-      setPageCount(Math.ceil(total / ITEMS_COUNT));
-      doSetApps(apps);
     });
-  };
 
-  const renderSorting = () => {
+    setPageCount(Math.ceil(response.data.total / limit));
+    doSetApps(response.data.apps);
+  }, [limit, page, order, orderBy, doSetApps]);
+
+  useEffect(() => {
+    fetchApps();
+  }, [fetchApps]);
+
+  const updateSearchParams = useCallback(
+    (newParams: Record<string, string | number>) => {
+      setSearchParams((prev) => {
+        const updatedParams = new URLSearchParams(prev);
+
+        Object.entries(newParams).forEach(([key, value]) => {
+          updatedParams.set(key, String(value));
+        });
+
+        return updatedParams;
+      });
+    },
+    [setSearchParams]
+  );
+
+  const onPageChange = useCallback(
+    (selectedItem: { selected: number }) => {
+      updateSearchParams({ page: selectedItem.selected });
+    },
+    [updateSearchParams]
+  );
+
+  const handleSortChange = useCallback(
+    (newOrderBy: OrderByType, newOrder: 'asc' | 'desc') => {
+      updateSearchParams({ orderBy: newOrderBy, order: newOrder, page: 0 });
+    },
+    [updateSearchParams]
+  );
+
+  const renderSorting = useCallback(() => {
     if (currentUser?.isSuperAdmin) {
       return (
         <Sorting
           className="mr-4"
           order={order}
-          setOrder={setOrder}
+          setOrder={(newOrder) => handleSortChange(orderBy, newOrder)}
           orderBy={orderBy}
-          setOrderBy={setOrderBy}
+          setOrderBy={(newOrderBy) => handleSortChange(newOrderBy, order)}
           orderByList={[
             { key: 'displayName', title: 'Display Name' },
             { key: 'totalRegistered', title: 'Registered' },
@@ -97,7 +123,11 @@ export default function AdminApps() {
     } else {
       return null;
     }
-  };
+  }, [currentUser?.isSuperAdmin, order, orderBy, handleSortChange]);
+
+  useEffect(() => {
+    localStorage.setItem('lastPath', location.pathname + location.search);
+  }, [location.pathname, location.search]);
 
   return (
     <div id="admin-apps">
@@ -117,14 +147,11 @@ export default function AdminApps() {
         </div>
         <div className="my-4 border-b border-b-gray-200"></div>
       </div>
+
       {/* apps list */}
       <div className="">
         {showStarterInf && !apps.length && (
-          <ApplicationStarterInf
-            onClose={() => {
-              setShowStarterInf(false);
-            }}
-          />
+          <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
         )}
 
         {apps.map((app) => (
@@ -134,13 +161,11 @@ export default function AdminApps() {
             primaryColor={currentApp.primaryColor}
           />
         ))}
+
         {currentUser?.isSuperAdmin && (
           <ReactPaginate
             className="flex items-center justify-center gap-2 mt-4 text-gray-500"
-            onPageActive={(...args) => {
-              console.log({ args });
-            }}
-            onPageChange={(selectedItem) => onPageChange(selectedItem.selected)}
+            onPageChange={onPageChange}
             breakLabel="..."
             nextLabel="Next ➝"
             pageRangeDisplayed={2}
@@ -157,6 +182,7 @@ export default function AdminApps() {
           />
         )}
       </div>
+
       {showModal && (
         <NewAppModal
           haveApps={!!apps.length}

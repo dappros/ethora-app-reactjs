@@ -78,6 +78,10 @@ export const router = createBrowserRouter(
                       Component: AdminApp,
                       children: [
                         {
+                          index: true,
+                          element: <Navigate to="settings" replace />,
+                        },
+                        {
                           path: 'settings',
                           Component: AppSettings,
                         },
@@ -110,11 +114,11 @@ export const router = createBrowserRouter(
             },
           ],
         },
+        {
+          path: '*',
+          element: <Error404Page />,
+        },
       ],
-    },
-    {
-      path: '*',
-      element: <Error404Page />,
     },
   ],
   {
