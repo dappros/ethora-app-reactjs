@@ -64,7 +64,8 @@ export function DocumentShares() {
         getItems();
         setShowDelete(undefined);
       })
-      .catch((_) => {
+      .catch((error) => {
+        console.error(error);
         toast.error('Error');
       })
       .finally(() => {
@@ -89,7 +90,6 @@ export function DocumentShares() {
       const items = data.items.filter(
         (el: ModelProfileShare) => el.resource === 'document'
       );
-      console.log({ items });
       setItems(items);
     });
   };
@@ -264,6 +264,15 @@ export function DocumentShares() {
     }
   };
 
+  const getDocumentId = (id: string) => {
+    if (documents.length > 0) {
+      const name = documents.filter((document) => document._id === id)[0]
+        .documentName;
+
+      return name;
+    }
+  };
+
   const renderItems = () => {
     if (items.length) {
       return (
@@ -293,7 +302,8 @@ export function DocumentShares() {
                 return (
                   <tr key={el._id} className="hover:!bg-[#F5F7F9]">
                     <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl whitespace-nowrap">
-                      {el.targetRecordId}
+                      {/* {el.targetRecordId} */}
+                      {getDocumentId(el.targetRecordId)}
                     </td>
                     <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm whitespace-nowrap">
                       {el.memo ? el.memo : '-'}
