@@ -1,6 +1,6 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
@@ -17,10 +17,47 @@ import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 
+const tabs = [
+  'Appearance',
+  'Sign-on options',
+  'Web app',
+  'Mobile app',
+  'Home screen',
+  'Menu',
+  'Chats',
+  'Visibility & Privacy',
+  'API',
+];
+
 export default function AppSettings() {
   const { appId } = useParams();
   const apps = useAppStore((s) => s.apps);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tabFromUrl = searchParams.get('tab');
+
+  const initialTabIndex = tabs.includes(tabFromUrl ?? '')
+    ? tabs.indexOf(tabFromUrl!)
+    : 0;
+  const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
+
+  useEffect(() => {
+    if (
+      tabs.includes(tabFromUrl ?? '') &&
+      tabs.indexOf(tabFromUrl!) !== selectedIndex
+    ) {
+      setSelectedIndex(tabs.indexOf(tabFromUrl!));
+    }
+  }, [tabFromUrl]);
+
+  const handleTabChange = (index: number) => {
+    if (tabs[index] !== tabFromUrl) {
+      setSearchParams({ tab: tabs[index] }, { replace: true });
+    }
+    setSelectedIndex(index);
+  };
 
   // appearance tab
   const [displayName, setDisplayName] = useState('');
@@ -233,17 +270,15 @@ export default function AppSettings() {
           </button>
         </div>
       </div>
-      <TabGroup className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] lg:grid-rows-1 lg:grid-cols-[308px,_1fr] px-4">
+      <TabGroup
+        className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] lg:grid-rows-1 lg:grid-cols-[308px,_1fr] px-4"
+        selectedIndex={selectedIndex}
+        onChange={handleTabChange}
+      >
         <TabList className="flex flex-row lg:flex-col hide-scroll lg:mb-0  border-b border-gray-200 lg:border-b-0 lg:pr-4 overflow-auto  lg:border-r lg:border-gray-200">
-          <TabApp text="Appearance" />
-          <TabApp text="Sign-on options" />
-          <TabApp text="Web app" />
-          <TabApp text="Mobile app" />
-          <TabApp text="Home screen" />
-          <TabApp text="Menu" />
-          <TabApp text="Chats" />
-          <TabApp text="Visibility & Privacy" />
-          <TabApp text="API" last />
+          {tabs.map((tab, index) => (
+            <TabApp key={index} text={tab} last={index === tabs.length - 1} />
+          ))}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
