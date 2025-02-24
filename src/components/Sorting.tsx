@@ -87,7 +87,7 @@ export function Sorting({
               aria-label="Server size"
             >
               {orderItemList.map((el) => (
-                <Field className="flex">
+                <Field key={el.key} className="flex">
                   <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
                     <CloseButton className="flex w-full items-center justify-between relative ">
                       <div>
@@ -118,33 +118,31 @@ export function Sorting({
               }}
               aria-label="Server size"
             >
-              {orderByList.map((el) => {
-                return (
-                  <Field className="flex">
-                    <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
-                      <CloseButton className="flex w-full items-center justify-between relative">
-                        <div>
-                          <Radio value={el.key} className="">
-                            {(props) => {
-                              return (
-                                <div className="absolute left-0">
-                                  {props.checked && <IconMarked />}
-                                </div>
-                              );
-                            }}
-                          </Radio>
-                          <div className="ml-8 font-sans text-[14px]">
-                            {el.title}
-                          </div>
+              {orderByList.map((el) => (
+                <Field key={el.key} className="flex">
+                  <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
+                    <CloseButton className="flex w-full items-center justify-between relative">
+                      <div>
+                        <Radio value={el.key} className="">
+                          {(props) => {
+                            return (
+                              <div className="absolute left-0">
+                                {props.checked && <IconMarked />}
+                              </div>
+                            );
+                          }}
+                        </Radio>
+                        <div className="ml-8 font-sans text-[14px]">
+                          {el.title}
                         </div>
-                        <div className="w-[24px] h-[24px] flex justify-center items-center">
-                          <IconAdd />
-                        </div>
-                      </CloseButton>
-                    </Label>
-                  </Field>
-                );
-              })}
+                      </div>
+                      <div className="w-[24px] h-[24px] flex justify-center items-center">
+                        <IconAdd />
+                      </div>
+                    </CloseButton>
+                  </Label>
+                </Field>
+              ))}
             </RadioGroup>
           </div>
         </PopoverPanel>

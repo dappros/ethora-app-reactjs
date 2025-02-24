@@ -56,17 +56,20 @@ export const AppearanceRightImage = ({
                 </div>
                 <div className="flex gap-3 mb-1">
                   <input
+                    readOnly
                     type="text"
                     value="Gloria"
                     className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
                   />
                   <input
+                    readOnly
                     type="text"
                     value="Mayer"
                     className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
                   />
                 </div>
                 <input
+                  readOnly
                   type="text"
                   value="GloriaMayer@gmail.com"
                   className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"

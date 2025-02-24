@@ -51,6 +51,7 @@ export const AppearanceIphone = ({
         </div>
         {inputPlaceholder.map((placeholder) => (
           <input
+            readOnly
             key={placeholder}
             type="text"
             placeholder={placeholder}

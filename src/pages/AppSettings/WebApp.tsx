@@ -1,6 +1,6 @@
 import { Textarea } from '@headlessui/react';
-import { IconInfo } from '../../components/Icons/IconInfo';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
+import { IconInfo } from '../../components/Icons/IconInfo';
 
 interface Props {
   domainName: string;
@@ -27,7 +27,7 @@ export function WebApp({
         domain name available for Free plan users and 1st level domain name for
         Business plan users.
       </p>
-      <p className="p-2 flex rounded-[8px] bg-brand-150 mb-4">
+      <div className="p-2 flex rounded-[8px] bg-brand-150 mb-4">
         <div className="mr-2">
           <IconInfo stroke={primaryColor} />
         </div>
@@ -35,7 +35,7 @@ export function WebApp({
           Self-host option: just clone our engine from github, build and run it
           on your server.
         </span>
-      </p>
+      </div>
       <div className="flex w-full max-w-[459px] relative mb-4 items-center">
         <input
           value={domainName}
@@ -47,13 +47,14 @@ export function WebApp({
           id="domain-input"
         />
         {/* <button onClick={onExternalClick} className='cursor-pointer'> */}
-        <button
-          className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl"
-        >
+        <button className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl">
           .ethora.com
         </button>
         {/* </button> */}
-        <button onClick={onExternalClick} className="ml-4 w-[40px] h-[40px] p-2 flex items-center justify-center rounded-xl hover:bg-brand-hover">
+        <button
+          onClick={onExternalClick}
+          className="ml-4 w-[40px] h-[40px] p-2 flex items-center justify-center rounded-xl hover:bg-brand-hover"
+        >
           <IconExternalLink />
         </button>
       </div>
@@ -90,14 +91,14 @@ export function WebApp({
         in your Firebase console. These options will be disabled if credentials
         are not provided.
       </p>
-      <p className="p-2 flex rounded-[8px] bg-brand-150 mb-2">
+      <div className="p-2 flex rounded-[8px] bg-brand-150 mb-2">
         <div className="mr-2">
           <IconInfo stroke={primaryColor} />
         </div>
         <span className="font-sans text-[12px]">
           Copy paste the configuration from your Firebase Console
         </span>
-      </p>
+      </div>
       <Textarea
         className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500"
         value={firebaseWebConfigString}
