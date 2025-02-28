@@ -19,7 +19,6 @@ export default function AdminApp() {
     const getApp = async () => {
       try {
         const response = await httpGetApp(appId);
-        console.log('AdminApp', response.data.result);
         doSetApp(response.data.result);
       } catch (e) {
         setIsValidApp(false);

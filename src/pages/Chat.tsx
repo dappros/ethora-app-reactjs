@@ -3,6 +3,10 @@ import React from 'react';
 import { httpTokens, refreshToken } from '../http';
 import { useAppStore } from '../store/useAppStore';
 
+export const VITE_APP_XMPP_SERVICE = import.meta.env.VITE_APP_XMPP_SERVICE;
+export const VITE_XMPP_SERVICE = import.meta.env.VITE_XMPP_SERVICE;
+export const VITE_XMPP_HOST = import.meta.env.VITE_XMPP_HOST;
+
 interface ChatComponentProps {
   config: any;
   currentUser: any;
@@ -28,6 +32,11 @@ const MemoizedChat = React.memo(function ChatComponent({
         colors: {
           primary: config?.primaryColor || '#fff',
           secondary: config?.secondaryColor || '#141414',
+        },
+        xmppSettings: {
+          devServer: VITE_APP_XMPP_SERVICE,
+          host: VITE_XMPP_HOST,
+          conference: VITE_XMPP_SERVICE,
         },
         // @ts-ignorex
         roomListStyles: {

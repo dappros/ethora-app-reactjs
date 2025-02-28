@@ -32,7 +32,7 @@ export function SignonOptions({
         Choose which sign on options to enable in your App. This controls how
         your Users create new accounts and login.
       </p>
-      <p className="font-sans text-[24px] font-medium mb-2">Standart login</p>
+      <p className="font-sans text-[24px] font-medium mb-2">Standard login</p>
       <p className="font-sans text-[12px] text-gray-500 mb-4">
         User is required to create an account with their e-mail and memorize the
         password. They will need to confirm their e-mail address by clicking a
