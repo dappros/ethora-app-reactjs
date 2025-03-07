@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Fallback } from './App.tsx';
 import './index.css';
 import { router } from './router.tsx';
+import "../comp/dist/style.css"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -11,6 +11,7 @@ export interface ModelCurrentUser {
   refreshToken: string;
   walletAddress: string;
   xmppPassword: string;
+  xmppUsername: string;
   profileImage: string;
   description: string;
   defaultWallet: {
