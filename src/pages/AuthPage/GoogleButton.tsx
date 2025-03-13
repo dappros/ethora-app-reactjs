@@ -5,12 +5,13 @@ import {
   httpCheckEmailExist,
   httpLoginSocial,
   httpRegisterSocial,
+  sendHSFormData,
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
+import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
-import { navigateToUserPage } from '../../utils/navigateToUserPage';
 
 export const GoogleButton = () => {
   const config = useAppStore.getState().currentApp;
@@ -41,11 +42,28 @@ export const GoogleButton = () => {
         if (emailExist.data.success) {
           console.log('new registration');
           try {
-            await httpRegisterSocial(
+            const userResult = await httpRegisterSocial(
               idToken ?? '',
               credential?.accessToken ?? '',
               '',
               loginType
+            );
+            const { firstName, lastName, email } = userResult?.data?.user;
+            const website = `${window?.location?.origin || ''}/google`;
+
+            const hubspotData = {
+              fields: [
+                { name: 'firstname', value: firstName },
+                { name: 'lastname', value: lastName },
+                { name: 'email', value: email },
+                { name: 'website', value: website },
+              ],
+            };
+
+            await sendHSFormData(
+              '4732608',
+              '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
+              hubspotData
             );
           } catch (error) {
             toast.error('Social registration failed');
