@@ -383,6 +383,10 @@ export function getExportMyData() {
   return http.get('/users/exportData', { responseType: 'arraybuffer' });
 }
 
+export function getExportCsv(id: string) {
+  return http.get(`/users/export/${id}`, { responseType: 'arraybuffer' });
+}
+
 export function deleteMe() {
   return http.delete('/users');
 }

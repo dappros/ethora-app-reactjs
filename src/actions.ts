@@ -1,5 +1,6 @@
 import { localStorageConstants } from './constants/localStorageConstants';
 import {
+  getExportCsv,
   httpCreateNewApp,
   httpDeleteManyUsers,
   httpGetApps,
@@ -211,4 +212,14 @@ export function actionLogout() {
   localStorage.clear()
   window.location.pathname = '/login'
   return null;
+}
+
+export const actionGetCsvFile = async (appId: string): Promise<void> => {
+  try {
+    const result = await getExportCsv(appId);
+
+    console.log('result', result);
+  } catch (e) {
+    console.error(e);
+  }
 }
