@@ -26,7 +26,7 @@ export async function actionGetConfig(domainName?: string) {
     data: { result },
   } = await httpGetConfig(domainName);
 
-  let app: ModelApp = {
+  const app: ModelApp = {
     afterLoginPage: result.afterLoginPage,
     appToken: result.appToken,
     bundleId: result.bundleId,
@@ -185,16 +185,16 @@ export async function actionResetPasswords(
 
 export async function actionUpdateApp(appId: string, options: any) {
   console.log('actionUpdateApp');
-  let response = await httpUpdateApp(appId, options);
+  const response = await httpUpdateApp(appId, options);
   const state = getState();
   state.doUpdateApp(response.data.result);
 }
 
 export async function actionUpdateUser(fd: FormData) {
-  let {
+  const {
     data: { user },
   } = await httpUpdateUser(fd);
-  let state = getState();
+  const state = getState();
   state.doUpdateUser({
     firstName: user.firstName,
     lastName: user.lastName,

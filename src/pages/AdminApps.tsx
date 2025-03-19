@@ -103,7 +103,7 @@ export default function AdminApps() {
   const renderSorting = useCallback(() => {
     if (currentUser?.isSuperAdmin) {
       return (
-        <Sorting
+        <Sorting<OrderByType>
           className="mr-4"
           order={order}
           setOrder={(newOrder) => handleSortChange(orderBy, newOrder)}
