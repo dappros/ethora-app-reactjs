@@ -23,8 +23,16 @@ export function withTracking<T>(Component: ComponentType<T>) {
   return function TrackedComponent(props: T) {
     const [isInitialized, setIsInitialized] = useState(false);
     const config = useAppStore((state) => state.currentApp?.firebaseConfigParsed);
+    const allowedDomains =
+      import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(",") || [];
+    const currentDomain = window.location.hostname;
 
     useEffect(() => {
+      if (!allowedDomains.includes(currentDomain)) {
+        console.warn(`Tracking is disabled on ${currentDomain}`);
+        return;
+      }
+
       if (!config) {
         console.warn("Firebase config is not available yet");
         return;
@@ -41,16 +49,6 @@ export function withTracking<T>(Component: ComponentType<T>) {
         appId: config.appId,
         measurementId: config.messagingSenderId,
       };
-
-      const allowedDomains =
-        import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(",") || [];
-      const currentDomain = window.location.hostname;
-
-      if (!allowedDomains.includes(currentDomain)) {
-        console.warn(`Tracking is disabled on ${currentDomain}`);
-        return;
-      }
-
 
       if (!firebaseApp) {
         firebaseApp = initializeApp(firebaseConfig);

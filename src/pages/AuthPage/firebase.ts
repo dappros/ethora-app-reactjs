@@ -1,5 +1,10 @@
 import { FirebaseApp, FirebaseOptions, initializeApp } from '@firebase/app';
-import  firebbaseAuth from 'firebase/auth';
+import  {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  User,
+} from 'firebase/auth';
 import { useAppStore } from '../../store/useAppStore';
 
 class Firebase {
@@ -23,7 +28,7 @@ class Firebase {
     this.firebaseApp = initializeApp(firebaseConfig);
   }
 }
-export type IUser = firebbaseAuth. & { accessToken: string };
+export type IUser = User & { accessToken: string };
 
 export const getUserCredsFromGoogle = async () => {
   const firebase = new Firebase();
