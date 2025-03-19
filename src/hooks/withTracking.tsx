@@ -19,6 +19,18 @@ let firebaseApp: FirebaseApp | null = null;
 let analytics: ReturnType<typeof getAnalytics> | null = null;
 let sessionStartTime: number | null = null;
 
+const logSessionDuration = () => {
+  if (analytics && sessionStartTime) {
+    const sessionDuration = (Date.now() - sessionStartTime) / 1000;
+    if (sessionDuration >= 2) {
+      logEvent(analytics, "session_duration", { duration: sessionDuration });
+      console.log(`session duration logged: ${sessionDuration}s`);
+    } else {
+      console.warn("Session too short (<2s), ignoring.");
+    }
+  }
+};
+
 export function withTracking<T>(Component: ComponentType<T>) {
   return function TrackedComponent(props: T) {
     const [isInitialized, setIsInitialized] = useState(false);
@@ -47,12 +59,13 @@ export function withTracking<T>(Component: ComponentType<T>) {
         storageBucket: config.storageBucket,
         messagingSenderId: config.messagingSenderId,
         appId: config.appId,
-        measurementId: config.messagingSenderId,
+        measurementId: config.measurementId,
       };
 
       if (!firebaseApp) {
         firebaseApp = initializeApp(firebaseConfig);
         analytics = getAnalytics(firebaseApp);
+        console.log("session_start");
         logEvent(analytics, "session_start");
       }
 
@@ -66,28 +79,59 @@ export function withTracking<T>(Component: ComponentType<T>) {
       sessionStartTime = Date.now();
 
       const handleClick = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        const elementName = target.tagName.toLowerCase();
+        let target = event.target as HTMLElement;
 
-        if (target.tagName === "BUTTON" || target.tagName === "A" || target.dataset.track) {
-          const text = target.textContent?.trim().substring(0, 50);
-          logEvent(analytics!, "click", { element: elementName, text });
-          console.log(`🔥 Click tracked: ${elementName} - ${text}`);
+
+        while (target && target !== document.body && !target.tagName.match(/^(button|a)$/i) && !target.dataset.track) {
+          target = target.parentElement as HTMLElement;
+        }
+
+        if (target && (target.tagName === "BUTTON" || target.tagName === "A" || target.dataset.track)) {
+          const elementName = target.tagName.toLowerCase();
+          const text = target.textContent?.trim().substring(0, 50) || "N/A";
+
+          console.log(`Click tracked: ${elementName} - ${text}`);
+
+          if (analytics) {
+            logEvent(analytics, "click", { element: elementName, text });
+          } else {
+            console.warn("Click ignored: No valid element found.");
+          }
         }
       };
 
-      document.addEventListener("click", handleClick);
+      document.addEventListener("click", (event) => {
+        handleClick(event);
+      });
 
       const handleBeforeUnload = () => {
+        console.log("beforeunload");
         logSessionDuration();
       };
+
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+          console.log("visibilitychange detected!");
+          logSessionDuration();
+        }
+      };
+
+      const handleUnload = () => {
+        console.log("unload event triggered!");
+        logSessionDuration();
+      };
+
       window.addEventListener("beforeunload", handleBeforeUnload);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      window.addEventListener("unload", handleUnload);
 
       setIsInitialized(true);
 
       return () => {
         document.removeEventListener("click", handleClick);
-        window.removeEventListener("beforeunload", handleBeforeUnload);
+        window.removeEventListener("beforeunload", () => {
+          handleBeforeUnload();
+        });
         logSessionDuration();
       };
     }, [config, isInitialized]);
@@ -95,18 +139,6 @@ export function withTracking<T>(Component: ComponentType<T>) {
     return <Component {...props} logLogin={logLogin} logLogout={logLogout} />;
   };
 }
-
-const logSessionDuration = () => {
-  if (analytics && sessionStartTime) {
-    const sessionDuration = (Date.now() - sessionStartTime) / 1000;
-    if (sessionDuration >= 2) {
-      logEvent(analytics, "session_duration", { duration: sessionDuration });
-      console.log(`ession duration logged: ${sessionDuration}s`);
-    } else {
-      console.warn("Session too short (<2s), ignoring.");
-    }
-  }
-};
 
 export const logLogin = (method: string, userId?: string) => {
   if (analytics) {
