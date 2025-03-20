@@ -8,7 +8,6 @@ import {
   Radio,
   RadioGroup,
 } from '@headlessui/react';
-import { OrderByType } from '../models';
 import { IconAdd } from './Icons/IconAdd';
 import { IconArrowDown } from './Icons/IconArrowDown';
 import { IconMarked } from './Icons/IconMarked';
@@ -18,23 +17,23 @@ interface OrderItem {
   title: string;
 }
 
-interface Props {
+interface Props<T extends string> {
   orderByList: Array<OrderItem>;
   order: string;
   setOrder: (s: 'asc' | 'desc') => void;
-  orderBy: string;
-  setOrderBy: (s: OrderByType) => void;
+  orderBy: T;
+  setOrderBy: (s: T) => void;
   className: string;
 }
 
-export function Sorting({
+export function Sorting<T extends string>({
   orderByList,
   order,
   setOrder,
   orderBy,
   setOrderBy,
   className,
-}: Props) {
+}: Props<T>) {
   const orderItemList: Array<OrderItem> = [
     {
       title: '(A-Z)',
@@ -105,9 +104,7 @@ export function Sorting({
             <RadioGroup
               className="flex flex-col"
               value={orderBy}
-              onChange={(value: OrderByType) => {
-                setOrderBy(value);
-              }}
+              onChange={setOrderBy}
               aria-label="Server size"
             >
               {orderByList.map((el) => (

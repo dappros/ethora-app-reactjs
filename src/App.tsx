@@ -6,6 +6,7 @@ import { Loading } from './components/Loading';
 import { useTrackUrl } from './hooks/useTrackUrl';
 import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
+import {withTracking} from "./hooks/withTracking.tsx";
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -94,4 +95,4 @@ function App() {
   }
 }
 
-export default App;
+export default withTracking(App);

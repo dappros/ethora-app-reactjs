@@ -1,5 +1,5 @@
 import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
-import {
+import  {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
@@ -12,7 +12,7 @@ class Firebase {
   firebaseConfig: FirebaseOptions | null = null;
   init() {
     const config = useAppStore.getState().currentApp?.firebaseConfigParsed;
-    console.log('init with config ', config);
+
     if (!config) return;
 
     const firebaseConfig = {
@@ -31,7 +31,7 @@ class Firebase {
 export type IUser = User & { accessToken: string };
 
 export const getUserCredsFromGoogle = async () => {
-  let firebase = new Firebase();
+  const firebase = new Firebase();
   firebase.init();
   const auth = getAuth(firebase.firebaseApp as FirebaseApp);
   const googleProvider = new GoogleAuthProvider();
