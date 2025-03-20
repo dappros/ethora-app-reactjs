@@ -1,7 +1,7 @@
-import { initializeApp } from "@firebase/app";
-import { getAnalytics, logEvent } from "@firebase/analytics";
+import { initializeApp } from "firebase/app";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import {ComponentType, useEffect, useState} from "react";
-import type { FirebaseApp } from "@firebase/app";
+import type { FirebaseApp } from "firebase/app";
 import Clarity from '@microsoft/clarity';
 import {useAppStore} from "../store/useAppStore.ts";
 

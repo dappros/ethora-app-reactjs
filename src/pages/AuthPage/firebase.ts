@@ -1,4 +1,4 @@
-import { FirebaseApp, FirebaseOptions, initializeApp } from '@firebase/app';
+import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
 import  {
   getAuth,
   GoogleAuthProvider,
