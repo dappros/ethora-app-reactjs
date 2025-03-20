@@ -179,4 +179,6 @@ export type OrderByType =
   | 'totalApiCalls'
   | 'totalFiles'
   | 'totalTransactions'
-  | 'lastName';
+  | 'lastName'
+  | "email"
+  | "firstName";

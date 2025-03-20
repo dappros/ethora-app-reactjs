@@ -478,7 +478,7 @@ export default function AppUsers() {
           Users
         </div>
         <div className="flex lg:flex-row flex-col w-full md:w-auto lg:items-center items-end lg:justify-end justify-start gap-4">
-          <Sorting<"createdAt" | "email" | "firstName" | "lastName">
+          <Sorting<OrderByType>
             className=""
             order={order}
             setOrder={setOrder}
