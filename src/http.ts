@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { actionLogout } from './actions';
-import { ModelUserACL } from './models';
+import { ModelUserACL, OrderByType } from './models';
 
 export const httpTokens = {
   appJwt: '',
@@ -124,14 +124,7 @@ export interface GetAppsPaginator {
   limit?: number;
   offset?: number;
   order?: 'asc' | 'desc';
-  orderBy?:
-    | 'displayName'
-    | 'totalRegistered'
-    | 'totalSessions'
-    | 'totalApiCalls'
-    | 'totalFiles'
-    | 'totalTransactions'
-    | 'createdAt';
+  orderBy?: OrderByType;
 }
 export function httpGetApps({
   limit = 10,
@@ -145,9 +138,7 @@ export function httpGetApps({
 }
 
 export function httpGetApp(id: string) {
-  return http.get(
-    `/apps/${id}`
-  );
+  return http.get(`/apps/${id}`);
 }
 
 export function httpUpdateApp(appId: string, options: any) {
@@ -184,7 +175,7 @@ export function httpGetUsers(
   appId: string,
   limit: number = 10,
   offset: number = 0,
-  orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+  orderBy: OrderByType = 'lastName',
   order: 'asc' | 'desc' = 'asc'
 ) {
   return http.get(

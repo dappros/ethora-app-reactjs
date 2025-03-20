@@ -13,7 +13,7 @@ import {
   httpUpdateUser,
   refreshToken,
 } from './http';
-import { ModelApp, ModelCurrentUser } from './models';
+import { ModelApp, ModelCurrentUser, OrderByType } from './models';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
 import { sleep } from './utils/sleep';
@@ -163,7 +163,7 @@ export async function actionGetUsers(
   appId: string,
   limit: number = 10,
   offset: number = 0,
-  orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+  orderBy: OrderByType = 'lastName',
   order: 'asc' | 'desc' = 'asc'
 ) {
   return httpGetUsers(appId, limit, offset, orderBy, order);
@@ -209,8 +209,8 @@ export async function actionUpdateUser(fd: FormData) {
 }
 
 export function actionLogout() {
-  localStorage.clear()
-  window.location.pathname = '/login'
+  localStorage.clear();
+  window.location.pathname = '/login';
   return null;
 }
 
@@ -222,4 +222,4 @@ export const actionGetCsvFile = async (appId: string): Promise<void> => {
   } catch (e) {
     console.error(e);
   }
-}
+};

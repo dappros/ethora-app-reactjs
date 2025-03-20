@@ -21,8 +21,13 @@ import { IconAdd } from '../components/Icons/IconAdd';
 import { IconCheckbox } from '../components/Icons/IconCheckbox';
 import { IconDelete } from '../components/Icons/IconDelete';
 import { IconSettings } from '../components/Icons/IconSettings';
-import {getExportCsv, httpCraeteUser, httpTagsSet, httpUpdateAcl} from '../http';
-import { ModelAppUser, ModelUserACL } from '../models';
+import {
+  getExportCsv,
+  httpCraeteUser,
+  httpTagsSet,
+  httpUpdateAcl,
+} from '../http';
+import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
 
 import classNames from 'classnames';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
@@ -30,12 +35,12 @@ import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
+import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
 import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
 import MetamaskIcon from './AuthPage/Icons/socials/metamaskIcon';
-import CsvButton from "../components/UI/Buttons/CSVButton.tsx";
 
 export default function AppUsers() {
   const { appId } = useParams();
@@ -53,13 +58,13 @@ export default function AppUsers() {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [order, setOrder] = useState<"asc" | "desc">('asc');
-  const [orderBy, setOrderBy] = useState<"email" | "createdAt" | "firstName" | "lastName">('createdAt');
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
 
   const [editAcl, setEditAcl] = useState<ModelUserACL | null>(null);
 
   const getCsvFile = async () => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -67,7 +72,7 @@ export default function AppUsers() {
       const response = await getExportCsv(appId);
       const binaryData = response.data;
 
-      const blob = new Blob([binaryData], { type: 'text/plain' })
+      const blob = new Blob([binaryData], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement('a');
@@ -82,7 +87,7 @@ export default function AppUsers() {
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   const updateAcl = () => {
     if (editAcl && appId) {
@@ -130,7 +135,7 @@ export default function AppUsers() {
   }, [items]);
 
   useEffect(() => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -143,7 +148,7 @@ export default function AppUsers() {
   }, []);
 
   const onPageChange = (page: number) => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -164,17 +169,11 @@ export default function AppUsers() {
   };
 
   useEffect(() => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
-    actionGetUsers(
-      appId,
-      itemsPerTable,
-      0,
-      orderBy,
-      order
-    ).then((response) => {
+    actionGetUsers(appId, itemsPerTable, 0, orderBy, order).then((response) => {
       const { total, items } = response.data;
       setItems(items);
       setTotal(total);
@@ -186,7 +185,7 @@ export default function AppUsers() {
   }, [itemsPerTable]);
 
   useEffect(() => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -236,7 +235,7 @@ export default function AppUsers() {
   };
 
   const onTagsSumbmit = () => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -244,7 +243,7 @@ export default function AppUsers() {
 
     httpTagsSet(appId, {
       usersIdList: selectedUserIds,
-      tagsList: tags.split(',').filter((el) => (!!el)),
+      tagsList: tags.split(',').filter((el) => !!el),
     }).then(() => {
       actionGetUsers(
         appId,
@@ -274,7 +273,7 @@ export default function AppUsers() {
     lastName: string;
     email: string;
   }) => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -301,7 +300,7 @@ export default function AppUsers() {
   };
 
   const onResetPassword = () => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -314,7 +313,7 @@ export default function AppUsers() {
   };
 
   const onDelete = () => {
-    if(!appId) {
+    if (!appId) {
       return;
     }
 
@@ -325,8 +324,6 @@ export default function AppUsers() {
         selectedUserIds.push(item._id);
       }
     });
-
-
 
     actionDeleteManyUsers(appId, selectedUserIds).then(() => {
       actionGetUsers(
@@ -495,7 +492,7 @@ export default function AppUsers() {
             setOrderBy={setOrderBy}
           />
           <div className="flex items-center justify-end gap-4">
-            <CsvButton onClick={getCsvFile}/>
+            <CsvButton onClick={getCsvFile} />
             <button
               onClick={() => setShowNewUserModal(true)}
               className="flex hover:bg-brand-darker items-center justify-center sm:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
