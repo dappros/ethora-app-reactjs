@@ -8,18 +8,10 @@ import {
   Radio,
   RadioGroup,
 } from '@headlessui/react';
+import { OrderByType } from '../models';
 import { IconAdd } from './Icons/IconAdd';
 import { IconArrowDown } from './Icons/IconArrowDown';
 import { IconMarked } from './Icons/IconMarked';
-
-type OrderByType =
-  | 'createdAt'
-  | 'displayName'
-  | 'totalRegistered'
-  | 'totalSessions'
-  | 'totalApiCalls'
-  | 'totalFiles'
-  | 'totalTransactions';
 
 interface OrderItem {
   key: string;
