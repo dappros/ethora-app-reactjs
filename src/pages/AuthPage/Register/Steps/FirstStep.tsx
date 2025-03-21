@@ -49,7 +49,7 @@ const FirstStep: React.FC<FirstStepProps> = ({
         const website = window.location.origin;
         const currentDomain = window.location.hostname;
         const allowedDomains =
-          import.meta.env.REACT_APP_ALLOWED_DOMAINS?.split(",") || [];
+          import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
 
         const hubspotData = {
           fields: [

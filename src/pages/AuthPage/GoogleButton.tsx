@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../actions';
+import { logLogin } from '../../hooks/withTracking.tsx';
 import {
   httpCheckEmailExist,
   httpLoginSocial,
@@ -12,7 +13,6 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
-import {logLogin} from "../../hooks/withTracking.tsx";
 
 export const GoogleButton = () => {
   const config = useAppStore.getState().currentApp;
@@ -51,13 +51,13 @@ export const GoogleButton = () => {
             );
             const { firstName, lastName, email } = userResult?.data?.user;
 
-            console.log('userResult', userResult)
+            console.log('userResult', userResult);
 
-            logLogin("google", userResult?.data?.user?.user._id);
+            logLogin('google', userResult?.data?.user?.user._id);
 
             const website = `${window?.location?.origin || ''}/google`;
             const allowedDomains =
-              import.meta.env.REACT_APP_ALLOWED_DOMAINS?.split(",") || [];
+              import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {
@@ -97,7 +97,7 @@ export const GoogleButton = () => {
             credential?.accessToken ?? '',
             loginType
           ).then(async ({ data }) => {
-            logLogin("google", data.user._id);
+            logLogin('google', data.user._id);
 
             await actionAfterLogin(data);
             navigateToUserPage(navigate, config?.afterLoginPage);
