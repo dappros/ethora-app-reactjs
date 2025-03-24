@@ -47,7 +47,9 @@ export function ManageData() {
       .then(() => {
         toast.success('Success');
         doClearState();
-        navigate('/');
+        localStorage.removeItem('token-538');
+        localStorage.removeItem('lastPath');
+        navigate('/login');
       })
       .finally(() => setLoading(false));
   };

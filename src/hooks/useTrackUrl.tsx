@@ -27,7 +27,7 @@ export const useTrackUrl = () => {
       return;
     }
 
-    if (token && location.pathname === '/login') {
+    if ((token && token !== 'undefined') && location.pathname === '/login') {
       navigate(lastPath || '/app/admin/apps', { replace: true });
       return;
     }
@@ -41,7 +41,7 @@ export const useTrackUrl = () => {
     const token = localStorage.getItem('token-538');
     const lastPath = localStorage.getItem('lastPath');
 
-    if (token && location.pathname === '/login') {
+    if ((token && token !== 'undefined')  && location.pathname === '/login') {
       navigate(lastPath || '/app/admin/apps', { replace: true });
     }
   }, [location.pathname, navigate]);

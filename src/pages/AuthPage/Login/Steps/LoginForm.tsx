@@ -35,7 +35,6 @@ const LoginStep = () => {
         await actionAfterLogin(data);
 
         logLogin("email", data.user._id);
-
         if (config?.afterLoginPage) {
           navigateToUserPage(navigate, config.afterLoginPage as string);
         }
