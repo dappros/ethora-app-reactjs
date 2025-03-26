@@ -41,6 +41,7 @@ const LoginStep = () => {
       })
       .catch((error) => {
         toast.error(error.response.data.error);
+        localStorage.removeItem('token-538');
       });
   };
 
