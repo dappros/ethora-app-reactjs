@@ -1,22 +1,19 @@
 import hexToRgba from 'hex-to-rgba';
 import { useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { actionAfterLogin, actionGetConfig } from './actions';
+import { Outlet } from 'react-router-dom';
+import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { useTrackUrl } from './hooks/useTrackUrl';
-import { httpGetOneUser } from './http';
 import { useAppStore } from './store/useAppStore';
 import {withTracking} from "./hooks/withTracking.tsx";
+import {useCaptureUtm} from "./hooks/useCaptureUtm.tsx";
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
 }
 
 function App() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const currentApp = useAppStore((s) => s.currentApp);
-  const token = localStorage.getItem('token-538');
 
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
@@ -54,38 +51,7 @@ function App() {
     }
   }, [currentApp]);
 
-  useEffect(() => {
-    // alert("here ++")
-    const example = async () => {
-      if (token) {
-        // sleep(1000)
-        try {
-          const { data } = await httpGetOneUser();
-          await actionAfterLogin(data);
-        } catch (e) {
-          if (
-            !location.pathname.startsWith('/tempPassword') ||
-            !location.pathname.startsWith('/resetPassword')
-          ) {
-            navigate('/login');
-          }
-          console.error(e);
-        }
-      } else {
-        if (
-          location.pathname.startsWith('/tempPassword') ||
-          location.pathname.startsWith('/resetPassword')
-        ) {
-          return;
-        } else {
-          navigate('/login');
-        }
-      }
-    };
-
-    example();
-  }, []);
-
+  useCaptureUtm();
   useTrackUrl();
 
   if (!currentApp) {
