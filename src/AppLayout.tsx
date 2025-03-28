@@ -6,7 +6,6 @@ import { useAppStore } from './store/useAppStore';
 export default function AppLayout() {
   const location = useLocation();
   const user = useAppStore((s) => s.currentUser);
-  const currentApp = useAppStore((s) => s.currentApp);
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -15,12 +14,6 @@ export default function AppLayout() {
   //   export const VITE_APP_XMPP_SERVICE = import.meta.env.VITE_APP_XMPP_SERVICE;
   // export const VITE_XMPP_SERVICE = import.meta.env.VITE_XMPP_SERVICE;
   // export const VITE_XMPP_HOST = import.meta.env.VITE_XMPP_HOST;
-  let rooms = currentApp?.defaultRooms.map((el) => {
-    return {
-      title: el.title,
-      chatId: el.jid,
-    };
-  });
 
   if (location.pathname !== '/login') {
     localStorage.setItem('lastPath', location.pathname + location.search);
