@@ -53,7 +53,7 @@ export const GoogleButton = () => {
 
             console.log('userResult', userResult);
 
-            logLogin('google', userResult?.data?.user?.user._id);
+            logLogin('google', userResult?.data?.user?._id);
 
             const website = `${window?.location?.origin || ''}/google`;
             const allowedDomains =
@@ -79,6 +79,7 @@ export const GoogleButton = () => {
               hubspotData
             );
           } catch (error) {
+            console.log(error);
             toast.error('Social registration failed');
           }
 
