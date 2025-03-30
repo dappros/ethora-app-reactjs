@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
+import {useCallback, useEffect, useState} from 'react';
+import {NavLink, Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { httpGetApp } from '../http';
 import { useAppStore } from '../store/useAppStore';
@@ -7,11 +7,17 @@ import { Error404Page } from './ErrorPage/Error404Page';
 
 export default function AdminApp() {
   const { appId } = useParams();
+  const location = useLocation();
   const apps = useAppStore((s) => s.apps);
   const doSetApp = useAppStore((s) => s.doSetApp);
   const app = apps.find((app) => app._id === appId);
   const navigate = useNavigate();
   const [isValidApp, setIsValidApp] = useState<boolean>(true);
+
+  const goBack = useCallback(() => {
+    const backUrl = location.state?.from;
+    navigate(backUrl || '/app/admin/apps');
+  }, [location.state?.from, navigate]);
 
   useEffect(() => {
     if (!appId || app) return;
@@ -30,7 +36,7 @@ export default function AdminApp() {
   }, [appId, app, doSetApp]);
 
   if (!isValidApp) {
-    return <Error404Page navigateUrl="/app/admin/apps/" />;
+    return <Error404Page navigateUrl={location.state?.from || "/app/admin/apps/"} />;
   }
 
   return (
@@ -40,7 +46,7 @@ export default function AdminApp() {
         <div className="flex mb-4 md:mb-0">
           <button
             className="ml-[5px] md:mb-0 mr-[13px]"
-            onClick={() => navigate('/app/admin/apps')}
+            onClick={goBack}
           >
             <IconArrowLeft />
           </button>

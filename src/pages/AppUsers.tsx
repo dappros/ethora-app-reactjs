@@ -8,8 +8,7 @@ import {
 } from '@headlessui/react';
 import cn from 'classnames';
 import { DateTime } from 'luxon';
-import { useEffect, useState } from 'react';
-import ReactPaginate from 'react-paginate';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -41,8 +40,11 @@ import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
 import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
 import MetamaskIcon from './AuthPage/Icons/socials/metamaskIcon';
+import { useSearchParams } from 'react-router-dom';
+import {Pagination} from "../components/UI/Pagination/Pagination.tsx";
 
 export default function AppUsers() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { appId } = useParams();
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [items, setItems] = useState<Array<ModelAppUser>>([]);
@@ -50,7 +52,6 @@ export default function AppUsers() {
   const [showNewUserModal, setShowNewUserModal] = useState(false);
   const [itemsPerTable, setItemsPerTable] = useState(10);
   const [pageCount, setPageCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [showManageTags, setShowManageTags] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
@@ -58,10 +59,38 @@ export default function AppUsers() {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-  const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
+  // const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  // const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
 
   const [editAcl, setEditAcl] = useState<ModelUserACL | null>(null);
+
+  const limit = useMemo(() => Number(searchParams.get('limit')) || 10, [searchParams]);
+  const page = useMemo(() => Number(searchParams.get('page')) || 0, [searchParams]);
+  const order = useMemo(() => (searchParams.get('order') as 'asc' | 'desc') || 'asc', [searchParams]);
+  const orderBy = useMemo(() => (searchParams.get('orderBy') as OrderByType) || 'createdAt', [searchParams]);
+
+  const updateSearchParams = useCallback((newParams: Record<string, string | number>) => {
+    setSearchParams((prev) => {
+      const updatedParams = new URLSearchParams(prev);
+      Object.entries(newParams).forEach(([key, value]) => {
+        updatedParams.set(key, String(value));
+      });
+      return updatedParams;
+    });
+  }, [setSearchParams]);
+
+  const setOrder = useCallback((newOrder: 'asc' | 'desc') => {
+    updateSearchParams({ order: newOrder, page: 0 });
+  }, [updateSearchParams]);
+
+  const setOrderBy = useCallback((newOrderBy: OrderByType) => {
+    updateSearchParams({ orderBy: newOrderBy, page: 0 });
+  }, [updateSearchParams]);
+
+  const changeItemsPerTable = useCallback((count: number) => {
+    setItemsPerTable(count);
+    updateSearchParams({ limit: count, page: 0 });
+  }, [updateSearchParams]);
 
   const getCsvFile = async () => {
     if (!appId) {
@@ -95,7 +124,7 @@ export default function AppUsers() {
         actionGetUsers(
           appId,
           itemsPerTable,
-          currentPage * itemsPerTable,
+          page * itemsPerTable,
           orderBy,
           order
         ).then((response) => {
@@ -103,7 +132,6 @@ export default function AppUsers() {
           setItems(items);
           setTotal(total);
           setPageCount(Math.ceil(total / itemsPerTable));
-          setCurrentPage(currentPage);
           setEditAcl(null);
         });
       });
@@ -134,20 +162,26 @@ export default function AppUsers() {
     setRowsSelected(() => items.map((_el) => false));
   }, [items]);
 
-  useEffect(() => {
-    if (!appId) {
-      return;
-    }
+  const onPageChange = useCallback((selectedItem: { selected: number }) => {
+    updateSearchParams({ page: selectedItem.selected });
+  }, [updateSearchParams]);
 
-    actionGetUsers(appId, itemsPerTable, 0, orderBy, order).then((response) => {
+  const fetchUsers = useCallback(() => {
+    if (!appId) return;
+
+    actionGetUsers(appId, limit, page * limit, orderBy, order).then((response) => {
       const { total, items } = response.data;
       setItems(items);
       setTotal(total);
-      setPageCount(Math.ceil(total / itemsPerTable));
+      setPageCount(Math.ceil(total / limit));
     });
-  }, []);
+  }, [appId, limit, page, orderBy, order]);
 
-  const onPageChange = (page: number) => {
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  useEffect(() => {
     if (!appId) {
       return;
     }
@@ -163,54 +197,16 @@ export default function AppUsers() {
       setItems(items);
       setTotal(total);
       setPageCount(Math.ceil(total / itemsPerTable));
-      setCurrentPage(page);
-      setRowsSelected((selected) => selected.map(() => false));
-    });
-  };
-
-  useEffect(() => {
-    if (!appId) {
-      return;
-    }
-
-    actionGetUsers(appId, itemsPerTable, 0, orderBy, order).then((response) => {
-      const { total, items } = response.data;
-      setItems(items);
-      setTotal(total);
-      setPageCount(Math.ceil(total / itemsPerTable));
-      setCurrentPage(0);
-      setRowsSelected((selected) => selected.map(() => false));
-    });
-    setCurrentPage(0);
-  }, [itemsPerTable]);
-
-  useEffect(() => {
-    if (!appId) {
-      return;
-    }
-
-    actionGetUsers(
-      appId,
-      itemsPerTable,
-      currentPage * itemsPerTable,
-      orderBy,
-      order
-    ).then((response) => {
-      const { total, items } = response.data;
-      setItems(items);
-      setTotal(total);
-      setPageCount(Math.ceil(total / itemsPerTable));
-      setCurrentPage(currentPage);
       setRowsSelected((selected) => selected.map(() => false));
     });
   }, [orderBy, order]);
 
   const renderTo = () => {
-    return itemsPerTable * (currentPage + 1);
+    return itemsPerTable * (page + 1);
   };
 
   const renderFrom = () => {
-    if (currentPage === 0) {
+    if (page === 0) {
       return <span>1</span>;
     } else {
       return 1;
@@ -248,7 +244,7 @@ export default function AppUsers() {
       actionGetUsers(
         appId,
         itemsPerTable,
-        currentPage * itemsPerTable,
+        page * itemsPerTable,
         orderBy,
         order
       ).then((response) => {
@@ -256,7 +252,6 @@ export default function AppUsers() {
         setItems(items);
         setTotal(total);
         setPageCount(Math.ceil(total / itemsPerTable));
-        setCurrentPage(currentPage);
         setShowManageTags(false);
         setTags('');
         toast('Tags applied successfully!');
@@ -283,7 +278,7 @@ export default function AppUsers() {
         actionGetUsers(
           appId,
           itemsPerTable,
-          currentPage * itemsPerTable,
+          page * itemsPerTable,
           orderBy,
           order
         ).then((response) => {
@@ -291,7 +286,6 @@ export default function AppUsers() {
           setItems(items);
           setTotal(total);
           setPageCount(Math.ceil(total / itemsPerTable));
-          setCurrentPage(currentPage);
           setShowNewUserModal(false);
           toast('User created successfully!');
         });
@@ -329,7 +323,7 @@ export default function AppUsers() {
       actionGetUsers(
         appId,
         itemsPerTable,
-        currentPage * itemsPerTable,
+        page * itemsPerTable,
         orderBy,
         order
       ).then((response) => {
@@ -337,7 +331,6 @@ export default function AppUsers() {
         setItems(items);
         setTotal(total);
         setPageCount(Math.ceil(total / itemsPerTable));
-        setCurrentPage(currentPage);
         setRowsSelected((selected) => selected.map(() => false));
         setShowDelete(false);
         toast(
@@ -346,48 +339,6 @@ export default function AppUsers() {
       });
     });
   };
-
-  // // @ts-ignore
-  // const onOrderChange = (value: 'asc' | 'desc') => {
-  //   setOrder(value);
-  // };
-  //
-  // // @ts-ignore
-  // const onSortByChange = (value: string) => {
-  //   console.log('onSortByChange ', value);
-  //   // @ts-ignore
-  //   setOrderBy(value);
-  // };
-  //
-  // // @ts-ignore
-  // const renderOrder = (value: 'asc' | 'desc') => {
-  //   if (value === 'asc') {
-  //     return '(A-Z)';
-  //   } else {
-  //     return '(Z-A)';
-  //   }
-  // };
-  //
-  // // @ts-ignore
-  // const renderOrderBy = (value: string) => {
-  //   if (value === 'createdAt') {
-  //     return 'Creation Date';
-  //   }
-  //
-  //   if (value === 'firstName') {
-  //     return 'First Name';
-  //   }
-  //
-  //   if (value === 'lastName') {
-  //     return 'Last Name';
-  //   }
-  //
-  //   if (value === 'email') {
-  //     return 'Email';
-  //   }
-  //
-  //   return value;
-  // };
 
   const renderAuthMethodIcon = (name: string) => {
     switch (name) {
@@ -406,7 +357,7 @@ export default function AppUsers() {
     const selectedIndexes = [];
 
     rowsSelected.forEach((el, index) => {
-      if (el === true) {
+      if (el) {
         selectedIndexes.push(index);
       }
     });
@@ -637,8 +588,8 @@ export default function AppUsers() {
                 </tbody>
               </table>
             </div>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mx-8 my-[12px]">
-              <div className="flex justify-between md:justify-start items-center">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mx-8 my-[12px]">
+              <div className="flex justify-between lg:justify-start items-center">
                 <div className="text-[#71717A] text-xs mr-8 whitespace-nowrap">
                   {renderFrom()} to {renderTo()} of {total}
                 </div>
@@ -653,52 +604,27 @@ export default function AppUsers() {
                     </MenuButton>
                     <MenuItems anchor="bottom" className="bg-white">
                       <div className="">
-                        <MenuItem>
-                          <div
-                            onClick={() => setItemsPerTable(10)}
-                            className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
-                          >
-                            {10}
-                          </div>
-                        </MenuItem>
-                        <MenuItem>
-                          <div
-                            onClick={() => setItemsPerTable(15)}
-                            className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
-                          >
-                            {15}
-                          </div>
-                        </MenuItem>
-                        <MenuItem>
-                          <div
-                            onClick={() => setItemsPerTable(25)}
-                            className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
-                          >
-                            {25}
-                          </div>
-                        </MenuItem>
+                        {[10, 15, 25].map(item => (
+                          <MenuItem>
+                            <div
+                              onClick={() => changeItemsPerTable(item)}
+                              className="cursor-pointer px-2 text-brand-500 w-[60px] font-semibold"
+                            >
+                              {item}
+                            </div>
+                          </MenuItem>
+                        ))}
                       </div>
                     </MenuItems>
                   </Menu>
                   <div className="text-[#71717A]">users</div>
                 </div>
               </div>
-              <div className="flex justify-center md:justify-end md:items-center">
-                <ReactPaginate
-                  className="paginate"
-                  onPageActive={(...args) => {
-                    console.log({ args });
-                  }}
-                  onPageChange={(selectedItem) =>
-                    onPageChange(selectedItem.selected)
-                  }
-                  breakLabel="..."
-                  nextLabel=""
-                  pageRangeDisplayed={3}
+              <div className="flex justify-center lg:justify-end lg:items-center">
+                <Pagination
+                  onPageChange={onPageChange}
                   pageCount={pageCount}
-                  previousLabel=""
-                  renderOnZeroPageCount={null}
-                  forcePage={currentPage}
+                  forcePage={page}
                 />
               </div>
             </div>

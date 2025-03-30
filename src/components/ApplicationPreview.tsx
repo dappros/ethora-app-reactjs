@@ -15,7 +15,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
   const navigate = useNavigate();
   const numberFormatter = new Intl.NumberFormat('en-US')
   const onClick = () => {
-    navigate(`/app/admin/apps/${app._id}/settings`);
+    navigate(`/app/admin/apps/${app._id}/settings`, {
+      state: { from: location.pathname + location.search },
+    });
   };
 
   const onExternalClick = () => {

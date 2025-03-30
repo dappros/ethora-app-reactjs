@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import ReactPaginate from 'react-paginate';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { ApplicationPreview } from '../components/ApplicationPreview';
 import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
@@ -9,8 +8,7 @@ import { Sorting } from '../components/Sorting';
 import { httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
-
-const ITEMS_COUNT = 5;
+import {Pagination} from "../components/UI/Pagination/Pagination.tsx";
 
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,7 +21,7 @@ export default function AdminApps() {
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
 
   const limit = useMemo(
-    () => Number(searchParams.get('limit')) || ITEMS_COUNT,
+    () => Number(searchParams.get('limit')) || 5,
     [searchParams]
   );
   const page = useMemo(
@@ -154,22 +152,10 @@ export default function AdminApps() {
         ))}
 
         {currentUser?.isSuperAdmin && (
-          <ReactPaginate
-            className="flex items-center justify-center gap-2 mt-4 text-gray-500"
+          <Pagination
             onPageChange={onPageChange}
-            breakLabel="..."
-            nextLabel="Next ➝"
-            pageRangeDisplayed={2}
             pageCount={pageCount}
-            previousLabel="⬅ Prev"
-            renderOnZeroPageCount={null}
             forcePage={currentPage}
-            activeClassName="text-brand-500 font-bold px-3 py-2 rounded"
-            pageClassName="px-3 py-2 hover:bg-gray-200"
-            previousClassName="px-3 py-2 hover:bg-gray-200"
-            nextClassName="px-3 py-2 hover:bg-gray-200"
-            disabledClassName="text-grey-300 cursor-not-allowed"
-            breakClassName="px-3 py-2"
           />
         )}
       </div>
