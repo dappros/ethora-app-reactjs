@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { DateTime, Duration } from 'luxon';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-date-range';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -33,6 +33,7 @@ const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
 
 export const AppStatistics = (): ReactElement => {
   const { appId } = useParams<string>();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [graphStatistics, setGraphStatistics] = useState<
     Record<string, { value: number; name: string }[]>
@@ -40,19 +41,55 @@ export const AppStatistics = (): ReactElement => {
   const [graphStatisticsCont, setGraphStatisticsCount] = useState<
     Record<string, number>
   >({});
-  const [selectedTab, setSelectedTab] = useState(tabs[1]);
-  const [timePeriod, setTimePeriod] = useState<string>('7 days');
+  
+  // Получаем значения из URL параметров
+  const tabFromUrl = searchParams.get('tab');
+  const periodFromUrl = searchParams.get('period');
+  
+  // Инициализируем состояния с учетом URL параметров
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const savedTab = tabs.find(tab => tab.value === tabFromUrl);
+    return savedTab || tabs[1];
+  });
+  
+  const [timePeriod, setTimePeriod] = useState<string>(() => {
+    return periodFromUrl || '7 days';
+  });
+  
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customRangeVisible, setCustomRangeVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: DateTime.now().toJSDate(),
-      endDate: DateTime.now().toJSDate(),
-      key: 'selection',
-    },
-  ]);
+  const [dateRange, setDateRange] = useState(() => {
+    const savedRange = searchParams.get('dateRange');
+    return savedRange ? JSON.parse(savedRange) : [{
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection'
+    }];
+  });
+
+  // Обновляем URL при изменении состояний
+  useEffect(() => {
+    setSearchParams(params => {
+      params.set('tab', selectedTab.value);
+      return params;
+    });
+  }, [selectedTab, setSearchParams]);
+
+  useEffect(() => {
+    setSearchParams(params => {
+      params.set('period', timePeriod);
+      return params;
+    });
+  }, [timePeriod, setSearchParams]);
+
+  useEffect(() => {
+    setSearchParams(params => {
+      params.set('dateRange', JSON.stringify(dateRange));
+      return params;
+    });
+  }, [dateRange, setSearchParams]);
 
   const calculateDates = (period: string) => {
     const endDate = DateTime.now();

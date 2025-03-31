@@ -51,8 +51,6 @@ export const GoogleButton = () => {
             );
             const { firstName, lastName, email } = userResult?.data?.user;
 
-            console.log('userResult', userResult);
-
             logLogin('google', userResult?.data?.user?._id);
 
             const website = `${window?.location?.origin || ''}/google`;
