@@ -7,6 +7,7 @@ import { useTrackUrl } from './hooks/useTrackUrl';
 import { useAppStore } from './store/useAppStore';
 import {withTracking} from "./hooks/withTracking.tsx";
 import {useCaptureUtm} from "./hooks/useCaptureUtm.tsx";
+import ReloadPrompt from './components/ReloadPrompt';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -57,7 +58,12 @@ function App() {
   if (!currentApp) {
     return <Loading></Loading>;
   } else {
-    return <Outlet />;
+    return (
+      <>
+        <Outlet />
+        <ReloadPrompt />
+      </>
+    );
   }
 }
 
