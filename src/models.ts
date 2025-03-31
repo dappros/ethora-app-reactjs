@@ -138,7 +138,9 @@ export interface ModelUserACL {
     };
   };
   network: {
-    read: boolean;
+    netStats: {
+      read: boolean;
+    }
   };
 }
 

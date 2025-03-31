@@ -4,7 +4,7 @@ import { ModelUserACL } from '../../models';
 import { IconClose } from '../Icons/IconClose';
 import './AclModal.scss';
 //@ts-ignore
-import { set } from 'lodash';
+import { set, get } from 'lodash';
 import { CheckboxApp } from '../CheckboxApp';
 
 interface Props {
@@ -15,7 +15,6 @@ interface Props {
 }
 
 export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
-  console.log({ acl });
   const onChange = (isSet: boolean, path: string) => {
     let newAcl = JSON.parse(JSON.stringify(acl));
     set(newAcl, path, isSet);
@@ -42,7 +41,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         </div>
 
         <div className="font-sans text-xs text-[#8C8C8C] mb-4">
-          Here you can assign or remove User’s access rights to certain objects
+          Here you can assign or remove User's access rights to certain objects
           within the current App.
         </div>
 
@@ -326,8 +325,8 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                 <td className="px-4 font-sans font-normal text-sm text-center">
                   <div className="flex justify-center">
                     <CheckboxApp
-                      checked={acl.network.read}
-                      onChange={(isSet) => onChange(isSet, 'network.read')}
+                      checked={acl.application.appStats.read}
+                      onChange={(isSet) => onChange(isSet, 'application.appStats.read')}
                     />
                   </div>
                 </td>
@@ -341,10 +340,12 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                     <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
-
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
-                    <CheckboxApp checked={false} onChange={() => {}} disabled />
+                    <CheckboxApp
+                      checked={acl.application.appStats.admin}
+                      onChange={(isSet) => onChange(isSet, 'application.appStats.admin')}
+                    />
                   </div>
                 </td>
               </tr>
@@ -358,7 +359,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         </div>
 
         <div className="font-sans text-xs text-[#8C8C8C] mb-4">
-          Here you can assign or remove User’s access to infrastructure level
+          Here you can assign or remove User's access to infrastructure level
           objects, above the context of any Apps. Available for Enterprise Plan.
         </div>
 
@@ -401,8 +402,8 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                 <td className="px-4 font-sans font-normal text-sm text-center">
                   <div className="flex justify-center">
                     <CheckboxApp
-                      checked={acl.network.read}
-                      onChange={(isSet) => onChange(isSet, 'network.read')}
+                      checked={acl.network.netStats.read}
+                      onChange={(isSet) => onChange(isSet, 'network.netStats.read')}
                     />
                   </div>
                 </td>
@@ -416,7 +417,6 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                     <CheckboxApp checked={false} onChange={() => {}} disabled />
                   </div>
                 </td>
-
                 <td className="px-4 rounded-r-lg font-sans font-normal text-sm">
                   <div className="flex justify-center">
                     <CheckboxApp checked={false} onChange={() => {}} disabled />
