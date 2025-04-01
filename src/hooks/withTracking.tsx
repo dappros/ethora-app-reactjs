@@ -15,6 +15,15 @@ interface FirebaseConfig {
   measurementId?: string;
 }
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dataLayer: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    gtag: (...args: any[]) => void;
+  }
+}
+
 let firebaseApp: FirebaseApp | null = null;
 let analytics: ReturnType<typeof getAnalytics> | null = null;
 let sessionStartTime: number | null = null;
@@ -29,6 +38,36 @@ const logSessionDuration = () => {
       console.warn("Session too short (<2s), ignoring.");
     }
   }
+};
+
+const initializeGoogleAnalytics = () => {
+  const gtmScript = document.createElement('script');
+  gtmScript.innerHTML = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-NTMFZ8P');`;
+  document.head.appendChild(gtmScript);
+
+  // Initialize GA4
+  const gaScript = document.createElement('script');
+  gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-LJGQL9DG2Z';
+  gaScript.async = true;
+  document.head.appendChild(gaScript);
+
+  window.dataLayer = window.dataLayer || [];
+
+  window.gtag = function(...args) {
+    window.dataLayer.push(args);
+  };
+
+  window.gtag('js', new Date());
+  window.gtag('config', 'G-LJGQL9DG2Z');
+
+  const gtmNoscript = document.createElement('noscript');
+  gtmNoscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NTMFZ8P"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+  document.body.insertBefore(gtmNoscript, document.body.firstChild);
 };
 
 export function withTracking<T>(Component: ComponentType<T>) {
@@ -76,11 +115,12 @@ export function withTracking<T>(Component: ComponentType<T>) {
         console.error("Microsoft Clarity failed to start", error);
       }
 
+      initializeGoogleAnalytics();
+
       sessionStartTime = Date.now();
 
       const handleClick = (event: MouseEvent) => {
         let target = event.target as HTMLElement;
-
 
         while (target && target !== document.body && !target.tagName.match(/^(button|a)$/i) && !target.dataset.track) {
           target = target.parentElement as HTMLElement;
@@ -168,4 +208,4 @@ export const logLogout = () => {
     logEvent(analytics, "session_end");
   }
   sessionStartTime = null;
-  }
+};

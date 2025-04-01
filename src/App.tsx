@@ -5,8 +5,8 @@ import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { useTrackUrl } from './hooks/useTrackUrl';
 import { useAppStore } from './store/useAppStore';
-import {withTracking} from "./hooks/withTracking.tsx";
-import {useCaptureUtm} from "./hooks/useCaptureUtm.tsx";
+import { withTracking } from "./hooks/withTracking";
+import { useCaptureParams } from "./hooks/useCaptureParams";
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -51,7 +51,7 @@ function App() {
     }
   }, [currentApp]);
 
-  useCaptureUtm();
+  useCaptureParams();
   useTrackUrl();
 
   if (!currentApp) {
