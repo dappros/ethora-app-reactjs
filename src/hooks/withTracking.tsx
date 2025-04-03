@@ -40,6 +40,16 @@ const logSessionDuration = () => {
   }
 };
 
+
+// <script async src="https://www.googletagmanager.com/gtag/js?id=G-M8SFB5QEGX"></script>
+// <script>
+//   window.dataLayer = window.dataLayer || [];
+//   function gtag(){dataLayer.push(arguments);}
+//   gtag('js', new Date());
+//
+//   gtag('config', 'G-M8SFB5QEGX');
+// </script>
+
 const initializeGoogleAnalytics = () => {
   const gtmScript = document.createElement('script');
   gtmScript.innerHTML = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -51,7 +61,7 @@ const initializeGoogleAnalytics = () => {
 
   // Initialize GA4
   const gaScript = document.createElement('script');
-  gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-LJGQL9DG2Z';
+  gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-M8SFB5QEGX';
   gaScript.async = true;
   document.head.appendChild(gaScript);
 
@@ -62,7 +72,7 @@ const initializeGoogleAnalytics = () => {
   };
 
   window.gtag('js', new Date());
-  window.gtag('config', 'G-LJGQL9DG2Z');
+  window.gtag('config', 'G-M8SFB5QEGX');
 
   const gtmNoscript = document.createElement('noscript');
   gtmNoscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NTMFZ8P"
