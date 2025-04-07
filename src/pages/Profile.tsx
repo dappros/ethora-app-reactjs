@@ -1,3 +1,4 @@
+import { logoutService } from '@ethora/chat-component';
 import {
   Dialog,
   DialogPanel,
@@ -76,6 +77,7 @@ export default function Profile() {
 
   const onLogout = () => {
     actionLogout();
+    logoutService.performLogout();
     navigate('/login', { replace: true });
   };
 
