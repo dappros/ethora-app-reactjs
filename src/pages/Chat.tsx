@@ -67,6 +67,8 @@ const MemoizedChat = React.memo(function ChatComponent({
           enabled: true,
         },
         setRoomJidInPath: true,
+        disableSentLogic: true,
+        disableMedia: true,
       }}
     />
   );
