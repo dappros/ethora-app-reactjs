@@ -61,8 +61,6 @@ export const initializeGA4 = (measurementId: string) => {
 
     window.gtag('js', new Date());
     window.gtag('config', measurementId);
-
-    console.log('GA');
   };
 };
 
@@ -94,8 +92,6 @@ export const initializeGTM = (gtmId: string) => {
     height="0" width="0" style="display:none;visibility:hidden"></iframe>
   `;
   document.body.appendChild(gtmNoscript);
-
-  console.log('GTM');
 };
 
 export function withTracking<T>(Component: ComponentType<T>) {
