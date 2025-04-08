@@ -33,57 +33,69 @@ const logSessionDuration = () => {
     const sessionDuration = (Date.now() - sessionStartTime) / 1000;
     if (sessionDuration >= 2) {
       logEvent(analytics, 'session_duration', { duration: sessionDuration });
-      console.log(`session duration logged: ${sessionDuration}s`);
     } else {
       console.warn('Session too short (<2s), ignoring.');
     }
   }
 };
 
-// <script async src="https://www.googletagmanager.com/gtag/js?id=G-M8SFB5QEGX"></script>
-// <script>
-//   window.dataLayer = window.dataLayer || [];
-//   function gtag(){dataLayer.push(arguments);}
-//   gtag('js', new Date());
-//
-//   gtag('config', 'G-M8SFB5QEGX');
-// </script>
+export const initializeGA4 = (measurementId: string) => {
+  if (!measurementId) {
+    console.warn('Missing GA4 Measurement ID');
+    return;
+  }
 
-const initializeGoogleAnalytics = () => {
-  const GTM_ID = import.meta.env.VITE_GTM_ID;
-  const GA_ID = import.meta.env.VITE_GA_ID;
+  const script = document.createElement('script');
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  script.async = true;
+  document.head.appendChild(script);
+
+  script.onload = () => {
+    window.dataLayer = window.dataLayer || [];
+
+    if (!window.gtag) {
+      window.gtag = function (...args) {
+        window.dataLayer.push(args);
+      };
+    }
+
+    window.gtag('js', new Date());
+    window.gtag('config', measurementId);
+
+    console.log('GA');
+  };
+};
+
+export const initializeGTM = (gtmId: string) => {
+  if (!gtmId) {
+    console.warn('Missing GTM container ID');
+    return;
+  }
 
   const gtmScript = document.createElement('script');
   gtmScript.type = 'text/javascript';
   gtmScript.textContent = `
-    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer', ${GTM_ID});
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[];
+      w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),
+          dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true;
+      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','${gtmId}');
   `;
   document.head.appendChild(gtmScript);
 
-  const gaScript = document.createElement('script');
-  gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-  gaScript.async = true;
-  document.head.appendChild(gaScript);
-
-  const inlineScript = document.createElement('script');
-  inlineScript.textContent = `
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', ${GA_ID});
-  `;
-  document.head.appendChild(inlineScript);
-
   const gtmNoscript = document.createElement('noscript');
   gtmNoscript.innerHTML = `
-    <iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}"
+    <iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}"
     height="0" width="0" style="display:none;visibility:hidden"></iframe>
   `;
-  document.body.insertBefore(gtmNoscript, document.body.firstChild);
+  document.body.appendChild(gtmNoscript);
+
+  console.log('GTM');
 };
 
 export function withTracking<T>(Component: ComponentType<T>) {
@@ -95,6 +107,8 @@ export function withTracking<T>(Component: ComponentType<T>) {
     const allowedDomains =
       import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
     const currentDomain = window.location.hostname;
+    const GTM_ID = import.meta.env.VITE_GTM_ID;
+    const GA_ID = import.meta.env.VITE_GA_ID;
 
     useEffect(() => {
       if (!allowedDomains.includes(currentDomain)) {
@@ -122,18 +136,18 @@ export function withTracking<T>(Component: ComponentType<T>) {
       if (!firebaseApp) {
         firebaseApp = initializeApp(firebaseConfig);
         analytics = getAnalytics(firebaseApp);
-        console.log('session_start');
         logEvent(analytics, 'session_start');
       }
 
       try {
         Clarity.init(import.meta.env.VITE_CLARITY_ID);
-        console.log('Microsoft Clarity started');
       } catch (error) {
         console.error('Microsoft Clarity failed to start', error);
       }
 
-      initializeGoogleAnalytics();
+      // Google GA and GTM
+      initializeGTM(GTM_ID);
+      initializeGA4(GA_ID);
 
       sessionStartTime = Date.now();
 
@@ -158,8 +172,6 @@ export function withTracking<T>(Component: ComponentType<T>) {
           const elementName = target.tagName.toLowerCase();
           const text = target.textContent?.trim().substring(0, 50) || 'N/A';
 
-          console.log(`Click tracked: ${elementName} - ${text}`);
-
           if (analytics) {
             logEvent(analytics, 'click', { element: elementName, text });
           } else {
@@ -173,19 +185,16 @@ export function withTracking<T>(Component: ComponentType<T>) {
       });
 
       const handleBeforeUnload = () => {
-        console.log('beforeunload');
         logSessionDuration();
       };
 
       const handleVisibilityChange = () => {
         if (document.visibilityState === 'hidden') {
-          console.log('visibilitychange detected!');
           logSessionDuration();
         }
       };
 
       const handleUnload = () => {
-        console.log('unload event triggered!');
         logSessionDuration();
       };
 
@@ -202,7 +211,7 @@ export function withTracking<T>(Component: ComponentType<T>) {
         });
         logSessionDuration();
       };
-    }, [config, isInitialized]);
+    }, [GA_ID, GTM_ID, allowedDomains, config, currentDomain, isInitialized]);
 
     return <Component {...props} logLogin={logLogin} logLogout={logLogout} />;
   };
@@ -221,7 +230,6 @@ export const logLogin = (method: string, userId?: string) => {
       if (analytics) {
         logEvent(analytics, 'session_duration', { duration: sessionDuration });
       }
-      console.log(`Session duration logged: ${sessionDuration}s`);
     }
   }
 
