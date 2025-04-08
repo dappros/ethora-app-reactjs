@@ -1,19 +1,6 @@
 import Clarity from '@microsoft/clarity';
-import { getAnalytics, logEvent } from 'firebase/analytics';
-import type { FirebaseApp } from 'firebase/app';
-import { initializeApp } from 'firebase/app';
 import { ComponentType, useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore.ts';
-
-interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-  measurementId?: string;
-}
 
 declare global {
   interface Window {
@@ -24,44 +11,25 @@ declare global {
   }
 }
 
-let firebaseApp: FirebaseApp | null = null;
-let analytics: ReturnType<typeof getAnalytics> | null = null;
-let sessionStartTime: number | null = null;
-
-const logSessionDuration = () => {
-  if (analytics && sessionStartTime) {
-    const sessionDuration = (Date.now() - sessionStartTime) / 1000;
-    if (sessionDuration >= 2) {
-      logEvent(analytics, 'session_duration', { duration: sessionDuration });
-    } else {
-      console.warn('Session too short (<2s), ignoring.');
-    }
-  }
-};
-
 export const initializeGA4 = (measurementId: string) => {
   if (!measurementId) {
     console.warn('Missing GA4 Measurement ID');
     return;
   }
 
-  const script = document.createElement('script');
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-  script.async = true;
-  document.head.appendChild(script);
+  const gtagScript = document.createElement('script');
+  gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-M8SFB5QEGX';
+  gtagScript.async = true;
+  document.head.appendChild(gtagScript);
 
-  script.onload = () => {
+  const inlineScript = document.createElement('script');
+  inlineScript.innerHTML = `
     window.dataLayer = window.dataLayer || [];
-
-    if (!window.gtag) {
-      window.gtag = function (...args) {
-        window.dataLayer.push(args);
-      };
-    }
-
-    window.gtag('js', new Date());
-    window.gtag('config', measurementId);
-  };
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-M8SFB5QEGX', { debug_mode: true });
+  `;
+  document.head.appendChild(inlineScript);
 };
 
 export const initializeGTM = (gtmId: string) => {
@@ -94,6 +62,14 @@ export const initializeGTM = (gtmId: string) => {
   document.body.appendChild(gtmNoscript);
 };
 
+export const initializeClarity = (clarityId: string) => {
+  try {
+    Clarity.init(clarityId);
+  } catch (error) {
+    console.error('Microsoft Clarity failed to start', error);
+  }
+};
+
 export function withTracking<T>(Component: ComponentType<T>) {
   return function TrackedComponent(props: T) {
     const [isInitialized, setIsInitialized] = useState(false);
@@ -112,101 +88,16 @@ export function withTracking<T>(Component: ComponentType<T>) {
         return;
       }
 
-      if (!config) {
-        console.warn('Firebase config is not available yet');
-        return;
-      }
-
       if (isInitialized) return;
-
-      const firebaseConfig: FirebaseConfig = {
-        apiKey: config.apiKey,
-        authDomain: config.authDomain,
-        projectId: config.projectId,
-        storageBucket: config.storageBucket,
-        messagingSenderId: config.messagingSenderId,
-        appId: config.appId,
-        measurementId: config.measurementId,
-      };
-
-      if (!firebaseApp) {
-        firebaseApp = initializeApp(firebaseConfig);
-        analytics = getAnalytics(firebaseApp);
-        logEvent(analytics, 'session_start');
-      }
-
-      try {
-        Clarity.init(import.meta.env.VITE_CLARITY_ID);
-      } catch (error) {
-        console.error('Microsoft Clarity failed to start', error);
-      }
 
       // Google GA and GTM
       initializeGTM(GTM_ID);
       initializeGA4(GA_ID);
-
-      sessionStartTime = Date.now();
-
-      const handleClick = (event: MouseEvent) => {
-        let target = event.target as HTMLElement;
-
-        while (
-          target &&
-          target !== document.body &&
-          !target.tagName.match(/^(button|a)$/i) &&
-          !target.dataset.track
-        ) {
-          target = target.parentElement as HTMLElement;
-        }
-
-        if (
-          target &&
-          (target.tagName === 'BUTTON' ||
-            target.tagName === 'A' ||
-            target.dataset.track)
-        ) {
-          const elementName = target.tagName.toLowerCase();
-          const text = target.textContent?.trim().substring(0, 50) || 'N/A';
-
-          if (analytics) {
-            logEvent(analytics, 'click', { element: elementName, text });
-          } else {
-            console.warn('Click ignored: No valid element found.');
-          }
-        }
-      };
-
-      document.addEventListener('click', (event) => {
-        handleClick(event);
-      });
-
-      const handleBeforeUnload = () => {
-        logSessionDuration();
-      };
-
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'hidden') {
-          logSessionDuration();
-        }
-      };
-
-      const handleUnload = () => {
-        logSessionDuration();
-      };
-
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('unload', handleUnload);
+      initializeClarity(import.meta.env.VITE_CLARITY_ID);
 
       setIsInitialized(true);
 
-      return () => {
-        document.removeEventListener('click', handleClick);
-        window.removeEventListener('beforeunload', () => {
-          handleBeforeUnload();
-        });
-        logSessionDuration();
-      };
+      return () => {};
     }, [GA_ID, GTM_ID, allowedDomains, config, currentDomain, isInitialized]);
 
     return <Component {...props} logLogin={logLogin} logLogout={logLogout} />;
@@ -214,30 +105,7 @@ export function withTracking<T>(Component: ComponentType<T>) {
 }
 
 export const logLogin = (method: string, userId?: string) => {
-  if (analytics) {
-    logEvent(analytics, 'login', { method, userId });
-  }
-
-  if (sessionStartTime) {
-    const sessionDuration = (Date.now() - sessionStartTime) / 1000;
-    if (sessionDuration < 2) {
-      console.warn('Session too short (<2s), ignoring.');
-    } else {
-      if (analytics) {
-        logEvent(analytics, 'session_duration', { duration: sessionDuration });
-      }
-    }
-  }
-
-  logSessionDuration();
-  sessionStartTime = Date.now();
+  return { method, userId };
 };
 
-export const logLogout = () => {
-  logSessionDuration();
-
-  if (analytics) {
-    logEvent(analytics, 'session_end');
-  }
-  sessionStartTime = null;
-};
+export const logLogout = () => {};
