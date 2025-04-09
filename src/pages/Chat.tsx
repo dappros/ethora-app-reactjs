@@ -6,6 +6,7 @@ import { useAppStore } from '../store/useAppStore';
 export const VITE_APP_XMPP_SERVICE = import.meta.env.VITE_APP_XMPP_SERVICE;
 export const VITE_XMPP_SERVICE = import.meta.env.VITE_XMPP_SERVICE;
 export const VITE_XMPP_HOST = import.meta.env.VITE_XMPP_HOST;
+export const VITE_API = import.meta.env.VITE_API;
 
 interface ChatComponentProps {
   config: any;
@@ -16,6 +17,8 @@ const MemoizedChat = React.memo(function ChatComponent({
   config,
   currentUser,
 }: ChatComponentProps) {
+  const appToken = useAppStore((s) => s.currentApp?.appToken);
+
   const handleChangeTokens = async () => {
     const { token, refreshToken: refresh } = await refreshToken();
 
@@ -33,7 +36,8 @@ const MemoizedChat = React.memo(function ChatComponent({
           primary: config?.primaryColor || '#fff',
           secondary: config?.secondaryColor || '#141414',
         },
-        baseUrl: 'https://dev.api.ethoradev.com/v1',
+        baseUrl: VITE_API ?? 'https://api.ethoradev.com/v1',
+        customAppToken: appToken,
         newArch: true,
         qrUrl: 'https://ethora.dev.frontend.ethoradev.com/app/chat/?chatId=',
         xmppSettings: {
@@ -67,8 +71,6 @@ const MemoizedChat = React.memo(function ChatComponent({
           enabled: true,
         },
         setRoomJidInPath: true,
-        disableSentLogic: true,
-        disableMedia: true,
       }}
     />
   );

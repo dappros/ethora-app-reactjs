@@ -1,5 +1,10 @@
 import { StateCreator } from 'zustand';
-import { ModelApp, ModelCurrentUser, ModelState } from '../models';
+import {
+  Iso639_1Codes,
+  ModelApp,
+  ModelCurrentUser,
+  ModelState,
+} from '../models';
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -16,6 +21,7 @@ export interface AppSliceInterface extends ModelState {
   doSetApps: (apps: Array<ModelApp>) => void;
   doUpdateApp: (app: ModelApp) => void;
   doUpdateUser: (userFieldsForUpdate: any) => void;
+  doSetLangSource: (langSource: Iso639_1Codes) => void;
   doClearState: () => void;
 }
 
@@ -67,7 +73,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   },
   doSetApp: (app) => {
     set((s) => {
-      if(s.apps.some((ap) => ap._id === app._id)) {
+      if (s.apps.some((ap) => ap._id === app._id)) {
         return;
       }
       s.apps = [...s.apps, app];
@@ -88,6 +94,13 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
 
       console.log('doUpdateApp newApps ', newApps);
       s.apps = newApps;
+    });
+  },
+  doSetLangSource: (langSource: Iso639_1Codes) => {
+    set((state) => {
+      if (state.currentUser) {
+        state.currentUser.langSource = langSource;
+      }
     });
   },
 });

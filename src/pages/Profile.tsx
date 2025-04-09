@@ -23,6 +23,7 @@ import { IconQr } from '../components/Icons/IconQr';
 import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
+import LanguageSelect from '../components/shared/LanguageSelect';
 import { deleteDocuments, getDocuments } from '../http';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -123,6 +124,12 @@ export default function Profile() {
             <div className="border border-[#F0F0F0] rounded-xl p-4">
               <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">About</p>
               <p className="text-black text-regular">{description}</p>
+            </div>
+            <div className="border border-[#F0F0F0] rounded-xl p-4">
+              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
+                Select chat translations language
+              </p>
+              <LanguageSelect />
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
               <TabGroup className="px-2">

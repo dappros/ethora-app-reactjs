@@ -1,5 +1,6 @@
 import { localStorageConstants } from './constants/localStorageConstants';
 import {
+  getExportCsv,
   httpCreateNewApp,
   httpDeleteManyUsers,
   httpGetApps,
@@ -12,7 +13,7 @@ import {
   httpUpdateUser,
   refreshToken,
 } from './http';
-import { ModelApp, ModelCurrentUser } from './models';
+import { ModelApp, ModelCurrentUser, OrderByType } from './models';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
 import { sleep } from './utils/sleep';
@@ -25,7 +26,7 @@ export async function actionGetConfig(domainName?: string) {
     data: { result },
   } = await httpGetConfig(domainName);
 
-  let app: ModelApp = {
+  const app: ModelApp = {
     afterLoginPage: result.afterLoginPage,
     appToken: result.appToken,
     bundleId: result.bundleId,
@@ -90,7 +91,7 @@ export async function actionAfterLogin(data: any) {
     defaultWallet: {
       walletAddress: data.user.defaultWallet.walletAddress,
     },
-    xmppUsername: data.user.xmppUsername
+    xmppUsername: data.user.xmppUsername,
   };
 
   if (data.user.isSuperAdmin) {
@@ -129,7 +130,7 @@ export async function actionRefreshUserFromLocalStorage(
     defaultWallet: {
       walletAddress: user.defaultWallet.walletAddress,
     },
-    xmppUsername: user.xmppUsername
+    xmppUsername: user.xmppUsername,
   };
 
   if (user.isSuperAdmin) {
@@ -164,7 +165,7 @@ export async function actionGetUsers(
   appId: string,
   limit: number = 10,
   offset: number = 0,
-  orderBy: 'email' | 'createdAt' | 'firstName' | 'lastName' = 'lastName',
+  orderBy: OrderByType = 'lastName',
   order: 'asc' | 'desc' = 'asc'
 ) {
   return httpGetUsers(appId, limit, offset, orderBy, order);
@@ -186,16 +187,16 @@ export async function actionResetPasswords(
 
 export async function actionUpdateApp(appId: string, options: any) {
   console.log('actionUpdateApp');
-  let response = await httpUpdateApp(appId, options);
+  const response = await httpUpdateApp(appId, options);
   const state = getState();
   state.doUpdateApp(response.data.result);
 }
 
 export async function actionUpdateUser(fd: FormData) {
-  let {
+  const {
     data: { user },
   } = await httpUpdateUser(fd);
-  let state = getState();
+  const state = getState();
   state.doUpdateUser({
     firstName: user.firstName,
     lastName: user.lastName,
@@ -210,7 +211,17 @@ export async function actionUpdateUser(fd: FormData) {
 }
 
 export function actionLogout() {
-  localStorage.clear()
-  window.location.pathname = '/login'
+  localStorage.clear();
+  window.location.pathname = '/login';
   return null;
 }
+
+export const actionGetCsvFile = async (appId: string): Promise<void> => {
+  try {
+    const result = await getExportCsv(appId);
+
+    console.log('result', result);
+  } catch (e) {
+    console.error(e);
+  }
+};

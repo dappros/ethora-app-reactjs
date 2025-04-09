@@ -11,10 +11,6 @@ export default function AppLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  //   export const VITE_APP_XMPP_SERVICE = import.meta.env.VITE_APP_XMPP_SERVICE;
-  // export const VITE_XMPP_SERVICE = import.meta.env.VITE_XMPP_SERVICE;
-  // export const VITE_XMPP_HOST = import.meta.env.VITE_XMPP_HOST;
-
   if (location.pathname !== '/login') {
     localStorage.setItem('lastPath', location.pathname + location.search);
   }

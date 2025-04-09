@@ -97,7 +97,7 @@ export interface ModelApp {
   googleServicesJson: string;
   googleServiceInfoPlist: string;
   appSecret: string;
-  allowUsersToCreateRooms: boolean
+  allowUsersToCreateRooms: boolean;
 }
 
 export interface ModelUserACL {
@@ -139,7 +139,9 @@ export interface ModelUserACL {
     };
   };
   network: {
-    read: boolean;
+    netStats: {
+      read: boolean;
+    };
   };
 }
 
@@ -171,3 +173,15 @@ export interface ModelState {
   currentApp: ModelApp | null;
   apps: Array<ModelApp>;
 }
+
+export type OrderByType =
+  | 'createdAt'
+  | 'displayName'
+  | 'totalRegistered'
+  | 'totalSessions'
+  | 'totalApiCalls'
+  | 'totalFiles'
+  | 'totalTransactions'
+  | 'lastName'
+  | 'email'
+  | 'firstName';
