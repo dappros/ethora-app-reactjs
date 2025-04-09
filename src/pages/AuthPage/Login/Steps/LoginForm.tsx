@@ -12,6 +12,7 @@ import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
+import {logLogin} from "../../../../hooks/withTracking.tsx";
 
 type Inputs = {
   email: string;
@@ -32,12 +33,15 @@ const LoginStep = () => {
     httpLogingWithEmail(email, password)
       .then(async ({ data }) => {
         await actionAfterLogin(data);
+
+        logLogin("email", data.user._id);
         if (config?.afterLoginPage) {
           navigateToUserPage(navigate, config.afterLoginPage as string);
         }
       })
       .catch((error) => {
         toast.error(error.response.data.error);
+        localStorage.removeItem('token-538');
       });
   };
 

@@ -7,19 +7,10 @@ import { IconAdd } from '../components/Icons/IconAdd';
 import { NewAppModal } from '../components/modal/NewAppModal';
 import { Sorting } from '../components/Sorting';
 import { httpGetApps } from '../http';
-import { ModelApp } from '../models';
+import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
 const ITEMS_COUNT = 5;
-
-type OrderByType =
-  | 'createdAt'
-  | 'displayName'
-  | 'totalRegistered'
-  | 'totalSessions'
-  | 'totalApiCalls'
-  | 'totalFiles'
-  | 'totalTransactions';
 
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -103,7 +94,7 @@ export default function AdminApps() {
   const renderSorting = useCallback(() => {
     if (currentUser?.isSuperAdmin) {
       return (
-        <Sorting
+        <Sorting<OrderByType>
           className="mr-4"
           order={order}
           setOrder={(newOrder) => handleSortChange(orderBy, newOrder)}

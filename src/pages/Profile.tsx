@@ -27,6 +27,7 @@ import LanguageSelect from '../components/shared/LanguageSelect';
 import { deleteDocuments, getDocuments } from '../http';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
+import {logLogout} from "../hooks/withTracking.tsx";
 
 export default function Profile() {
   const [showQr, setShowQr] = useState<boolean>(false);
@@ -77,6 +78,7 @@ export default function Profile() {
   };
 
   const onLogout = () => {
+    logLogout();
     actionLogout();
     logoutService.performLogout();
     navigate('/login', { replace: true });

@@ -47,6 +47,9 @@ const FirstStep: React.FC<FirstStepProps> = ({
     try {
       await httpRegisterWithEmail(email, firstName, lastName).then(async () => {
         const website = window.location.origin;
+        const currentDomain = window.location.hostname;
+        const allowedDomains =
+          import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
 
         const hubspotData = {
           fields: [
@@ -56,6 +59,10 @@ const FirstStep: React.FC<FirstStepProps> = ({
             { name: 'website', value: website },
           ],
         };
+
+        if (!allowedDomains.includes(currentDomain)) {
+          return;
+        }
 
         await sendHSFormData(
           '4732608',

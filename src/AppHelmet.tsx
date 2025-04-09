@@ -27,12 +27,12 @@ export default function AppHelmet() {
 
   useEffect(() => {
     if (
-      token &&
+      (token && token !== 'undefined') &&
       (location.pathname === '/login' || location.pathname === '/')
     ) {
       navigate(lastPath, { replace: true });
     }
-  }, [token, location.pathname, navigate, lastPath]);
+  }, [token, lastPath]);
 
   return (
     <>

@@ -2,6 +2,7 @@ import { toast } from 'react-toastify';
 import { useAppStore } from '../../store/useAppStore';
 import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
+import {logLogin} from "../../hooks/withTracking.tsx";
 
 function isMobileDevice() {
   return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -27,7 +28,11 @@ export const MetamaskButton = () => {
             method: 'eth_requestAccounts',
           });
           // window.ethereum.request({method: ""})
-          console.log(accounts[0]);
+          if (accounts.length > 0) {
+            console.log("MetaMask address:", accounts[0]);
+
+            logLogin("metamask", accounts[0]); // Используем Ethereum-адрес как userId
+          }
         } catch (e) {
           console.error('error ', e);
         }

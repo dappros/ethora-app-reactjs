@@ -1,16 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../actions';
+import { logLogin } from '../../hooks/withTracking.tsx';
 import {
   httpCheckEmailExist,
   httpLoginSocial,
   httpRegisterSocial,
+  sendHSFormData,
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
+import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
-import { navigateToUserPage } from '../../utils/navigateToUserPage';
 
 export const GoogleButton = () => {
   const config = useAppStore.getState().currentApp;
@@ -41,13 +43,43 @@ export const GoogleButton = () => {
         if (emailExist.data.success) {
           console.log('new registration');
           try {
-            await httpRegisterSocial(
+            const userResult = await httpRegisterSocial(
               idToken ?? '',
               credential?.accessToken ?? '',
               '',
               loginType
             );
+            const { firstName, lastName, email } = userResult?.data?.user;
+
+            console.log('userResult', userResult);
+
+            logLogin('google', userResult?.data?.user?._id);
+
+            const website = `${window?.location?.origin || ''}/google`;
+            const allowedDomains =
+              import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+            const currentDomain = window.location.hostname;
+
+            if (!allowedDomains.includes(currentDomain)) {
+              return;
+            }
+
+            const hubspotData = {
+              fields: [
+                { name: 'firstname', value: firstName },
+                { name: 'lastname', value: lastName },
+                { name: 'email', value: email },
+                { name: 'website', value: website },
+              ],
+            };
+
+            await sendHSFormData(
+              '4732608',
+              '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
+              hubspotData
+            );
           } catch (error) {
+            console.log(error);
             toast.error('Social registration failed');
           }
 
@@ -66,6 +98,8 @@ export const GoogleButton = () => {
             credential?.accessToken ?? '',
             loginType
           ).then(async ({ data }) => {
+            logLogin('google', data.user._id);
+
             await actionAfterLogin(data);
             navigateToUserPage(navigate, config?.afterLoginPage);
           });

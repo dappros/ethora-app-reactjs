@@ -12,37 +12,28 @@ import { IconAdd } from './Icons/IconAdd';
 import { IconArrowDown } from './Icons/IconArrowDown';
 import { IconMarked } from './Icons/IconMarked';
 
-type OrderByType =
-  | 'createdAt'
-  | 'displayName'
-  | 'totalRegistered'
-  | 'totalSessions'
-  | 'totalApiCalls'
-  | 'totalFiles'
-  | 'totalTransactions';
-
 interface OrderItem {
   key: string;
   title: string;
 }
 
-interface Props {
+interface Props<T extends string> {
   orderByList: Array<OrderItem>;
   order: string;
   setOrder: (s: 'asc' | 'desc') => void;
-  orderBy: string;
-  setOrderBy: (s: OrderByType) => void;
+  orderBy: T;
+  setOrderBy: (s: T) => void;
   className: string;
 }
 
-export function Sorting({
+export function Sorting<T extends string>({
   orderByList,
   order,
   setOrder,
   orderBy,
   setOrderBy,
   className,
-}: Props) {
+}: Props<T>) {
   const orderItemList: Array<OrderItem> = [
     {
       title: '(A-Z)',
@@ -113,9 +104,7 @@ export function Sorting({
             <RadioGroup
               className="flex flex-col"
               value={orderBy}
-              onChange={(value: OrderByType) => {
-                setOrderBy(value);
-              }}
+              onChange={setOrderBy}
               aria-label="Server size"
             >
               {orderByList.map((el) => (

@@ -21,8 +21,13 @@ import { IconAdd } from '../components/Icons/IconAdd';
 import { IconCheckbox } from '../components/Icons/IconCheckbox';
 import { IconDelete } from '../components/Icons/IconDelete';
 import { IconSettings } from '../components/Icons/IconSettings';
-import { httpCraeteUser, httpTagsSet, httpUpdateAcl } from '../http';
-import { ModelAppUser, ModelUserACL } from '../models';
+import {
+  getExportCsv,
+  httpCraeteUser,
+  httpTagsSet,
+  httpUpdateAcl,
+} from '../http';
+import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
 
 import classNames from 'classnames';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
@@ -30,6 +35,7 @@ import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
+import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
@@ -40,7 +46,7 @@ export default function AppUsers() {
   const { appId } = useParams();
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [items, setItems] = useState<Array<ModelAppUser>>([]);
-  const [rowsSelected, setRowsSelected] = useState(items.map((_el) => false));
+  const [rowsSelected, setRowsSelected] = useState(items.map(() => false));
   const [showNewUserModal, setShowNewUserModal] = useState(false);
   const [itemsPerTable, setItemsPerTable] = useState(10);
   const [pageCount, setPageCount] = useState(0);
@@ -52,10 +58,36 @@ export default function AppUsers() {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [order, setOrder] = useState<string>('asc');
-  const [orderBy, setOrderBy] = useState<string>('createdAt');
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
 
   const [editAcl, setEditAcl] = useState<ModelUserACL | null>(null);
+
+  const getCsvFile = async () => {
+    if (!appId) {
+      return;
+    }
+
+    try {
+      const response = await getExportCsv(appId);
+      const binaryData = response.data;
+
+      const blob = new Blob([binaryData], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mydata.json';
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const updateAcl = () => {
     if (editAcl && appId) {
@@ -64,7 +96,6 @@ export default function AppUsers() {
           appId,
           itemsPerTable,
           currentPage * itemsPerTable,
-          // @ts-ignore
           orderBy,
           order
         ).then((response) => {
@@ -98,16 +129,16 @@ export default function AppUsers() {
     setRowsSelected(items.map(() => selected));
   };
 
-  if (!appId) {
-    return;
-  }
-
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setRowsSelected(() => items.map((_el) => false));
   }, [items]);
 
   useEffect(() => {
-    // @ts-ignore
+    if (!appId) {
+      return;
+    }
+
     actionGetUsers(appId, itemsPerTable, 0, orderBy, order).then((response) => {
       const { total, items } = response.data;
       setItems(items);
@@ -117,11 +148,14 @@ export default function AppUsers() {
   }, []);
 
   const onPageChange = (page: number) => {
+    if (!appId) {
+      return;
+    }
+
     actionGetUsers(
       appId,
       itemsPerTable,
       page * itemsPerTable,
-      // @ts-ignore
       orderBy,
       order
     ).then((response) => {
@@ -135,14 +169,11 @@ export default function AppUsers() {
   };
 
   useEffect(() => {
-    actionGetUsers(
-      appId,
-      itemsPerTable,
-      0 * itemsPerTable,
-      // @ts-ignore
-      orderBy,
-      order
-    ).then((response) => {
+    if (!appId) {
+      return;
+    }
+
+    actionGetUsers(appId, itemsPerTable, 0, orderBy, order).then((response) => {
       const { total, items } = response.data;
       setItems(items);
       setTotal(total);
@@ -154,11 +185,14 @@ export default function AppUsers() {
   }, [itemsPerTable]);
 
   useEffect(() => {
+    if (!appId) {
+      return;
+    }
+
     actionGetUsers(
       appId,
       itemsPerTable,
       currentPage * itemsPerTable,
-      // @ts-ignore
       orderBy,
       order
     ).then((response) => {
@@ -184,10 +218,10 @@ export default function AppUsers() {
   };
 
   const getSelectedIndexes = () => {
-    let indexes: Array<number> = [];
+    const indexes: Array<number> = [];
 
     rowsSelected.forEach((el, index) => {
-      if (el === true) {
+      if (el) {
         indexes.push(index);
       }
     });
@@ -196,22 +230,25 @@ export default function AppUsers() {
   };
 
   const getSelectedUserIds = () => {
-    let indexes = getSelectedIndexes();
+    const indexes = getSelectedIndexes();
     return indexes.map((el) => items[el]._id);
   };
 
   const onTagsSumbmit = () => {
-    let selectedUserIds = getSelectedUserIds();
+    if (!appId) {
+      return;
+    }
+
+    const selectedUserIds = getSelectedUserIds();
 
     httpTagsSet(appId, {
       usersIdList: selectedUserIds,
-      tagsList: tags.split(',').filter((el) => (el ? true : false)),
-    }).then((_) => {
+      tagsList: tags.split(',').filter((el) => !!el),
+    }).then(() => {
       actionGetUsers(
         appId,
         itemsPerTable,
         currentPage * itemsPerTable,
-        // @ts-ignore
         orderBy,
         order
       ).then((response) => {
@@ -236,14 +273,17 @@ export default function AppUsers() {
     lastName: string;
     email: string;
   }) => {
+    if (!appId) {
+      return;
+    }
+
     setLoading(true);
     httpCraeteUser(appId, { firstName, lastName, email })
-      .then((_) => {
+      .then(() => {
         actionGetUsers(
           appId,
           itemsPerTable,
           currentPage * itemsPerTable,
-          // @ts-ignore
           orderBy,
           order
         ).then((response) => {
@@ -260,7 +300,11 @@ export default function AppUsers() {
   };
 
   const onResetPassword = () => {
-    let selectedUserIds = getSelectedUserIds();
+    if (!appId) {
+      return;
+    }
+
+    const selectedUserIds = getSelectedUserIds();
 
     actionResetPasswords(appId, selectedUserIds).then(() => {
       setShowResetPassword(false);
@@ -269,10 +313,14 @@ export default function AppUsers() {
   };
 
   const onDelete = () => {
-    let selectedUserIds: Array<string> = [];
+    if (!appId) {
+      return;
+    }
+
+    const selectedUserIds: Array<string> = [];
     rowsSelected.forEach((el, index) => {
-      if (el === true) {
-        let item = items[index];
+      if (el) {
+        const item = items[index];
         selectedUserIds.push(item._id);
       }
     });
@@ -282,7 +330,6 @@ export default function AppUsers() {
         appId,
         itemsPerTable,
         currentPage * itemsPerTable,
-        // @ts-ignore
         orderBy,
         order
       ).then((response) => {
@@ -300,47 +347,47 @@ export default function AppUsers() {
     });
   };
 
-  // @ts-ignore
-  const onOrderChange = (value: 'asc' | 'desc') => {
-    setOrder(value);
-  };
-
-  // @ts-ignore
-  const onSortByChange = (value: string) => {
-    console.log('onSortByChange ', value);
-    // @ts-ignore
-    setOrderBy(value);
-  };
-
-  // @ts-ignore
-  const renderOrder = (value: 'asc' | 'desc') => {
-    if (value === 'asc') {
-      return '(A-Z)';
-    } else {
-      return '(Z-A)';
-    }
-  };
-
-  // @ts-ignore
-  const renderOrderBy = (value: string) => {
-    if (value === 'createdAt') {
-      return 'Creation Date';
-    }
-
-    if (value === 'firstName') {
-      return 'First Name';
-    }
-
-    if (value === 'lastName') {
-      return 'Last Name';
-    }
-
-    if (value === 'email') {
-      return 'Email';
-    }
-
-    return value;
-  };
+  // // @ts-ignore
+  // const onOrderChange = (value: 'asc' | 'desc') => {
+  //   setOrder(value);
+  // };
+  //
+  // // @ts-ignore
+  // const onSortByChange = (value: string) => {
+  //   console.log('onSortByChange ', value);
+  //   // @ts-ignore
+  //   setOrderBy(value);
+  // };
+  //
+  // // @ts-ignore
+  // const renderOrder = (value: 'asc' | 'desc') => {
+  //   if (value === 'asc') {
+  //     return '(A-Z)';
+  //   } else {
+  //     return '(Z-A)';
+  //   }
+  // };
+  //
+  // // @ts-ignore
+  // const renderOrderBy = (value: string) => {
+  //   if (value === 'createdAt') {
+  //     return 'Creation Date';
+  //   }
+  //
+  //   if (value === 'firstName') {
+  //     return 'First Name';
+  //   }
+  //
+  //   if (value === 'lastName') {
+  //     return 'Last Name';
+  //   }
+  //
+  //   if (value === 'email') {
+  //     return 'Email';
+  //   }
+  //
+  //   return value;
+  // };
 
   const renderAuthMethodIcon = (name: string) => {
     switch (name) {
@@ -356,7 +403,7 @@ export default function AppUsers() {
   };
 
   const renderActionsForSelected = () => {
-    let selectedIndexes = [];
+    const selectedIndexes = [];
 
     rowsSelected.forEach((el, index) => {
       if (el === true) {
@@ -364,7 +411,11 @@ export default function AppUsers() {
       }
     });
 
-    let length = selectedIndexes.length;
+    const length = selectedIndexes.length;
+
+    if (!appId) {
+      return;
+    }
 
     if (length > 0) {
       //
@@ -421,13 +472,13 @@ export default function AppUsers() {
 
   return (
     // overflow-hidden
-    <div className="admin-app-users h-full w-full  grid grid-rows-[57px,_1fr] gap-y-[16px]">
+    <div className="admin-app-users h-full w-full  grid lg:grid-rows-[57px,_1fr] grid-rows-[97px,_1fr] gap-y-[16px]">
       <div className="md:row-start-1 flex w-full md:justify-between items-center border-b border-b-gray-200">
         <div className="ml-4 hidden md:block font-varela text-[24px]">
           Users
         </div>
-        <div className="flex w-full md:w-auto items-center justify-end">
-          <Sorting
+        <div className="flex lg:flex-row flex-col w-full md:w-auto lg:items-center items-end lg:justify-end justify-start gap-4">
+          <Sorting<OrderByType>
             className=""
             order={order}
             setOrder={setOrder}
@@ -440,13 +491,16 @@ export default function AppUsers() {
             ]}
             setOrderBy={setOrderBy}
           />
-          <button
-            onClick={() => setShowNewUserModal(true)}
-            className="flex ml-4 hover:bg-brand-darker items-center justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
-          >
-            <IconAdd color="white" className="md:mr-2" />
-            <span className="hidden md:block">Add User</span>
-          </button>
+          <div className="flex items-center justify-end gap-4">
+            <CsvButton onClick={getCsvFile} />
+            <button
+              onClick={() => setShowNewUserModal(true)}
+              className="flex hover:bg-brand-darker items-center justify-center sm:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
+            >
+              <IconAdd color="white" className="sm:mr-2" />
+              <span className="hidden sm:block">Add User</span>
+            </button>
+          </div>
         </div>
       </div>
       <div className="overflow-hidden">
