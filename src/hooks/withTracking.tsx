@@ -18,7 +18,7 @@ export const initializeGA4 = (measurementId: string) => {
   }
 
   const gtagScript = document.createElement('script');
-  gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-M8SFB5QEGX';
+  gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   gtagScript.async = true;
   document.head.appendChild(gtagScript);
 
@@ -27,7 +27,7 @@ export const initializeGA4 = (measurementId: string) => {
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-M8SFB5QEGX', { debug_mode: true });
+    gtag('config', '${measurementId}', { debug_mode: true });
   `;
   document.head.appendChild(inlineScript);
 };
