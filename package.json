@@ -13,7 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@ethora/chat-component": "^25.3.11",
+    "@ethora/chat-component": "^25.3.14",
     "@headlessui/react": "^2.1.8",
     "@microsoft/clarity": "^1.0.0",
     "@mui/icons-material": "^6.1.1",
