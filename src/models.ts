@@ -21,6 +21,7 @@ export interface ModelCurrentUser {
     read: boolean;
     write: boolean;
   };
+  langSource?: Iso639_1Codes;
 }
 
 export interface ModelCurrentApp {
@@ -185,3 +186,5 @@ export type OrderByType =
   | 'lastName'
   | 'email'
   | 'firstName';
+
+export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'zh';

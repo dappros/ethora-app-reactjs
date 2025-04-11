@@ -326,7 +326,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                 <td className="px-4 font-sans font-normal text-sm text-center">
                   <div className="flex justify-center">
                     <CheckboxApp
-                      checked={acl.network.read}
+                      checked={acl.network.netStats.read}
                       onChange={(isSet) => onChange(isSet, 'network.read')}
                     />
                   </div>
@@ -401,7 +401,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
                 <td className="px-4 font-sans font-normal text-sm text-center">
                   <div className="flex justify-center">
                     <CheckboxApp
-                      checked={acl.network.read}
+                      checked={acl.network.netStats.read}
                       onChange={(isSet) => onChange(isSet, 'network.read')}
                     />
                   </div>
