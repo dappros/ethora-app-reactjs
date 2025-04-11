@@ -91,6 +91,7 @@ export async function actionAfterLogin(data: any) {
     defaultWallet: {
       walletAddress: data.user.defaultWallet.walletAddress,
     },
+    xmppUsername: data.user.xmppUsername,
   };
 
   if (data.user.isSuperAdmin) {
@@ -129,6 +130,7 @@ export async function actionRefreshUserFromLocalStorage(
     defaultWallet: {
       walletAddress: user.defaultWallet.walletAddress,
     },
+    xmppUsername: user.xmppUsername,
   };
 
   if (user.isSuperAdmin) {
