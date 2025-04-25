@@ -1,3 +1,4 @@
+import { logoutService } from '@ethora/chat-component';
 import {
   Dialog,
   DialogPanel,
@@ -22,10 +23,10 @@ import { IconQr } from '../components/Icons/IconQr';
 import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
+import { logLogout } from '../hooks/withTracking.tsx';
 import { deleteDocuments, getDocuments } from '../http';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import {logLogout} from "../hooks/withTracking.tsx";
 
 export default function Profile() {
   const [showQr, setShowQr] = useState<boolean>(false);
@@ -78,6 +79,8 @@ export default function Profile() {
   const onLogout = () => {
     logLogout();
     actionLogout();
+    console.log('Logout');
+    logoutService.performLogout();
     navigate('/login', { replace: true });
   };
 

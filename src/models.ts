@@ -11,6 +11,7 @@ export interface ModelCurrentUser {
   refreshToken: string;
   walletAddress: string;
   xmppPassword: string;
+  xmppUsername: string;
   profileImage: string;
   description: string;
   defaultWallet: {
@@ -140,7 +141,7 @@ export interface ModelUserACL {
   network: {
     netStats: {
       read: boolean;
-    }
+    };
   };
 }
 
@@ -182,5 +183,7 @@ export type OrderByType =
   | 'totalFiles'
   | 'totalTransactions'
   | 'lastName'
-  | "email"
-  | "firstName";
+  | 'email'
+  | 'firstName';
+
+export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'zh';
