@@ -81,6 +81,8 @@ export interface ModelApp {
     totalRegistered: number;
     totalSessions: number;
     totalTransactions: number;
+    totalChats: number;
+    recentlyChats: number;
   };
   systemChatAccount: {
     jid: string;

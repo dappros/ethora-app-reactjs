@@ -378,6 +378,10 @@ export function getExportCsv(id: string) {
   return http.get(`/users/export/${id}`, { responseType: 'arraybuffer' });
 }
 
+export function getExportAppsCsv() {
+  return http.get(`/apps/stat-csv`, { responseType: 'arraybuffer' });
+}
+
 export function deleteMe() {
   return http.delete('/users');
 }
