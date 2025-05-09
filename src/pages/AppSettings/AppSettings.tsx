@@ -129,10 +129,6 @@ export default function AppSettings() {
       googleServiceInfoPlist,
       afterLoginPage,
     };
-    console.log(
-      'isModified',
-      JSON.stringify(initialState) !== JSON.stringify(currentState)
-    );
     const isModified =
       JSON.stringify(initialState) !== JSON.stringify(currentState);
     setIsModified(isModified);

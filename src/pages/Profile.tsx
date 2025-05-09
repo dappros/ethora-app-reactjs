@@ -24,7 +24,7 @@ import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
 import { logLogout } from '../hooks/withTracking.tsx';
-import { deleteDocuments, getDocuments } from '../http';
+import { deleteDocuments, getDocuments, httpLogout } from '../http';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -76,12 +76,14 @@ export default function Profile() {
     setShowDelete(false);
   };
 
-  const onLogout = () => {
-    logLogout();
-    actionLogout();
-    console.log('Logout');
-    logoutService.performLogout();
-    navigate('/login', { replace: true });
+  const onLogout = async () => {
+    httpLogout().then(() => {
+      logLogout();
+      actionLogout();
+      console.log('Logout');
+      logoutService.performLogout();
+      navigate('/login', { replace: true });
+    });
   };
 
   return (

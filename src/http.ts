@@ -112,6 +112,10 @@ export function httpLogingWithEmail(email: string, password: string) {
   return http.post('/users/login-with-email', { email, password });
 }
 
+export function httpLogout() {
+  return http.post('/users/logout');
+}
+
 export function httpGetOneUser() {
   return http.get('/users/me');
 }
