@@ -284,7 +284,8 @@ export const httpRegisterWithEmail = (
   email: string,
   firstName: string,
   lastName: string,
-  signUpPlan?: string
+  utm?: string,
+  signUpPlan?: string,
 ) => {
   const body = signUpPlan
     ? {
@@ -292,11 +293,13 @@ export const httpRegisterWithEmail = (
         firstName,
         lastName,
         signupPlan: signUpPlan,
+        utm,
       }
     : {
         email,
         firstName,
         lastName,
+        utm,
       };
   return http.post('/users/sign-up-with-email', body);
 };

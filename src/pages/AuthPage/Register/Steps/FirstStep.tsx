@@ -30,6 +30,7 @@ const FirstStep: React.FC<FirstStepProps> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const config = useAppStore((s) => s.currentApp);
+  const utmParams = localStorage.getItem('urlParams');
 
   const {
     register,
@@ -45,7 +46,12 @@ const FirstStep: React.FC<FirstStepProps> = ({
     console.log('onSubmit');
 
     try {
-      await httpRegisterWithEmail(email, firstName, lastName).then(async () => {
+      await httpRegisterWithEmail(
+        email,
+        firstName,
+        lastName,
+        utmParams || ''
+      ).then(async () => {
         const website = window.location.origin;
         const currentDomain = window.location.hostname;
         const allowedDomains =
