@@ -418,7 +418,7 @@ export default function AppSettings() {
               logoImage={logoImage}
               setLogoImage={setLogoImage}
               // sublogoImage={sublogoImage}
-              setSublogoImage={setSublogoImage}
+              // setSublogoImage={setSublogoImage}
             />
           </TabPanel>
           <TabPanel

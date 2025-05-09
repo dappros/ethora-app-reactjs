@@ -19,7 +19,7 @@ interface Props {
   logoImage: string;
   setLogoImage: (s: string) => void;
   // sublogoImage: string;
-  setSublogoImage: (s: string) => void;
+  // setSublogoImage: (s: string) => void;
 }
 
 export function Appearance({
@@ -34,7 +34,7 @@ export function Appearance({
   setColor,
   setLogoImage,
   // sublogoImage,
-  setSublogoImage,
+  // setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
   // const sublogoRef = useRef<HTMLInputElement>(null);
