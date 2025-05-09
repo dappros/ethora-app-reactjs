@@ -18,7 +18,7 @@ interface Props {
   setColor: (c: string) => void;
   logoImage: string;
   setLogoImage: (s: string) => void;
-  sublogoImage: string;
+  // sublogoImage: string;
   setSublogoImage: (s: string) => void;
 }
 
@@ -33,11 +33,11 @@ export function Appearance({
   logoImage,
   setColor,
   setLogoImage,
-  sublogoImage,
+  // sublogoImage,
   setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
-  const sublogoRef = useRef<HTMLInputElement>(null);
+  // const sublogoRef = useRef<HTMLInputElement>(null);
 
   const onChangeColor = (color: string) => {
     console.log('color ', color);
@@ -59,16 +59,16 @@ export function Appearance({
     });
   };
 
-  const postSublogo = (file: File | null) => {
-    if (!file) {
-      return;
-    }
+  // const postSublogo = (file: File | null) => {
+  //   if (!file) {
+  //     return;
+  //   }
 
-    actionPostFile(file).then((resp) => {
-      console.log('resp', resp.data.results[0].location);
-      setSublogoImage(resp.data.results[0].location);
-    });
-  };
+  //   actionPostFile(file).then((resp) => {
+  //     console.log('resp', resp.data.results[0].location);
+  //     setSublogoImage(resp.data.results[0].location);
+  //   });
+  // };
 
   return (
     // settings-appearance

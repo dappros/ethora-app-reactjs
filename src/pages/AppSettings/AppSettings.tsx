@@ -127,7 +127,12 @@ export default function AppSettings() {
       bundleId,
       googleServicesJson,
       googleServiceInfoPlist,
+      availableMenuItems,
       afterLoginPage,
+      defaultAccessAssetsOpen,
+      defaultAccessProfileOpen,
+      usersCanFree,
+      allowUsersToCreateRooms,
     };
     const isModified =
       JSON.stringify(initialState) !== JSON.stringify(currentState);
@@ -153,7 +158,12 @@ export default function AppSettings() {
     bundleId,
     googleServicesJson,
     googleServiceInfoPlist,
+    availableMenuItems,
     afterLoginPage,
+    defaultAccessAssetsOpen,
+    defaultAccessProfileOpen,
+    usersCanFree,
+    allowUsersToCreateRooms,
   ]);
 
   useEffect(() => {
@@ -175,7 +185,12 @@ export default function AppSettings() {
         bundleId: app.bundleId,
         googleServicesJson: app.googleServicesJson,
         googleServiceInfoPlist: app.googleServiceInfoPlist,
+        availableMenuItems: app.availableMenuItems,
         afterLoginPage: app.afterLoginPage,
+        defaultAccessAssetsOpen: app.defaultAccessAssetsOpen,
+        defaultAccessProfileOpen: app.defaultAccessProfileOpen,
+        usersCanFree: app.usersCanFree,
+        allowUsersToCreateRooms: app.allowUsersToCreateRooms,
       };
 
       setInitialState(initialData);
@@ -287,7 +302,12 @@ export default function AppSettings() {
           bundleId,
           googleServicesJson,
           googleServiceInfoPlist,
+          availableMenuItems,
           afterLoginPage,
+          defaultAccessAssetsOpen,
+          defaultAccessProfileOpen,
+          usersCanFree,
+          allowUsersToCreateRooms,
         });
         setIsModified(false);
       });
@@ -397,7 +417,7 @@ export default function AppSettings() {
               setColor={setColor}
               logoImage={logoImage}
               setLogoImage={setLogoImage}
-              sublogoImage={sublogoImage}
+              // sublogoImage={sublogoImage}
               setSublogoImage={setSublogoImage}
             />
           </TabPanel>

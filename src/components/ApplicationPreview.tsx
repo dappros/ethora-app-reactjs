@@ -13,7 +13,7 @@ interface Props {
 
 export function ApplicationPreview({ app, primaryColor }: Props) {
   const navigate = useNavigate();
-  const numberFormatter = new Intl.NumberFormat('en-US')
+  const numberFormatter = new Intl.NumberFormat('en-US');
   const onClick = () => {
     navigate(`/app/admin/apps/${app._id}/settings`, {
       state: { from: location.pathname + location.search },
@@ -36,11 +36,13 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           className="w-[120px] h-[120px] rounded-xl flex justify-center bg-gray-100 items-center bg-contain bg-no-repeat bg-center cursor-pointer"
           style={{ backgroundImage: `url(${app.logoImage})` }}
         ></div>
-
       );
     } else {
       return (
-        <div onClick={onClick} className="w-[120px] h-[120px] rounded-xl bg-gray-100 flex justify-center items-center cursor-pointer">
+        <div
+          onClick={onClick}
+          className="w-[120px] h-[120px] rounded-xl bg-gray-100 flex justify-center items-center cursor-pointer"
+        >
           <span className="text-gray-500 font-varela text-[18px]">
             {app.displayName}
           </span>
@@ -56,7 +58,10 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
         {/* app title */}
         <div className="flex justify-center md:justify-between items-center">
           <div className="md:ml-[40px]">
-            <div onClick={onClick} className="font-varela text-[18px] text-brand-500 hover:text-brand-darker text-center md:text-left cursor-pointer">
+            <div
+              onClick={onClick}
+              className="font-varela text-[18px] text-brand-500 hover:text-brand-darker text-center md:text-left cursor-pointer"
+            >
               {app.displayName}
             </div>
             <div className="font-sans text-[12px] text-gray-500">
@@ -64,7 +69,10 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
             </div>
           </div>
           <div className="hidden md:flex items-ceter justify-center">
-            <button onClick={onExternalClick} className="mr-4 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover">
+            <button
+              onClick={onExternalClick}
+              className="mr-4 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover"
+            >
               <IconExternalLink color={primaryColor} />
             </button>
             <button
@@ -83,40 +91,61 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Users</span>
-              <Tooltip title="Users registered (total vs 24h)" className="relative">
+              <Tooltip
+                title="Users registered (total vs 24h)"
+                className="relative"
+              >
                 <IconInfo />
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">{app.stats.totalRegistered}</span>{' '}
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalRegistered)}
+              </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{app.stats.recentlyRegistered}</span>
+              <span className="text-green-600 font-sans text-sm">
+                {app.stats.recentlyRegistered}
+              </span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Sessions</span>
-              <Tooltip title="User sessions (total vs 24h)" className="relative">
+              <Tooltip
+                title="User sessions (total vs 24h)"
+                className="relative"
+              >
                 <IconInfo />
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalSessions)}</span>{' '}
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalSessions)}
+              </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlySessions)}</span>
+              <span className="text-green-600 font-sans text-sm">
+                {numberFormatter.format(app.stats.recentlySessions)}
+              </span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Chats</span>
-              <Tooltip title="Chat messages (total vs 24h)" className="relative">
+              <Tooltip
+                title="Chat messages (total vs 24h)"
+                className="relative"
+              >
                 <IconInfo />
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalChats)}</span>{' '}
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalChats)}
+              </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyChats)}</span>
+              <span className="text-green-600 font-sans text-sm">
+                {numberFormatter.format(app.stats.recentlyChats)}
+              </span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -127,9 +156,13 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalApiCalls)}</span>{' '}
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalApiCalls)}
+              </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyApiCalls)}</span>
+              <span className="text-green-600 font-sans text-sm">
+                {numberFormatter.format(app.stats.recentlyApiCalls)}
+              </span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -140,22 +173,33 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalFiles)}</span>{' '}
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalFiles)}
+              </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyFiles)}</span>
+              <span className="text-green-600 font-sans text-sm">
+                {numberFormatter.format(app.stats.recentlyFiles)}
+              </span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Web3</span>
-              <Tooltip title="Blockchain transactions (total vs 24h)" className="relative">
+              <Tooltip
+                title="Blockchain transactions (total vs 24h)"
+                className="relative"
+              >
                 <IconInfo />
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalTransactions)}</span>{' '}
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalTransactions)}
+              </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyTransactions)}</span>
+              <span className="text-green-600 font-sans text-sm">
+                {numberFormatter.format(app.stats.recentlyTransactions)}
+              </span>
             </div>
           </div>
         </div>
