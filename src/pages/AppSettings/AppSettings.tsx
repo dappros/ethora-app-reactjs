@@ -1,4 +1,5 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -59,6 +60,9 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
+  const [isModified, setIsModified] = useState(false);
+  const [initialState, setInitialState] = useState({});
+
   // appearance tab
   const [displayName, setDisplayName] = useState('');
   const [tagline, setTagline] = useState('');
@@ -104,6 +108,83 @@ export default function AppSettings() {
   const [defaultChatRooms, setDefaultChatRooms] = useState<
     Array<ModelAppDefaulRooom>
   >([]);
+
+  const checkIfModified = () => {
+    const currentState = {
+      displayName,
+      tagline,
+      coinName,
+      color,
+      logoImage,
+      sublogoImage,
+      enableEmail,
+      enableGoogle,
+      enableApple,
+      enableFacebook,
+      enableMetamask,
+      domainName,
+      firebaseWebConfigString,
+      bundleId,
+      googleServicesJson,
+      googleServiceInfoPlist,
+      afterLoginPage,
+    };
+    console.log(
+      'isModified',
+      JSON.stringify(initialState) !== JSON.stringify(currentState)
+    );
+    const isModified =
+      JSON.stringify(initialState) !== JSON.stringify(currentState);
+    setIsModified(isModified);
+  };
+
+  useEffect(() => {
+    checkIfModified();
+  }, [
+    displayName,
+    tagline,
+    coinName,
+    color,
+    logoImage,
+    sublogoImage,
+    enableEmail,
+    enableGoogle,
+    enableApple,
+    enableFacebook,
+    enableMetamask,
+    domainName,
+    firebaseWebConfigString,
+    bundleId,
+    googleServicesJson,
+    googleServiceInfoPlist,
+    afterLoginPage,
+  ]);
+
+  useEffect(() => {
+    if (app) {
+      const initialData = {
+        displayName: app.displayName || '',
+        tagline: app.appTagline || '',
+        coinName: app.coinName || '',
+        color: app.primaryColor || '',
+        logoImage: app.logoImage,
+        sublogoImage: app.sublogoImage,
+        enableEmail: app.signonOptions.includes('email'),
+        enableGoogle: app.signonOptions.includes('google'),
+        enableApple: app.signonOptions.includes('apple'),
+        enableFacebook: app.signonOptions.includes('facebook'),
+        enableMetamask: app.signonOptions.includes('metamask'),
+        domainName: app.domainName,
+        firebaseWebConfigString: app.firebaseWebConfigString || '',
+        bundleId: app.bundleId,
+        googleServicesJson: app.googleServicesJson,
+        googleServiceInfoPlist: app.googleServiceInfoPlist,
+        afterLoginPage: app.afterLoginPage,
+      };
+
+      setInitialState(initialData);
+    }
+  }, [app]);
 
   const onSave = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -193,6 +274,26 @@ export default function AppSettings() {
     if (appId) {
       actionUpdateApp(appId, body).then(() => {
         toast('Settings applied successfully!');
+        setInitialState({
+          displayName,
+          tagline,
+          coinName,
+          color,
+          logoImage,
+          sublogoImage,
+          enableEmail,
+          enableGoogle,
+          enableApple,
+          enableFacebook,
+          enableMetamask,
+          domainName,
+          firebaseWebConfigString,
+          bundleId,
+          googleServicesJson,
+          googleServiceInfoPlist,
+          afterLoginPage,
+        });
+        setIsModified(false);
       });
     }
   };
@@ -264,7 +365,11 @@ export default function AppSettings() {
           </button>
           <button
             onClick={onSave}
-            className="border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white"
+            className={classNames(
+              'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white',
+              isModified ? '' : 'opacity-50 cursor-not-allowed'
+            )}
+            disabled={!isModified}
           >
             Save
           </button>

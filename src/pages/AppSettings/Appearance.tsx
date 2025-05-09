@@ -140,7 +140,7 @@ export function Appearance({
           Add logo
         </button>
 
-        <div className="flex items-center mb-2">
+        {/* <div className="flex items-center mb-2">
           <p className="mr-2 font-sans font-semibold text-base">Submark logo</p>
           <div className="text-xs inline-block text-gray-500">(optional)</div>
           <Tooltip
@@ -153,8 +153,8 @@ export function Appearance({
               className=" ml-2 text-gray-500 cursor-pointer"
             />
           </Tooltip>
-        </div>
-        {sublogoImage && (
+        </div> */}
+        {/* {sublogoImage && (
           <div className="w-fit bg-gray-100 p-2 rounded-xl flex mb-2">
             <img
               src={sublogoImage}
@@ -174,7 +174,7 @@ export function Appearance({
           className="w-full p-2 hover:bg-brand-hover border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
         >
           Add logo
-        </button>
+        </button> */}
       </div>
       <AppearanceRightImage
         color={color}
