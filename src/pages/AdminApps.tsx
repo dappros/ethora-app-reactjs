@@ -101,12 +101,13 @@ export default function AdminApps() {
           setOrderBy={(newOrderBy) => handleSortChange(newOrderBy, order)}
           orderByList={[
             { key: 'displayName', title: 'Display Name' },
-            { key: 'totalRegistered', title: 'Registered' },
+            { key: 'totalRegistered', title: 'Users' },
             { key: 'totalSessions', title: 'Sessions' },
             { key: 'totalApiCalls', title: 'API' },
             { key: 'totalFiles', title: 'Files' },
             { key: 'totalTransactions', title: 'Transactions' },
             { key: 'createdAt', title: 'Date' },
+            { key: 'totalChats', title: 'Chats' },
           ]}
         />
       );
