@@ -5,10 +5,11 @@ import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { NewAppModal } from '../components/modal/NewAppModal';
 import { Sorting } from '../components/Sorting';
-import { httpGetApps } from '../http';
+import { getExportAppsCsv, httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
 import {Pagination} from "../components/UI/Pagination/Pagination.tsx";
+import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,11 +30,11 @@ export default function AdminApps() {
     [searchParams]
   );
   const order = useMemo(
-    () => (searchParams.get('order') as 'asc' | 'desc') || 'asc',
+    () => (searchParams.get('order') as 'asc' | 'desc') || 'desc',
     [searchParams]
   );
   const orderBy = useMemo(
-    () => (searchParams.get('orderBy') as OrderByType) || 'createdAt',
+    () => (searchParams.get('orderBy') as OrderByType) || 'totalRegistered',
     [searchParams]
   );
 
@@ -114,6 +115,28 @@ export default function AdminApps() {
     }
   }, [currentUser?.isSuperAdmin, order, orderBy, handleSortChange]);
 
+  const getCsvFile = async () => {  
+      try {
+        const response = await getExportAppsCsv();
+        const binaryData = response.data;
+  
+        const blob = new Blob([binaryData], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+  
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mydata.json';
+  
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+  
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
   useEffect(() => {
     localStorage.setItem('lastPath', location.pathname + location.search);
   }, [location.pathname, location.search]);
@@ -123,8 +146,9 @@ export default function AdminApps() {
       <div>
         <div className="flex justify-between items-center px-4">
           <div className="font-varela text-[18px] md:text-2xl">Apps</div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             {renderSorting()}
+            {currentUser?.isSuperAdmin && <CsvButton onClick={getCsvFile} />}
             <button
               onClick={() => setShowModal(true)}
               className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"

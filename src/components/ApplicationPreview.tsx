@@ -114,9 +114,9 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               </Tooltip>
             </div>
             <div>
-              <span className="font-sans text-sm">-</span>{' '}
+              <span className="font-sans text-sm">{numberFormatter.format(app.stats.totalChats)}</span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">-</span>
+              <span className="text-green-600 font-sans text-sm">{numberFormatter.format(app.stats.recentlyChats)}</span>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">

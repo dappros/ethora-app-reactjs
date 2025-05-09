@@ -22,12 +22,13 @@ import { Loading } from '../components/Loading';
 
 // Data
 const tabs: Record<string, string>[] = [
-  { name: 'Users', value: 'user', disabled: 'disabled' },
+  { name: 'Users', value: 'users' },
   { name: 'Sessions', value: 'sessions' },
-  { name: 'Chats', value: 'chats', disabled: 'disabled' },
+  { name: 'Chats', value: 'chats' },
   { name: 'API calls', value: 'apiCalls' },
   { name: 'Assets', value: 'issuance' },
   { name: 'Transactions', value: 'transactions' },
+  { name: 'Files', value: 'files' },
 ];
 const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
 
@@ -42,11 +43,9 @@ export const AppStatistics = (): ReactElement => {
     Record<string, number>
   >({});
   
-  // Получаем значения из URL параметров
   const tabFromUrl = searchParams.get('tab');
   const periodFromUrl = searchParams.get('period');
   
-  // Инициализируем состояния с учетом URL параметров
   const [selectedTab, setSelectedTab] = useState(() => {
     const savedTab = tabs.find(tab => tab.value === tabFromUrl);
     return savedTab || tabs[1];
@@ -69,7 +68,6 @@ export const AppStatistics = (): ReactElement => {
     }];
   });
 
-  // Обновляем URL при изменении состояний
   useEffect(() => {
     setSearchParams(params => {
       params.set('tab', selectedTab.value);
