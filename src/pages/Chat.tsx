@@ -37,6 +37,7 @@ const MemoizedChat = React.memo(function ChatComponent({
           secondary: config?.secondaryColor || '#141414',
         },
         baseUrl: VITE_API ?? 'https://api.ethoradev.com/v1',
+        // @ts-ignorex
         customAppToken: appToken,
         newArch: true,
         qrUrl: 'https://beta.ethora.com/app/chat/?qrChatId=',

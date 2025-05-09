@@ -8,7 +8,7 @@ import {
 } from '@headlessui/react';
 import cn from 'classnames';
 import { DateTime } from 'luxon';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -29,19 +29,19 @@ import {
 import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
 
 import classNames from 'classnames';
+import { useSearchParams } from 'react-router-dom';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
+import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
 import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
 import MetamaskIcon from './AuthPage/Icons/socials/metamaskIcon';
-import { useSearchParams } from 'react-router-dom';
-import {Pagination} from "../components/UI/Pagination/Pagination.tsx";
 
 export default function AppUsers() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,33 +64,57 @@ export default function AppUsers() {
 
   const [editAcl, setEditAcl] = useState<ModelUserACL | null>(null);
 
-  const limit = useMemo(() => Number(searchParams.get('limit')) || 10, [searchParams]);
-  const page = useMemo(() => Number(searchParams.get('page')) || 0, [searchParams]);
-  const order = useMemo(() => (searchParams.get('order') as 'asc' | 'desc') || 'asc', [searchParams]);
-  const orderBy = useMemo(() => (searchParams.get('orderBy') as OrderByType) || 'createdAt', [searchParams]);
+  const limit = useMemo(
+    () => Number(searchParams.get('limit')) || 10,
+    [searchParams]
+  );
+  const page = useMemo(
+    () => Number(searchParams.get('page')) || 0,
+    [searchParams]
+  );
+  const order = useMemo(
+    () => (searchParams.get('order') as 'asc' | 'desc') || 'asc',
+    [searchParams]
+  );
+  const orderBy = useMemo(
+    () => (searchParams.get('orderBy') as OrderByType) || 'createdAt',
+    [searchParams]
+  );
 
-  const updateSearchParams = useCallback((newParams: Record<string, string | number>) => {
-    setSearchParams((prev) => {
-      const updatedParams = new URLSearchParams(prev);
-      Object.entries(newParams).forEach(([key, value]) => {
-        updatedParams.set(key, String(value));
+  const updateSearchParams = useCallback(
+    (newParams: Record<string, string | number>) => {
+      setSearchParams((prev) => {
+        const updatedParams = new URLSearchParams(prev);
+        Object.entries(newParams).forEach(([key, value]) => {
+          updatedParams.set(key, String(value));
+        });
+        return updatedParams;
       });
-      return updatedParams;
-    });
-  }, [setSearchParams]);
+    },
+    [setSearchParams]
+  );
 
-  const setOrder = useCallback((newOrder: 'asc' | 'desc') => {
-    updateSearchParams({ order: newOrder, page: 0 });
-  }, [updateSearchParams]);
+  const setOrder = useCallback(
+    (newOrder: 'asc' | 'desc') => {
+      updateSearchParams({ order: newOrder, page: 0 });
+    },
+    [updateSearchParams]
+  );
 
-  const setOrderBy = useCallback((newOrderBy: OrderByType) => {
-    updateSearchParams({ orderBy: newOrderBy, page: 0 });
-  }, [updateSearchParams]);
+  const setOrderBy = useCallback(
+    (newOrderBy: OrderByType) => {
+      updateSearchParams({ orderBy: newOrderBy, page: 0 });
+    },
+    [updateSearchParams]
+  );
 
-  const changeItemsPerTable = useCallback((count: number) => {
-    setItemsPerTable(count);
-    updateSearchParams({ limit: count, page: 0 });
-  }, [updateSearchParams]);
+  const changeItemsPerTable = useCallback(
+    (count: number) => {
+      setItemsPerTable(count);
+      updateSearchParams({ limit: count, page: 0 });
+    },
+    [updateSearchParams]
+  );
 
   const getCsvFile = async () => {
     if (!appId) {
@@ -102,11 +126,16 @@ export default function AppUsers() {
       const binaryData = response.data;
 
       const blob = new Blob([binaryData], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
 
+      const date = new Date();
+      const formattedDate = `${String(date.getFullYear()).slice(2)}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+      const fileName = `users_${formattedDate}.csv`;
+
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
+
       a.href = url;
-      a.download = 'mydata.json';
+      a.download = fileName;
 
       document.body.appendChild(a);
       a.click();
@@ -162,19 +191,24 @@ export default function AppUsers() {
     setRowsSelected(() => items.map((_el) => false));
   }, [items]);
 
-  const onPageChange = useCallback((selectedItem: { selected: number }) => {
-    updateSearchParams({ page: selectedItem.selected });
-  }, [updateSearchParams]);
+  const onPageChange = useCallback(
+    (selectedItem: { selected: number }) => {
+      updateSearchParams({ page: selectedItem.selected });
+    },
+    [updateSearchParams]
+  );
 
   const fetchUsers = useCallback(() => {
     if (!appId) return;
 
-    actionGetUsers(appId, limit, page * limit, orderBy, order).then((response) => {
-      const { total, items } = response.data;
-      setItems(items);
-      setTotal(total);
-      setPageCount(Math.ceil(total / limit));
-    });
+    actionGetUsers(appId, limit, page * limit, orderBy, order).then(
+      (response) => {
+        const { total, items } = response.data;
+        setItems(items);
+        setTotal(total);
+        setPageCount(Math.ceil(total / limit));
+      }
+    );
   }, [appId, limit, page, orderBy, order]);
 
   useEffect(() => {
@@ -604,7 +638,7 @@ export default function AppUsers() {
                     </MenuButton>
                     <MenuItems anchor="bottom" className="bg-white">
                       <div className="">
-                        {[10, 15, 25].map(item => (
+                        {[10, 15, 25].map((item) => (
                           <MenuItem>
                             <div
                               onClick={() => changeItemsPerTable(item)}

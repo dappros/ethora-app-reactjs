@@ -5,11 +5,11 @@ import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { NewAppModal } from '../components/modal/NewAppModal';
 import { Sorting } from '../components/Sorting';
+import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
+import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { getExportAppsCsv, httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import {Pagination} from "../components/UI/Pagination/Pagination.tsx";
-import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,27 +115,32 @@ export default function AdminApps() {
     }
   }, [currentUser?.isSuperAdmin, order, orderBy, handleSortChange]);
 
-  const getCsvFile = async () => {  
-      try {
-        const response = await getExportAppsCsv();
-        const binaryData = response.data;
-  
-        const blob = new Blob([binaryData], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-  
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mydata.json';
-  
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-  
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        console.error(e);
-      }
-    };
+  const getCsvFile = async () => {
+    try {
+      const response = await getExportAppsCsv();
+      const binaryData = response.data;
+
+      const blob = new Blob([binaryData], { type: 'text/csv' });
+
+      const date = new Date();
+      const formattedDate = `${String(date.getFullYear()).slice(2)}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+      const fileName = `apps_${formattedDate}.csv`;
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+
+      a.href = url;
+      a.download = fileName;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('lastPath', location.pathname + location.search);
