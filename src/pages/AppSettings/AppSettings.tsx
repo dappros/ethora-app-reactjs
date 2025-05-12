@@ -19,13 +19,13 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 
 const tabs = [
+  'Chats',
   'Appearance',
   'Sign-on options',
   'Web app',
   'Mobile app',
   'Home screen',
   'Menu',
-  'Chats',
   'Visibility & Privacy',
   'API',
 ];
@@ -403,6 +403,19 @@ export default function AppSettings() {
         </TabList>
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
+            key="Chats"
+            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
+          >
+            <Chats
+              allowUsersToCreateRooms={allowUsersToCreateRooms}
+              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
+              defaultChatRooms={defaultChatRooms}
+              setDefaultChatRooms={setDefaultChatRooms}
+              appId={appId as string}
+            />
+          </TabPanel>
+
+          <TabPanel
             key="Appearance"
             className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
@@ -474,19 +487,6 @@ export default function AppSettings() {
             <Menu
               availableMenuItems={availableMenuItems}
               setAvailableMenuItems={setAvailableMenuItems}
-            />
-          </TabPanel>
-
-          <TabPanel
-            key="Chats"
-            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
-          >
-            <Chats
-              allowUsersToCreateRooms={allowUsersToCreateRooms}
-              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
-              defaultChatRooms={defaultChatRooms}
-              setDefaultChatRooms={setDefaultChatRooms}
-              appId={appId as string}
             />
           </TabPanel>
 

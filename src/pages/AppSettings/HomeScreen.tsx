@@ -59,6 +59,20 @@ export function HomeScreen({
             where quick access to multiple conversations is important.
           </span>
         </p>
+
+        <RadioButton className="mb-2" value="admin" label="Admin panel" />
+        <p className="font-sans text-gray-500 text-[12px] mb-4">
+          Users will see Admin first, as long as they have permissions.
+        </p>
+        <p className="p-2 flex items-center rounded-[8px] bg-brand-150 mb-8">
+          <div className="mr-2">
+            <IconInfo stroke={primaryColor} />
+          </div>
+          <span className="font-sans text-[12px]">
+            Useful when you on-board many admin users or for a Base App on your
+            dedicated server.
+          </span>
+        </p>
       </RadioGroup>
     </div>
   );

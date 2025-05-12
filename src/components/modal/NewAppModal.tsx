@@ -5,7 +5,6 @@ import { IconClose } from '../Icons/IconClose';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
-import firstAppModalPic from '../../assets/first_app_modal_pic.png';
 import { Loading } from '../Loading';
 // import { TextInput } from '../ui/TextInput';
 
@@ -43,7 +42,7 @@ export function NewAppModal({ onClose, show, haveApps }: Props) {
       transition
       onClose={() => {}}
     >
-      {!next && (
+      {/* {!next && (
         <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8 relative">
           <button
             className="absolute top-[15px] right-[15px] "
@@ -83,39 +82,37 @@ export function NewAppModal({ onClose, show, haveApps }: Props) {
             </button>
           </div>
         </DialogPanel>
-      )}
-      {next && (
-        <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8 relative">
-          <button
-            className="absolute top-[15px] right-[15px] "
-            onClick={() => onClose()}
-          >
-            <IconClose />
-          </button>
-          <div className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
-            Get Started with Your New App
+      )} */}
+      <DialogPanel className="p-4 sm:p-8 bg-white rounded-3xl w-full max-w-[640px] m-8 relative">
+        <button
+          className="absolute top-[15px] right-[15px] "
+          onClick={() => onClose()}
+        >
+          <IconClose />
+        </button>
+        <div className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
+          Get Started with Your New App
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input
+            type="text"
+            placeholder="App Name"
+            {...register('appName', { required: true })}
+            className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-[24px] md:mb-8 outline-none"
+          />
+          <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
+            <button
+              className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500 hover:bg-brand-hover"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white hover:bg-brand-darker">
+              Continue
+            </button>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <input
-              type="text"
-              placeholder="App Name"
-              {...register('appName', { required: true })}
-              className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-[24px] md:mb-8 outline-none"
-            />
-            <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
-              <button
-                className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500 hover:bg-brand-hover"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white hover:bg-brand-darker">
-                Continue
-              </button>
-            </div>
-          </form>
-        </DialogPanel>
-      )}
+        </form>
+      </DialogPanel>
 
       {loading && <Loading />}
     </Dialog>

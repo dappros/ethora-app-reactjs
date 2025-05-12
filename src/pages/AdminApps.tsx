@@ -45,6 +45,10 @@ export default function AdminApps() {
     setCurrentPage(page);
   }, [page]);
 
+  useEffect(() => {
+    setShowModal(!apps.length);
+  }, [apps.length]);
+
   const fetchApps = useCallback(async () => {
     const response = await httpGetApps({
       limit,

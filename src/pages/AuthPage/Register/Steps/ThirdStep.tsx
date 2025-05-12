@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import CustomInput from '../../../../components/input/Input';
+import { actionAfterLogin } from '../../../../actions';
 import PasswordInput from '../../../../components/input/PasswordInput';
 import { Loading } from '../../../../components/Loading';
-import { setPermanentPassword } from '../../../../http';
+import { logLogin } from '../../../../hooks/withTracking';
+import { httpLogingWithEmail, setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
+import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
 
@@ -32,10 +34,26 @@ const ThirdStep = () => {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<Inputs>();
 
   const navigate = useNavigate();
   const config = useAppStore((state) => state.currentApp);
+
+  const newPassword = watch('newPassword');
+  const repeatPassword = watch('repeatPassword');
+
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  useEffect(() => {
+    if (newPassword === '' || repeatPassword === '') {
+      setIsDisabled(true);
+    } else if (newPassword !== repeatPassword) {
+      setIsDisabled(true);
+    } else {
+      setIsDisabled(false);
+    }
+  }, [newPassword, repeatPassword]);
 
   if (!config) {
     return null;
@@ -71,15 +89,32 @@ const ThirdStep = () => {
   }, []);
 
   const onSubmit = async ({ newPassword, repeatPassword }: Inputs) => {
+    const email = queryParams.get('email') || '';
+
     if (newPassword !== repeatPassword) {
       toast.error('Password do not match!');
       return;
     }
     setLoading(true);
     setPermanentPassword(tempPassword, newPassword)
-      .then(() => {
+      .then((data) => {
+        console.log('data registration', data);
         toast.success('Success');
-        navigate('/login');
+        // navigate('/login');
+
+        httpLogingWithEmail(email, newPassword)
+          .then(async ({ data }) => {
+            await actionAfterLogin(data);
+
+            logLogin('email', data.user._id);
+            if (config?.afterLoginPage) {
+              navigateToUserPage(navigate, config.afterLoginPage as string);
+            }
+          })
+          .catch((error) => {
+            toast.error(error.response.data.error);
+            localStorage.removeItem('token-538');
+          });
       })
       .catch(() => {
         toast.error('Error');
@@ -133,7 +168,7 @@ const ThirdStep = () => {
               disabled
               isDisabledPassword
             />
-            <CustomInput
+            <PasswordInput
               type="password"
               placeholder={'Enter Your Password'}
               sx={{ flex: 1, width: '100%' }}
@@ -141,7 +176,7 @@ const ThirdStep = () => {
               error={!!errors.newPassword}
               helperText={errors.newPassword?.message}
             />
-            <CustomInput
+            <PasswordInput
               type="password"
               placeholder={'Repeat Your Password'}
               sx={{ flex: 1, width: '100%' }}
@@ -151,14 +186,19 @@ const ThirdStep = () => {
             />
           </Box>
           <CustomButton
+            disabled={isDisabled}
             fullWidth
             variant="contained"
             color="primary"
             type="submit"
             style={{
-              backgroundColor: config?.primaryColor
-                ? config.primaryColor
-                : '#0052CD',
+              backgroundColor: isDisabled
+                ? 'rgb(18 141 202 / 69%)'
+                : config?.primaryColor
+                  ? config.primaryColor
+                  : '#0052CD',
+              color: '#ffffff',
+              cursor: isDisabled ? 'no-drop' : 'pointer',
             }}
           >
             Set Password
