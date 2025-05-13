@@ -117,14 +117,13 @@ export function Appearance({
         <div className="mb-4">
           <PopoverColorPicker color={color} onChange={onChangeColor} />
         </div>
-        <div className="font-sans font-semibold text-base mb-4">Logo</div>
-        <div className="flex items-center mb-2">
-          <span className="font-sans font-semibold text-base">
-            Primary Logo
-          </span>
-          <span className="text-xs inline-block ml-auto text-gray-500">
-            (Recommended size: 500px x 500px)
-          </span>
+        <div className="xs:flex items-center justify-between">
+          <div className="font-sans font-semibold text-base mb-4">Logo</div>
+          <div className="flex items-center mb-2">
+            <span className="text-xs inline-block ml-auto text-gray-500">
+              (Recommended size: 500px x 500px)
+            </span>
+          </div>
         </div>
         <input
           type="file"

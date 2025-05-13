@@ -155,6 +155,8 @@ export async function actionCreateApp(displayName: string) {
   const state = getState();
   const { data } = await httpCreateNewApp(displayName);
   state.doAddApp(data.app);
+
+  return data.app;
 }
 
 export async function actionPostFile(file: File) {

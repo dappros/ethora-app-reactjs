@@ -19,13 +19,13 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 
 const tabs = [
-  'Chats',
   'Appearance',
-  'Sign-on options',
+  'Chats',
   'Web app',
   'Mobile app',
-  'Home screen',
+  'Sign-on options',
   'Menu',
+  'Home screen',
   'Visibility & Privacy',
   'API',
 ];
@@ -403,19 +403,6 @@ export default function AppSettings() {
         </TabList>
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
-            key="Chats"
-            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
-          >
-            <Chats
-              allowUsersToCreateRooms={allowUsersToCreateRooms}
-              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
-              defaultChatRooms={defaultChatRooms}
-              setDefaultChatRooms={setDefaultChatRooms}
-              appId={appId as string}
-            />
-          </TabPanel>
-
-          <TabPanel
             key="Appearance"
             className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
@@ -434,23 +421,20 @@ export default function AppSettings() {
               // setSublogoImage={setSublogoImage}
             />
           </TabPanel>
+
           <TabPanel
-            key="Sign-on options"
-            className="grid grid-rows-1 lg:ml-4 h-full "
+            key="Chats"
+            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
           >
-            <SignonOptions
-              enableEmail={enableEmail}
-              setEnableEmail={setEnableEmail}
-              enableGoogle={enableGoogle}
-              setEnableGoogle={setEnableGoogle}
-              enableApple={enableApple}
-              setEnableApple={setEnableApple}
-              enableFacebook={enableFacebook}
-              setEnableFacebook={setEnableFacebook}
-              enableMetamask={enableMetamask}
-              setEnableMetamask={setEnableMetamask}
+            <Chats
+              allowUsersToCreateRooms={allowUsersToCreateRooms}
+              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
+              defaultChatRooms={defaultChatRooms}
+              setDefaultChatRooms={setDefaultChatRooms}
+              appId={appId as string}
             />
           </TabPanel>
+
           <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
             <WebApp
               domainName={domainName}
@@ -474,6 +458,30 @@ export default function AppSettings() {
             />
           </TabPanel>
           <TabPanel
+            key="Sign-on options"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <SignonOptions
+              enableEmail={enableEmail}
+              setEnableEmail={setEnableEmail}
+              enableGoogle={enableGoogle}
+              setEnableGoogle={setEnableGoogle}
+              enableApple={enableApple}
+              setEnableApple={setEnableApple}
+              enableFacebook={enableFacebook}
+              setEnableFacebook={setEnableFacebook}
+              enableMetamask={enableMetamask}
+              setEnableMetamask={setEnableMetamask}
+            />
+          </TabPanel>
+          <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <Menu
+              availableMenuItems={availableMenuItems}
+              setAvailableMenuItems={setAvailableMenuItems}
+            />
+          </TabPanel>
+
+          <TabPanel
             key="Home screen"
             className="grid grid-rows-1 lg:ml-4 h-full "
           >
@@ -481,12 +489,6 @@ export default function AppSettings() {
               afterLoginPage={afterLoginPage}
               setAfterLoginPage={setAfterLoginPage}
               primaryColor={app.primaryColor}
-            />
-          </TabPanel>
-          <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <Menu
-              availableMenuItems={availableMenuItems}
-              setAvailableMenuItems={setAvailableMenuItems}
             />
           </TabPanel>
 

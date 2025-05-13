@@ -1,6 +1,7 @@
 import { Textarea } from '@headlessui/react';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { IconInfo } from '../../components/Icons/IconInfo';
+import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
 
 interface Props {
   domainName: string;
@@ -57,6 +58,7 @@ export function WebApp({
         >
           <IconExternalLink />
         </button>
+        <CopyButtonText textToCopy={`${domainName}.ethora.com`} />
       </div>
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">
