@@ -11,6 +11,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
+import { CryptoRewards } from './CryptoRewards';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
@@ -25,6 +26,7 @@ const tabs = [
   'Mobile app',
   'Sign-on options',
   'Menu',
+  'Crypto & Rewards',
   'Home screen',
   'Visibility & Privacy',
   'API',
@@ -479,6 +481,13 @@ export default function AppSettings() {
               availableMenuItems={availableMenuItems}
               setAvailableMenuItems={setAvailableMenuItems}
             />
+          </TabPanel>
+
+          <TabPanel
+            key="Crypto & Rewards"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <CryptoRewards coinName={coinName} setCoinName={setCoinName} />
           </TabPanel>
 
           <TabPanel
