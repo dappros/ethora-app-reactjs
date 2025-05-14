@@ -2,7 +2,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { useEffect, useState } from 'react';
 import { IconClose } from '../Icons/IconClose';
 
-import { LinearProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -31,28 +31,35 @@ export function NewAppModal({ onClose, show }: Props) {
     setLoading(true);
     setProgress(0);
 
+    let serverResponded = false;
+
     const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 100 : prev + 5));
+      setProgress((prev) => {
+        if (serverResponded) return prev;
+        return prev < 100 ? prev + 5 : 100;
+      });
     }, 500);
 
     actionCreateApp(appName)
       .then((app) => {
-        toast('Application created successfully!');
-        console.log('app create', app);
+        serverResponded = true;
+        clearInterval(interval);
+
+        setProgress(100);
+
         setTimeout(() => {
+          toast('Application created successfully!');
           setLoading(false);
-          onClose();
           navigate(`/app/admin/apps/${app._id}/settings`, {
             state: { from: location.pathname + location.search },
           });
-        }, 1000);
+          onClose();
+        }, 1500);
       })
       .catch(() => {
         toast.error('Error creating application.');
-        setLoading(false);
-      })
-      .finally(() => {
         clearInterval(interval);
+        setLoading(false);
       });
   };
 
@@ -90,16 +97,22 @@ export function NewAppModal({ onClose, show }: Props) {
               10-15 seconds{dots}
             </p>
 
-            <LinearProgress
-              variant="determinate"
-              value={progress}
-              sx={{
-                backgroundColor: '#e0e0e0',
-                '& .MuiLinearProgress-bar': {
-                  backgroundColor: '#0052CD',
-                },
-              }}
-            />
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative inline-flex items-center justify-center">
+                <CircularProgress
+                  variant="determinate"
+                  value={progress}
+                  size={80}
+                  thickness={5}
+                  sx={{
+                    color: '#0052CD',
+                  }}
+                />
+                <div className="absolute text-base font-semibold">
+                  {progress}%
+                </div>
+              </div>
+            </div>
           </>
         ) : (
           <>
