@@ -413,8 +413,6 @@ export default function AppSettings() {
               setDisplayName={setDisplayName}
               tagline={tagline}
               setTagline={setTagline}
-              coinName={coinName}
-              setCoinName={setCoinName}
               color={color}
               setColor={setColor}
               logoImage={logoImage}
