@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import LogoAndText from './Icons/logoAndText';
 
 interface LogoContentProps {
   isMobile?: boolean;
@@ -35,14 +34,12 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
           justifyContent: isMobile ? 'center' : 'start',
         }}
       >
-        {config.logoImage && config.logoImage !== '' && !imageError ? (
+        {config.logoImage && config.logoImage !== '' && !imageError && (
           <img
             alt="logoImage"
             src={config.logoImage}
             onError={() => setImageError(true)}
           />
-        ) : (
-          <LogoAndText />
         )}
       </Box>
       {!isMobile && (
@@ -59,7 +56,9 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
             overflowWrap: 'break-word',
           }}
         >
-          {config?.appTagline ? config.appTagline : 'Empower your community'}
+          {config?.appTagline
+            ? config.appTagline
+            : `Tagline: "${config.displayName || ''}: join our community"`}
         </Typography>
       )}
     </Box>
