@@ -56,7 +56,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   },
   doAddApp: (app) => {
     set((s) => {
-      let newApps = s.apps.concat([app]);
+      const newApps = s.apps.concat([app]);
       s.apps = newApps;
     });
   },
@@ -75,8 +75,8 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   },
   doUpdateApp: (app) => {
     set((s) => {
-      let newApps = s.apps.concat([]);
-      let index = newApps.findIndex((el) => el._id === app._id);
+      const newApps = s.apps.concat([]);
+      const index = newApps.findIndex((el) => el._id === app._id);
 
       if (index !== -1) {
         newApps[index] = app;
