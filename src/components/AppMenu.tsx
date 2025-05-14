@@ -12,6 +12,7 @@ export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
   const currentUser = useAppStore((s) => s.currentUser);
+  const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
 
   const getPageTitle = useMemo(() => {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -50,15 +51,17 @@ export function AppMenu() {
           </div>
         </NavLink>
         <div className="my-2 border-b border-b-gray-200"></div>
-        <NavLink
-          to="/app/admin"
-          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-        >
-          <IconAdmin />
-          <div className="text-center group-aria-[current=page]:text-brand-500 font-sans text-sm">
-            Admin
-          </div>
-        </NavLink>
+        {isAdmin && (
+          <NavLink
+            to="/app/admin"
+            className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+          >
+            <IconAdmin />
+            <div className="text-center group-aria-[current=page]:text-brand-500 font-sans text-sm">
+              Admin
+            </div>
+          </NavLink>
+        )}
       </div>
       <div>
         <NavLink

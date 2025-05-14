@@ -19,6 +19,7 @@ const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
 
 import App from './App';
+import AdminLayout from './pages/AdminLayout';
 
 export const router = createBrowserRouter(
   [
@@ -59,7 +60,11 @@ export const router = createBrowserRouter(
                 },
                 {
                   path: 'admin',
-                  Component: Admin,
+                  Component: () => (
+                    <AdminLayout>
+                      <Admin />
+                    </AdminLayout>
+                  ),
                   children: [
                     {
                       index: true,

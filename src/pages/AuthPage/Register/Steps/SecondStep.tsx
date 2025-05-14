@@ -62,7 +62,7 @@ const SecondStep = () => {
         >
           We`ve sent an email to {email ? email : 'your email'}
         </Typography>
-        <Box component="ul" sx={{ paddingLeft: '20px', margin: 0 }}>
+        <Box component="ul" sx={{ paddingLeft: '0', margin: 0 }}>
           <Typography
             component="li"
             sx={{

@@ -1,7 +1,5 @@
 import { useRef } from 'react';
 
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Tooltip } from '@mui/material';
 import hexToRgba from 'hex-to-rgba';
 import { actionPostFile } from '../../actions';
 import { AppearanceRightImage } from '../../components/Appearance/AppearanceRightImage';
@@ -12,8 +10,6 @@ interface Props {
   setDisplayName: (s: string) => void;
   tagline: string;
   setTagline: (s: string) => void;
-  coinName: string;
-  setCoinName: (s: string) => void;
   color: string;
   setColor: (c: string) => void;
   logoImage: string;
@@ -27,8 +23,6 @@ export function Appearance({
   setDisplayName,
   tagline,
   setTagline,
-  coinName,
-  setCoinName,
   color,
   logoImage,
   setColor,
@@ -93,38 +87,17 @@ export function Appearance({
           value={tagline}
           onChange={(e) => setTagline(e.target.value)}
         />
-        <div className="flex items-center mb-4">
-          <div className="font-sans font-semibold text-base">Coin Name</div>
-          <Tooltip
-            title="The name of the in-app currency or token used for transactions and rewards."
-            arrow
-            placement="top"
-          >
-            <HelpOutlineIcon
-              sx={{ width: '20px', height: '20px' }}
-              className=" ml-2 text-gray-500 cursor-pointer"
-            />
-          </Tooltip>
-        </div>
-        <input
-          placeholder="Enter Coin Name"
-          className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
-          type="text"
-          value={coinName}
-          onChange={(e) => setCoinName(e.target.value)}
-        />
         <div className="font-sans font-semibold text-base mb-4">Color</div>
         <div className="mb-4">
           <PopoverColorPicker color={color} onChange={onChangeColor} />
         </div>
-        <div className="font-sans font-semibold text-base mb-4">Logo</div>
-        <div className="flex items-center mb-2">
-          <span className="font-sans font-semibold text-base">
-            Primary Logo
-          </span>
-          <span className="text-xs inline-block ml-auto text-gray-500">
-            (Recommended size: 500px x 500px)
-          </span>
+        <div className="xs:flex items-center justify-between">
+          <div className="font-sans font-semibold text-base mb-4">Logo</div>
+          <div className="flex items-center mb-2">
+            <span className="text-xs inline-block ml-auto text-gray-500">
+              (Recommended size: 500px x 500px)
+            </span>
+          </div>
         </div>
         <input
           type="file"

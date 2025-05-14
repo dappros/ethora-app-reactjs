@@ -11,6 +11,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
+import { CryptoRewards } from './CryptoRewards';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
@@ -20,12 +21,13 @@ import { WebApp } from './WebApp';
 
 const tabs = [
   'Appearance',
-  'Sign-on options',
+  'Chats',
   'Web app',
   'Mobile app',
-  'Home screen',
+  'Sign-on options',
   'Menu',
-  'Chats',
+  'Crypto & Rewards',
+  'Home screen',
   'Visibility & Privacy',
   'API',
 ];
@@ -421,23 +423,20 @@ export default function AppSettings() {
               // setSublogoImage={setSublogoImage}
             />
           </TabPanel>
+
           <TabPanel
-            key="Sign-on options"
-            className="grid grid-rows-1 lg:ml-4 h-full "
+            key="Chats"
+            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
           >
-            <SignonOptions
-              enableEmail={enableEmail}
-              setEnableEmail={setEnableEmail}
-              enableGoogle={enableGoogle}
-              setEnableGoogle={setEnableGoogle}
-              enableApple={enableApple}
-              setEnableApple={setEnableApple}
-              enableFacebook={enableFacebook}
-              setEnableFacebook={setEnableFacebook}
-              enableMetamask={enableMetamask}
-              setEnableMetamask={setEnableMetamask}
+            <Chats
+              allowUsersToCreateRooms={allowUsersToCreateRooms}
+              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
+              defaultChatRooms={defaultChatRooms}
+              setDefaultChatRooms={setDefaultChatRooms}
+              appId={appId as string}
             />
           </TabPanel>
+
           <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
             <WebApp
               domainName={domainName}
@@ -461,13 +460,20 @@ export default function AppSettings() {
             />
           </TabPanel>
           <TabPanel
-            key="Home screen"
+            key="Sign-on options"
             className="grid grid-rows-1 lg:ml-4 h-full "
           >
-            <HomeScreen
-              afterLoginPage={afterLoginPage}
-              setAfterLoginPage={setAfterLoginPage}
-              primaryColor={app.primaryColor}
+            <SignonOptions
+              enableEmail={enableEmail}
+              setEnableEmail={setEnableEmail}
+              enableGoogle={enableGoogle}
+              setEnableGoogle={setEnableGoogle}
+              enableApple={enableApple}
+              setEnableApple={setEnableApple}
+              enableFacebook={enableFacebook}
+              setEnableFacebook={setEnableFacebook}
+              enableMetamask={enableMetamask}
+              setEnableMetamask={setEnableMetamask}
             />
           </TabPanel>
           <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
@@ -478,15 +484,20 @@ export default function AppSettings() {
           </TabPanel>
 
           <TabPanel
-            key="Chats"
-            className="grid overflow-hidden grid-rows-1 lg:ml-4 h-full"
+            key="Crypto & Rewards"
+            className="grid grid-rows-1 lg:ml-4 h-full "
           >
-            <Chats
-              allowUsersToCreateRooms={allowUsersToCreateRooms}
-              setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
-              defaultChatRooms={defaultChatRooms}
-              setDefaultChatRooms={setDefaultChatRooms}
-              appId={appId as string}
+            <CryptoRewards coinName={coinName} setCoinName={setCoinName} />
+          </TabPanel>
+
+          <TabPanel
+            key="Home screen"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <HomeScreen
+              afterLoginPage={afterLoginPage}
+              setAfterLoginPage={setAfterLoginPage}
+              primaryColor={app.primaryColor}
             />
           </TabPanel>
 

@@ -3,6 +3,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { ApplicationPreview } from '../components/ApplicationPreview';
 import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
+import { Loading } from '../components/Loading.tsx';
 import { NewAppModal } from '../components/modal/NewAppModal';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
@@ -16,6 +17,7 @@ export default function AdminApps() {
   const location = useLocation();
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
@@ -41,25 +43,24 @@ export default function AdminApps() {
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(page);
 
-  useEffect(() => {
-    setCurrentPage(page);
-  }, [page]);
-
   const fetchApps = useCallback(async () => {
-    const response = await httpGetApps({
-      limit,
-      offset: limit * page,
-      order,
-      orderBy,
-    });
+    setLoading(true);
+    try {
+      const response = await httpGetApps({
+        limit,
+        offset: limit * page,
+        order,
+        orderBy,
+      });
 
-    setPageCount(Math.ceil(response.data.total / limit));
-    doSetApps(response.data.apps);
+      setPageCount(Math.ceil(response.data.total / limit));
+      doSetApps(response.data.apps);
+    } catch (error: AxiosError | any) {
+      console.error(error?.response?.data?.error || error);
+    } finally {
+      setLoading(false);
+    }
   }, [limit, page, order, orderBy, doSetApps]);
-
-  useEffect(() => {
-    fetchApps();
-  }, [fetchApps]);
 
   const updateSearchParams = useCallback(
     (newParams: Record<string, string | number>) => {
@@ -147,56 +148,76 @@ export default function AdminApps() {
     localStorage.setItem('lastPath', location.pathname + location.search);
   }, [location.pathname, location.search]);
 
+  useEffect(() => {
+    setCurrentPage(page);
+  }, [page]);
+
+  useEffect(() => {
+    setShowModal(!apps.length);
+  }, [apps.length]);
+
+  useEffect(() => {
+    fetchApps();
+  }, [fetchApps]);
+
   return (
-    <div id="admin-apps">
-      <div>
-        <div className="flex justify-between items-center px-4">
-          <div className="font-varela text-[18px] md:text-2xl">Apps</div>
-          <div className="flex items-center gap-4">
-            {renderSorting()}
-            {currentUser?.isSuperAdmin && <CsvButton onClick={getCsvFile} />}
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
-            >
-              <IconAdd color="white" className="md:mr-2" />
-              <span className="hidden md:block">Create App</span>
-            </button>
+    <>
+      {loading ? (
+        <Loading />
+      ) : (
+        <div id="admin-apps">
+          <div>
+            <div className="flex justify-between items-center px-4">
+              <div className="font-varela text-[18px] md:text-2xl">Apps</div>
+              <div className="flex items-center gap-4">
+                {renderSorting()}
+                {currentUser?.isSuperAdmin && (
+                  <CsvButton onClick={getCsvFile} />
+                )}
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
+                >
+                  <IconAdd color="white" className="md:mr-2" />
+                  <span className="hidden md:block">Create App</span>
+                </button>
+              </div>
+            </div>
+            <div className="my-4 border-b border-b-gray-200"></div>
           </div>
+
+          {/* apps list */}
+          <div className="">
+            {showStarterInf && !apps.length && (
+              <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
+            )}
+
+            {apps.map((app) => (
+              <ApplicationPreview
+                key={app._id}
+                app={app}
+                primaryColor={currentApp.primaryColor}
+              />
+            ))}
+
+            {currentUser?.isSuperAdmin && (
+              <Pagination
+                onPageChange={onPageChange}
+                pageCount={pageCount}
+                forcePage={currentPage}
+              />
+            )}
+          </div>
+
+          {showModal && (
+            <NewAppModal
+              haveApps={!!apps.length}
+              show={showModal}
+              onClose={() => setShowModal(false)}
+            />
+          )}
         </div>
-        <div className="my-4 border-b border-b-gray-200"></div>
-      </div>
-
-      {/* apps list */}
-      <div className="">
-        {showStarterInf && !apps.length && (
-          <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
-        )}
-
-        {apps.map((app) => (
-          <ApplicationPreview
-            key={app._id}
-            app={app}
-            primaryColor={currentApp.primaryColor}
-          />
-        ))}
-
-        {currentUser?.isSuperAdmin && (
-          <Pagination
-            onPageChange={onPageChange}
-            pageCount={pageCount}
-            forcePage={currentPage}
-          />
-        )}
-      </div>
-
-      {showModal && (
-        <NewAppModal
-          haveApps={!!apps.length}
-          show={showModal}
-          onClose={() => setShowModal(false)}
-        />
       )}
-    </div>
+    </>
   );
 }
