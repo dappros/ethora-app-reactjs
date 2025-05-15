@@ -7,7 +7,7 @@ import { actionAfterLogin } from '../../../../actions';
 import PasswordInput from '../../../../components/input/PasswordInput';
 import { Loading } from '../../../../components/Loading';
 import { logLogin } from '../../../../hooks/withTracking';
-import { httpLogingWithEmail, setPermanentPassword } from '../../../../http';
+import { httpLoginWithEmail, setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
@@ -102,7 +102,7 @@ const ThirdStep = () => {
         toast.success('Success');
         // navigate('/login');
 
-        httpLogingWithEmail(email, newPassword)
+        httpLoginWithEmail(email, newPassword)
           .then(async ({ data }) => {
             await actionAfterLogin(data);
 

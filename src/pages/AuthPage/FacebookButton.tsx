@@ -10,34 +10,39 @@ import {
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
-import CustomButton from './Button';
-import { getUserCredsFromGoogle } from './firebase';
-import GoogleIcon from './Icons/socials/googleIcon';
+import CustomButton from './Button.tsx';
+import { getUserCredsFromFacebook } from './firebase';
+import FacebookIcon from './Icons/socials/facebookIcon';
 
-export const GoogleButton = () => {
-  const config = useAppStore.getState().currentApp;
+export const FacebookButton = () => {
+  const config = useAppStore((s) => s.currentApp);
+
+  if (!config) return null;
+
   const navigate = useNavigate();
-  const onGoogleLogin = async () => {
+
+  const onFacebookLogin = async () => {
     try {
-      const loginType = 'google';
+      const loginType = 'facebook';
       let user, idToken, credential;
       try {
-        const creds = await getUserCredsFromGoogle();
+        const creds = await getUserCredsFromFacebook();
         user = creds.user;
         idToken = creds.idToken;
         credential = creds.credential;
       } catch (e) {
-        console.log('here ', e);
+        console.log('Facebook login error:', e);
+        return;
       }
 
       if (user) {
-        if (!user.providerData[0].email) {
-          toast.error('Email not provided by Google');
+        const email = user.providerData[0]?.email;
+        if (!email) {
+          toast.error('Email not provided by Facebook');
           return;
         }
-        const emailExist = await httpCheckEmailExist(
-          user.providerData[0].email
-        );
+
+        const emailExist = await httpCheckEmailExist(email);
 
         if (emailExist.data.success) {
           console.log('new registration');
@@ -50,9 +55,9 @@ export const GoogleButton = () => {
             );
             const { firstName, lastName, email } = userResult?.data?.user;
 
-            logLogin('google', userResult?.data?.user?._id);
+            logLogin('facebook', userResult?.data?.user?._id);
 
-            const website = `${window?.location?.origin || ''}/google`;
+            const website = `${window?.location?.origin || ''}/facebook`;
             const allowedDomains =
               import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
             const currentDomain = window.location.hostname;
@@ -95,8 +100,7 @@ export const GoogleButton = () => {
             credential?.accessToken ?? '',
             loginType
           ).then(async ({ data }) => {
-            logLogin('google', data.user._id);
-
+            logLogin('facebook', data.user._id);
             await actionAfterLogin(data);
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
@@ -106,18 +110,19 @@ export const GoogleButton = () => {
       console.log('++ ', error);
     }
   };
+
   return (
     <CustomButton
       fullWidth
       variant="outlined"
-      startIcon={<GoogleIcon />}
-      onClick={() => onGoogleLogin()}
+      startIcon={<FacebookIcon />}
+      onClick={onFacebookLogin}
       style={{
         borderColor: config?.primaryColor ? config.primaryColor : '#0052CD',
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
       }}
     >
-      Continue with Google
+      {config?.signonOptions.length < 3 && 'Continue with Facebook'}
     </CustomButton>
   );
 };

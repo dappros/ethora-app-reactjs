@@ -1,21 +1,24 @@
-import { NavigateFunction } from "react-router-dom";
+import { NavigateFunction } from 'react-router-dom';
 
-export function navigateToUserPage(navigate: NavigateFunction, page: string | null | undefined) {
-  if(page === 'login') {
-    return navigate("/login");
+export function navigateToUserPage(
+  navigate: NavigateFunction,
+  page: string | null | undefined
+) {
+  if (page === 'login') {
+    return navigate('/login');
   }
 
   switch (page) {
     case 'chats': {
-      navigate("/app/chat");
+      navigate('/app/chat');
       break;
     }
     case 'profile': {
-      navigate("/app/profile");
+      navigate('/app/profile');
       break;
     }
     default: {
-      navigate("/app/admin/apps");
+      navigate('/app/admin/apps');
     }
   }
 }
