@@ -25,26 +25,6 @@ export function HomeScreen({
         onChange={setAfterLoginPage}
         aria-label="Server size"
       >
-        <RadioButton
-          className="mb-2"
-          value="profile"
-          label="Profile / Wallet"
-        />
-        <p className="font-sans text-gray-500 text-[12px] mb-4">
-          User will see their Profile and any documents or assets stored there.
-          User will be able to share their profile or individual documents /
-          assets.
-        </p>
-        <p className="p-2 flex items-center rounded-[8px] bg-brand-150 mb-8">
-          <div className="mr-2">
-            <IconInfo stroke={primaryColor} />
-          </div>
-          <span className="font-sans text-[12px]">
-            Good for: <span className="font-bold">digital wallet</span> use case
-            where quick access to User’s documents, assets or QR pass is
-            important. 
-          </span>
-        </p>
         <RadioButton className="mb-2" value="chats" label="List of Chats" />
         <p className="font-sans text-gray-500 text-[12px] mb-4">
           User will be see the list of chats available to them with tabs for
@@ -69,8 +49,29 @@ export function HomeScreen({
             <IconInfo stroke={primaryColor} />
           </div>
           <span className="font-sans text-[12px]">
-            Useful when you on-board many admin users or for a Base App on your
-            dedicated server.
+            Useful when you on-board many{' '}
+            <span className="font-bold">admin users</span> or for a Base App on
+            your dedicated server.
+          </span>
+        </p>
+        <RadioButton
+          className="mb-2"
+          value="profile"
+          label="Profile / Wallet"
+        />
+        <p className="font-sans text-gray-500 text-[12px] mb-4">
+          User will see their Profile and any documents or assets stored there.
+          User will be able to share their profile or individual documents /
+          assets.
+        </p>
+        <p className="p-2 flex items-center rounded-[8px] bg-brand-150 mb-8">
+          <div className="mr-2">
+            <IconInfo stroke={primaryColor} />
+          </div>
+          <span className="font-sans text-[12px]">
+            Good for: <span className="font-bold">digital wallet</span> use case
+            where quick access to User’s documents, assets or QR pass is
+            important. 
           </span>
         </p>
       </RadioGroup>

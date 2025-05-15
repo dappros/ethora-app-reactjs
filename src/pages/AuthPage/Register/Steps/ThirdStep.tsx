@@ -157,7 +157,7 @@ const ThirdStep = () => {
               flexDirection: 'column',
             }}
           >
-            <Box
+            {/* <Box
               className="select-none"
               onContextMenu={(e) => e.preventDefault()}
               onCopy={(e) => e.preventDefault()}
@@ -166,7 +166,7 @@ const ThirdStep = () => {
               <Box className="text-gray-500 text-xs text-right">
                 You can find the temporary password in the verification email.
               </Box>
-            </Box>
+            </Box> */}
             {/* <PasswordInput
               inputRef={newPasswordRef}
               placeholder={'Enter temporary password'}
