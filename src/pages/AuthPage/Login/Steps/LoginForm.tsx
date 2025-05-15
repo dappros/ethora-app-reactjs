@@ -136,6 +136,7 @@ const LoginStep = () => {
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
         {config?.signonOptions.includes('metamask') && <MetamaskButton />}
+        {/* {config?.signonOptions.includes('facebook') && <FacebookButton />} */}
       </Box>
     </Box>
   );

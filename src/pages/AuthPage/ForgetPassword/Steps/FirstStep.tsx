@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import CustomInput from '../../../../components/input/Input';
 import { httpPostForgotPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
@@ -17,6 +18,7 @@ interface FirstStepProps {
 const FirstStep = ({ setStep }: FirstStepProps) => {
   const config = useAppStore((s) => s.currentApp);
   const [loading, setLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   if (!config) {
     return null;
@@ -32,8 +34,11 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
     setLoading(true);
     httpPostForgotPassword(email)
       .then((res) => {
-        console.log(res);
+        searchParams.set('email', email);
+        setSearchParams(searchParams);
         setStep((prev) => prev + 1);
+
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
