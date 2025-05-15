@@ -3,11 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { actionAfterLogin } from '../../../../actions';
 import CustomInput from '../../../../components/input/Input';
 import PasswordInput from '../../../../components/input/PasswordInput';
 import { Loading } from '../../../../components/Loading';
-import { setPermanentPassword } from '../../../../http';
+import { logLogin } from '../../../../hooks/withTracking';
+import { httpLoginWithEmail, setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
+import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
 
@@ -77,7 +80,22 @@ const ThirdStep = () => {
     }
     setLoading(true);
     setPermanentPassword(tempPassword, newPassword)
-      .then(() => {
+      .then(async () => {
+        const email = queryParams.get('email') || '';
+
+        await httpLoginWithEmail(email, newPassword)
+          .then(async ({ data }) => {
+            await actionAfterLogin(data);
+
+            logLogin('email', data.user._id);
+            if (config?.afterLoginPage) {
+              navigateToUserPage(navigate, config.afterLoginPage as string);
+            }
+          })
+          .catch((error) => {
+            toast.error(error.response.data.error);
+            localStorage.removeItem('token-538');
+          });
         toast.success('Success');
         navigate('/login');
       })

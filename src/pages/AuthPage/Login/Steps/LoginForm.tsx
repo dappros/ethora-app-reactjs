@@ -6,13 +6,13 @@ import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
 import CustomInput from '../../../../components/input/Input';
 import PasswordInput from '../../../../components/input/PasswordInput';
-import { httpLogingWithEmail } from '../../../../http';
+import { logLogin } from '../../../../hooks/withTracking.tsx';
+import { httpLoginWithEmail } from '../../../../http.ts';
 import { useAppStore } from '../../../../store/useAppStore';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
-import {logLogin} from "../../../../hooks/withTracking.tsx";
 
 type Inputs = {
   email: string;
@@ -30,11 +30,11 @@ const LoginStep = () => {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = ({ email, password }) => {
-    httpLogingWithEmail(email, password)
+    httpLoginWithEmail(email, password)
       .then(async ({ data }) => {
         await actionAfterLogin(data);
 
-        logLogin("email", data.user._id);
+        logLogin('email', data.user._id);
         if (config?.afterLoginPage) {
           navigateToUserPage(navigate, config.afterLoginPage as string);
         }

@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import LogoAndText from './Icons/logoAndText';
 
@@ -11,55 +11,61 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const [imageError, setImageError] = useState(false);
 
-  if (!config) {
-    return null;
-  }
+  const logoImage = useMemo(() => {
+    if (imageError || !config?.logoImage) {
+      return <LogoAndText />;
+    }
+
+    return (
+      <img
+        alt="logoImage"
+        src={config.logoImage}
+        onError={() => setImageError(true)}
+        style={{ maxWidth: '100%' }}
+      />
+    );
+  }, [config?.logoImage, imageError]);
+
+  if (!config) return null;
 
   return (
     <Box
       sx={{
         display: 'flex',
-        width: '100%',
         flexDirection: 'column',
+        width: '100%',
+        minWidth: 221,
         textAlign: 'left',
-        minWidth: '221px',
         justifyContent: 'center',
-        gap: '40px',
+        gap: 5,
       }}
     >
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'row',
+          justifyContent: isMobile ? 'center' : 'flex-start',
           textAlign: isMobile ? 'center' : 'start',
-          justifyContent: isMobile ? 'center' : 'start',
         }}
       >
-        {config.logoImage && config.logoImage !== '' && !imageError ? (
-          <img
-            alt="logoImage"
-            src={config.logoImage}
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <LogoAndText />
-        )}
+        {logoImage}
       </Box>
+
       {!isMobile && (
         <Typography
           sx={{
             fontFamily: 'Varela Round',
             fontWeight: 400,
-            fontSize: '48px',
+            fontSize: 48,
             color: '#141414',
-            textAlign: 'left',
             lineHeight: '56px',
             height: '112px',
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
+            textAlign: 'left',
           }}
         >
-          {config?.appTagline ? config.appTagline : 'Empower your community'}
+          {config.appTagline || 'Built with Ethora'}
         </Typography>
       )}
     </Box>

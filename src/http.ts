@@ -108,7 +108,7 @@ export function httpGetConfig(domainName?: string) {
   return http.get(path);
 }
 
-export function httpLogingWithEmail(email: string, password: string) {
+export function httpLoginWithEmail(email: string, password: string) {
   return http.post('/users/login-with-email', { email, password });
 }
 
