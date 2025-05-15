@@ -13,7 +13,8 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@ethora/chat-component": "^25.4.03",
+    "@ethersproject/providers": "^5.8.0",
+    "@ethora/chat-component": "^25.4.11",
     "@headlessui/react": "^2.1.8",
     "@microsoft/clarity": "^1.0.0",
     "@mui/icons-material": "^6.1.1",
@@ -23,6 +24,7 @@
     "@stripe/stripe-js": "^4.10.0",
     "axios": "^1.7.5",
     "classnames": "^2.5.1",
+    "ethers": "^6.14.0",
     "firebase": "^10.14.1",
     "hex-to-rgba": "^2.0.1",
     "immer": "^10.1.1",

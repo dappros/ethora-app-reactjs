@@ -1,5 +1,6 @@
 import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
-import  {
+import {
+  FacebookAuthProvider,
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
@@ -42,6 +43,25 @@ export const getUserCredsFromGoogle = async () => {
   const user = res.user as IUser;
   const idToken = await auth?.currentUser?.getIdToken();
   const credential = GoogleAuthProvider.credentialFromResult(res);
+  return {
+    user,
+    idToken,
+    credential,
+  };
+};
+
+export const getUserCredsFromFacebook = async () => {
+  const firebase = new Firebase();
+  firebase.init();
+  const auth = getAuth(firebase.firebaseApp as FirebaseApp);
+  const facebookProvider = new FacebookAuthProvider();
+  facebookProvider.addScope('email');
+  facebookProvider.addScope('public_profile');
+
+  const res = await signInWithPopup(auth, facebookProvider);
+  const user = res.user as IUser;
+  const idToken = await auth?.currentUser?.getIdToken();
+  const credential = FacebookAuthProvider.credentialFromResult(res);
   return {
     user,
     idToken,

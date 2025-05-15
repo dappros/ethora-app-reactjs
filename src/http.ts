@@ -108,7 +108,7 @@ export function httpGetConfig(domainName?: string) {
   return http.get(path);
 }
 
-export function httpLogingWithEmail(email: string, password: string) {
+export function httpLoginWithEmail(email: string, password: string) {
   return http.post('/users/login-with-email', { email, password });
 }
 
@@ -284,12 +284,46 @@ export const httpLoginSocial = (
   });
 };
 
+export function registerSignature(
+  walletAddress: string,
+  signature: string,
+  message: string,
+  firstName: string,
+  lastName: string
+) {
+  return http.post(
+    '/users',
+    {
+      loginType: 'signature',
+      walletAddress,
+      signature,
+      msg: message,
+      firstName,
+      lastName,
+    }
+    // { headers: { Authorization: accessToken } }
+  );
+}
+
+export function loginSignature(
+  walletAddress: string,
+  signature: string,
+  message: string
+) {
+  return http.post('/users/login', {
+    loginType: 'signature',
+    walletAddress,
+    signature,
+    msg: message,
+  });
+}
+
 export const httpRegisterWithEmail = (
   email: string,
   firstName: string,
   lastName: string,
   utm?: string,
-  signUpPlan?: string,
+  signUpPlan?: string
 ) => {
   const body = signUpPlan
     ? {

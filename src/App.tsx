@@ -3,10 +3,10 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
+import { useCaptureParams } from './hooks/useCaptureParams';
 import { useTrackUrl } from './hooks/useTrackUrl';
+import { withTracking } from './hooks/withTracking';
 import { useAppStore } from './store/useAppStore';
-import { withTracking } from "./hooks/withTracking";
-import { useCaptureParams } from "./hooks/useCaptureParams";
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -41,7 +41,6 @@ function App() {
           g = Math.ceil(g * 0.8);
           b = Math.ceil(b * 0.8);
           const newColor = `rgba(${r},${g},${b},${a})`;
-          console.log({ newColor });
           document.documentElement.style.setProperty(
             '--brand-darker',
             newColor

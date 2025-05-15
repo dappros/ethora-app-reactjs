@@ -72,6 +72,7 @@ const MemoizedChat = React.memo(function ChatComponent({
           enabled: true,
         },
         setRoomJidInPath: true,
+        enableRoomsRetry: { enabled: false, helperText: '' },
       }}
     />
   );
