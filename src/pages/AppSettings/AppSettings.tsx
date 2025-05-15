@@ -1,4 +1,6 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -7,6 +9,7 @@ import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
+import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
 import { deleteApp } from '../../http';
 import { ModelApp, ModelAppDefaulRooom } from '../../models';
@@ -39,6 +42,7 @@ export default function AppSettings() {
   const { appId } = useParams();
   const navigate = useNavigate();
   const apps = useAppStore((s) => s.apps);
+  const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -390,6 +394,18 @@ export default function AppSettings() {
     setDefaultChatRooms(app.defaultRooms);
   }, [app]);
 
+  useEffect(() => {
+    if (!app) return;
+
+    const createdAt = new Date(app.createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - createdAt.getTime();
+
+    if (diffMs <= 3 * 60 * 1000) {
+      setIsInfo(true);
+    }
+  }, [app]);
+
   if (!app) {
     return <div></div>;
   }
@@ -398,7 +414,15 @@ export default function AppSettings() {
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
       <div className="px-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">
-          Settings
+          <span>Settings</span>
+          <IconButton
+            size="small"
+            sx={{ marginLeft: 1, verticalAlign: 'middle' }}
+            aria-label="info"
+            onClick={() => setIsInfo(true)}
+          >
+            <InfoOutlinedIcon fontSize="small" />
+          </IconButton>
         </div>
         <div className="flex w-full lg:w-auto items-center">
           <button
@@ -553,6 +577,16 @@ export default function AppSettings() {
           onClose={() => setIsDelete(false)}
           handleDelete={handleDelete}
           show={isDelete}
+        />
+      )}
+
+      {isInfo && (
+        <InfoAppModal
+          appName={displayName}
+          domainName={app.domainName}
+          onClose={() => setIsInfo(false)}
+          show={isInfo}
+          primaryColor={app.primaryColor}
         />
       )}
 
