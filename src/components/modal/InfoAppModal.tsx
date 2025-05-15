@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { IconClose } from '../Icons/IconClose';
 import { IconInfo } from '../Icons/IconInfo';

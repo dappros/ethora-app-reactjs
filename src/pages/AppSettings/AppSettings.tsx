@@ -3,7 +3,12 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
@@ -41,6 +46,7 @@ const tabs = [
 export default function AppSettings() {
   const { appId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const isNew = location.state?.isNew ?? false;
 
   const apps = useAppStore((s) => s.apps);
