@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
+import { Step } from 'react-joyride';
 
 import hexToRgba from 'hex-to-rgba';
 import { actionPostFile } from '../../actions';
@@ -15,6 +16,10 @@ interface Props {
   logoImage: string;
   setLogoImage: (s: string) => void;
   onDelete: () => void;
+  runTour?: boolean;
+  setRunTour?: Dispatch<SetStateAction<boolean>>;
+  setTourSteps?: Dispatch<SetStateAction<Step[]>>;
+  isAppearanceTabActive?: boolean;
   // sublogoImage: string;
   // setSublogoImage: (s: string) => void;
 }
@@ -29,11 +34,54 @@ export function Appearance({
   setColor,
   setLogoImage,
   onDelete,
+  runTour,
+  setRunTour,
+  setTourSteps,
+  isAppearanceTabActive,
   // sublogoImage,
   // setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
   // const sublogoRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isAppearanceTabActive && runTour && setTourSteps && setRunTour) {
+      const appearanceSteps: Step[] = [
+        {
+          target: '[data-testid="appearance-display-name"]',
+          content: 'Set the name that will be displayed for your application.',
+          placement: 'bottom',
+          disableBeacon: true,
+        },
+        {
+          target: '[data-testid="appearance-tagline"]',
+          content: 'Enter a catchy tagline or slogan for your app.',
+          placement: 'bottom',
+        },
+        {
+          target: '[data-testid="appearance-color-picker"]',
+          content: 'Choose the primary color theme for your application.',
+          placement: 'bottom',
+        },
+        {
+          target: '[data-testid="appearance-add-logo"]',
+          content:
+            "Upload your app's main logo here. Recommended size: 500px x 500px.",
+          placement: 'bottom',
+        },
+        {
+          target: '[data-testid="appearance-delete-button"]',
+          content:
+            'If you need to remove this application entirely, you can do so here. This action is irreversible.',
+          placement: 'top',
+        },
+      ];
+      setTourSteps(appearanceSteps);
+      // setRunTour(true); // Ensure tour continues if it was restarted or is part of a larger flow
+      // It might be better to manage the overall run state from AppSettings to avoid loops or unexpected behavior.
+      // For now, we assume AppSettings controls the `run` prop of Joyride and this just sets the steps.
+    }
+  }, [isAppearanceTabActive, runTour, setTourSteps, setRunTour]);
 
   const onChangeColor = (color: string) => {
     console.log('color ', color);
@@ -75,6 +123,7 @@ export function Appearance({
           Display Name
         </div>
         <input
+          data-testid="appearance-display-name"
           placeholder="Enter App's Name"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
@@ -83,6 +132,7 @@ export function Appearance({
         />
         <div className="font-sans font-semibold text-base mb-4">Tagline</div>
         <input
+          data-testid="appearance-tagline"
           placeholder="Enter Tagline of Your App"
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
           type="text"
@@ -90,7 +140,7 @@ export function Appearance({
           onChange={(e) => setTagline(e.target.value)}
         />
         <div className="font-sans font-semibold text-base mb-4">Color</div>
-        <div className="mb-4">
+        <div className="mb-4" data-testid="appearance-color-picker">
           <PopoverColorPicker color={color} onChange={onChangeColor} />
         </div>
         <div className="xs:flex items-center justify-between">
@@ -109,6 +159,7 @@ export function Appearance({
           id="logo-file"
         />
         <button
+          data-testid="appearance-add-logo"
           onClick={() => logoRef.current?.click()}
           className="w-full hover:bg-brand-hover p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
         >
@@ -157,6 +208,7 @@ export function Appearance({
             This action is irreversible.
           </p>
           <button
+            data-testid="appearance-delete-button"
             onClick={onDelete}
             className="w-full hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white mb-4 text-[16px] font-varela"
           >
@@ -176,6 +228,7 @@ export function Appearance({
           is irreversible.
         </p>
         <button
+          data-testid="appearance-delete-button-mobile"
           onClick={onDelete}
           className="w-full hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white text-[16px] font-varela"
         >

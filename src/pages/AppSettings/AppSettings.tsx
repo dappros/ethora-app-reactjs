@@ -3,6 +3,13 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
+import Joyride, {
+  ACTIONS,
+  CallBackProps,
+  EVENTS,
+  STATUS,
+  Step,
+} from 'react-joyride';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
@@ -54,6 +61,10 @@ export default function AppSettings() {
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
 
+  // Joyride state
+  const [runTour, setRunTour] = useState(false);
+  const [tourSteps, setTourSteps] = useState<Step[]>([]);
+
   useEffect(() => {
     if (
       tabs.includes(tabFromUrl ?? '') &&
@@ -62,6 +73,233 @@ export default function AppSettings() {
       setSelectedIndex(tabs.indexOf(tabFromUrl!));
     }
   }, [tabFromUrl]);
+
+  useEffect(() => {
+    // Initialize tour steps for the main tabs
+    const mainTabsSteps: Step[] = [
+      {
+        target: '[data-testid="tab-Appearance"]',
+        content:
+          "Manage your app's visual style. Click next to see more details within this tab.",
+        placement: 'right',
+        disableBeacon: true,
+      },
+      {
+        target: '[data-testid="tab-Chats"]',
+        content:
+          'Configure chat functionalities, such as allowing users to create rooms and setting up default chat rooms.',
+        placement: 'right',
+      },
+      {
+        target: '[data-testid="tab-Web app"]',
+        content:
+          'Set up your web application, including domain name and Firebase configuration.',
+        placement: 'right',
+      },
+      {
+        target: '[data-testid="tab-Mobile app"]',
+        content:
+          'Configure settings for your mobile application, like bundle ID and Firebase service files.',
+        placement: 'right',
+      },
+      {
+        target: '[data-testid="tab-Sign-on options"]',
+        content:
+          'Manage various sign-on methods for your users, such as email, Google, Apple, Facebook, and Metamask.',
+        placement: 'right',
+      },
+      {
+        target: '[data-testid="tab-Home screen"]',
+        content: 'Define the initial screen users see after logging in.',
+        placement: 'right',
+      },
+      {
+        target: '[data-testid="tab-Menu"]',
+        content: "Customize the available items in your app's menu.",
+        placement: 'right',
+      },
+      {
+        target: '[data-testid="tab-Crypto & Rewards"]',
+        content:
+          'Set up cryptocurrency features and reward systems for your app.',
+        placement: 'bottom',
+      },
+      {
+        target: '[data-testid="tab-Visibility & Privacy"]',
+        content:
+          'Control default access settings for assets and profiles, and manage user privacy options.',
+        placement: 'bottom',
+      },
+      {
+        target: '[data-testid="tab-API"]',
+        content:
+          'Access and manage API keys and related settings for your application.',
+        placement: 'bottom',
+      },
+    ];
+    // Initially, set the tour steps to the main tabs tour.
+    // The Appearance tab component will set its own steps when it becomes active during the tour.
+    setTourSteps(mainTabsSteps);
+  }, []); // Removed setRunTour from dependencies as it's not used here and could cause loops
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { action, index, status, type, step } = data; // Added step to access target
+
+    if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
+      const currentTarget = step.target;
+      // If the current step was for the Appearance tab, and we are moving NEXT
+      if (
+        action === ACTIONS.NEXT &&
+        currentTarget === '[data-testid="tab-Appearance"]'
+      ) {
+        // The useEffect in Appearance.tsx should now take over and set its own steps.
+        // We might need to briefly set runTour to false and then true to re-trigger Joyride with new steps,
+        // or ensure Joyride picks up new steps automatically.
+        // For now, relying on Appearance.tsx to set its steps and Joyride to pick them up.
+        // If Appearance.tsx sets new steps, Joyride should continue with them.
+      } else if (
+        index === 0 &&
+        action === ACTIONS.PREV &&
+        selectedIndex !== tabs.indexOf('Appearance')
+      ) {
+        // If we are on the first step of a sub-tour (e.g., inside Appearance) and click back,
+        // we should revert to the main tour steps.
+        // This logic will need refinement if other tabs also get sub-tours.
+        const mainTabsSteps: Step[] = [
+          {
+            target: '[data-testid="tab-Appearance"]',
+            content:
+              "Manage your app's visual style. Click next to see more details within this tab.",
+            placement: 'right',
+            disableBeacon: true,
+          },
+          {
+            target: '[data-testid="tab-Chats"]',
+            content:
+              'Configure chat functionalities, such as allowing users to create rooms and setting up default chat rooms.',
+            placement: 'right',
+          },
+          {
+            target: '[data-testid="tab-Web app"]',
+            content:
+              'Set up your web application, including domain name and Firebase configuration.',
+            placement: 'right',
+          },
+          {
+            target: '[data-testid="tab-Mobile app"]',
+            content:
+              'Configure settings for your mobile application, like bundle ID and Firebase service files.',
+            placement: 'right',
+          },
+          {
+            target: '[data-testid="tab-Sign-on options"]',
+            content:
+              'Manage various sign-on methods for your users, such as email, Google, Apple, Facebook, and Metamask.',
+            placement: 'right',
+          },
+          {
+            target: '[data-testid="tab-Home screen"]',
+            content: 'Define the initial screen users see after logging in.',
+            placement: 'right',
+          },
+          {
+            target: '[data-testid="tab-Menu"]',
+            content: "Customize the available items in your app's menu.",
+            placement: 'right',
+          },
+          {
+            target: '[data-testid="tab-Crypto & Rewards"]',
+            content:
+              'Set up cryptocurrency features and reward systems for your app.',
+            placement: 'bottom',
+          },
+          {
+            target: '[data-testid="tab-Visibility & Privacy"]',
+            content:
+              'Control default access settings for assets and profiles, and manage user privacy options.',
+            placement: 'bottom',
+          },
+          {
+            target: '[data-testid="tab-API"]',
+            content:
+              'Access and manage API keys and related settings for your application.',
+            placement: 'bottom',
+          },
+        ];
+        setTourSteps(mainTabsSteps);
+        // Potentially force a re-render or restart of joyride for the new steps to take effect immediately.
+        // setRunTour(false); // This might stop the tour, needs careful handling
+        // setTimeout(() => setRunTour(true), 0); // Restart tour with new steps
+      }
+    } else if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      setRunTour(false);
+      // Reset to main tour steps when finished or skipped
+      const mainTabsSteps: Step[] = [
+        {
+          target: '[data-testid="tab-Appearance"]',
+          content:
+            "Manage your app's visual style. Click next to see more details within this tab.",
+          placement: 'right',
+          disableBeacon: true,
+        },
+        {
+          target: '[data-testid="tab-Chats"]',
+          content:
+            'Configure chat functionalities, such as allowing users to create rooms and setting up default chat rooms.',
+          placement: 'right',
+        },
+        {
+          target: '[data-testid="tab-Web app"]',
+          content:
+            'Set up your web application, including domain name and Firebase configuration.',
+          placement: 'right',
+        },
+        {
+          target: '[data-testid="tab-Mobile app"]',
+          content:
+            'Configure settings for your mobile application, like bundle ID and Firebase service files.',
+          placement: 'right',
+        },
+        {
+          target: '[data-testid="tab-Sign-on options"]',
+          content:
+            'Manage various sign-on methods for your users, such as email, Google, Apple, Facebook, and Metamask.',
+          placement: 'right',
+        },
+        {
+          target: '[data-testid="tab-Home screen"]',
+          content: 'Define the initial screen users see after logging in.',
+          placement: 'right',
+        },
+        {
+          target: '[data-testid="tab-Menu"]',
+          content: "Customize the available items in your app's menu.",
+          placement: 'right',
+        },
+        {
+          target: '[data-testid="tab-Crypto & Rewards"]',
+          content:
+            'Set up cryptocurrency features and reward systems for your app.',
+          placement: 'bottom',
+        },
+        {
+          target: '[data-testid="tab-Visibility & Privacy"]',
+          content:
+            'Control default access settings for assets and profiles, and manage user privacy options.',
+          placement: 'bottom',
+        },
+        {
+          target: '[data-testid="tab-API"]',
+          content:
+            'Access and manage API keys and related settings for your application.',
+          placement: 'bottom',
+        },
+      ];
+      setTourSteps(mainTabsSteps);
+    }
+
+    console.log('Joyride callback AppSettings: ', data);
+  };
 
   const handleTabChange = (index: number) => {
     if (tabs[index] !== tabFromUrl) {
@@ -344,26 +582,6 @@ export default function AppSettings() {
     }
   }, [apps, appId]);
 
-  const handleDelete = async () => {
-    if (!app) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await deleteApp(app._id).then(() => {
-        toast.success('You have successfully deleted your application');
-        setIsDelete(false);
-        navigate('/app/admin/apps', { replace: true });
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!app) return;
 
@@ -406,12 +624,58 @@ export default function AppSettings() {
     }
   }, [app]);
 
+  const handleDelete = async () => {
+    if (!app) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await deleteApp(app._id).then(() => {
+        toast.success('You have successfully deleted your application');
+        setIsDelete(false);
+        navigate('/app/admin/apps', { replace: true });
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!app) {
     return <div></div>;
   }
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        continuous
+        showProgress
+        showSkipButton
+        callback={handleJoyrideCallback}
+        styles={{
+          options: {
+            zIndex: 10000, // Ensure Joyride is above other elements
+            arrowColor: '#fff',
+            backgroundColor: '#fff',
+            primaryColor: '#007aff', // A pleasant blue, adjust as needed
+            textColor: '#333',
+          },
+          tooltipContainer: {
+            textAlign: 'left',
+          },
+          buttonNext: {
+            backgroundColor: '#007aff',
+          },
+          buttonBack: {
+            marginRight: 10,
+          },
+        }}
+      />
       <div className="px-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">
           <span>Settings</span>
@@ -432,6 +696,12 @@ export default function AppSettings() {
             <IconExternalLink />
           </button>
           <button
+            onClick={() => setRunTour(true)}
+            className="mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl"
+          >
+            Start Tour
+          </button>
+          <button
             onClick={onSave}
             className={classNames(
               'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white px-4',
@@ -450,7 +720,12 @@ export default function AppSettings() {
       >
         <TabList className="flex flex-row lg:flex-col hide-scroll lg:mb-0  border-b border-gray-200 lg:border-b-0 lg:pr-4 overflow-auto  lg:border-r lg:border-gray-200">
           {tabs.map((tab, index) => (
-            <TabApp key={index} text={tab} last={index === tabs.length - 1} />
+            <TabApp
+              key={index}
+              text={tab}
+              last={index === tabs.length - 1}
+              dataTestId={`tab-${tab.replace(/\\s|&/g, '-')}`}
+            />
           ))}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
@@ -467,9 +742,11 @@ export default function AppSettings() {
               setColor={setColor}
               logoImage={logoImage}
               setLogoImage={setLogoImage}
-              // sublogoImage={sublogoImage}
-              // setSublogoImage={setSublogoImage}
               onDelete={() => setIsDelete(true)}
+              runTour={runTour}
+              setRunTour={setRunTour}
+              setTourSteps={setTourSteps}
+              isAppearanceTabActive={tabs[selectedIndex] === 'Appearance'}
             />
           </TabPanel>
 
