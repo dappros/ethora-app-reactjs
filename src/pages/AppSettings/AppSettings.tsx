@@ -41,6 +41,8 @@ const tabs = [
 export default function AppSettings() {
   const { appId } = useParams();
   const navigate = useNavigate();
+  const isNew = location.state?.isNew ?? false;
+
   const apps = useAppStore((s) => s.apps);
   const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
@@ -395,16 +397,10 @@ export default function AppSettings() {
   }, [app]);
 
   useEffect(() => {
-    if (!app) return;
-
-    const createdAt = new Date(app.createdAt);
-    const now = new Date();
-    const diffMs = now.getTime() - createdAt.getTime();
-
-    if (diffMs <= 3 * 60 * 1000) {
+    if (isNew) {
       setIsInfo(true);
     }
-  }, [app]);
+  }, [isNew]);
 
   if (!app) {
     return <div></div>;
@@ -587,6 +583,8 @@ export default function AppSettings() {
           onClose={() => setIsInfo(false)}
           show={isInfo}
           primaryColor={app.primaryColor}
+          appId={app._id}
+          navigate={navigate}
         />
       )}
 
