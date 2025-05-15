@@ -26,7 +26,7 @@ const ThirdStep = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const tempPassword = queryParams.get('tempPassword') || '';
   const [loading, setLoading] = useState(false);
-  const [setMaskPassword] = useState<string>('');
+  // const [setMaskPassword] = useState<string>('');
 
   const newPasswordRef = useRef<HTMLInputElement | null>(null);
 
@@ -76,10 +76,10 @@ const ThirdStep = () => {
     if (!userData.tempPassword) return;
     if (userData.tempPassword.length <= 6) return;
 
-    setMaskPassword(
-      '*'.repeat(userData.tempPassword.length - 6) +
-        userData.tempPassword.slice(-6)
-    );
+    // setMaskPassword(
+    //   '*'.repeat(userData.tempPassword.length - 6) +
+    //     userData.tempPassword.slice(-6)
+    // );
   }, [userData.tempPassword]);
 
   useEffect(() => {
