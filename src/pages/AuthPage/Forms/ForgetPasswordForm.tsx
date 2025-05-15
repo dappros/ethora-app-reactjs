@@ -35,7 +35,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
 
   const steps = [
     <FirstStep setStep={setActiveStep} />,
-    <SecondStep />,
+    <SecondStep setStep={setActiveStep} />,
     <ThirdStep />,
   ];
 
