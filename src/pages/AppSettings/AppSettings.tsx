@@ -28,9 +28,9 @@ const tabs = [
   'Web app',
   'Mobile app',
   'Sign-on options',
+  'Home screen',
   'Menu',
   'Crypto & Rewards',
-  'Home screen',
   'Visibility & Privacy',
   'API',
 ];
@@ -501,6 +501,18 @@ export default function AppSettings() {
               setEnableMetamask={setEnableMetamask}
             />
           </TabPanel>
+
+          <TabPanel
+            key="Home screen"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <HomeScreen
+              afterLoginPage={afterLoginPage}
+              setAfterLoginPage={setAfterLoginPage}
+              primaryColor={app.primaryColor}
+            />
+          </TabPanel>
+
           <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
             <Menu
               availableMenuItems={availableMenuItems}
@@ -513,17 +525,6 @@ export default function AppSettings() {
             className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <CryptoRewards coinName={coinName} setCoinName={setCoinName} />
-          </TabPanel>
-
-          <TabPanel
-            key="Home screen"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
-            <HomeScreen
-              afterLoginPage={afterLoginPage}
-              setAfterLoginPage={setAfterLoginPage}
-              primaryColor={app.primaryColor}
-            />
           </TabPanel>
 
           <TabPanel
