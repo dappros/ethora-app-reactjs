@@ -26,7 +26,7 @@ const ThirdStep = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const tempPassword = queryParams.get('tempPassword') || '';
   const [loading, setLoading] = useState(false);
-  const [maskPassword, setMaskPassword] = useState<string>('');
+  const [setMaskPassword] = useState<string>('');
 
   const newPasswordRef = useRef<HTMLInputElement | null>(null);
 
