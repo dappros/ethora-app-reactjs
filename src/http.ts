@@ -445,6 +445,10 @@ export function getDefaultRooms(appId: string) {
   return http.get(`/apps/get-default-rooms/app-id/${appId}`);
 }
 
+export function deleteApp(appId: string) {
+  return http.delete(`/apps/${appId}`)
+}
+
 export function deleteDefaultRooms(appId: string, chatJid: string) {
   return http.delete(`/apps/delete-app-chat/${appId}`, {
     data: {

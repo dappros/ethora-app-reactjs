@@ -14,6 +14,7 @@ interface Props {
   setColor: (c: string) => void;
   logoImage: string;
   setLogoImage: (s: string) => void;
+  onDelete: () => void;
   // sublogoImage: string;
   // setSublogoImage: (s: string) => void;
 }
@@ -27,6 +28,7 @@ export function Appearance({
   logoImage,
   setColor,
   setLogoImage,
+  onDelete,
   // sublogoImage,
   // setSublogoImage,
 }: Props) {
@@ -148,12 +150,38 @@ export function Appearance({
         >
           Add logo
         </button> */}
+        <div className="border-t border-t-gray-200 hidden 2xl:block">
+          <p className="text-xs text-gray-500 py-4">
+            By pressing the button below you confirm you wish to completely
+            delete this App including Users, Chats, Files and other contents.
+            This action is irreversible.
+          </p>
+          <button
+            onClick={onDelete}
+            className="w-full hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white mb-4 text-[16px] font-varela"
+          >
+            Delete {displayName}
+          </button>
+        </div>
       </div>
       <AppearanceRightImage
         color={color}
         tagline={tagline}
         logoImage={logoImage}
       />
+      <div className="border-t border-t-gray-200 block 2xl:hidden">
+        <p className="text-xs text-gray-500 py-4">
+          By pressing the button below you confirm you wish to completely delete
+          this App including Users, Chats, Files and other contents. This action
+          is irreversible.
+        </p>
+        <button
+          onClick={onDelete}
+          className="w-full hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white text-[16px] font-varela"
+        >
+          Delete {displayName}
+        </button>
+      </div>
     </>
   );
 }

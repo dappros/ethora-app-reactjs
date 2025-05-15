@@ -1,11 +1,14 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
+import { Loading } from '../../components/Loading';
+import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import TabApp from '../../components/TabApp';
+import { deleteApp } from '../../http';
 import { ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { Api } from './Api';
@@ -34,6 +37,7 @@ const tabs = [
 
 export default function AppSettings() {
   const { appId } = useParams();
+  const navigate = useNavigate();
   const apps = useAppStore((s) => s.apps);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
@@ -62,6 +66,8 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
+  const [loading, setLoading] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
   const [initialState, setInitialState] = useState({});
 
@@ -334,6 +340,26 @@ export default function AppSettings() {
     }
   }, [apps, appId]);
 
+  const handleDelete = async () => {
+    if (!app) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await deleteApp(app._id).then(() => {
+        toast.success('You have successfully deleted your application');
+        setIsDelete(false);
+        navigate('/app/admin/apps', { replace: true });
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!app) return;
 
@@ -370,7 +396,7 @@ export default function AppSettings() {
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
-      <div className="row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
+      <div className="px-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">
           Settings
         </div>
@@ -384,7 +410,7 @@ export default function AppSettings() {
           <button
             onClick={onSave}
             className={classNames(
-              'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white',
+              'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white px-4',
               isModified ? '' : 'opacity-50 cursor-not-allowed'
             )}
             disabled={!isModified}
@@ -419,6 +445,7 @@ export default function AppSettings() {
               setLogoImage={setLogoImage}
               // sublogoImage={sublogoImage}
               // setSublogoImage={setSublogoImage}
+              onDelete={() => setIsDelete(true)}
             />
           </TabPanel>
 
@@ -518,6 +545,17 @@ export default function AppSettings() {
           </TabPanel>
         </TabPanels>
       </TabGroup>
+
+      {isDelete && (
+        <DeleteAppModal
+          appName={displayName}
+          onClose={() => setIsDelete(false)}
+          handleDelete={handleDelete}
+          show={isDelete}
+        />
+      )}
+
+      {loading && <Loading />}
     </div>
   );
 }
