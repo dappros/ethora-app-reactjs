@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import React, { useMemo, useState } from 'react';
+import YouLogo from '../../assets/YouLogo.svg';
 import { useAppStore } from '../../store/useAppStore';
-import LogoAndText from './Icons/logoAndText';
 
 interface LogoContentProps {
   isMobile?: boolean;
@@ -13,7 +13,14 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
 
   const logoImage = useMemo(() => {
     if (imageError || !config?.logoImage) {
-      return <LogoAndText />;
+      return (
+        <img
+          alt="logoImage"
+          src={YouLogo}
+          onError={() => setImageError(true)}
+          style={{ maxWidth: '100%' }}
+        />
+      );
     }
 
     return (
