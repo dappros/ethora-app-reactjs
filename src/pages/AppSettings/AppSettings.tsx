@@ -26,6 +26,7 @@ import { CryptoRewards } from './CryptoRewards';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
+import ProgressCreateApp from './ProgressCreateApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
@@ -78,6 +79,7 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
+  const [showProgress, setShowProgress] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
@@ -414,7 +416,19 @@ export default function AppSettings() {
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
-      <div className="px-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
+      <div className="px-4">
+        {showProgress && (
+          <ProgressCreateApp
+            isAppearanceAdjusted={!!app?.logoImage || !!app?.primaryColor}
+            isEndUserCreated={Boolean(
+              app?.stats?.totalRegistered && app.stats.totalRegistered > 0
+            )}
+            onClose={() => setShowProgress(false)}
+          />
+        )}
+      </div>
+
+      <div className="px-4 pb-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">
           <span>Settings</span>
           <IconButton
