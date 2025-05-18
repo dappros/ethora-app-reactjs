@@ -2,7 +2,7 @@ import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   useLocation,
   useNavigate,
@@ -374,6 +374,17 @@ export default function AppSettings() {
     }
   };
 
+  const isAppearance = useMemo((): boolean => {
+    if (!app) return false;
+
+    return (
+      !!app.logoImage &&
+      !!app.primaryColor &&
+      !!app.appTagline &&
+      !!app.displayName
+    );
+  }, [app]);
+
   useEffect(() => {
     if (!app) return;
 
@@ -416,10 +427,10 @@ export default function AppSettings() {
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
-      <div className="px-4">
+      <div className="px-4 pt-4">
         {showProgress && (
           <ProgressCreateApp
-            isAppearanceAdjusted={!!app?.logoImage || !!app?.primaryColor}
+            isAppearanceAdjusted={isAppearance}
             isEndUserCreated={Boolean(
               app?.stats?.totalRegistered && app.stats.totalRegistered > 0
             )}
