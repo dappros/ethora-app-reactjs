@@ -12,6 +12,7 @@ interface InfoAppModalProps {
   navigate: ReturnType<typeof useNavigate>;
   appId: string;
   show: boolean;
+  onStartTour: () => void;
   onClose: () => void;
 }
 
@@ -22,6 +23,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
   navigate,
   appId,
   show,
+  onStartTour,
   onClose,
 }) => {
   return (
@@ -130,7 +132,13 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
             className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
             onClick={onClose}
           >
-            Cancel
+            Skip
+          </button>
+          <button
+            onClick={onStartTour}
+            className="w-full py-[12px] rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
+          >
+            Start Tour
           </button>
         </div>
       </DialogPanel>
