@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { IconClose } from '../Icons/IconClose';
 import { IconInfo } from '../Icons/IconInfo';
@@ -8,6 +9,8 @@ interface InfoAppModalProps {
   appName: string;
   domainName: string;
   primaryColor: string;
+  navigate: ReturnType<typeof useNavigate>;
+  appId: string;
   show: boolean;
   onClose: () => void;
 }
@@ -16,6 +19,8 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
   appName,
   primaryColor,
   domainName,
+  navigate,
+  appId,
   show,
   onClose,
 }) => {
@@ -41,8 +46,19 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
           1. Change appearance
         </p>
         <p className="font-sans text-sm p-4 pl-5">
-          Open Appearance tab where you can add your logo, change colors etc for
-          your App.
+          Open{' '}
+          <button
+            onClick={() => {
+              navigate(`/app/admin/apps/${appId}/settings?tab=Appearance`, {
+                state: { from: 'info', isNew: false },
+              });
+              onClose();
+            }}
+            className="text-blue-600 hover:underline cursor-pointer"
+          >
+            Appearance
+          </button>{' '}
+          tab where you can add your logo, change colors etc for your App.
         </p>
 
         <p className="font-sans text-[16px] font-semibold mb-2">
@@ -51,6 +67,22 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
         <p className="font-sans text-sm p-4 pl-5">
           A default “Main Chat” room has been pre-created and pinned for your
           Users.
+        </p>
+        <p>
+          Manage pinned chats in{' '}
+          <button
+            onClick={() => {
+              navigate(`/app/admin/apps/${appId}/settings?tab=Chats`, {
+                state: { from: 'info', isNew: false },
+              });
+              onClose();
+            }}
+            className="text-blue-600 hover:underline cursor-pointer"
+          >
+            chats
+          </button>{' '}
+          tab here. You and your users can also create and join chats via your
+          App interface.
         </p>
 
         <p className="font-sans text-[16px] font-semibold mb-2">
@@ -89,9 +121,18 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
           we suggest you start with the basics first.
         </p>
 
-        <p className="text-center font-sans text-[16px] font-semibold mb-2">
+        <p className="text-center font-sans text-[16px] font-semibold pt-4 pb-6">
           Good luck!
         </p>
+
+        <div className="flex gap-4">
+          <button
+            className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+        </div>
       </DialogPanel>
     </Dialog>
   );

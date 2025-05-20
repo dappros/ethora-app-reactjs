@@ -4,7 +4,12 @@ import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import Joyride, { CallBackProps, EVENTS, STATUS, Step } from 'react-joyride';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
@@ -22,6 +27,7 @@ import { CryptoRewards } from './CryptoRewards';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
+import ProgressCreateApp from './ProgressCreateApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
@@ -46,6 +52,9 @@ interface CustomStep extends Step {
 export default function AppSettings() {
   const { appId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isNew = location.state?.isNew ?? false;
+
   const apps = useAppStore((s) => s.apps);
   const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
@@ -216,6 +225,7 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
+  const [showProgress, setShowProgress] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
@@ -521,16 +531,10 @@ export default function AppSettings() {
   }, [app]);
 
   useEffect(() => {
-    if (!app) return;
-
-    const createdAt = new Date(app.createdAt);
-    const now = new Date();
-    const diffMs = now.getTime() - createdAt.getTime();
-
-    if (diffMs <= 3 * 60 * 1000) {
+    if (isNew) {
       setIsInfo(true);
     }
-  }, [app]);
+  }, [isNew]);
 
   const handleDelete = async () => {
     if (!app) {
@@ -558,6 +562,18 @@ export default function AppSettings() {
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
+      <div className="px-4">
+        {showProgress && (
+          <ProgressCreateApp
+            isAppearanceAdjusted={!!app?.logoImage || !!app?.primaryColor}
+            isEndUserCreated={Boolean(
+              app?.stats?.totalRegistered && app.stats.totalRegistered > 0
+            )}
+            onClose={() => setShowProgress(false)}
+          />
+        )}
+      </div>
+
       <Joyride
         steps={tourSteps}
         run={runTour}
@@ -584,7 +600,8 @@ export default function AppSettings() {
           },
         }}
       />
-      <div className="px-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
+      {/* <div className="px-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200"> */}
+      <div className="px-4 pb-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">
           <span>Settings</span>
           <IconButton
@@ -777,6 +794,8 @@ export default function AppSettings() {
           onClose={() => setIsInfo(false)}
           show={isInfo}
           primaryColor={app.primaryColor}
+          appId={app._id}
+          navigate={navigate}
         />
       )}
 
