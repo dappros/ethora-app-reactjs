@@ -1,5 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
-import { Step } from 'react-joyride';
+import { useRef } from 'react';
 
 import hexToRgba from 'hex-to-rgba';
 import { actionPostFile } from '../../actions';
@@ -16,10 +15,6 @@ interface Props {
   logoImage: string;
   setLogoImage: (s: string) => void;
   onDelete: () => void;
-  runTour?: boolean;
-  setRunTour?: Dispatch<SetStateAction<boolean>>;
-  setTourSteps?: Dispatch<SetStateAction<Step[]>>;
-  isAppearanceTabActive?: boolean;
   // sublogoImage: string;
   // setSublogoImage: (s: string) => void;
 }
@@ -34,54 +29,11 @@ export function Appearance({
   setColor,
   setLogoImage,
   onDelete,
-  runTour,
-  setRunTour,
-  setTourSteps,
-  isAppearanceTabActive,
   // sublogoImage,
   // setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
   // const sublogoRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isAppearanceTabActive && runTour && setTourSteps && setRunTour) {
-      const appearanceSteps: Step[] = [
-        {
-          target: '[data-testid="appearance-display-name"]',
-          content: 'Set the name that will be displayed for your application.',
-          placement: 'bottom',
-          disableBeacon: true,
-        },
-        {
-          target: '[data-testid="appearance-tagline"]',
-          content: 'Enter a catchy tagline or slogan for your app.',
-          placement: 'bottom',
-        },
-        {
-          target: '[data-testid="appearance-color-picker"]',
-          content: 'Choose the primary color theme for your application.',
-          placement: 'bottom',
-        },
-        {
-          target: '[data-testid="appearance-add-logo"]',
-          content:
-            "Upload your app's main logo here. Recommended size: 500px x 500px.",
-          placement: 'bottom',
-        },
-        {
-          target: '[data-testid="appearance-delete-button"]',
-          content:
-            'If you need to remove this application entirely, you can do so here. This action is irreversible.',
-          placement: 'top',
-        },
-      ];
-      setTourSteps(appearanceSteps);
-      // setRunTour(true); // Ensure tour continues if it was restarted or is part of a larger flow
-      // It might be better to manage the overall run state from AppSettings to avoid loops or unexpected behavior.
-      // For now, we assume AppSettings controls the `run` prop of Joyride and this just sets the steps.
-    }
-  }, [isAppearanceTabActive, runTour, setTourSteps, setRunTour]);
 
   const onChangeColor = (color: string) => {
     console.log('color ', color);
