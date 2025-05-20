@@ -2,7 +2,7 @@ import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Joyride, { CallBackProps, EVENTS, STATUS, Step } from 'react-joyride';
 import {
   useLocation,
@@ -67,6 +67,9 @@ export default function AppSettings() {
     ? tabs.indexOf(tabFromUrl!)
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [goToStepIndexAfterTabChange, setGoToStepIndexAfterTabChange] =
+    useState<number | null>(null);
 
   // Joyride state
   const [runTour, setRunTour] = useState(false);
@@ -198,25 +201,64 @@ export default function AppSettings() {
     setTourSteps(linearSteps);
   }, []);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status, type, step } = data;
+  const waitForElement = (selector: string, timeout = 3000): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const interval = 50;
+      const maxTries = timeout / interval;
+      let tries = 0;
+
+      const check = () => {
+        if (document.querySelector(selector)) resolve();
+        else if (++tries > maxTries) reject(`Element ${selector} not found`);
+        else setTimeout(check, interval);
+      };
+
+      check();
+    });
+  };
+
+  const handleJoyrideCallback = async (data: CallBackProps) => {
+    const { status, type, step, index } = data;
     const customStep = step as CustomStep;
 
     if (
       (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) &&
-      customStep?.goToTabIndex !== undefined
+      customStep.goToTabIndex !== undefined
     ) {
-      setSelectedIndex(customStep.goToTabIndex);
-      setSearchParams(
-        { tab: tabs[customStep.goToTabIndex] },
-        { replace: true }
-      );
+      const newTab = customStep.goToTabIndex;
+      if (selectedIndex !== newTab) {
+        setRunTour(false);
+        setGoToStepIndexAfterTabChange(index + 1); // запомним куда вернуться
+        setSelectedIndex(newTab);
+        setSearchParams({ tab: tabs[newTab] }, { replace: true });
+        return;
+      }
+      setStepIndex(index + 1);
     }
 
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRunTour(false);
+      setStepIndex(0);
+      setGoToStepIndexAfterTabChange(null);
     }
   };
+
+  useEffect(() => {
+    const continueTour = async () => {
+      if (goToStepIndexAfterTabChange !== null) {
+        const step = tourSteps[goToStepIndexAfterTabChange] as CustomStep;
+        try {
+          await waitForElement(step.target as string);
+          setStepIndex(goToStepIndexAfterTabChange);
+          setRunTour(true);
+          setGoToStepIndexAfterTabChange(null);
+        } catch (err) {
+          console.warn('Joyride: element not found for step', step.target);
+        }
+      }
+    };
+    continueTour();
+  }, [selectedIndex, goToStepIndexAfterTabChange, tourSteps]);
 
   const handleTabChange = (index: number) => {
     if (tabs[index] !== tabFromUrl) {
@@ -448,8 +490,6 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
-    console.log('on save body ', body);
-
     if (appId) {
       actionUpdateApp(appId, body).then(() => {
         toast('Settings applied successfully!');
@@ -499,6 +539,17 @@ export default function AppSettings() {
       }
     }
   }, [apps, appId]);
+
+  const isAppearance = useMemo((): boolean => {
+    if (!app) return false;
+
+    return (
+      !!app.logoImage &&
+      !!app.primaryColor &&
+      !!app.appTagline &&
+      !!app.displayName
+    );
+  }, [app]);
 
   useEffect(() => {
     if (!app) return;
@@ -556,16 +607,28 @@ export default function AppSettings() {
     }
   };
 
+  const handleStartTour = () => {
+    setIsInfo(false);
+    if (selectedIndex !== 0) {
+      setSelectedIndex(0);
+      setSearchParams({ tab: tabs[0] }, { replace: true });
+
+      setRunTour(true);
+    } else {
+      setRunTour(true);
+    }
+  };
+
   if (!app) {
     return <div></div>;
   }
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
-      <div className="px-4">
+      <div className="px-4 pt-4">
         {showProgress && (
           <ProgressCreateApp
-            isAppearanceAdjusted={!!app?.logoImage || !!app?.primaryColor}
+            isAppearanceAdjusted={isAppearance}
             isEndUserCreated={Boolean(
               app?.stats?.totalRegistered && app.stats.totalRegistered > 0
             )}
@@ -619,21 +682,6 @@ export default function AppSettings() {
             className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover"
           >
             <IconExternalLink />
-          </button>
-          <button
-            onClick={() => {
-              if (selectedIndex !== 0) {
-                setSelectedIndex(0);
-                setSearchParams({ tab: tabs[0] }, { replace: true });
-
-                setRunTour(true);
-              } else {
-                setRunTour(true);
-              }
-            }}
-            className="mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl"
-          >
-            Start Tour
           </button>
           <button
             onClick={onSave}
@@ -796,6 +844,7 @@ export default function AppSettings() {
           primaryColor={app.primaryColor}
           appId={app._id}
           navigate={navigate}
+          onStartTour={handleStartTour}
         />
       )}
 

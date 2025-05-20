@@ -1,3 +1,18 @@
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
+import {
+  Box,
+  Button,
+  IconButton,
+  Step,
+  StepIconProps,
+  StepLabel,
+  Stepper,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface Props {
@@ -6,6 +21,21 @@ interface Props {
   onClose: () => void;
 }
 
+const steps = ['App Created', 'Appearance Adjusted', 'End User Created'];
+
+const CustomStepIcon = ({ completed, icon }: StepIconProps) => {
+  const isCompleted = completed || icon === 1;
+  return (
+    <Box display="flex" alignItems="center" justifyContent="center">
+      {isCompleted ? (
+        <CheckCircleIcon sx={{ color: '#4caf50' }} />
+      ) : (
+        <CancelIcon sx={{ color: '#f44336' }} />
+      )}
+    </Box>
+  );
+};
+
 const ProgressCreateApp = ({
   isAppearanceAdjusted,
   isEndUserCreated,
@@ -13,68 +43,98 @@ const ProgressCreateApp = ({
 }: Props) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const activeStep = !isAppearanceAdjusted ? 1 : !isEndUserCreated ? 2 : 3;
+
+  const handleNavigateTo = (tab: string) => {
+    searchParams.set('tab', tab);
+    navigate({ search: searchParams.toString() });
+  };
 
   const renderHint = () => {
-    if (!isAppearanceAdjusted) {
+    if (activeStep === 1) {
       return (
-        <span className="text-xs text-gray-500">
+        <Typography variant="body2" color="textSecondary">
           Hint: open{' '}
-          <button
-            className="text-brand-500 underline"
-            onClick={() => {
-              searchParams.set('tab', 'Appearance');
-              navigate({ search: searchParams.toString() });
-            }}
-          >
+          <Button variant="text" onClick={() => handleNavigateTo('Appearance')}>
             Appearance tab
-          </button>{' '}
+          </Button>{' '}
           to adjust your branding.
-        </span>
+        </Typography>
       );
     }
-
-    if (!isEndUserCreated) {
+    if (activeStep === 2) {
       return (
-        <span className="text-xs text-gray-500">
+        <Typography variant="body2" color="textSecondary">
           Hint: go to{' '}
-          <button
-            className="text-brand-500 underline"
-            onClick={() => {
-              searchParams.set('tab', 'Web app');
-              navigate({ search: searchParams.toString() });
-            }}
-          >
+          <Button variant="text" onClick={() => handleNavigateTo('Web app')}>
             Web app tab
-          </button>{' '}
+          </Button>{' '}
           and copy your app link to test as end-user.
-        </span>
+        </Typography>
       );
     }
 
     return (
-      <p className="text-xs text-gray-500">
-        Well done! You have successfully completed the Initial Setup!
-      </p>
+      <Typography variant="body2" color="textSecondary">
+        🎉 Well done! You have successfully completed the Initial Setup!
+      </Typography>
     );
   };
 
   return (
-    <div className="p-4 bg-gray-100 rounded-xl flex flex-col gap-1 relative">
-      <button
+    <Box
+      sx={{
+        p: isMobile ? 2 : '16px 42px',
+        bgcolor: '#f9f9f9',
+        borderRadius: 2,
+        position: 'relative',
+      }}
+    >
+      <IconButton
+        size="small"
+        sx={{ position: 'absolute', top: 8, right: 8 }}
         onClick={onClose}
-        className="absolute right-4 top-2 text-gray-400 hover:text-gray-600"
       >
-        ✖
-      </button>
+        <CloseIcon fontSize="small" />
+      </IconButton>
 
-      <div className="text-sm font-medium pb-1">
-        [ App created ✅ ] → [ Appearance adjusted{' '}
-        {isAppearanceAdjusted ? '✅' : '❌'} ] → [ End User created{' '}
-        {isEndUserCreated ? '✅' : '❌'} ]
-      </div>
+      <Stepper
+        activeStep={activeStep}
+        orientation={isMobile ? 'vertical' : 'horizontal'}
+        alternativeLabel={!isMobile}
+      >
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            completed={
+              index === 0 ||
+              (index === 1 && isAppearanceAdjusted) ||
+              (index === 2 && isEndUserCreated)
+            }
+          >
+            <StepLabel StepIconComponent={CustomStepIcon}>
+              {!isMobile && label}
+            </StepLabel>
+            {isMobile && (
+              <Typography
+                variant="caption"
+                sx={{ pl: 4, mt: 0.5, mb: 1 }}
+                color="textSecondary"
+              >
+                {label}
+              </Typography>
+            )}
+          </Step>
+        ))}
+      </Stepper>
 
-      {renderHint()}
-    </div>
+      <Box pt={2} textAlign="center">
+        {renderHint()}
+      </Box>
+    </Box>
   );
 };
 
