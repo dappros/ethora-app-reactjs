@@ -88,7 +88,14 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
         </p>
         <p className="font-sans text-sm p-4 pl-5">
           {`Your temporary web app URL is `}
-          <span className="font-medium text-brand-500">{`${domainName}.ethora.com`}</span>
+          <a
+            href={`https://${domainName}.ethora.com`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-brand-500"
+          >
+            {`${domainName}.ethora.com`}
+          </a>
           <button
             onClick={() => {
               navigator.clipboard.writeText(`${domainName}.ethora.com`);
