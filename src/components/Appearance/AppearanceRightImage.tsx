@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import BG from '../../assets/_BG.png';
 import SafariImage from '../../assets/safari.png';
+import YouLogo from '../../assets/YouLogo.svg';
 import AppleIcon from '../../pages/AuthPage/Icons/socials/appleIcon';
 import FacebookIcon from '../../pages/AuthPage/Icons/socials/facebookIcon';
 import GoogleIcon from '../../pages/AuthPage/Icons/socials/googleIcon';
@@ -8,11 +9,13 @@ import MetamaskIcon from '../../pages/AuthPage/Icons/socials/metamaskIcon';
 import { AppearanceIphone } from './AppearanceIphone';
 
 interface AppearanceRightImageProps {
+  displayName: string;
   color: string;
   tagline: string;
   logoImage: string;
 }
 export const AppearanceRightImage = ({
+  displayName,
   color,
   tagline,
   logoImage,
@@ -33,14 +36,14 @@ export const AppearanceRightImage = ({
               style={{ backgroundImage: `url(${BG})` }}
             >
               <div className="max-w-[170px]">
-                {logoImage && (
-                  <img
-                    src={logoImage}
-                    alt="Primary Logo"
-                    className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
-                  />
-                )}
-                <p className="break-words">{tagline}</p>
+                <img
+                  src={logoImage || YouLogo}
+                  alt="Primary Logo"
+                  className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
+                />
+                <p className="break-words">
+                  {tagline || `${displayName}: join our community`}
+                </p>
               </div>
               <div
                 className={classNames(

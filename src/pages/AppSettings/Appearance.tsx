@@ -165,6 +165,7 @@ export function Appearance({
         </div>
       </div>
       <AppearanceRightImage
+        displayName={displayName}
         color={color}
         tagline={tagline}
         logoImage={logoImage}

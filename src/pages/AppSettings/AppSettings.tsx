@@ -377,12 +377,7 @@ export default function AppSettings() {
   const isAppearance = useMemo((): boolean => {
     if (!app) return false;
 
-    return (
-      !!app.logoImage &&
-      !!app.primaryColor &&
-      !!app.appTagline &&
-      !!app.displayName
-    );
+    return !!app.primaryColor && !!app.appTagline && !!app.displayName;
   }, [app]);
 
   useEffect(() => {
@@ -418,8 +413,12 @@ export default function AppSettings() {
   useEffect(() => {
     if (isNew) {
       setIsInfo(true);
+      navigate(location.pathname, {
+        replace: true,
+        state: { from: location.pathname + location.search, isNew: false },
+      });
     }
-  }, [isNew]);
+  }, [isNew, location.pathname, location.search, navigate]);
 
   if (!app) {
     return <div></div>;

@@ -107,12 +107,6 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
           </button>
           {`. You can send it to your beta testers or test it yourself in another browser.`}
         </p>
-        {/* <span className="font-sans text-[12px]">
-            You’re logged as App Owner within our Base App. To test your own app
-            as your End User, open the above URL in another browser or incognito
-            mode. A disposable e-mail via a service like Mailinator or another
-            Google account may be handy for your test “End User” account.
-          </span> */}
 
         <p className="font-sans text-sm p-4 pl-5">
           You’re logged as App Owner within our Base App. To test your own app
