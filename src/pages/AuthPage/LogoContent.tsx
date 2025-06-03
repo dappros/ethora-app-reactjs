@@ -74,7 +74,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
         >
           {config?.appTagline
             ? config.appTagline
-            : `Tagline: "${config.displayName || ''}: join our community"`}
+            : `${config.displayName || ''}: join our community`}
         </Typography>
       )}
     </Box>

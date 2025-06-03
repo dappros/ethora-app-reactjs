@@ -3,7 +3,6 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { IconClose } from '../Icons/IconClose';
-import { IconInfo } from '../Icons/IconInfo';
 
 interface InfoAppModalProps {
   appName: string;
@@ -17,7 +16,6 @@ interface InfoAppModalProps {
 
 const InfoAppModal: FC<InfoAppModalProps> = ({
   appName,
-  primaryColor,
   domainName,
   navigate,
   appId,
@@ -68,7 +66,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
           A default “Main Chat” room has been pre-created and pinned for your
           Users.
         </p>
-        <p>
+        <p className="font-sans text-sm p-4 pl-5">
           Manage pinned chats in{' '}
           <button
             onClick={() => {
@@ -79,7 +77,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
             }}
             className="text-blue-600 hover:underline cursor-pointer"
           >
-            chats
+            Chats
           </button>{' '}
           tab here. You and your users can also create and join chats via your
           App interface.
@@ -100,19 +98,21 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
           >
             📋 Copy
           </button>
-          {`. You can send it to your beta testers or test it yourself in another browser*.`}
+          {`. You can send it to your beta testers or test it yourself in another browser.`}
         </p>
-        <div className="p-2 flex rounded-[8px] bg-brand-150 mb-4 ml-5">
-          <div className="mr-2">
-            <IconInfo stroke={primaryColor} />
-          </div>
-          <span className="font-sans text-[12px]">
+        {/* <span className="font-sans text-[12px]">
             You’re logged as App Owner within our Base App. To test your own app
             as your End User, open the above URL in another browser or incognito
             mode. A disposable e-mail via a service like Mailinator or another
             Google account may be handy for your test “End User” account.
-          </span>
-        </div>
+          </span> */}
+
+        <p className="font-sans text-sm p-4 pl-5">
+          You’re logged as App Owner within our Base App. To test your own app
+          as your End User, open the above URL in another browser or incognito
+          mode. A disposable e-mail via a service like Mailinator or another
+          Google account may be handy for your test “End User” account.
+        </p>
 
         <p className="font-sans text-sm p-4 pl-5">
           There are many more things you can do such as AI bots and
@@ -130,7 +130,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
             className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
             onClick={onClose}
           >
-            Cancel
+            OK
           </button>
         </div>
       </DialogPanel>
