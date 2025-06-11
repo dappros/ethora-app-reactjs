@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { httpResendLink } from '../../../../http';
@@ -7,15 +7,14 @@ import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
 
+const RESEND_TIMEOUT = 60;
+
 const SecondStep = () => {
   const queryParams = new URLSearchParams(location.search);
   const email = queryParams.get('email');
   const navigate = useNavigate();
   const config = useAppStore((s) => s.currentApp);
-
-  if (!config) {
-    return null;
-  }
+  const [resendTimer, setResendTimer] = useState(0);
 
   useEffect(() => {
     if (!email || email === '') {
@@ -23,12 +22,23 @@ const SecondStep = () => {
     }
   }, []);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
   const handleResend = () => {
     httpResendLink(email as string)
       .then(() => {
         toast.success('Email has been resent');
+        setResendTimer(RESEND_TIMEOUT);
       })
-      .catch((_) => {
+      .catch(() => {
         toast.error('An error occured');
       });
   };
@@ -104,13 +114,18 @@ const SecondStep = () => {
             fullWidth
             aria-label="custom"
             onClick={handleResend}
+            disabled={resendTimer > 0}
             style={{
-              backgroundColor: config?.primaryColor
-                ? config.primaryColor
-                : '#0052CD',
+              backgroundColor:
+                resendTimer > 0
+                  ? '#a1a1a1'
+                  : config?.primaryColor
+                    ? config.primaryColor
+                    : '#0052CD',
+              color: resendTimer > 0 ? '#ffffff' : '#ffffff',
             }}
           >
-            Resend Email
+            {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Email'}
           </CustomButton>
         </Box>
       </Box>
