@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {httpGetOneUser} from "../http.ts";
-import {actionAfterLogin} from "../actions.ts";
+import { actionAfterLogin } from '../actions.ts';
+import { httpGetOneUser } from '../http.ts';
+
+const publicPaths = ['/register', '/resetPassword', '/tempPassword'];
 
 export const useTrackUrl = () => {
   const navigate = useNavigate();
@@ -10,16 +12,17 @@ export const useTrackUrl = () => {
   const token = localStorage.getItem('token-538');
   const lastPath = localStorage.getItem('lastPath');
 
+  const publicPath = publicPaths.filter((path) => {
+    const currentPath = location.pathname.split('?')[0];
+    return currentPath.startsWith(path);
+  })[0];
+
   useEffect(() => {
     if (!token) {
-      if (
-        location.pathname.startsWith('/tempPassword') ||
-        location.pathname.startsWith('/resetPassword') ||
-        location.pathname === '/register'
-      ) {
-        return;
+      if (publicPath) {
+        return navigate(`${publicPath}${location.search}`);
       } else {
-        navigate('/login');
+        return navigate(`/login${location.search}`);
       }
     }
 
@@ -28,7 +31,7 @@ export const useTrackUrl = () => {
       return;
     }
 
-    if ((token && token !== 'undefined') && location.pathname === '/login') {
+    if (token && token !== 'undefined' && location.pathname === '/login') {
       navigate(lastPath || '/app/admin/apps', { replace: true });
       return;
     }
@@ -39,8 +42,7 @@ export const useTrackUrl = () => {
   }, [navigate, location.pathname, isFirstLoad]);
 
   useEffect(() => {
-
-    if ((token && token !== 'undefined')  && location.pathname === '/login') {
+    if (token && token !== 'undefined' && location.pathname === '/login') {
       navigate(lastPath || '/app/admin/apps', { replace: true });
     }
   }, [location.pathname, navigate]);
@@ -63,13 +65,10 @@ export const useTrackUrl = () => {
           console.error(e);
         }
       } else {
-        if (
-          location.pathname.startsWith('/tempPassword') ||
-          location.pathname.startsWith('/resetPassword')
-        ) {
-          return;
+        if (publicPath) {
+          return navigate(`${publicPath}${location.search}`);
         } else {
-          navigate('/login');
+          navigate(`/login${location.search}`);
         }
       }
     };
