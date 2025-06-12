@@ -37,7 +37,7 @@ http.interceptors.request.use((config) => {
     (config.url === '/users' && config.method === 'post') ||
     config.url?.startsWith('/users/checkEmail/') ||
     config.url === '/users/sign-up-with-email' ||
-    config.url === '/users/resendLink' ||
+    config.url === '/users/sign-up-resend-email' ||
     config.url === '/users/forgot' ||
     config.url === '/users/reset'
   ) {
@@ -343,7 +343,7 @@ export const httpRegisterWithEmail = (
 };
 
 export async function httpResendLink(email: string) {
-  return await http.post('/users/resendLink', {
+  return await http.post('/users/sign-up-resend-email', {
     email,
   });
 }
@@ -446,7 +446,7 @@ export function getDefaultRooms(appId: string) {
 }
 
 export function deleteApp(appId: string) {
-  return http.delete(`/apps/${appId}`)
+  return http.delete(`/apps/${appId}`);
 }
 
 export function deleteDefaultRooms(appId: string, chatJid: string) {
