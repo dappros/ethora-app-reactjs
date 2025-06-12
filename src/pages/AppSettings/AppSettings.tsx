@@ -23,6 +23,7 @@ import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
 import { CryptoRewards } from './CryptoRewards';
+import { DeleteSetting } from './DeleteSetting';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
@@ -34,6 +35,7 @@ import { WebApp } from './WebApp';
 const tabs = [
   'Appearance',
   'Chats',
+  // 'AI bot',
   'Web app',
   'Mobile app',
   'Sign-on options',
@@ -42,6 +44,7 @@ const tabs = [
   'Crypto & Rewards',
   'Visibility & Privacy',
   'API',
+  'Delete',
 ];
 
 export default function AppSettings() {
@@ -493,9 +496,6 @@ export default function AppSettings() {
               setColor={setColor}
               logoImage={logoImage}
               setLogoImage={setLogoImage}
-              // sublogoImage={sublogoImage}
-              // setSublogoImage={setSublogoImage}
-              onDelete={() => setIsDelete(true)}
             />
           </TabPanel>
 
@@ -511,6 +511,10 @@ export default function AppSettings() {
               appId={appId as string}
             />
           </TabPanel>
+
+          {/* <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <AIbot primaryColor={app.primaryColor} />
+          </TabPanel> */}
 
           <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
             <WebApp
@@ -593,6 +597,13 @@ export default function AppSettings() {
 
           <TabPanel key="API" className="grid grid-rows-1 lg:ml-4 h-full">
             <Api app={app} />
+          </TabPanel>
+
+          <TabPanel key="Delete" className="grid grid-rows-1 lg:ml-4 h-full">
+            <DeleteSetting
+              displayName={displayName}
+              onDelete={() => setIsDelete(true)}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>

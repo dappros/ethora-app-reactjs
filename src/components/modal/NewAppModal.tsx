@@ -51,7 +51,7 @@ export function NewAppModal({ onClose, show }: Props) {
           toast('Application created successfully!');
           setLoading(false);
           navigate(`/app/admin/apps/${app._id}/settings`, {
-            state: { from: location.pathname + location.search, isNew: true },
+            state: { from: location.pathname + location.search },
           });
           onClose();
         }, 1500);

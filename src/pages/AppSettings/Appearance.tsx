@@ -14,9 +14,6 @@ interface Props {
   setColor: (c: string) => void;
   logoImage: string;
   setLogoImage: (s: string) => void;
-  onDelete: () => void;
-  // sublogoImage: string;
-  // setSublogoImage: (s: string) => void;
 }
 
 export function Appearance({
@@ -28,12 +25,8 @@ export function Appearance({
   logoImage,
   setColor,
   setLogoImage,
-  onDelete,
-  // sublogoImage,
-  // setSublogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
-  // const sublogoRef = useRef<HTMLInputElement>(null);
 
   const onChangeColor = (color: string) => {
     console.log('color ', color);
@@ -54,17 +47,6 @@ export function Appearance({
       setLogoImage(resp.data.results[0].location);
     });
   };
-
-  // const postSublogo = (file: File | null) => {
-  //   if (!file) {
-  //     return;
-  //   }
-
-  //   actionPostFile(file).then((resp) => {
-  //     console.log('resp', resp.data.results[0].location);
-  //     setSublogoImage(resp.data.results[0].location);
-  //   });
-  // };
 
   return (
     // settings-appearance
@@ -115,53 +97,17 @@ export function Appearance({
           Add logo
         </button>
 
-        {/* <div className="flex items-center mb-2">
-          <p className="mr-2 font-sans font-semibold text-base">Submark logo</p>
-          <div className="text-xs inline-block text-gray-500">(optional)</div>
-          <Tooltip
-            title="An additional logo used for icons and small branding spaces"
-            placement="top"
-            arrow
-          >
-            <HelpOutlineIcon
-              sx={{ width: '20px', height: '20px' }}
-              className=" ml-2 text-gray-500 cursor-pointer"
-            />
-          </Tooltip>
-        </div> */}
-        {/* {sublogoImage && (
-          <div className="w-fit bg-gray-100 p-2 rounded-xl flex mb-2">
-            <img
-              src={sublogoImage}
-              alt="Primary Logo"
-              className="max-w-[40px] max-h-[40px] object-contain"
-            />
-          </div>
-        )}
-        <input
-          type="file"
-          ref={sublogoRef}
-          className="hidden"
-          onChange={(e) => postSublogo(e.target.files && e.target.files[0])}
-        />
-        <button
-          onClick={() => sublogoRef.current?.click()}
-          className="w-full p-2 hover:bg-brand-hover border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
-        >
-          Add logo
-        </button> */}
         <div className="border-t border-t-gray-200 hidden 2xl:block">
           <p className="text-xs text-gray-500 py-4">
-            By pressing the button below you confirm you wish to completely
-            delete this App including Users, Chats, Files and other contents.
-            This action is irreversible.
+            Need assistance? Create a topic in our{' '}
+            <a
+              href="https://forum.ethora.com/"
+              target="_blank"
+              className="text-brand-500 underline"
+            >
+              Community Forum.
+            </a>
           </p>
-          <button
-            onClick={onDelete}
-            className="w-full hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white mb-4 text-[16px] font-varela"
-          >
-            Delete {displayName}
-          </button>
         </div>
       </div>
       <AppearanceRightImage
@@ -172,16 +118,15 @@ export function Appearance({
       />
       <div className="border-t border-t-gray-200 block 2xl:hidden">
         <p className="text-xs text-gray-500 py-4">
-          By pressing the button below you confirm you wish to completely delete
-          this App including Users, Chats, Files and other contents. This action
-          is irreversible.
+          Need assistance? Create a topic in our{' '}
+          <a
+            href="https://forum.ethora.com/"
+            target="_blank"
+            className="text-brand-500 underline"
+          >
+            Community Forum.
+          </a>
         </p>
-        <button
-          onClick={onDelete}
-          className="w-full hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white text-[16px] font-varela"
-        >
-          Delete {displayName}
-        </button>
       </div>
     </>
   );
