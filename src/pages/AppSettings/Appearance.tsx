@@ -96,19 +96,6 @@ export function Appearance({
         >
           Add logo
         </button>
-
-        <div className="border-t border-t-gray-200 hidden 2xl:block">
-          <p className="text-xs text-gray-500 py-4">
-            Need assistance? Create a topic in our{' '}
-            <a
-              href="https://forum.ethora.com/"
-              target="_blank"
-              className="text-brand-500 underline"
-            >
-              Community Forum.
-            </a>
-          </p>
-        </div>
       </div>
       <AppearanceRightImage
         displayName={displayName}
@@ -116,18 +103,6 @@ export function Appearance({
         tagline={tagline}
         logoImage={logoImage}
       />
-      <div className="border-t border-t-gray-200 block 2xl:hidden">
-        <p className="text-xs text-gray-500 py-4">
-          Need assistance? Create a topic in our{' '}
-          <a
-            href="https://forum.ethora.com/"
-            target="_blank"
-            className="text-brand-500 underline"
-          >
-            Community Forum.
-          </a>
-        </p>
-      </div>
     </>
   );
 }

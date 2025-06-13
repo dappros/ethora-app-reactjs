@@ -53,6 +53,8 @@ export default function AppSettings() {
   const location = useLocation();
   const isNew = location.state?.isNew ?? false;
 
+  const DOMAIN_NAME = import.meta.env.VITE_DOMAIN_NAME;
+
   const apps = useAppStore((s) => s.apps);
   const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
@@ -348,6 +350,16 @@ export default function AppSettings() {
     }
   };
 
+  const tabsMemo = useMemo(() => {
+    return tabs.map((tab, index) => {
+      if (tab === 'Delete' && domainName === DOMAIN_NAME) {
+        return;
+      }
+
+      return <TabApp key={index} text={tab} last={index === tabs.length - 1} />;
+    });
+  }, [DOMAIN_NAME, domainName]);
+
   useEffect(() => {
     if (apps) {
       const result = apps.find((app) => app._id === appId);
@@ -478,9 +490,7 @@ export default function AppSettings() {
         onChange={handleTabChange}
       >
         <TabList className="flex flex-row lg:flex-col hide-scroll lg:mb-0  border-b border-gray-200 lg:border-b-0 lg:pr-4 overflow-auto  lg:border-r lg:border-gray-200">
-          {tabs.map((tab, index) => (
-            <TabApp key={index} text={tab} last={index === tabs.length - 1} />
-          ))}
+          {tabsMemo}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
@@ -599,14 +609,28 @@ export default function AppSettings() {
             <Api app={app} />
           </TabPanel>
 
-          <TabPanel key="Delete" className="grid grid-rows-1 lg:ml-4 h-full">
-            <DeleteSetting
-              displayName={displayName}
-              onDelete={() => setIsDelete(true)}
-            />
-          </TabPanel>
+          {domainName !== DOMAIN_NAME && (
+            <TabPanel key="Delete" className="grid grid-rows-1 lg:ml-4 h-full">
+              <DeleteSetting
+                displayName={displayName}
+                onDelete={() => setIsDelete(true)}
+              />
+            </TabPanel>
+          )}
         </TabPanels>
       </TabGroup>
+      <div className="border-t border-t-gray-200">
+        <p className="text-xs text-gray-500 py-4 text-center">
+          Need assistance? Create a topic in our{' '}
+          <a
+            href="https://forum.ethora.com/"
+            target="_blank"
+            className="text-brand-500 underline"
+          >
+            Community Forum.
+          </a>
+        </p>
+      </div>
 
       {isDelete && (
         <DeleteAppModal
