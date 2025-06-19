@@ -30,7 +30,7 @@ type FormData = {
 };
 
 interface MetamaskButtonProps {
-  utm: string | null;
+  utm?: string | null;
 }
 
 export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {

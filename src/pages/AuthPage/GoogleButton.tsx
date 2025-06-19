@@ -15,7 +15,7 @@ import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
 
 interface GoogleButtonProps {
-  utm: string | null;
+  utm?: string | null;
 }
 
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
