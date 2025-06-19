@@ -259,14 +259,16 @@ export const httpRegisterSocial = (
   accessToken: string,
   authToken: string,
   loginType: string,
-  signUpPlan?: string
+  signUpPlan?: string,
+  utm?: string,
 ) => {
-  return http.post(`/users`, {
+  return http.post('/users', {
     idToken,
     accessToken,
     loginType,
     authToken: authToken,
     signupPlan: signUpPlan,
+    utm,
   });
 };
 
@@ -289,10 +291,10 @@ export function registerSignature(
   signature: string,
   message: string,
   firstName: string,
-  lastName: string
+  lastName: string,
+  utm?: string,
 ) {
-  return http.post(
-    '/users',
+  return http.post('/users',
     {
       loginType: 'signature',
       walletAddress,
@@ -300,6 +302,7 @@ export function registerSignature(
       msg: message,
       firstName,
       lastName,
+      utm,
     }
     // { headers: { Authorization: accessToken } }
   );

@@ -14,7 +14,11 @@ import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
 
-export const GoogleButton = () => {
+interface GoogleButtonProps {
+  utm: string | null;
+}
+
+export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
   const onGoogleLogin = async () => {
@@ -46,9 +50,17 @@ export const GoogleButton = () => {
               idToken ?? '',
               credential?.accessToken ?? '',
               '',
-              loginType
+              loginType,
+              '',
+              utm || ''
             );
-            const { firstName, lastName, email } = userResult?.data?.user;
+
+            if (!userResult?.data?.user) {
+              toast.error('Social registration failed');
+              return;
+            }
+
+            const { firstName, lastName, email } = userResult.data.user;
 
             logLogin('google', userResult?.data?.user?._id);
 

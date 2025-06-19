@@ -228,10 +228,14 @@ const FirstStep: React.FC<FirstStepProps> = ({
               or
             </Typography>
           )}
-          {config?.signonOptions.includes('google') && <GoogleButton />}
+          {config?.signonOptions.includes('google') && (
+            <GoogleButton utm={utmParams} />
+          )}
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-          {config?.signonOptions.includes('metamask') && <MetamaskButton />}
+          {config?.signonOptions.includes('metamask') && (
+            <MetamaskButton utm={utmParams} />
+          )}
         </Box>
       </SkeletonLoader>
     </Box>

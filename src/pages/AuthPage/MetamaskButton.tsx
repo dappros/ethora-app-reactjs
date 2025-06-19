@@ -29,7 +29,11 @@ type FormData = {
   lastName: string;
 };
 
-export const MetamaskButton = () => {
+interface MetamaskButtonProps {
+  utm: string | null;
+}
+
+export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
   const config = useAppStore((s) => s.currentApp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [account, setAccount] = useState<string | null>(null);
@@ -102,7 +106,8 @@ export const MetamaskButton = () => {
         sig,
         message,
         data.firstName,
-        data.lastName
+        data.lastName,
+        utm || ''
       );
       toast.success('Successfully registered with Metamask!');
       setIsModalOpen(false);
