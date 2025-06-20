@@ -1,15 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { FeedbackButton } from './components/feedback/FeedbackButton';
+import { FeedbackIframe } from './components/feedback/FeedbackIframe';
 import { ModelApp } from './models';
 import { useAppStore } from './store/useAppStore';
 
 export default function AppHelmet() {
+  const [isViewFeedback, setIsViewFeedback] = useState<boolean>(false);
+
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token-538');
   const lastPath = localStorage.getItem('lastPath') || '/app/admin/apps';
+
+  const handleChangeIsViewFeedback = (value: boolean) => {
+    setIsViewFeedback(value);
+  };
 
   useEffect(() => {
     if (!token) {
@@ -27,7 +35,8 @@ export default function AppHelmet() {
 
   useEffect(() => {
     if (
-      (token && token !== 'undefined') &&
+      token &&
+      token !== 'undefined' &&
       (location.pathname === '/login' || location.pathname === '/')
     ) {
       navigate(lastPath, { replace: true });
@@ -45,6 +54,10 @@ export default function AppHelmet() {
           content={currentApp.displayName || 'Ethora - Web3 super app engine'}
         />
       </Helmet>
+      <FeedbackButton onClick={handleChangeIsViewFeedback} />
+      {isViewFeedback && (
+        <FeedbackIframe onClick={handleChangeIsViewFeedback} />
+      )}
       <Outlet />
     </>
   );

@@ -1,0 +1,42 @@
+.feedback-wrapper {
+  position: fixed;
+  top: 50%;
+  right: -2rem;
+  transform: translateY(-50%);
+  transition: right 0.3s ease;
+  z-index: 50;
+}
+
+.feedback-wrapper:hover {
+  right: 0;
+}
+
+.feedback-inner {
+  transform: rotate(-90deg);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+@keyframes wiggleX {
+
+  0%,
+  100% {
+    transform: rotate(-90deg) translateY(-50%);
+  }
+
+  20% {
+    transform: rotate(-90deg) translateY(-30%);
+  }
+
+  40% {
+    transform: rotate(-90deg) translateY(-50%);
+  }
+
+  60% {
+    transform: rotate(-90deg) translateY(-35%);
+  }
+}
+
+.feedback-inner.wiggleX {
+  animation: wiggleX 0.8s ease-in-out;
+}
