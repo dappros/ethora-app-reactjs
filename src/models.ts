@@ -35,7 +35,31 @@ export interface ModelAppDefaulRooom {
   pinned: boolean;
   title: string;
   creator: string;
+  chatId: string;
 }
+
+export interface ModelAIbot {
+    userId: string;
+    chatId: string;
+    status: "on" | "off";
+    greetingMessage: string;
+    trigger: string;
+    prompt: string;
+    user: {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      isBot: boolean;
+    }
+    chat: {
+      _id: string;
+      name: string;
+      title: string;
+      description: string;
+      type: string;
+      picture: string;
+    }
+  }
 
 export interface ModelApp {
   appToken: string;
@@ -100,6 +124,7 @@ export interface ModelApp {
   googleServiceInfoPlist: string;
   appSecret: string;
   allowUsersToCreateRooms: boolean;
+  aiBot: ModelAIbot;
 }
 
 export interface ModelUserACL {

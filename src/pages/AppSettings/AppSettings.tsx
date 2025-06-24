@@ -2,6 +2,7 @@ import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
+import { cloneDeep, isEqual } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import {
   useLocation,
@@ -17,8 +18,9 @@ import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
 import { deleteApp } from '../../http';
-import { ModelApp, ModelAppDefaulRooom } from '../../models';
+import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
+import { AIbot } from './AIbot';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
@@ -35,7 +37,7 @@ import { WebApp } from './WebApp';
 const tabs = [
   'Appearance',
   'Chats',
-  // 'AI bot',
+  'AI bot',
   'Web app',
   'Mobile app',
   'Sign-on options',
@@ -109,6 +111,9 @@ export default function AppSettings() {
   const [domainName, setDomainName] = useState('');
   const [firebaseWebConfigString, setFirebaseWebConfigString] = useState('');
 
+  // AI bot
+  const [aiBot, setAiBot] = useState<ModelAIbot>({} as ModelAIbot);
+
   // mobile app
   const [bundleId, setBundleId] = useState('');
   const [googleServicesJson, setGoogleServicesJson] = useState('');
@@ -160,9 +165,9 @@ export default function AppSettings() {
       defaultAccessProfileOpen,
       usersCanFree,
       allowUsersToCreateRooms,
+      aiBot: cloneDeep(aiBot),
     };
-    const isModified =
-      JSON.stringify(initialState) !== JSON.stringify(currentState);
+    const isModified = !isEqual(initialState, currentState);
     setIsModified(isModified);
   };
 
@@ -191,6 +196,7 @@ export default function AppSettings() {
     defaultAccessProfileOpen,
     usersCanFree,
     allowUsersToCreateRooms,
+    aiBot,
   ]);
 
   useEffect(() => {
@@ -218,6 +224,7 @@ export default function AppSettings() {
         defaultAccessProfileOpen: app.defaultAccessProfileOpen,
         usersCanFree: app.usersCanFree,
         allowUsersToCreateRooms: app.allowUsersToCreateRooms,
+        aiBot: cloneDeep(app.aiBot),
       };
 
       setInitialState(initialData);
@@ -305,6 +312,14 @@ export default function AppSettings() {
       body.afterLoginPage = afterLoginPage;
     }
 
+    //AI bot
+    if (Object.keys(aiBot).length > 0) {
+      body.botPrompt = aiBot.prompt;
+      body.botGreetingMessage = aiBot.greetingMessage;
+      body.botTrigger = aiBot.trigger;
+      body.botChatId = aiBot.chatId;
+    }
+
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
     console.log('on save body ', body);
@@ -335,6 +350,7 @@ export default function AppSettings() {
           defaultAccessProfileOpen,
           usersCanFree,
           allowUsersToCreateRooms,
+          aiBot,
         });
         setIsModified(false);
       });
@@ -423,6 +439,7 @@ export default function AppSettings() {
     setUsersCanFree(app.usersCanFree);
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
     setDefaultChatRooms(app.defaultRooms);
+    setAiBot(app.aiBot || {});
   }, [app]);
 
   useEffect(() => {
@@ -522,9 +539,15 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          {/* <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <AIbot primaryColor={app.primaryColor} />
-          </TabPanel> */}
+          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <AIbot
+              appId={appId as string}
+              aiBot={aiBot}
+              setAiBot={setAiBot}
+              defaultChatRooms={defaultChatRooms}
+              primaryColor={app.primaryColor}
+            />
+          </TabPanel>
 
           <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
             <WebApp

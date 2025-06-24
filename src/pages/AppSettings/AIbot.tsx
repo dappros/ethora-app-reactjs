@@ -9,25 +9,100 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RadioButton } from '../../components/RadioButton';
+import { httpUpdateApp } from '../../http';
+import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
-const chatRooms = ['Room1', 'Room2', 'Room3'];
+const statusAiBot = {
+  on: true,
+  off: false,
+};
 
 interface Props {
+  appId: string;
+  setAiBot: (aiBot: ModelAIbot) => void;
+  aiBot: ModelAIbot;
+  defaultChatRooms: Array<ModelAppDefaulRooom>;
   primaryColor: string;
 }
 
-export function AIbot({ primaryColor }: Props) {
+export function AIbot({
+  appId,
+  aiBot,
+  setAiBot,
+  defaultChatRooms,
+  primaryColor,
+}: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
-  const [chatRoom, setChatRoom] = useState<string>(chatRooms[0]);
-  const [firstName, setFirstName] = useState<string>('AI');
-  const [lastName, setLastName] = useState<string>('bot');
+
   const [url, setUrl] = useState<string>('');
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setChatRoom(event.target.value as string);
+  console.log('AIbot component rendered with aiBot:', aiBot);
+
+  useEffect(() => {
+    if (aiBot.status) {
+      setStatusBot(statusAiBot[aiBot.status]);
+    }
+  }, [aiBot.status]);
+
+  const handleStatusChange = async () => {
+    try {
+      const status = statusBot ? 'off' : 'on';
+      const response = await httpUpdateApp(appId, { botStatus: status });
+
+      const isNewStatus = response.data.result.aiBot.status === 'on';
+      setStatusBot(isNewStatus);
+    } catch (error) {
+      console.error('Error updating AI bot status:', error);
+    }
   };
+
+  const handleChatChange = (event: SelectChangeEvent<string>) => {
+    const selectedJid = event.target.value;
+    const selectedChat = defaultChatRooms.find(
+      (chat) => chat.jid === selectedJid
+    );
+    setAiBot({
+      ...aiBot,
+      chat: selectedChat
+        ? {
+            _id: selectedChat.chatId,
+            name: selectedChat.jid,
+            title: selectedChat.title,
+            description: '',
+            type: '',
+            picture: '',
+          }
+        : {
+            _id: '',
+            name: '',
+            title: '',
+            description: '',
+            type: '',
+            picture: '',
+          },
+    });
+  };
+
+  const handleGreetingChange = (value: boolean) => {
+    setAiBot({
+      ...aiBot,
+      greetingMessage: value
+        ? 'Hello, I am your AI assistant. How can I help you today?'
+        : '',
+    });
+  };
+
+  const handleTriggergChange = (value: boolean) => {
+    setAiBot({
+      ...aiBot,
+      trigger: value ? '/bot' : '',
+    });
+  };
+
+  console.log('aiBot', aiBot);
+  console.log('defaultChatRooms', defaultChatRooms);
 
   return (
     <div className="">
@@ -35,16 +110,16 @@ export function AIbot({ primaryColor }: Props) {
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         AI bot is:{' '}
         <PowerSettingsNewIcon
-          color={statusBot ? 'error' : 'success'}
+          color={statusBot ? 'success' : 'error'}
           fontSize="small"
         />{' '}
-        {statusBot ? 'offline' : 'online'}
+        {statusBot ? 'online' : 'offline'}
       </p>
       <button
         className="px-16 py-2 rounded-xl hover:bg-brand-hover border border-brand-500 text-brand-500 flex items-center justify-center mb-8"
-        onClick={() => setStatusBot(!statusBot)}
+        onClick={handleStatusChange}
       >
-        <span className="">{statusBot ? 'start' : 'stop'}</span>
+        <span className="">{statusBot ? 'stop' : 'start'}</span>
       </button>
       <div className="font-semibold font-sans text-[16px] mb-4">Chat room</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
@@ -80,15 +155,18 @@ export function AIbot({ primaryColor }: Props) {
           labelId="demo-select-small-label"
           id="demo-select-small"
           label="Chat"
-          value={chatRoom}
-          onChange={handleChange}
+          value={aiBot.chat?.name || 'None'}
+          onChange={(event: SelectChangeEvent<string>) =>
+            handleChatChange(event)
+          }
+          sx={{ height: '42px' }}
         >
-          <MenuItem value="">
+          <MenuItem value="None">
             <em>None</em>
           </MenuItem>
-          {chatRooms.map((name) => (
-            <MenuItem key={name} value={name}>
-              {name}
+          {defaultChatRooms.map((chat) => (
+            <MenuItem key={chat.jid} value={chat.jid}>
+              {chat.title}
             </MenuItem>
           ))}
         </Select>
@@ -104,15 +182,25 @@ export function AIbot({ primaryColor }: Props) {
           type="text"
           className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
           placeholder="First name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          value={aiBot.user?.firstName}
+          onChange={(e) =>
+            setAiBot({
+              ...aiBot,
+              user: { ...aiBot.user, firstName: e.target.value },
+            })
+          }
         />
         <input
           type="text"
           className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
           placeholder="Last name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          value={aiBot.user?.lastName}
+          onChange={(e) =>
+            setAiBot({
+              ...aiBot,
+              user: { ...aiBot.user, lastName: e.target.value },
+            })
+          }
         />
       </div>
       <div className="font-semibold font-sans text-[16px] mb-4">
@@ -123,11 +211,15 @@ export function AIbot({ primaryColor }: Props) {
         message.
       </p>
       <div className="mb-8">
-        <RadioGroup className="flex flex-col mb-8">
+        <RadioGroup
+          className="flex flex-col mb-8"
+          value={!!aiBot.greetingMessage}
+          onChange={handleGreetingChange}
+        >
           <RadioButton
             className="mb-4"
             value={true}
-            label={`👋 Hello! I'm ${firstName} ${lastName}, an AI assistant powered by OpenAI. I'm here to help answer your questions and participate in discussions. Feel free to chat with me!`}
+            label={'Hello, I am your AI assistant. How can I help you today?'}
           />
           <RadioButton className="mb-2" value={false} label="None" />
         </RadioGroup>
@@ -140,7 +232,11 @@ export function AIbot({ primaryColor }: Props) {
         To witch messages should the bot respond
       </p>
       <div className="mb-8">
-        <RadioGroup className="flex flex-col mb-8">
+        <RadioGroup
+          className="flex flex-col mb-8"
+          value={!!aiBot.trigger}
+          onChange={handleTriggergChange}
+        >
           <RadioButton
             className="mb-4"
             value={true}
@@ -163,6 +259,8 @@ export function AIbot({ primaryColor }: Props) {
       <Textarea
         className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500 mb-8"
         placeholder="Enter prompt instructions here..."
+        value={aiBot.prompt}
+        onChange={(e) => setAiBot({ ...aiBot, prompt: e.target.value })}
       />
 
       <p className="font-sans text-sm flex items-center gap-1 pb-8">
