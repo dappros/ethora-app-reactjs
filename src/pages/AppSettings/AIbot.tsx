@@ -62,18 +62,26 @@ export function AIbot({
       (chat) => chat.chatId === selectedJid
     );
 
-    if (!selectedChat) return;
     setAiBot({
       ...aiBot,
       chatId: selectedChat?.chatId || '',
-      chat: {
-        _id: selectedChat.chatId,
-        name: selectedChat.jid,
-        title: selectedChat.title,
-        description: '',
-        type: '',
-        picture: '',
-      },
+      chat: selectedChat
+        ? {
+            _id: selectedChat.chatId,
+            name: selectedChat.jid,
+            title: selectedChat.title,
+            description: '',
+            type: '',
+            picture: '',
+          }
+        : {
+            _id: '',
+            name: '',
+            title: '',
+            description: '',
+            type: '',
+            picture: '',
+          },
     });
   };
 
