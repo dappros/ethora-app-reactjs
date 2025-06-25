@@ -60,6 +60,7 @@ export async function actionGetConfig(domainName?: string) {
     ),
     appSecret: '',
     allowUsersToCreateRooms: result.allowUsersToCreateRooms,
+    aiBot: result.aiBot,
   };
 
   await sleep(1000);
