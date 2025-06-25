@@ -113,7 +113,6 @@ export default function AppSettings() {
 
   // AI bot
   const [aiBot, setAiBot] = useState<ModelAIbot>({} as ModelAIbot);
-  const [userId, setUserId] = useState<string>('');
 
   // mobile app
   const [bundleId, setBundleId] = useState('');
