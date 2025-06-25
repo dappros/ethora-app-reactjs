@@ -8,6 +8,7 @@ import './index.css';
 import { router } from './router.tsx';
 
 createRoot(document.getElementById('root')!).render(
+  // @ts-ignore
   <XmppProvider>
     <RouterProvider
       router={router}
