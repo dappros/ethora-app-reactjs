@@ -9,7 +9,7 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RadioButton } from '../../components/RadioButton';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
@@ -37,8 +37,6 @@ export function AIbot({
   const [statusBot, setStatusBot] = useState<boolean>(false);
 
   const [url, setUrl] = useState<string>('');
-
-  console.log('AIbot component rendered with aiBot:', aiBot);
 
   useEffect(() => {
     if (aiBot.status) {
@@ -94,15 +92,20 @@ export function AIbot({
     });
   };
 
-  const handleTriggergChange = (value: boolean) => {
+  const handleTriggerChange = (value: string) => {
     setAiBot({
       ...aiBot,
-      trigger: value ? '/bot' : '',
+      trigger: value,
     });
   };
 
-  console.log('aiBot', aiBot);
-  console.log('defaultChatRooms', defaultChatRooms);
+  const memoChatName = useMemo(() => {
+    if (!aiBot.chat || !aiBot.chat.name) {
+      return 'None';
+    }
+
+    return aiBot.chat.name;
+  }, [aiBot.chat]);
 
   return (
     <div className="">
@@ -155,7 +158,7 @@ export function AIbot({
           labelId="demo-select-small-label"
           id="demo-select-small"
           label="Chat"
-          value={aiBot.chat?.name || 'None'}
+          value={memoChatName}
           onChange={(event: SelectChangeEvent<string>) =>
             handleChatChange(event)
           }
@@ -234,17 +237,17 @@ export function AIbot({
       <div className="mb-8">
         <RadioGroup
           className="flex flex-col mb-8"
-          value={!!aiBot.trigger}
-          onChange={handleTriggergChange}
+          value={aiBot.trigger}
+          onChange={handleTriggerChange}
         >
           <RadioButton
             className="mb-4"
-            value={true}
+            value="any_message"
             label="Any message from another user"
           />
           <RadioButton
             className="mb-2"
-            value={false}
+            value="/bot"
             label="Any messages addressed to the bot or with '/bot' prefix"
           />
         </RadioGroup>

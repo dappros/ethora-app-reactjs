@@ -17,7 +17,7 @@ import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
-import { deleteApp } from '../../http';
+import { deleteApp, httpUpdateOneUser } from '../../http';
 import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIbot } from './AIbot';
@@ -113,6 +113,9 @@ export default function AppSettings() {
 
   // AI bot
   const [aiBot, setAiBot] = useState<ModelAIbot>({} as ModelAIbot);
+
+  console.log('setting aiBot', aiBot);
+  console.log('setting initialState', initialState);
 
   // mobile app
   const [bundleId, setBundleId] = useState('');
@@ -323,12 +326,12 @@ export default function AppSettings() {
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
     console.log('on save body ', body);
-    // if (aiBot.user.lastName || aiBot.user.firstName) {
-    //   await httpUpdateOneUser(appId as string, aiBot.user._id, {
-    //     lastName: aiBot.user.lastName,
-    //     firstName: aiBot.user.firstName,
-    //   });
-    // }
+    if (aiBot.user.lastName || aiBot.user.firstName) {
+      await httpUpdateOneUser(appId as string, aiBot.user._id, {
+        lastName: aiBot.user.lastName,
+        firstName: aiBot.user.firstName,
+      });
+    }
 
     if (appId) {
       actionUpdateApp(appId, body).then(() => {
