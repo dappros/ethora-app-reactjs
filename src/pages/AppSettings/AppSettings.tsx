@@ -114,9 +114,6 @@ export default function AppSettings() {
   // AI bot
   const [aiBot, setAiBot] = useState<ModelAIbot>({} as ModelAIbot);
 
-  console.log('setting aiBot', aiBot);
-  console.log('setting initialState', initialState);
-
   // mobile app
   const [bundleId, setBundleId] = useState('');
   const [googleServicesJson, setGoogleServicesJson] = useState('');
@@ -325,7 +322,6 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
-    console.log('on save body ', body);
     if (aiBot.user.lastName || aiBot.user.firstName) {
       await httpUpdateOneUser(appId as string, aiBot.user._id, {
         lastName: aiBot.user.lastName,

@@ -63,6 +63,7 @@ export function AIbot({
     );
     setAiBot({
       ...aiBot,
+      chatId: selectedChat?.chatId || '',
       chat: selectedChat
         ? {
             _id: selectedChat.chatId,
@@ -100,12 +101,12 @@ export function AIbot({
   };
 
   const memoChatName = useMemo(() => {
-    if (!aiBot.chat || !aiBot.chat.name) {
+    if (!aiBot.chatId) {
       return 'None';
     }
 
-    return aiBot.chat.name;
-  }, [aiBot.chat]);
+    return aiBot.chatId;
+  }, [aiBot.chatId]);
 
   return (
     <div className="">
@@ -168,7 +169,7 @@ export function AIbot({
             <em>None</em>
           </MenuItem>
           {defaultChatRooms.map((chat) => (
-            <MenuItem key={chat.jid} value={chat.jid}>
+            <MenuItem key={chat.chatId} value={chat.chatId}>
               {chat.title}
             </MenuItem>
           ))}
