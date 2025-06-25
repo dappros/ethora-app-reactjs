@@ -59,28 +59,21 @@ export function AIbot({
   const handleChatChange = (event: SelectChangeEvent<string>) => {
     const selectedJid = event.target.value;
     const selectedChat = defaultChatRooms.find(
-      (chat) => chat.jid === selectedJid
+      (chat) => chat.chatId === selectedJid
     );
+
+    if (!selectedChat) return;
     setAiBot({
       ...aiBot,
       chatId: selectedChat?.chatId || '',
-      chat: selectedChat
-        ? {
-            _id: selectedChat.chatId,
-            name: selectedChat.jid,
-            title: selectedChat.title,
-            description: '',
-            type: '',
-            picture: '',
-          }
-        : {
-            _id: '',
-            name: '',
-            title: '',
-            description: '',
-            type: '',
-            picture: '',
-          },
+      chat: {
+        _id: selectedChat.chatId,
+        name: selectedChat.jid,
+        title: selectedChat.title,
+        description: '',
+        type: '',
+        picture: '',
+      },
     });
   };
 
