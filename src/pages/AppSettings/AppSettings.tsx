@@ -113,6 +113,7 @@ export default function AppSettings() {
 
   // AI bot
   const [aiBot, setAiBot] = useState<ModelAIbot>({} as ModelAIbot);
+  const [userId, setUserId] = useState<string>('');
 
   // mobile app
   const [bundleId, setBundleId] = useState('');
@@ -322,8 +323,8 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
-    if (aiBot.user.lastName || aiBot.user.firstName) {
-      await httpUpdateOneUser(appId as string, aiBot.user._id, {
+    if (aiBot.userId && (aiBot.user.lastName || aiBot.user.firstName)) {
+      await httpUpdateOneUser(appId as string, aiBot.userId, {
         lastName: aiBot.user.lastName,
         firstName: aiBot.user.firstName,
       });
