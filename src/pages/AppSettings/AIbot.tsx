@@ -179,7 +179,6 @@ export function AIbot({
       </p>
       <div className="flex flex-col gap-2 mb-8">
         <input
-          disabled
           type="text"
           className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
           placeholder="First name"
@@ -192,7 +191,6 @@ export function AIbot({
           }
         />
         <input
-          disabled
           type="text"
           className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
           placeholder="Last name"
