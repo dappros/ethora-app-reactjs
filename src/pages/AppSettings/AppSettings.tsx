@@ -231,7 +231,7 @@ export default function AppSettings() {
     }
   }, [app]);
 
-  const onSave = () => {
+  const onSave = async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body: any = {};
 
@@ -323,6 +323,12 @@ export default function AppSettings() {
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
     console.log('on save body ', body);
+    // if (aiBot.user.lastName || aiBot.user.firstName) {
+    //   await httpUpdateOneUser(appId as string, aiBot.user._id, {
+    //     lastName: aiBot.user.lastName,
+    //     firstName: aiBot.user.firstName,
+    //   });
+    // }
 
     if (appId) {
       actionUpdateApp(appId, body).then(() => {

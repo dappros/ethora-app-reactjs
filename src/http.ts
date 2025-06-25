@@ -212,6 +212,12 @@ export function httpCraeteUser(
   });
 }
 
+export function httpUpdateOneUser(appId: string, userId: string, options: any) {
+  return http.put(`/users/${appId}/${userId}`, {
+    ...options,
+  });
+}
+
 export function httpTagsSet(
   appId: string,
   {
