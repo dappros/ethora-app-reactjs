@@ -87,6 +87,9 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
               '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
               hubspotData
             );
+
+            document.cookie =
+              'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
           } catch (error) {
             console.log(error);
             toast.error('Social registration failed');

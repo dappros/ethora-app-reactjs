@@ -104,6 +104,9 @@ const ThirdStep = () => {
 
         httpLoginWithEmail(email, newPassword)
           .then(async ({ data }) => {
+            document.cookie =
+              'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+
             await actionAfterLogin(data);
 
             logLogin('email', data.user._id);

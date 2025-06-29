@@ -113,6 +113,9 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
       setIsModalOpen(false);
 
       await actionAfterMetamask(res.data);
+
+      document.cookie =
+        'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
     } catch (err) {
       toast.error('Registration failed.');
       console.error(err);
