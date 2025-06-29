@@ -30,6 +30,7 @@ const MemoizedChat = React.memo(function ChatComponent({
   };
 
   return (
+    // @ts-ignore
     <Chat
       config={{
         colors: {
@@ -68,6 +69,7 @@ const MemoizedChat = React.memo(function ChatComponent({
         disableRoomMenu: true,
         defaultRooms: config?.defaultRooms || [],
         refreshTokens: {
+          // @ts-ignore
           refreshFunction: handleChangeTokens,
           enabled: true,
         },
