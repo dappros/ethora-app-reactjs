@@ -55,6 +55,9 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
 
     toast.success('Successfully logged in with Metamask!');
 
+    document.cookie =
+      'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+
     if (config?.afterLoginPage) {
       navigateToUserPage(navigate, config.afterLoginPage as string);
     }
@@ -113,9 +116,6 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
       setIsModalOpen(false);
 
       await actionAfterMetamask(res.data);
-
-      document.cookie =
-        'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
     } catch (err) {
       toast.error('Registration failed.');
       console.error(err);

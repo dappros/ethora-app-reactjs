@@ -89,7 +89,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             );
 
             document.cookie =
-              'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+              'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
           } catch (error) {
             console.log(error);
             toast.error('Social registration failed');
@@ -101,6 +101,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             loginType
           ).then(async ({ data }) => {
             await actionAfterLogin(data);
+            document.cookie =
+              'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
         } else {
@@ -113,6 +115,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             logLogin('google', data.user._id);
 
             await actionAfterLogin(data);
+            document.cookie =
+              'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
         }

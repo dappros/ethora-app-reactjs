@@ -35,6 +35,9 @@ const LoginStep = () => {
         await actionAfterLogin(data);
 
         logLogin('email', data.user._id);
+        document.cookie =
+          'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+
         if (config?.afterLoginPage) {
           navigateToUserPage(navigate, config.afterLoginPage as string);
         }
