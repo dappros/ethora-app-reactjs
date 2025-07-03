@@ -234,7 +234,7 @@ export function AIbot({
         Response trigger
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        To witch messages should the bot respond
+        To which messages should the bot respond
       </p>
       <div className="mb-8">
         <RadioGroup
