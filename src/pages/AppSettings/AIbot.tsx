@@ -11,11 +11,11 @@ import {
   SelectChangeEvent,
   Tooltip,
 } from '@mui/material';
+import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
 import { RadioButton } from '../../components/RadioButton';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
-import classNames from 'classnames';
 
 const statusAiBot = {
   on: true,
@@ -90,12 +90,10 @@ export function AIbot({
     });
   };
 
-  const handleGreetingChange = (value: boolean) => {
+  const handleGreetingChange = (value: string) => {
     setAiBot({
       ...aiBot,
-      greetingMessage: value
-        ? 'Hello, I am your AI assistant. How can I help you today?'
-        : '',
+      greetingMessage: value,
     });
   };
 
@@ -197,8 +195,8 @@ export function AIbot({
           disabled={isDisabled}
           type="text"
           className={classNames(
-            "w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4",
-            isDisabled && "opacity-50 cursor-not-allowed bg-gray-200"
+            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4',
+            isDisabled && 'opacity-50 cursor-not-allowed bg-gray-200'
           )}
           placeholder="First name"
           value={aiBot.user?.firstName}
@@ -213,8 +211,8 @@ export function AIbot({
           disabled={isDisabled}
           type="text"
           className={classNames(
-            "w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4",
-            isDisabled && "opacity-50 cursor-not-allowed bg-gray-200"
+            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4',
+            isDisabled && 'opacity-50 cursor-not-allowed bg-gray-200'
           )}
           placeholder="Last name"
           value={aiBot.user?.lastName}
@@ -236,15 +234,15 @@ export function AIbot({
       <div className="mb-8">
         <RadioGroup
           className="flex flex-col mb-8"
-          value={!!aiBot.greetingMessage}
+          value={aiBot.greetingMessage}
           onChange={handleGreetingChange}
         >
           <RadioButton
             className="mb-4"
-            value={true}
+            value="Hello, I am your AI assistant. How can I help you today?"
             label={'Hello, I am your AI assistant. How can I help you today?'}
           />
-          <RadioButton className="mb-2" value={false} label="None" />
+          <RadioButton className="mb-2" value="None" label="None" />
         </RadioGroup>
       </div>
 

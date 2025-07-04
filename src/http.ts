@@ -120,6 +120,10 @@ export function httpGetOneUser() {
   return http.get('/users/me');
 }
 
+export function httpGetOneUserWallet(wallet: string) {
+  return http.get(`/users/profile/${wallet}`);
+}
+
 export function httpCreateNewApp(displayName: string) {
   return http.post(`/apps`, { displayName });
 }

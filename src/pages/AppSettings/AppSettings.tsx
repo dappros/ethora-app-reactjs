@@ -321,12 +321,11 @@ export default function AppSettings() {
       body.botChatId = aiBot.chatId;
     }
 
-    body.allowUsersToCreateRooms = allowUsersToCreateRooms;
-
     if (
       aiBot.userId &&
-      (aiBot.user.lastName !== app?.aiBot.user.lastName ||
-        aiBot.user.firstName !== app?.aiBot.user.firstName)
+      app?.aiBot?.user &&
+      (aiBot.user.lastName !== app?.aiBot?.user?.lastName ||
+        aiBot.user.firstName !== app?.aiBot?.user?.firstName)
     ) {
       if (aiBot.user.lastName.length < 3 || aiBot.user.firstName.length < 3) {
         toast.warning('The AI bot name must be at least 3 characters long');
@@ -339,6 +338,8 @@ export default function AppSettings() {
         });
       }
     }
+
+    body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
     if (appId) {
       actionUpdateApp(appId, body).then(() => {
@@ -430,6 +431,22 @@ export default function AppSettings() {
   useEffect(() => {
     if (!app) return;
 
+    if (
+      app.aiBot &&
+      (!app.aiBot?.user?.lastName || !app.aiBot?.user?.firstName)
+    ) {
+      setAiBot({
+        ...app.aiBot,
+        user: {
+          ...aiBot.user,
+          firstName: aiBot.user.firstName || '',
+          lastName: aiBot.user.lastName || '',
+        },
+      });
+    } else {
+      setAiBot(app.aiBot || {});
+    }
+
     setDisplayName(app.displayName || '');
     setTagline(app.appTagline || '');
     setCoinName(app.coinName || '');
@@ -455,7 +472,6 @@ export default function AppSettings() {
     setUsersCanFree(app.usersCanFree);
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
     setDefaultChatRooms(app.defaultRooms);
-    setAiBot(app.aiBot || {});
   }, [app]);
 
   useEffect(() => {
