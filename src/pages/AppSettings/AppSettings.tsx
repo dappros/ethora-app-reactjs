@@ -58,6 +58,7 @@ export default function AppSettings() {
   const DOMAIN_NAME = import.meta.env.VITE_DOMAIN_NAME;
 
   const apps = useAppStore((s) => s.apps);
+  const currentUser = useAppStore((s) => s.currentUser);
   const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
@@ -323,10 +324,12 @@ export default function AppSettings() {
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
     if (aiBot.userId && (aiBot.user.lastName || aiBot.user.firstName)) {
-      await httpUpdateOneUser(appId as string, aiBot.userId, {
-        lastName: aiBot.user.lastName,
-        firstName: aiBot.user.firstName,
-      });
+      if(app?.creatorId === currentUser?._id) {
+        await httpUpdateOneUser(appId as string, aiBot.userId, {
+          lastName: aiBot.user.lastName,
+          firstName: aiBot.user.firstName,
+        });
+      };
     }
 
     if (appId) {
@@ -551,6 +554,7 @@ export default function AppSettings() {
               setAiBot={setAiBot}
               defaultChatRooms={defaultChatRooms}
               primaryColor={app.primaryColor}
+              isDisabled={app?.creatorId !== currentUser?._id}
             />
           </TabPanel>
 

@@ -1,6 +1,7 @@
 import { RadioGroup, Textarea } from '@headlessui/react';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import {
   FormControl,
   IconButton,
@@ -8,11 +9,13 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Tooltip,
 } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { RadioButton } from '../../components/RadioButton';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
+import classNames from 'classnames';
 
 const statusAiBot = {
   on: true,
@@ -25,6 +28,7 @@ interface Props {
   aiBot: ModelAIbot;
   defaultChatRooms: Array<ModelAppDefaulRooom>;
   primaryColor: string;
+  isDisabled: boolean;
 }
 
 export function AIbot({
@@ -33,6 +37,7 @@ export function AIbot({
   setAiBot,
   defaultChatRooms,
   primaryColor,
+  isDisabled,
 }: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
 
@@ -177,15 +182,24 @@ export function AIbot({
         </Select>
       </FormControl>
       <div className="font-semibold font-sans text-[16px] mb-4">
-        Display Name
+        <span className="pr-2">Display Name</span>
+        <Tooltip title="Only the app owner can change the bot's name." arrow>
+          <WarningAmberOutlinedIcon
+            style={{ color: '#f59e0b', fontSize: 18, cursor: 'pointer' }}
+          />
+        </Tooltip>
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Which Display Name should the bot use?
       </p>
       <div className="flex flex-col gap-2 mb-8">
         <input
+          disabled={isDisabled}
           type="text"
-          className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
+          className={classNames(
+            "w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4",
+            isDisabled && "opacity-50 cursor-not-allowed bg-gray-200"
+          )}
           placeholder="First name"
           value={aiBot.user?.firstName}
           onChange={(e) =>
@@ -196,8 +210,12 @@ export function AIbot({
           }
         />
         <input
+          disabled={isDisabled}
           type="text"
-          className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
+          className={classNames(
+            "w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4",
+            isDisabled && "opacity-50 cursor-not-allowed bg-gray-200"
+          )}
           placeholder="Last name"
           value={aiBot.user?.lastName}
           onChange={(e) =>
