@@ -323,13 +323,21 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
-    if (aiBot.userId && (aiBot.user.lastName || aiBot.user.firstName)) {
-      if(app?.creatorId === currentUser?._id) {
+    if (
+      aiBot.userId &&
+      (aiBot.user.lastName !== app?.aiBot.user.lastName ||
+        aiBot.user.firstName !== app?.aiBot.user.firstName)
+    ) {
+      if (aiBot.user.lastName.length < 3 || aiBot.user.firstName.length < 3) {
+        toast.warning('The AI bot name must be at least 3 characters long');
+      }
+
+      if (app?.creatorId === currentUser?._id) {
         await httpUpdateOneUser(appId as string, aiBot.userId, {
           lastName: aiBot.user.lastName,
           firstName: aiBot.user.firstName,
         });
-      };
+      }
     }
 
     if (appId) {
