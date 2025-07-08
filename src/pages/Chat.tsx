@@ -46,6 +46,7 @@ const MemoizedChat = React.memo(function ChatComponent({
           devServer: VITE_APP_XMPP_SERVICE,
           host: VITE_XMPP_HOST,
           conference: VITE_XMPP_SERVICE,
+          xmppPingOnSendEnabled: true,
         },
         // @ts-ignorex
         roomListStyles: {
