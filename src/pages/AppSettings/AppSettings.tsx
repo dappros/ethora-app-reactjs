@@ -438,9 +438,9 @@ export default function AppSettings() {
       setAiBot({
         ...app.aiBot,
         user: {
-          ...aiBot.user,
-          firstName: aiBot.user.firstName || '',
-          lastName: aiBot.user.lastName || '',
+          ...aiBot?.user,
+          firstName: aiBot?.user?.firstName || '',
+          lastName: aiBot?.user?.lastName || '',
         },
       });
     } else {
