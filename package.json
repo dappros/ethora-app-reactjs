@@ -14,7 +14,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@ethersproject/providers": "^5.8.0",
-    "@ethora/chat-component": "^25.6.8",
+    "@ethora/chat-component": "^25.6.10",
     "@headlessui/react": "^2.1.8",
     "@microsoft/clarity": "^1.0.0",
     "@mui/icons-material": "^6.1.1",
