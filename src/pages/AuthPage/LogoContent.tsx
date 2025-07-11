@@ -11,6 +11,20 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const [imageError, setImageError] = useState(false);
 
+  const allowedDomains =
+    import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+  const currentDomain = window.location.hostname;
+
+  // if (!allowedDomains.includes(currentDomain)) {
+  //   return;
+  // }
+
+  console.log('allowedDomains', allowedDomains);
+  console.log(
+    'allowedDomains.includes(currentDomain)',
+    allowedDomains.includes(currentDomain)
+  );
+
   const logoImage = useMemo(() => {
     if (imageError || !config?.logoImage) {
       return (
@@ -20,6 +34,19 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
           onError={() => setImageError(true)}
           style={{ maxWidth: '100%' }}
         />
+      );
+    }
+
+    if (allowedDomains.includes(currentDomain)) {
+      return (
+        <a href="https://ethora.com/" target="_blank" rel="noopener noreferrer">
+          <img
+            alt="logoImage"
+            src={config.logoImage}
+            onError={() => setImageError(true)}
+            style={{ maxWidth: '100%' }}
+          />
+        </a>
       );
     }
 
