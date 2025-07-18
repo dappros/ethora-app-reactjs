@@ -486,3 +486,18 @@ export const sendHSFormData = async (
     }
   );
 };
+
+
+export function setSourcesSiteCrawl(appId: string, url: string) {
+  return http.post(`/sources/site-crawl/${appId}`, {
+    url
+  });
+}
+
+export function deleteSourcesSiteCrawl(appId: string, url: string) {
+  return http.delete(`/sources/site-crawl/url/${appId}`, {
+    data: {
+      url
+    }
+  });
+}

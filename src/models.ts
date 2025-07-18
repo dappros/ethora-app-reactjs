@@ -45,6 +45,7 @@ export interface ModelAIbot {
     greetingMessage: string;
     trigger: string;
     prompt: string;
+    siteLinks: Array<string>;
     user: {
       _id: string;
       firstName: string;

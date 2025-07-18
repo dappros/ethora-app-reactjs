@@ -1,5 +1,7 @@
 import { RadioGroup, Textarea } from '@headlessui/react';
+import DeleteIcon from '@mui/icons-material/Delete';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import LanguageIcon from '@mui/icons-material/Language';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import {
@@ -13,6 +15,7 @@ import {
 } from '@mui/material';
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
+import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
 import { RadioButton } from '../../components/RadioButton';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
@@ -29,6 +32,8 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>;
   primaryColor: string;
   isDisabled: boolean;
+  handleSiteCrawl: (url: string) => void;
+  deleteSiteCrawl: (url: string) => void;
 }
 
 export function AIbot({
@@ -38,10 +43,14 @@ export function AIbot({
   defaultChatRooms,
   primaryColor,
   isDisabled,
+  handleSiteCrawl,
+  deleteSiteCrawl,
 }: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
+  const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
 
   const [url, setUrl] = useState<string>('');
+  const [choseUrl, setChoseUrl] = useState<string>('');
 
   useEffect(() => {
     if (aiBot.status) {
@@ -111,6 +120,12 @@ export function AIbot({
 
     return aiBot.chatId;
   }, [aiBot.chatId]);
+
+  useEffect(() => {
+    if (aiBot.siteLinks && !!aiBot.siteLinks.length) {
+      setUrl(aiBot.siteLinks[0]);
+    }
+  }, [aiBot.siteLinks]);
 
   return (
     <div className="">
@@ -325,13 +340,74 @@ export function AIbot({
         Provide your website URL(s) in order for the system to ingest data from
         there.
       </p>
-      <input
-        type="text"
-        className="w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
-        placeholder="https://example.com"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-      />
+      <div className="flex gap-2 items-center justify-start mb-4">
+        <input
+          disabled={aiBot.siteLinks && !!aiBot.siteLinks.length}
+          type="text"
+          className={classNames(
+            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px]',
+            aiBot.siteLinks &&
+              !!aiBot.siteLinks.length &&
+              'opacity-50 cursor-not-allowed bg-gray-200'
+          )}
+          placeholder="https://example.com"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+        <IconButton
+          disabled={aiBot.siteLinks && !!aiBot.siteLinks.length}
+          className={classNames(
+            aiBot.siteLinks &&
+              !!aiBot.siteLinks.length &&
+              'opacity-50 cursor-not-allowed bg-gray-200'
+          )}
+          aria-label="delete"
+          onClick={() => handleSiteCrawl(url)}
+        >
+          <LanguageIcon />
+        </IconButton>
+      </div>
+      {aiBot && aiBot.siteLinks && aiBot.siteLinks.length > 0 && (
+        <div
+          className="border rounded-lg"
+          style={{
+            maxHeight: '14em',
+            overflowY: aiBot.siteLinks.length > 5 ? 'auto' : 'unset',
+          }}
+        >
+          {aiBot.siteLinks.map((link, index) => (
+            <div
+              key={`${index}-${link}`}
+              className={classNames(
+                ' flex items-center justify-between hover:!bg-[#F5F7F9] p-3',
+                {
+                  '!bg-[#E7EDF9]': index % 2 === 0,
+                }
+              )}
+            >
+              <p>{link}</p>
+              <IconButton
+                aria-label="delete"
+                color="error"
+                onClick={() => {
+                  setShowNewDocModal(true);
+                  setChoseUrl(link);
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showNewDocModal && (
+        <SourcesSiteCrawlModal
+          url={choseUrl}
+          onClose={() => setShowNewDocModal(false)}
+          deleteSiteCrawl={() => deleteSiteCrawl(choseUrl)}
+        />
+      )}
     </div>
   );
 }

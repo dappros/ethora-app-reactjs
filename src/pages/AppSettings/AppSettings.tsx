@@ -17,7 +17,12 @@ import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
-import { deleteApp, httpUpdateOneUser } from '../../http';
+import {
+  deleteApp,
+  deleteSourcesSiteCrawl,
+  httpUpdateOneUser,
+  setSourcesSiteCrawl,
+} from '../../http';
 import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIbot } from './AIbot';
@@ -374,6 +379,49 @@ export default function AppSettings() {
     }
   };
 
+  const handleSiteCrawl = async (url: string) => {
+    if (!appId || !url) return;
+
+    setLoading(true);
+
+    try {
+      const response = await setSourcesSiteCrawl(appId, url);
+      setAiBot((prev) => {
+        const combined = [...prev.siteLinks, ...response.data.result];
+        const uniqueLinks = Array.from(new Set(combined));
+        return { ...prev, siteLinks: uniqueLinks };
+      });
+      toast.success('Site crawl set successfully');
+    } catch (error) {
+      console.error('Error setting site crawl:', error);
+      toast.error('Failed to set site crawl');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSiteCrawl = async (url: string) => {
+    if (!appId || !url) return;
+
+    setLoading(true);
+
+    try {
+      const response = await deleteSourcesSiteCrawl(appId, url);
+      setAiBot((prev) => {
+        const updatedLinks = prev.siteLinks.filter(
+          (link) => link !== response.data.result
+        );
+        return { ...prev, siteLinks: updatedLinks };
+      });
+      toast.success('Site crawl deleted successfully');
+    } catch (error) {
+      console.error('Error deleting site crawl:', error);
+      toast.error('Failed to delete site crawl');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onExternalClick = () => {
     if (app) {
       window.open(
@@ -579,6 +627,8 @@ export default function AppSettings() {
               defaultChatRooms={defaultChatRooms}
               primaryColor={app.primaryColor}
               isDisabled={app?.creatorId !== currentUser?._id}
+              handleSiteCrawl={handleSiteCrawl}
+              deleteSiteCrawl={deleteSiteCrawl}
             />
           </TabPanel>
 
