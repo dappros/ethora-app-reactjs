@@ -1,4 +1,6 @@
 import { RadioGroup, Textarea } from '@headlessui/react';
+import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -48,9 +50,16 @@ export function AIbot({
 }: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const [url, setUrl] = useState<string>('');
   const [choseUrl, setChoseUrl] = useState<string>('');
+  // const [scriptCode , setScriptCode] = useState<string>('');
+
+  const scriptCode = useMemo(() => {
+    return `<script src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js" 
+    id="chat-content-assistant" data-bot-id="${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com"></script>`;
+  }, [appId, aiBot.userId]);
 
   useEffect(() => {
     if (aiBot.status) {
@@ -110,6 +119,13 @@ export function AIbot({
     setAiBot({
       ...aiBot,
       trigger: value,
+    });
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(scriptCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
     });
   };
 
@@ -286,7 +302,40 @@ export function AIbot({
         </RadioGroup>
       </div>
 
-      <div className="font-semibold font-sans text-[16px] mb-4">Prompt</div>
+      <div className="font-semibold font-sans text-[16px] my-4">
+        Integrating Chat into your website
+      </div>
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
+        Copy and paste the following code into your website’s HTML to add the AI
+        Assistant. You’ll get a ready-to-use chat widget that will instantly
+        appear on the page.
+      </p>
+      <div
+        className={classNames(
+          'relative bg-gray-100 rounded-md overflow-hidden'
+        )}
+      >
+        <pre className="p-4 overflow-x-auto text-sm text-gray-800 whitespace-pre-wrap">
+          <code>{scriptCode}</code>
+        </pre>
+        <div className="flex items-center justify-end px-2 pb-2">
+          <Tooltip title={copied ? 'Copied' : 'Copy'}>
+            <IconButton
+              onClick={handleCopy}
+              className="text-gray-600 hover:text-black"
+              size="small"
+            >
+              {copied ? (
+                <CheckIcon fontSize="small" />
+              ) : (
+                <ContentCopyIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
+
+      <div className="font-semibold font-sans text-[16px] my-4">Prompt</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Use to provide instructions on how the bot should behave. You may also
         copy&paste limited data on your specific business context the bot should
