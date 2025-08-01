@@ -15,7 +15,7 @@ import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
-import InfoAppModal from '../../components/modal/InfoAppModal';
+import { SettingTutorialModal } from '../../components/modal/SettingsTutorialModal/SettingTutorialModal';
 import TabApp from '../../components/TabApp';
 import {
   deleteApp,
@@ -31,23 +31,19 @@ import { Appearance } from './Appearance';
 import { Chats } from './Chats';
 import { CryptoRewards } from './CryptoRewards';
 import { DeleteSetting } from './DeleteSetting';
-import { HomeScreen } from './HomeScreen';
-import { Menu } from './Menu';
-import { MobileApp } from './MobileApp';
 import ProgressCreateApp from './ProgressCreateApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
-import { WebApp } from './WebApp';
+import { WebMobileApp } from './WebMobileApp';
+import { Widget } from './Widget';
 
 const tabs = [
   'Appearance',
   'Chats',
   'AI bot',
-  'Web app',
-  'Mobile app',
+  'App',
   'Sign-on options',
-  'Home screen',
-  'Menu',
+  'Widget',
   'Crypto & Rewards',
   'Visibility & Privacy',
   'API',
@@ -92,7 +88,19 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
-  const [showProgress, setShowProgress] = useState(true);
+  const isOpen = localStorage.getItem('isProgressCreateAppOpen');
+  console.log('isOpen', localStorage.getItem('isProgressCreateAppOpen'));
+  const [showProgress, setShowProgress] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (isOpen === null) {
+      setShowProgress(true);
+      return;
+    }
+
+    setShowProgress(isOpen === 'true');
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
@@ -632,28 +640,21 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <WebApp
+          <TabPanel key="App" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <WebMobileApp
               domainName={domainName}
               setDomainName={setDomainName}
               firebaseWebConfigString={firebaseWebConfigString}
               setFirebaseWebConfigString={setFirebaseWebConfigString}
               primaryColor={app.primaryColor}
               onExternalClick={onExternalClick}
-            />
-          </TabPanel>
-          <TabPanel
-            key="Mobile app"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
-            <MobileApp
               bundleId={bundleId}
               setBundleId={setBundleId}
               setGoogleServicesJson={setGoogleServicesJson}
               setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
-              primaryColor={app.primaryColor}
             />
           </TabPanel>
+
           <TabPanel
             key="Sign-on options"
             className="grid grid-rows-1 lg:ml-4 h-full "
@@ -672,21 +673,13 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel
-            key="Home screen"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
-            <HomeScreen
+          <TabPanel key="Widget" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <Widget
               afterLoginPage={afterLoginPage}
               setAfterLoginPage={setAfterLoginPage}
-              primaryColor={app.primaryColor}
-            />
-          </TabPanel>
-
-          <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <Menu
               availableMenuItems={availableMenuItems}
               setAvailableMenuItems={setAvailableMenuItems}
+              primaryColor={app.primaryColor}
             />
           </TabPanel>
 
@@ -747,7 +740,7 @@ export default function AppSettings() {
         />
       )}
 
-      {isInfo && (
+      {/* {isInfo && (
         <InfoAppModal
           appName={displayName}
           domainName={app.domainName}
@@ -757,6 +750,9 @@ export default function AppSettings() {
           appId={app._id}
           navigate={navigate}
         />
+      )} */}
+      {isInfo && (
+        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
       )}
 
       {loading && <Loading />}

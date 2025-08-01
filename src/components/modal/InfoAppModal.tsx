@@ -30,13 +30,13 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
     >
       <DialogPanel className="p-4 sm:py-8 sm:px-8 bg-white rounded-3xl w-full max-w-[65%] m-8 relative">
         <button
-          className="absolute top-[15px] right-[15px]"
+          className="absolute top-[20px] right-[20px]"
           onClick={() => onClose()}
         >
           <IconClose />
         </button>
 
-        <div className="font-varela text-[18px] md:text-[20px] mt-4 my-10">
+        <div className="font-varela text-[18px] md:text-[20px] mt-4 py-6">
           {`Awesome - your “${appName}” app is here! You will now see your Admin dashboard where you can:`}
         </div>
 
