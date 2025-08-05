@@ -53,6 +53,13 @@ const ProgressCreateApp = ({
     navigate({ search: searchParams.toString() });
   };
 
+  const handleClose = () => {
+    if (activeStep === 3) {
+      localStorage.setItem('isProgressCreateAppOpen', 'false');
+    }
+    onClose();
+  };
+
   const renderHint = () => {
     if (activeStep === 1) {
       return (
@@ -96,7 +103,7 @@ const ProgressCreateApp = ({
       <IconButton
         size="small"
         sx={{ position: 'absolute', top: 8, right: 8 }}
-        onClick={onClose}
+        onClick={handleClose}
       >
         <CloseIcon fontSize="small" />
       </IconButton>

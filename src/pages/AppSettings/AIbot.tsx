@@ -1,24 +1,18 @@
-import { RadioGroup, Textarea } from '@headlessui/react';
+import { Textarea } from '@headlessui/react';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LanguageIcon from '@mui/icons-material/Language';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
-import {
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Tooltip,
-} from '@mui/material';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
+import { Box, IconButton, Tab, Tooltip } from '@mui/material';
 import classNames from 'classnames';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
-import { RadioButton } from '../../components/RadioButton';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
@@ -42,30 +36,31 @@ export function AIbot({
   appId,
   aiBot,
   setAiBot,
-  defaultChatRooms,
-  primaryColor,
-  isDisabled,
   handleSiteCrawl,
   deleteSiteCrawl,
 }: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [value, setValue] = useState('1');
 
   const [url, setUrl] = useState<string>('');
   const [choseUrl, setChoseUrl] = useState<string>('');
   // const [scriptCode , setScriptCode] = useState<string>('');
 
+  const ragRef = useRef<HTMLDivElement>(null);
+
   const scriptCode = useMemo(() => {
-    return `<script src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js" 
-    id="chat-content-assistant" data-bot-id="${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com"></script>`;
+    return `<script
+  src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js" 
+  id="chat-content-assistant"
+  data-bot-id="${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com"
+></script>`;
   }, [appId, aiBot.userId]);
 
-  useEffect(() => {
-    if (aiBot.status) {
-      setStatusBot(statusAiBot[aiBot.status]);
-    }
-  }, [aiBot.status]);
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    setValue(newValue);
+  };
 
   const handleStatusChange = async () => {
     try {
@@ -79,48 +74,48 @@ export function AIbot({
     }
   };
 
-  const handleChatChange = (event: SelectChangeEvent<string>) => {
-    const selectedJid = event.target.value;
-    const selectedChat = defaultChatRooms.find(
-      (chat) => chat.chatId === selectedJid
-    );
+  // const handleChatChange = (event: SelectChangeEvent<string>) => {
+  //   const selectedJid = event.target.value;
+  //   const selectedChat = defaultChatRooms.find(
+  //     (chat) => chat.chatId === selectedJid
+  //   );
 
-    setAiBot({
-      ...aiBot,
-      chatId: selectedChat?.chatId || '',
-      chat: selectedChat
-        ? {
-            _id: selectedChat.chatId,
-            name: selectedChat.jid,
-            title: selectedChat.title,
-            description: '',
-            type: '',
-            picture: '',
-          }
-        : {
-            _id: '',
-            name: '',
-            title: '',
-            description: '',
-            type: '',
-            picture: '',
-          },
-    });
-  };
+  //   setAiBot({
+  //     ...aiBot,
+  //     chatId: selectedChat?.chatId || '',
+  //     chat: selectedChat
+  //       ? {
+  //           _id: selectedChat.chatId,
+  //           name: selectedChat.jid,
+  //           title: selectedChat.title,
+  //           description: '',
+  //           type: '',
+  //           picture: '',
+  //         }
+  //       : {
+  //           _id: '',
+  //           name: '',
+  //           title: '',
+  //           description: '',
+  //           type: '',
+  //           picture: '',
+  //         },
+  //   });
+  // };
 
-  const handleGreetingChange = (value: string) => {
-    setAiBot({
-      ...aiBot,
-      greetingMessage: value,
-    });
-  };
+  // const handleGreetingChange = (value: string) => {
+  //   setAiBot({
+  //     ...aiBot,
+  //     greetingMessage: value,
+  //   });
+  // };
 
-  const handleTriggerChange = (value: string) => {
-    setAiBot({
-      ...aiBot,
-      trigger: value,
-    });
-  };
+  // const handleTriggerChange = (value: string) => {
+  //   setAiBot({
+  //     ...aiBot,
+  //     trigger: value,
+  //   });
+  // };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(scriptCode).then(() => {
@@ -129,13 +124,19 @@ export function AIbot({
     });
   };
 
-  const memoChatName = useMemo(() => {
-    if (!aiBot.chatId) {
-      return 'None';
-    }
+  // const memoChatName = useMemo(() => {
+  //   if (!aiBot.chatId) {
+  //     return 'None';
+  //   }
 
-    return aiBot.chatId;
-  }, [aiBot.chatId]);
+  //   return aiBot.chatId;
+  // }, [aiBot.chatId]);
+
+  useEffect(() => {
+    if (aiBot.status) {
+      setStatusBot(statusAiBot[aiBot.status]);
+    }
+  }, [aiBot.status]);
 
   useEffect(() => {
     if (aiBot.siteLinks && !!aiBot.siteLinks.length) {
@@ -160,11 +161,109 @@ export function AIbot({
       >
         <span className="">{statusBot ? 'stop' : 'start'}</span>
       </button>
-      <div className="font-semibold font-sans text-[16px] mb-4">Chat room</div>
+
+      <div className="font-semibold font-sans text-[16px] my-4">Code</div>
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
+        Use this code to integrate widget into your website or external app.
+      </p>
+
+      <TabContext value={value}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <TabList onChange={handleChange} aria-label="lab API tabs example">
+            <Tab label="HTML Widget" value="1" />
+            <Tab label="Wordpress" value="2" />
+          </TabList>
+        </Box>
+        <TabPanel value="1">
+          <p className="font-sans text-sm pb-4 flex items-center gap-1">{`Insert this code anywhere inside your <body> tag:`}</p>
+          <div className="relative rounded-md overflow-hidden bg-gray-700">
+            <div className="overflow-x-auto whitespace-pre-wrap break-words">
+              <SyntaxHighlighter
+                language="html"
+                style={oneDark}
+                customStyle={{
+                  fontSize: '0.875rem',
+                  background: 'transparent',
+                  padding: '1rem',
+                  margin: 0,
+                }}
+                showLineNumbers={true}
+                wrapLongLines={true}
+              >
+                {scriptCode}
+              </SyntaxHighlighter>
+            </div>
+
+            <div className="flex items-center justify-end px-2 pb-2">
+              <Tooltip title={copied ? 'Copied' : 'Copy'}>
+                <IconButton onClick={handleCopy}>
+                  {copied ? (
+                    <CheckIcon
+                      fontSize="small"
+                      className="text-white hover:text-gray-300"
+                    />
+                  ) : (
+                    <ContentCopyIcon
+                      fontSize="small"
+                      className="text-white hover:text-gray-300"
+                    />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </div>
+          </div>
+        </TabPanel>
+        <TabPanel value="2">
+          <p className="font-sans text-sm pb-4 flex items-center gap-1">
+            Insert this bot ID in your Wordpress
+            <a href="" className="text-brand-500">
+              Ethora AI Assistant plugin
+            </a>
+            settings:
+          </p>
+          <div className="relative rounded-md overflow-hidden bg-gray-700">
+            <div className="overflow-x-auto whitespace-pre-wrap break-words flex items-center justify-between">
+              <SyntaxHighlighter
+                language="html"
+                style={oneDark}
+                customStyle={{
+                  fontSize: '0.875rem',
+                  background: 'transparent',
+                  padding: '1rem',
+                  margin: 0,
+                }}
+                showLineNumbers={false}
+                wrapLongLines={true}
+              >
+                {`${appId}_${aiBot.userId}`}
+              </SyntaxHighlighter>
+              <div className="flex items-center justify-end pr-4">
+                <Tooltip title={copied ? 'Copied' : 'Copy'}>
+                  <IconButton onClick={handleCopy}>
+                    {copied ? (
+                      <CheckIcon
+                        fontSize="small"
+                        className="text-white hover:text-gray-300"
+                      />
+                    ) : (
+                      <ContentCopyIcon
+                        fontSize="small"
+                        className="text-white hover:text-gray-300"
+                      />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+        </TabPanel>
+      </TabContext>
+
+      {/* <div className="font-semibold font-sans text-[16px] mb-4">Chat room</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Select Chat room where the bot should be deployed
-      </p>
-      <FormControl
+      </p> */}
+      {/* <FormControl
         sx={{
           mb: 4,
           mt: 1,
@@ -209,19 +308,19 @@ export function AIbot({
             </MenuItem>
           ))}
         </Select>
-      </FormControl>
-      <div className="font-semibold font-sans text-[16px] mb-4">
+      </FormControl> */}
+      {/* <div className="font-semibold font-sans text-[16px] mb-4">
         <span className="pr-2">Display Name</span>
         <Tooltip title="Only the app owner can change the bot's name." arrow>
           <WarningAmberOutlinedIcon
             style={{ color: '#f59e0b', fontSize: 18, cursor: 'pointer' }}
           />
         </Tooltip>
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
+      </div> */}
+      {/* <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Which Display Name should the bot use?
-      </p>
-      <div className="flex flex-col gap-2 mb-8">
+      </p> */}
+      {/* <div className="flex flex-col gap-2 mb-8">
         <input
           disabled={isDisabled}
           type="text"
@@ -254,8 +353,8 @@ export function AIbot({
             })
           }
         />
-      </div>
-      <div className="font-semibold font-sans text-[16px] mb-4">
+      </div> */}
+      {/* <div className="font-semibold font-sans text-[16px] mb-4">
         Greeting message when joining the room
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
@@ -275,9 +374,9 @@ export function AIbot({
           />
           <RadioButton className="mb-2" value="None" label="None" />
         </RadioGroup>
-      </div>
+      </div> */}
 
-      <div className="font-semibold font-sans text-[16px] mb-4">
+      {/* <div className="font-semibold font-sans text-[16px] mb-4">
         Response trigger
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
@@ -300,40 +399,7 @@ export function AIbot({
             label="Any messages addressed to the bot or with '/bot' prefix"
           />
         </RadioGroup>
-      </div>
-
-      <div className="font-semibold font-sans text-[16px] my-4">
-        Integrating Chat into your website
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
-        Copy and paste the following code into your website’s HTML to add the AI
-        Assistant. You’ll get a ready-to-use chat widget that will instantly
-        appear on the page.
-      </p>
-      <div
-        className={classNames(
-          'relative bg-gray-100 rounded-md overflow-hidden'
-        )}
-      >
-        <pre className="p-4 overflow-x-auto text-sm text-gray-800 whitespace-pre-wrap">
-          <code>{scriptCode}</code>
-        </pre>
-        <div className="flex items-center justify-end px-2 pb-2">
-          <Tooltip title={copied ? 'Copied' : 'Copy'}>
-            <IconButton
-              onClick={handleCopy}
-              className="text-gray-600 hover:text-black"
-              size="small"
-            >
-              {copied ? (
-                <CheckIcon fontSize="small" />
-              ) : (
-                <ContentCopyIcon fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
+      </div> */}
 
       <div className="font-semibold font-sans text-[16px] my-4">Prompt</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
@@ -348,43 +414,16 @@ export function AIbot({
         onChange={(e) => setAiBot({ ...aiBot, prompt: e.target.value })}
       />
 
-      <p className="font-sans text-sm flex items-center gap-1 pb-8">
-        — [ section below only available for paid plans only ] —
-      </p>
-
       <div className="font-semibold font-sans text-[16px] mb-4">
-        RAG (Retrieval Augmented Generation)
+        <span>Crawl URL (</span>
+        <button
+          onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
+        >
+          <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
+        </button>
+        <span>)</span>
       </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        This is a pre-processing layer that allows you to include much larger
-        context for your AI Bot to use.
-      </p>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Your data will be stored into vector database embeddings.
-      </p>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
-        Every time the AI Bot receives a request, the embedding layer will
-        augment the request with relevant chunks from your knowledge base,
-        making your bot more powerful and knowledgeable without the limitations
-        of the prompt context size.
-      </p>
-      <div className="font-semibold font-sans text-[16px] mb-4">
-        Upload documents
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
-        Drag & Drop your documents here for. Supported formats: TXT, CSV, JSON,
-        DOC, PDF.
-      </p>
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <div className="flex flex-col items-center">
-          <IconButton>
-            <FileUploadOutlinedIcon className="h-8 w-8 text-gray-400 mb-2" />
-          </IconButton>
-          {/* <Upload className="h-8 w-8 text-gray-400 mb-2" /> */}
-          <p className="text-sm text-gray-500">Drag & Drop</p>
-        </div>
-      </div>
-      <div className="font-semibold font-sans text-[16px] mb-4">Crawl URL</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Provide your website URL(s) in order for the system to ingest data from
         there.
@@ -449,6 +488,55 @@ export function AIbot({
           ))}
         </div>
       )}
+
+      <div className="font-semibold font-sans text-[16px] pb-4 pt-8">
+        <span> Upload documents (</span>
+        <button
+          onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
+        >
+          <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
+        </button>
+        <span>)</span>
+      </div>
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
+        Drag & Drop your documents here for. Supported formats: TXT, CSV, JSON,
+        DOC, PDF.
+      </p>
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div className="flex flex-col items-center">
+          <IconButton>
+            <FileUploadOutlinedIcon className="h-8 w-8 text-gray-400 mb-2" />
+          </IconButton>
+          {/* <Upload className="h-8 w-8 text-gray-400 mb-2" /> */}
+          <p className="text-sm text-gray-500">Drag & Drop</p>
+        </div>
+      </div>
+
+      {/* <p className="font-sans text-sm flex items-center gap-1 pb-8">
+        — [ section below only available for paid plans only ] —
+      </p> */}
+
+      <div
+        ref={ragRef}
+        className="font-semibold font-sans text-[16px] pb-4 pt-8 text-blue-600"
+      >
+        RAG (Retrieval Augmented Generation)
+      </div>
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600">
+        This feature allows you to augment your LLM-powered AI agent chat bot
+        with your own context data. Just index your website or upload documents
+        that provide additional information e.g. your products and services.
+      </p>
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600">
+        Your data will be converted into vector space embeddings used by your AI
+        agent as its “external memory” when answering users queries.
+      </p>
+      <p className="font-sans text-sm pb-4 text-blue-600 items-center gap-1 mb-8 inline-block">
+        This allows you to{' '}
+        <strong>create your own project-specific AI agents</strong> without
+        being limited by the prompt context window size.
+      </p>
 
       {showNewDocModal && (
         <SourcesSiteCrawlModal

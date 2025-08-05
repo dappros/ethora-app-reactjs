@@ -57,7 +57,7 @@ export function HomeScreen({
           <span className="font-sans text-[12px]">
             Good for: <span className="font-bold">digital wallet</span> use case
             where quick access to User’s documents, assets or QR pass is
-            important. 
+            important.
           </span>
         </p>
 

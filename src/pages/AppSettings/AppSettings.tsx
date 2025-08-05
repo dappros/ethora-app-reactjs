@@ -40,19 +40,25 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 
 const tabs = [
+  'AI Widget',
+  'Web App',
+  'Mobile App',
+  'Chat',
   'Appearance',
-  'Chats',
-  'AI bot',
-  'Web app',
-  'Mobile app',
   'Sign-on options',
   'Home screen',
   'Menu',
-  'Crypto & Rewards',
+  'Rewards',
   'Visibility & Privacy',
   'API',
   'Delete',
 ];
+
+const tabsNew = {
+  Publish: ['AI Widget', 'Web App', 'Mobile App', 'Chat'],
+  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
+  System: ['Rewards', 'Visibility & Privacy', 'API', 'Delete'],
+};
 
 export default function AppSettings() {
   const { appId } = useParams();
@@ -92,7 +98,19 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
-  const [showProgress, setShowProgress] = useState(true);
+  const isOpen = localStorage.getItem('isProgressCreateAppOpen');
+  console.log('isOpen', localStorage.getItem('isProgressCreateAppOpen'));
+  const [showProgress, setShowProgress] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (isOpen === null) {
+      setShowProgress(true);
+      return;
+    }
+
+    setShowProgress(isOpen === 'true');
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
@@ -432,12 +450,27 @@ export default function AppSettings() {
   };
 
   const tabsMemo = useMemo(() => {
-    return tabs.map((tab, index) => {
-      if (tab === 'Delete' && domainName === DOMAIN_NAME) {
-        return;
-      }
+    return Object.entries(tabsNew).flatMap(([sectionTitle, items]) => {
+      const sectionHeader = (
+        <div
+          key={`section-${sectionTitle}`}
+          className="text-md font-bold uppercase text-black py-[10px] md:py-3 md:px-2 border-b-brand-500"
+        >
+          {sectionTitle}
+        </div>
+      );
 
-      return <TabApp key={index} text={tab} last={index === tabs.length - 1} />;
+      const tabItems = items.map((tab, index) => {
+        if (tab === 'Delete' && domainName === DOMAIN_NAME) {
+          return null;
+        }
+
+        return (
+          <TabApp key={`${tab}_${index}`} text={tab} last={tab === 'Delete'} />
+        );
+      });
+
+      return [sectionHeader, ...tabItems];
     });
   }, [DOMAIN_NAME, domainName]);
 
@@ -590,19 +623,44 @@ export default function AppSettings() {
           {tabsMemo}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
+          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <AIbot
+              appId={appId as string}
+              aiBot={aiBot}
+              setAiBot={setAiBot}
+              defaultChatRooms={defaultChatRooms}
+              primaryColor={app.primaryColor}
+              isDisabled={app?.creatorId !== currentUser?._id}
+              handleSiteCrawl={handleSiteCrawl}
+              deleteSiteCrawl={deleteSiteCrawl}
+            />
+          </TabPanel>
+
           <TabPanel
-            key="Appearance"
-            className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
+            key="Web App"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+            // className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
-            <Appearance
-              displayName={displayName}
-              setDisplayName={setDisplayName}
-              tagline={tagline}
-              setTagline={setTagline}
-              color={color}
-              setColor={setColor}
-              logoImage={logoImage}
-              setLogoImage={setLogoImage}
+            <WebApp
+              domainName={domainName}
+              setDomainName={setDomainName}
+              firebaseWebConfigString={firebaseWebConfigString}
+              setFirebaseWebConfigString={setFirebaseWebConfigString}
+              primaryColor={app.primaryColor}
+              onExternalClick={onExternalClick}
+            />
+          </TabPanel>
+
+          <TabPanel
+            key="Mobile App"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <MobileApp
+              primaryColor={app.primaryColor}
+              bundleId={bundleId}
+              setBundleId={setBundleId}
+              setGoogleServicesJson={setGoogleServicesJson}
+              setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
             />
           </TabPanel>
 
@@ -619,41 +677,23 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <AIbot
-              appId={appId as string}
-              aiBot={aiBot}
-              setAiBot={setAiBot}
-              defaultChatRooms={defaultChatRooms}
-              primaryColor={app.primaryColor}
-              isDisabled={app?.creatorId !== currentUser?._id}
-              handleSiteCrawl={handleSiteCrawl}
-              deleteSiteCrawl={deleteSiteCrawl}
+          <TabPanel
+            key="Appearance"
+            // className="grid grid-rows-1 lg:ml-4 h-full "
+            className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
+          >
+            <Appearance
+              displayName={displayName}
+              setDisplayName={setDisplayName}
+              tagline={tagline}
+              setTagline={setTagline}
+              color={color}
+              setColor={setColor}
+              logoImage={logoImage}
+              setLogoImage={setLogoImage}
             />
           </TabPanel>
 
-          <TabPanel key="Web app" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <WebApp
-              domainName={domainName}
-              setDomainName={setDomainName}
-              firebaseWebConfigString={firebaseWebConfigString}
-              setFirebaseWebConfigString={setFirebaseWebConfigString}
-              primaryColor={app.primaryColor}
-              onExternalClick={onExternalClick}
-            />
-          </TabPanel>
-          <TabPanel
-            key="Mobile app"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
-            <MobileApp
-              bundleId={bundleId}
-              setBundleId={setBundleId}
-              setGoogleServicesJson={setGoogleServicesJson}
-              setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
-              primaryColor={app.primaryColor}
-            />
-          </TabPanel>
           <TabPanel
             key="Sign-on options"
             className="grid grid-rows-1 lg:ml-4 h-full "
@@ -673,7 +713,7 @@ export default function AppSettings() {
           </TabPanel>
 
           <TabPanel
-            key="Home screen"
+            key="Home Screen"
             className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <HomeScreen
@@ -690,10 +730,7 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel
-            key="Crypto & Rewards"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
+          <TabPanel key="Rewards" className="grid grid-rows-1 lg:ml-4 h-full ">
             <CryptoRewards coinName={coinName} setCoinName={setCoinName} />
           </TabPanel>
 
@@ -758,6 +795,9 @@ export default function AppSettings() {
           navigate={navigate}
         />
       )}
+      {/* {isInfo && (
+        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
+      )} */}
 
       {loading && <Loading />}
     </div>
