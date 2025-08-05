@@ -5,14 +5,15 @@ import { NavLink } from 'react-router-dom';
 import { IconAdmin } from '../Icons/IconAdmin';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
-import './MobileMenuModal.scss';
 import { IconSettingsMenu } from '../Icons/IconSettingsMenu';
+import './MobileMenuModal.scss';
 
 interface Props {
+  isAdmin?: boolean;
   onClose: () => void;
 }
 
-export function MobileMenuModal({ onClose }: Props) {
+export function MobileMenuModal({ onClose, isAdmin }: Props) {
   useEffect(() => {
     function onResize() {
       onClose();
@@ -24,28 +25,37 @@ export function MobileMenuModal({ onClose }: Props) {
     };
   }, []);
   return (
-    <Dialog className="fixed inset-0 bg-black/30 flex z-50 justify-start items-stretch " open={true} onClose={() => onClose()}>
+    <Dialog
+      className="fixed inset-0 bg-black/30 flex z-50 justify-start items-stretch "
+      open={true}
+      onClose={() => onClose()}
+    >
       <DialogPanel className="bg-white relative rounded-r-xl p-4 w-8/12 flex flex-col justify-between">
         <button className="absolute top-[24px] left-[16px]" onClick={onClose}>
           <IconClose />
         </button>
         <div className="mt-[72px]">
-
+          {isAdmin && (
+            <NavLink
+              to="/app/admin/apps"
+              onClick={onClose}
+              className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
+            >
+              <IconAdmin />
+              <span className="ml-2 group-aria-[current=page]:text-brand-500">
+                Admin
+              </span>
+            </NavLink>
+          )}
           <NavLink
             to="/app/chat"
             onClick={onClose}
             className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >
             <IconChat />
-            <span className="ml-2 group-aria-[current=page]:text-brand-500">Chats</span>
-          </NavLink>
-          <NavLink
-            to="/app/admin/apps"
-            onClick={onClose}
-            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
-          >
-            <IconAdmin />
-            <span className="ml-2 group-aria-[current=page]:text-brand-500">Admin</span>
+            <span className="ml-2 group-aria-[current=page]:text-brand-500">
+              Chats
+            </span>
           </NavLink>
         </div>
         <div className="">
@@ -55,7 +65,9 @@ export function MobileMenuModal({ onClose }: Props) {
             className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >
             <IconSettingsMenu />
-            <span className="ml-2 group-aria-[current=page]:text-brand-500 font-sans ">Settings</span>
+            <span className="ml-2 group-aria-[current=page]:text-brand-500 font-sans ">
+              Settings
+            </span>
           </NavLink>
         </div>
       </DialogPanel>

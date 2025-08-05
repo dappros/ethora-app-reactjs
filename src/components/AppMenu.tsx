@@ -41,16 +41,6 @@ export function AppMenu() {
         {getPageTitle}
       </div>
       <div className="hidden md:flex flex-col">
-        <NavLink
-          to="/app/chat"
-          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-        >
-          <IconChat />
-          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
-            Chats
-          </div>
-        </NavLink>
-        <div className="my-2 border-b border-b-gray-200"></div>
         {isAdmin && (
           <NavLink
             to="/app/admin"
@@ -62,6 +52,16 @@ export function AppMenu() {
             </div>
           </NavLink>
         )}
+        <NavLink
+          to="/app/chat"
+          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+        >
+          <IconChat />
+          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
+            Chats
+          </div>
+        </NavLink>
+        <div className="my-2 border-b border-b-gray-200"></div>
       </div>
       <div>
         <NavLink
@@ -97,7 +97,10 @@ export function AppMenu() {
         </NavLink>
       </div>
       {isMobileMenuVisible && (
-        <MobileMenuModal onClose={() => setMobileMenuVisible(false)} />
+        <MobileMenuModal
+          isAdmin={isAdmin}
+          onClose={() => setMobileMenuVisible(false)}
+        />
       )}
     </div>
   );
