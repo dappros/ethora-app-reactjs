@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { TransitionGroup } from 'react-transition-group';
 import { AnswerStep, QuestionsStepDefault } from '.';
 import { QuestionsType } from '../typeTutorial';
@@ -7,37 +7,32 @@ import { QuestionsType } from '../typeTutorial';
 export const StepChooseTutorial = ({
   questions,
   goBack,
+  animate,
+  questionStep,
+  handleChangeQuestionStep,
 }: {
   goBack: () => void;
   questions: QuestionsType;
+  animate: boolean;
+  questionStep: string;
+  handleChangeQuestionStep: (next: string) => void;
 }): ReactElement => {
-  const [chatStep, setChatStep] = useState('default');
-  const [animate, setAnimate] = useState(false);
-
-  const handleChangeStep = (next: string) => {
-    setAnimate(true);
-    setTimeout(() => {
-      setChatStep(next);
-      setAnimate(false);
-    }, 200);
-  };
-
   const currentComponent = () => {
-    switch (chatStep) {
+    switch (questionStep) {
       case 'default':
         return (
           <QuestionsStepDefault
             questions={questions}
             goBack={goBack}
-            setChatStep={handleChangeStep}
+            setQuestionStep={handleChangeQuestionStep}
           />
         );
       default:
         return (
           <AnswerStep
             questions={questions}
-            answer={chatStep}
-            setChatStep={handleChangeStep}
+            answer={questionStep}
+            setQuestionStep={handleChangeQuestionStep}
           />
         );
     }

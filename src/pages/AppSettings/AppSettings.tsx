@@ -31,24 +31,34 @@ import { Appearance } from './Appearance';
 import { Chats } from './Chats';
 import { CryptoRewards } from './CryptoRewards';
 import { DeleteSetting } from './DeleteSetting';
+import { HomeScreen } from './HomeScreen';
+import { Menu } from './Menu';
+import { MobileApp } from './MobileApp';
 import ProgressCreateApp from './ProgressCreateApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
-import { WebMobileApp } from './WebMobileApp';
-import { Widget } from './Widget';
+import { WebApp } from './WebApp';
 
 const tabs = [
+  'AI Widget',
+  'Web App',
+  'Mobile App',
+  'Chat',
   'Appearance',
-  'Chats',
-  'AI bot',
-  'App',
   'Sign-on options',
-  'Widget',
-  'Crypto & Rewards',
+  'Home screen',
+  'Menu',
+  'Rewards',
   'Visibility & Privacy',
   'API',
   'Delete',
 ];
+
+const tabsNew = {
+  Publish: ['AI Widget', 'Web App', 'Mobile App', 'Chat'],
+  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
+  System: ['Rewards', 'Visibility & Privacy', 'API', 'Delete'],
+};
 
 export default function AppSettings() {
   const { appId } = useParams();
@@ -440,12 +450,27 @@ export default function AppSettings() {
   };
 
   const tabsMemo = useMemo(() => {
-    return tabs.map((tab, index) => {
-      if (tab === 'Delete' && domainName === DOMAIN_NAME) {
-        return;
-      }
+    return Object.entries(tabsNew).flatMap(([sectionTitle, items]) => {
+      const sectionHeader = (
+        <div
+          key={`section-${sectionTitle}`}
+          className="text-md font-bold uppercase text-black py-[10px] md:py-3 md:px-2 border-b-brand-500"
+        >
+          {sectionTitle}
+        </div>
+      );
 
-      return <TabApp key={index} text={tab} last={index === tabs.length - 1} />;
+      const tabItems = items.map((tab, index) => {
+        if (tab === 'Delete' && domainName === DOMAIN_NAME) {
+          return null;
+        }
+
+        return (
+          <TabApp key={`${tab}_${index}`} text={tab} last={tab === 'Delete'} />
+        );
+      });
+
+      return [sectionHeader, ...tabItems];
     });
   }, [DOMAIN_NAME, domainName]);
 
@@ -598,19 +623,44 @@ export default function AppSettings() {
           {tabsMemo}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
+          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <AIbot
+              appId={appId as string}
+              aiBot={aiBot}
+              setAiBot={setAiBot}
+              defaultChatRooms={defaultChatRooms}
+              primaryColor={app.primaryColor}
+              isDisabled={app?.creatorId !== currentUser?._id}
+              handleSiteCrawl={handleSiteCrawl}
+              deleteSiteCrawl={deleteSiteCrawl}
+            />
+          </TabPanel>
+
           <TabPanel
-            key="Appearance"
-            className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
+            key="Web App"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+            // className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
-            <Appearance
-              displayName={displayName}
-              setDisplayName={setDisplayName}
-              tagline={tagline}
-              setTagline={setTagline}
-              color={color}
-              setColor={setColor}
-              logoImage={logoImage}
-              setLogoImage={setLogoImage}
+            <WebApp
+              domainName={domainName}
+              setDomainName={setDomainName}
+              firebaseWebConfigString={firebaseWebConfigString}
+              setFirebaseWebConfigString={setFirebaseWebConfigString}
+              primaryColor={app.primaryColor}
+              onExternalClick={onExternalClick}
+            />
+          </TabPanel>
+
+          <TabPanel
+            key="Mobile App"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <MobileApp
+              primaryColor={app.primaryColor}
+              bundleId={bundleId}
+              setBundleId={setBundleId}
+              setGoogleServicesJson={setGoogleServicesJson}
+              setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
             />
           </TabPanel>
 
@@ -627,31 +677,20 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <AIbot
-              appId={appId as string}
-              aiBot={aiBot}
-              setAiBot={setAiBot}
-              defaultChatRooms={defaultChatRooms}
-              primaryColor={app.primaryColor}
-              isDisabled={app?.creatorId !== currentUser?._id}
-              handleSiteCrawl={handleSiteCrawl}
-              deleteSiteCrawl={deleteSiteCrawl}
-            />
-          </TabPanel>
-
-          <TabPanel key="App" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <WebMobileApp
-              domainName={domainName}
-              setDomainName={setDomainName}
-              firebaseWebConfigString={firebaseWebConfigString}
-              setFirebaseWebConfigString={setFirebaseWebConfigString}
-              primaryColor={app.primaryColor}
-              onExternalClick={onExternalClick}
-              bundleId={bundleId}
-              setBundleId={setBundleId}
-              setGoogleServicesJson={setGoogleServicesJson}
-              setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
+          <TabPanel
+            key="Appearance"
+            // className="grid grid-rows-1 lg:ml-4 h-full "
+            className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
+          >
+            <Appearance
+              displayName={displayName}
+              setDisplayName={setDisplayName}
+              tagline={tagline}
+              setTagline={setTagline}
+              color={color}
+              setColor={setColor}
+              logoImage={logoImage}
+              setLogoImage={setLogoImage}
             />
           </TabPanel>
 
@@ -673,20 +712,25 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="Widget" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <Widget
+          <TabPanel
+            key="Home Screen"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <HomeScreen
               afterLoginPage={afterLoginPage}
               setAfterLoginPage={setAfterLoginPage}
-              availableMenuItems={availableMenuItems}
-              setAvailableMenuItems={setAvailableMenuItems}
               primaryColor={app.primaryColor}
             />
           </TabPanel>
 
-          <TabPanel
-            key="Crypto & Rewards"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
+          <TabPanel key="Menu" className="grid grid-rows-1 lg:ml-4 h-full ">
+            <Menu
+              availableMenuItems={availableMenuItems}
+              setAvailableMenuItems={setAvailableMenuItems}
+            />
+          </TabPanel>
+
+          <TabPanel key="Rewards" className="grid grid-rows-1 lg:ml-4 h-full ">
             <CryptoRewards coinName={coinName} setCoinName={setCoinName} />
           </TabPanel>
 

@@ -1,4 +1,5 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
+import classNames from 'classnames';
 import clsx from 'clsx';
 import { FC, ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -22,6 +23,7 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
   onClose,
 }): ReactElement => {
   const [step, setStep] = useState<Step>('Start');
+  const [questionStep, setQuestionStep] = useState('default');
   const [animate, setAnimate] = useState(false);
   const { appId } = useParams();
   const questionsChat = getQuestionsChat(appId);
@@ -36,6 +38,14 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
     }, 200);
   };
 
+  const handleChangeQuestionStep = (next: string) => {
+    setAnimate(true);
+    setTimeout(() => {
+      setQuestionStep(next);
+      setAnimate(false);
+    }, 200);
+  };
+
   const goBack = () => handleChangeStep('Start');
 
   const currentComponent = () => {
@@ -43,11 +53,35 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       case 'Start':
         return <StepStartTutorial onSelect={handleChangeStep} />;
       case 'Chat':
-        return <StepChooseTutorial questions={questionsChat} goBack={goBack} />;
+        return (
+          <StepChooseTutorial
+            animate={animate}
+            questionStep={questionStep}
+            handleChangeQuestionStep={handleChangeQuestionStep}
+            questions={questionsChat}
+            goBack={goBack}
+          />
+        );
       case 'AI':
-        return <StepChooseTutorial questions={questionsAi} goBack={goBack} />;
+        return (
+          <StepChooseTutorial
+            animate={animate}
+            questionStep={questionStep}
+            handleChangeQuestionStep={handleChangeQuestionStep}
+            questions={questionsAi}
+            goBack={goBack}
+          />
+        );
       case 'Demo':
-        return <StepChooseTutorial questions={questionsDemo} goBack={goBack} />;
+        return (
+          <StepChooseTutorial
+            animate={animate}
+            questionStep={questionStep}
+            handleChangeQuestionStep={handleChangeQuestionStep}
+            questions={questionsDemo}
+            goBack={goBack}
+          />
+        );
     }
   };
 
@@ -57,7 +91,14 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       open={show}
       onClose={onClose}
     >
-      <DialogPanel className="p-4 sm:py-8 sm:px-8 bg-white rounded-3xl w-full max-w-[70%] md:max-w-[60%] lg:max-w-[40%] m-8 relative overflow-hidden">
+      <DialogPanel
+        className={classNames(
+          'p-4 sm:py-8 sm:px-8 bg-white rounded-3xl w-full  m-8 relative overflow-hidden max-h-[90vh] overflow-y-scroll scrollbar-hide',
+          questionStep === 'default'
+            ? 'max-w-[70%] md:max-w-[60%] lg:max-w-[40%]'
+            : 'lg:max-w-[50%]'
+        )}
+      >
         <button className="absolute top-[20px] right-[20px]" onClick={onClose}>
           <IconClose />
         </button>

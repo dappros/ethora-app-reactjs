@@ -6,13 +6,13 @@ import { QuestionsType } from '../typeTutorial';
 interface QuestionsStepDefaultProps {
   questions: QuestionsType;
   goBack: () => void;
-  setChatStep: (id: string) => void;
+  setQuestionStep: (id: string) => void;
 }
 
 export const QuestionsStepDefault = ({
   questions,
   goBack,
-  setChatStep,
+  setQuestionStep,
 }: QuestionsStepDefaultProps): ReactElement => {
   return (
     <StepLayout
@@ -23,7 +23,7 @@ export const QuestionsStepDefault = ({
       {questions.map(({ id, question }, index) => (
         <button
           key={`${id}-${index}`}
-          onClick={() => setChatStep(id)}
+          onClick={() => setQuestionStep(id)}
           className={classNames(
             'btn flex items-start gap-3 text-left p-4 w-full rounded-lg border hover:bg-gray-100 transition'
           )}

@@ -46,26 +46,31 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     ],
     answer: {
       time: `5–15 minutes`,
-      complexity: '🌶️ (mild)',
-      description: (
+      complexity: 2,
+      description: [
         <span>
-          Take user to{' '}
-          <NavLink
-            to={`/app/admin/apps/${query}/settings?tab=Widget`}
-            className="text-blue-600 underline inline"
-          >
-            Web
-          </NavLink>{' '}
-          &{' '}
+          Go to the{' '}
           <NavLink
             to={`/app/admin/apps/${query}/settings?tab=Appearance`}
             className="text-blue-600 underline inline"
           >
             Appearance
           </NavLink>{' '}
-          , then guide to test as End User
-        </span>
-      ),
+          section, then customize the appearance of your application.
+        </span>,
+        <span>
+          Go to the{' '}
+          <NavLink
+            to={`/app/admin/apps/${query}/settings?tab=Web+App`}
+            className="text-blue-600 underline inline"
+          >
+            Web
+          </NavLink>{' '}
+          , then enter the URL address of the application name and navigate to
+          it.
+        </span>,
+      ],
+      images: ['/src/assets/gif/appearance.gif', '/src/assets/gif/webApp.gif'],
     },
   },
   {
@@ -81,8 +86,8 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     ],
     answer: {
       time: `5–15 minutes`,
-      complexity: '🌶️ (mild)',
-      description: (
+      complexity: 2,
+      description: [
         <span>
           Take user to{' '}
           <NavLink
@@ -99,8 +104,8 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
             Appearance
           </NavLink>{' '}
           , then guide to test as End User
-        </span>
-      ),
+        </span>,
+      ],
     },
   },
   {
@@ -116,8 +121,8 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     ],
     answer: {
       time: `days to weeks`,
-      complexity: '🌶️🌶️🌶️🌶️ (spicy)',
-      description: <span>Take user to documentation on NPM component</span>,
+      complexity: 4,
+      description: [<span>Take user to documentation on NPM component</span>],
     },
   },
 ];
@@ -132,8 +137,8 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     ],
     answer: {
       time: `5–15 minutes`,
-      complexity: '🌶️ (mild)',
-      description: (
+      complexity: 2,
+      description: [
         <span>
           Take user to{' '}
           <NavLink
@@ -143,8 +148,8 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
             Ai bot
           </NavLink>{' '}
           tab
-        </span>
-      ),
+        </span>,
+      ],
     },
   },
   {
@@ -152,10 +157,10 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     question: ['..add AI to my Wordpress website (using a WP plugin)'],
     answer: {
       time: `0.5–1 hour`,
-      complexity: '🌶️🌶️ (medium)',
-      description: (
-        <span>Take user to documentation on WP or WP plugin page</span>
-      ),
+      complexity: 2,
+      description: [
+        <span>Take user to documentation on WP or WP plugin page</span>,
+      ],
     },
   },
   {
@@ -165,8 +170,8 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     ],
     answer: {
       time: `0.5–4 hours`,
-      complexity: '🌶️🌶️ (medium)',
-      description: (
+      complexity: 2,
+      description: [
         <span>
           TaTake user to{' '}
           <NavLink
@@ -176,8 +181,8 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
             Ai bot
           </NavLink>{' '}
           tab
-        </span>
-      ),
+        </span>,
+      ],
     },
   },
 ];
@@ -189,7 +194,7 @@ export const getQuestionsDemo = (): QuestionsType => [
       'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
     ],
     answer: {
-      description: <span>[Book a feasibility call]</span>,
+      description: [<span>[Book a feasibility call]</span>],
     },
   },
 ];

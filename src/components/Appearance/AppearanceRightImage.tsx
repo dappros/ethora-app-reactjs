@@ -21,7 +21,7 @@ export const AppearanceRightImage = ({
   logoImage,
 }: AppearanceRightImageProps) => {
   return (
-    <div className="w-full appearance-right flex justify-center items-center overflow-hidden relative">
+    <div className="appearance-right w-full flex justify-center items-start relative pt-20">
       <div className="relative">
         <div
           className={classNames(

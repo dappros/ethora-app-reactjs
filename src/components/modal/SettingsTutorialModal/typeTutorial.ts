@@ -7,7 +7,8 @@ export type QuestionsType = {
   question: QuestionPart[];
   answer: {
     time?: string;
-    complexity?: string;
-    description: React.ReactNode;
+    complexity?: number;
+    description: Array<React.ReactNode>;
+    images?: Array<string>;
   };
 }[];
