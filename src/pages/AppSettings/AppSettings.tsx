@@ -15,7 +15,7 @@ import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
-import { SettingTutorialModal } from '../../components/modal/SettingsTutorialModal/SettingTutorialModal';
+import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
 import {
   deleteApp,
@@ -784,7 +784,7 @@ export default function AppSettings() {
         />
       )}
 
-      {/* {isInfo && (
+      {isInfo && (
         <InfoAppModal
           appName={displayName}
           domainName={app.domainName}
@@ -794,10 +794,10 @@ export default function AppSettings() {
           appId={app._id}
           navigate={navigate}
         />
-      )} */}
-      {isInfo && (
-        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
       )}
+      {/* {isInfo && (
+        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
+      )} */}
 
       {loading && <Loading />}
     </div>
