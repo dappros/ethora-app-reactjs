@@ -25,11 +25,10 @@ import {
 } from '../../http';
 import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
-import { AIbot } from './AIbot';
+import { AIWidget } from './AIWidget';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
-import { CryptoRewards } from './CryptoRewards';
 import { DeleteSetting } from './DeleteSetting';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
@@ -47,8 +46,7 @@ const tabs = [
   'Sign-on options',
   'Home screen',
   'Menu',
-  'Chat',
-  'Rewards',
+  'Chats',
   'Visibility & Privacy',
   'API',
   'Delete',
@@ -57,7 +55,7 @@ const tabs = [
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
-  System: ['Chat', 'Rewards', 'Visibility & Privacy', 'API', 'Delete'],
+  System: ['Chats', 'Visibility & Privacy', 'API', 'Delete'],
 };
 
 export default function AppSettings() {
@@ -624,7 +622,7 @@ export default function AppSettings() {
         </TabList>
         <TabPanels className="h-full overflow-hidden">
           <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
-            <AIbot
+            <AIWidget
               appId={appId as string}
               aiBot={aiBot}
               setAiBot={setAiBot}
@@ -642,6 +640,11 @@ export default function AppSettings() {
             // className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
             <WebApp
+              appId={appId as string}
+              aiBot={aiBot}
+              setAiBot={setAiBot}
+              defaultChatRooms={defaultChatRooms}
+              isDisabled={app?.creatorId !== currentUser?._id}
               domainName={domainName}
               setDomainName={setDomainName}
               firebaseWebConfigString={firebaseWebConfigString}
@@ -656,6 +659,11 @@ export default function AppSettings() {
             className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <MobileApp
+              appId={appId as string}
+              aiBot={aiBot}
+              setAiBot={setAiBot}
+              defaultChatRooms={defaultChatRooms}
+              isDisabled={app?.creatorId !== currentUser?._id}
               primaryColor={app.primaryColor}
               bundleId={bundleId}
               setBundleId={setBundleId}
@@ -730,9 +738,9 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          <TabPanel key="Rewards" className="grid grid-rows-1 lg:ml-4 h-full ">
+          {/* <TabPanel key="Rewards" className="grid grid-rows-1 lg:ml-4 h-full ">
             <CryptoRewards coinName={coinName} setCoinName={setCoinName} />
-          </TabPanel>
+          </TabPanel> */}
 
           <TabPanel
             key="Visibility & Privacy"

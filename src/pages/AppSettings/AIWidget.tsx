@@ -32,7 +32,7 @@ interface Props {
   deleteSiteCrawl: (url: string) => void;
 }
 
-export function AIbot({
+export function AIWidget({
   appId,
   aiBot,
   setAiBot,
@@ -164,7 +164,7 @@ export function AIbot({
       </button>
 
       <div className="font-semibold font-sans text-[16px] my-4">Code</div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
+      <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Use this code to integrate widget into your website or external app.
       </p>
 
@@ -175,7 +175,7 @@ export function AIbot({
             <Tab label="Wordpress" value="2" />
           </TabList>
         </Box>
-        <TabPanel value="1">
+        <TabPanel value="1" style={{ padding: 0, paddingTop: 24 }}>
           <p className="font-sans text-sm pb-4 flex items-center gap-1">{`Insert this code anywhere inside your <body> tag:`}</p>
           <div className="relative rounded-md overflow-hidden bg-gray-700">
             <div className="overflow-x-auto whitespace-pre-wrap break-words">
@@ -214,7 +214,7 @@ export function AIbot({
             </div>
           </div>
         </TabPanel>
-        <TabPanel value="2">
+        <TabPanel value="2" style={{ padding: 0, paddingTop: 24 }}>
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
             Insert this bot ID in your Wordpress
             <a href="" className="text-brand-500">
@@ -402,7 +402,9 @@ export function AIbot({
         </RadioGroup>
       </div> */}
 
-      <div className="font-semibold font-sans text-[16px] my-4">Prompt</div>
+      <div className="font-semibold font-sans text-[16px] pt-8 pb-4">
+        Prompt
+      </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Use to provide instructions on how the bot should behave. You may also
         copy&paste limited data on your specific business context the bot should
@@ -490,7 +492,7 @@ export function AIbot({
         </div>
       )}
 
-      <div className="font-semibold font-sans text-[16px] pb-4 pt-8">
+      <div className="font-semibold font-sans text-[16px] pb-4 pt-10">
         <span> Upload documents (</span>
         <button
           onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
@@ -499,14 +501,17 @@ export function AIbot({
           <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
         </button>
         <span>)</span>
+        <span className="text-xs text-gray-600 ml-2 p-2 border rounded-sm">
+          Available in paid plans
+        </span>
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
-        Drag & Drop your documents here for. Supported formats: TXT, CSV, JSON,
-        DOC, PDF.
+        Drag & Drop your documents here for the system to ingest data from
+        there. Supported formats: TXT, CSV, JSON, DOC, PDF.
       </p>
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
         <div className="flex flex-col items-center">
-          <IconButton>
+          <IconButton disabled>
             <FileUploadOutlinedIcon className="h-8 w-8 text-gray-400 mb-2" />
           </IconButton>
           {/* <Upload className="h-8 w-8 text-gray-400 mb-2" /> */}
