@@ -236,7 +236,7 @@ export function AIWidget({
                 showLineNumbers={false}
                 wrapLongLines={true}
               >
-                {`${appId}_${aiBot.userId}`}
+                {`${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`}
               </SyntaxHighlighter>
               <div className="flex items-center justify-end pr-4">
                 <Tooltip title={copied ? 'Copied' : 'Copy'}>
