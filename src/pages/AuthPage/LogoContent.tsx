@@ -19,12 +19,6 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   //   return;
   // }
 
-  console.log('allowedDomains', allowedDomains);
-  console.log(
-    'allowedDomains.includes(currentDomain)',
-    allowedDomains.includes(currentDomain)
-  );
-
   const logoImage = useMemo(() => {
     if (imageError || !config?.logoImage) {
       return (

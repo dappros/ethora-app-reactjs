@@ -11,7 +11,6 @@ export const FeedbackIframe = ({ onClick }: FeedbackIframeProps) => {
 
   useEffect(() => {
     const listener = (event: MessageEvent) => {
-      console.log('[iframe] message received:', event.data);
       if (event.data === 'feedback-submitted') {
         onClick(false);
       }
