@@ -33,7 +33,7 @@ export const FeedbackButton = ({ onClick }: FeedbackButtonProps) => {
             className="bg-[#f38518] hover:bg-brand-500 text-white px-4 py-2 rounded-tl-lg rounded-tr-lg shadow"
             onClick={() => onClick(true)}
           >
-            Feedback
+            Support
           </button>
         </div>
       </div>
@@ -42,7 +42,7 @@ export const FeedbackButton = ({ onClick }: FeedbackButtonProps) => {
         className="md:hidden fixed bottom-4 right-4 z-50 bg-[#f38518] hover:bg-brand-500 text-white w-12 h-12 flex items-center justify-center rounded-full shadow transition-all duration-300 ease-in-out text-sm font-bold"
         onClick={() => onClick(true)}
       >
-        Fb
+        Sp
       </button>
     </>
   );
