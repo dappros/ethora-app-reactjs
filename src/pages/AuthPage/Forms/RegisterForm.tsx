@@ -36,8 +36,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
     <ThirdStep />,
   ];
 
-  // @ts-ignore
-  const StepComponent = ({ step }) => {
+  const StepComponent: React.FC<{ step: number }> = ({ step }) => {
     return steps[step] || <div>Step not found</div>;
   };
 

@@ -96,8 +96,25 @@ const FirstStep: React.FC<FirstStepProps> = ({
         flexDirection: 'column',
         gap: '24px',
         minWidth: '320px',
+        paddingTop: '16px',
       }}
     >
+      {config?.signonOptions.includes('google') && (
+        <GoogleButton utm={utmParams} />
+      )}
+      {config?.signonOptions.length > 1 && (
+        <Box className="flex items-center w-full my-2">
+          <span className="flex-grow border-t border-2 border-gray-300 mx-4 border-r-2" />
+          <Typography
+            variant="h6"
+            className="mx-4 text-black"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            OR
+          </Typography>
+          <span className="flex-grow border-t border-2 border-gray-300 mx-4 border-r-2" />
+        </Box>
+      )}
       <SkeletonLoader loading={false}>
         <Box
           component="form"
@@ -221,16 +238,6 @@ const FirstStep: React.FC<FirstStepProps> = ({
               </Typography>
             </Box>
           </Box>
-          {config?.signonOptions.length > 1 && (
-            <Typography
-              sx={{ width: '100%', textAlign: 'center', color: '#8C8C8C' }}
-            >
-              or
-            </Typography>
-          )}
-          {config?.signonOptions.includes('google') && (
-            <GoogleButton utm={utmParams} />
-          )}
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
           {config?.signonOptions.includes('metamask') && (
