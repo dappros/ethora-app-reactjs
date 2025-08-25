@@ -42,6 +42,7 @@ export function AIWidget({
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [copiedText, setCopiedText] = useState<string>('');
   const [value, setValue] = useState('1');
 
   const [url, setUrl] = useState<string>('');
@@ -51,6 +52,10 @@ export function AIWidget({
   const ragRef = useRef<HTMLDivElement>(null);
 
   const scriptCode = useMemo(() => {
+    if (!appId && !aiBot.userId) {
+      return '<script></script>';
+    }
+
     return `<script
   src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js" 
   id="chat-content-assistant"
@@ -58,8 +63,17 @@ export function AIWidget({
 ></script>`;
   }, [appId, aiBot.userId]);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    console.log(event);
+  const currentCopyTarget = useMemo(() => {
+    if (value === '1') {
+      return scriptCode;
+    }
+    if (appId && aiBot.userId) {
+      return `${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`;
+    }
+    return '';
+  }, [value, scriptCode, appId, aiBot.userId]);
+
+  const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
 
@@ -118,10 +132,10 @@ export function AIWidget({
   //   });
   // };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(scriptCode).then(() => {
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setCopiedText(text);
     });
   };
 
@@ -144,6 +158,10 @@ export function AIWidget({
       setUrl(aiBot.siteLinks[0]);
     }
   }, [aiBot.siteLinks]);
+
+  useEffect(() => {
+    setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
+  }, [copiedText, currentCopyTarget]);
 
   return (
     <div className="">
@@ -176,28 +194,13 @@ export function AIWidget({
           </TabList>
         </Box>
         <TabPanel value="1" style={{ padding: 0, paddingTop: 24 }}>
-          <p className="font-sans text-sm pb-4 flex items-center gap-1">{`Insert this code anywhere inside your <body> tag:`}</p>
-          <div className="relative rounded-md overflow-hidden bg-gray-700">
-            <div className="overflow-x-auto whitespace-pre-wrap break-words">
-              <SyntaxHighlighter
-                language="html"
-                style={oneDark}
-                customStyle={{
-                  fontSize: '0.875rem',
-                  background: 'transparent',
-                  padding: '1rem',
-                  margin: 0,
-                }}
-                showLineNumbers={true}
-                wrapLongLines={true}
-              >
-                {scriptCode}
-              </SyntaxHighlighter>
-            </div>
-
-            <div className="flex items-center justify-end px-2 pb-2">
+          <p className="font-sans text-sm pb-4 flex items-center gap-1">
+            {`Insert this code anywhere inside your <body> tag:`}
+          </p>
+          <div className="relative rounded-md bg-gray-700">
+            <div className="absolute top-1 right-1 z-10">
               <Tooltip title={copied ? 'Copied' : 'Copy'}>
-                <IconButton onClick={handleCopy}>
+                <IconButton onClick={() => handleCopy(scriptCode)} size="small">
                   {copied ? (
                     <CheckIcon
                       fontSize="small"
@@ -212,6 +215,39 @@ export function AIWidget({
                 </IconButton>
               </Tooltip>
             </div>
+            <SyntaxHighlighter
+              language="html"
+              style={oneDark}
+              customStyle={{
+                fontSize: '0.875rem',
+                background: 'transparent',
+                padding: '1rem 2.5rem 1rem 1rem',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                overflowX: 'auto',
+              }}
+              showLineNumbers={true}
+              wrapLongLines={true}
+              wrapLines={true}
+              lineProps={{
+                style: {
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
+                },
+              }}
+              codeTagProps={{
+                style: {
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
+                },
+              }}
+            >
+              {scriptCode}
+            </SyntaxHighlighter>
           </div>
         </TabPanel>
         <TabPanel value="2" style={{ padding: 0, paddingTop: 24 }}>
@@ -222,40 +258,68 @@ export function AIWidget({
             </a>
             settings:
           </p>
-          <div className="relative rounded-md overflow-hidden bg-gray-700">
-            <div className="overflow-x-auto whitespace-pre-wrap break-words flex items-center justify-between">
-              <SyntaxHighlighter
-                language="html"
-                style={oneDark}
-                customStyle={{
-                  fontSize: '0.875rem',
-                  background: 'transparent',
-                  padding: '1rem',
-                  margin: 0,
-                }}
-                showLineNumbers={false}
-                wrapLongLines={true}
-              >
-                {`${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`}
-              </SyntaxHighlighter>
-              <div className="flex items-center justify-end pr-4">
-                <Tooltip title={copied ? 'Copied' : 'Copy'}>
-                  <IconButton onClick={handleCopy}>
-                    {copied ? (
-                      <CheckIcon
-                        fontSize="small"
-                        className="text-white hover:text-gray-300"
-                      />
-                    ) : (
-                      <ContentCopyIcon
-                        fontSize="small"
-                        className="text-white hover:text-gray-300"
-                      />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </div>
+          <div className="relative rounded-md bg-gray-700">
+            <div className="absolute top-1 right-1 z-10">
+              <Tooltip title={copied ? 'Copied' : 'Copy'}>
+                <IconButton
+                  onClick={() =>
+                    handleCopy(
+                      appId && aiBot.userId
+                        ? `${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`
+                        : ''
+                    )
+                  }
+                  size="small"
+                >
+                  {copied ? (
+                    <CheckIcon
+                      fontSize="small"
+                      className="text-white hover:text-gray-300"
+                    />
+                  ) : (
+                    <ContentCopyIcon
+                      fontSize="small"
+                      className="text-white hover:text-gray-300"
+                    />
+                  )}
+                </IconButton>
+              </Tooltip>
             </div>
+            <SyntaxHighlighter
+              language="html"
+              style={oneDark}
+              customStyle={{
+                fontSize: '0.875rem',
+                background: 'transparent',
+                padding: '1rem 2.5rem 1rem 1rem',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                overflowX: 'auto',
+              }}
+              showLineNumbers={false}
+              wrapLongLines={true}
+              wrapLines={true}
+              lineProps={{
+                style: {
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
+                },
+              }}
+              codeTagProps={{
+                style: {
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
+                },
+              }}
+            >
+              {appId && aiBot.userId
+                ? `${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`
+                : ''}
+            </SyntaxHighlighter>
           </div>
         </TabPanel>
       </TabContext>
