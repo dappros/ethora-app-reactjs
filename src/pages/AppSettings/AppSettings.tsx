@@ -95,19 +95,6 @@ export default function AppSettings() {
     setSelectedIndex(index);
   };
 
-  const isOpen = localStorage.getItem('isProgressCreateAppOpen');
-  console.log('isOpen', localStorage.getItem('isProgressCreateAppOpen'));
-  const [showProgress, setShowProgress] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (isOpen === null) {
-      setShowProgress(true);
-      return;
-    }
-
-    setShowProgress(isOpen === 'true');
-  }, []);
-
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
@@ -499,12 +486,6 @@ export default function AppSettings() {
       setLoading(false);
     }
   };
-
-  const isAppearance = useMemo((): boolean => {
-    if (!app) return false;
-
-    return !!app.primaryColor && !!app.appTagline && !!app.displayName;
-  }, [app]);
 
   useEffect(() => {
     if (!app) return;

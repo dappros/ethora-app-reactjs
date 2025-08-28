@@ -453,8 +453,10 @@ export function AIWidget({
       )}
 
       {statusBot && (
+        // @ts-ignore
         <XmppProvider>
           <Box className="chatAssistantButton">
+            {/* @ts-ignore */}
             <Chat
               roomJID={`${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`}
               config={{
