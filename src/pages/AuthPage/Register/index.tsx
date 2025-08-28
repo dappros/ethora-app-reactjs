@@ -1,5 +1,5 @@
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import SignUpForm from '../Forms/RegisterForm';
+import SignUpForm from '../Forms/RegisterLayout';
 import LogoContent from '../LogoContent';
 import Wrapper from '../Wrapper';
 

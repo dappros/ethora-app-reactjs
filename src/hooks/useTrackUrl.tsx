@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { actionAfterLogin } from '../actions.ts';
 import { httpGetOneUser } from '../http.ts';
 
@@ -20,10 +20,10 @@ export const useTrackUrl = () => {
   useEffect(() => {
     if (!token) {
       if (publicPath) {
-        return navigate(`${publicPath}${location.search}`);
-      } else {
-        return navigate(`/login${location.search}`);
+        // already on a public route (e.g., /resetPassword/:token), keep full path
+        return;
       }
+      return navigate(`/login${location.search}`);
     }
 
     if (location.pathname === '/') {
@@ -50,26 +50,31 @@ export const useTrackUrl = () => {
   useEffect(() => {
     // alert("here ++")
     const getUrl = async () => {
+      const isResetPassword = matchPath(
+        '/resetPassword/:token?',
+        location.pathname
+      );
+      const isTempPassword = matchPath('/tempPassword', location.pathname);
+
       if (token) {
         // sleep(1000)
         try {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
         } catch (e) {
-          if (
-            !location.pathname.startsWith('/tempPassword') ||
-            !location.pathname.startsWith('/resetPassword')
-          ) {
-            navigate('/login');
+          if (isResetPassword || isTempPassword) {
+            return;
           }
+
+          navigate(`/login${location.search}`);
           console.error(e);
         }
       } else {
         if (publicPath) {
-          return navigate(`${publicPath}${location.search}`);
-        } else {
-          navigate(`/login${location.search}`);
+          // already on a public route (e.g., /resetPassword/:token), keep full path
+          return;
         }
+        navigate(`/login${location.search}`);
       }
     };
 

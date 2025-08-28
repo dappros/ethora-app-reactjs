@@ -19,19 +19,10 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const config = useAppStore((s) => s.currentApp);
-  let { token } = useParams();
-
-  if (!config) {
-    return null;
-  }
-
   const navigate = useNavigate();
+  const { token } = useParams();
 
-  useEffect(() => {
-    if (token) {
-      setActiveStep(2);
-    }
-  }, [token]);
+  console.log('Token from params:', token);
 
   const steps = [
     <FirstStep setStep={setActiveStep} />,
@@ -39,8 +30,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
     <ThirdStep />,
   ];
 
-  // @ts-ignore
-  const StepComponent = ({ step }) => {
+  const StepComponent: React.FC<{ step: number }> = ({ step }) => {
     return steps[step] || <div>Step not found</div>;
   };
 
@@ -48,6 +38,16 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
     setActiveStep((prev) => prev - 1);
     navigate('/resetPassword', { replace: true });
   };
+
+  useEffect(() => {
+    if (token) {
+      setActiveStep(2);
+    }
+  }, [token]);
+
+  if (!config) {
+    return null;
+  }
 
   return (
     <Box

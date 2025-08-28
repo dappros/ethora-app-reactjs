@@ -1,3 +1,8 @@
+import {
+  Chat,
+  XmppProvider,
+  createAnonymousXmppCredentials,
+} from '@ethora/ai-chat-widget';
 import { Textarea } from '@headlessui/react';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -15,6 +20,33 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
+
+import './AIWidget.scss';
+
+const assistantChatConfig = {
+  colors: { primary: '#1976D2', secondary: '#E1E4FE' },
+  assistantButton: {
+    position: { right: 24, bottom: 24 },
+    ariaLabel: 'Open assistant chat',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  assistantPopup: {
+    width: 320,
+    height: 520,
+    closeButtonAriaLabel: 'Close assistant chat',
+  },
+  assistantOpenStateKey: 'EthoraAssistantOpen',
+  disableMedia: true,
+  disableInteractions: true,
+  disableRooms: true,
+  xmppSettings: {
+    devServer: 'wss://xmpp.ethoradev.com:5443/ws',
+    host: 'xmpp.ethoradev.com',
+    conference: 'conference.xmpp.ethoradev.com',
+  },
+};
 
 const statusAiBot = {
   on: true,
@@ -48,6 +80,7 @@ export function AIWidget({
   const [url, setUrl] = useState<string>('');
   const [choseUrl, setChoseUrl] = useState<string>('');
   // const [scriptCode , setScriptCode] = useState<string>('');
+  const user = createAnonymousXmppCredentials();
 
   const ragRef = useRef<HTMLDivElement>(null);
 
@@ -89,63 +122,12 @@ export function AIWidget({
     }
   };
 
-  // const handleChatChange = (event: SelectChangeEvent<string>) => {
-  //   const selectedJid = event.target.value;
-  //   const selectedChat = defaultChatRooms.find(
-  //     (chat) => chat.chatId === selectedJid
-  //   );
-
-  //   setAiBot({
-  //     ...aiBot,
-  //     chatId: selectedChat?.chatId || '',
-  //     chat: selectedChat
-  //       ? {
-  //           _id: selectedChat.chatId,
-  //           name: selectedChat.jid,
-  //           title: selectedChat.title,
-  //           description: '',
-  //           type: '',
-  //           picture: '',
-  //         }
-  //       : {
-  //           _id: '',
-  //           name: '',
-  //           title: '',
-  //           description: '',
-  //           type: '',
-  //           picture: '',
-  //         },
-  //   });
-  // };
-
-  // const handleGreetingChange = (value: string) => {
-  //   setAiBot({
-  //     ...aiBot,
-  //     greetingMessage: value,
-  //   });
-  // };
-
-  // const handleTriggerChange = (value: string) => {
-  //   setAiBot({
-  //     ...aiBot,
-  //     trigger: value,
-  //   });
-  // };
-
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setCopiedText(text);
     });
   };
-
-  // const memoChatName = useMemo(() => {
-  //   if (!aiBot.chatId) {
-  //     return 'None';
-  //   }
-
-  //   return aiBot.chatId;
-  // }, [aiBot.chatId]);
 
   useEffect(() => {
     if (aiBot.status) {
@@ -324,148 +306,6 @@ export function AIWidget({
         </TabPanel>
       </TabContext>
 
-      {/* <div className="font-semibold font-sans text-[16px] mb-4">Chat room</div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Select Chat room where the bot should be deployed
-      </p> */}
-      {/* <FormControl
-        sx={{
-          mb: 4,
-          mt: 1,
-          minWidth: 220,
-          '& label': {
-            color: primaryColor,
-          },
-          '& label.Mui-focused': {
-            color: primaryColor,
-          },
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '12px',
-            '& fieldset': {
-              borderColor: primaryColor,
-            },
-            '&:hover fieldset': {
-              borderColor: primaryColor,
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: primaryColor,
-            },
-          },
-        }}
-      >
-        <InputLabel id="demo-select-small-label">Chat</InputLabel>
-        <Select
-          labelId="demo-select-small-label"
-          id="demo-select-small"
-          label="Chat"
-          value={memoChatName}
-          onChange={(event: SelectChangeEvent<string>) =>
-            handleChatChange(event)
-          }
-          sx={{ height: '42px' }}
-        >
-          <MenuItem value="None">
-            <em>None</em>
-          </MenuItem>
-          {defaultChatRooms.map((chat) => (
-            <MenuItem key={chat.chatId} value={chat.chatId}>
-              {chat.title}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl> */}
-      {/* <div className="font-semibold font-sans text-[16px] mb-4">
-        <span className="pr-2">Display Name</span>
-        <Tooltip title="Only the app owner can change the bot's name." arrow>
-          <WarningAmberOutlinedIcon
-            style={{ color: '#f59e0b', fontSize: 18, cursor: 'pointer' }}
-          />
-        </Tooltip>
-      </div> */}
-      {/* <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Which Display Name should the bot use?
-      </p> */}
-      {/* <div className="flex flex-col gap-2 mb-8">
-        <input
-          disabled={isDisabled}
-          type="text"
-          className={classNames(
-            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4',
-            isDisabled && 'opacity-50 cursor-not-allowed bg-gray-200'
-          )}
-          placeholder="First name"
-          value={aiBot.user?.firstName}
-          onChange={(e) =>
-            setAiBot({
-              ...aiBot,
-              user: { ...aiBot.user, firstName: e.target.value },
-            })
-          }
-        />
-        <input
-          disabled={isDisabled}
-          type="text"
-          className={classNames(
-            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4',
-            isDisabled && 'opacity-50 cursor-not-allowed bg-gray-200'
-          )}
-          placeholder="Last name"
-          value={aiBot.user?.lastName}
-          onChange={(e) =>
-            setAiBot({
-              ...aiBot,
-              user: { ...aiBot.user, lastName: e.target.value },
-            })
-          }
-        />
-      </div> */}
-      {/* <div className="font-semibold font-sans text-[16px] mb-4">
-        Greeting message when joining the room
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Bot sends this message as a greeting once launched. Delete for no
-        message.
-      </p>
-      <div className="mb-8">
-        <RadioGroup
-          className="flex flex-col mb-8"
-          value={aiBot.greetingMessage}
-          onChange={handleGreetingChange}
-        >
-          <RadioButton
-            className="mb-4"
-            value="Hello, I am your AI assistant. How can I help you today?"
-            label={'Hello, I am your AI assistant. How can I help you today?'}
-          />
-          <RadioButton className="mb-2" value="None" label="None" />
-        </RadioGroup>
-      </div> */}
-
-      {/* <div className="font-semibold font-sans text-[16px] mb-4">
-        Response trigger
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        To which messages should the bot respond
-      </p>
-      <div className="mb-8">
-        <RadioGroup
-          className="flex flex-col mb-8"
-          value={aiBot.trigger}
-          onChange={handleTriggerChange}
-        >
-          <RadioButton
-            className="mb-4"
-            value="any_message"
-            label="Any message from another user"
-          />
-          <RadioButton
-            className="mb-2"
-            value="/bot"
-            label="Any messages addressed to the bot or with '/bot' prefix"
-          />
-        </RadioGroup>
-      </div> */}
-
       <div className="font-semibold font-sans text-[16px] pt-8 pb-4">
         Prompt
       </div>
@@ -583,10 +423,6 @@ export function AIWidget({
         </div>
       </div>
 
-      {/* <p className="font-sans text-sm flex items-center gap-1 pb-8">
-        — [ section below only available for paid plans only ] —
-      </p> */}
-
       <div
         ref={ragRef}
         className="font-semibold font-sans text-[16px] pb-4 pt-8 text-blue-600"
@@ -614,6 +450,20 @@ export function AIWidget({
           onClose={() => setShowNewDocModal(false)}
           deleteSiteCrawl={() => deleteSiteCrawl(choseUrl)}
         />
+      )}
+
+      {statusBot && (
+        <XmppProvider>
+          <Box className="chatAssistantButton">
+            <Chat
+              roomJID={`${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`}
+              config={{
+                ...assistantChatConfig,
+                assistantMode: { enabled: true, user },
+              }}
+            />
+          </Box>
+        </XmppProvider>
       )}
     </div>
   );

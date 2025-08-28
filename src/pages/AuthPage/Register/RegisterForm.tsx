@@ -1,29 +1,30 @@
-import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Box, Typography } from '@mui/material';
 import { AxiosError } from 'axios';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { actionAfterLogin } from '../../../../actions';
-import CustomInput from '../../../../components/input/Input';
-import PasswordInput from '../../../../components/input/PasswordInput';
-import { logLogin } from '../../../../hooks/withTracking';
+import { actionAfterLogin } from '../../../actions';
+import CustomInput from '../../../components/input/Input';
+import PasswordInput from '../../../components/input/PasswordInput';
+import { logLogin } from '../../../hooks/withTracking';
 import {
   httpLoginWithEmail,
   httpRegisterWithEmailV2,
   sendHSFormData,
-} from '../../../../http';
-import { useAppStore } from '../../../../store/useAppStore';
-import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
-import CustomButton from '../../Button';
-import { GoogleButton } from '../../GoogleButton';
-import { MetamaskButton } from '../../MetamaskButton';
-import SkeletonLoader from '../../SkeletonLoader';
+} from '../../../http';
+import { useAppStore } from '../../../store/useAppStore';
+import { navigateToUserPage } from '../../../utils/navigateToUserPage';
+import CustomButton from '../Button';
+import { GoogleButton } from '../GoogleButton';
+import { MetamaskButton } from '../MetamaskButton';
+import SkeletonLoader from '../SkeletonLoader';
+
+const SITE_KEY = import.meta.env.VITE_SITE_KEY;
 
 interface FirstStepProps {
-  setStep: Dispatch<SetStateAction<number>>;
   isSmallDevice?: boolean;
 }
 
@@ -34,7 +35,7 @@ type Inputs = {
   password: string;
 };
 
-const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
+const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const config = useAppStore((s) => s.currentApp);
@@ -56,16 +57,11 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     'gmail.com',
     'googlemail.com',
     'yahoo.com',
-    'yandex.ru',
     'yandex.com',
     'outlook.com',
     'hotmail.com',
     'live.com',
     'icloud.com',
-    'mail.ru',
-    'bk.ru',
-    'list.ru',
-    'inbox.ru',
     'proton.me',
   ];
 
@@ -75,7 +71,9 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const bn = b.length;
     if (an === 0) return bn;
     if (bn === 0) return an;
-    const matrix: number[][] = Array.from({ length: an + 1 }, () => new Array(bn + 1).fill(0));
+    const matrix: number[][] = Array.from({ length: an + 1 }, () =>
+      new Array(bn + 1).fill(0)
+    );
     for (let i = 0; i <= an; i++) matrix[i][0] = i;
     for (let j = 0; j <= bn; j++) matrix[0][j] = j;
     for (let i = 1; i <= an; i++) {
@@ -97,7 +95,10 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const atIndex = email.indexOf('@');
     if (atIndex === -1) return null;
     const local = email.slice(0, atIndex).trim();
-    const domain = email.slice(atIndex + 1).trim().toLowerCase();
+    const domain = email
+      .slice(atIndex + 1)
+      .trim()
+      .toLowerCase();
     if (!local || !domain) return null;
     if (commonDomains.includes(domain)) return null;
     let best: { d: number; domain: string } | null = null;
@@ -111,8 +112,6 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     return null;
   };
 
-  
-
   if (!config) {
     return null;
   }
@@ -123,14 +122,15 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       setEmailSuggestion(suggested);
       setError('email', {
         type: 'suggestion',
-        message: `Возможно, вы имели в виду ${suggested}?`,
+        message: `Did you mean ${suggested}?`,
       });
       return;
     }
     const formData = new FormData(formRef.current!);
     const cfToken = formData.get('cf-turnstile-response');
 
-    console.log('Turnstile token:', typeof cfToken);
+    console.log('data', { email, firstName, lastName, password });
+
     if (!cfToken || typeof cfToken !== 'string' || cfToken.trim() === '') {
       return;
     }
@@ -300,7 +300,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                 clearErrors('email');
               }}
             >
-              Возможно, вы имели в виду {emailSuggestion}?
+              Did you mean {emailSuggestion}?
             </Typography>
           )}
           <PasswordInput
@@ -316,7 +316,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
               options={{
                 theme: 'light',
               }}
-              siteKey="0x4AAAAAABu5unVlwIkWIU9X"
+              siteKey={SITE_KEY}
             />
           </Box>
           <CustomButton
@@ -399,4 +399,4 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
   );
 };
 
-export default FirstStep;
+export default RegisterForm;

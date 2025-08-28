@@ -33,7 +33,6 @@ import { DeleteSetting } from './DeleteSetting';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
-import ProgressCreateApp from './ProgressCreateApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
@@ -569,7 +568,7 @@ export default function AppSettings() {
 
   return (
     <div className="h-full grid grid-rows-[1fr,_57px] lg:grid-rows-[57px,_1fr] gap-y-[16px]">
-      <div className="px-4 pt-4">
+      {/* <div className="px-4 pt-4">
         {showProgress && (
           <ProgressCreateApp
             isAppearanceAdjusted={isAppearance}
@@ -579,7 +578,7 @@ export default function AppSettings() {
             onClose={() => setShowProgress(false)}
           />
         )}
-      </div>
+      </div> */}
 
       <div className="px-4 pb-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">

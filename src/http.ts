@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
 import { ModelUserACL, OrderByType } from './models';
 
@@ -26,53 +26,76 @@ export const http = axios.create({
   baseURL: import.meta.env.VITE_API,
 });
 
-http.interceptors.request.use((config) => {
-  if (config.url === '/users/login/refresh') {
-    return config;
-  }
-
-  if (
-    config.url === '/users/login-with-email' ||
-    config.url === '/users/login' ||
-    (config.url === '/users' && config.method === 'post') ||
-    config.url?.startsWith('/users/checkEmail/') ||
-    config.url === '/users/sign-up-with-email' ||
-    config.url === '/users/sign-up-resend-email' ||
-    config.url === '/users/forgot' ||
-    config.url === '/users/reset'
-  ) {
-    config.headers.Authorization = httpTokens.appJwt;
-
-    return config;
-  }
-
-  config.headers.Authorization = httpTokens.token;
-
-  return config;
-}, null);
-
-http.interceptors.response.use(null, async (error) => {
-  if (!error.response || error.response.status !== 401) {
-    return Promise.reject(error);
-  }
-  const request = error.config;
-  const url = request.url;
-
-  if (
-    url === '/users/login/refresh' ||
-    url === '/users/login-with-email' ||
-    url === '/users/login'
-  ) {
-    return Promise.reject(error);
-  }
-
-  try {
-    await refreshToken();
-    return http(request);
-  } catch (error) {
-    return Promise.reject(error);
-  }
+export const httpV2 = axios.create({
+  baseURL: import.meta.env.VITE_API_V2,
 });
+
+const AUTH_WHITELIST: Array<string | RegExp> = [
+  '/users/login-with-email',
+  '/users/login',
+  /^\/users\/checkEmail\//,
+  '/users/sign-up-with-email',
+  '/users/sign-up-resend-email',
+  '/users/forgot',
+  '/users/reset',
+];
+
+function isWhitelisted(url: string | undefined, method?: string) {
+  if (!url) return false;
+  if (url === '/users' && method && method.toLowerCase() === 'post') {
+    return true;
+  }
+  return AUTH_WHITELIST.some((rule) => {
+    if (typeof rule === 'string') {
+      return url === rule;
+    }
+    return (rule as RegExp).test(url);
+  });
+}
+
+function attachAuthInterceptors(client: AxiosInstance) {
+  client.interceptors.request.use((config) => {
+    if (config.url === '/users/login/refresh') {
+      return config;
+    }
+
+    if (isWhitelisted(config.url, config.method)) {
+      config.headers = config.headers || {};
+      (config.headers as any).Authorization = httpTokens.appJwt;
+      return config;
+    }
+
+    config.headers = config.headers || {};
+    (config.headers as any).Authorization = httpTokens.token;
+    return config;
+  }, null);
+
+  client.interceptors.response.use(null, async (error) => {
+    if (!error.response || error.response.status !== 401) {
+      return Promise.reject(error);
+    }
+    const request = error.config;
+    const url = request.url;
+
+    if (
+      url === '/users/login/refresh' ||
+      url === '/users/login-with-email' ||
+      url === '/users/login'
+    ) {
+      return Promise.reject(error);
+    }
+
+    try {
+      await refreshToken();
+      return client(request);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  });
+}
+
+attachAuthInterceptors(http);
+attachAuthInterceptors(httpV2);
 
 export const refreshToken = async () => {
   try {
@@ -240,7 +263,7 @@ export function httpUpdateAcl(
   userId: string,
   acl: ModelUserACL
 ) {
-  let _acl = JSON.parse(JSON.stringify(acl));
+  const _acl = JSON.parse(JSON.stringify(acl));
 
   delete _acl.createdAt;
   delete _acl.appId;
@@ -353,6 +376,36 @@ export const httpRegisterWithEmail = (
         utm,
       };
   return http.post('/users/sign-up-with-email', body);
+};
+
+export const httpRegisterWithEmailV2 = (
+  email: string,
+  password: string,
+  cfToken: string,
+  firstName: string,
+  lastName: string,
+  utm?: string,
+  signUpPlan?: string
+) => {
+  const body = signUpPlan
+    ? {
+        email,
+        password,
+        cfToken,
+        firstName,
+        lastName,
+        signupPlan: signUpPlan,
+        utm,
+      }
+    : {
+        email,
+        password,
+        cfToken,
+        firstName,
+        lastName,
+        utm,
+      };
+  return httpV2.post('/users/sign-up-with-email', body);
 };
 
 export async function httpResendLink(email: string) {
