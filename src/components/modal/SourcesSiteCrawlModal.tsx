@@ -4,13 +4,13 @@ import { IconClose } from '../Icons/IconClose';
 import './CreateDocumentModal.scss';
 
 interface Props {
-  url: string;
+  urls: string[];
   onClose: () => void;
-  deleteSiteCrawl: (url: string) => void;
+  deleteSiteCrawl: (url: string[]) => void;
 }
 
 export function SourcesSiteCrawlModal({
-  url,
+  urls,
   onClose,
   deleteSiteCrawl,
 }: Props) {
@@ -26,7 +26,15 @@ export function SourcesSiteCrawlModal({
         </div>
 
         <div className="flex flex-col items-center">
-          <p>Delete - {url}</p>
+          <div className="max-h-48 overflow-y-auto w-full px-4">
+            <span className="block mb-2 font-medium text-center">Delete:</span>
+            {urls &&
+              urls.map((url) => (
+                <p key={url} className="text-sm break-all">
+                  {url}
+                </p>
+              ))}
+          </div>
         </div>
 
         <div className="flex gap-8 mt-8">
@@ -38,7 +46,7 @@ export function SourcesSiteCrawlModal({
           </button>
           <button
             onClick={() => {
-              deleteSiteCrawl(url);
+              deleteSiteCrawl(urls);
               onClose();
             }}
             className="w-full hover:bg-red-700 py-[12px] rounded-xl bg-red-600 text-white"

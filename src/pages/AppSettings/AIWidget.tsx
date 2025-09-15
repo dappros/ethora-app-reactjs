@@ -3,24 +3,14 @@ import {
   XmppProvider,
   createAnonymousXmppCredentials,
 } from '@ethora/ai-chat-widget';
-import { Textarea } from '@headlessui/react';
-import CheckIcon from '@mui/icons-material/Check';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import LanguageIcon from '@mui/icons-material/Language';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, IconButton, Tab, Tooltip } from '@mui/material';
-import classNames from 'classnames';
+import { Box } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
+import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
+import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
 import './AIWidget.scss';
 
 const assistantChatConfig = {
@@ -61,7 +51,7 @@ interface Props {
   primaryColor: string;
   isDisabled: boolean;
   handleSiteCrawl: (url: string) => void;
-  deleteSiteCrawl: (url: string) => void;
+  deleteSiteCrawl: (url: string[]) => void;
 }
 
 export function AIWidget({
@@ -78,7 +68,7 @@ export function AIWidget({
   const [value, setValue] = useState('1');
 
   const [url, setUrl] = useState<string>('');
-  const [choseUrl, setChoseUrl] = useState<string>('');
+  const [choseUrl, setChoseUrl] = useState<string[]>([]);
   // const [scriptCode , setScriptCode] = useState<string>('');
   const user = createAnonymousXmppCredentials();
 
@@ -147,281 +137,28 @@ export function AIWidget({
 
   return (
     <div className="">
-      <div className="font-semibold font-sans text-[16px] mb-4">Status</div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        AI bot is:{' '}
-        <PowerSettingsNewIcon
-          color={statusBot ? 'success' : 'error'}
-          fontSize="small"
-        />{' '}
-        {statusBot ? 'online' : 'offline'}
-      </p>
-      <button
-        className="px-16 py-2 rounded-xl hover:bg-brand-hover border border-brand-500 text-brand-500 flex items-center justify-center mb-8"
-        onClick={handleStatusChange}
-      >
-        <span className="">{statusBot ? 'stop' : 'start'}</span>
-      </button>
-
-      <div className="font-semibold font-sans text-[16px] my-4">Code</div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Use this code to integrate widget into your website or external app.
-      </p>
-
-      <TabContext value={value}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <TabList onChange={handleChange} aria-label="lab API tabs example">
-            <Tab label="HTML Widget" value="1" />
-            <Tab label="Wordpress" value="2" />
-          </TabList>
-        </Box>
-        <TabPanel value="1" style={{ padding: 0, paddingTop: 24 }}>
-          <p className="font-sans text-sm pb-4 flex items-center gap-1">
-            {`Insert this code anywhere inside your <body> tag:`}
-          </p>
-          <div className="relative rounded-md bg-gray-700">
-            <div className="absolute top-1 right-1 z-10">
-              <Tooltip title={copied ? 'Copied' : 'Copy'}>
-                <IconButton onClick={() => handleCopy(scriptCode)} size="small">
-                  {copied ? (
-                    <CheckIcon
-                      fontSize="small"
-                      className="text-white hover:text-gray-300"
-                    />
-                  ) : (
-                    <ContentCopyIcon
-                      fontSize="small"
-                      className="text-white hover:text-gray-300"
-                    />
-                  )}
-                </IconButton>
-              </Tooltip>
-            </div>
-            <SyntaxHighlighter
-              language="html"
-              style={oneDark}
-              customStyle={{
-                fontSize: '0.875rem',
-                background: 'transparent',
-                padding: '1rem 2.5rem 1rem 1rem',
-                margin: 0,
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'break-word',
-                wordBreak: 'break-word',
-                overflowX: 'auto',
-              }}
-              showLineNumbers={true}
-              wrapLongLines={true}
-              wrapLines={true}
-              lineProps={{
-                style: {
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word',
-                  wordBreak: 'break-word',
-                },
-              }}
-              codeTagProps={{
-                style: {
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word',
-                  wordBreak: 'break-word',
-                },
-              }}
-            >
-              {scriptCode}
-            </SyntaxHighlighter>
-          </div>
-        </TabPanel>
-        <TabPanel value="2" style={{ padding: 0, paddingTop: 24 }}>
-          <p className="font-sans text-sm pb-4 flex items-center gap-1">
-            Insert this bot ID in your Wordpress
-            <a href="" className="text-brand-500">
-              Ethora AI Assistant plugin
-            </a>
-            settings:
-          </p>
-          <div className="relative rounded-md bg-gray-700">
-            <div className="absolute top-1 right-1 z-10">
-              <Tooltip title={copied ? 'Copied' : 'Copy'}>
-                <IconButton
-                  onClick={() =>
-                    handleCopy(
-                      appId && aiBot.userId
-                        ? `${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`
-                        : ''
-                    )
-                  }
-                  size="small"
-                >
-                  {copied ? (
-                    <CheckIcon
-                      fontSize="small"
-                      className="text-white hover:text-gray-300"
-                    />
-                  ) : (
-                    <ContentCopyIcon
-                      fontSize="small"
-                      className="text-white hover:text-gray-300"
-                    />
-                  )}
-                </IconButton>
-              </Tooltip>
-            </div>
-            <SyntaxHighlighter
-              language="html"
-              style={oneDark}
-              customStyle={{
-                fontSize: '0.875rem',
-                background: 'transparent',
-                padding: '1rem 2.5rem 1rem 1rem',
-                margin: 0,
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'break-word',
-                wordBreak: 'break-word',
-                overflowX: 'auto',
-              }}
-              showLineNumbers={false}
-              wrapLongLines={true}
-              wrapLines={true}
-              lineProps={{
-                style: {
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word',
-                  wordBreak: 'break-word',
-                },
-              }}
-              codeTagProps={{
-                style: {
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word',
-                  wordBreak: 'break-word',
-                },
-              }}
-            >
-              {appId && aiBot.userId
-                ? `${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`
-                : ''}
-            </SyntaxHighlighter>
-          </div>
-        </TabPanel>
-      </TabContext>
-
-      <div className="font-semibold font-sans text-[16px] pt-8 pb-4">
-        Prompt
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Use to provide instructions on how the bot should behave. You may also
-        copy&paste limited data on your specific business context the bot should
-        be aware of.
-      </p>
-      <Textarea
-        className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500 mb-8"
-        placeholder="Enter prompt instructions here..."
-        value={aiBot.prompt}
-        onChange={(e) => setAiBot({ ...aiBot, prompt: e.target.value })}
+      <HeaderAIWidget
+        statusBot={statusBot}
+        handleStatusChange={handleStatusChange}
       />
 
-      <div className="font-semibold font-sans text-[16px] mb-4">
-        <span>Crawl URL (</span>
-        <button
-          onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
-        >
-          <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
-        </button>
-        <span>)</span>
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Provide your website URL(s) in order for the system to ingest data from
-        there.
-      </p>
-      <div className="flex gap-2 items-center justify-start mb-4">
-        <input
-          disabled={aiBot.siteLinks && !!aiBot.siteLinks.length}
-          type="text"
-          className={classNames(
-            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px]',
-            aiBot.siteLinks &&
-              !!aiBot.siteLinks.length &&
-              'opacity-50 cursor-not-allowed bg-gray-200'
-          )}
-          placeholder="https://example.com"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
-        <IconButton
-          disabled={aiBot.siteLinks && !!aiBot.siteLinks.length}
-          className={classNames(
-            aiBot.siteLinks &&
-              !!aiBot.siteLinks.length &&
-              'opacity-50 cursor-not-allowed bg-gray-200'
-          )}
-          aria-label="delete"
-          onClick={() => handleSiteCrawl(url)}
-        >
-          <LanguageIcon />
-        </IconButton>
-      </div>
-      {aiBot && aiBot.siteLinks && aiBot.siteLinks.length > 0 && (
-        <div
-          className="border rounded-lg"
-          style={{
-            maxHeight: '14em',
-            overflowY: aiBot.siteLinks.length > 5 ? 'auto' : 'unset',
-          }}
-        >
-          {aiBot.siteLinks.map((link, index) => (
-            <div
-              key={`${index}-${link}`}
-              className={classNames(
-                ' flex items-center justify-between hover:!bg-[#F5F7F9] p-3',
-                {
-                  '!bg-[#E7EDF9]': index % 2 === 0,
-                }
-              )}
-            >
-              <p>{link}</p>
-              <IconButton
-                aria-label="delete"
-                color="error"
-                onClick={() => {
-                  setShowNewDocModal(true);
-                  setChoseUrl(link);
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="font-semibold font-sans text-[16px] pb-4 pt-10">
-        <span> Upload documents (</span>
-        <button
-          onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
-        >
-          <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
-        </button>
-        <span>)</span>
-        <span className="text-xs text-gray-600 ml-2 p-2 border rounded-sm">
-          Available in paid plans
-        </span>
-      </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
-        Drag & Drop your documents here for the system to ingest data from
-        there. Supported formats: TXT, CSV, JSON, DOC, PDF.
-      </p>
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <div className="flex flex-col items-center">
-          <IconButton disabled>
-            <FileUploadOutlinedIcon className="h-8 w-8 text-gray-400 mb-2" />
-          </IconButton>
-          {/* <Upload className="h-8 w-8 text-gray-400 mb-2" /> */}
-          <p className="text-sm text-gray-500">Drag & Drop</p>
-        </div>
-      </div>
+      <TabAIWidget
+        value={value}
+        copied={copied}
+        scriptCode={scriptCode}
+        appId={appId}
+        userId={aiBot.userId}
+        handleChange={handleChange}
+        handleCopy={handleCopy}
+        aiBot={aiBot}
+        setAiBot={setAiBot}
+        url={url}
+        ragRef={ragRef}
+        setUrl={setUrl}
+        handleSiteCrawl={handleSiteCrawl}
+        setChoseUrl={setChoseUrl}
+        setShowNewDocModal={setShowNewDocModal}
+      />
 
       <div
         ref={ragRef}
@@ -446,7 +183,7 @@ export function AIWidget({
 
       {showNewDocModal && (
         <SourcesSiteCrawlModal
-          url={choseUrl}
+          urls={choseUrl}
           onClose={() => setShowNewDocModal(false)}
           deleteSiteCrawl={() => deleteSiteCrawl(choseUrl)}
         />

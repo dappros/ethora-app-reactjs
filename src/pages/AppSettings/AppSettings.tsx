@@ -402,23 +402,38 @@ export default function AppSettings() {
     }
   };
 
-  const deleteSiteCrawl = async (url: string) => {
-    if (!appId || !url) return;
+  const deleteSiteCrawl = async (urls: string[]) => {
+    if (!appId || !urls || urls.length === 0) return;
 
     setLoading(true);
 
     try {
-      const response = await deleteSourcesSiteCrawl(appId, url);
-      setAiBot((prev) => {
-        const updatedLinks = prev.siteLinks.filter(
-          (link) => link !== response.data.result
-        );
-        return { ...prev, siteLinks: updatedLinks };
-      });
-      toast.success('Site crawl deleted successfully');
+      const deletedLinks: string[] = [];
+
+      for (const url of urls) {
+        try {
+          const response = await deleteSourcesSiteCrawl(appId, url);
+          deletedLinks.push(response.data.result);
+        } catch (err) {
+          console.error(`Error during deletion: ${url}`, err);
+        }
+      }
+
+      if (deletedLinks.length > 0) {
+        setAiBot((prev) => {
+          const updatedLinks = prev.siteLinks.filter(
+            (link) => !deletedLinks.includes(link)
+          );
+          return { ...prev, siteLinks: updatedLinks };
+        });
+
+        toast.success('Selected links successfully deleted');
+      } else {
+        toast.warning('None of the links could be deleted.');
+      }
     } catch (error) {
-      console.error('Error deleting site crawl:', error);
-      toast.error('Failed to delete site crawl');
+      console.error('Error during bulk deletion:', error);
+      toast.error('An error occurred while deleting links');
     } finally {
       setLoading(false);
     }

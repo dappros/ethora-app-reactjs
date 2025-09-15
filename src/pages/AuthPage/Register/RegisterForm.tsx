@@ -129,8 +129,6 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const formData = new FormData(formRef.current!);
     const cfToken = formData.get('cf-turnstile-response');
 
-    console.log('data', { email, firstName, lastName, password });
-
     if (!cfToken || typeof cfToken !== 'string' || cfToken.trim() === '') {
       return;
     }
