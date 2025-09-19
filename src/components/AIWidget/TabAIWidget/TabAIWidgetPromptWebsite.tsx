@@ -81,7 +81,7 @@ export const TabAIWidgetPromptWebsite = ({
 
       {aiBot && aiBot.siteLinks && aiBot.siteLinks.length > 0 && (
         <LinksTable
-          siteLinks={aiBot.siteLinks}
+          siteLinks={aiBot.siteUrlsV2}
           handleShowDeleteModal={handleShowDeleteModal}
         />
       )}

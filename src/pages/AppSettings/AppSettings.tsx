@@ -616,7 +616,7 @@ export default function AppSettings() {
           {tabsMemo}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
-          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full ">
+          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-hidden">
             <AIWidget
               appId={appId as string}
               aiBot={aiBot}

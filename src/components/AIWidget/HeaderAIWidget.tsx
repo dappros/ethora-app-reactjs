@@ -55,7 +55,7 @@ export const HeaderAIWidget = ({
       <Box>
         <div className="font-semibold font-sans text-[16px] mb-4">Model</div>
         <p className="font-sans text-sm pb-4 flex items-center gap-1">
-          Open GPT-5
+          Open GPT-4o-mini
         </p>
       </Box>
     </Box>

@@ -124,9 +124,9 @@ export async function singin() {
 
 export function httpGetConfig(domainName?: string) {
   let path = '/apps/get-config';
-  if (domainName) {
-    path += `?domainName=${domainName}`;
-  }
+  // if (domainName) {
+  //   path += `?domainName=${domainName}`;
+  // }
 
   return http.get(path);
 }

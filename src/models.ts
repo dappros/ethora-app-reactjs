@@ -38,6 +38,12 @@ export interface ModelAppDefaulRooom {
   chatId: string;
 }
 
+export interface SiteLinks {
+  url: string;
+  mdByteSize: number;
+  md: string;
+}
+
 export interface ModelAIbot {
     userId: string;
     chatId: string;
@@ -46,6 +52,7 @@ export interface ModelAIbot {
     trigger: string;
     prompt: string;
     siteLinks: Array<string>;
+    siteUrlsV2: Array<SiteLinks>;
     user: {
       _id: string;
       firstName: string;

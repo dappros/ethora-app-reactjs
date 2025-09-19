@@ -42,7 +42,7 @@ const MemoizedChat = React.memo(function ChatComponent({
         // @ts-ignorex
         customAppToken: appToken,
         newArch: true,
-        qrUrl: 'https://beta.ethora.com/app/chat/?qrChatId=',
+        qrUrl: 'https://app.ethora.com/app/chat/?qrChatId=',
         xmppSettings: {
           devServer: VITE_APP_XMPP_SERVICE,
           host: VITE_XMPP_HOST,
