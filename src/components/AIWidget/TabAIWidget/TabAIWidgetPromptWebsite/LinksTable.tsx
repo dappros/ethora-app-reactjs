@@ -1,10 +1,10 @@
+import { Dialog, DialogPanel } from '@headlessui/react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
   Checkbox,
   IconButton,
-  Modal,
   Paper,
   Table,
   TableBody,
@@ -18,6 +18,8 @@ import {
 } from '@mui/material';
 import React, { ReactElement, useMemo, useState } from 'react';
 import { SiteLinks } from '../../../../models';
+import { MarkDown } from '../../../../utils/MarkDown';
+import { IconClose } from '../../../Icons/IconClose';
 
 interface EnhancedTableProps {
   siteLinks: SiteLinks[];
@@ -44,8 +46,8 @@ export const LinksTable = ({
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const allVisible = visibleRows.map((_, idx) => idx + page * rowsPerPage);
-      setSelectedIndexes(allVisible);
+      const allIndexes = siteLinks.map((_, idx) => idx);
+      setSelectedIndexes(allIndexes);
     } else {
       setSelectedIndexes([]);
     }
@@ -124,11 +126,11 @@ export const LinksTable = ({
                     color="primary"
                     indeterminate={
                       selectedIndexes.length > 0 &&
-                      selectedIndexes.length < visibleRows.length
+                      selectedIndexes.length < siteLinks.length
                     }
                     checked={
-                      visibleRows.length > 0 &&
-                      selectedIndexes.length === visibleRows.length
+                      siteLinks.length > 0 &&
+                      selectedIndexes.length === siteLinks.length
                     }
                     onChange={handleSelectAllClick}
                   />
@@ -244,39 +246,34 @@ export const LinksTable = ({
         />
       </Paper>
 
-      <Modal
+      <Dialog
+        className="fixed inset-0 flex justify-center items-center bg-black/30 z-[9999]"
         open={openMdModal}
         onClose={handleCloseMd}
-        aria-labelledby="md-preview-title"
-        aria-describedby="md-preview-content"
       >
-        <Box
-          sx={{
-            position: 'absolute' as const,
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 600,
-            bgcolor: 'background.paper',
-            border: '2px solid #5f5f5f',
-            boxShadow: 24,
-            p: 4,
-            maxHeight: '80vh',
-            overflow: 'auto',
-          }}
-        >
-          <Typography id="md-preview-title" variant="h6" component="h2">
+        <DialogPanel className="p-6 bg-white rounded-2xl relative w-full max-w-[640px] m-4 max-h-[80%] flex flex-col">
+          <div className="text-xl font-semibold text-center mb-4">
             Markdown Preview
-          </Typography>
-          <Typography
-            id="md-preview-content"
-            variant="body2"
-            sx={{ whiteSpace: 'pre-wrap', mt: 2 }}
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2">
+            <Typography
+              id="md-preview-content"
+              variant="body2"
+              sx={{ whiteSpace: 'pre-wrap' }}
+            >
+              {MarkDown(currentMd)}
+            </Typography>
+          </div>
+
+          <button
+            className="absolute top-[20px] right-[20px]"
+            onClick={handleCloseMd}
           >
-            {currentMd}
-          </Typography>
-        </Box>
-      </Modal>
+            <IconClose />
+          </button>
+        </DialogPanel>
+      </Dialog>
     </Box>
   );
 };

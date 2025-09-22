@@ -1,5 +1,11 @@
-import {useCallback, useEffect, useState} from 'react';
-import {NavLink, Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { httpGetApp } from '../http';
 import { useAppStore } from '../store/useAppStore';
@@ -20,7 +26,7 @@ export default function AdminApp() {
   }, [location.state?.from, navigate]);
 
   useEffect(() => {
-    if (!appId || app) return;
+    if (!appId) return;
 
     const getApp = async () => {
       try {
@@ -33,10 +39,12 @@ export default function AdminApp() {
     };
 
     getApp();
-  }, [appId, app, doSetApp]);
+  }, [appId, doSetApp]);
 
   if (!isValidApp) {
-    return <Error404Page navigateUrl={location.state?.from || "/app/admin/apps/"} />;
+    return (
+      <Error404Page navigateUrl={location.state?.from || '/app/admin/apps/'} />
+    );
   }
 
   return (
@@ -44,10 +52,7 @@ export default function AdminApp() {
     <div className="h-full  grid grid-rows-[auto,_1fr]">
       <div className="mb-4 flex md:flex-row flex-col md:justify-between">
         <div className="flex mb-4 md:mb-0">
-          <button
-            className="ml-[5px] md:mb-0 mr-[13px]"
-            onClick={goBack}
-          >
+          <button className="ml-[5px] md:mb-0 mr-[13px]" onClick={goBack}>
             <IconArrowLeft />
           </button>
 

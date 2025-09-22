@@ -7,11 +7,13 @@ const DISABLED = true;
 
 interface HeaderAIWidgetProps {
   statusBot?: boolean;
+  size: string | null;
   handleStatusChange?: () => void;
 }
 
 export const HeaderAIWidget = ({
   statusBot,
+  size,
   handleStatusChange,
 }: HeaderAIWidgetProps): ReactElement => {
   return (
@@ -39,7 +41,7 @@ export const HeaderAIWidget = ({
           Local context
         </div>
         <p className="font-sans text-sm pb-4 flex items-center gap-1">
-          RAG enabled {'(25 Mb)'}
+          RAG enabled {size ? `- ${size} MB` : '0 MB'}
         </p>
         <button
           disabled

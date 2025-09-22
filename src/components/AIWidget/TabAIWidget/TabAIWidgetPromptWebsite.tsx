@@ -2,8 +2,14 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LanguageIcon from '@mui/icons-material/Language';
 import { Box, IconButton } from '@mui/material';
 import classNames from 'classnames';
-import { ReactElement, RefObject, SetStateAction } from 'react';
-import { ModelAIbot } from '../../../models';
+import {
+  ReactElement,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
+import { ModelAIbot, SiteLinks } from '../../../models';
 import { LinksTable } from './TabAIWidgetPromptWebsite/LinksTable';
 
 interface TabAIWidgetPromptWebsiteProps {
@@ -12,7 +18,8 @@ interface TabAIWidgetPromptWebsiteProps {
   url: string;
   setUrl: (url: string) => void;
   handleSiteCrawl: (url: string) => void;
-  setChoseUrl: (value: SetStateAction<string[]>) => void;
+  loadingTextCrawl?: boolean;
+  setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
   setShowNewDocModal: (value: SetStateAction<boolean>) => void;
 }
 
@@ -24,11 +31,20 @@ export const TabAIWidgetPromptWebsite = ({
   handleSiteCrawl,
   setChoseUrl,
   setShowNewDocModal,
+  loadingTextCrawl,
 }: TabAIWidgetPromptWebsiteProps): ReactElement => {
-  const handleShowDeleteModal = (links: string[]) => {
+  const [disabled, setDisabled] = useState<boolean>(false);
+
+  const handleShowDeleteModal = (links: SiteLinks[]) => {
     setShowNewDocModal(true);
     setChoseUrl(links);
   };
+
+  useEffect(() => {
+    return aiBot.siteUrlsV2.some((link) => link.url === url)
+      ? setDisabled(true)
+      : setDisabled(false);
+  }, [aiBot.siteUrlsV2, url]);
 
   return (
     <>
@@ -46,32 +62,33 @@ export const TabAIWidgetPromptWebsite = ({
         Provide your website URL(s) in order for the system to ingest data from
         there.
       </p>
-      <Box className="flex gap-2 items-center justify-start mb-4">
-        <input
-          disabled={aiBot.siteLinks && !!aiBot.siteLinks.length}
-          type="text"
-          className={classNames(
-            'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px]',
-            aiBot.siteLinks &&
-              !!aiBot.siteLinks.length &&
-              'opacity-50 cursor-not-allowed bg-gray-200'
-          )}
-          placeholder="https://example.com"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
-        <IconButton
-          disabled={aiBot.siteLinks && !!aiBot.siteLinks.length}
-          className={classNames(
-            aiBot.siteLinks &&
-              !!aiBot.siteLinks.length &&
-              'opacity-50 cursor-not-allowed bg-gray-200'
-          )}
-          aria-label="delete"
-          onClick={() => handleSiteCrawl(url)}
-        >
-          <LanguageIcon />
-        </IconButton>
+      <Box className="flex lg:flex-row flex-col gap-4 lg:gap-2 lg:items-center justify-start mb-8">
+        <Box className="flex gap-2 items-center justify-start">
+          <input
+            type="text"
+            className={classNames(
+              'w-[300px] py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px]'
+            )}
+            placeholder="https://example.com"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <IconButton
+            disabled={disabled}
+            className={classNames(
+              disabled && 'opacity-50 cursor-not-allowed bg-gray-200'
+            )}
+            aria-label="delete"
+            onClick={() => handleSiteCrawl(url)}
+          >
+            <LanguageIcon />
+          </IconButton>
+        </Box>
+        {loadingTextCrawl && (
+          <Box className="text-gray-600 font-medium animate-pulse">
+            Indexing in progress, please wait or come back later...
+          </Box>
+        )}
       </Box>
 
       {/* <Box className="flex items-center gap-2 pb-6">

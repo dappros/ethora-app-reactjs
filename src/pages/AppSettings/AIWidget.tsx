@@ -7,7 +7,7 @@ import { Box } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
 import { httpUpdateApp } from '../../http';
-import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
+import { ModelAIbot, ModelAppDefaulRooom, SiteLinks } from '../../models';
 
 import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
 import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
@@ -50,6 +50,7 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>;
   primaryColor: string;
   isDisabled: boolean;
+  loadingTextCrawl?: boolean;
   handleSiteCrawl: (url: string) => void;
   deleteSiteCrawl: (url: string[]) => void;
 }
@@ -60,6 +61,7 @@ export function AIWidget({
   setAiBot,
   handleSiteCrawl,
   deleteSiteCrawl,
+  loadingTextCrawl,
 }: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
@@ -68,7 +70,7 @@ export function AIWidget({
   const [value, setValue] = useState('1');
 
   const [url, setUrl] = useState<string>('');
-  const [choseUrl, setChoseUrl] = useState<string[]>([]);
+  const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
   // const [scriptCode , setScriptCode] = useState<string>('');
   const user = createAnonymousXmppCredentials();
 
@@ -119,6 +121,16 @@ export function AIWidget({
     });
   };
 
+  const size = useMemo(() => {
+    if (!aiBot.siteUrlsV2 || !aiBot.siteUrlsV2.length) {
+      return null;
+    }
+    return (
+      aiBot.siteUrlsV2.reduce((sum, l) => sum + l.mdByteSize, 0) /
+      (1024 * 1024)
+    ).toFixed(2);
+  }, [aiBot.siteUrlsV2]);
+
   useEffect(() => {
     if (aiBot.status) {
       setStatusBot(statusAiBot[aiBot.status]);
@@ -126,10 +138,10 @@ export function AIWidget({
   }, [aiBot.status]);
 
   useEffect(() => {
-    if (aiBot.siteLinks && !!aiBot.siteLinks.length) {
-      setUrl(aiBot.siteLinks[0]);
+    if (aiBot.siteUrlsV2 && !!aiBot.siteUrlsV2.length) {
+      setUrl(aiBot.siteUrlsV2[0].url);
     }
-  }, [aiBot.siteLinks]);
+  }, [aiBot.siteUrlsV2]);
 
   useEffect(() => {
     setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
@@ -140,6 +152,7 @@ export function AIWidget({
       <HeaderAIWidget
         statusBot={statusBot}
         handleStatusChange={handleStatusChange}
+        size={size}
       />
 
       <TabAIWidget
@@ -158,6 +171,7 @@ export function AIWidget({
         handleSiteCrawl={handleSiteCrawl}
         setChoseUrl={setChoseUrl}
         setShowNewDocModal={setShowNewDocModal}
+        loadingTextCrawl={loadingTextCrawl}
       />
 
       <div
@@ -185,7 +199,7 @@ export function AIWidget({
         <SourcesSiteCrawlModal
           urls={choseUrl}
           onClose={() => setShowNewDocModal(false)}
-          deleteSiteCrawl={() => deleteSiteCrawl(choseUrl)}
+          deleteSiteCrawl={deleteSiteCrawl}
         />
       )}
 

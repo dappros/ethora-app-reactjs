@@ -124,9 +124,9 @@ export async function singin() {
 
 export function httpGetConfig(domainName?: string) {
   let path = '/apps/get-config';
-  // if (domainName) {
-  //   path += `?domainName=${domainName}`;
-  // }
+  if (domainName) {
+    path += `?domainName=${domainName}`;
+  }
 
   return http.get(path);
 }
@@ -551,6 +551,14 @@ export function deleteSourcesSiteCrawl(appId: string, url: string) {
   return http.delete(`/sources/site-crawl/url/${appId}`, {
     data: {
       url
+    }
+  });
+}
+
+export function deleteSourcesSiteCrawlV2(appId: string, urls: string[]) {
+  return http.delete(`/sources/site-crawl-v2/url/${appId}`, {
+    data: {
+      urls
     }
   });
 }

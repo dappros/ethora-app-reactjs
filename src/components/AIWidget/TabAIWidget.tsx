@@ -7,7 +7,7 @@ import {
   SyntheticEvent,
   useState,
 } from 'react';
-import { ModelAIbot } from '../../models';
+import { ModelAIbot, SiteLinks } from '../../models';
 import { TabAIWidgetCode } from './TabAIWidget/TabAIWidgetCode';
 import { TabAIWidgetDocument } from './TabAIWidget/TabAIWidgetDocument';
 import { TabAIWidgetPrompt } from './TabAIWidget/TabAIWidgetPrompt';
@@ -22,12 +22,13 @@ interface TabAIWidgetProps {
   userId?: string;
   url: string;
   ragRef: RefObject<HTMLDivElement>;
+  loadingTextCrawl?: boolean;
   setAiBot: (aiBot: ModelAIbot) => void;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
   handleCopy: (text: string) => void;
   setUrl: (url: string) => void;
   handleSiteCrawl: (url: string) => void;
-  setChoseUrl: (value: SetStateAction<string[]>) => void;
+  setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
   setShowNewDocModal: (value: SetStateAction<boolean>) => void;
 }
 
@@ -47,6 +48,7 @@ export const TabAIWidget = ({
   handleSiteCrawl,
   setChoseUrl,
   setShowNewDocModal,
+  loadingTextCrawl,
 }: TabAIWidgetProps): ReactElement => {
   const [valueTabs, setValueTabs] = useState('1');
 
@@ -87,6 +89,7 @@ export const TabAIWidget = ({
           handleSiteCrawl={handleSiteCrawl}
           setChoseUrl={setChoseUrl}
           setShowNewDocModal={setShowNewDocModal}
+          loadingTextCrawl={loadingTextCrawl}
         />
       </TabPanel>
       <TabPanel value="4">

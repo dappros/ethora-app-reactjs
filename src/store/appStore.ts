@@ -68,7 +68,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   doSetApp: (app) => {
     set((s) => {
       if(s.apps.some((ap) => ap._id === app._id)) {
-        return;
+        s.apps = s.apps.map((ap) => ap._id === app._id ? app : ap);
       }
       s.apps = [...s.apps, app];
     });

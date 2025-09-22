@@ -1,10 +1,11 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { IconClose } from '../Icons/IconClose';
 
+import { SiteLinks } from '../../models';
 import './CreateDocumentModal.scss';
 
 interface Props {
-  urls: string[];
+  urls: SiteLinks[];
   onClose: () => void;
   deleteSiteCrawl: (url: string[]) => void;
 }
@@ -16,7 +17,7 @@ export function SourcesSiteCrawlModal({
 }: Props) {
   return (
     <Dialog
-      className="fixed inset-0 flex justify-center items-center bg-black/30"
+      className="fixed inset-0 flex justify-center items-center bg-black/30 z-[9999]"
       open={true}
       onClose={onClose}
     >
@@ -29,9 +30,9 @@ export function SourcesSiteCrawlModal({
           <div className="max-h-48 overflow-y-auto w-full px-4">
             <span className="block mb-2 font-medium text-center">Delete:</span>
             {urls &&
-              urls.map((url) => (
-                <p key={url} className="text-sm break-all">
-                  {url}
+              urls.map((urlOb) => (
+                <p key={urlOb.id} className="text-sm break-all">
+                  {urlOb.url}
                 </p>
               ))}
           </div>
@@ -46,7 +47,7 @@ export function SourcesSiteCrawlModal({
           </button>
           <button
             onClick={() => {
-              deleteSiteCrawl(urls);
+              deleteSiteCrawl(urls.map((url) => url.id));
               onClose();
             }}
             className="w-full hover:bg-red-700 py-[12px] rounded-xl bg-red-600 text-white"

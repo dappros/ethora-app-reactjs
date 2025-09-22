@@ -39,6 +39,8 @@ export interface ModelAppDefaulRooom {
 }
 
 export interface SiteLinks {
+  createdAt: string;
+  id: string;
   url: string;
   mdByteSize: number;
   md: string;

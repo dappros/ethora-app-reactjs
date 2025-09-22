@@ -19,11 +19,16 @@ import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
 import {
   deleteApp,
-  deleteSourcesSiteCrawl,
+  deleteSourcesSiteCrawlV2,
   httpUpdateOneUser,
   setSourcesSiteCrawl,
 } from '../../http';
-import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
+import {
+  ModelAIbot,
+  ModelApp,
+  ModelAppDefaulRooom,
+  SiteLinks,
+} from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIWidget } from './AIWidget';
 import { Api } from './Api';
@@ -96,6 +101,7 @@ export default function AppSettings() {
   };
 
   const [loading, setLoading] = useState(false);
+  const [loadingTextCrawl, setLoadingTextCrawl] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
   const [initialState, setInitialState] = useState({});
@@ -384,21 +390,26 @@ export default function AppSettings() {
   const handleSiteCrawl = async (url: string) => {
     if (!appId || !url) return;
 
-    setLoading(true);
+    setLoadingTextCrawl(true);
 
     try {
       const response = await setSourcesSiteCrawl(appId, url);
       setAiBot((prev) => {
-        const combined = [...prev.siteLinks, ...response.data.result];
-        const uniqueLinks = Array.from(new Set(combined));
-        return { ...prev, siteLinks: uniqueLinks };
+        const combined = [
+          ...prev.siteUrlsV2,
+          ...(response.data.resultV2 as SiteLinks[]),
+        ];
+        const uniqueById: SiteLinks[] = Array.from(
+          new Map(combined.map((item) => [item.id, item])).values()
+        );
+        return { ...prev, siteUrlsV2: uniqueById };
       });
       toast.success('Site crawl set successfully');
     } catch (error) {
       console.error('Error setting site crawl:', error);
       toast.error('Failed to set site crawl');
     } finally {
-      setLoading(false);
+      setLoadingTextCrawl(false);
     }
   };
 
@@ -408,23 +419,20 @@ export default function AppSettings() {
     setLoading(true);
 
     try {
-      const deletedLinks: string[] = [];
+      const deletedIds: string[] = [];
 
-      for (const url of urls) {
-        try {
-          const response = await deleteSourcesSiteCrawl(appId, url);
-          deletedLinks.push(response.data.result);
-        } catch (err) {
-          console.error(`Error during deletion: ${url}`, err);
-        }
+      const response = await deleteSourcesSiteCrawlV2(appId, urls);
+
+      if (response.data.result.acknowledged) {
+        deletedIds.push(...urls);
       }
 
-      if (deletedLinks.length > 0) {
+      if (deletedIds.length > 0) {
         setAiBot((prev) => {
-          const updatedLinks = prev.siteLinks.filter(
-            (link) => !deletedLinks.includes(link)
+          const updatedLinks = prev.siteUrlsV2.filter(
+            (item) => !deletedIds.includes(item.id)
           );
-          return { ...prev, siteLinks: updatedLinks };
+          return { ...prev, siteUrlsV2: updatedLinks };
         });
 
         toast.success('Selected links successfully deleted');
@@ -616,7 +624,10 @@ export default function AppSettings() {
           {tabsMemo}
         </TabList>
         <TabPanels className="h-full overflow-hidden">
-          <TabPanel key="AI bot" className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-hidden">
+          <TabPanel
+            key="AI bot"
+            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-hidden"
+          >
             <AIWidget
               appId={appId as string}
               aiBot={aiBot}
@@ -626,6 +637,7 @@ export default function AppSettings() {
               isDisabled={app?.creatorId !== currentUser?._id}
               handleSiteCrawl={handleSiteCrawl}
               deleteSiteCrawl={deleteSiteCrawl}
+              loadingTextCrawl={loadingTextCrawl}
             />
           </TabPanel>
 
