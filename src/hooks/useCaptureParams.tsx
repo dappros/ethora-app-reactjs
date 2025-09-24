@@ -1,46 +1,36 @@
 import { useEffect } from 'react';
 
 interface Params {
-  [key: string]: string;
+  utm_ref?: string;
+  first_page?: string;
+  device_type?: string;
 }
 
-const searchEngines: { [key: string]: string } = {
-  'google.': 'Google',
-  'bing.': 'Bing',
-  'yahoo.': 'Yahoo',
-  'duckduckgo.': 'DuckDuckGo',
-  'yandex.': 'Yandex',
-  'baidu.': 'Baidu',
-};
-
-export const useCaptureParams = (paramNames: string[] = []) => {
+export const useCaptureParams = () => {
   useEffect(() => {
     const hasCapturedParams = localStorage.getItem('hasCapturedParams');
-    if (hasCapturedParams) {
-      return;
-    }
+    if (hasCapturedParams) return;
 
     const urlParams = new URLSearchParams(window.location.search);
     const params: Params = {};
 
-    const paramsToCapture =
-      paramNames.length > 0 ? paramNames : Array.from(urlParams.keys());
+    const utmRef = urlParams.get('utm_ref');
+    if (utmRef) {
+      params.utm_ref = utmRef;
+    }
 
-    paramsToCapture.forEach((param) => {
-      const value = urlParams.get(param);
-      if (value) {
-        params[param] = value;
+    const firstPage = urlParams.get('first_page');
+    if (firstPage) {
+      try {
+        params.first_page = decodeURIComponent(firstPage);
+      } catch {
+        params.first_page = firstPage;
       }
-    });
+    }
 
-    if (Object.keys(params).length === 0 && document.referrer) {
-      const referrer = document.referrer;
-      const searchEngine = Object.entries(searchEngines).find(([key]) =>
-        referrer.includes(key)
-      );
-      if (searchEngine) {
-        params['utm_ref'] = searchEngine[1];
-      }
+    const deviceType = urlParams.get('device_type');
+    if (deviceType) {
+      params.device_type = deviceType;
     }
 
     if (Object.keys(params).length > 0) {
