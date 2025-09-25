@@ -2,6 +2,7 @@ import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import { ReactElement, RefObject } from 'react';
+import { Rag } from '../rag';
 
 interface TabAIWidgetDocumentProps {
   ragRef: RefObject<HTMLDivElement>;
@@ -38,6 +39,8 @@ export const TabAIWidgetDocument = ({
           <p className="text-sm text-gray-500">Drag & Drop</p>
         </div>
       </div>
+
+      <Rag ragRef={ragRef} />
     </>
   );
 };

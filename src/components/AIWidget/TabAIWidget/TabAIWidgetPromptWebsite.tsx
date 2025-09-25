@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 import { ModelAIbot, SiteLinks } from '../../../models';
+import { Rag } from '../rag';
 import { LinksTable } from './TabAIWidgetPromptWebsite/LinksTable';
 
 interface TabAIWidgetPromptWebsiteProps {
@@ -21,6 +22,7 @@ interface TabAIWidgetPromptWebsiteProps {
   loadingTextCrawl?: boolean;
   setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
   setShowNewDocModal: (value: SetStateAction<boolean>) => void;
+  handleCrawlReindex: (id: string) => void;
 }
 
 export const TabAIWidgetPromptWebsite = ({
@@ -32,6 +34,7 @@ export const TabAIWidgetPromptWebsite = ({
   setChoseUrl,
   setShowNewDocModal,
   loadingTextCrawl,
+  handleCrawlReindex,
 }: TabAIWidgetPromptWebsiteProps): ReactElement => {
   const [disabled, setDisabled] = useState<boolean>(false);
 
@@ -94,14 +97,17 @@ export const TabAIWidgetPromptWebsite = ({
       {/* <Box className="flex items-center gap-2 pb-6">
         <Checkbox defaultChecked />
         <p className="font-sans text-sm">Follow link</p>
-      </Box> */}
+        </Box> */}
 
       {aiBot && aiBot.siteLinks && aiBot.siteLinks.length > 0 && (
         <LinksTable
           siteLinks={aiBot.siteUrlsV2}
           handleShowDeleteModal={handleShowDeleteModal}
+          handleCrawlReindex={handleCrawlReindex}
         />
       )}
+
+      <Rag ragRef={ragRef} />
     </>
   );
 };

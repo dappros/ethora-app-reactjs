@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreIcon from '@mui/icons-material/Restore';
 import {
   Box,
   Button,
@@ -24,21 +25,25 @@ import { IconClose } from '../../../Icons/IconClose';
 interface EnhancedTableProps {
   siteLinks: SiteLinks[];
   handleShowDeleteModal: (links: SiteLinks[]) => void;
+  handleCrawlReindex: (id: string) => void;
 }
 
 export const LinksTable = ({
   siteLinks,
   handleShowDeleteModal,
+  handleCrawlReindex,
 }: EnhancedTableProps): ReactElement => {
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [openMdModal, setOpenMdModal] = useState(false);
   const [currentMd, setCurrentMd] = useState<string>('');
 
   const visibleRows = useMemo(
-    () => siteLinks.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    () =>
+      siteLinks &&
+      siteLinks.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
     [siteLinks, page, rowsPerPage]
   );
 
@@ -117,7 +122,7 @@ export const LinksTable = ({
           <Table
             size="medium"
             stickyHeader
-            sx={{ minWidth: 650, tableLayout: 'fixed', width: '100%' }}
+            sx={{ minWidth: 700, tableLayout: 'fixed', width: '100%' }}
           >
             <TableHead>
               <TableRow>
@@ -129,6 +134,7 @@ export const LinksTable = ({
                       selectedIndexes.length < siteLinks.length
                     }
                     checked={
+                      siteLinks &&
                       siteLinks.length > 0 &&
                       selectedIndexes.length === siteLinks.length
                     }
@@ -164,6 +170,10 @@ export const LinksTable = ({
                   Preview
                 </TableCell>
 
+                <TableCell align="center" sx={{ width: 100 }}>
+                  Reindex
+                </TableCell>
+
                 <TableCell align="right" sx={{ width: 72 }}>
                   {selectedIndexes.length > 0 && (
                     <Tooltip title="Delete chosen links">
@@ -177,60 +187,67 @@ export const LinksTable = ({
             </TableHead>
 
             <TableBody>
-              {visibleRows.map((link, idxInPage) => {
-                const globalIndex = page * rowsPerPage + idxInPage;
-                const isItemSelected = selectedIndexes.includes(globalIndex);
+              {visibleRows &&
+                visibleRows.map((link, idxInPage) => {
+                  const globalIndex = page * rowsPerPage + idxInPage;
+                  const isItemSelected = selectedIndexes.includes(globalIndex);
 
-                return (
-                  <TableRow
-                    hover
-                    key={globalIndex}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell padding="checkbox" sx={{ width: 56 }}>
-                      <Checkbox
-                        checked={isItemSelected}
-                        onClick={() => handleClick(globalIndex)}
-                      />
-                    </TableCell>
-
-                    <TableCell
-                      sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
+                  return (
+                    <TableRow
+                      hover
+                      key={globalIndex}
+                      selected={isItemSelected}
+                      sx={{ cursor: 'pointer' }}
                     >
-                      <Typography variant="body2">
-                        <a
-                          className="text-blue-500"
-                          href={link.url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {link.url}
-                        </a>
-                      </Typography>
-                    </TableCell>
+                      <TableCell padding="checkbox" sx={{ width: 56 }}>
+                        <Checkbox
+                          checked={isItemSelected}
+                          onClick={() => handleClick(globalIndex)}
+                        />
+                      </TableCell>
 
-                    <TableCell
-                      align="left"
-                      sx={{ width: 120, whiteSpace: 'nowrap' }}
-                    >
-                      {(link.mdByteSize / (1024 * 1024)).toFixed(2)}
-                    </TableCell>
-
-                    <TableCell align="center" sx={{ width: 100 }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleOpenMd(link.md)}
+                      <TableCell
+                        sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                       >
-                        md
-                      </Button>
-                    </TableCell>
+                        <Typography variant="body2">
+                          <a
+                            className="text-blue-500"
+                            href={link.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {link.url}
+                          </a>
+                        </Typography>
+                      </TableCell>
 
-                    <TableCell sx={{ padding: '0 4px' }} />
-                  </TableRow>
-                );
-              })}
+                      <TableCell
+                        align="left"
+                        sx={{ width: 120, whiteSpace: 'nowrap' }}
+                      >
+                        {(link.mdByteSize / (1024 * 1024)).toFixed(2)}
+                      </TableCell>
+
+                      <TableCell align="center" sx={{ width: 100 }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleOpenMd(link.md)}
+                        >
+                          md
+                        </Button>
+                      </TableCell>
+
+                      <TableCell align="center" sx={{ width: 100 }}>
+                        <IconButton onClick={() => handleCrawlReindex(link.id)}>
+                          <RestoreIcon color="primary" />
+                        </IconButton>
+                      </TableCell>
+
+                      <TableCell sx={{ padding: '0 4px' }} />
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
         </TableContainer>

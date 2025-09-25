@@ -547,6 +547,12 @@ export function setSourcesSiteCrawl(appId: string, url: string) {
   });
 }
 
+export function setSourcesSiteCrawlReindex(appId: string, urlId: string) {
+  return http.post(`/sources/site-crawl-reindex/${appId}`, {
+    urlId
+  });
+}
+
 export function deleteSourcesSiteCrawl(appId: string, url: string) {
   return http.delete(`/sources/site-crawl/url/${appId}`, {
     data: {

@@ -40,6 +40,7 @@ export interface ModelAppDefaulRooom {
 
 export interface SiteLinks {
   createdAt: string;
+  updatedAt?: string;
   id: string;
   url: string;
   mdByteSize: number;
@@ -51,6 +52,7 @@ export interface ModelAIbot {
     chatId: string;
     status: "on" | "off";
     greetingMessage: string;
+    isRAG: boolean;
     trigger: string;
     prompt: string;
     siteLinks: Array<string>;

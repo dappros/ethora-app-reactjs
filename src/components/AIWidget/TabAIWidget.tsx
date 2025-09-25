@@ -30,6 +30,7 @@ interface TabAIWidgetProps {
   handleSiteCrawl: (url: string) => void;
   setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
   setShowNewDocModal: (value: SetStateAction<boolean>) => void;
+  handleCrawlReindex: (id: string) => void;
 }
 
 export const TabAIWidget = ({
@@ -49,6 +50,7 @@ export const TabAIWidget = ({
   setChoseUrl,
   setShowNewDocModal,
   loadingTextCrawl,
+  handleCrawlReindex,
 }: TabAIWidgetProps): ReactElement => {
   const [valueTabs, setValueTabs] = useState('1');
 
@@ -90,6 +92,7 @@ export const TabAIWidget = ({
           setChoseUrl={setChoseUrl}
           setShowNewDocModal={setShowNewDocModal}
           loadingTextCrawl={loadingTextCrawl}
+          handleCrawlReindex={handleCrawlReindex}
         />
       </TabPanel>
       <TabPanel value="4">

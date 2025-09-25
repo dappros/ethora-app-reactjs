@@ -22,6 +22,7 @@ import {
   deleteSourcesSiteCrawlV2,
   httpUpdateOneUser,
   setSourcesSiteCrawl,
+  setSourcesSiteCrawlReindex,
 } from '../../http';
 import {
   ModelAIbot,
@@ -154,6 +155,13 @@ export default function AppSettings() {
   const [defaultChatRooms, setDefaultChatRooms] = useState<
     Array<ModelAppDefaulRooom>
   >([]);
+
+  const handleRagChange = () => {
+    setAiBot({
+      ...aiBot,
+      isRAG: !aiBot.isRAG,
+    });
+  };
 
   const checkIfModified = () => {
     const currentState = {
@@ -332,6 +340,7 @@ export default function AppSettings() {
       body.botGreetingMessage = aiBot.greetingMessage;
       body.botTrigger = aiBot.trigger;
       body.botChatId = aiBot.chatId;
+      body.botIsRAG = aiBot.isRAG;
     }
 
     if (
@@ -384,6 +393,33 @@ export default function AppSettings() {
         });
         setIsModified(false);
       });
+    }
+  };
+
+  const handleCrawlReindex = async (id: string) => {
+    if (!appId || !id || !app) return;
+
+    setLoading(true);
+
+    try {
+      const response = await setSourcesSiteCrawlReindex(appId, id);
+      const data = response.data.result as SiteLinks;
+
+      setAiBot((prev) => ({
+        ...prev,
+        siteUrlsV2: prev.siteUrlsV2.map((link) =>
+          link.id === data.id ? data : link
+        ),
+      }));
+
+      toast.success(
+        `link ${aiBot.siteUrlsV2.filter((link) => link.id === data.id)[0].url} successfully reindexed`
+      );
+    } catch (error) {
+      console.error('Error reindex site crawl:', error);
+      toast.error('Failed to reindex site crawl');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -635,9 +671,11 @@ export default function AppSettings() {
               defaultChatRooms={defaultChatRooms}
               primaryColor={app.primaryColor}
               isDisabled={app?.creatorId !== currentUser?._id}
+              handleRagChange={handleRagChange}
               handleSiteCrawl={handleSiteCrawl}
               deleteSiteCrawl={deleteSiteCrawl}
               loadingTextCrawl={loadingTextCrawl}
+              handleCrawlReindex={handleCrawlReindex}
             />
           </TabPanel>
 
