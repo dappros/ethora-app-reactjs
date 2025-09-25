@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react';
 import { ModelAIbot, SiteLinks } from '../../../models';
-import { Rag } from '../rag';
+import { Rag } from '../Rag';
 import { LinksTable } from './TabAIWidgetPromptWebsite/LinksTable';
 
 interface TabAIWidgetPromptWebsiteProps {

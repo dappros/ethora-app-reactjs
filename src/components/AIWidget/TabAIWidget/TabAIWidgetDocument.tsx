@@ -2,7 +2,7 @@ import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import { ReactElement, RefObject } from 'react';
-import { Rag } from '../rag';
+import { Rag } from '../Rag';
 
 interface TabAIWidgetDocumentProps {
   ragRef: RefObject<HTMLDivElement>;
