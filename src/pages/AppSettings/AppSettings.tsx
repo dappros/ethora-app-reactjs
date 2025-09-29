@@ -408,7 +408,7 @@ export default function AppSettings() {
       setAiBot((prev) => ({
         ...prev,
         siteUrlsV2: prev.siteUrlsV2.map((link) =>
-          link.id === data.id ? { ...data, url: link.url } : link
+          link.id === data.id ? data : link
         ),
       }));
 

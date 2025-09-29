@@ -110,6 +110,7 @@ export interface ModelApp {
     recentlyIssuance: number;
     recentlyRegistered: number;
     recentlySessions: number;
+    recentlyTokens: number;
     recentlyTransactions: number;
     totalApiCalls: number;
     totalFiles: number;
@@ -118,6 +119,7 @@ export interface ModelApp {
     totalSessions: number;
     totalTransactions: number;
     totalChats: number;
+    totalTokens: number;
     recentlyChats: number;
   };
   systemChatAccount: {
