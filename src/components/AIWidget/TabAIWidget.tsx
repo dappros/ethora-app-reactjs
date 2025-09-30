@@ -16,8 +16,6 @@ import { TabAIWidgetPromptWebsite } from './TabAIWidget/TabAIWidgetPromptWebsite
 interface TabAIWidgetProps {
   aiBot: ModelAIbot;
   value: string;
-  copied?: boolean;
-  scriptCode: string;
   appId?: string;
   userId?: string;
   url: string;
@@ -25,7 +23,6 @@ interface TabAIWidgetProps {
   loadingTextCrawl?: boolean;
   setAiBot: (aiBot: ModelAIbot) => void;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
-  handleCopy: (text: string) => void;
   setUrl: (url: string) => void;
   handleSiteCrawl: (url: string) => void;
   setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
@@ -35,8 +32,6 @@ interface TabAIWidgetProps {
 
 export const TabAIWidget = ({
   value,
-  copied,
-  scriptCode,
   appId,
   userId,
   aiBot,
@@ -45,7 +40,6 @@ export const TabAIWidget = ({
   setUrl,
   setAiBot,
   handleChange,
-  handleCopy,
   handleSiteCrawl,
   setChoseUrl,
   setShowNewDocModal,
@@ -71,12 +65,9 @@ export const TabAIWidget = ({
       <TabPanel value="1">
         <TabAIWidgetCode
           value={value}
-          copied={copied}
-          scriptCode={scriptCode}
           appId={appId}
           userId={userId}
           handleChange={handleChange}
-          handleCopy={handleCopy}
         />
       </TabPanel>
       <TabPanel value="2">

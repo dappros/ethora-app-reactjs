@@ -1,29 +1,99 @@
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Box, Button, ButtonGroup, IconButton, Tooltip } from '@mui/material';
-import { ReactElement } from 'react';
+import classNames from 'classnames';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface TabAIWidgetCodeProps {
   value: string;
-  copied?: boolean;
-  scriptCode: string;
   appId?: string;
   userId?: string;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
-  handleCopy: (text: string) => void;
 }
 
 export const TabAIWidgetCode = ({
   value,
-  copied,
-  scriptCode,
   appId,
   userId,
   handleChange,
-  handleCopy,
 }: TabAIWidgetCodeProps): ReactElement => {
+  const [displayName, setDisplayName] = useState<string>('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
+  const [copiedText, setCopiedText] = useState<string>('');
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setCopiedText(text);
+    });
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarFile(file);
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const scriptCode = useMemo(() => {
+    if (!appId || !userId) {
+      return '<script></script>';
+    }
+
+    const lines = [
+      `<script`,
+      `  src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js"`,
+      `  id="chat-content-assistant"`,
+      `  data-bot-id="${appId}_${userId}-bot@xmpp.ethoradev.com"`,
+    ];
+
+    if (avatarPreview) {
+      lines.push(`  data-avatar="${avatarPreview}"`);
+    }
+
+    if (displayName) {
+      lines.push(`  data-bot-display-name="${displayName}"`);
+    }
+
+    lines.push(`></script>`);
+
+    return lines.join('\n');
+  }, [appId, userId, avatarPreview, displayName]);
+
+  const currentCopyTarget = useMemo(() => {
+    if (value === '1') {
+      return scriptCode;
+    }
+    if (appId && userId) {
+      return `${appId}_${userId}-bot@xmpp.ethoradev.com`;
+    }
+    return '';
+  }, [value, scriptCode, appId, userId]);
+
+  useEffect(() => {
+    setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
+  }, [copiedText, currentCopyTarget]);
+
+  useEffect(() => {
+    if (avatarFile) {
+      const url = URL.createObjectURL(avatarFile);
+      setAvatarPreview(url);
+
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    }
+  }, [avatarFile]);
+
   return (
     <>
       <div className="font-semibold font-sans text-[16px] my-4">Code</div>
@@ -52,6 +122,42 @@ export const TabAIWidgetCode = ({
 
       {value === '1' && (
         <Box sx={{ pt: 3 }}>
+          <div className="flex flex-col gap-2 mb-8">
+            <p className="font-sans text-sm pb-4 flex items-center gap-1">
+              Which Display Name should the bot use?
+            </p>
+            <input
+              type="text"
+              className={classNames(
+                'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4'
+              )}
+              placeholder="Display name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+            <div className="mb-4">
+              <label className="font-sans text-sm mb-2 block">
+                Upload avatar
+              </label>
+              <label className="inline-block bg-brand-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-700">
+                Upload avatar
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={{ display: 'none' }}
+                />
+              </label>
+              {avatarPreview && (
+                <img
+                  src={avatarPreview}
+                  alt="avatar preview"
+                  className="mt-4 rounded-full h-12 w-12 object-cover border"
+                />
+              )}
+            </div>
+          </div>
+
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
             {`Insert this code anywhere inside your <body> tag:`}
           </p>
@@ -110,7 +216,6 @@ export const TabAIWidgetCode = ({
         </Box>
       )}
 
-      {/* Панель 2: Wordpress */}
       {value === '2' && (
         <Box sx={{ pt: 3 }}>
           <p className="font-sans text-sm pb-4 flex items-center gap-1">

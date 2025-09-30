@@ -90,24 +90,6 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
         <div className="grid grid-cols-2 gap-x-[33px] gap-y-4 grid-rows-3 md:grid-cols-3 md:grid-rows-2 lg:grid-cols-7 lg:grid-rows-1">
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">Tokens</span>
-              <Tooltip title="API calls (total vs 24h)" className="relative">
-                <IconInfo />
-              </Tooltip>
-            </div>
-            <div>
-              <span className="font-sans text-sm">
-                {numberFormatter.format(app.stats.totalTokens)}
-              </span>{' '}
-              <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
-                {numberFormatter.format(app.stats.recentlyTokens)}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-center items-center">
-            <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Users</span>
               <Tooltip
                 title="Users registered (total vs 24h)"
@@ -183,6 +165,25 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
               </span>
             </div>
           </div>
+
+          <div className="flex flex-col justify-center items-center">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">AI</span>
+              <Tooltip title="API calls (total vs 24h)" className="relative">
+                <IconInfo />
+              </Tooltip>
+            </div>
+            <div>
+              <span className="font-sans text-sm">
+                {numberFormatter.format(app.stats.totalTokens)}
+              </span>{' '}
+              <span className="text-gray-500"> / </span>{' '}
+              <span className="text-green-600 font-sans text-sm">
+                {numberFormatter.format(app.stats.recentlyTokens)}
+              </span>
+            </div>
+          </div>
+
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">Files</span>

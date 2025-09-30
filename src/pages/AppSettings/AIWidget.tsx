@@ -69,38 +69,13 @@ export function AIWidget({
 }: Props) {
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [copiedText, setCopiedText] = useState<string>('');
   const [value, setValue] = useState('1');
 
   const [url, setUrl] = useState<string>('');
   const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
-  // const [scriptCode , setScriptCode] = useState<string>('');
   const user = createAnonymousXmppCredentials();
 
   const ragRef = useRef<HTMLDivElement>(null);
-
-  const scriptCode = useMemo(() => {
-    if (!appId && !aiBot.userId) {
-      return '<script></script>';
-    }
-
-    return `<script
-  src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js" 
-  id="chat-content-assistant"
-  data-bot-id="${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com"
-></script>`;
-  }, [appId, aiBot.userId]);
-
-  const currentCopyTarget = useMemo(() => {
-    if (value === '1') {
-      return scriptCode;
-    }
-    if (appId && aiBot.userId) {
-      return `${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`;
-    }
-    return '';
-  }, [value, scriptCode, appId, aiBot.userId]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -116,13 +91,6 @@ export function AIWidget({
     } catch (error) {
       console.error('Error updating AI bot status:', error);
     }
-  };
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setCopiedText(text);
-    });
   };
 
   const size = useMemo(() => {
@@ -147,10 +115,6 @@ export function AIWidget({
     }
   }, [aiBot.siteUrlsV2]);
 
-  useEffect(() => {
-    setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
-  }, [copiedText, currentCopyTarget]);
-
   return (
     <div className="">
       <HeaderAIWidget
@@ -163,12 +127,9 @@ export function AIWidget({
 
       <TabAIWidget
         value={value}
-        copied={copied}
-        scriptCode={scriptCode}
         appId={appId}
         userId={aiBot.userId}
         handleChange={handleChange}
-        handleCopy={handleCopy}
         aiBot={aiBot}
         setAiBot={setAiBot}
         url={url}
