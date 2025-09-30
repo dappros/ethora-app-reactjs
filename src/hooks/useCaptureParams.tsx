@@ -4,9 +4,8 @@ interface Params {
   utm_ref?: string;
   first_page?: string;
   device_type?: string;
-  fallback_referrer?: string;
-  fallback_device_type?: string;
-  fallback_first_page?: string;
+  referrer?: string;
+  device?: string;
 }
 
 export const useCaptureParams = () => {
@@ -36,7 +35,6 @@ export const useCaptureParams = () => {
       params.device_type = deviceType;
     }
 
-    // 🔍 Если UTM не пришли, пробуем определить источник, первую страницу и устройство
     const isAllowedDomain = (() => {
       const allowed =
         import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
@@ -58,14 +56,14 @@ export const useCaptureParams = () => {
       const fallbackDeviceType = isMobile ? 'mobile' : 'desktop';
 
       if (referrer) {
-        params.fallback_referrer = referrer;
+        params.referrer = referrer;
       }
 
       if (fallbackFirstPage) {
-        params.fallback_first_page = fallbackFirstPage;
+        params.first_page = fallbackFirstPage;
       }
 
-      params.fallback_device_type = fallbackDeviceType;
+      params.device = fallbackDeviceType;
     }
 
     if (Object.keys(params).length > 0) {
