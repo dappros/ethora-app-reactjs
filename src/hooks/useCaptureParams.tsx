@@ -4,8 +4,6 @@ interface Params {
   utm_ref?: string;
   first_page?: string;
   device_type?: string;
-  referrer?: string;
-  device?: string;
 }
 
 export const useCaptureParams = () => {
@@ -45,7 +43,7 @@ export const useCaptureParams = () => {
     const isEmpty = Object.keys(params).length === 0;
 
     if (isAllowedDomain && isEmpty) {
-      const referrer = document.referrer;
+      const utm_ref = document.referrer;
       const fallbackFirstPage = window.location.pathname;
       const ua = navigator.userAgent;
 
@@ -55,15 +53,15 @@ export const useCaptureParams = () => {
         );
       const fallbackDeviceType = isMobile ? 'mobile' : 'desktop';
 
-      if (referrer) {
-        params.referrer = referrer;
+      if (utm_ref) {
+        params.utm_ref = utm_ref;
       }
 
       if (fallbackFirstPage) {
         params.first_page = fallbackFirstPage;
       }
 
-      params.device = fallbackDeviceType;
+      params.device_type = fallbackDeviceType;
     }
 
     if (Object.keys(params).length > 0) {
