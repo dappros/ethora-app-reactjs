@@ -20,8 +20,9 @@ export const TabAIWidgetCode = ({
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
   const [displayName, setDisplayName] = useState<string>('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [avatar, setAvatar] = useState<string>('');
+  // const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  // const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>('');
 
@@ -32,17 +33,17 @@ export const TabAIWidgetCode = ({
     });
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarFile(file);
-      setAvatarPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     setAvatarFile(file);
+  //     setAvatarPreview(reader.result as string);
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
 
   const scriptCode = useMemo(() => {
     if (!appId || !userId) {
@@ -56,8 +57,8 @@ export const TabAIWidgetCode = ({
       `  data-bot-id="${appId}_${userId}-bot@xmpp.ethoradev.com"`,
     ];
 
-    if (avatarPreview) {
-      lines.push(`  data-avatar="${avatarPreview}"`);
+    if (avatar) {
+      lines.push(`  data-avatar="${avatar}"`);
     }
 
     if (displayName) {
@@ -67,7 +68,7 @@ export const TabAIWidgetCode = ({
     lines.push(`></script>`);
 
     return lines.join('\n');
-  }, [appId, userId, avatarPreview, displayName]);
+  }, [appId, userId, avatar, displayName]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
@@ -83,16 +84,16 @@ export const TabAIWidgetCode = ({
     setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
   }, [copiedText, currentCopyTarget]);
 
-  useEffect(() => {
-    if (avatarFile) {
-      const url = URL.createObjectURL(avatarFile);
-      setAvatarPreview(url);
+  // useEffect(() => {
+  //   if (avatarFile) {
+  //     const url = URL.createObjectURL(avatarFile);
+  //     setAvatarPreview(url);
 
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    }
-  }, [avatarFile]);
+  //     return () => {
+  //       URL.revokeObjectURL(url);
+  //     };
+  //   }
+  // }, [avatarFile]);
 
   return (
     <>
@@ -135,27 +136,19 @@ export const TabAIWidgetCode = ({
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
             />
-            <div className="mb-4">
-              <label className="font-sans text-sm mb-2 block">
-                Upload avatar
-              </label>
-              <label className="inline-block bg-brand-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-700">
-                Upload avatar
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  style={{ display: 'none' }}
-                />
-              </label>
-              {avatarPreview && (
-                <img
-                  src={avatarPreview}
-                  alt="avatar preview"
-                  className="mt-4 rounded-full h-12 w-12 object-cover border"
-                />
+
+            <p className="font-sans text-sm pb-4 flex items-center gap-1">
+              Provide the URL address
+            </p>
+            <input
+              type="text"
+              className={classNames(
+                'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4'
               )}
-            </div>
+              placeholder="url"
+              value={avatar}
+              onChange={(e) => setAvatar(e.target.value)}
+            />
           </div>
 
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
