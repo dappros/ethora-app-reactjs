@@ -11,6 +11,7 @@ import { ModelAIbot, ModelAppDefaulRooom, SiteLinks } from '../../models';
 
 import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
 import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
+import { useAppStore } from '../../store/useAppStore';
 import './AIWidget.scss';
 
 const assistantChatConfig = {
@@ -67,6 +68,8 @@ export function AIWidget({
   loadingTextCrawl,
   handleCrawlReindex,
 }: Props) {
+  const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
+
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
   const [value, setValue] = useState('1');
@@ -115,6 +118,8 @@ export function AIWidget({
     }
   }, [aiBot.siteUrlsV2]);
 
+  console.log('aiWidgetValues', aiWidgetValues);
+
   return (
     <div className="">
       <HeaderAIWidget
@@ -162,6 +167,8 @@ export function AIWidget({
               config={{
                 ...assistantChatConfig,
                 assistantMode: { enabled: true, user },
+                botDisplayName: aiWidgetValues.displayName || undefined,
+                botAvatar: aiWidgetValues.avatar || undefined,
               }}
             />
           </Box>

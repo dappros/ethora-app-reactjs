@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useAppStore } from '../../../store/useAppStore';
 
 interface TabAIWidgetCodeProps {
   value: string;
@@ -19,6 +20,8 @@ export const TabAIWidgetCode = ({
   userId,
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
+  const doSetAiValues = useAppStore((s) => s.doSetAiValues);
+
   const [displayName, setDisplayName] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
   // const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -134,7 +137,10 @@ export const TabAIWidgetCode = ({
               )}
               placeholder="Display name"
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              onChange={(e) => {
+                setDisplayName(e.target.value);
+                doSetAiValues({ displayName: e.target.value, avatar });
+              }}
             />
 
             <p className="font-sans text-sm pb-4 flex items-center gap-1">
@@ -147,7 +153,10 @@ export const TabAIWidgetCode = ({
               )}
               placeholder="url"
               value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
+              onChange={(e) => {
+                setAvatar(e.target.value);
+                doSetAiValues({ avatar: e.target.value, displayName });
+              }}
             />
           </div>
 

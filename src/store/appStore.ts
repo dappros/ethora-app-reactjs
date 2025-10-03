@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { ModelApp, ModelCurrentUser, ModelState } from '../models';
+import { ModelAiWidgetValues, ModelApp, ModelCurrentUser, ModelState } from '../models';
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -15,18 +15,22 @@ export interface AppSliceInterface extends ModelState {
   doSetApp: (apps: ModelApp) => void;
   doSetApps: (apps: Array<ModelApp>) => void;
   doUpdateApp: (app: ModelApp) => void;
-  doUpdateUser: (userFieldsForUpdate: any) => void;
+  doUpdateUser: (userFieldsForUpdate: ModelCurrentUser) => void;
   doClearState: () => void;
+  doSetAiValues: (app: ModelAiWidgetValues) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
-  set,
-  _
+  set
 ) => ({
   inited: false,
   currentUser: null,
   currentApp: null,
   apps: [],
+  aiWidgetValues: {
+    displayName: '',
+    avatar: '',
+  },
   doSetUser: (user: ModelCurrentUser | null) => {
     set((s) => {
       s.currentUser = user;
@@ -37,7 +41,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
       s.currentUser = null;
     });
   },
-  doUpdateUser: (userFieldsForUpdate: any) => {
+  doUpdateUser: (userFieldsForUpdate: ModelCurrentUser) => {
     set((s) => {
       if (s.currentUser) {
         s.currentUser.firstName = userFieldsForUpdate.firstName;
@@ -86,8 +90,19 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
         s.currentApp = app;
       }
 
-      console.log('doUpdateApp newApps ', newApps);
       s.apps = newApps;
+    });
+  },
+  doSetAiValues: (values) => {
+    set((s) => {
+      if(!values) return;
+
+      const {avatar, displayName} = values;
+
+      if (JSON.stringify(s.aiWidgetValues) === JSON.stringify(values)) return;
+
+        s.aiWidgetValues.avatar = avatar;
+        s.aiWidgetValues.displayName = displayName;
     });
   },
 });

@@ -141,6 +141,11 @@ export interface ModelApp {
   aiBot: ModelAIbot;
 }
 
+export interface ModelAiWidgetValues {
+  displayName: string;
+  avatar: string;
+}
+
 export interface ModelUserACL {
   appId: string;
   userId: string;
@@ -213,6 +218,7 @@ export interface ModelState {
   currentUser: ModelCurrentUser | null;
   currentApp: ModelApp | null;
   apps: Array<ModelApp>;
+  aiWidgetValues: ModelAiWidgetValues;
 }
 
 export type OrderByType =
