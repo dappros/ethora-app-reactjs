@@ -71,7 +71,7 @@ export const TabAIWidgetPromptWebsite = ({
         Provide your website URL(s) in order for the system to ingest data from
         there.
       </p>
-      <Box className="flex lg:flex-row flex-col gap-4 lg:gap-2 lg:items-center justify-start mb-8">
+      <Box className="flex lg:flex-row flex-col gap-4 lg:gap-2 lg:items-center justify-start">
         <Box className="flex gap-2 items-center justify-start">
           <input
             type="text"
@@ -100,8 +100,15 @@ export const TabAIWidgetPromptWebsite = ({
         )}
       </Box>
 
-      <Box className="flex items-center gap-2 pb-6">
-        <Checkbox defaultChecked={followLink} onChange={handleChange} />
+      <Box className="flex items-center pb-8 pl-2 gap-2">
+        <Checkbox
+          sx={{ '&:hover': { bgcolor: 'transparent' }, padding: 0 }}
+          disableRipple
+          color="primary"
+          defaultChecked={followLink}
+          onChange={handleChange}
+          size="small"
+        />
         <p className="font-sans text-sm">Follow link</p>
       </Box>
 

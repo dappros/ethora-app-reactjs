@@ -61,7 +61,7 @@ export const TabAIWidgetCode = ({
     ];
 
     if (avatar) {
-      lines.push(`  data-avatar="${avatar}"`);
+      lines.push(`  data-bot-avatar="${avatar}"`);
     }
 
     if (displayName) {
