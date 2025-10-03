@@ -1,6 +1,6 @@
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LanguageIcon from '@mui/icons-material/Language';
-import { Box, Checkbox, IconButton } from '@mui/material';
+import { Box, IconButton, Switch } from '@mui/material';
 import classNames from 'classnames';
 import {
   ChangeEvent,
@@ -55,6 +55,8 @@ export const TabAIWidgetPromptWebsite = ({
       : setDisabled(false);
   }, [aiBot.siteUrlsV2, url]);
 
+  console.log('followLink', followLink);
+
   return (
     <>
       <Box className="font-semibold font-sans text-[16px] mb-4">
@@ -100,16 +102,18 @@ export const TabAIWidgetPromptWebsite = ({
         )}
       </Box>
 
-      <Box className="flex items-center pb-8 pl-2 gap-2">
-        <Checkbox
-          sx={{ '&:hover': { bgcolor: 'transparent' }, padding: 0 }}
-          disableRipple
-          color="primary"
-          defaultChecked={followLink}
+      <Box className="flex items-center pb-8 pl-1 gap-2">
+        <Switch
+          checked={followLink}
           onChange={handleChange}
+          slotProps={{ input: { 'aria-label': 'controlled' } }}
           size="small"
         />
-        <p className="font-sans text-sm">Follow link</p>
+        <p className="font-sans text-sm">
+          {followLink
+            ? 'Links will be followed (same domain only). Use this to index the whole website.'
+            : 'Links will not be followed. Use this to index one specific page only'}
+        </p>
       </Box>
 
       {aiBot && aiBot.siteLinks && aiBot.siteLinks.length > 0 && (
