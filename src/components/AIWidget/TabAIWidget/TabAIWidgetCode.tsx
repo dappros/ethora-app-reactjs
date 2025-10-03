@@ -132,6 +132,7 @@ export const TabAIWidgetCode = ({
             </p>
             <input
               type="text"
+              maxLength={24}
               className={classNames(
                 'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4'
               )}
