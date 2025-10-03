@@ -110,9 +110,17 @@ export const TabAIWidgetPromptWebsite = ({
           size="small"
         />
         <p className="font-sans text-sm">
-          {followLink
-            ? 'Links will be followed (same domain only). Use this to index the whole website.'
-            : 'Links will not be followed. Use this to index one specific page only'}
+          {followLink ? (
+            <span>
+              Links will be followed (same domain only). Use this to index the{' '}
+              <span className="font-semibold">whole website</span>.
+            </span>
+          ) : (
+            <span>
+              Links will not be followed. Use this to index{' '}
+              <span className="font-semibold">one specific page</span> only
+            </span>
+          )}
         </p>
       </Box>
 
