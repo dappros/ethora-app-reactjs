@@ -1,5 +1,5 @@
 import {
-  Chat,
+  AiAssistant,
   XmppProvider,
   createAnonymousXmppCredentials,
 } from '@ethora/ai-chat-widget';
@@ -160,7 +160,7 @@ export function AIWidget({
           <Box className="chatAssistantButton">
             {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/* @ts-ignore */}
-            <Chat
+            <AiAssistant
               roomJID={`${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`}
               config={{
                 ...assistantChatConfig,
