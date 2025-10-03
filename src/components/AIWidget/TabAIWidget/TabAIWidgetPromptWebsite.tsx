@@ -1,8 +1,9 @@
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LanguageIcon from '@mui/icons-material/Language';
-import { Box, IconButton } from '@mui/material';
+import { Box, Checkbox, IconButton } from '@mui/material';
 import classNames from 'classnames';
 import {
+  ChangeEvent,
   ReactElement,
   RefObject,
   SetStateAction,
@@ -18,7 +19,7 @@ interface TabAIWidgetPromptWebsiteProps {
   aiBot: ModelAIbot;
   url: string;
   setUrl: (url: string) => void;
-  handleSiteCrawl: (url: string) => void;
+  handleSiteCrawl: (url: string, followLink: boolean) => void;
   loadingTextCrawl?: boolean;
   setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
   setShowNewDocModal: (value: SetStateAction<boolean>) => void;
@@ -37,10 +38,15 @@ export const TabAIWidgetPromptWebsite = ({
   handleCrawlReindex,
 }: TabAIWidgetPromptWebsiteProps): ReactElement => {
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [followLink, setFollowLink] = useState<boolean>(true);
 
   const handleShowDeleteModal = (links: SiteLinks[]) => {
     setShowNewDocModal(true);
     setChoseUrl(links);
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFollowLink(event.target.checked);
   };
 
   useEffect(() => {
@@ -82,7 +88,7 @@ export const TabAIWidgetPromptWebsite = ({
               disabled && 'opacity-50 cursor-not-allowed bg-gray-200'
             )}
             aria-label="delete"
-            onClick={() => handleSiteCrawl(url)}
+            onClick={() => handleSiteCrawl(url, followLink)}
           >
             <LanguageIcon />
           </IconButton>
@@ -94,10 +100,10 @@ export const TabAIWidgetPromptWebsite = ({
         )}
       </Box>
 
-      {/* <Box className="flex items-center gap-2 pb-6">
-        <Checkbox defaultChecked />
+      <Box className="flex items-center gap-2 pb-6">
+        <Checkbox defaultChecked={followLink} onChange={handleChange} />
         <p className="font-sans text-sm">Follow link</p>
-        </Box> */}
+      </Box>
 
       {aiBot && aiBot.siteLinks && aiBot.siteLinks.length > 0 && (
         <LinksTable

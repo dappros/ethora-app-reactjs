@@ -541,9 +541,10 @@ export const sendHSFormData = async (
 };
 
 
-export function setSourcesSiteCrawl(appId: string, url: string) {
+export function setSourcesSiteCrawl(appId: string, url: string, followLink: boolean) {
   return http.post(`/sources/site-crawl/${appId}`, {
-    url
+    url,
+    followLink
   });
 }
 

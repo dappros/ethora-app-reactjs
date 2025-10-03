@@ -423,13 +423,13 @@ export default function AppSettings() {
     }
   };
 
-  const handleSiteCrawl = async (url: string) => {
+  const handleSiteCrawl = async (url: string, followLink: boolean) => {
     if (!appId || !url) return;
 
     setLoadingTextCrawl(true);
 
     try {
-      const response = await setSourcesSiteCrawl(appId, url);
+      const response = await setSourcesSiteCrawl(appId, url, followLink);
       setAiBot((prev) => {
         const combined = [
           ...prev.siteUrlsV2,

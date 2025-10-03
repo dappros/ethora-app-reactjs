@@ -24,7 +24,7 @@ interface TabAIWidgetProps {
   setAiBot: (aiBot: ModelAIbot) => void;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
   setUrl: (url: string) => void;
-  handleSiteCrawl: (url: string) => void;
+  handleSiteCrawl: (url: string, followLink: boolean) => void;
   setChoseUrl: (value: SetStateAction<SiteLinks[]>) => void;
   setShowNewDocModal: (value: SetStateAction<boolean>) => void;
   handleCrawlReindex: (id: string) => void;

@@ -144,7 +144,7 @@ export const TabAIWidgetCode = ({
             />
 
             <p className="font-sans text-sm pb-4 flex items-center gap-1">
-              Provide the URL address
+              Bot avatar URL (optional)
             </p>
             <input
               type="text"

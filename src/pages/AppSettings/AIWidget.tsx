@@ -53,7 +53,7 @@ interface Props {
   isDisabled: boolean;
   loadingTextCrawl?: boolean;
   handleRagChange: () => void;
-  handleSiteCrawl: (url: string) => void;
+  handleSiteCrawl: (url: string, followLink: boolean) => void;
   handleCrawlReindex: (id: string) => void;
   deleteSiteCrawl: (url: string[]) => void;
 }
@@ -117,8 +117,6 @@ export function AIWidget({
       setUrl(aiBot.siteUrlsV2[0].url);
     }
   }, [aiBot.siteUrlsV2]);
-
-  console.log('aiWidgetValues', aiWidgetValues);
 
   return (
     <div className="">
