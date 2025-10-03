@@ -15,13 +15,13 @@ export interface AppSliceInterface extends ModelState {
   doSetApp: (apps: ModelApp) => void;
   doSetApps: (apps: Array<ModelApp>) => void;
   doUpdateApp: (app: ModelApp) => void;
-  doUpdateUser: (userFieldsForUpdate: ModelCurrentUser) => void;
+  doUpdateUser: (userFieldsForUpdate: Record<string, string | boolean>) => void;
   doClearState: () => void;
   doSetAiValues: (app: ModelAiWidgetValues) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
-  set
+  set,
 ) => ({
   inited: false,
   currentUser: null,
@@ -41,7 +41,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
       s.currentUser = null;
     });
   },
-  doUpdateUser: (userFieldsForUpdate: ModelCurrentUser) => {
+  doUpdateUser: (userFieldsForUpdate: any) => {
     set((s) => {
       if (s.currentUser) {
         s.currentUser.firstName = userFieldsForUpdate.firstName;
