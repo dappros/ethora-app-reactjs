@@ -55,15 +55,16 @@ jobs:
             # Force sync local dev to remote state to avoid divergence issues
             git reset --hard origin/dev
             git clean -fd
-            export NODE_ENV=development
+            # Install devDependencies too (vite/ts), build static assets
+            npm ci --silent --no-audit --no-fund
+            npm run build
+            export NODE_ENV=production
             if command -v pm2 >/dev/null 2>&1; then
+              # Stop dev server if it is running
               pm2 delete ethora-dev || true
-            fi
-            npm install --no-audit --no-fund
-            if command -v pm2 >/dev/null 2>&1; then
-              pm2 start npm --name "ethora-dev" -- run dev
+              # Serve built dist on 5173 (SPA mode) under pm2
+              pm2 delete ethora-static || true
+              pm2 serve dist 5173 --name ethora-static --spa
               pm2 save || true
-            else
-              nohup npm run dev >/dev/null 2>&1 &
             fi
 
