@@ -128,7 +128,9 @@ export default function Profile() {
               </p>
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
-              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">About</p>
+              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
+                About profile
+              </p>
               <p className="text-black text-regular">{description}</p>
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">

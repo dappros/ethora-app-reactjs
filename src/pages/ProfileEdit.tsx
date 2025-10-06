@@ -87,7 +87,10 @@ export default function ProfileEdit() {
           >
             Cancel
           </button>
-          <button className="w-full max-w-[128px] py-2 rounded-xl border text-brand-500 hover:bg-[#F3F6FC] border-brand-500" onClick={onSave}>
+          <button
+            className="w-full max-w-[128px] py-2 rounded-xl border text-brand-500 hover:bg-[#F3F6FC] border-brand-500"
+            onClick={onSave}
+          >
             Save
           </button>
         </div>
@@ -100,7 +103,11 @@ export default function ProfileEdit() {
             editMode
           />
           <div className="flex flex-col items-center mt-8">
-            <form className="max-w-[768px] w-full" onSubmit={handleSubmit(onSubmit)} action="">
+            <form
+              className="max-w-[768px] w-full"
+              onSubmit={handleSubmit(onSubmit)}
+              action=""
+            >
               <div>
                 <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
                   First Name
