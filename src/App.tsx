@@ -15,6 +15,8 @@ export function Fallback() {
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
 
+  // Hello world
+
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
   }, []);
