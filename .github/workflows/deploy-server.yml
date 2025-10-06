@@ -50,9 +50,11 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.APP_DIR }}
-            git fetch --all
-            git checkout dev
-            git pull --ff-only origin dev
+            git fetch --all --prune
+            git checkout dev || git checkout -b dev
+            # Force sync local dev to remote state to avoid divergence issues
+            git reset --hard origin/dev
+            git clean -fd
             export NODE_ENV=development
             if command -v pm2 >/dev/null 2>&1; then
               pm2 delete ethora-dev || true
