@@ -106,7 +106,7 @@ export default function AdminApps() {
             { key: 'totalRegistered', title: 'Users' },
             { key: 'totalSessions', title: 'Sessions' },
             { key: 'totalApiCalls', title: 'API' },
-            // { key: 'totalTokensCalls', title: 'AI' },
+            // { key: 'totalTokens', title: 'AI' },
             { key: 'totalFiles', title: 'Files' },
             { key: 'totalTransactions', title: 'Transactions' },
             { key: 'createdAt', title: 'Date' },
