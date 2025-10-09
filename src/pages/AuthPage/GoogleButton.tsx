@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useState } from 'react';
 import { actionAfterLogin } from '../../actions';
 import { logLogin } from '../../hooks/withTracking.tsx';
 import {
@@ -21,7 +22,15 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
   const onGoogleLogin = async () => {
+    // Защита от двойного клика
+    if (isLoading) {
+      return;
+    }
+    
+    setIsLoading(true);
     try {
       const loginType = 'google';
       let user, idToken, credential;
@@ -123,6 +132,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       }
     } catch (error) {
       console.log('++ ', error);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -130,7 +141,9 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       fullWidth
       variant="outlined"
       startIcon={<GoogleIcon />}
-      onClick={() => onGoogleLogin()}
+      onClick={onGoogleLogin}
+      loading={isLoading}
+      disabled={isLoading}
       style={{
         borderColor: config?.primaryColor ? config.primaryColor : '#0052CD',
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
