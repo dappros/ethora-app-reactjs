@@ -42,7 +42,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         idToken = creds.idToken;
         credential = creds.credential;
       } catch (e) {
-        console.log('here ', e);
+        console.error('here ', e);
         onGoogleLogin();
       }
 
@@ -56,7 +56,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         );
 
         if (emailExist.data.success) {
-          console.log('new registration');
+          console.error('new registration');
           try {
             const userResult = await httpRegisterSocial(
               idToken ?? '',
