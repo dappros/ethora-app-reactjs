@@ -30,6 +30,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       toast.error('Something went wrong with Google login');
       return;
     }
+    
     try {
       const loginType = 'google';
       let user, idToken, credential;
@@ -40,8 +41,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         credential = creds.credential;
       } catch (e) {
         console.log('here ', e);
-        onGoogleLogin();
         setProcessCount(processCount + 1);
+        onGoogleLogin();
       }
 
       if (user) {
