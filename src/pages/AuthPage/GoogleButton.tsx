@@ -25,7 +25,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const onGoogleLogin = async () => {
-    // Защита от двойного клика
     if (isLoading) {
       return;
     }
@@ -41,11 +40,14 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         credential = creds.credential;
       } catch (e) {
         console.log('here ', e);
+        setIsLoading(false);
+        return;
       }
 
       if (user) {
         if (!user.providerData[0].email) {
           toast.error('Email not provided by Google');
+          setIsLoading(false);
           return;
         }
         const emailExist = await httpCheckEmailExist(
@@ -66,6 +68,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
             if (!userResult?.data?.user) {
               toast.error('Social registration failed');
+              setIsLoading(false);
               return;
             }
 
@@ -79,6 +82,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {
+              setIsLoading(false);
               return;
             }
 
@@ -102,6 +106,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
           } catch (error) {
             console.log(error);
             toast.error('Social registration failed');
+            setIsLoading(false);
+            return;
           }
 
           httpLoginSocial(
@@ -113,6 +119,10 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
+          }).catch((error) => {
+            console.log('Login error:', error);
+            toast.error('Login failed');
+            setIsLoading(false);
           });
         } else {
           console.log('existing user');
@@ -127,12 +137,18 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
+          }).catch((error) => {
+            console.log('Login error:', error);
+            toast.error('Login failed');
+            setIsLoading(false);
           });
         }
+      } else {
+        // Пользователь не найден или ошибка аутентификации
+        setIsLoading(false);
       }
     } catch (error) {
       console.log('++ ', error);
-    } finally {
       setIsLoading(false);
     }
   };
