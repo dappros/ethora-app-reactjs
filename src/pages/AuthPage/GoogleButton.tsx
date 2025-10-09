@@ -31,7 +31,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       return;
     }
 
-    console.log('processCount', processCountRef.current);
     processCountRef.current += 1;
     
     try {
