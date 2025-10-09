@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
 import { actionAfterLogin } from '../../actions';
 import { logLogin } from '../../hooks/withTracking.tsx';
 import {
@@ -22,21 +21,8 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [lastClickTime, setLastClickTime] = useState(0);
-  
+
   const onGoogleLogin = async () => {
-    const currentTime = Date.now();
-    
-    if (isLoading || isProcessing || (currentTime - lastClickTime < 1000)) {
-      console.log('Click blocked - too fast or already processing');
-      return;
-    }
-    
-    setLastClickTime(currentTime);
-    setIsLoading(true);
-    setIsProcessing(true);
     try {
       const loginType = 'google';
       let user, idToken, credential;
@@ -47,16 +33,11 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         credential = creds.credential;
       } catch (e) {
         console.log('here ', e);
-        setIsLoading(false);
-        setIsProcessing(false);
-        return;
       }
 
       if (user) {
         if (!user.providerData[0].email) {
           toast.error('Email not provided by Google');
-          setIsLoading(false);
-          setIsProcessing(false);
           return;
         }
         const emailExist = await httpCheckEmailExist(
@@ -77,8 +58,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
             if (!userResult?.data?.user) {
               toast.error('Social registration failed');
-              setIsLoading(false);
-              setIsProcessing(false);
               return;
             }
 
@@ -92,8 +71,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {
-              setIsLoading(false);
-              setIsProcessing(false);
               return;
             }
 
@@ -114,16 +91,9 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
-          } catch (error: any) {
+          } catch (error) {
             console.log(error);
-            if (error?.response?.data?.error?.includes('No such customer')) {
-              console.log('Stripe customer error, but continuing with login...');
-            } else {
-              toast.error('Social registration failed');
-              setIsLoading(false);
-              setIsProcessing(false);
-              return;
-            }
+            toast.error('Social registration failed');
           }
 
           httpLoginSocial(
@@ -135,15 +105,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
-          }).catch((error: any) => {
-            console.log('Login error:', error);
-            if (error?.response?.data?.error?.includes('No such customer')) {
-              console.log('Stripe customer error during login, but user is authenticated');
-            } else {
-              toast.error('Login failed');
-            }
-            setIsLoading(false);
-            setIsProcessing(false);
           });
         } else {
           console.log('existing user');
@@ -158,44 +119,23 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
-          }).catch((error: any) => {
-            console.log('Login error:', error);
-            if (error?.response?.data?.error?.includes('No such customer')) {
-              console.log('Stripe customer error during login, but user is authenticated');
-            } else {
-              toast.error('Login failed');
-            }
-            setIsLoading(false);
-            setIsProcessing(false);
           });
         }
-      } else {
-        setIsLoading(false);
-        setIsProcessing(false);
       }
     } catch (error) {
       console.log('++ ', error);
-      setIsLoading(false);
-      setIsProcessing(false);
     }
   };
+
   return (
     <CustomButton
       fullWidth
       variant="outlined"
       startIcon={<GoogleIcon />}
       onClick={onGoogleLogin}
-      onTouchStart={(e) => {
-        e.preventDefault();
-        onGoogleLogin();
-      }}
-      loading={isLoading}
-      disabled={isLoading || isProcessing}
-      className="no-double-tap"
       style={{
         borderColor: config?.primaryColor ? config.primaryColor : '#0052CD',
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
-        touchAction: 'manipulation',
       }}
     >
       Continue with Google

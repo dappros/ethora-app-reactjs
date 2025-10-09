@@ -32,9 +32,7 @@ export function ManageData() {
         // Append the link to the document, click it, and then remove it
         document.body.appendChild(a);
         a.click();
-        if (a.parentNode) {
-          a.parentNode.removeChild(a);
-        }
+        document.body.removeChild(a);
 
         // Release the URL once done
         URL.revokeObjectURL(url);

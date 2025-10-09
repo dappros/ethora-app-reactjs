@@ -138,9 +138,7 @@ export default function AdminApps() {
 
       document.body.appendChild(a);
       a.click();
-      if (a.parentNode) {
-        a.parentNode.removeChild(a);
-      }
+      document.body.removeChild(a);
 
       URL.revokeObjectURL(url);
     } catch (e) {
