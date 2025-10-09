@@ -32,7 +32,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
     const currentTime = Date.now();
     
     if (isLoading || isProcessingRef.current || (currentTime - lastClickTimeRef.current < 1000)) {
-      console.log('Click blocked - too fast or already processing');
       return;
     }
     
@@ -48,7 +47,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         idToken = creds.idToken;
         credential = creds.credential;
       } catch (e) {
-        console.log('here ', e);
+        console.error(e);
         setIsLoading(false);
         isProcessingRef.current = false;
         return;
@@ -66,7 +65,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         );
 
         if (emailExist.data.success) {
-          console.log('new registration');
           try {
             const userResult = await httpRegisterSocial(
               idToken ?? '',
@@ -117,7 +115,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
           } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error('Social registration failed');
             setIsLoading(false);
             isProcessingRef.current = false;
@@ -134,26 +132,24 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
           }).catch((error) => {
-            console.log('Login error:', error);
+            console.error('Login error:', error);
             toast.error('Login failed');
             setIsLoading(false);
             isProcessingRef.current = false;
           });
         } else {
-          console.log('existing user');
           httpLoginSocial(
             idToken ?? '',
             credential?.accessToken ?? '',
             loginType
           ).then(async ({ data }) => {
-            logLogin('google', data.user._id);
 
             await actionAfterLogin(data);
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
           }).catch((error) => {
-            console.log('Login error:', error);
+            console.error('Login error:', error);
             toast.error('Login failed');
             setIsLoading(false);
             isProcessingRef.current = false;
@@ -164,7 +160,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         isProcessingRef.current = false;
       }
     } catch (error) {
-      console.log('++ ', error);
+      console.error('++ ', error);
       setIsLoading(false);
       isProcessingRef.current = false;
     }
