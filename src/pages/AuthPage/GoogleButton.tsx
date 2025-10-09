@@ -26,7 +26,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const isProcessingRef = useRef(false);
   const lastClickTimeRef = useRef(0);
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   const onGoogleLogin = async () => {
     const currentTime = Date.now();
