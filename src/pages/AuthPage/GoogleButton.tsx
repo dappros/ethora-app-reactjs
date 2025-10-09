@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useRef } from 'react';
 import { actionAfterLogin } from '../../actions';
 import { logLogin } from '../../hooks/withTracking.tsx';
 import {
@@ -14,6 +13,7 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
+import { useState } from 'react';
 
 interface GoogleButtonProps {
   utm?: string | null;
@@ -22,14 +22,14 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
-  const isProcessingRef = useRef(false);
-  
+
+  const [processCount, setProcessCount] = useState(0);
+
   const onGoogleLogin = async () => {
-    if (isProcessingRef.current) {
+    if (processCount > 2) {
+      toast.error('Something went wrong with Google login');
       return;
     }
-    
-    isProcessingRef.current = true;
     try {
       const loginType = 'google';
       let user, idToken, credential;
@@ -38,25 +38,15 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         user = creds.user;
         idToken = creds.idToken;
         credential = creds.credential;
-        } catch (e: any) {
-          console.error('Google auth error:', e);
-          
-          if (e.code === 'auth/popup-blocked') {
-            toast.error('Popup blocked by browser. Allow popup for this site and try again.');
-          } else if (e.code === 'auth/popup-closed-by-user') {
-            toast.error('Authorization canceled by user');
-          } else {
-            toast.error('Authorization error: ' + (e.message || 'Unknown error'));
-          }
-          
-          isProcessingRef.current = false;
-          return;
-        }
+      } catch (e) {
+        console.log('here ', e);
+        onGoogleLogin();
+        setProcessCount(processCount + 1);
+      }
 
       if (user) {
         if (!user.providerData[0].email) {
           toast.error('Email not provided by Google');
-          isProcessingRef.current = false;
           return;
         }
         const emailExist = await httpCheckEmailExist(
@@ -64,6 +54,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         );
 
         if (emailExist.data.success) {
+          console.log('new registration');
           try {
             const userResult = await httpRegisterSocial(
               idToken ?? '',
@@ -110,7 +101,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
           } catch (error) {
-            console.error(error);
+            console.log(error);
             toast.error('Social registration failed');
           }
 
@@ -123,12 +114,9 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
-          }).catch((error) => {
-            console.error('Login error:', error);
-            toast.error('Login error: ' + error.message);
-            isProcessingRef.current = false;
           });
         } else {
+          console.log('existing user');
           httpLoginSocial(
             idToken ?? '',
             credential?.accessToken ?? '',
@@ -140,16 +128,11 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
-          }).catch((error) => {
-            console.error('Login error:', error);
-            toast.error('Login error: ' + error.message);
-            isProcessingRef.current = false;
           });
         }
       }
     } catch (error) {
-      console.error('General error:', error);
-      isProcessingRef.current = false;
+      console.log('++ ', error);
     }
   };
   return (
