@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useState, useRef } from 'react';
 import { actionAfterLogin } from '../../actions';
 import { logLogin } from '../../hooks/withTracking.tsx';
 import {
@@ -21,8 +22,23 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const isProcessingRef = useRef(false);
+  const lastClickTimeRef = useRef(0);
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   const onGoogleLogin = async () => {
+    const currentTime = Date.now();
+    
+    if (isLoading || isProcessingRef.current || (currentTime - lastClickTimeRef.current < 1000)) {
+      console.log('Click blocked - too fast or already processing');
+      return;
+    }
+    
+    lastClickTimeRef.current = currentTime;
+    isProcessingRef.current = true;
+    setIsLoading(true);
     try {
       const loginType = 'google';
       let user, idToken, credential;
@@ -33,11 +49,16 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         credential = creds.credential;
       } catch (e) {
         console.log('here ', e);
+        setIsLoading(false);
+        isProcessingRef.current = false;
+        return;
       }
 
       if (user) {
         if (!user.providerData[0].email) {
           toast.error('Email not provided by Google');
+          setIsLoading(false);
+          isProcessingRef.current = false;
           return;
         }
         const emailExist = await httpCheckEmailExist(
@@ -58,6 +79,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
             if (!userResult?.data?.user) {
               toast.error('Social registration failed');
+              setIsLoading(false);
+              isProcessingRef.current = false;
               return;
             }
 
@@ -71,6 +94,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {
+              setIsLoading(false);
+              isProcessingRef.current = false;
               return;
             }
 
@@ -94,6 +119,9 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
           } catch (error) {
             console.log(error);
             toast.error('Social registration failed');
+            setIsLoading(false);
+            isProcessingRef.current = false;
+            return;
           }
 
           httpLoginSocial(
@@ -105,6 +133,11 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
+          }).catch((error) => {
+            console.log('Login error:', error);
+            toast.error('Login failed');
+            setIsLoading(false);
+            isProcessingRef.current = false;
           });
         } else {
           console.log('existing user');
@@ -119,11 +152,43 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
+          }).catch((error) => {
+            console.log('Login error:', error);
+            toast.error('Login failed');
+            setIsLoading(false);
+            isProcessingRef.current = false;
           });
         }
+      } else {
+        setIsLoading(false);
+        isProcessingRef.current = false;
       }
     } catch (error) {
       console.log('++ ', error);
+      setIsLoading(false);
+      isProcessingRef.current = false;
+    }
+  };
+
+  const handleIOSClick = (e: React.MouseEvent) => {
+    if (isIOS) {
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(() => {
+        onGoogleLogin();
+      }, 50);
+    } else {
+      onGoogleLogin();
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isIOS) {
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(() => {
+        onGoogleLogin();
+      }, 50);
     }
   };
 
@@ -132,10 +197,21 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       fullWidth
       variant="outlined"
       startIcon={<GoogleIcon />}
-      onClick={onGoogleLogin}
+      onClick={handleIOSClick}
+      onTouchStart={handleTouchStart}
+      loading={isLoading}
+      disabled={isLoading || isProcessingRef.current}
+      className={isIOS ? 'ios-button' : ''}
       style={{
         borderColor: config?.primaryColor ? config.primaryColor : '#0052CD',
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
+        ...(isIOS && {
+          WebkitTapHighlightColor: 'transparent',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          touchAction: 'manipulation',
+          cursor: 'pointer',
+        }),
       }}
     >
       Continue with Google
