@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { useRef } from 'react';
 import { actionAfterLogin } from '../../actions';
 import { logLogin } from '../../hooks/withTracking.tsx';
 import {
@@ -22,14 +22,14 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const isProcessingRef = useRef(false);
   
   const onGoogleLogin = async () => {
-    if (isLoading) {
+    if (isProcessingRef.current) {
       return;
     }
     
-    setIsLoading(true);
+    isProcessingRef.current = true;
     try {
       const loginType = 'google';
       let user, idToken, credential;
@@ -38,16 +38,25 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         user = creds.user;
         idToken = creds.idToken;
         credential = creds.credential;
-      } catch (e) {
-        console.log('here ', e);
-        setIsLoading(false);
-        return;
-      }
+        } catch (e: any) {
+          console.error('Google auth error:', e);
+          
+          if (e.code === 'auth/popup-blocked') {
+            toast.error('Popup blocked by browser. Allow popup for this site and try again.');
+          } else if (e.code === 'auth/popup-closed-by-user') {
+            toast.error('Authorization canceled by user');
+          } else {
+            toast.error('Authorization error: ' + (e.message || 'Unknown error'));
+          }
+          
+          isProcessingRef.current = false;
+          return;
+        }
 
       if (user) {
         if (!user.providerData[0].email) {
           toast.error('Email not provided by Google');
-          setIsLoading(false);
+          isProcessingRef.current = false;
           return;
         }
         const emailExist = await httpCheckEmailExist(
@@ -67,7 +76,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
             if (!userResult?.data?.user) {
               toast.error('Social registration failed');
-              setIsLoading(false);
               return;
             }
 
@@ -81,7 +89,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {
-              setIsLoading(false);
               return;
             }
 
@@ -103,10 +110,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
           } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error('Social registration failed');
-            setIsLoading(false);
-            return;
           }
 
           httpLoginSocial(
@@ -119,12 +124,11 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
           }).catch((error) => {
-            console.log('Login error:', error);
-            toast.error('Login failed');
-            setIsLoading(false);
+            console.error('Login error:', error);
+            toast.error('Login error: ' + error.message);
+            isProcessingRef.current = false;
           });
         } else {
-          console.log('existing user');
           httpLoginSocial(
             idToken ?? '',
             credential?.accessToken ?? '',
@@ -137,17 +141,15 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
             navigateToUserPage(navigate, config?.afterLoginPage);
           }).catch((error) => {
-            console.log('Login error:', error);
-            toast.error('Login failed');
-            setIsLoading(false);
+            console.error('Login error:', error);
+            toast.error('Login error: ' + error.message);
+            isProcessingRef.current = false;
           });
         }
-      } else {
-        setIsLoading(false);
       }
     } catch (error) {
-      console.log('++ ', error);
-      setIsLoading(false);
+      console.error('General error:', error);
+      isProcessingRef.current = false;
     }
   };
   return (
@@ -155,9 +157,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       fullWidth
       variant="outlined"
       startIcon={<GoogleIcon />}
-      onClick={onGoogleLogin}
-      loading={isLoading}
-      disabled={isLoading}
+      onClick={() => onGoogleLogin()}
       style={{
         borderColor: config?.primaryColor ? config.primaryColor : '#0052CD',
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
