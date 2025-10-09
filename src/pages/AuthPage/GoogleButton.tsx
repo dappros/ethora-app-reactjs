@@ -13,7 +13,7 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
-import { useState } from 'react';
+import { useRef } from 'react';
 
 interface GoogleButtonProps {
   utm?: string | null;
@@ -23,15 +23,16 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
 
-  const [processCount, setProcessCount] = useState(0);
+  const processCountRef = useRef(0);
 
   const onGoogleLogin = async () => {
-    if (processCount > 2) {
-      toast.error('Something went wrong with Google login');
+    if (processCountRef.current > 2) {
+      processCountRef.current = 0;
       return;
     }
 
-    setProcessCount(processCount + 1);
+    console.log('processCount', processCountRef.current);
+    processCountRef.current += 1;
     
     try {
       const loginType = 'google';
