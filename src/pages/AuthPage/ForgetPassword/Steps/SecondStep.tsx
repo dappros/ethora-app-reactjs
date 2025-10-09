@@ -49,11 +49,9 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
     setTimer(60);
 
     httpPostForgotPassword(email)
-      .then((res) => {
-        console.log(res);
-      })
+      .then(() => {})
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       })
       .finally(() => {
         setIsSubmitting(false);

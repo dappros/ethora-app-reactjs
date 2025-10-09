@@ -55,8 +55,6 @@ export const TabAIWidgetPromptWebsite = ({
       : setDisabled(false);
   }, [aiBot.siteUrlsV2, url]);
 
-  console.log('followLink', followLink);
-
   return (
     <>
       <Box className="font-semibold font-sans text-[16px] mb-4">

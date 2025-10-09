@@ -16,10 +16,9 @@ import FacebookIcon from './Icons/socials/facebookIcon';
 
 export const FacebookButton = () => {
   const config = useAppStore((s) => s.currentApp);
+  const navigate = useNavigate();
 
   if (!config) return null;
-
-  const navigate = useNavigate();
 
   const onFacebookLogin = async () => {
     try {
@@ -31,7 +30,7 @@ export const FacebookButton = () => {
         idToken = creds.idToken;
         credential = creds.credential;
       } catch (e) {
-        console.log('Facebook login error:', e);
+        console.error('Facebook login error:', e);
         return;
       }
 
@@ -45,7 +44,6 @@ export const FacebookButton = () => {
         const emailExist = await httpCheckEmailExist(email);
 
         if (emailExist.data.success) {
-          console.log('new registration');
           try {
             const userResult = await httpRegisterSocial(
               idToken ?? '',
@@ -81,7 +79,7 @@ export const FacebookButton = () => {
               hubspotData
             );
           } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error('Social registration failed');
           }
 
@@ -94,7 +92,6 @@ export const FacebookButton = () => {
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
         } else {
-          console.log('existing user');
           httpLoginSocial(
             idToken ?? '',
             credential?.accessToken ?? '',
@@ -107,7 +104,7 @@ export const FacebookButton = () => {
         }
       }
     } catch (error) {
-      console.log('++ ', error);
+      console.error('++ ', error);
     }
   };
 

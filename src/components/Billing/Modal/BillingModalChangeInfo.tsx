@@ -56,7 +56,6 @@ export const BillingModalChangeInfo = ({
   } = useForm<BillingInfoFormInputs>();
 
   const onSubmit: SubmitHandler<BillingInfoFormInputs> = (data) => {
-    console.log('Form Data:', data);
     handleClose();
   };
 

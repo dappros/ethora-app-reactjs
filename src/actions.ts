@@ -148,7 +148,6 @@ export async function actionBootsrap() {
   const {
     data: { apps },
   } = await httpGetApps({});
-  console.log(apps.length);
   state.doSetApps(apps);
 }
 
@@ -189,7 +188,6 @@ export async function actionResetPasswords(
 }
 
 export async function actionUpdateApp(appId: string, options: any) {
-  console.log('actionUpdateApp');
   const response = await httpUpdateApp(appId, options);
   const state = getState();
   state.doUpdateApp(response.data.result);
@@ -219,11 +217,11 @@ export function actionLogout() {
   return null;
 }
 
-export const actionGetCsvFile = async (appId: string): Promise<void> => {
+export const actionGetCsvFile = async (appId: string): Promise<any> => {
   try {
     const result = await getExportCsv(appId);
 
-    console.log('result', result);
+    return result;
   } catch (e) {
     console.error(e);
   }

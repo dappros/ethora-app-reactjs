@@ -22,8 +22,6 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
   const navigate = useNavigate();
   const { token } = useParams();
 
-  console.log('Token from params:', token);
-
   const steps = [
     <FirstStep setStep={setActiveStep} />,
     <SecondStep setStep={setActiveStep} />,

@@ -97,8 +97,7 @@ const ThirdStep = () => {
     }
     setLoading(true);
     setPermanentPassword(tempPassword, newPassword)
-      .then((data) => {
-        console.log('data registration', data);
+      .then(() => {
         toast.success('Success');
         // navigate('/login');
 

@@ -20,28 +20,26 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  if (!config) {
-    return null;
-  }
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
 
+  if (!config) {
+    return null;
+  }
+
   const onSubmit = async ({ email }: Inputs) => {
     setLoading(true);
     httpPostForgotPassword(email)
-      .then((res) => {
+      .then(() => {
         searchParams.set('email', email);
         setSearchParams(searchParams);
         setStep((prev) => prev + 1);
-
-        console.log(res);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       })
       .finally(() => {
         setLoading(false);

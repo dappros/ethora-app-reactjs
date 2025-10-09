@@ -18,7 +18,6 @@ export function ManageData() {
     getExportMyData()
       .then((response) => {
         const binaryData = response.data;
-        console.log(binaryData);
         const blob = new Blob([binaryData], { type: 'text/plain' });
 
         // Create a temporary URL for the Blob
@@ -56,14 +55,21 @@ export function ManageData() {
 
   return (
     <div className="md:ml-4">
-      <p className="font-sans text-regular font-semibold mb-2">Download your data</p>
+      <p className="font-sans text-regular font-semibold mb-2">
+        Download your data
+      </p>
       <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
         You own your data. Tap the button below to download a copy of your data
       </div>
-      <button className="mb-8 rounded-xl hover:bg-brand-hover border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2" onClick={onDownloadMyData}>
+      <button
+        className="mb-8 rounded-xl hover:bg-brand-hover border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
+        onClick={onDownloadMyData}
+      >
         Download My Data
       </button>
-      <div className="font-sans text-regular font-semibold mb-2">Delete your data</div>
+      <div className="font-sans text-regular font-semibold mb-2">
+        Delete your data
+      </div>
       <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
         Use this only if you want to permanently delete your account & data from
         our system.
@@ -78,15 +84,17 @@ export function ManageData() {
           storage etc will be removed. Any of your digital assets will be lost.
         </p>
       </div>
-      <button 
-        className="mb-8 rounded-xl hover:bg-brand-hover border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2" 
+      <button
+        className="mb-8 rounded-xl hover:bg-brand-hover border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2"
         onClick={() => setWarning(true)}
       >
         Delete My Account
       </button>
       {warning && (
         <SubmitModal onClose={() => setWarning(false)}>
-          <p className="font-varela text-[24px] text-center mb-8">Delete Account</p>
+          <p className="font-varela text-[24px] text-center mb-8">
+            Delete Account
+          </p>
           <p className="font-sans text-[14px] mb-8">
             {`Are you sure you want to delete your all data from the platform?`}
           </p>

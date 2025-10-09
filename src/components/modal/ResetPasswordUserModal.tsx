@@ -19,9 +19,11 @@ export function ResetPasswordUserModal({ onClose }: Props) {
   // @ts-ignore
   const { register, handleSubmit } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = ({ firstName, lastName, email }) => {
-    console.log({ firstName, lastName, email });
-  };
+  const onSubmit: SubmitHandler<Inputs> = ({
+    firstName,
+    lastName,
+    email,
+  }) => {};
 
   return (
     <Dialog className="reset-password-user-modal" open={true} onClose={onClose}>

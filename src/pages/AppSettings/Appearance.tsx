@@ -29,7 +29,6 @@ export function Appearance({
   const logoRef = useRef<HTMLInputElement>(null);
 
   const onChangeColor = (color: string) => {
-    console.log('color ', color);
     document.documentElement.style.setProperty(
       '--bg-brand-preview-auth',
       hexToRgba(color, '0.05')
@@ -43,7 +42,6 @@ export function Appearance({
     }
 
     actionPostFile(file).then((resp) => {
-      console.log('resp', resp.data.results[0].location);
       setLogoImage(resp.data.results[0].location);
     });
   };

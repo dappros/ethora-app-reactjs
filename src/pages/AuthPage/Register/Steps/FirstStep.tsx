@@ -75,7 +75,9 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const bn = b.length;
     if (an === 0) return bn;
     if (bn === 0) return an;
-    const matrix: number[][] = Array.from({ length: an + 1 }, () => new Array(bn + 1).fill(0));
+    const matrix: number[][] = Array.from({ length: an + 1 }, () =>
+      new Array(bn + 1).fill(0)
+    );
     for (let i = 0; i <= an; i++) matrix[i][0] = i;
     for (let j = 0; j <= bn; j++) matrix[0][j] = j;
     for (let i = 1; i <= an; i++) {
@@ -97,7 +99,10 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const atIndex = email.indexOf('@');
     if (atIndex === -1) return null;
     const local = email.slice(0, atIndex).trim();
-    const domain = email.slice(atIndex + 1).trim().toLowerCase();
+    const domain = email
+      .slice(atIndex + 1)
+      .trim()
+      .toLowerCase();
     if (!local || !domain) return null;
     if (commonDomains.includes(domain)) return null;
     let best: { d: number; domain: string } | null = null;
@@ -111,8 +116,6 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     return null;
   };
 
-  
-
   if (!config) {
     return null;
   }
@@ -123,14 +126,13 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       setEmailSuggestion(suggested);
       setError('email', {
         type: 'suggestion',
-        message: `Возможно, вы имели в виду ${suggested}?`,
+        message: `Perhaps you meant ${suggested}?`,
       });
       return;
     }
     const formData = new FormData(formRef.current!);
     const cfToken = formData.get('cf-turnstile-response');
 
-    console.log('Turnstile token:', typeof cfToken);
     if (!cfToken || typeof cfToken !== 'string' || cfToken.trim() === '') {
       return;
     }

@@ -43,8 +43,7 @@ export function ProfileShares() {
 
   const getItems = () => {
     getSharedLinks().then(({ data }) => {
-      let items = data.items.filter((el: any) => el.resource === 'profile');
-      console.log({ items });
+      const items = data.items.filter((el: any) => el.resource === 'profile');
       setItems(items);
     });
   };
@@ -54,12 +53,10 @@ export function ProfileShares() {
   }, []);
 
   const doCreateNewLink = () => {
-    let body: any = {
+    const body: any = {
       memo: memo,
       resource: 'profile',
     };
-
-    console.log({ expirationTime });
 
     if (expirationTime === -1) {
       body.expiration = -1;

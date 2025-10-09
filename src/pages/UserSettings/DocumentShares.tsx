@@ -52,10 +52,6 @@ export function DocumentShares() {
   const [memo, setMemo] = useState('');
   const [documentForShare, setDocumentForShare] = useState<string>('');
 
-  useEffect(() => {
-    console.log({ documentForShare });
-  }, [documentForShare]);
-
   const onDelete = () => {
     setLoading(true);
     deleteSharedLink(showDelete?.token as string)
@@ -107,8 +103,6 @@ export function DocumentShares() {
       memo: memo,
       resource: 'document',
     };
-
-    console.log({ expirationTime });
 
     if (expirationTime === -1) {
       body.expiration = -1;
@@ -200,7 +194,6 @@ export function DocumentShares() {
                     <Select
                       className="w-full bg-[#F5F7F9]"
                       onChange={(e) => {
-                        console.log('value', e.target.value.split(','));
                         setDocumentForShare(e.target.value);
                       }}
                     >

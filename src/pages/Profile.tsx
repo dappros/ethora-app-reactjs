@@ -80,7 +80,6 @@ export default function Profile() {
     httpLogout().then(() => {
       logLogout();
       actionLogout();
-      console.log('Logout');
       logoutService.performLogout();
       document.cookie =
         'ethora_user=; domain=.ethora.com; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
