@@ -13,7 +13,6 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
-import { useRef, useEffect } from 'react';
 
 interface GoogleButtonProps {
   utm?: string | null;
@@ -22,25 +21,6 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
-
-  const processCountRef = useRef(0);
-
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const creds = await getUserCredsFromGoogle();
-        if (creds.user) {
-          await processGoogleLogin(creds.user, creds.idToken || '', creds.credential);
-        }
-      } catch (e) {
-        if (e instanceof Error && e.message !== 'Redirect initiated') {
-          console.log('No redirect result on page load');
-        }
-      }
-    };
-
-    handleRedirectResult();
-  }, []);
 
   const processGoogleLogin = async (user: any, idToken: string, credential: any) => {
     const loginType = 'google';
@@ -132,13 +112,21 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   };
 
   const onGoogleLogin = async () => {
-    if (processCountRef.current > 2) {
-      processCountRef.current = 0;
-      return;
-    }
+    const handleRedirectResult = async () => {
+      try {
+        const creds = await getUserCredsFromGoogle();
+        if (creds.user) {
+          await processGoogleLogin(creds.user, creds.idToken || '', creds.credential);
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message !== 'Redirect initiated') {
+          console.log('No redirect result on page load');
+        }
+      }
+    };
 
-    processCountRef.current += 1;
-    
+    handleRedirectResult();
+
     try {
       const creds = await getUserCredsFromGoogle();
       await processGoogleLogin(creds.user, creds.idToken || '', creds.credential);
