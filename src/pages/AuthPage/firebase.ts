@@ -38,10 +38,19 @@ const isIOSSafari = () => {
   const userAgent = navigator.userAgent;
   const isIOS = /iPad|iPhone|iPod/.test(userAgent);
   const isSafari = /Safari/.test(userAgent) && !/Chrome|CriOS|FxiOS|OPiOS|mercury/.test(userAgent);
-  return isIOS && isSafari;
+  const isIOSWebView = /iPhone|iPad|iPod/.test(userAgent) && /Version/.test(userAgent);
+  
+  console.log('User Agent:', userAgent);
+  console.log('Is iOS:', isIOS);
+  console.log('Is Safari:', isSafari);
+  console.log('Is iOS WebView:', isIOSWebView);
+  
+  return (isIOS && isSafari) || isIOSWebView;
 };
 
 export const getUserCredsFromGoogle = async () => {
+  console.log('getUserCredsFromGoogle called');
+  
   const firebase = new Firebase();
   firebase.init();
   const auth = getAuth(firebase.firebaseApp as FirebaseApp);
@@ -49,8 +58,10 @@ export const getUserCredsFromGoogle = async () => {
   googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
   googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
 
+  console.log('Checking for redirect result...');
   const redirectResult = await getRedirectResult(auth);
   if (redirectResult) {
+    console.log('Redirect result found:', redirectResult);
     const user = redirectResult.user as IUser;
     const idToken = await auth?.currentUser?.getIdToken();
     const credential = GoogleAuthProvider.credentialFromResult(redirectResult);
@@ -61,10 +72,15 @@ export const getUserCredsFromGoogle = async () => {
     };
   }
 
-  if (isIOSSafari()) {
+  const isIOS = isIOSSafari();
+  console.log('Is iOS Safari:', isIOS);
+  
+  if (isIOS) {
+    console.log('Using signInWithRedirect for iOS Safari');
     await signInWithRedirect(auth, googleProvider);
     throw new Error('Redirect initiated');
   } else {
+    console.log('Using signInWithPopup for non-iOS');
     const res = await signInWithPopup(auth, googleProvider);
     const user = res.user as IUser;
     const idToken = await auth?.currentUser?.getIdToken();
