@@ -13,6 +13,7 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import { getUserCredsFromGoogle } from './firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
+import { useEffect, useRef } from 'react';
 
 interface GoogleButtonProps {
   utm?: string | null;
@@ -21,6 +22,14 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
+
+  const isRedirecctRef = useRef(false);
+
+  useEffect(() => {
+    isRedirecctRef.current = false;
+  }, []);
+  
+  if (!config) return null;
 
   const processGoogleLogin = async (user: any, idToken: string, credential: any) => {
     const loginType = 'google';
@@ -111,20 +120,21 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   };
 
   const onGoogleLogin = async () => {
-    const handleRedirectResult = async () => {
+    if (isRedirecctRef.current) return;
+
+
       try {
         const creds = await getUserCredsFromGoogle();
         if (creds.user) {
+          isRedirecctRef.current = false;
           await processGoogleLogin(creds.user, creds.idToken || '', creds.credential);
         }
       } catch (e) {
         if (e instanceof Error && e.message !== 'Redirect initiated') {
-          console.error('No redirect result on page load');
+          isRedirecctRef.current = true;
+          return;
         }
       }
-    };
-
-    handleRedirectResult();
 
     try {
       const creds = await getUserCredsFromGoogle();
