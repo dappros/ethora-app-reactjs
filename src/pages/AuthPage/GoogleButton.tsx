@@ -80,7 +80,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         document.cookie =
           'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error('Social registration failed');
       }
 
@@ -95,7 +95,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         navigateToUserPage(navigate, config?.afterLoginPage);
       });
     } else {
-      console.log('existing user');
       httpLoginSocial(
         idToken ?? '',
         credential?.accessToken ?? '',
@@ -120,7 +119,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         }
       } catch (e) {
         if (e instanceof Error && e.message !== 'Redirect initiated') {
-          console.log('No redirect result on page load');
+          console.error('No redirect result on page load');
         }
       }
     };
