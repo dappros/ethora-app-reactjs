@@ -43,7 +43,9 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         credential = creds.credential;
       } catch (e) {
         console.error('here ', e);
-        onGoogleLogin();
+        if (e instanceof Error && e.message === 'Redirect initiated') {
+          return;
+        }
       }
 
       if (user) {
