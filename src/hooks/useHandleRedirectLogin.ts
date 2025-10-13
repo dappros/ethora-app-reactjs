@@ -26,14 +26,13 @@ export const useHandleRedirectLogin = () => {
         const result = await getRedirectResult(auth);
         if (!result) return;
   
-        const credential =
-          GoogleAuthProvider.credentialFromResult(result) ||
+        GoogleAuthProvider.credentialFromResult(result) ||
           FacebookAuthProvider.credentialFromResult(result);
   
         const idToken = await auth.currentUser?.getIdToken();
   
   
-        const data = await actionAfterLogin({
+        await actionAfterLogin({
           token: idToken,
           user: result.user,
         });
