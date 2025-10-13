@@ -4,8 +4,6 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   User,
 } from 'firebase/auth';
 import { useAppStore } from '../../store/useAppStore';
@@ -33,19 +31,7 @@ class Firebase {
 }
 export type IUser = User & { accessToken: string };
 
-// Функция для определения iOS Safari
-const isIOSSafari = () => {
-  const userAgent = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-  const isSafari = /Safari/.test(userAgent) && !/Chrome|CriOS|FxiOS|OPiOS|mercury/.test(userAgent);
-  const isIOSWebView = /iPhone|iPad|iPod/.test(userAgent) && /Version/.test(userAgent);
-
-  
-  return (isIOS && isSafari) || isIOSWebView;
-};
-
 export const getUserCredsFromGoogle = async () => {
-  
   const firebase = new Firebase();
   firebase.init();
   const auth = getAuth(firebase.firebaseApp as FirebaseApp);
@@ -53,34 +39,15 @@ export const getUserCredsFromGoogle = async () => {
   googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
   googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
 
-  const redirectResult = await getRedirectResult(auth);
-  if (redirectResult) {
-    const user = redirectResult.user as IUser;
-    const idToken = await auth?.currentUser?.getIdToken();
-    const credential = GoogleAuthProvider.credentialFromResult(redirectResult);
-    return {
-      user,
-      idToken,
-      credential,
-    };
-  }
-
-  const isIOS = isIOSSafari();
-  
-  if (isIOS) {
-    await signInWithRedirect(auth, googleProvider);
-    throw new Error('Redirect initiated');
-  } else {
-    const res = await signInWithPopup(auth, googleProvider);
-    const user = res.user as IUser;
-    const idToken = await auth?.currentUser?.getIdToken();
-    const credential = GoogleAuthProvider.credentialFromResult(res);
-    return {
-      user,
-      idToken,
-      credential,
-    };
-  }
+  const res = await signInWithPopup(auth, googleProvider);
+  const user = res.user as IUser;
+  const idToken = await auth?.currentUser?.getIdToken();
+  const credential = GoogleAuthProvider.credentialFromResult(res);
+  return {
+    user,
+    idToken,
+    credential,
+  };
 };
 
 export const getUserCredsFromFacebook = async () => {
@@ -91,30 +58,13 @@ export const getUserCredsFromFacebook = async () => {
   facebookProvider.addScope('email');
   facebookProvider.addScope('public_profile');
 
-  const redirectResult = await getRedirectResult(auth);
-  if (redirectResult) {
-    const user = redirectResult.user as IUser;
-    const idToken = await auth?.currentUser?.getIdToken();
-    const credential = FacebookAuthProvider.credentialFromResult(redirectResult);
-    return {
-      user,
-      idToken,
-      credential,
-    };
-  }
-
-  if (isIOSSafari()) {
-    await signInWithRedirect(auth, facebookProvider);
-    throw new Error('Redirect initiated');
-  } else {
-    const res = await signInWithPopup(auth, facebookProvider);
-    const user = res.user as IUser;
-    const idToken = await auth?.currentUser?.getIdToken();
-    const credential = FacebookAuthProvider.credentialFromResult(res);
-    return {
-      user,
-      idToken,
-      credential,
-    };
-  }
+  const res = await signInWithPopup(auth, facebookProvider);
+  const user = res.user as IUser;
+  const idToken = await auth?.currentUser?.getIdToken();
+  const credential = FacebookAuthProvider.credentialFromResult(res);
+  return {
+    user,
+    idToken,
+    credential,
+  };
 };

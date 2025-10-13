@@ -7,6 +7,8 @@ import { useCaptureParams } from './hooks/useCaptureParams';
 import { useTrackUrl } from './hooks/useTrackUrl';
 import { withTracking } from './hooks/withTracking';
 import { useAppStore } from './store/useAppStore';
+import { initFirebase } from './utils/firebase';
+import { useHandleRedirectLogin } from './hooks/useHandleRedirectLogin';
 
 export function Fallback() {
   return <p>Performing initial data load</p>;
@@ -15,11 +17,16 @@ export function Fallback() {
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
 
-  // Hello world
-
   useEffect(() => {
     actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
   }, []);
+
+  useEffect(() => {
+    if (currentApp) {
+      initFirebase();
+    }
+  }, [currentApp]);
+
 
   useEffect(() => {
     if (currentApp) {
@@ -54,6 +61,7 @@ function App() {
 
   useCaptureParams();
   useTrackUrl();
+  useHandleRedirectLogin();
 
   if (!currentApp) {
     return <Loading></Loading>;
