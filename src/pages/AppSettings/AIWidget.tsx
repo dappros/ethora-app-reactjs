@@ -119,7 +119,7 @@ export function AIWidget({
   }, [aiBot.siteUrlsV2]);
 
   return (
-    <div className="">
+    <div className="w-full h-full overflow-x-auto overflow-y-hidden">
       <HeaderAIWidget
         isRag={aiBot.isRAG}
         statusBot={statusBot}

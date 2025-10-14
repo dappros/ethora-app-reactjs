@@ -12,7 +12,7 @@ const CsvButton: FC<CsvButtonProps> = ({onClick}) => {
   return (
       <button
         onClick={onClick}
-        className="flex items-center px-2 sm:px-7 py-2 bg-white text-brand-500 border border-brand-500 rounded-xl"
+        className="flex items-center h-[40px] text-sm sm:text-base px-2 sm:px-7 sm:py-2 bg-white text-brand-500 border border-brand-500 rounded-xl"
       >
         <IconDownload stroke={(currentApp && currentApp.primaryColor) || "#0052CD"}/>
         <span className="pl-3">

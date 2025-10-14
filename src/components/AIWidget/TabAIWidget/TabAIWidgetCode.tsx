@@ -99,7 +99,7 @@ export const TabAIWidgetCode = ({
   // }, [avatarFile]);
 
   return (
-    <>
+    <div className="py-6 p-0 md:p-6">
       <div className="font-semibold font-sans text-[16px] my-4">Code</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         Use this code to integrate widget into your website or external app.
@@ -293,6 +293,6 @@ export const TabAIWidgetCode = ({
           </div>
         </Box>
       )}
-    </>
+    </div>
   );
 };

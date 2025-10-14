@@ -54,15 +54,19 @@ export const TabAIWidget = ({
 
   return (
     <TabContext value={valueTabs}>
+      <div className="w-full h-full overflow-x-auto overflow-y-hidden">
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <TabList onChange={handleChangeTabs} aria-label="lab API tabs example">
+        <TabList
+          onChange={handleChangeTabs}
+          aria-label="lab API tabs example"
+        >
           <Tab label="Code" value="1" />
           <Tab label="Prompt" value="2" />
           <Tab label="Add websites" value="3" />
           <Tab label="Add documents" value="4" />
         </TabList>
       </Box>
-      <TabPanel value="1">
+      <TabPanel value="1" sx={{ p: 0 }}>
         <TabAIWidgetCode
           value={value}
           appId={appId}
@@ -70,10 +74,10 @@ export const TabAIWidget = ({
           handleChange={handleChange}
         />
       </TabPanel>
-      <TabPanel value="2">
+      <TabPanel value="2" sx={{ p: 0 }}>
         <TabAIWidgetPrompt aiBot={aiBot} setAiBot={setAiBot} />
       </TabPanel>
-      <TabPanel value="3">
+      <TabPanel value="3" sx={{ p: 0 }}>
         <TabAIWidgetPromptWebsite
           ragRef={ragRef}
           aiBot={aiBot}
@@ -86,9 +90,10 @@ export const TabAIWidget = ({
           handleCrawlReindex={handleCrawlReindex}
         />
       </TabPanel>
-      <TabPanel value="4">
+      <TabPanel value="4" sx={{ p: 0 }}>
         <TabAIWidgetDocument ragRef={ragRef} />
       </TabPanel>
+      </div>
     </TabContext>
   );
 };

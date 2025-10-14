@@ -11,8 +11,8 @@ export const TabAIWidgetPrompt = ({
   setAiBot,
 }: TabAIWidgetPromptProps) => {
   return (
-    <>
-      <div className="font-semibold font-sans text-[16px] pt-8 pb-4">
+    <div className="py-6 p-0 md:p-6">
+      <div className="font-semibold font-sans text-[16px] py-4 pb-4">
         Prompt
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
@@ -26,6 +26,6 @@ export const TabAIWidgetPrompt = ({
         value={aiBot.prompt}
         onChange={(e) => setAiBot({ ...aiBot, prompt: e.target.value })}
       />
-    </>
+    </div>
   );
 };

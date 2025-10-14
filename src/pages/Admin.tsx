@@ -10,7 +10,7 @@ export default function Admin() {
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Admin
         </div>
-        <div className="md:w-[400px] h-[40px] flex justify-between">
+        <div className="w-full max-w-[400px] h-[40px] flex justify-between">
           <NavLink
             className={({ isActive }) =>
               cn(

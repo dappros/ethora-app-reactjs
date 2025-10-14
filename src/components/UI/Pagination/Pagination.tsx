@@ -14,7 +14,7 @@ export const Pagination: FC<PaginationProps> = ({
 }) => {
   return (
     <ReactPaginate
-      className="flex items-center justify-center gap-2 mt-4 text-gray-500"
+      className="flex flex-wrap items-center justify-center gap-2 mt-4 text-gray-500 w-full max-w-full overflow-hidden"
       onPageChange={onPageChange}
       breakLabel="..."
       nextLabel="Next →"
@@ -24,11 +24,11 @@ export const Pagination: FC<PaginationProps> = ({
       forcePage={forcePage}
       renderOnZeroPageCount={null}
       activeClassName="text-brand-500 font-bold px-3 py-2 rounded"
-      pageClassName="px-3 py-2 hover:bg-gray-200"
-      previousClassName="px-3 py-2 hover:bg-gray-200"
-      nextClassName="px-3 py-2 hover:bg-gray-200"
+      pageClassName="px-2 py-1 sm:px-3 sm:py-2 hover:bg-gray-200"
+      previousClassName="px-2 py-1 sm:px-3 sm:py-2 hover:bg-gray-200"
+      nextClassName="px-2 py-1 sm:px-3 sm:py-2 hover:bg-gray-200"
       disabledClassName="text-grey-300 cursor-not-allowed"
-      breakClassName="px-3 py-2"
+      breakClassName="px-2 py-1 sm:px-3 sm:py-2"
     />
   );
 };

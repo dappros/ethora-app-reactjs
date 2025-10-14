@@ -497,7 +497,7 @@ export default function AppSettings() {
       const sectionHeader = (
         <div
           key={`section-${sectionTitle}`}
-          className="text-md font-bold uppercase text-black py-[10px] md:py-3 md:px-2 border-b-brand-500"
+          className="hidden md:block text-md font-bold uppercase text-black py-[10px] md:py-3 md:px-2 border-b-brand-500"
         >
           {sectionTitle}
         </div>
@@ -662,7 +662,7 @@ export default function AppSettings() {
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
             key="AI bot"
-            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-hidden"
+            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
           >
             <AIWidget
               appId={appId as string}

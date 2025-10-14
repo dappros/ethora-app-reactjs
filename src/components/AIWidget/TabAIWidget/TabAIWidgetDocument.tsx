@@ -12,7 +12,7 @@ export const TabAIWidgetDocument = ({
   ragRef,
 }: TabAIWidgetDocumentProps): ReactElement => {
   return (
-    <>
+    <div className="py-6 p-0 md:p-6">
       <div className="font-semibold font-sans text-[16px] pb-4 pt-10">
         <span> Upload documents (</span>
         <button
@@ -41,6 +41,6 @@ export const TabAIWidgetDocument = ({
       </div>
 
       <Rag ragRef={ragRef} />
-    </>
+    </div>
   );
 };

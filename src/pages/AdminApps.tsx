@@ -172,8 +172,10 @@ export default function AdminApps() {
       ) : (
         <div id="admin-apps">
           <div>
+              <div className="text-center pb-2 font-varela text-[18px] md:text-2xl block sm:hidden">Apps</div>
+
             <div className="flex justify-between items-center px-4">
-              <div className="font-varela text-[18px] md:text-2xl">Apps</div>
+              <div className="font-varela text-[18px] md:text-2xl hidden sm:block">Apps</div>
               <div className="flex items-center gap-4">
                 {renderSorting()}
                 {currentUser?.isSuperAdmin && (
@@ -181,7 +183,7 @@ export default function AdminApps() {
                 )}
                 <button
                   onClick={() => setShowModal(true)}
-                  className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
+                  className="flex items-center justify-center sm:w-[40px] h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
                 >
                   <IconAdd color="white" className="md:mr-2" />
                   <span className="hidden md:block">Create App</span>

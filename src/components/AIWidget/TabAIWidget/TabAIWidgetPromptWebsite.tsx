@@ -56,8 +56,8 @@ export const TabAIWidgetPromptWebsite = ({
   }, [aiBot.siteUrlsV2, url]);
 
   return (
-    <>
-      <Box className="font-semibold font-sans text-[16px] mb-4">
+    <div className="py-6 p-0 md:p-6">
+      <Box className="font-semibold font-sans text-[16px] my-4">
         <span>Add Website (</span>
         <button
           onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
@@ -131,6 +131,6 @@ export const TabAIWidgetPromptWebsite = ({
       )}
 
       <Rag ragRef={ragRef} />
-    </>
+    </div>
   );
 };

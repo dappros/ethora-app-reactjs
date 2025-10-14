@@ -21,6 +21,7 @@ import React, { ReactElement, useMemo, useState } from 'react';
 import { SiteLinks } from '../../../../models';
 import { MarkDown } from '../../../../utils/MarkDown';
 import { IconClose } from '../../../Icons/IconClose';
+import './LinksTable.scss';
 
 interface EnhancedTableProps {
   siteLinks: SiteLinks[];
@@ -108,21 +109,38 @@ export const LinksTable = ({
         }}
       >
         <TableContainer
+          className="mobile-table-container"
           sx={{
-            flex: 1,
-            minHeight: 0,
-            height: '100%',
             width: '100%',
-            maxWidth: '100%',
             overflowX: 'auto',
-            overflowY: 'auto',
+            overflowY: 'hidden',
             display: 'block',
+            // Улучшенные стили для мобильного скролла
+            '&::-webkit-scrollbar': {
+              height: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#f1f1f1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#c1c1c1',
+              borderRadius: '4px',
+              '&:hover': {
+                backgroundColor: '#a8a8a8',
+              },
+            },
           }}
         >
           <Table
+            className="mobile-table"
             size="medium"
             stickyHeader
-            sx={{ minWidth: 700, tableLayout: 'fixed', width: '100%' }}
+            sx={{ 
+              minWidth: 800, 
+              tableLayout: 'auto', 
+              width: '100%'
+            }}
           >
             <TableHead>
               <TableRow>
@@ -207,6 +225,7 @@ export const LinksTable = ({
                       </TableCell>
 
                       <TableCell
+                        className="url-cell"
                         sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                       >
                         <Typography variant="body2">
