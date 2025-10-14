@@ -115,7 +115,6 @@ export const LinksTable = ({
             overflowX: 'auto',
             overflowY: 'hidden',
             display: 'block',
-            // Улучшенные стили для мобильного скролла
             '&::-webkit-scrollbar': {
               height: '8px',
             },

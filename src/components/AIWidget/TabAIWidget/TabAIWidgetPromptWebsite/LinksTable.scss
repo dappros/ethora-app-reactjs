@@ -1,12 +1,10 @@
-// Стили для мобильного скролла таблицы
 .mobile-table-container {
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch; // Плавный скролл на iOS
+  -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   width: 100% !important;
   
-  // Принудительно показываем скроллбар
   &::-webkit-scrollbar {
     height: 8px;
   }
@@ -30,14 +28,12 @@
   min-width: 800px !important;
   width: 100% !important;
   
-  // Уменьшаем размеры ячеек на мобильных
   .MuiTableCell-root {
     padding: 8px 4px;
     font-size: 0.875rem;
     white-space: nowrap;
   }
   
-  // Специальные стили для URL колонки
   .url-cell {
     min-width: 200px;
     max-width: 300px;
