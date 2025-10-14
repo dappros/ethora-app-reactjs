@@ -55,10 +55,19 @@ export const TabAIWidget = ({
   return (
     <TabContext value={valueTabs}>
       <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', overflowX: 'auto' }}>
         <TabList
           onChange={handleChangeTabs}
           aria-label="lab API tabs example"
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            minWidth: 'fit-content',
+            '& .MuiTab-root': {
+              minWidth: 'auto',
+              padding: '12px 16px',
+            }
+          }}
         >
           <Tab label="Code" value="1" />
           <Tab label="Prompt" value="2" />
