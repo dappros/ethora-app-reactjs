@@ -85,6 +85,7 @@ export async function actionAfterLogin(data: any) {
     lastName: data.user.lastName,
     refreshToken: data.refreshToken,
     token: data.token,
+    wsToken: data.wsToken,
     xmppPassword: data.user.xmppPassword,
     walletAddress: data.user.defaultWallet.walletAddress,
     profileImage: data.user.profileImage,

@@ -9,6 +9,7 @@ import { NewAppModal } from '../components/modal/NewAppModal';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
+import { useCentrifugeChannel } from '../hooks/useCentrifuge.ts';
 import { getExportAppsCsv, httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -19,10 +20,15 @@ export default function AdminApps() {
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+
   const apps = useAppStore((s) => s.apps);
+  const [appsState, setAppState] = useState<ModelApp[]>(apps);
+
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
+
+  const { data } = useCentrifugeChannel();
 
   const limit = useMemo(
     () => Number(searchParams.get('limit')) || 5,
@@ -138,7 +144,7 @@ export default function AdminApps() {
 
       document.body.appendChild(a);
       a.click();
-      
+
       if (a.parentNode) {
         a.parentNode.removeChild(a);
       }
@@ -165,6 +171,31 @@ export default function AdminApps() {
     fetchApps();
   }, [fetchApps]);
 
+  useEffect(() => {
+    setAppState(apps);
+  }, [apps]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    if (data.type === 'counter_new_chats') {
+      setAppState((prev) =>
+        prev.map((app) =>
+          app._id === data.appId
+            ? {
+                ...app,
+                stats: {
+                  ...app.stats,
+                  totalChats: app.stats.totalChats + 1,
+                  recentlyChats: app.stats.recentlyChats + 1,
+                },
+              }
+            : app
+        )
+      );
+    }
+  }, [data]);
+
   return (
     <>
       {loading ? (
@@ -172,10 +203,14 @@ export default function AdminApps() {
       ) : (
         <div id="admin-apps">
           <div>
-              <div className="text-center pb-2 font-varela text-[18px] md:text-2xl block sm:hidden">Apps</div>
+            <div className="text-center pb-2 font-varela text-[18px] md:text-2xl block sm:hidden">
+              Apps
+            </div>
 
             <div className="flex justify-between items-center px-4">
-              <div className="font-varela text-[18px] md:text-2xl hidden sm:block">Apps</div>
+              <div className="font-varela text-[18px] md:text-2xl hidden sm:block">
+                Apps
+              </div>
               <div className="flex items-center gap-4">
                 {renderSorting()}
                 {currentUser?.isSuperAdmin && (
@@ -199,7 +234,7 @@ export default function AdminApps() {
               <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
             )}
 
-            {apps.map((app) => (
+            {appsState.map((app) => (
               <ApplicationPreview
                 key={app._id}
                 app={app}

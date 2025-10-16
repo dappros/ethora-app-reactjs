@@ -26,6 +26,7 @@
     "@stripe/react-stripe-js": "^2.9.0",
     "@stripe/stripe-js": "^4.10.0",
     "axios": "^1.7.5",
+    "centrifuge": "^5.5.0",
     "classnames": "^2.5.1",
     "ethers": "^6.14.0",
     "firebase": "^10.14.1",

@@ -5,6 +5,7 @@ import { ModelUserACL, OrderByType } from './models';
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
+  _wsToken: '',
   _refreshToken: localStorage.getItem('refreshToken-538') || '',
   set refreshToken(token: string) {
     localStorage.setItem('refreshToken-538', token);
@@ -20,6 +21,9 @@ export const httpTokens = {
   get token() {
     return this._token;
   },
+  set wsToken(wsToken: string) {
+    this._wsToken = wsToken;
+  }
 };
 
 export const http = axios.create({
@@ -104,9 +108,10 @@ export const refreshToken = async () => {
         Authorization: httpTokens.refreshToken,
       },
     });
-    const { token, refreshToken } = response.data;
+    const { token, refreshToken, wsToken } = response.data;
     httpTokens.token = token;
     httpTokens.refreshToken = refreshToken;
+    httpTokens.wsToken = wsToken;
 
     return httpTokens;
   } catch (error) {

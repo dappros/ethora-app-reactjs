@@ -9,6 +9,7 @@ export interface ModelCurrentUser {
   isProfileOpen: boolean;
   token: string;
   refreshToken: string;
+  wsToken: string;
   walletAddress: string;
   xmppPassword: string;
   xmppUsername: string;
