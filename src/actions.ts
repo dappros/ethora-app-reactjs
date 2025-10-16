@@ -112,6 +112,7 @@ export async function actionRefreshUserFromLocalStorage(
   const refreshed = await refreshToken();
 
   httpTokens.token = refreshed.token;
+  httpTokens.wsToken = refreshed.wsToken;
   httpTokens.refreshToken = refreshed.refreshToken;
 
   const localStorageUser: ModelCurrentUser = {
@@ -125,6 +126,7 @@ export async function actionRefreshUserFromLocalStorage(
     lastName: user.lastName,
     refreshToken: refreshed.refreshToken,
     token: refreshed.token,
+    wsToken: refreshed.wsToken,
     xmppPassword: user.xmppPassword,
     walletAddress: user.defaultWallet.walletAddress,
     profileImage: user.profileImage,
