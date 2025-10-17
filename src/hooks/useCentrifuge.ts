@@ -4,13 +4,28 @@ import { useAppStore } from '../store/useAppStore';import { refreshToken } from 
 
 const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE;
 
+type CounterType =
+  | 'counter_chats'
+  | 'counter_api_calls'
+  | 'counter_aitokens'
+  | 'counter_files'
+  | 'counter_transactions'
+  | 'counter_sessions'
+  | 'counter_registered';
+
+  interface CentrifugeData {
+    type: CounterType;
+    appId: string;
+  }
+
 export function useCentrifugeChannel() {
    const currentUser = useAppStore((s) => s.currentUser);
 
-  const [data, setData] = useState<Record<string, string | number>>();
+  const [data, setData] = useState<CentrifugeData>();
   const [connected, setConnected] = useState(false);
 
   const getToken = async () => {
+    console.log('[centrifuge] getToken CALLED!');
     const newTokens = await refreshToken();
 
     return newTokens.wsToken;

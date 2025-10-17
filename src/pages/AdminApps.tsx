@@ -9,7 +9,7 @@ import { NewAppModal } from '../components/modal/NewAppModal';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
-import { useCentrifugeChannel } from '../hooks/useCentrifuge.ts';
+import { useCentrifugeAppUpdater } from '../hooks/useCentrifugeAppUpdater.ts';
 import { getExportAppsCsv, httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -27,8 +27,6 @@ export default function AdminApps() {
   const currentUser = useAppStore((s) => s.currentUser);
   const doSetApps = useAppStore((s) => s.doSetApps);
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
-
-  const { data } = useCentrifugeChannel();
 
   const limit = useMemo(
     () => Number(searchParams.get('limit')) || 5,
@@ -175,26 +173,28 @@ export default function AdminApps() {
     setAppState(apps);
   }, [apps]);
 
-  useEffect(() => {
-    if (!data) return;
+  useCentrifugeAppUpdater(setAppState);
 
-    if (data.type === 'counter_new_chats') {
-      setAppState((prev) =>
-        prev.map((app) =>
-          app._id === data.appId
-            ? {
-                ...app,
-                stats: {
-                  ...app.stats,
-                  totalChats: app.stats.totalChats + 1,
-                  recentlyChats: app.stats.recentlyChats + 1,
-                },
-              }
-            : app
-        )
-      );
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (!data) return;
+
+  //   if (data.type === 'counter_chats') {
+  //     setAppState((prev) =>
+  //       prev.map((app) =>
+  //         app._id === data.appId
+  //           ? {
+  //               ...app,
+  //               stats: {
+  //                 ...app.stats,
+  //                 totalChats: app.stats.totalChats + 1,
+  //                 recentlyChats: app.stats.recentlyChats + 1,
+  //               },
+  //             }
+  //           : app
+  //       )
+  //     );
+  //   }
+  // }, [data]);
 
   return (
     <>
@@ -218,7 +218,7 @@ export default function AdminApps() {
                 )}
                 <button
                   onClick={() => setShowModal(true)}
-                  className="flex items-center justify-center sm:w-[40px] h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
+                  className="flex items-center justify-center sm:w-full h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
                 >
                   <IconAdd color="white" className="md:mr-2" />
                   <span className="hidden md:block">Create App</span>
@@ -234,13 +234,14 @@ export default function AdminApps() {
               <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
             )}
 
-            {appsState.map((app) => (
-              <ApplicationPreview
-                key={app._id}
-                app={app}
-                primaryColor={currentApp.primaryColor}
-              />
-            ))}
+            {appsState &&
+              appsState.map((app) => (
+                <ApplicationPreview
+                  key={app._id}
+                  app={app}
+                  primaryColor={currentApp.primaryColor}
+                />
+              ))}
 
             {currentUser?.isSuperAdmin && (
               <Pagination
