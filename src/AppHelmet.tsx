@@ -30,7 +30,7 @@ export default function AppHelmet() {
         navigate('/login');
       }
     }
-  }, []);
+  }, [token, location.pathname, navigate]);
 
   useEffect(() => {
     if (
