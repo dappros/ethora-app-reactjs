@@ -43,11 +43,11 @@ export default function TurnstileBridge() {
         sitekey: siteKey,
         callback: (token: string) => {
           console.log('Turnstile success, token:', token);
-          window.location.href = `ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`;
+          window.location.replace(`ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`);
         },
         'error-callback': (error: string) => {
           console.error('Turnstile error:', error);
-          window.location.href = `ethoraappreactnative://turnstile?error=${encodeURIComponent(error)}`;
+          window.location.replace(`ethoraappreactnative://turnstile?error=${encodeURIComponent(error)}`);
         },
         theme: 'light',
       });
@@ -70,7 +70,7 @@ export default function TurnstileBridge() {
         padding: '20px'
       }}>
         <h2 style={{ marginBottom: '20px', color: '#333' }}>
-          Подтвердите, что вы не робот
+          Confirm that you are not a robot
         </h2>
         <div ref={containerRef} style={{
           minHeight: '65px',
@@ -79,7 +79,7 @@ export default function TurnstileBridge() {
           justifyContent: 'center'
         }} />
         <p style={{ marginTop: '20px', color: '#666', fontSize: '14px' }}>
-          Завершите проверку для продолжения
+          Complete the verification to continue
         </p>
       </div>
     </div>
