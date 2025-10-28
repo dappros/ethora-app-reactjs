@@ -42,8 +42,21 @@ export default function TurnstileBridge() {
       (window as any).turnstile.render(containerRef.current, {
         sitekey: siteKey,
         callback: (token: string) => {
-          console.log('Turnstile success, token:', token);
-          window.location.replace(`ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`);
+          try {
+            window.location.replace(`ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`);
+          } catch (e) {
+            try {
+              window.open(`ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`, '_self');
+            } catch (e2) {
+              try {
+                const link = document.createElement('a');
+                link.href = `ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`;
+                link.click();
+              } catch (e3) {
+                console.error('All redirect methods failed:', e3);
+              }
+            }
+          }
         },
         'error-callback': (error: string) => {
           console.error('Turnstile error:', error);
