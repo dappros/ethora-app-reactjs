@@ -22,7 +22,8 @@ export default function AppHelmet() {
       if (
         location.pathname.startsWith('/tempPassword') ||
         location.pathname.startsWith('/resetPassword') ||
-        location.pathname === '/register'
+        location.pathname === '/register' ||
+        location.pathname === '/turnstile'
       ) {
         return;
       } else {

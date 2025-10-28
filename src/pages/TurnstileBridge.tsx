@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
-const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
+const DEFAULT_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
 
 declare global {
   interface Window {
@@ -11,6 +12,10 @@ declare global {
 
 export default function TurnstileBridge() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [searchParams] = useSearchParams();
+  
+  // Получаем sitekey из URL параметров или используем значение по умолчанию
+  const siteKey = searchParams.get('sitekey') || DEFAULT_SITE_KEY;
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -36,7 +41,7 @@ export default function TurnstileBridge() {
 
       if (containerRef.current && ts) {
         ts.render(containerRef.current, {
-          sitekey: SITE_KEY,
+          sitekey: siteKey,
           callback: (token: string) => {
             window.location.href =
               'ethoraappreactnative://turnstile?token=' +
