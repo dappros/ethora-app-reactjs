@@ -14,7 +14,6 @@ export default function TurnstileBridge() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [searchParams] = useSearchParams();
   
-  // Получаем sitekey из URL параметров или используем значение по умолчанию
   const siteKey = searchParams.get('sitekey') || DEFAULT_SITE_KEY;
 
   useEffect(() => {

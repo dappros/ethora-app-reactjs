@@ -3,7 +3,7 @@ import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { actionAfterLogin } from '../actions.ts';
 import { httpGetOneUser } from '../http.ts';
 
-const publicPaths = ['/register', '/resetPassword', '/tempPassword'];
+const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile'];
 
 export const useTrackUrl = () => {
   const navigate = useNavigate();
@@ -20,7 +20,6 @@ export const useTrackUrl = () => {
   useEffect(() => {
     if (!token) {
       if (publicPath) {
-        // already on a public route (e.g., /resetPassword/:token), keep full path
         return;
       }
       return navigate(`/login${location.search}`);
@@ -48,7 +47,6 @@ export const useTrackUrl = () => {
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-    // alert("here ++")
     const getUrl = async () => {
       const isResetPassword = matchPath(
         '/resetPassword/:token?',
@@ -57,7 +55,6 @@ export const useTrackUrl = () => {
       const isTempPassword = matchPath('/tempPassword', location.pathname);
 
       if (token) {
-        // sleep(1000)
         try {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
@@ -71,7 +68,6 @@ export const useTrackUrl = () => {
         }
       } else {
         if (publicPath) {
-          // already on a public route (e.g., /resetPassword/:token), keep full path
           return;
         }
         navigate(`/login${location.search}`);
