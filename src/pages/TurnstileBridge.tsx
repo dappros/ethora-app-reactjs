@@ -42,25 +42,28 @@ export default function TurnstileBridge() {
       (window as any).turnstile.render(containerRef.current, {
         sitekey: siteKey,
         callback: (token: string) => {
-          try {
-            window.location.replace(`ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`);
-          } catch (e) {
-            try {
-              window.open(`ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`, '_self');
-            } catch (e2) {
-              try {
-                const link = document.createElement('a');
-                link.href = `ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`;
-                link.click();
-              } catch (e3) {
-                console.error('All redirect methods failed:', e3);
-              }
-            }
+          console.log('Turnstile success, token:', token);
+          // Используем redirect URI для возврата в мобильное приложение
+          const redirectUri = new URLSearchParams(window.location.search).get('redirect_uri');
+          if (redirectUri) {
+            const url = new URL(redirectUri);
+            url.searchParams.set('token', token);
+            window.location.href = url.toString();
+          } else {
+            // Fallback для тестирования в браузере
+            alert(`Turnstile Token: ${token}`);
           }
         },
         'error-callback': (error: string) => {
           console.error('Turnstile error:', error);
-          window.location.replace(`ethoraappreactnative://turnstile?error=${encodeURIComponent(error)}`);
+          const redirectUri = new URLSearchParams(window.location.search).get('redirect_uri');
+          if (redirectUri) {
+            const url = new URL(redirectUri);
+            url.searchParams.set('error', error);
+            window.location.href = url.toString();
+          } else {
+            alert(`Turnstile Error: ${error}`);
+          }
         },
         theme: 'light',
       });
