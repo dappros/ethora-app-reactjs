@@ -8,7 +8,6 @@ import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
-import { ErrorBoundary } from './components/ErrorBoundary';
 const Admin = lazy(() => import('./pages/Admin'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
@@ -18,10 +17,10 @@ const AppUsers = lazy(() => import('./pages/AppUsers'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
-const TurnstileBridge = lazy(() => import('./pages/TurnstileBridge'));
 
 import App from './App';
 import AdminLayout from './pages/AdminLayout';
+import TurnstileBridge from './pages/TurnstileBridge';
 
 export const router = createBrowserRouter(
   [
@@ -50,11 +49,7 @@ export const router = createBrowserRouter(
             },
             {
               path: '/turnstile',
-              element: (
-                <ErrorBoundary>
-                  <TurnstileBridge />
-                </ErrorBoundary>
-              ),
+              Component: TurnstileBridge,
             },
             {
               path: '/app',

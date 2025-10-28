@@ -1,115 +1,87 @@
 import { useEffect, useRef } from 'react';
 
-const DEFAULT_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
-
-declare global {
-  interface Window {
-    onTurnstileOK?: (token: string) => void;
-    onTurnstileError?: (err: unknown) => void;
-  }
-}
+const TEST_SITE_KEY = import.meta.env.VITE_SITE_KEY as string;
 
 export default function TurnstileBridge() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const scriptLoadedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const siteKey = urlParams.get('sitekey') || DEFAULT_SITE_KEY;
+    const siteKey = urlParams.get('sitekey') || TEST_SITE_KEY;
+    
+    console.log('Turnstile sitekey:', siteKey);
 
-    if (!siteKey) {
-      console.error('No sitekey provided');
-      return;
-    }
-
-    if (scriptLoadedRef.current) {
-      return;
-    }
-
-    const existingScript = document.querySelector('script[src*="turnstile"]');
-    if (existingScript) {
-      scriptLoadedRef.current = true;
-      initializeTurnstile(siteKey);
+    if (document.querySelector('script[src*="turnstile"]')) {
+      renderTurnstile(siteKey);
       return;
     }
 
     const script = document.createElement('script');
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
     script.async = true;
-    script.defer = true;
-    
     script.onload = () => {
-      scriptLoadedRef.current = true;
-      initializeTurnstile(siteKey);
+      console.log('Turnstile script loaded');
+      renderTurnstile(siteKey);
     };
-
     script.onerror = () => {
       console.error('Failed to load Turnstile script');
     };
-
+    
     document.head.appendChild(script);
-
-    return () => {
-    };
   }, []);
 
-  const initializeTurnstile = (siteKey: string) => {
-    if (!containerRef.current) {
-      console.error('Container not found');
-      return;
-    }
-
-    if (typeof (window as any).turnstile === 'undefined') {
-      console.error('Turnstile not available');
+  const renderTurnstile = (siteKey: string) => {
+    if (!containerRef.current || !(window as any).turnstile) {
+      console.error('Container or Turnstile not available');
       return;
     }
 
     try {
+      console.log('Rendering Turnstile with sitekey:', siteKey);
+      
       (window as any).turnstile.render(containerRef.current, {
         sitekey: siteKey,
         callback: (token: string) => {
-          try {
-            window.location.href = 
-              'ethoraappreactnative://turnstile?token=' + 
-              encodeURIComponent(token);
-          } catch (err) {
-            console.error('Error redirecting with token:', err);
-          }
+          console.log('Turnstile success, token:', token);
+          window.location.href = `ethoraappreactnative://turnstile?token=${encodeURIComponent(token)}`;
         },
         'error-callback': (error: string) => {
-          try {
-            window.location.href = 
-              'ethoraappreactnative://turnstile?error=' + 
-              encodeURIComponent(String(error));
-          } catch (err) {
-            console.error('Error redirecting with error:', err);
-          }
+          console.error('Turnstile error:', error);
+          window.location.href = `ethoraappreactnative://turnstile?error=${encodeURIComponent(error)}`;
         },
-        action: 'signup',
         theme: 'light',
       });
-    } catch (err) {
-      console.error('Error initializing Turnstile:', err);
+    } catch (error) {
+      console.error('Error rendering Turnstile:', error);
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f5f5f5',
-      }}
-    >
-      <div 
-        ref={containerRef}
-        style={{
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f5f5f5',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <div style={{
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        <h2 style={{ marginBottom: '20px', color: '#333' }}>
+          Подтвердите, что вы не робот
+        </h2>
+        <div ref={containerRef} style={{
           minHeight: '65px',
           minWidth: '300px',
-        }}
-      />
+          display: 'flex',
+          justifyContent: 'center'
+        }} />
+        <p style={{ marginTop: '20px', color: '#666', fontSize: '14px' }}>
+          Завершите проверку для продолжения
+        </p>
+      </div>
     </div>
   );
 }
