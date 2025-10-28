@@ -17,6 +17,7 @@ const AppUsers = lazy(() => import('./pages/AppUsers'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
+const TurnstileBridge = lazy(() => import('./pages/TurnstileBridge'));
 
 import App from './App';
 import AdminLayout from './pages/AdminLayout';
@@ -45,6 +46,10 @@ export const router = createBrowserRouter(
             {
               path: '/resetPassword/:token?',
               Component: ForgetPassword,
+            },
+            {
+              path: '/turnstile',
+              Component: TurnstileBridge,
             },
             {
               path: '/app',
