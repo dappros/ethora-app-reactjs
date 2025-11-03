@@ -27,7 +27,11 @@ export function NewAppModal({ onClose, show }: Props) {
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const { register, handleSubmit } = useForm<Inputs>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>();
   const [dots, setDots] = useState('');
 
   const onSubmit: SubmitHandler<Inputs> = ({ appName }) => {
@@ -124,12 +128,29 @@ export function NewAppModal({ onClose, show }: Props) {
               Get Started with Your New App
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
-              <input
-                type="text"
-                placeholder="App Name"
-                {...register('appName', { required: true })}
-                className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-4 outline-none"
-              />
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="App Name"
+                  {...register('appName', {
+                    required: 'App name is required',
+                    minLength: {
+                      value: 3,
+                      message: 'App name must be at least 3 characters',
+                    },
+                  })}
+                  className={`rounded-2xl bg-gray-100 py-3 px-6 w-full outline-none ${
+                    errors.appName
+                      ? 'border-2 border-red-500'
+                      : 'border-2 border-transparent'
+                  }`}
+                />
+                {errors.appName && (
+                  <p className="text-red-500 text-sm mt-1 px-6">
+                    {errors.appName.message}
+                  </p>
+                )}
+              </div>
               <div className="flex gap-4">
                 <button
                   className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
