@@ -13,6 +13,7 @@ import { useCentrifugeAppUpdater } from '../hooks/useCentrifugeAppUpdater.ts';
 import { getExportAppsCsv, httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
+import classNames from 'classnames';
 
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -218,7 +219,10 @@ export default function AdminApps() {
                 )}
                 <button
                   onClick={() => setShowModal(true)}
-                  className="flex items-center justify-center sm:w-full h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
+                  className={classNames(
+                    "flex items-center justify-center sm:w-full h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela",
+                    currentUser?.isSuperAdmin ? "px-0" : "px-4"
+                  )}
                 >
                   <IconAdd color="white" className="md:mr-2" />
                   <span className="hidden md:block">Create App</span>

@@ -20,7 +20,6 @@ export function useGoogleTranslateFix() {
         }
 
         if (mutation.type === 'childList') {
-          const target = mutation.target as Element;
           const addedNodes = Array.from(mutation.addedNodes);
           return addedNodes.some((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
