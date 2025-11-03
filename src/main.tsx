@@ -33,29 +33,6 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
   }
 };
 
-window.addEventListener('error', (event) => {
-  if (
-    event.error?.name === 'NotFoundError' &&
-    event.error?.message?.includes('removeChild') &&
-    event.error?.message?.includes('not a child')
-  ) {
-    event.preventDefault();
-    event.stopPropagation();
-    return false;
-  }
-}, true);
-
-window.addEventListener('unhandledrejection', (event) => {
-  if (
-    event.reason?.name === 'NotFoundError' &&
-    event.reason?.message?.includes('removeChild') &&
-    event.reason?.message?.includes('not a child')
-  ) {
-    event.preventDefault();
-    return false;
-  }
-});
-
 createRoot(document.getElementById('root')!).render(
   // @ts-ignore
   <XmppProvider>
