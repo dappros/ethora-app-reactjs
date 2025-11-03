@@ -4,9 +4,10 @@ import { IconClose } from '../Icons/IconClose';
 
 import { CircularProgress } from '@mui/material';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
+import { useGoogleTranslateFix } from '../../hooks/useGoogleTranslateFix';
 // import { TextInput } from '../ui/TextInput';
 
 interface Props {
@@ -21,6 +22,8 @@ type Inputs = {
 
 export function NewAppModal({ onClose, show }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fixKey = useGoogleTranslateFix();
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -75,6 +78,7 @@ export function NewAppModal({ onClose, show }: Props) {
 
   return (
     <Dialog
+      key={fixKey}
       className="fixed inset-0 z-50 flex justify-center items-center bg-black/50 transition duration-300"
       open={show}
       onClose={() => {}}

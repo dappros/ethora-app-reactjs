@@ -55,7 +55,7 @@ export const TabAIWidgetCode = ({
 
     const lines = [
       `<script`,
-      `  src="https://dappros-wp-scripts.s3.us-east-2.amazonaws.com/ethora_assistant.js"`,
+      `  src="https://widget.ethora.com/assistant.js"`,
       `  id="chat-content-assistant"`,
       `  data-bot-id="${appId}_${userId}-bot@xmpp.ethoradev.com"`,
     ];
