@@ -1,5 +1,6 @@
 import { Checkbox, Field, Label } from '@headlessui/react';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 interface Props {
   enableEmail: boolean;
@@ -28,6 +29,30 @@ export function SignonOptions({
   setEnableMetamask,
   firebaseWebConfigString,
 }: Props) {
+  const isEmptyFirebaseConfig = !firebaseWebConfigString || firebaseWebConfigString.trim() === '';
+
+  const WarningMessage = ({ text }: { text: string }) => {
+    if (!isEmptyFirebaseConfig) {
+      return <p className="font-sans text-[12px] text-gray-500 mb-4">{text}</p>;
+    }
+
+    return (
+      <div className="flex items-start gap-2 mb-4">
+        <WarningAmberIcon 
+          sx={{ 
+            fontSize: 16, 
+            color: '#f59e0b',
+            marginTop: '2px',
+            flexShrink: 0
+          }} 
+        />
+        <p className="font-sans text-[14px] text-yellow-600 font-medium">
+          {text}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="">
       <p className="font-sans text-sm mb-8">
@@ -69,9 +94,7 @@ export function SignonOptions({
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">Google</Label>
       </Field>
-      <p className="font-sans text-[12px] text-gray-500 mb-4">
-        Make sure to add your App Firebase settings for this to work.
-      </p>
+      <WarningMessage text="Make sure to add your App Firebase settings for this to work." />
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
           className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
@@ -82,9 +105,7 @@ export function SignonOptions({
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">Apple</Label>
       </Field>
-      <p className="font-sans text-[12px] text-gray-500 mb-4">
-        Make sure to add your App Firebase settings for this to work.
-      </p>
+      <WarningMessage text="Make sure to add your App Firebase settings for this to work." />
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
           className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
@@ -95,9 +116,7 @@ export function SignonOptions({
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">Facebook</Label>
       </Field>
-      <p className="font-sans text-[12px] text-gray-500 mb-4">
-        Make sure to add your App Firebase settings for this to work.
-      </p>
+      <WarningMessage text="Make sure to add your App Firebase settings for this to work." />
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
           className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
