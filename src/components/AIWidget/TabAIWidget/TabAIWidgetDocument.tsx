@@ -1,8 +1,9 @@
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
+import { IconButton, Box, Typography } from '@mui/material';
 import { ReactElement, RefObject, useState, useRef, useMemo, useEffect } from 'react';
 import { Rag } from '../Rag';
 import { setSourcesSiteFiles, setSourcesSiteFilesDelete } from '../../../http';
@@ -111,25 +112,33 @@ export const TabAIWidgetDocument = ({
   };
 
   const handleRemoveFile = async (fileId: string) => {
+    const isLocalFile = localFiles.some((f) => f.id === fileId && f.file);
+    
+    if (isLocalFile) {
+      setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
+      return;
+    }
+    
     try {
       await setSourcesSiteFilesDelete(appId as string, fileId);
       
-      setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
-      
       setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
-      
       setInitialFiles((prev) => prev.filter((f) => f.id !== fileId));
     } catch (error) {
       console.error('Error removing file', error);
     }
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    if (extension === 'pdf') {
+      return <PictureAsPdfIcon sx={{ fontSize: 48, color: '#ef4444' }} />;
+    }
+    return <DescriptionIcon sx={{ fontSize: 48, color: '#6b7280' }} />;
+  };
+
+  const getFileName = (url: string): string => {
+    return url.split('/').pop() || url;
   };
 
   return (
@@ -151,23 +160,131 @@ export const TabAIWidgetDocument = ({
         Drag & Drop your documents here for the system to ingest data from
         there. Supported formats: TXT, CSV, JSON, DOC, PDF.
       </p>
-      <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragging
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-white'
-        }`}
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div className="flex flex-col items-center">
-          <IconButton onClick={handleIconButtonClick}>
-            <FileUploadOutlinedIcon className="h-8 w-8 text-gray-400" />
-          </IconButton>
-          <p className="pt-2 text-sm text-gray-500">Drag & Drop or click to select files</p>
-        </div>
+
+      <div className="flex flex-wrap gap-4">
+        {allFiles.map((file) => (
+          <Box
+            key={file.id}
+            sx={{
+              position: 'relative',
+              width: 130,
+              height: 130,
+              border: '2px dashed',
+              borderColor: file.file ? '#fbbf24' : '#d1d5db',
+              borderRadius: 2,
+              backgroundColor: file.file ? '#fef3c7' : '#f9fafb',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 1,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              '&:hover': {
+                borderColor: '#3b82f6',
+                backgroundColor: '#eff6ff',
+              },
+            }}
+          >
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveFile(file.id);
+              }}
+              sx={{
+                position: 'absolute',
+                top: 4,
+                right: 4,
+                width: 24,
+                height: 24,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 2,
+              }}
+            >
+              {getFileIcon(getFileName(file.url))}
+            </Box>
+
+            <Typography
+              variant="caption"
+              sx={{
+                width: '100%',
+                textAlign: 'center',
+                paddingX: 1,
+                paddingBottom: 1,
+                fontSize: '0.7rem',
+                fontWeight: 500,
+                color: '#374151',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+              title={getFileName(file.url)}
+            >
+              {getFileName(file.url)}
+            </Typography>
+          </Box>
+        ))}
+
+        <Box
+          onClick={handleIconButtonClick}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          sx={{
+            width: allFiles.length === 0 ? '100%' : 130,
+            height: allFiles.length === 0 ? 160 : 130,
+            border: '2px dashed',
+            borderColor: isDragging ? '#3b82f6' : '#d1d5db',
+            borderRadius: 2,
+            backgroundColor: isDragging ? '#eff6ff' : '#ffffff',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            '&:hover': {
+              borderColor: '#3b82f6',
+              backgroundColor: '#eff6ff',
+            },
+          }}
+        >
+          <FileUploadOutlinedIcon
+            sx={{
+              fontSize: 48,
+              color: isDragging ? '#3b82f6' : '#9ca3af',
+              marginBottom: 1,
+            }}
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.7rem',
+              color: '#6b7280',
+              textAlign: 'center',
+              paddingX: 1,
+            }}
+          >
+            Drag & Drop or click to select files
+          </Typography>
+        </Box>
       </div>
 
       <input
@@ -178,45 +295,6 @@ export const TabAIWidgetDocument = ({
         onChange={handleFileInputChange}
         className="hidden"
       />
-
-      {allFiles.length > 0 && (
-        <div className="mt-6">
-          <h3 className="font-semibold text-sm mb-3">Files:</h3>
-          <div className="space-y-2">
-            {allFiles.map((file) => (
-              <div
-                key={file.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  file.file 
-                    ? 'bg-yellow-50 border-yellow-200' 
-                    : 'bg-gray-50 border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <InsertDriveFileIcon className="text-gray-500 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {file.url}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatFileSize(file.mdByteSize)}
-                      {file.createdAt && !file.file && ` • ${new Date(file.createdAt).toLocaleDateString()}`}
-                      {file.file && ' • Waiting for upload'}
-                    </p>
-                  </div>
-                </div>
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveFile(file.id)}
-                  className="flex-shrink-0"
-                >
-                  <DeleteOutlineIcon fontSize="small" className="text-red-500" />
-                </IconButton>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {localFiles.length > 0 && (
         <button 
