@@ -3,9 +3,9 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { IconButton } from '@mui/material';
-import { ReactElement, RefObject, useState, useRef, useMemo } from 'react';
+import { ReactElement, RefObject, useState, useRef, useMemo, useEffect } from 'react';
 import { Rag } from '../Rag';
-import { setSourcesSiteFiles } from '../../../http';
+import { setSourcesSiteFiles, setSourcesSiteFilesDelete } from '../../../http';
 import { useParams } from 'react-router-dom';
 import { Files } from '../../../models';
 
@@ -22,11 +22,20 @@ export const TabAIWidgetDocument = ({
   const [localFiles, setLocalFiles] = useState<Files[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Files[]>([]);
+  const [initialFiles, setInitialFiles] = useState<Files[]>([]);
+  const isInitializedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!isInitializedRef.current && arrayFiles) {
+      setInitialFiles(arrayFiles || []);
+      isInitializedRef.current = true;
+    }
+  }, [arrayFiles]);
 
   const allFiles: Files[] = useMemo(() => {
-    if (!arrayFiles) return localFiles;
-    return [...arrayFiles, ...localFiles];
-  }, [arrayFiles, localFiles]);
+    return [...initialFiles, ...uploadedFiles, ...localFiles];
+  }, [initialFiles, uploadedFiles, localFiles]);
 
   const handleSetFiles = async () => {
     const filesToUpload = localFiles.filter((f) => f.file);
@@ -38,9 +47,12 @@ export const TabAIWidgetDocument = ({
     
     try {
       const fileObjects = filesToUpload.map((f) => f.file!);
-      const response = await setSourcesSiteFiles(appId as string, fileObjects);
-      console.log('Files uploaded successfully', response);
-      setLocalFiles([]);
+      const { data } = await setSourcesSiteFiles(appId as string, fileObjects);
+      
+      const uploadedIds = filesToUpload.map(f => f.id);
+      setLocalFiles((prev) => prev.filter((f) => !uploadedIds.includes(f.id)));
+      
+      setUploadedFiles((prev) => [...prev, ...data.result]);
     } catch (error) {
       console.error('Error setting files', error);
     }
@@ -98,8 +110,18 @@ export const TabAIWidgetDocument = ({
     handleFileSelect(droppedFiles);
   };
 
-  const handleRemoveFile = (fileId: string) => {
-    setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
+  const handleRemoveFile = async (fileId: string) => {
+    try {
+      await setSourcesSiteFilesDelete(appId as string, fileId);
+      
+      setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
+      
+      setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
+      
+      setInitialFiles((prev) => prev.filter((f) => f.id !== fileId));
+    } catch (error) {
+      console.error('Error removing file', error);
+    }
   };
 
   const formatFileSize = (bytes: number): string => {

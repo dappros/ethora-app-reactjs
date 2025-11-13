@@ -587,3 +587,11 @@ export function setSourcesSiteFiles(appId: string, files: File[]) {
     },
   });
 }
+
+export function setSourcesSiteFilesDelete(appId: string, fileId: string) {  
+  return http.delete(`/sources/docs/${appId}/${fileId}`, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}
