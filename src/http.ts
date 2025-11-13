@@ -574,3 +574,16 @@ export function deleteSourcesSiteCrawlV2(appId: string, urls: string[]) {
     }
   });
 }
+
+export function setSourcesSiteFiles(appId: string, files: File[]) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  
+  return http.post(`/sources/docs/${appId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}

@@ -48,6 +48,15 @@ export interface SiteLinks {
   md: string;
 }
 
+export interface Files {
+  createdAt: string;
+  id: string;
+  md: string;
+  mdByteSize: number;
+  url: string;
+  file?: File;
+}
+
 export interface ModelAIbot {
     userId: string;
     chatId: string;
@@ -72,6 +81,7 @@ export interface ModelAIbot {
       type: string;
       picture: string;
     }
+    files: Array<Files>;
   }
 
 export interface ModelApp {

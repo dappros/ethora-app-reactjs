@@ -100,7 +100,7 @@ export const TabAIWidget = ({
         />
       </TabPanel>
       <TabPanel value="4" sx={{ p: 0 }}>
-        <TabAIWidgetDocument ragRef={ragRef} />
+        <TabAIWidgetDocument ragRef={ragRef} arrayFiles={aiBot.files} />
       </TabPanel>
       </div>
     </TabContext>

@@ -12,6 +12,7 @@ interface Props {
   setEnableFacebook: (on: boolean) => void;
   enableMetamask: boolean;
   setEnableMetamask: (on: boolean) => void;
+  firebaseWebConfigString: string;
 }
 
 export function SignonOptions({
@@ -25,6 +26,7 @@ export function SignonOptions({
   setEnableFacebook,
   enableMetamask,
   setEnableMetamask,
+  firebaseWebConfigString,
 }: Props) {
   return (
     <div className="">

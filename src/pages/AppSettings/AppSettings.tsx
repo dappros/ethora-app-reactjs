@@ -42,6 +42,7 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
+import { SettingTutorialModal } from '../../components/modal/SettingsTutorialModal/SettingTutorialModal';
 
 const tabs = [
   'AI Widget',
@@ -749,6 +750,7 @@ export default function AppSettings() {
               setEnableFacebook={setEnableFacebook}
               enableMetamask={enableMetamask}
               setEnableMetamask={setEnableMetamask}
+              firebaseWebConfigString={firebaseWebConfigString}
             />
           </TabPanel>
 
@@ -837,7 +839,7 @@ export default function AppSettings() {
         />
       )}
 
-      {isInfo && (
+      {/* {isInfo && (
         <InfoAppModal
           appName={displayName}
           domainName={app.domainName}
@@ -847,10 +849,10 @@ export default function AppSettings() {
           appId={app._id}
           navigate={navigate}
         />
-      )}
-      {/* {isInfo && (
-        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
       )} */}
+      {isInfo && (
+        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
+      )}
 
       {loading && <Loading />}
     </div>
