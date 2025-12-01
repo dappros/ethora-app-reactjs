@@ -42,14 +42,8 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   {
     id: 'one',
     question: {
-      title: 'quickly build a new Chat app for Web (using no code or low code if possible)',
-      description: [
-        'quickly build a new ',
-        <strong key="chat">Chat app</strong>,
-        ' for ',
-        <strong key="web">Web</strong>,
-        ' (using no code or low code if possible)',
-      ],
+      title: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
+      description: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
       image: IconChat,
     },
     answer: {
@@ -66,6 +60,21 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
           </NavLink>{' '}
           section, then customize the appearance of your application.
         </span>,
+      ],
+      images: ['/src/assets/gif/appearance.gif'],
+    },
+  },
+  {
+    id: 'one',
+    question: {
+      title: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
+      description: 'Quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
+      image: IconChat,
+    },
+    answer: {
+      time: `5–15 minutes`,
+      complexity: 2,
+      description: [
         <span>
           Go to the{' '}
           <NavLink
@@ -78,22 +87,14 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
           it.
         </span>,
       ],
-      images: ['/src/assets/gif/appearance.gif', '/src/assets/gif/webApp.gif'],
+      images: ['/src/assets/gif/webApp.gif'],
     },
   },
   {
     id: 'two',
     question: {
-      title: 'quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
-      description: [
-        'quickly build a new ',
-        <strong key="chat-ios">Chat app</strong>,
-        ' for ',
-        <strong key="ios">iOS</strong>,
-        ' or ',
-        <strong key="android">Android</strong>,
-        ' (using no code or low code if possible)',
-      ],
+      title: 'Quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
+      description: 'Quickly build a new for iOS or Android (using no code or low code if possible)',
       image: IconChat,
     },
     answer: {
@@ -124,15 +125,46 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     id: 'three',
     question: {
       title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description: [
-        'develop a new app ',
-        <strong key="scratch">from scratch</strong>,
-        ' or ',
-        <strong key="screen">integrate chat screen</strong>,
-        ' into my React or Javascript app (using Ethora ',
-        <strong key="sdk">SDK NPM</strong>,
-        ' component) leveraging Ethora Chat & AI infrastructure',
-      ],
+      description:  'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      image: IconChat,
+    },
+    answer: {
+      time: `days to weeks`,
+      complexity: 4,
+      description: [<span>Take user to documentation on NPM component</span>],
+    },
+  },
+  {
+    id: 'four',
+    question: {
+      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      image: IconChat,
+    },
+    answer: {
+      time: `days to weeks`,
+      complexity: 4,
+      description: [<span>Take user to documentation on NPM component</span>],
+    },
+  },
+  {
+    id: 'five',
+    question: {
+      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      image: IconChat,
+    },
+    answer: {
+      time: `days to weeks`,
+      complexity: 4,
+      description: [<span>Take user to documentation on NPM component</span>],
+    },
+  },
+  {
+    id: 'six',
+    question: {
+      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
       image: IconChat,
     },
     answer: {
@@ -148,11 +180,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     id: 'one',
     question: {
       title: '..add AI to my no-code web/mobile app built with Ethora',
-      description: [
-        <strong>..add AI</strong>,
-        ' to my no-code web/mobile ',
-        <strong>app built with Ethora</strong>,
-      ],
+      description: '..add AI to my no-code web/mobile app built with Ethora',
       image: IconChat,
     },
     answer: {
@@ -176,10 +204,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     id: 'two',
     question: {
       title: '..add AI to my Wordpress website (using a WP plugin)',
-      description: [
-        <strong>..add AI</strong>,
-        ' to my Wordpress website (using a WP plugin)',
-      ],
+      description: '..add AI to my Wordpress website (using a WP plugin)',
       image: IconChat,
     },
     answer: {
@@ -194,10 +219,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     id: 'three',
     question: {
       title: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
-      description: [
-        <strong>..add AI</strong>,
-        ' to my website, web app or enterprise web portal (using a ready widget code)',
-      ],
+      description: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
       image: IconChat,
     },
     answer: {
@@ -224,10 +246,7 @@ export const getQuestionsDemo = (): QuestionsType => [
     id: 'one',
     question: {
       title: 'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
-      description: [
-        <strong>Book a free feasibility call</strong>,
-        ' with Ethora team to help you choose the right tools and see examples in action.',
-      ],
+      description: 'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
       image: IconChat,
     },
     answer: {

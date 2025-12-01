@@ -5,13 +5,14 @@ import { FC, ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { TransitionGroup } from 'react-transition-group';
 import { IconClose } from '../../Icons/IconClose';
-import { StepChooseTutorial, StepStartTutorial } from './components';
+import { StepChooseTutorial, StepStartTutorial, ListQuestion } from './components';
 import {
   getQuestionsAi,
   getQuestionsChat,
   getQuestionsDemo,
 } from './DataTutorial';
 import { Step } from './typeTutorial';
+import { DemoComponentForm } from './components/DemoComponentForm';
 
 interface SettingTutorialModalProps {
   show: boolean;
@@ -24,6 +25,7 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
 }): ReactElement => {
   const [step, setStep] = useState<Step>('Start');
   const [questionStep, setQuestionStep] = useState('default');
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | undefined>();
   const [animate, setAnimate] = useState(false);
   const { appId } = useParams();
   const questionsChat = getQuestionsChat(appId);
@@ -46,13 +48,52 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
     }, 200);
   };
 
-  const goBack = () => handleChangeStep('Start');
+  const handleSelectQuestion = (questionId: string, category: 'Chat' | 'AI') => {
+    setSelectedQuestionId(questionId);
+    const nextStep: Step = category === 'Chat' ? 'ChatQuestion' : 'AIQuestion';
+    handleChangeStep(nextStep);
+  };
+
+  const goBack = () => {
+    if (step === 'ChatList' || step === 'AIList') {
+      handleChangeStep('Start');
+    } else if (step === 'ChatQuestion' || step === 'AIQuestion') {
+      const listStep = step === 'ChatQuestion' ? 'ChatList' : 'AIList';
+      handleChangeStep(listStep);
+    } else {
+      handleChangeStep('Start');
+    }
+  };
 
   const currentComponent = () => {
     switch (step) {
       case 'Start':
-        return <StepStartTutorial onSelect={handleChangeStep} />;
-      case 'Chat':
+        return <StepStartTutorial onSelect={(selectedStep) => {
+          if (selectedStep === 'Chat') {
+            handleChangeStep('ChatList');
+          } else if (selectedStep === 'AI') {
+            handleChangeStep('AIList');
+          } else {
+            handleChangeStep(selectedStep);
+          }
+        }} />;
+      case 'ChatList':
+        return (
+          <ListQuestion
+            questions={questionsChat}
+            goBack={goBack}
+            onSelectQuestion={(questionId: string) => handleSelectQuestion(questionId, 'Chat')}
+          />
+        );
+      case 'AIList':
+        return (
+          <ListQuestion
+            questions={questionsAi}
+            goBack={goBack}
+            onSelectQuestion={(questionId: string) => handleSelectQuestion(questionId, 'AI')}
+          />
+        );
+      case 'ChatQuestion':
         return (
           <StepChooseTutorial
             animate={animate}
@@ -62,9 +103,10 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
             goBack={goBack}
             navigateStart={`?tab=Appearance`}
             onClose={onClose}
+            initialQuestionId={selectedQuestionId}
           />
         );
-      case 'AI':
+      case 'AIQuestion':
         return (
           <StepChooseTutorial
             animate={animate}
@@ -74,17 +116,19 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
             goBack={goBack}
             navigateStart={`?tab=AI+Widget`}
             onClose={onClose}
+            initialQuestionId={selectedQuestionId}
           />
         );
+      case 'Chat':
+      case 'AI':
+        const listStep = step === 'Chat' ? 'ChatList' : 'AIList';
+        handleChangeStep(listStep);
+        return null;
       case 'Demo':
         return (
-          <StepChooseTutorial
+          <DemoComponentForm
             animate={animate}
-            questionStep={questionStep}
-            handleChangeQuestionStep={handleChangeQuestionStep}
-            questions={questionsDemo}
             goBack={goBack}
-            demo={true}
             onClose={onClose}
           />
         );

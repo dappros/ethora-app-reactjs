@@ -19,6 +19,7 @@ export const StepChooseTutorial = ({
   questionStep: _questionStep,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleChangeQuestionStep: _handleChangeQuestionStep,
+  initialQuestionId,
 }: {
   navigateStart?: string;
   demo?: boolean;
@@ -28,10 +29,20 @@ export const StepChooseTutorial = ({
   animate: boolean;
   questionStep: string;
   handleChangeQuestionStep: (next: string) => void;
+  initialQuestionId?: string;
 }): ReactElement => {
   const navigate = useNavigate();
   
-  const [currentStep, setCurrentStep] = useState(0);
+  // Находим индекс начального вопроса по ID, если он передан
+  const getInitialStep = () => {
+    if (initialQuestionId) {
+      const index = questions.findIndex(q => q.id === initialQuestionId);
+      return index >= 0 ? index : 0;
+    }
+    return 0;
+  };
+  
+  const [currentStep, setCurrentStep] = useState(getInitialStep);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const totalSteps = questions.length;
 
@@ -112,22 +123,11 @@ export const StepChooseTutorial = ({
               direction === 'right' ? 'slide-in-right' : 'slide-in-left'
             )}
           >
-            <div className="btn flex items-start gap-3 text-left p-4 w-full rounded-lg border bg-gray-100">
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">
-                  {currentQuestion.question.description.map((part, i) => (
-                    <span key={i}>{part}</span>
-                  ))}
-                </span>
-              </div>
-            </div>
 
             <div className="flex flex-col items-start gap-2 pt-2 pl-2">
               {currentQuestion.answer.description.map((desc, index) => (
                 <div key={index} className="w-full">
-                  <div className="py-2">
-                    <strong>Answer:</strong> {desc}
-                  </div>
+                  
                   {currentQuestion.answer.images && currentQuestion.answer.images[index] && (
                     <img
                       src={currentQuestion.answer.images[index]}
@@ -135,37 +135,41 @@ export const StepChooseTutorial = ({
                       className="w-full rounded-lg"
                     />
                   )}
+                  <div className="btn flex items-start text-left w-full pt-4">
+                      <span className="font-medium text-lg font-bold">{currentQuestion.question.description}</span>
+                  </div>
+
+                  <div className="pt-4">
+                    {desc}
+                  </div>
                 </div>
               ))}
               
-              {currentQuestion.answer.time && (
-                <div className="py-2">
-                  <strong>Time: </strong>
-                  {currentQuestion.answer.time}
-                </div>
-              )}
-              
-              {currentQuestion.answer.complexity && (
-                <div className="flex items-center gap-2 py-2">
-                  <strong>Complexity: </strong>
-                  <Rating
-                    name="read-only"
-                    value={currentQuestion.answer.complexity}
-                    readOnly
-                    size="small"
-                  />
-                </div>
-              )}
+              <div className="flex items-center justify-around py-2 w-full">
+                {currentQuestion.answer.time && (
+                  <div className="py-2">
+                    <strong>Time: </strong>
+                    {currentQuestion.answer.time}
+                  </div>
+                )}
+                
+                {currentQuestion.answer.complexity && (
+                  <div className="flex items-center gap-2 py-2">
+                    <strong>Complexity: </strong>
+                    <Rating
+                      name="read-only"
+                      value={currentQuestion.answer.complexity}
+                      readOnly
+                      size="small"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {demo ? <div className="mt-6 pt-4 border-t w-full flex items-center justify-center">
-          <button onClick={() => onClose()} className="text-blue-600 hover:text-blue-800 transition-colors">
-            <span>Book demo</span>
-          </button>
-        </div>
-        : <div className="mt-6 pt-4 border-t w-full">
+        <div className="mt-6 pt-4 border-t w-full">
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={handleBack}
@@ -200,7 +204,7 @@ export const StepChooseTutorial = ({
             {!isLastStep && <KeyboardArrowRightRoundedIcon  className="text-white" />}
           </button>
         </div>
-      </div>}
+      </div>
       </StepLayout>
     </div>
   );

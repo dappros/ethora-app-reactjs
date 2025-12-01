@@ -1,8 +1,8 @@
-export type Step = 'Start' | 'Chat' | 'AI' | 'Demo';
+export type Step = 'Start' | 'Chat' | 'AI' | 'Demo' | 'ChatList' | 'AIList' | 'ChatQuestion' | 'AIQuestion';
 
 type QuestionPart = {
   title: string;
-  description: Array<React.ReactNode>;
+  description: string;
   image: string;
 };
 
