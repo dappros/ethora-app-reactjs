@@ -9,9 +9,9 @@ import {
   sendHSFormData,
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
+import { getUserCredsFromGoogle, IUser } from '../../utils/firebase';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
-import { getUserCredsFromGoogle, IUser } from '../../utils/firebase';
 import GoogleIcon from './Icons/socials/googleIcon';
 
 interface GoogleButtonProps {
@@ -26,7 +26,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
     try {
       const loginType = 'google';
       let user, idToken, credential;
-      let creds: | { user: IUser; idToken: any; credential: any } | undefined;
+      let creds: { user: IUser; idToken: any; credential: any } | undefined;
       try {
         creds = await getUserCredsFromGoogle();
         if (!creds) {
@@ -39,7 +39,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       } catch (e) {
         console.error('here ', e);
       }
-
 
       if (user) {
         if (!user.providerData[0].email) {
@@ -110,6 +109,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             await actionAfterLogin(data);
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+            localStorage.setItem('newUser', true.toString());
+
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
         } else {
@@ -124,6 +125,8 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             await actionAfterLogin(data);
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+            localStorage.setItem('newUser', true.toString());
+
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
         }

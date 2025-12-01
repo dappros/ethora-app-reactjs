@@ -4,31 +4,35 @@ import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { NavLink } from 'react-router-dom';
 import { QuestionsType } from './typeTutorial';
 
+import IconChat from '../../../assets/tutorial/tutorial-chat.png';
+import IconAi from '../../../assets/tutorial/tutorial-ai.png';
+import IconDemo from '../../../assets/tutorial/tutorial-demo.png';
+
 export const stepsStartView: {
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: string;
   color: string;
   bgColor?: string;
 }[] = [
   {
     title: 'Chat',
     description: 'Talk to our assistant in real-time',
-    icon: ChatBubbleOutlineIcon,
+    icon: IconChat,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50 hover:bg-purple-100',
   },
   {
     title: 'AI',
     description: 'Get AI-powered assistance',
-    icon: SmartToyOutlinedIcon,
+    icon: IconAi,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-50 hover:bg-yellow-100',
   },
   {
     title: 'Demo',
     description: 'Explore a demo of our features',
-    icon: OndemandVideoOutlinedIcon,
+    icon: IconDemo,
     color: 'text-green-600',
     bgColor: 'bg-green-50 hover:bg-green-100',
   },
@@ -37,13 +41,17 @@ export const stepsStartView: {
 export const getQuestionsChat = (query?: string): QuestionsType => [
   {
     id: 'one',
-    question: [
-      'quickly build a new ',
-      <strong key="chat">Chat app</strong>,
-      ' for ',
-      <strong key="web">Web</strong>,
-      ' (using no code or low code if possible)',
-    ],
+    question: {
+      title: 'quickly build a new Chat app for Web (using no code or low code if possible)',
+      description: [
+        'quickly build a new ',
+        <strong key="chat">Chat app</strong>,
+        ' for ',
+        <strong key="web">Web</strong>,
+        ' (using no code or low code if possible)',
+      ],
+      image: IconChat,
+    },
     answer: {
       time: `5–15 minutes`,
       complexity: 2,
@@ -75,15 +83,19 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   },
   {
     id: 'two',
-    question: [
-      'quickly build a new ',
-      <strong key="chat-ios">Chat app</strong>,
-      ' for ',
-      <strong key="ios">iOS</strong>,
-      ' or ',
-      <strong key="android">Android</strong>,
-      ' (using no code or low code if possible)',
-    ],
+    question: {
+      title: 'quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
+      description: [
+        'quickly build a new ',
+        <strong key="chat-ios">Chat app</strong>,
+        ' for ',
+        <strong key="ios">iOS</strong>,
+        ' or ',
+        <strong key="android">Android</strong>,
+        ' (using no code or low code if possible)',
+      ],
+      image: IconChat,
+    },
     answer: {
       time: `5–15 minutes`,
       complexity: 2,
@@ -110,15 +122,19 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   },
   {
     id: 'three',
-    question: [
-      'develop a new app ',
-      <strong key="scratch">from scratch</strong>,
-      ' or ',
-      <strong key="screen">integrate chat screen</strong>,
-      ' into my React or Javascript app (using Ethora ',
-      <strong key="sdk">SDK NPM</strong>,
-      ' component) leveraging Ethora Chat & AI infrastructure',
-    ],
+    question: {
+      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      description: [
+        'develop a new app ',
+        <strong key="scratch">from scratch</strong>,
+        ' or ',
+        <strong key="screen">integrate chat screen</strong>,
+        ' into my React or Javascript app (using Ethora ',
+        <strong key="sdk">SDK NPM</strong>,
+        ' component) leveraging Ethora Chat & AI infrastructure',
+      ],
+      image: IconChat,
+    },
     answer: {
       time: `days to weeks`,
       complexity: 4,
@@ -130,11 +146,15 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
 export const getQuestionsAi = (query?: string): QuestionsType => [
   {
     id: 'one',
-    question: [
-      <strong>..add AI</strong>,
-      ' to my no-code web/mobile ',
-      <strong>app built with Ethora</strong>,
-    ],
+    question: {
+      title: '..add AI to my no-code web/mobile app built with Ethora',
+      description: [
+        <strong>..add AI</strong>,
+        ' to my no-code web/mobile ',
+        <strong>app built with Ethora</strong>,
+      ],
+      image: IconChat,
+    },
     answer: {
       time: `5–15 minutes`,
       complexity: 2,
@@ -154,7 +174,14 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
   },
   {
     id: 'two',
-    question: ['..add AI to my Wordpress website (using a WP plugin)'],
+    question: {
+      title: '..add AI to my Wordpress website (using a WP plugin)',
+      description: [
+        <strong>..add AI</strong>,
+        ' to my Wordpress website (using a WP plugin)',
+      ],
+      image: IconChat,
+    },
     answer: {
       time: `0.5–1 hour`,
       complexity: 2,
@@ -165,9 +192,14 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
   },
   {
     id: 'three',
-    question: [
-      '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
-    ],
+    question: {
+      title: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
+      description: [
+        <strong>..add AI</strong>,
+        ' to my website, web app or enterprise web portal (using a ready widget code)',
+      ],
+      image: IconChat,
+    },
     answer: {
       time: `0.5–4 hours`,
       complexity: 2,
@@ -190,9 +222,14 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
 export const getQuestionsDemo = (): QuestionsType => [
   {
     id: 'one',
-    question: [
-      'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
-    ],
+    question: {
+      title: 'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
+      description: [
+        <strong>Book a free feasibility call</strong>,
+        ' with Ethora team to help you choose the right tools and see examples in action.',
+      ],
+      image: IconChat,
+    },
     answer: {
       description: [<span>[Book a feasibility call]</span>],
     },

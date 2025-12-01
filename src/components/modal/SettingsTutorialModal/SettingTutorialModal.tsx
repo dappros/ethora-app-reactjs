@@ -60,6 +60,8 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
             handleChangeQuestionStep={handleChangeQuestionStep}
             questions={questionsChat}
             goBack={goBack}
+            navigateStart={`?tab=Appearance`}
+            onClose={onClose}
           />
         );
       case 'AI':
@@ -70,6 +72,8 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
             handleChangeQuestionStep={handleChangeQuestionStep}
             questions={questionsAi}
             goBack={goBack}
+            navigateStart={`?tab=AI+Widget`}
+            onClose={onClose}
           />
         );
       case 'Demo':
@@ -80,6 +84,8 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
             handleChangeQuestionStep={handleChangeQuestionStep}
             questions={questionsDemo}
             goBack={goBack}
+            demo={true}
+            onClose={onClose}
           />
         );
     }
@@ -93,10 +99,10 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
     >
       <DialogPanel
         className={classNames(
-          'p-4 sm:py-8 sm:px-8 bg-white rounded-3xl w-full  m-8 relative overflow-hidden max-h-[90vh] overflow-y-scroll scrollbar-hide',
-          questionStep === 'default'
-            ? 'max-w-[70%] md:max-w-[60%] lg:max-w-[40%]'
-            : 'lg:max-w-[50%]'
+          'p-4 sm:py-8 sm:px-8 bg-white rounded-3xl m-8 relative overflow-hidden max-h-[90vh] overflow-y-scroll scrollbar-hide',
+          step === 'Start' 
+            ? 'w-auto' 
+            : 'w-[60%]'
         )}
       >
         <button className="absolute top-[20px] right-[20px]" onClick={onClose}>

@@ -1,10 +1,14 @@
 export type Step = 'Start' | 'Chat' | 'AI' | 'Demo';
 
-type QuestionPart = string | React.ReactNode;
+type QuestionPart = {
+  title: string;
+  description: Array<React.ReactNode>;
+  image: string;
+};
 
 export type QuestionsType = {
   id: string;
-  question: QuestionPart[];
+  question: QuestionPart;
   answer: {
     time?: string;
     complexity?: number;
