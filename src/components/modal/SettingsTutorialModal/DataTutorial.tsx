@@ -8,6 +8,10 @@ import IconChat from '../../../assets/tutorial/tutorial-chat.png';
 import IconAi from '../../../assets/tutorial/tutorial-ai.png';
 import IconDemo from '../../../assets/tutorial/tutorial-demo.png';
 
+import ChatTutorialOne from '../../../assets/tutorial/chat/chat_tutorial_one.png';
+import ChatTutorialTwo from '../../../assets/tutorial/chat/chat_tutorial_two.png';
+import ChatTutorialThree from '../../../assets/tutorial/chat/chat_tutorial_three.png';
+
 export const stepsStartView: {
   title: string;
   description: string;
@@ -44,7 +48,7 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     question: {
       title: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
       description: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
-      image: IconChat,
+      image: ChatTutorialOne,
     },
     answer: {
       time: `5–15 minutes`,
@@ -58,18 +62,18 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
           >
             Appearance
           </NavLink>{' '}
-          section, then customize the appearance of your application.
+          section to give your application a unique style and emphasize its individuality. Here, you can set an attractive Display Name, add a memorable Tagline, choose a signature color to enhance the visual identity, and upload a logo — a key branding element that will help your application stand out from the rest.
         </span>,
       ],
       images: ['/src/assets/gif/appearance.gif'],
     },
   },
   {
-    id: 'one',
+    id: 'two',
     question: {
       title: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
       description: 'Quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
-      image: IconChat,
+      image: ChatTutorialTwo,
     },
     answer: {
       time: `5–15 minutes`,
@@ -91,11 +95,11 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     },
   },
   {
-    id: 'two',
+    id: 'three',
     question: {
       title: 'Quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
       description: 'Quickly build a new for iOS or Android (using no code or low code if possible)',
-      image: IconChat,
+      image: ChatTutorialThree,
     },
     answer: {
       time: `5–15 minutes`,
@@ -122,23 +126,10 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     },
   },
   {
-    id: 'three',
-    question: {
-      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description:  'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      image: IconChat,
-    },
-    answer: {
-      time: `days to weeks`,
-      complexity: 4,
-      description: [<span>Take user to documentation on NPM component</span>],
-    },
-  },
-  {
     id: 'four',
     question: {
       title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      description:  'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
       image: IconChat,
     },
     answer: {
@@ -162,6 +153,19 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   },
   {
     id: 'six',
+    question: {
+      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
+      image: IconChat,
+    },
+    answer: {
+      time: `days to weeks`,
+      complexity: 4,
+      description: [<span>Take user to documentation on NPM component</span>],
+    },
+  },
+  {
+    id: 'seven',
     question: {
       title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
       description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
