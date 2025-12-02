@@ -12,7 +12,6 @@ export const StepChooseTutorial = ({
   questions,
   goBack,
   animate,
-  demo,
   navigateStart,
   onClose,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,7 +21,6 @@ export const StepChooseTutorial = ({
   initialQuestionId,
 }: {
   navigateStart?: string;
-  demo?: boolean;
   goBack: () => void;
   onClose: () => void;
   questions: QuestionsType;
@@ -132,7 +130,8 @@ export const StepChooseTutorial = ({
                     <img
                       src={currentQuestion.answer.images[index]}
                       alt="Demo animation"
-                      className="w-full rounded-lg"
+                      className="w-full rounded-lg w-[80%]"
+                      style={{ margin: '0 auto' }}
                     />
                   )}
                   <div className="btn flex items-start text-left w-full pt-4">
@@ -145,7 +144,7 @@ export const StepChooseTutorial = ({
                 </div>
               ))}
               
-              <div className="flex items-center justify-around py-2 w-full">
+              {/* <div className="flex items-center justify-around py-2 w-full">
                 {currentQuestion.answer.time && (
                   <div className="py-2">
                     <strong>Time: </strong>
@@ -164,7 +163,7 @@ export const StepChooseTutorial = ({
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ export const ListQuestion = ({
               onClick={() => onSelectQuestion(data.id)}
               className="flex flex-col items-start gap-3 text-left p-4 pb-0 w-full hover:bg-gray-100 transition-colors"
             >
-              <div className="flex items-center gap-3 w-full">
+              <div className="flex items-start gap-3 w-full">
                 {data.question.image && (
                   <img 
                     src={data.question.image} 

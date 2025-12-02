@@ -8,9 +8,18 @@ import IconChat from '../../../assets/tutorial/tutorial-chat.png';
 import IconAi from '../../../assets/tutorial/tutorial-ai.png';
 import IconDemo from '../../../assets/tutorial/tutorial-demo.png';
 
+
+// Chat tutorial
 import ChatTutorialOne from '../../../assets/tutorial/chat/chat_tutorial_one.png';
 import ChatTutorialTwo from '../../../assets/tutorial/chat/chat_tutorial_two.png';
 import ChatTutorialThree from '../../../assets/tutorial/chat/chat_tutorial_three.png';
+
+// AI tutorial
+import AiTutorialOne from '../../../assets/tutorial/widget/widget_tutorial_one.png';
+import AiTutorialOneAnswer from '../../../assets/tutorial/widget/widget_tutorial_one_answer.png';
+import AiTutorialTwo from '../../../assets/tutorial/widget/widget_tutorial_two.png';
+import AiTutorialTwoAnswer from '../../../assets/tutorial/widget/widget_tutorial_two_answer.png';
+// import AiTutorialThree from '../../../assets/tutorial/ai/ai_tutorial_three.png';
 
 export const stepsStartView: {
   title: string;
@@ -183,6 +192,38 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
   {
     id: 'one',
     question: {
+      title: 'Easy integration of the AI widget into your project',
+      description: 'Use the opportunity to give your AI widget a branded look...',
+      image: AiTutorialOne,
+    },
+    answer: {
+      time: `5–15 minutes`,
+      complexity: 2,
+      description: [
+        'Use the opportunity to give your AI widget a branded look — specify a convenient and memorable name, and set the path to a local avatar so the widget fits perfectly into your project’s design. After configuring everything, simply copy the generated code and paste it at the end of the <body> tag — and your personalized AI assistant will be fully ready to work in your application or on your website. Fast, simple, and without any extra steps.',
+      ],
+      images: [AiTutorialOneAnswer],
+    },
+  },
+  {
+    id: 'two',
+    question: {
+      title: 'Easy integration of the AI widget into your project',
+      description: 'Use this section to define your bot’s personality and interaction style...',
+      image: AiTutorialTwo,
+    },
+    answer: {
+      time: `5–15 minutes`,
+      complexity: 2,
+      description: [
+        'Use this section to define your bot’s personality and interaction style. Here, you can describe in detail how the assistant should respond to users, what tasks it should perform, and what tone of communication it should maintain. If needed, you can also add important context about your business so the bot understands the specifics of your products and works as accurately and effectively as possible.',
+      ],
+      images: [AiTutorialTwoAnswer],
+    },
+  },
+  {
+    id: 'three',
+    question: {
       title: '..add AI to my no-code web/mobile app built with Ethora',
       description: '..add AI to my no-code web/mobile app built with Ethora',
       image: IconChat,
@@ -205,7 +246,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     },
   },
   {
-    id: 'two',
+    id: 'four',
     question: {
       title: '..add AI to my Wordpress website (using a WP plugin)',
       description: '..add AI to my Wordpress website (using a WP plugin)',
@@ -220,7 +261,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
     },
   },
   {
-    id: 'three',
+    id: 'five',
     question: {
       title: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
       description: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
