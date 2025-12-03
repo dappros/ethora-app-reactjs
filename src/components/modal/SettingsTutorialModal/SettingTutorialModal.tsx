@@ -9,7 +9,6 @@ import { StepChooseTutorial, StepStartTutorial, ListQuestion } from './component
 import {
   getQuestionsAi,
   getQuestionsChat,
-  getQuestionsDemo,
 } from './DataTutorial';
 import { Step } from './typeTutorial';
 import { DemoComponentForm } from './components/DemoComponentForm';
@@ -30,7 +29,6 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
   const { appId } = useParams();
   const questionsChat = getQuestionsChat(appId);
   const questionsAi = getQuestionsAi(appId);
-  const questionsDemo = getQuestionsDemo();
 
   const handleChangeStep = (next: Step) => {
     setAnimate(true);

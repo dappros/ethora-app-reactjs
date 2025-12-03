@@ -2,6 +2,7 @@ export type Step = 'Start' | 'Chat' | 'AI' | 'Demo' | 'ChatList' | 'AIList' | 'C
 
 type QuestionPart = {
   title: string;
+  time: string;
   description: string;
   image: string;
 };

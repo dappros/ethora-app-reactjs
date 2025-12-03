@@ -19,7 +19,7 @@ import AiTutorialOne from '../../../assets/tutorial/widget/widget_tutorial_one.p
 import AiTutorialOneAnswer from '../../../assets/tutorial/widget/widget_tutorial_one_answer.png';
 import AiTutorialTwo from '../../../assets/tutorial/widget/widget_tutorial_two.png';
 import AiTutorialTwoAnswer from '../../../assets/tutorial/widget/widget_tutorial_two_answer.png';
-// import AiTutorialThree from '../../../assets/tutorial/ai/ai_tutorial_three.png';
+import AiTutorialThree from '../../../assets/tutorial/widget/widget_tutorial_three.png';
 
 export const stepsStartView: {
   title: string;
@@ -30,21 +30,21 @@ export const stepsStartView: {
 }[] = [
   {
     title: 'Chat',
-    description: 'Talk to our assistant in real-time',
+    description: 'Build or integrate instant messaging experience.',
     icon: IconChat,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50 hover:bg-purple-100',
   },
   {
     title: 'AI',
-    description: 'Get AI-powered assistance',
+    description: 'Deploy AI agent for your visitors or your team.',
     icon: IconAi,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-50 hover:bg-yellow-100',
   },
   {
     title: 'Demo',
-    description: 'Explore a demo of our features',
+    description: 'Book a demo with Ethora team.',
     icon: IconDemo,
     color: 'text-green-600',
     bgColor: 'bg-green-50 hover:bg-green-100',
@@ -55,24 +55,16 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   {
     id: 'one',
     question: {
-      title: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
-      description: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
+      title: 'New web app',
+    time: `(no code, 5 min)`,
+      description: 'Launch your own web app with unique URL address, logo and colours without leaving the admin panel. Manage Chat rooms, on-board Users and AI agents if required.',
       image: ChatTutorialOne,
     },
     answer: {
       time: `5–15 minutes`,
       complexity: 2,
       description: [
-        <span>
-          Go to the{' '}
-          <NavLink
-            to={`/app/admin/apps/${query}/settings?tab=Appearance`}
-            className="text-blue-600 underline inline"
-          >
-            Appearance
-          </NavLink>{' '}
-          section to give your application a unique style and emphasize its individuality. Here, you can set an attractive Display Name, add a memorable Tagline, choose a signature color to enhance the visual identity, and upload a logo — a key branding element that will help your application stand out from the rest.
-        </span>,
+        'Launch your own web app with unique URL address, logo and colours without leaving the admin panel. Manage Chat rooms, on-board Users and AI agents if required.',
       ],
       images: ['/src/assets/gif/appearance.gif'],
     },
@@ -80,8 +72,9 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   {
     id: 'two',
     question: {
-      title: 'Quickly build a new Chat app for Web (using no code or low code if possible)',
-      description: 'Quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
+      title: 'New iOS/Android React Native app',
+      time: `(low code, 30 min)`,
+      description: 'Build your own iOS or Android app using our open-source engine. Manage Chat rooms, on-board Users and AI agents if required.',
       image: ChatTutorialTwo,
     },
     answer: {
@@ -106,8 +99,9 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
   {
     id: 'three',
     question: {
-      title: 'Quickly build a new Chat app for iOS or Android (using no code or low code if possible)',
-      description: 'Quickly build a new for iOS or Android (using no code or low code if possible)',
+      title: 'Existing app integration',
+      time: `(days)`,
+      description: 'Add chat into your existing apps using Ethora SDK: NPM chat component, Swift SPM library, Javascript iframe widget, API, Chat Protocol and Bots Framework. ',
       image: ChatTutorialThree,
     },
     answer: {
@@ -134,66 +128,15 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
       ],
     },
   },
-  {
-    id: 'four',
-    question: {
-      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description:  'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      image: IconChat,
-    },
-    answer: {
-      time: `days to weeks`,
-      complexity: 4,
-      description: [<span>Take user to documentation on NPM component</span>],
-    },
-  },
-  {
-    id: 'five',
-    question: {
-      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      image: IconChat,
-    },
-    answer: {
-      time: `days to weeks`,
-      complexity: 4,
-      description: [<span>Take user to documentation on NPM component</span>],
-    },
-  },
-  {
-    id: 'six',
-    question: {
-      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      image: IconChat,
-    },
-    answer: {
-      time: `days to weeks`,
-      complexity: 4,
-      description: [<span>Take user to documentation on NPM component</span>],
-    },
-  },
-  {
-    id: 'seven',
-    question: {
-      title: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      description: 'develop a new app from scratch or integrate chat screen into my React or Javascript app (using Ethora SDK NPM component) leveraging Ethora Chat & AI infrastructure',
-      image: IconChat,
-    },
-    answer: {
-      time: `days to weeks`,
-      complexity: 4,
-      description: [<span>Take user to documentation on NPM component</span>],
-    },
-  },
 ];
 
 export const getQuestionsAi = (query?: string): QuestionsType => [
   {
     id: 'one',
     question: {
-      title: 'Easy integration of the AI widget into your project',
-      description: 'Use the opportunity to give your AI widget a branded look...',
+      title: 'AI widget (copy & paste)',
+      time: `(low code, 10 min)`,
+      description: 'Get a Javascript to add AI agent into your website or test it right here in the admin panel. Index your website or upload documents to train your project specific AI agent.',
       image: AiTutorialOne,
     },
     answer: {
@@ -208,8 +151,9 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
   {
     id: 'two',
     question: {
-      title: 'Easy integration of the AI widget into your project',
-      description: 'Use this section to define your bot’s personality and interaction style...',
+      title: 'AI widget (WP plugin)',
+      time: `(low code, 15 min)`,
+      description: 'Download and install our Wordpress plugin to launch AI agent for your website. Index your website or upload documents via admin panel to manage context.',
       image: AiTutorialTwo,
     },
     answer: {
@@ -224,9 +168,10 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
   {
     id: 'three',
     question: {
-      title: '..add AI to my no-code web/mobile app built with Ethora',
-      description: '..add AI to my no-code web/mobile app built with Ethora',
-      image: IconChat,
+      title: 'AI web app',
+      time: `(no code, 15 min)`,
+      description: 'Launch your own AI agent app with your unique URL, logo and branding. Index your website or upload documents to make your AI agent efficient for your use case.',
+      image: AiTutorialThree,
     },
     answer: {
       time: `5–15 minutes`,
@@ -243,59 +188,6 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
           tab
         </span>,
       ],
-    },
-  },
-  {
-    id: 'four',
-    question: {
-      title: '..add AI to my Wordpress website (using a WP plugin)',
-      description: '..add AI to my Wordpress website (using a WP plugin)',
-      image: IconChat,
-    },
-    answer: {
-      time: `0.5–1 hour`,
-      complexity: 2,
-      description: [
-        <span>Take user to documentation on WP or WP plugin page</span>,
-      ],
-    },
-  },
-  {
-    id: 'five',
-    question: {
-      title: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
-      description: '..add AI to my website, web app or enterprise web portal (using a ready widget code)',
-      image: IconChat,
-    },
-    answer: {
-      time: `0.5–4 hours`,
-      complexity: 2,
-      description: [
-        <span>
-          TaTake user to{' '}
-          <NavLink
-            to={`/app/admin/apps/${query}/settings?tab=AI+bot`}
-            className="text-blue-600 underline inline"
-          >
-            Ai bot
-          </NavLink>{' '}
-          tab
-        </span>,
-      ],
-    },
-  },
-];
-
-export const getQuestionsDemo = (): QuestionsType => [
-  {
-    id: 'one',
-    question: {
-      title: 'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
-      description: 'Book a free feasibility call with Ethora team to help you choose the right tools and see examples in action.',
-      image: IconChat,
-    },
-    answer: {
-      description: [<span>[Book a feasibility call]</span>],
     },
   },
 ];

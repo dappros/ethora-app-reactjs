@@ -74,7 +74,7 @@ export default function AppSettings() {
 
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
-  const [isInfo, setIsInfo] = useState(false);
+  const [isInfo, setIsInfo] = useState(true);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
   const [searchParams, setSearchParams] = useSearchParams();

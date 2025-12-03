@@ -8,6 +8,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
+import backgroundImage from '../../assets/tutorial/background.png';
 import welcomeImage from '../../assets/tutorial/welcome.png';
 import { useGoogleTranslateFix } from '../../hooks/useGoogleTranslateFix';
 // import { TextInput } from '../ui/TextInput';
@@ -39,6 +40,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
 
   const onSubmit: SubmitHandler<Inputs> = ({ appName }) => {
     setLoading(true);
+    setStep(2);
     setProgress(0);
 
     let serverResponded = false;
@@ -94,9 +96,17 @@ export function PreviewAppModal({ onClose, show }: Props) {
     >
       <DialogPanel
         className={classNames(
-          'pb-8 bg-white rounded-3xl w-full max-w-[640px] m-8 relative',
-          step === 0 ? 'p-0 pb-8' : 'p-8'
+          'pb-8 bg-white rounded-3xl w-full m-8 relative',
+          step === 0 ? 'p-0 pb-8' : 'p-8',
+          'xs:max-w-[80%] max-w-[95%]'
+          // 'max-w-[640px]'
         )}
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
       >
         <button
           className="absolute top-[15px] right-[15px]"
@@ -106,22 +116,24 @@ export function PreviewAppModal({ onClose, show }: Props) {
         </button>
 
         {step === 0 && (
-          <>
-            <img src={welcomeImage} alt="Welcome" className="rounded-t-2xl" />
-            <div className="p-4">
-              Thank you for joining us. We are glad to have you here. In your
-              personal account, you can create your own applications, customize
-              chat functions, and use all the features of the Ethora platform.
+          <div className="flex md:flex-row flex-col items-center justify-center gap-4 pt-4">
+            <img src={welcomeImage} alt="Welcome" className="rounded-t-2xl w-full md:w-[60%]" />
+            <div className="p-4 md:pl-0">
+              <p className="text-2xl font-bold pt-4">Welcome to Ethora</p>
+              <div className="py-4">
+              Thank you for joining! This is your admin panel. Here you can <strong>create Apps</strong> 
+              for your projects. Also, you can manage various features such as <strong>Chats</strong> and <strong>AI bots</strong>.
+              </div>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex items-center justify-center py-[8px] px-6 bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
+                >
+                  <span>Let's start</span>
+                </button>
+              </div>
             </div>
-            <div className="border-t flex justify-center pt-4">
-              <button
-                onClick={() => setStep(1)}
-                className="flex items-center justify-center py-[12px] px-7 bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
-              >
-                <span className="hidden md:block">Let's start</span>
-              </button>
-            </div>
-          </>
+          </div>
         )}
 
         {step === 1 && (
