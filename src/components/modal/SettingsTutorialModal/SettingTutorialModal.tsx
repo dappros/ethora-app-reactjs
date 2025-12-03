@@ -144,7 +144,7 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
           'p-4 sm:py-8 sm:px-8 bg-white rounded-3xl m-8 relative overflow-hidden max-h-[90vh] overflow-y-scroll scrollbar-hide',
           step === 'Start' 
             ? 'w-auto' 
-            : 'w-[60%]'
+            : 'w-[80%]'
         )}
       >
         <button className="absolute top-[20px] right-[20px]" onClick={onClose}>

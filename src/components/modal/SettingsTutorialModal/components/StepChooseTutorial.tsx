@@ -135,7 +135,7 @@ export const StepChooseTutorial = ({
                     />
                   )}
                   <div className="btn flex items-start text-left w-full pt-4">
-                      <span className="font-medium text-lg font-bold">{currentQuestion.question.description}</span>
+                      <span className="font-medium text-lg font-bold">{currentQuestion.question.title}</span>
                   </div>
 
                   <div className="pt-4">

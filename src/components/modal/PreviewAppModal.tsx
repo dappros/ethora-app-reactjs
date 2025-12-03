@@ -97,8 +97,8 @@ export function PreviewAppModal({ onClose, show }: Props) {
       <DialogPanel
         className={classNames(
           'pb-8 bg-white rounded-3xl w-full m-8 relative',
-          step === 0 ? 'p-0 pb-8' : 'p-8',
-          'xs:max-w-[80%] max-w-[95%]'
+          step === 0 ? 'p-0 pb-8 xs:max-w-[80%] max-w-[95%]' : 'max-w-[50%] p-8',
+          // 'xs:max-w-[80%] max-w-[95%]'
           // 'max-w-[640px]'
         )}
         style={{

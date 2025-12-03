@@ -56,7 +56,7 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     id: 'one',
     question: {
       title: 'New web app',
-    time: `(no code, 5 min)`,
+      time: `(no code, 5 min)`,
       description: 'Launch your own web app with unique URL address, logo and colours without leaving the admin panel. Manage Chat rooms, on-board Users and AI agents if required.',
       image: ChatTutorialOne,
     },
@@ -81,17 +81,7 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
       time: `5–15 minutes`,
       complexity: 2,
       description: [
-        <span>
-          Go to the{' '}
-          <NavLink
-            to={`/app/admin/apps/${query}/settings?tab=Web+App`}
-            className="text-blue-600 underline inline"
-          >
-            Web
-          </NavLink>{' '}
-          , then enter the URL address of the application name and navigate to
-          it.
-        </span>,
+        'Build your own iOS or Android app using our open-source engine. Manage Chat rooms, on-board Users and AI agents if required.',
       ],
       images: ['/src/assets/gif/webApp.gif'],
     },
@@ -101,30 +91,14 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
     question: {
       title: 'Existing app integration',
       time: `(days)`,
-      description: 'Add chat into your existing apps using Ethora SDK: NPM chat component, Swift SPM library, Javascript iframe widget, API, Chat Protocol and Bots Framework. ',
+      description: 'Add chat into your existing apps using Ethora SDK: NPM chat component, Swift SPM library, Javascript iframe widget, API, Chat Protocol and Bots Framework.',
       image: ChatTutorialThree,
     },
     answer: {
       time: `5–15 minutes`,
       complexity: 2,
       description: [
-        <span>
-          Take user to{' '}
-          <NavLink
-            to={`/app/admin/apps/${query}/settings?tab=Widget`}
-            className="text-blue-600 underline"
-          >
-            Mobile
-          </NavLink>{' '}
-          &{' '}
-          <NavLink
-            to={`/app/admin/apps/${query}/settings?tab=Appearance`}
-            className="text-blue-600 underline inline"
-          >
-            Appearance
-          </NavLink>{' '}
-          , then guide to test as End User
-        </span>,
+        'Add chat into your existing apps using Ethora SDK: NPM chat component, Swift SPM library, Javascript iframe widget, API, Chat Protocol and Bots Framework.',
       ],
     },
   },
