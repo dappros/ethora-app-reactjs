@@ -125,7 +125,6 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             await actionAfterLogin(data);
             document.cookie =
               'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
-            localStorage.setItem('newUser', true.toString());
 
             navigateToUserPage(navigate, config?.afterLoginPage);
           });
