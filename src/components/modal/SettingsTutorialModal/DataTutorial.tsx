@@ -1,6 +1,3 @@
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import OndemandVideoOutlinedIcon from '@mui/icons-material/OndemandVideoOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { NavLink } from 'react-router-dom';
 import { QuestionsType } from './typeTutorial';
 
@@ -13,6 +10,9 @@ import IconDemo from '../../../assets/tutorial/tutorial-demo.png';
 import ChatTutorialOne from '../../../assets/tutorial/chat/chat_tutorial_one.png';
 import ChatTutorialTwo from '../../../assets/tutorial/chat/chat_tutorial_two.png';
 import ChatTutorialThree from '../../../assets/tutorial/chat/chat_tutorial_three.png';
+
+//Chat video
+import ChatVideoOne from '../../../assets/tutorial/video/appearance_chat_tutorial.mp4';
 
 // AI tutorial
 import AiTutorialOne from '../../../assets/tutorial/widget/widget_tutorial_one.png';
@@ -59,6 +59,7 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
       time: `(no code, 5 min)`,
       description: 'Launch your own web app with unique URL address, logo and colours without leaving the admin panel. Manage Chat rooms, on-board Users and AI agents if required.',
       image: ChatTutorialOne,
+      link: `/app/admin/apps/${query}/settings?tab=Appearance`
     },
     answer: {
       time: `5–15 minutes`,
@@ -66,7 +67,8 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
       description: [
         'Launch your own web app with unique URL address, logo and colours without leaving the admin panel. Manage Chat rooms, on-board Users and AI agents if required.',
       ],
-      images: ['/src/assets/gif/appearance.gif'],
+      // images: ['/src/assets/gif/appearance.gif'],
+      video: ChatVideoOne,
     },
   },
   {
@@ -76,6 +78,7 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
       time: `(low code, 30 min)`,
       description: 'Build your own iOS or Android app using our open-source engine. Manage Chat rooms, on-board Users and AI agents if required.',
       image: ChatTutorialTwo,
+      link: `/app/admin/apps/${query}/settings?tab=Mobile+App`
     },
     answer: {
       time: `5–15 minutes`,
@@ -93,6 +96,7 @@ export const getQuestionsChat = (query?: string): QuestionsType => [
       time: `(days)`,
       description: 'Add chat into your existing apps using Ethora SDK: NPM chat component, Swift SPM library, Javascript iframe widget, API, Chat Protocol and Bots Framework.',
       image: ChatTutorialThree,
+      link: `https://github.com/dappros`
     },
     answer: {
       time: `5–15 minutes`,
@@ -112,6 +116,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
       time: `(low code, 10 min)`,
       description: 'Get a Javascript to add AI agent into your website or test it right here in the admin panel. Index your website or upload documents to train your project specific AI agent.',
       image: AiTutorialOne,
+      link: `/app/admin/apps/${query}/settings?tab=AI+Widget`
     },
     answer: {
       time: `5–15 minutes`,
@@ -129,6 +134,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
       time: `(low code, 15 min)`,
       description: 'Download and install our Wordpress plugin to launch AI agent for your website. Index your website or upload documents via admin panel to manage context.',
       image: AiTutorialTwo,
+      link: `/app/admin/apps/${query}/settings?tab=AI+Widget`
     },
     answer: {
       time: `5–15 minutes`,
@@ -146,6 +152,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
       time: `(no code, 15 min)`,
       description: 'Launch your own AI agent app with your unique URL, logo and branding. Index your website or upload documents to make your AI agent efficient for your use case.',
       image: AiTutorialThree,
+      link: `/app/admin/apps/${query}/settings?tab=AI+Widget`
     },
     answer: {
       time: `5–15 minutes`,

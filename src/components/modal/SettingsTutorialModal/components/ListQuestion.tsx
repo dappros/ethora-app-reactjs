@@ -1,20 +1,27 @@
 import { ReactElement } from "react"
 import { QuestionsType } from "../typeTutorial"
 import { StepLayout } from "."
+import { useNavigate } from "react-router-dom";
 
 export const ListQuestion = ({ 
   questions, 
   goBack,
-  onSelectQuestion,
-  title = "Chat",
-  subtitle = "Choose from one of our Chat options:"
+  onClose,
+  title,
+  subtitle
 }: { 
   questions: QuestionsType;
   goBack: () => void;
-  onSelectQuestion: (questionId: string) => void;
+  onClose: () => void;
   title?: string;
   subtitle?: string;
 }): ReactElement => {
+  const navigate = useNavigate();
+  
+  const handleClick = (link: string) => {
+    navigate(link);
+    onClose();
+  }
   return (
     <StepLayout goBack={goBack}>
       <div className="flex flex-col gap-6 w-full">
@@ -27,7 +34,7 @@ export const ListQuestion = ({
           {questions.map((data) => (
             <button
               key={data.id}
-              onClick={() => onSelectQuestion(data.id)}
+              onClick={() => handleClick(data.question.link)}
               className="relative flex flex-col text-left group h-full"
             >
               <div className="absolute left-1/2 -translate-x-1/2 -top-14 md:-top-16 z-10">

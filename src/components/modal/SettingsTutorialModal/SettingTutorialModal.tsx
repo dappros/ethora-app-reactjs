@@ -78,17 +78,23 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       case 'ChatList':
         return (
           <ListQuestion
+            title="Chat"
+            subtitle="Build or integrate instant messaging experience."
             questions={questionsChat}
+            onClose={onClose}
             goBack={goBack}
-            onSelectQuestion={(questionId: string) => handleSelectQuestion(questionId, 'Chat')}
+            // onSelectQuestion={(questionId: string) => handleSelectQuestion(questionId, 'Chat')}
           />
         );
       case 'AIList':
         return (
           <ListQuestion
+            title="AI"
+            subtitle="Deploy AI agent for your visitors or your team."
             questions={questionsAi}
+            onClose={onClose}
             goBack={goBack}
-            onSelectQuestion={(questionId: string) => handleSelectQuestion(questionId, 'AI')}
+            // onSelectQuestion={(questionId: string) => handleSelectQuestion(questionId, 'AI')}
           />
         );
       case 'ChatQuestion':
@@ -142,9 +148,8 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       <DialogPanel
         className={classNames(
           'p-4 sm:py-8 sm:px-8 bg-white rounded-3xl m-8 relative overflow-hidden max-h-[90vh] overflow-y-scroll scrollbar-hide',
-          step === 'Start' 
-            ? 'w-auto' 
-            : 'w-[80%]'
+          step === 'Start' ? 'w-auto' : 'w-[80%]',
+          step === 'Demo' ? 'w-[50%]' : 'w-[80%]'
         )}
       >
         <button className="absolute top-[20px] right-[20px]" onClick={onClose}>

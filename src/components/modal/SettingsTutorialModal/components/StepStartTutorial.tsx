@@ -10,8 +10,11 @@ export const StepStartTutorial = ({
 }): ReactElement => {
   return (
     <div>
-      <p className='text-2xl font-bold py-4 w-[60%]' style={{ margin: '0 auto' }}>
-        Make titles and descriptions visible straight away for all 3 options:
+      <p className='text-2xl font-bold pt-4 pb-2'>
+        Choose Your Path
+      </p>
+      <p className='text-sm text-gray-500 pb-4'>
+        Select one of the three approaches to continue with your personalized experience.
       </p>
       <div className='flex md:flex-row flex-col gap-6 items-center justify-center'>
       {stepsStartView.map(
@@ -29,7 +32,7 @@ export const StepStartTutorial = ({
                 src={icon} 
                 alt={title} 
                 className={classNames(
-                  'block w-[200px] h-[200px] max-w-[300px] h-auto object-cover rounded-lg border-2 border-gray-200',
+                  'block w-[200px] h-[200px] object-cover rounded-lg border-2 border-gray-200',
                   'transition-all duration-300'
                 )} 
               />

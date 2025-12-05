@@ -124,7 +124,7 @@ export const StepChooseTutorial = ({
 
             <div className="flex flex-col items-start gap-2 pt-2 pl-2">
               {currentQuestion.answer.description.map((desc, index) => (
-                <div key={index} className="w-full">
+                <div key={index} className="w-[75%]" style={{ margin: '0 auto' }}>
                   
                   {currentQuestion.answer.images && currentQuestion.answer.images[index] && (
                     <img
@@ -133,6 +133,17 @@ export const StepChooseTutorial = ({
                       className="w-full rounded-lg w-[80%]"
                       style={{ margin: '0 auto' }}
                     />
+                  )}
+                  {currentQuestion.answer.video && (
+                    <video 
+                      src={currentQuestion.answer.video} 
+                      className="w-full rounded-lg w-[80%]" 
+                      style={{ margin: '0 auto' }}
+                      controls
+                      loop
+                    >
+                      <source src={currentQuestion.answer.video} type="video/mp4" />
+                    </video>
                   )}
                   <div className="btn flex items-start text-left w-full pt-4">
                       <span className="font-medium text-lg font-bold">{currentQuestion.question.title}</span>

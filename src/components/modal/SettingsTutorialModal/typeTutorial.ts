@@ -5,6 +5,7 @@ type QuestionPart = {
   time: string;
   description: string;
   image: string;
+  link: string;
 };
 
 export type QuestionsType = {
@@ -15,5 +16,6 @@ export type QuestionsType = {
     complexity?: number;
     description: Array<React.ReactNode>;
     images?: Array<string>;
+    video?: string;
   };
 }[];

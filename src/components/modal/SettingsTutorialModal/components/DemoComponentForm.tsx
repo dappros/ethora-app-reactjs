@@ -28,7 +28,6 @@ export const DemoComponentForm = ({
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     console.log('Form submitted:', data)
-    // Здесь можно добавить отправку данных на сервер
     onClose()
   }
 
