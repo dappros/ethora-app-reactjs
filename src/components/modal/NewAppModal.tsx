@@ -60,6 +60,8 @@ export function NewAppModal({ onClose, show }: Props) {
           navigate(`/app/admin/apps/${app._id}/settings`, {
             state: { from: location.pathname + location.search },
           });
+          localStorage.removeItem('newUser');
+
           onClose();
         }, 1500);
       })

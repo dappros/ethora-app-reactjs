@@ -4,6 +4,7 @@ import { StepLayout } from "./StepLayout"
 import CustomInput from "../../../../components/input/Input"
 import { Box } from "@mui/material"
 import CustomButton from "../../../../pages/AuthPage/Button"
+import { HubspotForm } from "./HubspotForm"
 
 type FormInputs = {
   name: string;
@@ -49,12 +50,12 @@ export const DemoComponentForm = ({
             width: '100%',
           }}
         >
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <p className="text-2xl font-bold">Book a Demo</p>
             <p className="text-sm text-gray-500 mt-1">Fill in your details to schedule a demo</p>
-          </div>
+          </div> */}
 
-          <CustomInput
+          {/* <CustomInput
             placeholder="Name"
             id="name"
             fullWidth
@@ -101,7 +102,8 @@ export const DemoComponentForm = ({
             <CustomButton type="submit" variant="contained">
               Book demo
             </CustomButton>
-          </div>
+          </div> */}
+          <HubspotForm />
         </Box>
       </StepLayout>  
     </div>

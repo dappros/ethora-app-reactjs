@@ -167,8 +167,7 @@ export default function AdminApps() {
   useEffect(() => {
     const newUser = localStorage.getItem('newUser');
 
-    console.log('newUser', newUser, !apps.length);
-    if (!!true && !apps.length) {
+    if (newUser && !apps.length) {
       return setNewShowModal(true);
     }
     setShowModal(!apps.length);
