@@ -1,4 +1,3 @@
-import { Rating } from '@mui/material';
 import clsx from 'clsx';
 import { ReactElement, useState } from 'react';
 import { StepLayout } from '.';

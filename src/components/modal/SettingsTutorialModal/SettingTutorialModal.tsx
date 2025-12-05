@@ -24,7 +24,7 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
 }): ReactElement => {
   const [step, setStep] = useState<Step>('Start');
   const [questionStep, setQuestionStep] = useState('default');
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | undefined>();
+  const [selectedQuestionId] = useState<string | undefined>();
   const [animate, setAnimate] = useState(false);
   const { appId } = useParams();
   const questionsChat = getQuestionsChat(appId);
@@ -44,12 +44,6 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       setQuestionStep(next);
       setAnimate(false);
     }, 200);
-  };
-
-  const handleSelectQuestion = (questionId: string, category: 'Chat' | 'AI') => {
-    setSelectedQuestionId(questionId);
-    const nextStep: Step = category === 'Chat' ? 'ChatQuestion' : 'AIQuestion';
-    handleChangeStep(nextStep);
   };
 
   const goBack = () => {

@@ -27,9 +27,7 @@ export const AnswerStep = ({
       <div className="btn flex items-start gap-3 text-left p-4 w-full rounded-lg border bg-gray-100 hover:bg-white transition">
         <div className="flex flex-col">
           <span className="font-medium text-sm">
-            {filteredAnswer.question.map((part, i) => (
-              <span key={i}>{part}</span>
-            ))}
+            {filteredAnswer.question.title}
           </span>
         </div>
       </div>

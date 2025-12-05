@@ -61,6 +61,7 @@ export function NewAppModal({ onClose, show }: Props) {
             state: { from: location.pathname + location.search },
           });
           localStorage.removeItem('newUser');
+          localStorage.setItem('firstAdd', true.toString());
 
           onClose();
         }, 1500);

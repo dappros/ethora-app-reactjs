@@ -15,7 +15,6 @@ import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
-import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
 import {
   deleteApp,
@@ -74,7 +73,7 @@ export default function AppSettings() {
 
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
-  const [isInfo, setIsInfo] = useState(true);
+  const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -85,6 +84,14 @@ export default function AppSettings() {
     ? tabs.indexOf(tabFromUrl!)
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
+
+  const firstAdd = localStorage.getItem('firstAdd') === 'true';
+
+  useEffect(() => {
+    if (firstAdd) {
+      setIsInfo(true);
+    }
+  }, [firstAdd]);
 
   useEffect(() => {
     if (

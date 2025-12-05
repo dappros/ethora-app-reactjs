@@ -1,9 +1,7 @@
 import classNames from "classnames"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { StepLayout } from "./StepLayout"
-import CustomInput from "../../../../components/input/Input"
 import { Box } from "@mui/material"
-import CustomButton from "../../../../pages/AuthPage/Button"
 import { HubspotForm } from "./HubspotForm"
 
 type FormInputs = {
@@ -22,13 +20,10 @@ export const DemoComponentForm = ({
     animate: boolean;
   }) => {
   const {
-    register,
     handleSubmit,
-    formState: { errors },
   } = useForm<FormInputs>()
 
-  const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    console.log('Form submitted:', data)
+  const onSubmit: SubmitHandler<FormInputs> = () => {
     onClose()
   }
 
