@@ -15,7 +15,6 @@ import { actionUpdateApp } from '../../actions';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
-import InfoAppModal from '../../components/modal/InfoAppModal';
 import TabApp from '../../components/TabApp';
 import {
   deleteApp,
@@ -42,6 +41,7 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
+import { SettingTutorialModal } from '../../components/modal/SettingsTutorialModal/SettingTutorialModal';
 
 const tabs = [
   'AI Widget',
@@ -84,6 +84,14 @@ export default function AppSettings() {
     ? tabs.indexOf(tabFromUrl!)
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
+
+  const firstAdd = localStorage.getItem('firstAdd') === 'true';
+
+  useEffect(() => {
+    if (firstAdd) {
+      setIsInfo(true);
+    }
+  }, [firstAdd]);
 
   useEffect(() => {
     if (
@@ -838,7 +846,7 @@ export default function AppSettings() {
         />
       )}
 
-      {isInfo && (
+      {/* {isInfo && (
         <InfoAppModal
           appName={displayName}
           domainName={app.domainName}
@@ -848,10 +856,10 @@ export default function AppSettings() {
           appId={app._id}
           navigate={navigate}
         />
-      )}
-      {/* {isInfo && (
-        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
       )} */}
+      {isInfo && (
+        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
+      )}
 
       {loading && <Loading />}
     </div>

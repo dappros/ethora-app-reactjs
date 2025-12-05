@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import classNames from 'classnames';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { ApplicationPreview } from '../components/ApplicationPreview';
@@ -6,6 +7,7 @@ import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { Loading } from '../components/Loading.tsx';
 import { NewAppModal } from '../components/modal/NewAppModal';
+import { PreviewAppModal } from '../components/modal/PreviewAppModal.tsx';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
@@ -13,13 +15,13 @@ import { useCentrifugeAppUpdater } from '../hooks/useCentrifugeAppUpdater.ts';
 import { getExportAppsCsv, httpGetApps } from '../http';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import classNames from 'classnames';
 
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [newShowModal, setNewShowModal] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const apps = useAppStore((s) => s.apps);
@@ -163,8 +165,15 @@ export default function AdminApps() {
   }, [page]);
 
   useEffect(() => {
+    const newUser = localStorage.getItem('newUser');
+
+    if (newUser && !apps.length) {
+      return setNewShowModal(true);
+    }
     setShowModal(!apps.length);
   }, [apps.length]);
+
+  console.log('newShowModal', newShowModal);
 
   useEffect(() => {
     fetchApps();
@@ -220,8 +229,8 @@ export default function AdminApps() {
                 <button
                   onClick={() => setShowModal(true)}
                   className={classNames(
-                    "flex items-center justify-center sm:w-full h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela",
-                    currentUser?.isSuperAdmin ? "px-0" : "px-4"
+                    'flex items-center justify-center sm:w-full h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela',
+                    currentUser?.isSuperAdmin ? 'px-0' : 'px-4'
                   )}
                 >
                   <IconAdd color="white" className="md:mr-2" />
@@ -261,6 +270,14 @@ export default function AdminApps() {
               haveApps={!!apps.length}
               show={showModal}
               onClose={() => setShowModal(false)}
+            />
+          )}
+
+          {newShowModal && (
+            <PreviewAppModal
+              haveApps={!!apps.length}
+              show={newShowModal}
+              onClose={() => setNewShowModal(false)}
             />
           )}
         </div>

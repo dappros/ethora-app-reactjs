@@ -176,6 +176,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
         .then(async ({ data }) => {
           document.cookie =
             'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+          localStorage.setItem('newUser', true.toString());
 
           await actionAfterLogin(data);
 

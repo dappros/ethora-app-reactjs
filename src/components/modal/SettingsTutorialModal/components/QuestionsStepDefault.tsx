@@ -30,9 +30,7 @@ export const QuestionsStepDefault = ({
         >
           <div className="flex flex-col">
             <span className="font-medium text-sm">
-              {question.map((part, i) => (
-                <span key={i}>{part}</span>
-              ))}
+                <span>{question.title}</span>
             </span>
           </div>
         </button>
