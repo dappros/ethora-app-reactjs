@@ -134,7 +134,7 @@ export const getQuestionsAi = (query?: string): QuestionsType => [
       time: `(low code, 15 min)`,
       description: 'Download and install our Wordpress plugin to launch AI agent for your website. Index your website or upload documents via admin panel to manage context.',
       image: AiTutorialTwo,
-      link: `/app/admin/apps/${query}/settings?tab=AI+Widget`
+      link: `https://github.com/dappros/ethora-wp-plugin`
     },
     answer: {
       time: `5–15 minutes`,

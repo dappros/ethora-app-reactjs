@@ -18,10 +18,18 @@ export const ListQuestion = ({
 }): ReactElement => {
   const navigate = useNavigate();
   
+  const isExternalLink = (url: string): boolean => {
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
   const handleClick = (link: string) => {
-    navigate(link);
+    if (isExternalLink(link)) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      navigate(link);
+    }
     onClose();
-  }
+  };
   return (
     <StepLayout goBack={goBack}>
       <div className="flex flex-col gap-6 w-full">

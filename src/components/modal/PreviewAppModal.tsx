@@ -122,7 +122,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
             <div className="p-4 md:pl-0">
               <p className="text-2xl font-bold pt-4">Welcome to Ethora</p>
               <div className="py-4">
-              Thank you for joining! This is your admin panel. Here you can <strong>create Apps</strong> 
+              Thank you for joining! This is your admin panel. Here you can <strong>create Apps </strong> 
               for your projects. Also, you can manage various features such as <strong>Chats</strong> and <strong>AI bots</strong>.
               </div>
               <div className="flex justify-start">
@@ -140,11 +140,10 @@ export function PreviewAppModal({ onClose, show }: Props) {
         {step === 1 && (
           <>
             <div className="font-varela text-[18px] md:text-[24px] text-center mb-8">
-              Create your first app!
+              Create your first App!
             </div>
             <p className="text-start pb-6 px-2 text-gray-600">
-              Create your first application and start leveraging the full
-              capabilities of app.ethora.
+              To handle project contexts, you can create multiple Apps. What would be the name for your first App?
             </p>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
