@@ -15,6 +15,7 @@ if (import.meta.env.DEV) {
   
   console.warn = (...args: any[]) => {
     const message = args[0]?.toString() || '';
+    const fullMessage = args.map(a => a?.toString() || '').join(' ');
     if (
       message.includes('Download the React DevTools') ||
       message.includes('Module "buffer" has been externalized') ||
@@ -22,7 +23,10 @@ if (import.meta.env.DEV) {
       message.includes('appJwt is not set') ||
       message.includes('non-serializable value') ||
       message.includes('Selector unknown returned a different result') ||
-      message.includes('A non-serializable value was detected')
+      message.includes('A non-serializable value was detected') ||
+      fullMessage.includes('non-serializable value') ||
+      fullMessage.includes('refreshFunction') ||
+      fullMessage.includes('redux.js.org/faq/actions')
     ) {
       return; // Suppress these messages
     }
