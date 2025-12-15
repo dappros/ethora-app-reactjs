@@ -4,9 +4,9 @@ import { useAppStore } from '../store/useAppStore';
 import { refreshToken } from '../http';
 
 // Use environment variable or default to localhost for development
-// Centrifuge v6 endpoint format: just the base URL (library handles the path)
+// Centrifuge v6 requires ws:// or wss:// scheme for WebSocket transport
 const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE || 
-  (import.meta.env.DEV ? 'http://localhost:8001' : undefined);
+  (import.meta.env.DEV ? 'ws://localhost:8001' : undefined);
 
 type CounterType =
   | 'counter_chats'
