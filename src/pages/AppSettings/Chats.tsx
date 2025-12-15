@@ -120,13 +120,19 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
       await createAppChat(appId, chatTitle, true)
       const { data } = await getDefaultRooms(appId)
       setDefaultChatRooms(data)
+      
+      // Refresh app config to update defaultRooms in the store
+      const { actionGetConfig } = await import('../../actions')
+      await actionGetConfig()
+      
       setShowLoading(false)
       reset()
       setShowCreate(false)
       toast.success('Chat created successfully')
-    } catch (error) {
+    } catch (error: any) {
       setShowLoading(false)
-      toast.error('Failed to create chat')
+      console.error('Failed to create chat:', error)
+      toast.error(error?.response?.data?.error || 'Failed to create chat')
     }
   }
 
