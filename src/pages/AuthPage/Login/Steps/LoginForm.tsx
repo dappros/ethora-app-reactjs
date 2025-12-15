@@ -40,8 +40,13 @@ const LoginStep = () => {
           await actionAfterLogin(data);
 
           logLogin('email', data.user._id);
-          document.cookie =
-            'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+          // Set cookie - for localhost, don't set domain attribute
+          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          if (isLocalhost) {
+            document.cookie = 'ethora_user=1; path=/; samesite=lax; max-age=604800';
+          } else {
+            document.cookie = 'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+          }
 
           if (config?.afterLoginPage) {
             navigateToUserPage(navigate, config.afterLoginPage as string);
