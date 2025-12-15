@@ -26,19 +26,33 @@ export const httpTokens = {
   }
 };
 
+// Use relative URLs in development to leverage Vite proxy, full URLs in production
+const getBaseURL = (envVar: string | undefined, defaultPath: string) => {
+  if (import.meta.env.DEV) {
+    // In development, use relative URLs to go through Vite proxy
+    return defaultPath;
+  }
+  // In production, use the full URL from env
+  return envVar || defaultPath;
+};
+
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API,
+  baseURL: getBaseURL(import.meta.env.VITE_API, '/v1'),
+  timeout: 30000, // 30 seconds timeout
 });
 
 export const httpV2 = axios.create({
-  baseURL: import.meta.env.VITE_API_V2,
+  baseURL: getBaseURL(import.meta.env.VITE_API_V2, '/v2'),
+  timeout: 30000, // 30 seconds timeout
 });
 
 const AUTH_WHITELIST: Array<string | RegExp> = [
+  '/apps/get-config', // App config doesn't require user auth
   '/users/login-with-email',
   '/users/login',
   /^\/users\/checkEmail\//,
   '/users/sign-up-with-email',
+  '/v2/users/sign-up-with-email', // V2 signup endpoint
   '/users/sign-up-resend-email',
   '/users/forgot',
   '/users/reset',
@@ -65,7 +79,22 @@ function attachAuthInterceptors(client: AxiosInstance) {
 
     if (isWhitelisted(config.url, config.method)) {
       config.headers = config.headers || {};
-      (config.headers as any).Authorization = httpTokens.appJwt;
+      // Try to get appJwt from httpTokens, or from the store if not set yet
+      let appJwt = httpTokens.appJwt;
+      if (!appJwt && typeof window !== 'undefined' && (window as any).useAppStore) {
+        const appToken = (window as any).useAppStore.getState()?.currentApp?.appToken;
+        if (appToken) {
+          appJwt = appToken;
+          httpTokens.appJwt = appToken; // Cache it for next time
+        }
+      }
+      
+      // Only warn if we still don't have it after checking the store
+      if (!appJwt) {
+        console.warn('appJwt is not set. Login/registration requests may fail. Make sure app config is loaded.');
+      }
+      
+      (config.headers as any).Authorization = appJwt || '';
       return config;
     }
 

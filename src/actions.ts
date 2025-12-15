@@ -74,6 +74,9 @@ export async function actionAfterLogin(data: any) {
   httpTokens.token = data.token;
   httpTokens.refreshToken = data.refreshToken;
 
+  // Safely handle defaultWallet - it might be missing or undefined
+  const walletAddress = data.user?.defaultWallet?.walletAddress || '';
+
   const user: ModelCurrentUser = {
     _id: data.user._id,
     appId: data.user.appId,
@@ -85,13 +88,13 @@ export async function actionAfterLogin(data: any) {
     lastName: data.user.lastName,
     refreshToken: data.refreshToken,
     token: data.token,
-    wsToken: data.wsToken,
+    wsToken: data.wsToken || '',
     xmppPassword: data.user.xmppPassword,
-    walletAddress: data.user.defaultWallet.walletAddress,
+    walletAddress: walletAddress,
     profileImage: data.user.profileImage,
     description: data.user.description,
     defaultWallet: {
-      walletAddress: data.user.defaultWallet.walletAddress,
+      walletAddress: walletAddress,
     },
     xmppUsername: data.user.xmppUsername,
   };

@@ -8,6 +8,23 @@ import { RouterErrorBoundary } from './components/Error/RouterErrorBoundary';
 import './index.css';
 import { router } from './router.tsx';
 
+// Suppress React DevTools message and buffer warnings in development
+if (import.meta.env.DEV) {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    const message = args[0]?.toString() || '';
+    if (
+      message.includes('Download the React DevTools') ||
+      message.includes('Module "buffer" has been externalized') ||
+      message.includes('Cannot access "buffer.Buffer"') ||
+      message.includes('appJwt is not set') // Suppress appJwt warning - interceptor will handle it
+    ) {
+      return; // Suppress these messages
+    }
+    originalWarn(...args);
+  };
+}
+
 const originalRemoveChild = Node.prototype.removeChild;
 Node.prototype.removeChild = function <T extends Node>(child: T): T {
   try {
