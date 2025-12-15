@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Centrifuge } from 'centrifuge';
-import { useAppStore } from '../store/useAppStore';import { refreshToken } from '../http';
+import { useAppStore } from '../store/useAppStore';
+import { refreshToken } from '../http';
 
-const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE;
+// Use environment variable or default to localhost for development
+// Centrifuge v6 endpoint format: just the base URL (library handles the path)
+const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE || 
+  (import.meta.env.DEV ? 'http://localhost:8001' : undefined);
 
 type CounterType =
   | 'counter_chats'
@@ -32,27 +36,47 @@ export function useCentrifugeChannel() {
   }
 
   useEffect(() => {
-    const token = currentUser?.wsToken;
+    // Skip Centrifuge if endpoint is not configured
+    if (!VITE_APP_CENTRIFUGE_SERVICE) {
+      console.warn('[centrifuge] VITE_APP_CENTRIFUGE_SERVICE is not configured. Centrifuge features will be disabled.');
+      return;
+    }
+
+    // Skip if user is not logged in (no wsToken)
+    if (!currentUser?.wsToken) {
+      return;
+    }
+
+    const token = currentUser.wsToken;
     
-    const centrifuge = new Centrifuge(VITE_APP_CENTRIFUGE_SERVICE, {
-      token,
-      getToken: getToken,
-    });
+    try {
+      const centrifuge = new Centrifuge(VITE_APP_CENTRIFUGE_SERVICE, {
+        token,
+        getToken: getToken,
+      });
 
-    centrifuge.on('publication', (ctx) => {
-      setData(ctx.data);
-    });
+      centrifuge.on('publication', (ctx) => {
+        setData(ctx.data);
+      });
 
-    centrifuge.on('connected', () => {
-      console.log('[centrifuge] connected');
-      setConnected(true);
-    });
+      centrifuge.on('connected', () => {
+        console.log('[centrifuge] connected');
+        setConnected(true);
+      });
 
-    centrifuge.connect();
+      centrifuge.on('error', (ctx) => {
+        console.warn('[centrifuge] error:', ctx);
+        setConnected(false);
+      });
 
-    return () => {
-      centrifuge.disconnect();
-    };
+      centrifuge.connect();
+
+      return () => {
+        centrifuge.disconnect();
+      };
+    } catch (error) {
+      console.error('[centrifuge] Failed to initialize:', error);
+    }
   }, [currentUser]);
 
   return { data, connected };
