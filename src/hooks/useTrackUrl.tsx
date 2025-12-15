@@ -54,26 +54,39 @@ export const useTrackUrl = () => {
       );
       const isTempPassword = matchPath('/tempPassword', location.pathname);
 
-      if (token) {
+      if (token && token !== 'undefined') {
         try {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
-        } catch (e) {
-          if (isResetPassword || isTempPassword) {
+        } catch (e: any) {
+          // If 401/400, token is invalid - clear it and redirect to login
+          if (e?.response?.status === 401 || e?.response?.status === 400) {
+            localStorage.removeItem('token-538');
+            localStorage.removeItem('refreshToken-538');
+            if (!isResetPassword && !isTempPassword) {
+              navigate(`/login${location.search}`, { replace: true });
+            }
+          } else if (isResetPassword || isTempPassword) {
             return;
+          } else {
+            navigate(`/login${location.search}`, { replace: true });
           }
-
-          navigate(`/login${location.search}`);
-          console.error(e);
+          // Don't log expected auth errors
+          if (e?.response?.status !== 401 && e?.response?.status !== 400) {
+            console.error(e);
+          }
         }
       } else {
         if (publicPath) {
           return;
         }
-        navigate(`/login${location.search}`);
+        // Only navigate if not already on login page to avoid conflicts
+        if (location.pathname !== '/login') {
+          navigate(`/login${location.search}`, { replace: true });
+        }
       }
     };
 
     getUrl();
-  }, []);
+  }, [location.pathname, location.search]);
 };
