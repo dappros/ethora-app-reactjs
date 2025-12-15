@@ -34,7 +34,9 @@ if (import.meta.env.DEV) {
     const message = args[0]?.toString() || '';
     if (
       message.includes('Failed to send presence in response to error') ||
-      message.includes('Source map error')
+      message.includes('Source map error') ||
+      message.includes('Too many calls to Location or History APIs') ||
+      message.includes('The operation is insecure')
     ) {
       return; // Suppress these non-critical errors
     }
