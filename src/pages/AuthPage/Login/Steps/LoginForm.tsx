@@ -32,18 +32,46 @@ const LoginStep = () => {
   const onSubmit: SubmitHandler<Inputs> = ({ email, password }) => {
     httpLoginWithEmail(email, password)
       .then(async ({ data }) => {
-        await actionAfterLogin(data);
+        try {
+          if (!data || !data.user) {
+            throw new Error('Invalid response from server');
+          }
+          
+          await actionAfterLogin(data);
 
-        logLogin('email', data.user._id);
-        document.cookie =
-          'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+          logLogin('email', data.user._id);
+          document.cookie =
+            'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
 
-        if (config?.afterLoginPage) {
-          navigateToUserPage(navigate, config.afterLoginPage as string);
+          if (config?.afterLoginPage) {
+            navigateToUserPage(navigate, config.afterLoginPage as string);
+          } else {
+            // Default navigation if no afterLoginPage is set
+            navigate('/');
+          }
+        } catch (error: any) {
+          console.error('Error processing login response:', error);
+          toast.error(error?.message || 'Failed to process login. Please try again.');
         }
       })
       .catch((error) => {
-        toast.error(error.response.data.error);
+        console.error('Login error:', error);
+        
+        let errorMessage = 'Login failed. Please check your credentials.';
+        
+        if (error.code === 'ECONNABORTED' || error.message === 'Request aborted') {
+          errorMessage = 'Request timed out. Please check if the backend server is running on port 8080.';
+        } else if (error.response) {
+          // Server responded with error status
+          errorMessage = error.response.data?.error || `Server error: ${error.response.status}`;
+        } else if (error.request) {
+          // Request was made but no response received
+          errorMessage = 'No response from server. Please check if the backend is running.';
+        } else {
+          errorMessage = error.message || 'An unexpected error occurred.';
+        }
+        
+        toast.error(errorMessage);
         localStorage.removeItem('token-538');
       });
   };
