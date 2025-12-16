@@ -36,15 +36,20 @@ if (import.meta.env.DEV) {
       allMessages.includes('non-serializable value') ||
       allMessages.includes('selector unknown returned a different result') ||
       allMessages.includes('a non-serializable value was detected') ||
+      allMessages.includes('non-serializable value was detected in an action') ||
       allMessages.includes('firebase config not found') ||
       allMessages.includes('firebase not ready yet') ||
       allMessages.includes('failed to send presence') ||
+      allMessages.includes('payload.refreshtokens.refreshfunction') ||
       allMessages.includes('refreshfunction') ||
-      allMessages.includes('refreshfunction') ||
+      allMessages.includes('refresh function') ||
+      allMessages.includes('chatsettingstore/setconfig') ||
       allMessages.includes('redux.js.org/faq/actions') ||
       allMessages.includes('redux-toolkit.js.org/usage/usage-guide') ||
       allMessages.includes('take a look at the logic that dispatched this action') ||
-      allMessages.includes('tracking is disabled on localhost')
+      allMessages.includes('tracking is disabled on localhost') ||
+      allMessages.includes('see https://redux.js.org/faq/actions') ||
+      allMessages.includes('to allow non-serializable values see')
     ) {
       return; // Suppress these messages
     }
@@ -73,12 +78,18 @@ if (import.meta.env.DEV) {
       allMessages.includes('the operation is insecure') ||
       allMessages.includes('non-serializable value') ||
       allMessages.includes('a non-serializable value was detected') ||
+      allMessages.includes('non-serializable value was detected in an action') ||
+      allMessages.includes('payload.refreshtokens.refreshfunction') ||
       allMessages.includes('refreshfunction') ||
+      allMessages.includes('refresh function') ||
+      allMessages.includes('chatsettingstore/setconfig') ||
       allMessages.includes('redux.js.org/faq/actions') ||
       allMessages.includes('redux-toolkit.js.org/usage/usage-guide') ||
       allMessages.includes('take a look at the logic that dispatched this action') ||
       allMessages.includes('see https://redux.js.org/faq/actions') ||
-      allMessages.includes('to allow non-serializable values see')
+      allMessages.includes('to allow non-serializable values see') ||
+      allMessages.includes('why-should-type-be-a-string') ||
+      allMessages.includes('working-with-non-serializable-data')
     ) {
       return; // Suppress these non-critical errors
     }
