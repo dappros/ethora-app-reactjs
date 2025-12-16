@@ -24,9 +24,13 @@ if (import.meta.env.DEV) {
       message.includes('non-serializable value') ||
       message.includes('Selector unknown returned a different result') ||
       message.includes('A non-serializable value was detected') ||
+      message.includes('Firebase config not found') ||
+      message.includes('Firebase not ready yet') ||
+      message.includes('Failed to send presence') ||
       fullMessage.includes('non-serializable value') ||
       fullMessage.includes('refreshFunction') ||
-      fullMessage.includes('redux.js.org/faq/actions')
+      fullMessage.includes('redux.js.org/faq/actions') ||
+      fullMessage.includes('redux-toolkit.js.org/usage/usage-guide')
     ) {
       return; // Suppress these messages
     }
@@ -48,6 +52,7 @@ if (import.meta.env.DEV) {
       fullMessage.includes('redux.js.org/faq/actions') ||
       fullMessage.includes('redux-toolkit.js.org/usage/usage-guide') ||
       message.includes('A non-serializable value was detected') ||
+      fullMessage.includes('Take a look at the logic that dispatched this action') ||
       fullMessage.includes('non-serializable value') ||
       fullMessage.includes('refreshFunction') ||
       fullMessage.includes('redux.js.org/faq/actions') ||
