@@ -36,11 +36,22 @@ if (import.meta.env.DEV) {
   // Suppress specific error messages that are not critical
   console.error = (...args: any[]) => {
     const message = args[0]?.toString() || '';
+    const fullMessage = args.map(a => a?.toString() || '').join(' ');
     if (
       message.includes('Failed to send presence in response to error') ||
       message.includes('Source map error') ||
       message.includes('Too many calls to Location or History APIs') ||
-      message.includes('The operation is insecure')
+      message.includes('The operation is insecure') ||
+      message.includes('non-serializable value') ||
+      fullMessage.includes('non-serializable value') ||
+      fullMessage.includes('refreshFunction') ||
+      fullMessage.includes('redux.js.org/faq/actions') ||
+      fullMessage.includes('redux-toolkit.js.org/usage/usage-guide') ||
+      message.includes('A non-serializable value was detected') ||
+      fullMessage.includes('non-serializable value') ||
+      fullMessage.includes('refreshFunction') ||
+      fullMessage.includes('redux.js.org/faq/actions') ||
+      fullMessage.includes('redux-toolkit.js.org/usage/usage-guide')
     ) {
       return; // Suppress these non-critical errors
     }
