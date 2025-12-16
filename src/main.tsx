@@ -15,27 +15,36 @@ if (import.meta.env.DEV) {
   const originalError = console.error;
   
   console.warn = (...args: any[]) => {
-    const message = args[0]?.toString() || '';
-    const fullMessage = args.map(a => a?.toString() || '').join(' ');
-    const lowerMessage = message.toLowerCase();
-    const lowerFullMessage = fullMessage.toLowerCase();
+    // Convert all arguments to strings and check
+    const allMessages = args.map(a => {
+      if (typeof a === 'string') return a;
+      if (typeof a === 'object' && a !== null) {
+        try {
+          return JSON.stringify(a);
+        } catch {
+          return String(a);
+        }
+      }
+      return String(a);
+    }).join(' ').toLowerCase();
     
     if (
-      lowerMessage.includes('download the react devtools') ||
-      lowerMessage.includes('module "buffer" has been externalized') ||
-      lowerMessage.includes('cannot access "buffer.buffer"') ||
-      lowerMessage.includes('appjwt is not set') ||
-      lowerMessage.includes('non-serializable value') ||
-      lowerMessage.includes('selector unknown returned a different result') ||
-      lowerMessage.includes('a non-serializable value was detected') ||
-      lowerMessage.includes('firebase config not found') ||
-      lowerMessage.includes('firebase not ready yet') ||
-      lowerMessage.includes('failed to send presence') ||
-      lowerFullMessage.includes('non-serializable value') ||
-      lowerFullMessage.includes('refreshfunction') ||
-      lowerFullMessage.includes('redux.js.org/faq/actions') ||
-      lowerFullMessage.includes('redux-toolkit.js.org/usage/usage-guide') ||
-      lowerFullMessage.includes('take a look at the logic that dispatched this action')
+      allMessages.includes('download the react devtools') ||
+      allMessages.includes('module "buffer" has been externalized') ||
+      allMessages.includes('cannot access "buffer.buffer"') ||
+      allMessages.includes('appjwt is not set') ||
+      allMessages.includes('non-serializable value') ||
+      allMessages.includes('selector unknown returned a different result') ||
+      allMessages.includes('a non-serializable value was detected') ||
+      allMessages.includes('firebase config not found') ||
+      allMessages.includes('firebase not ready yet') ||
+      allMessages.includes('failed to send presence') ||
+      allMessages.includes('refreshfunction') ||
+      allMessages.includes('refreshfunction') ||
+      allMessages.includes('redux.js.org/faq/actions') ||
+      allMessages.includes('redux-toolkit.js.org/usage/usage-guide') ||
+      allMessages.includes('take a look at the logic that dispatched this action') ||
+      allMessages.includes('tracking is disabled on localhost')
     ) {
       return; // Suppress these messages
     }
@@ -44,23 +53,32 @@ if (import.meta.env.DEV) {
   
   // Suppress specific error messages that are not critical
   console.error = (...args: any[]) => {
-    const message = args[0]?.toString() || '';
-    const fullMessage = args.map(a => a?.toString() || '').join(' ');
-    const lowerMessage = message.toLowerCase();
-    const lowerFullMessage = fullMessage.toLowerCase();
+    // Convert all arguments to strings and check
+    const allMessages = args.map(a => {
+      if (typeof a === 'string') return a;
+      if (typeof a === 'object' && a !== null) {
+        try {
+          return JSON.stringify(a);
+        } catch {
+          return String(a);
+        }
+      }
+      return String(a);
+    }).join(' ').toLowerCase();
     
     if (
-      lowerMessage.includes('failed to send presence') ||
-      lowerMessage.includes('source map error') ||
-      lowerMessage.includes('too many calls to location or history apis') ||
-      lowerMessage.includes('the operation is insecure') ||
-      lowerMessage.includes('non-serializable value') ||
-      lowerMessage.includes('a non-serializable value was detected') ||
-      lowerFullMessage.includes('non-serializable value') ||
-      lowerFullMessage.includes('refreshfunction') ||
-      lowerFullMessage.includes('redux.js.org/faq/actions') ||
-      lowerFullMessage.includes('redux-toolkit.js.org/usage/usage-guide') ||
-      lowerFullMessage.includes('take a look at the logic that dispatched this action')
+      allMessages.includes('failed to send presence') ||
+      allMessages.includes('source map error') ||
+      allMessages.includes('too many calls to location or history apis') ||
+      allMessages.includes('the operation is insecure') ||
+      allMessages.includes('non-serializable value') ||
+      allMessages.includes('a non-serializable value was detected') ||
+      allMessages.includes('refreshfunction') ||
+      allMessages.includes('redux.js.org/faq/actions') ||
+      allMessages.includes('redux-toolkit.js.org/usage/usage-guide') ||
+      allMessages.includes('take a look at the logic that dispatched this action') ||
+      allMessages.includes('see https://redux.js.org/faq/actions') ||
+      allMessages.includes('to allow non-serializable values see')
     ) {
       return; // Suppress these non-critical errors
     }
