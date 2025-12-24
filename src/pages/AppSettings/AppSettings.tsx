@@ -85,7 +85,7 @@ export default function AppSettings() {
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
 
-  const firstAdd = localStorage.getItem('firstAdd') === 'true';
+  const firstAdd = localStorage.getItem('firstAdd');
 
   useEffect(() => {
     if (firstAdd) {
@@ -858,7 +858,10 @@ export default function AppSettings() {
         />
       )} */}
       {isInfo && (
-        <SettingTutorialModal show={isInfo} onClose={() => setIsInfo(false)} />
+        <SettingTutorialModal show={isInfo} onClose={() => {
+          setIsInfo(false);
+          localStorage.removeItem('firstAdd');
+        }} />
       )}
 
       {loading && <Loading />}
