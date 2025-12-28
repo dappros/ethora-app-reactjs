@@ -22,7 +22,8 @@ import { GoogleButton } from '../GoogleButton';
 import { MetamaskButton } from '../MetamaskButton';
 import SkeletonLoader from '../SkeletonLoader';
 
-const SITE_KEY = import.meta.env.VITE_SITE_KEY;
+const SITE_KEY = (import.meta.env.VITE_SITE_KEY || '').trim();
+const TURNSTILE_ENABLED = SITE_KEY.length > 0;
 
 interface FirstStepProps {
   isSmallDevice?: boolean;
@@ -129,7 +130,10 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const formData = new FormData(formRef.current!);
     const cfToken = formData.get('cf-turnstile-response');
 
-    if (!cfToken || typeof cfToken !== 'string' || cfToken.trim() === '') {
+    // Turnstile is optional for enterprise installs; if VITE_SITE_KEY is empty we skip it.
+    const cfTokenValue =
+      typeof cfToken === 'string' ? cfToken.trim() : '';
+    if (TURNSTILE_ENABLED && !cfTokenValue) {
       return;
     }
 
@@ -137,7 +141,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       await httpRegisterWithEmailV2(
         email,
         password,
-        cfToken,
+        cfTokenValue,
         firstName,
         lastName,
         utmParams || ''
@@ -311,12 +315,14 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
             helperText={errors.password?.message}
           />
           <Box className="flex justify-center items-center">
-            <Turnstile
-              options={{
-                theme: 'light',
-              }}
-              siteKey={SITE_KEY}
-            />
+            {TURNSTILE_ENABLED && (
+              <Turnstile
+                options={{
+                  theme: 'light',
+                }}
+                siteKey={SITE_KEY}
+              />
+            )}
           </Box>
           <CustomButton
             type="submit"
