@@ -108,7 +108,7 @@ export function MobileApp({
           Push Notifications
         </div>
         <p className="font-sans text-sm leading-relaxed mb-4">
-        Follow <a href="https://forum.ethora.com/topic/73-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this manual</a> to set up your Firebase account. Extract and upload your <strong>service-account.json</strong>. This will enable your users to receive push notifications for chat messages they missed while being offline.
+        Follow <a href="https://forum.ethora.com/topic/75-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this manual</a> to set up your Firebase account. Extract and upload your <strong>service-account.json</strong>. This will enable your users to receive push notifications for chat messages they missed while being offline.
         </p>
         <input
           type="file"
