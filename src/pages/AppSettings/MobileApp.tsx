@@ -1,33 +1,13 @@
-import { RadioGroup } from '@headlessui/react';
-import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Tooltip,
-} from '@mui/material';
-import classNames from 'classnames';
-import { useMemo, useRef } from 'react';
+
+import { useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { actionPostFile } from '../../actions';
-import { IconDownload } from '../../components/Icons/IconDownload';
 import { IconUpload } from '../../components/Icons/IconUpload';
-import { RadioButton } from '../../components/RadioButton';
-import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 interface Props {
   appId: string;
-  bundleId: string;
-  setBundleId: (s: string) => void;
   setGoogleServicesJson: (s: string) => void;
-  setGoogleServiceInfoPlist: (s: string) => void;
   primaryColor: string;
-  setAiBot: (aiBot: ModelAIbot) => void;
-  aiBot: ModelAIbot;
-  defaultChatRooms: Array<ModelAppDefaulRooom>;
-  isDisabled: boolean;
 }
 
 export function MobileApp({
