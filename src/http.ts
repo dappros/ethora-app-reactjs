@@ -46,6 +46,24 @@ export const httpV2 = axios.create({
   timeout: 30000, // 30 seconds timeout
 });
 
+// v2 client that authenticates as "app" (appJwt) and does NOT do user refresh/logout flows.
+export const httpV2App = axios.create({
+  baseURL: getBaseURL(import.meta.env.VITE_API_V2, '/v2'),
+  timeout: 30000,
+});
+
+function getAppJwt(): string {
+  let appJwt = httpTokens.appJwt;
+  if (!appJwt && typeof window !== 'undefined' && (window as any).useAppStore) {
+    const appToken = (window as any).useAppStore.getState()?.currentApp?.appToken;
+    if (appToken) {
+      appJwt = appToken;
+      httpTokens.appJwt = appToken;
+    }
+  }
+  return appJwt || '';
+}
+
 const AUTH_WHITELIST: Array<string | RegExp> = [
   '/apps/get-config', // App config doesn't require user auth
   '/users/login-with-email',
@@ -129,6 +147,13 @@ function attachAuthInterceptors(client: AxiosInstance) {
 
 attachAuthInterceptors(http);
 attachAuthInterceptors(httpV2);
+
+// App-auth for certain admin actions (do NOT refresh/logout user on 401 here).
+httpV2App.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  (config.headers as any).Authorization = getAppJwt();
+  return config;
+}, null);
 
 export const refreshToken = async () => {
   try {
@@ -566,11 +591,11 @@ export function httpBroadcastChatsV2(payload: {
   metadata?: any;
   dryRun?: boolean;
 }) {
-  return httpV2.post('/chats/broadcast', payload);
+  return httpV2App.post('/chats/broadcast', payload);
 }
 
 export function httpGetBroadcastChatsJobV2(jobId: string) {
-  return httpV2.get(`/chats/broadcast/${jobId}`);
+  return httpV2App.get(`/chats/broadcast/${jobId}`);
 }
 
 export const sendHSFormData = async (
