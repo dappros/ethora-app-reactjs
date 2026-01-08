@@ -22,6 +22,14 @@ import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
 import SkeletonLoader from '../../SkeletonLoader';
 
+const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+
+function setEthoraUserCookie(value: string) {
+  const domainPart =
+    ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
+  document.cookie = `ethora_user=${value}; path=/${domainPart}; secure; samesite=lax; max-age=604800`;
+}
+
 interface FirstStepProps {
   setStep: Dispatch<SetStateAction<number>>;
   isSmallDevice?: boolean;
@@ -164,9 +172,16 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           return;
         }
 
+        const hubspotEnabled = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+        const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+        const formId = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+        if (!hubspotEnabled || !portalId || !formId) {
+          return;
+        }
+
         await sendHSFormData(
-          '4732608',
-          '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
+          portalId,
+          formId,
           hubspotData
         );
       });
@@ -178,8 +193,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
 
       httpLoginWithEmail(email, password)
         .then(async ({ data }) => {
-          document.cookie =
-            'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+          setEthoraUserCookie('1');
 
           await actionAfterLogin(data);
 
