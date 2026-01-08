@@ -14,6 +14,10 @@ import CustomButton from './Button.tsx';
 import { getUserCredsFromFacebook } from './firebase';
 import FacebookIcon from './Icons/socials/facebookIcon';
 
+const HUBSPOT_ENABLED = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+const HUBSPOT_PORTAL_ID = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+const HUBSPOT_FORM_ID_SIGNUP = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+
 export const FacebookButton = () => {
   const config = useAppStore((s) => s.currentApp);
   const navigate = useNavigate();
@@ -64,20 +68,18 @@ export const FacebookButton = () => {
               return;
             }
 
-            const hubspotData = {
-              fields: [
-                { name: 'firstname', value: firstName },
-                { name: 'lastname', value: lastName },
-                { name: 'email', value: email },
-                { name: 'website', value: website },
-              ],
-            };
+            if (HUBSPOT_ENABLED && HUBSPOT_PORTAL_ID && HUBSPOT_FORM_ID_SIGNUP) {
+              const hubspotData = {
+                fields: [
+                  { name: 'firstname', value: firstName },
+                  { name: 'lastname', value: lastName },
+                  { name: 'email', value: email },
+                  { name: 'website', value: website },
+                ],
+              };
 
-            await sendHSFormData(
-              '4732608',
-              '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
-              hubspotData
-            );
+              await sendHSFormData(HUBSPOT_PORTAL_ID, HUBSPOT_FORM_ID_SIGNUP, hubspotData);
+            }
           } catch (error) {
             console.error(error);
             toast.error('Social registration failed');

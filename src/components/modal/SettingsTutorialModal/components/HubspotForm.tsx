@@ -17,6 +17,14 @@ declare global {
 
 export const HubspotForm = () => {
   useEffect(() => {
+    const enabled = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+    const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+    const formId = String(import.meta.env.VITE_HUBSPOT_FORM_ID_TUTORIAL || '').trim();
+    const region = String(import.meta.env.VITE_HUBSPOT_REGION || 'na1').trim();
+
+    // Enterprise/self-hosted safety: do not load HubSpot unless explicitly enabled + configured
+    if (!enabled || !portalId || !formId) return;
+
     const script = document.createElement('script');
     script.src = 'https://js.hsforms.net/forms/embed/v2.js';
     script.async = true;
@@ -25,9 +33,9 @@ export const HubspotForm = () => {
     script.onload = () => {
       if (window.hbspt) {
         window.hbspt.forms.create({
-          region: 'na1',
-          portalId: '4732608',
-          formId: '86cdc2e8-2221-44b0-a926-02bec92c1bed',
+          region,
+          portalId,
+          formId,
           target: '#hubspot-form-wrapper'
         });
       }
