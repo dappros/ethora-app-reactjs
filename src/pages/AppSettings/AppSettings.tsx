@@ -713,15 +713,8 @@ export default function AppSettings() {
           >
             <MobileApp
               appId={appId as string}
-              aiBot={aiBot}
-              setAiBot={setAiBot}
-              defaultChatRooms={defaultChatRooms}
-              isDisabled={app?.creatorId !== currentUser?._id}
               primaryColor={app.primaryColor}
-              bundleId={bundleId}
-              setBundleId={setBundleId}
               setGoogleServicesJson={setGoogleServicesJson}
-              setGoogleServiceInfoPlist={setGoogleServiceInfoPlist}
             />
           </TabPanel>
 
