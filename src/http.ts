@@ -557,6 +557,22 @@ export function deleteDefaultRooms(appId: string, chatJid: string) {
   });
 }
 
+// v2 chats broadcast (async job)
+export function httpBroadcastChatsV2(payload: {
+  text: string;
+  allRooms?: boolean;
+  chatNames?: string[];
+  chatIds?: string[];
+  metadata?: any;
+  dryRun?: boolean;
+}) {
+  return httpV2.post('/chats/broadcast', payload);
+}
+
+export function httpGetBroadcastChatsJobV2(jobId: string) {
+  return httpV2.get(`/chats/broadcast/${jobId}`);
+}
+
 export const sendHSFormData = async (
   appId: string,
   formId: string,

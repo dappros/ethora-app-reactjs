@@ -1,11 +1,11 @@
 import { Checkbox, Dialog, DialogPanel, Field, Label } from '@headlessui/react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IconAdd } from '../../components/Icons/IconAdd';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { ModelAppDefaulRooom } from '../../models';
 import { IconClose } from '../../components/Icons/IconClose';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { createAppChat, deleteDefaultRooms, getDefaultRooms } from '../../http';
+import { createAppChat, deleteDefaultRooms, getDefaultRooms, httpBroadcastChatsV2, httpGetBroadcastChatsJobV2 } from '../../http';
 import { Loading } from '../../components/Loading';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { SubmitModal } from '../../components/modal/SubmitModal';
@@ -30,6 +30,14 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+
+  // Broadcast Message (async job)
+  const [broadcastText, setBroadcastText] = useState('');
+  const [broadcastMode, setBroadcastMode] = useState<'all' | 'selected'>('all');
+  const [broadcastSelected, setBroadcastSelected] = useState<Record<string, boolean>>({});
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastJobId, setBroadcastJobId] = useState<string | null>(null);
+  const [broadcastJob, setBroadcastJob] = useState<any>(null);
 
   const [rowsSelected, setRowsSelected] = useState(
     defaultChatRooms.map((_) => false)
@@ -156,6 +164,95 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
     setDefaultChatRooms(data)
   }
 
+  // Broadcast helpers
+  const pinnedRooms = defaultChatRooms || [];
+
+  const selectedPinnedRooms = useMemo(() => {
+    return pinnedRooms.filter((r) => broadcastSelected[r.jid]);
+  }, [pinnedRooms, broadcastSelected]);
+
+  function getChatNameFromJid(jid: string) {
+    const s = String(jid || '');
+    return s.split('@')[0] || s;
+  }
+
+  useEffect(() => {
+    // Keep broadcast selection keys stable when pinned rooms list changes.
+    const next: Record<string, boolean> = {};
+    for (const r of pinnedRooms) {
+      next[r.jid] = Boolean(broadcastSelected[r.jid]);
+    }
+    setBroadcastSelected(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinnedRooms.length]);
+
+  useEffect(() => {
+    if (!broadcastJobId) return;
+    let alive = true;
+
+    const tick = async () => {
+      try {
+        const { data } = await httpGetBroadcastChatsJobV2(broadcastJobId);
+        if (!alive) return;
+        setBroadcastJob(data);
+        if (data?.state === 'completed') {
+          const total = data?.result?.total ?? 0;
+          const sent = (data?.result?.results || []).filter((r: any) => r.status === 'sent').length;
+          toast.success(`Broadcast completed: sent ${sent}/${total}`);
+        }
+        if (data?.state === 'failed') {
+          toast.error(`Broadcast failed: ${data?.error || 'unknown error'}`);
+        }
+      } catch (_e: any) {
+        // Best-effort polling; avoid noisy errors in UI.
+      }
+    };
+
+    tick();
+    const id = window.setInterval(() => {
+      if (!alive) return;
+      const st = broadcastJob?.state;
+      if (st === 'completed' || st === 'failed') return;
+      tick();
+    }, 2000);
+
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [broadcastJobId]);
+
+  const canSendBroadcast =
+    Boolean(broadcastText.trim()) &&
+    (broadcastMode === 'all' || selectedPinnedRooms.length > 0) &&
+    !broadcastSending;
+
+  const onSendBroadcast = async () => {
+    if (!canSendBroadcast) return;
+    setBroadcastSending(true);
+    setBroadcastJob(null);
+    setBroadcastJobId(null);
+    try {
+      const payload: any = {
+        text: broadcastText.trim(),
+        metadata: { source: 'admin_ui' },
+      };
+      if (broadcastMode === 'all') {
+        payload.allRooms = true;
+      } else {
+        payload.chatNames = selectedPinnedRooms.map((r) => getChatNameFromJid(r.jid));
+      }
+      const { data } = await httpBroadcastChatsV2(payload);
+      setBroadcastJobId(String(data.jobId));
+      toast.info('Broadcast enqueued');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || 'Failed to start broadcast');
+    } finally {
+      setBroadcastSending(false);
+    }
+  };
+
   return (
     <div className="overflow-hidden">
       <p className="font-semibold font-sans text-[16px] mb-2">New Chats</p>
@@ -261,6 +358,132 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
 
         </div>
       </div>
+
+      {/* Broadcast */}
+      <div className="mt-8">
+        <p className="font-semibold font-sans text-[16px] mb-2">Broadcast Message</p>
+        <p className="font-sans text-xs text-gray-500 mb-4">
+          Send an announcement to your chats. You can broadcast to all chats, or choose a subset from your pinned rooms list.
+        </p>
+
+        <div className="p-4 border border-gray-200 rounded-xl">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row gap-4 md:items-center">
+              <label className="inline-flex items-center gap-2 font-sans text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="broadcast-mode"
+                  checked={broadcastMode === 'all'}
+                  onChange={() => setBroadcastMode('all')}
+                />
+                All chats (recommended)
+              </label>
+              <label className="inline-flex items-center gap-2 font-sans text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="broadcast-mode"
+                  checked={broadcastMode === 'selected'}
+                  onChange={() => setBroadcastMode('selected')}
+                />
+                Selected pinned chats
+              </label>
+            </div>
+
+            {broadcastMode === 'selected' && (
+              <div className="bg-[#F3F6FC] p-4 rounded-xl">
+                {!pinnedRooms.length && (
+                  <div className="font-sans text-sm text-gray-700">
+                    No pinned rooms found. Add pinned chats above or switch to “All chats”.
+                  </div>
+                )}
+                {!!pinnedRooms.length && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {pinnedRooms.map((r) => (
+                      <label key={r.jid} className="flex items-center gap-2 font-sans text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(broadcastSelected[r.jid])}
+                          onChange={(e) => {
+                            setBroadcastSelected((prev) => ({ ...prev, [r.jid]: e.target.checked }));
+                          }}
+                        />
+                        <span className="truncate">{r.title}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <textarea
+              value={broadcastText}
+              onChange={(e) => setBroadcastText(e.target.value)}
+              placeholder="Type your broadcast message…"
+              className="rounded-2xl bg-gray-100 py-3 px-6 w-full min-h-[96px] outline-none font-sans text-sm"
+              maxLength={4000}
+            />
+
+            <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+              <div className="font-sans text-xs text-gray-500">
+                {broadcastText.trim().length}/4000
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setBroadcastText('');
+                    setBroadcastJobId(null);
+                    setBroadcastJob(null);
+                    setBroadcastSelected({});
+                    setBroadcastMode('all');
+                  }}
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-varela text-sm"
+                  type="button"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={onSendBroadcast}
+                  disabled={!canSendBroadcast}
+                  className="px-4 py-2 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-varela text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  type="button"
+                >
+                  {broadcastSending ? 'Sending…' : 'Send Broadcast'}
+                </button>
+              </div>
+            </div>
+
+            {broadcastJobId && (
+              <div className="mt-2 bg-[#FCFCFC] border border-gray-200 rounded-xl p-4">
+                <div className="font-sans text-sm font-semibold mb-1">Broadcast job</div>
+                <div className="font-sans text-xs text-gray-600">
+                  Job ID: <span className="font-mono">{broadcastJobId}</span>
+                </div>
+                <div className="font-sans text-xs text-gray-600 mt-1">
+                  State: <span className="font-mono">{broadcastJob?.state || 'loading…'}</span>
+                </div>
+                {broadcastJob?.progress && typeof broadcastJob.progress === 'object' && (
+                  <div className="font-sans text-xs text-gray-600 mt-1">
+                    Progress: {broadcastJob.progress.processed}/{broadcastJob.progress.total}
+                  </div>
+                )}
+                {broadcastJob?.state === 'completed' && (
+                  <div className="font-sans text-xs text-gray-700 mt-2">
+                    Completed. Sent:{' '}
+                    {(broadcastJob?.result?.results || []).filter((r: any) => r.status === 'sent').length}/
+                    {(broadcastJob?.result?.total ?? 0)}
+                  </div>
+                )}
+                {broadcastJob?.state === 'failed' && (
+                  <div className="font-sans text-xs text-red-700 mt-2">
+                    Failed: {broadcastJob?.error || 'unknown error'}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {renderActionsForSelected()}
       {showLoading && (<Loading />)}
       {showCreate && (
