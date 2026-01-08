@@ -1,5 +1,5 @@
 import { Checkbox, Dialog, DialogPanel, Field, Label } from '@headlessui/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IconAdd } from '../../components/Icons/IconAdd';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { ModelAppDefaulRooom } from '../../models';
@@ -38,6 +38,7 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [broadcastJobId, setBroadcastJobId] = useState<string | null>(null);
   const [broadcastJob, setBroadcastJob] = useState<any>(null);
+  const broadcastToastRef = useRef<{ completed: boolean; failed: boolean }>({ completed: false, failed: false });
 
   const [rowsSelected, setRowsSelected] = useState(
     defaultChatRooms.map((_) => false)
@@ -189,19 +190,27 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   useEffect(() => {
     if (!broadcastJobId) return;
     let alive = true;
+    broadcastToastRef.current = { completed: false, failed: false };
+    let timerId: number | null = null;
 
     const tick = async () => {
       try {
         const { data } = await httpGetBroadcastChatsJobV2(broadcastJobId);
         if (!alive) return;
         setBroadcastJob(data);
-        if (data?.state === 'completed') {
+        if (data?.state === 'completed' && !broadcastToastRef.current.completed) {
+          broadcastToastRef.current.completed = true;
           const total = data?.result?.total ?? 0;
           const sent = (data?.result?.results || []).filter((r: any) => r.status === 'sent').length;
           toast.success(`Broadcast completed: sent ${sent}/${total}`);
+          if (timerId) window.clearInterval(timerId);
+          alive = false;
         }
-        if (data?.state === 'failed') {
+        if (data?.state === 'failed' && !broadcastToastRef.current.failed) {
+          broadcastToastRef.current.failed = true;
           toast.error(`Broadcast failed: ${data?.error || 'unknown error'}`);
+          if (timerId) window.clearInterval(timerId);
+          alive = false;
         }
       } catch (_e: any) {
         // Best-effort polling; avoid noisy errors in UI.
@@ -209,16 +218,14 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
     };
 
     tick();
-    const id = window.setInterval(() => {
+    timerId = window.setInterval(() => {
       if (!alive) return;
-      const st = broadcastJob?.state;
-      if (st === 'completed' || st === 'failed') return;
       tick();
     }, 2000);
 
     return () => {
       alive = false;
-      window.clearInterval(id);
+      if (timerId) window.clearInterval(timerId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [broadcastJobId]);
@@ -471,6 +478,31 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
                     Completed. Sent:{' '}
                     {(broadcastJob?.result?.results || []).filter((r: any) => r.status === 'sent').length}/
                     {(broadcastJob?.result?.total ?? 0)}
+                  </div>
+                )}
+                {broadcastJob?.state === 'completed' && Array.isArray(broadcastJob?.result?.results) && (
+                  <div className="mt-3">
+                    <div className="font-sans text-xs text-gray-600 mb-1">Details (first 20)</div>
+                    <div className="max-h-[180px] overflow-auto border border-gray-200 rounded-lg bg-white">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#FCFCFC]">
+                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">Room</th>
+                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">Status</th>
+                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">Error</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(broadcastJob.result.results || []).slice(0, 20).map((r: any) => (
+                            <tr key={`${r.chatName}-${r.status}`} className="border-t border-gray-100">
+                              <td className="px-3 py-2 font-sans text-xs">{r.chatName}</td>
+                              <td className="px-3 py-2 font-mono text-xs">{r.status}</td>
+                              <td className="px-3 py-2 font-sans text-xs text-gray-600">{r.error || ''}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
                 {broadcastJob?.state === 'failed' && (
