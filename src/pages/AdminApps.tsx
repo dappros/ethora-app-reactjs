@@ -35,10 +35,11 @@ export default function AdminApps() {
     () => Number(searchParams.get('limit')) || 5,
     [searchParams]
   );
-  const page = useMemo(
-    () => Number(searchParams.get('page')) || 0,
-    [searchParams]
-  );
+  // В URL храним страницу с 1 (page=1, page=140), для API и react-paginate используем 0-based
+  const pageIndex = useMemo(() => {
+    const p = Number(searchParams.get('page')) || 1;
+    return Math.max(0, p - 1);
+  }, [searchParams]);
   const order = useMemo(
     () => (searchParams.get('order') as 'asc' | 'desc') || 'desc',
     [searchParams]
@@ -49,14 +50,14 @@ export default function AdminApps() {
   );
 
   const [pageCount, setPageCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(page);
+  const [currentPage, setCurrentPage] = useState(pageIndex);
 
   const fetchApps = useCallback(async () => {
     setLoading(true);
     try {
       const response = await httpGetApps({
         limit,
-        offset: limit * page,
+        offset: limit * pageIndex,
         order,
         orderBy,
       });
@@ -68,7 +69,7 @@ export default function AdminApps() {
     } finally {
       setLoading(false);
     }
-  }, [limit, page, order, orderBy, doSetApps]);
+  }, [limit, pageIndex, order, orderBy, doSetApps]);
 
   const updateSearchParams = useCallback(
     (newParams: Record<string, string | number>) => {
@@ -87,14 +88,15 @@ export default function AdminApps() {
 
   const onPageChange = useCallback(
     (selectedItem: { selected: number }) => {
-      updateSearchParams({ page: selectedItem.selected });
+      // react-paginate передаёт 0-based index; в URL пишем номер страницы с 1
+      updateSearchParams({ page: selectedItem.selected + 1 });
     },
     [updateSearchParams]
   );
 
   const handleSortChange = useCallback(
     (newOrderBy: OrderByType, newOrder: 'asc' | 'desc') => {
-      updateSearchParams({ orderBy: newOrderBy, order: newOrder, page: 0 });
+      updateSearchParams({ orderBy: newOrderBy, order: newOrder, page: 1 });
     },
     [updateSearchParams]
   );
@@ -161,8 +163,8 @@ export default function AdminApps() {
   }, [location.pathname, location.search]);
 
   useEffect(() => {
-    setCurrentPage(page);
-  }, [page]);
+    setCurrentPage(pageIndex);
+  }, [pageIndex]);
 
   useEffect(() => {
     const newUser = localStorage.getItem('newUser');
