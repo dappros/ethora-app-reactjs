@@ -30,12 +30,12 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
   const renderLogo = () => {
     if (app.logoImage) {
       return (
-        // logo — внутренние отступы, чтобы аватарка не прилипала к краям
         <div
           onClick={onClick}
           className="w-[120px] h-[120px] rounded-xl flex justify-center bg-gray-100 items-center bg-contain bg-no-repeat bg-center cursor-pointer p-3"
-          style={{ backgroundImage: `url(${app.logoImage})` }}
-        ></div>
+        >
+          <img src={app.logoImage} alt="Logo" className="w-full h-full object-contain rounded-md" />
+        </div>
       );
     } else {
       return (

@@ -35,7 +35,6 @@ export default function AdminApps() {
     () => Number(searchParams.get('limit')) || 5,
     [searchParams]
   );
-  // В URL храним страницу с 1 (page=1, page=140), для API и react-paginate используем 0-based
   const pageIndex = useMemo(() => {
     const p = Number(searchParams.get('page')) || 1;
     return Math.max(0, p - 1);
@@ -88,7 +87,6 @@ export default function AdminApps() {
 
   const onPageChange = useCallback(
     (selectedItem: { selected: number }) => {
-      // react-paginate передаёт 0-based index; в URL пишем номер страницы с 1
       updateSearchParams({ page: selectedItem.selected + 1 });
     },
     [updateSearchParams]
