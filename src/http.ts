@@ -151,7 +151,10 @@ attachAuthInterceptors(httpV2);
 // App-auth for certain admin actions (do NOT refresh/logout user on 401 here).
 httpV2App.interceptors.request.use((config) => {
   config.headers = config.headers || {};
-  (config.headers as any).Authorization = getAppJwt();
+  // Allow callers to override Authorization explicitly (e.g., when acting on a selected app in admin panel).
+  if (!(config.headers as any).Authorization) {
+    (config.headers as any).Authorization = getAppJwt();
+  }
   return config;
 }, null);
 
@@ -259,6 +262,14 @@ export function httpPostFile(file: File) {
   let fd = new FormData();
   fd.append('files', file);
   return http.post('/files', fd);
+}
+
+// Upload Firebase service account for push notifications (per-app).
+// POST /v1/push/firebase-service-account/:appId (multipart/form-data)
+export function httpUploadPushFirebaseServiceAccount(appId: string, file: File) {
+  const fd = new FormData();
+  fd.append('firebaseServiceAccount', file);
+  return http.post(`/push/firebase-service-account/${appId}`, fd);
 }
 
 export function httpGetUsers(
@@ -590,12 +601,14 @@ export function httpBroadcastChatsV2(payload: {
   chatIds?: string[];
   metadata?: any;
   dryRun?: boolean;
-}) {
-  return httpV2App.post('/chats/broadcast', payload);
+}, opts?: { appToken?: string }) {
+  const cfg = opts?.appToken ? { headers: { Authorization: opts.appToken } } : undefined;
+  return httpV2App.post('/chats/broadcast', payload, cfg);
 }
 
-export function httpGetBroadcastChatsJobV2(jobId: string) {
-  return httpV2App.get(`/chats/broadcast/${jobId}`);
+export function httpGetBroadcastChatsJobV2(jobId: string, opts?: { appToken?: string }) {
+  const cfg = opts?.appToken ? { headers: { Authorization: opts.appToken } } : undefined;
+  return httpV2App.get(`/chats/broadcast/${jobId}`, cfg);
 }
 
 export const sendHSFormData = async (

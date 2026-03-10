@@ -94,12 +94,25 @@ const MemoizedChat = React.memo(function ChatComponent({
 export default function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
+  const apps = useAppStore((s) => s.apps);
 
   const { currentUser } = useAppStore((s) => s);
 
   const allowedDomains =
     import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   const currentDomain = window.location.hostname;
+  const isDemoDomain = allowedDomains.includes(currentDomain);
+  const isBaseApp = Boolean(config?.isBaseApp);
+  const hasOtherApps = Array.isArray(apps)
+    ? apps.some((a) => a && (a as any)._id !== config?._id && !(a as any).isBaseApp)
+    : false;
+
+  // Banner rules:
+  // - Demo server: show for admins while in Base App context (even if no other apps exist yet),
+  //   to guide them towards creating/publishing their own app.
+  // - Enterprise / dedicated server: show only if the admin actually has other apps to switch to,
+  //   otherwise hide to avoid confusing “demo” messaging when Base App is the only app.
+  const showBaseAppContextBanner = Boolean(isAdmin && isBaseApp && (isDemoDomain || hasOtherApps));
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full abc">
@@ -107,11 +120,19 @@ export default function ChatPage() {
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Chats
         </div>
-        {isAdmin && allowedDomains.includes(currentDomain) && (
+        {showBaseAppContextBanner && (
           <div className="flex flex-col items-center bg-yellow-100 px-4 py-2 text-sm border">
-            <p>This is demo server</p>
+            {isDemoDomain ? (
+              <p>This is a demo server</p>
+            ) : (
+              <p>This is the Base App context</p>
+            )}
             <p className="flex items-center gap-2">
-              <span>To test your own App, go to "Admin"</span>
+              <span>
+                {isDemoDomain
+                  ? 'To test your own App, go to "Admin"'
+                  : 'To switch context, go to "Admin"'}
+              </span>
               <ArrowRightAltIcon /> <span>your App </span>
               <ArrowRightAltIcon /> <span>"Publish"</span>
             </p>

@@ -1,30 +1,35 @@
 
 import { useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { actionPostFile } from '../../actions';
+import { toast } from 'react-toastify';
+import { actionUploadPushFirebaseServiceAccount } from '../../actions';
 import { IconUpload } from '../../components/Icons/IconUpload';
 
 interface Props {
   appId: string;
-  setGoogleServicesJson: (s: string) => void;
   primaryColor: string;
 }
 
 export function MobileApp({
   appId,
-  setGoogleServicesJson,
   primaryColor,
 }: Props) {
-  const googleJsonRef = useRef<HTMLInputElement>(null);
+  const pushServiceAccountRef = useRef<HTMLInputElement>(null);
 
-  const onGoogleJsonRefChanges = (file: File | null) => {
-    if (!file) {
-      return;
-    }
-
-    actionPostFile(file).then((resp) => {
-      setGoogleServicesJson(resp.data.results[0].location);
-    });
+  const onPushServiceAccountChanges = (file: File | null) => {
+    if (!file) return;
+    actionUploadPushFirebaseServiceAccount(appId, file)
+      .then(() => {
+        toast.success('Push service account uploaded');
+      })
+      .catch((e) => {
+        const msg =
+          e?.response?.data?.error ||
+          e?.response?.data?.details ||
+          e?.message ||
+          'Failed to upload push service account';
+        toast.error(String(msg));
+      });
   };
 
   return (
@@ -108,20 +113,20 @@ export function MobileApp({
           Push Notifications
         </div>
         <p className="font-sans text-sm leading-relaxed mb-4">
-        Follow <a href="https://forum.ethora.com/topic/75-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this manual</a> to set up your Firebase account. Extract and upload your <strong>service-account.json</strong>. This will enable your users to receive push notifications for chat messages they missed while being offline.
+        Follow <a href="https://forum.ethora.com/topic/75-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this manual</a> to set up your Firebase account. Upload your <strong>service-account.json</strong> here to enable push notifications for offline chat messages.
         </p>
         <input
           type="file"
-          ref={googleJsonRef}
+          ref={pushServiceAccountRef}
           accept=".json"
           className="hidden"
           onChange={(e) =>
-            onGoogleJsonRefChanges(e.target.files && e.target.files[0])
+            onPushServiceAccountChanges(e.target.files && e.target.files[0])
           }
         />
         <button
           className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8"
-          onClick={() => googleJsonRef.current?.click()}
+          onClick={() => pushServiceAccountRef.current?.click()}
         >
           <IconUpload stroke={primaryColor}></IconUpload>
           <span className="ml-2">Upload</span>

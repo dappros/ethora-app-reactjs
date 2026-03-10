@@ -18,6 +18,7 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>,
   setDefaultChatRooms: (value: Array<ModelAppDefaulRooom>) => void,
   appId: string,
+  appToken: string,
 }
 
 interface Inputs {
@@ -25,7 +26,7 @@ interface Inputs {
   pinned: false;
 }
 
-export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, defaultChatRooms, setDefaultChatRooms, appId }: Props) {
+export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, defaultChatRooms, setDefaultChatRooms, appId, appToken }: Props) {
   const [showCreate, setShowCreate] = useState(false);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -129,11 +130,7 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
       await createAppChat(appId, chatTitle, true)
       const { data } = await getDefaultRooms(appId)
       setDefaultChatRooms(data)
-      
-      // Refresh app config to update defaultRooms in the store
-      const { actionGetConfig } = await import('../../actions')
-      await actionGetConfig()
-      
+
       setShowLoading(false)
       reset()
       setShowCreate(false)
@@ -195,7 +192,7 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
 
     const tick = async () => {
       try {
-        const { data } = await httpGetBroadcastChatsJobV2(broadcastJobId);
+        const { data } = await httpGetBroadcastChatsJobV2(broadcastJobId, { appToken });
         if (!alive) return;
         setBroadcastJob(data);
         if (data?.state === 'completed' && !broadcastToastRef.current.completed) {
@@ -250,7 +247,7 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
       } else {
         payload.chatNames = selectedPinnedRooms.map((r) => getChatNameFromJid(r.jid));
       }
-      const { data } = await httpBroadcastChatsV2(payload);
+      const { data } = await httpBroadcastChatsV2(payload, { appToken });
       setBroadcastJobId(String(data.jobId));
       toast.info('Broadcast enqueued');
     } catch (e: any) {

@@ -714,7 +714,6 @@ export default function AppSettings() {
             <MobileApp
               appId={appId as string}
               primaryColor={app.primaryColor}
-              setGoogleServicesJson={setGoogleServicesJson}
             />
           </TabPanel>
 
@@ -782,6 +781,7 @@ export default function AppSettings() {
               defaultChatRooms={defaultChatRooms}
               setDefaultChatRooms={setDefaultChatRooms}
               appId={appId as string}
+              appToken={app?.appToken || ''}
             />
           </TabPanel>
 
