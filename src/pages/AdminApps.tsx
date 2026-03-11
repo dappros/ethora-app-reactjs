@@ -44,7 +44,7 @@ export default function AdminApps() {
     [searchParams]
   );
   const orderBy = useMemo(
-    () => (searchParams.get('orderBy') as OrderByType) || 'totalRegistered',
+    () => (searchParams.get('orderBy') as OrderByType) || 'createdAt',
     [searchParams]
   );
 

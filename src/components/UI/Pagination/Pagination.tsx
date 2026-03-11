@@ -12,7 +12,7 @@ export const Pagination: FC<PaginationProps> = ({
   pageCount,
   forcePage,
 }) => {
-  const safeForcePage = pageCount > 0 ? Math.min(forcePage, pageCount - 1) : 0;
+  const safeForcePage = pageCount > 0 ? Math.min(forcePage, pageCount - 1) : undefined;
 
   return (
     <ReactPaginate
