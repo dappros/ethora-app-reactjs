@@ -207,6 +207,12 @@ export function httpPostFile(file: File) {
   return http.post('/files', fd);
 }
 
+export function httpUploadPushFirebaseServiceAccount(appId: string, file: File) {
+  const fd = new FormData();
+  fd.append('firebaseServiceAccount', file);
+  return http.post(`/push/firebase-service-account/${appId}`, fd);
+}
+
 export function httpGetUsers(
   appId: string,
   limit: number = 10,
