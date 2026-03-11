@@ -12,6 +12,8 @@ export const Pagination: FC<PaginationProps> = ({
   pageCount,
   forcePage,
 }) => {
+  const safeForcePage = pageCount > 0 ? Math.min(forcePage, pageCount - 1) : 0;
+
   return (
     <ReactPaginate
       className="flex flex-wrap items-center justify-center gap-2 mt-4 text-gray-500 w-full max-w-full overflow-hidden"
@@ -21,7 +23,7 @@ export const Pagination: FC<PaginationProps> = ({
       previousLabel="← Prev"
       pageRangeDisplayed={2}
       pageCount={pageCount}
-      forcePage={forcePage}
+      forcePage={safeForcePage}
       renderOnZeroPageCount={null}
       activeClassName="text-brand-500 font-bold px-3 py-2 rounded"
       pageClassName="px-2 py-1 sm:px-3 sm:py-2 hover:bg-gray-200"

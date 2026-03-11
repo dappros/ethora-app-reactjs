@@ -173,8 +173,6 @@ export default function AdminApps() {
     setShowModal(!apps.length);
   }, [apps.length]);
 
-  console.log('newShowModal', newShowModal);
-
   useEffect(() => {
     fetchApps();
   }, [fetchApps]);
