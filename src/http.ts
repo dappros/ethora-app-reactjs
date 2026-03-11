@@ -34,6 +34,22 @@ export const httpV2 = axios.create({
   baseURL: import.meta.env.VITE_API_V2,
 });
 
+export const httpV2App = axios.create({
+  baseURL: import.meta.env.VITE_API_V2,
+});
+
+function getAppJwt(): string {
+  let appJwt = httpTokens.appJwt;
+  if (!appJwt && typeof window !== 'undefined' && window.useAppStore) {
+    const appToken = window.useAppStore.getState()?.currentApp?.appToken;
+    if (appToken) {
+      appJwt = appToken;
+      httpTokens.appJwt = appToken;
+    }
+  }
+  return appJwt || '';
+}
+
 const AUTH_WHITELIST: Array<string | RegExp> = [
   '/users/login-with-email',
   '/users/login',
@@ -100,6 +116,14 @@ function attachAuthInterceptors(client: AxiosInstance) {
 
 attachAuthInterceptors(http);
 attachAuthInterceptors(httpV2);
+
+httpV2App.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  if (!(config.headers as any).Authorization) {
+    (config.headers as any).Authorization = getAppJwt();
+  }
+  return config;
+}, null);
 
 export const refreshToken = async () => {
   try {
@@ -526,6 +550,33 @@ export function deleteDefaultRooms(appId: string, chatJid: string) {
       chatJid,
     },
   });
+}
+
+export function httpBroadcastChatsV2(
+  payload: {
+    text: string;
+    allRooms?: boolean;
+    chatNames?: string[];
+    chatIds?: string[];
+    metadata?: any;
+    dryRun?: boolean;
+  },
+  opts?: { appToken?: string }
+) {
+  const cfg = opts?.appToken
+    ? { headers: { Authorization: opts.appToken } }
+    : undefined;
+  return httpV2App.post('/chats/broadcast', payload, cfg);
+}
+
+export function httpGetBroadcastChatsJobV2(
+  jobId: string,
+  opts?: { appToken?: string }
+) {
+  const cfg = opts?.appToken
+    ? { headers: { Authorization: opts.appToken } }
+    : undefined;
+  return httpV2App.get(`/chats/broadcast/${jobId}`, cfg);
 }
 
 export const sendHSFormData = async (
