@@ -7,6 +7,7 @@ import {
   httpGetConfig,
   httpGetUsers,
   httpPostFile,
+  httpUploadPushFirebaseServiceAccount,
   httpResetPasswords,
   httpTokens,
   httpUpdateApp,
@@ -164,6 +165,13 @@ export async function actionCreateApp(displayName: string) {
 
 export async function actionPostFile(file: File) {
   return httpPostFile(file);
+}
+
+export async function actionUploadPushFirebaseServiceAccount(
+  appId: string,
+  file: File
+) {
+  return httpUploadPushFirebaseServiceAccount(appId, file);
 }
 
 export async function actionGetUsers(

@@ -714,7 +714,6 @@ export default function AppSettings() {
             <MobileApp
               appId={appId as string}
               primaryColor={app.primaryColor}
-              setGoogleServicesJson={setGoogleServicesJson}
             />
           </TabPanel>
 
