@@ -10,6 +10,8 @@
 
 Full Ethora app engine, React.js version.
 
+**Part of the [Ethora SDK ecosystem](https://github.com/dappros/ethora#ecosystem)** — see all SDKs, tools, and sample apps. Follow cross-SDK updates in the [Release Notes](https://github.com/dappros/ethora/blob/main/RELEASE-NOTES.md).
+
 ## About
 
 This repository contains the React.js frontend for Ethora. It is the main web client used for Ethora-powered apps and includes authentication, chat and messaging flows, AI-related UI surfaces, admin/app settings, widgets, and integrations used by the wider platform.
