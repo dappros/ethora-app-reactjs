@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../actions';
 import CustomInput from '../../components/input/Input';
-import { logLogin } from '../../hooks/withTracking';
+import { logLogin, logSignup } from '../../hooks/withTracking';
 import { loginSignature, registerSignature } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
@@ -113,6 +113,7 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
         utm || ''
       );
       toast.success('Successfully registered with Metamask!');
+      logSignup('metamask', res.data?.user?._id);
       setIsModalOpen(false);
 
       await actionAfterMetamask(res.data);

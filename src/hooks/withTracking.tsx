@@ -105,6 +105,28 @@ export function withTracking<T>(Component: ComponentType<T>) {
 }
 
 export const logLogin = (method: string, userId?: string) => {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'login', {
+      method: method,
+      user_id: userId,
+    });
+  }
+  return { method, userId };
+};
+
+export const logSignup = (method: string, userId?: string, email?: string) => {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'signup_complete', {
+      event_category: 'conversion',
+      method: method,
+      user_id: userId,
+      email_domain: email ? email.split('@')[1] || '' : '',
+    });
+    // Also fire the standard GA4 sign_up event
+    window.gtag('event', 'sign_up', {
+      method: method,
+    });
+  }
   return { method, userId };
 };
 
