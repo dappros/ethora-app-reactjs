@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../actions';
-import { logLogin } from '../../hooks/withTracking.tsx';
+import { logLogin, logSignup } from '../../hooks/withTracking.tsx';
 import {
   httpCheckEmailExist,
   httpLoginSocial,
@@ -53,7 +53,7 @@ export const FacebookButton = () => {
             );
             const { firstName, lastName, email } = userResult?.data?.user;
 
-            logLogin('facebook', userResult?.data?.user?._id);
+            logSignup('facebook', userResult?.data?.user?._id, userResult?.data?.user?.email);
 
             const website = `${window?.location?.origin || ''}/facebook`;
             const allowedDomains =

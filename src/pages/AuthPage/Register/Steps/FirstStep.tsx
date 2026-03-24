@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
 import CustomInput from '../../../../components/input/Input';
 import PasswordInput from '../../../../components/input/PasswordInput';
-import { logLogin } from '../../../../hooks/withTracking';
+import { logLogin, logSignup } from '../../../../hooks/withTracking';
 import {
   httpLoginWithEmail,
   httpRegisterWithEmailV2,
@@ -183,7 +183,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
 
           await actionAfterLogin(data);
 
-          logLogin('email', data.user._id);
+          logSignup('email', data.user._id, email);
           if (config?.afterLoginPage) {
             navigateToUserPage(navigate, config.afterLoginPage as string);
           }
