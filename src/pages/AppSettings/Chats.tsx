@@ -18,6 +18,7 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>,
   setDefaultChatRooms: (value: Array<ModelAppDefaulRooom>) => void,
   appId: string,
+  domainName?: string,
 }
 
 interface Inputs {
@@ -25,7 +26,7 @@ interface Inputs {
   pinned: false;
 }
 
-export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, defaultChatRooms, setDefaultChatRooms, appId }: Props) {
+export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, defaultChatRooms, setDefaultChatRooms, appId, domainName }: Props) {
   const [showCreate, setShowCreate] = useState(false);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -132,7 +133,7 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
       
       // Refresh app config to update defaultRooms in the store
       const { actionGetConfig } = await import('../../actions')
-      await actionGetConfig()
+      await actionGetConfig(domainName)
       
       setShowLoading(false)
       reset()

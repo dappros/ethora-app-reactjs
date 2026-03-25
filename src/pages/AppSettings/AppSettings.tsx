@@ -782,6 +782,7 @@ export default function AppSettings() {
               defaultChatRooms={defaultChatRooms}
               setDefaultChatRooms={setDefaultChatRooms}
               appId={appId as string}
+              domainName={domainName}
             />
           </TabPanel>
 
