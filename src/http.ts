@@ -64,6 +64,14 @@ function getAppJwt(): string {
   return appJwt || '';
 }
 
+function getCurrentAppId(): string {
+  if (typeof window !== 'undefined' && (window as any).useAppStore) {
+    const currentApp = (window as any).useAppStore.getState()?.currentApp;
+    return currentApp?._id || currentApp?.appId || '';
+  }
+  return '';
+}
+
 const AUTH_WHITELIST: Array<string | RegExp> = [
   '/apps/get-config', // App config doesn't require user auth
   '/users/login-with-email',
@@ -89,6 +97,24 @@ function isWhitelisted(url: string | undefined, method?: string) {
   });
 }
 
+function shouldInjectAppIdInBody(url: string | undefined, method?: string) {
+  if (!url) return false;
+  const m = (method || 'get').toLowerCase();
+  if (url === '/users' && m === 'post') return true;
+  if (url === '/users/login' && m === 'post') return true;
+  if (url === '/users/login-with-email' && m === 'post') return true;
+  if (url === '/users/sign-up-with-email' && m === 'post') return true;
+  if (url === '/users/sign-up-resend-email' && m === 'post') return true;
+  if (url === '/users/forgot' && m === 'post') return true;
+  return false;
+}
+
+function shouldInjectAppIdInQuery(url: string | undefined, method?: string) {
+  if (!url) return false;
+  const m = (method || 'get').toLowerCase();
+  return m === 'get' && /^\/users\/checkEmail\//.test(url);
+}
+
 function attachAuthInterceptors(client: AxiosInstance) {
   client.interceptors.request.use((config) => {
     if (config.url === '/users/login/refresh') {
@@ -97,7 +123,28 @@ function attachAuthInterceptors(client: AxiosInstance) {
 
     if (isWhitelisted(config.url, config.method)) {
       config.headers = config.headers || {};
-      // Try to get appJwt from httpTokens, or from the store if not set yet
+      const appId = getCurrentAppId();
+
+      if (shouldInjectAppIdInBody(config.url, config.method)) {
+        const body =
+          config.data && typeof config.data === 'object' && !(config.data instanceof FormData)
+            ? config.data
+            : {};
+        if (!(body as any).appId && appId) {
+          (body as any).appId = appId;
+        }
+        config.data = body;
+      }
+
+      if (shouldInjectAppIdInQuery(config.url, config.method)) {
+        const params = config.params && typeof config.params === 'object' ? config.params : {};
+        if (!(params as any).appId && appId) {
+          (params as any).appId = appId;
+        }
+        config.params = params;
+      }
+
+      // Keep legacy appJwt auth for backward compatibility during migration.
       let appJwt = httpTokens.appJwt;
       if (!appJwt && typeof window !== 'undefined' && (window as any).useAppStore) {
         const appToken = (window as any).useAppStore.getState()?.currentApp?.appToken;
@@ -107,12 +154,13 @@ function attachAuthInterceptors(client: AxiosInstance) {
         }
       }
       
-      // Only warn if we still don't have it after checking the store
-      if (!appJwt) {
-        console.warn('appJwt is not set. Login/registration requests may fail. Make sure app config is loaded.');
+      if (appJwt) {
+        (config.headers as any).Authorization = appJwt;
       }
-      
-      (config.headers as any).Authorization = appJwt || '';
+
+      if (!appId && !appJwt) {
+        console.warn('App context is not set. Public auth bootstrap requests should include appId; legacy appJwt fallback is also unavailable.');
+      }
       return config;
     }
 
@@ -343,7 +391,11 @@ export function httpUpdateAcl(
 }
 
 export const httpCheckEmailExist = (email: string) => {
-  return http.get(`/users/checkEmail/${email}`);
+  return http.get(`/users/checkEmail/${email}`, {
+    params: {
+      appId: getCurrentAppId(),
+    },
+  });
 };
 
 export const httpRegisterSocial = (
@@ -355,6 +407,7 @@ export const httpRegisterSocial = (
   utm?: string,
 ) => {
   return http.post('/users', {
+    appId: getCurrentAppId(),
     idToken,
     accessToken,
     loginType,
@@ -371,6 +424,7 @@ export const httpLoginSocial = (
   authToken: string = 'authToken'
 ) => {
   return http.post(`/users/login`, {
+    appId: getCurrentAppId(),
     idToken,
     accessToken,
     loginType,
@@ -388,6 +442,7 @@ export function registerSignature(
 ) {
   return http.post('/users',
     {
+      appId: getCurrentAppId(),
       loginType: 'signature',
       walletAddress,
       signature,
@@ -406,6 +461,7 @@ export function loginSignature(
   message: string
 ) {
   return http.post('/users/login', {
+    appId: getCurrentAppId(),
     loginType: 'signature',
     walletAddress,
     signature,
@@ -422,6 +478,7 @@ export const httpRegisterWithEmail = (
 ) => {
   const body = signUpPlan
     ? {
+        appId: getCurrentAppId(),
         email,
         firstName,
         lastName,
@@ -429,6 +486,7 @@ export const httpRegisterWithEmail = (
         utm,
       }
     : {
+        appId: getCurrentAppId(),
         email,
         firstName,
         lastName,
@@ -448,6 +506,7 @@ export const httpRegisterWithEmailV2 = (
 ) => {
   const body = signUpPlan
     ? {
+        appId: getCurrentAppId(),
         email,
         password,
         cfToken,
@@ -457,6 +516,7 @@ export const httpRegisterWithEmailV2 = (
         utm,
       }
     : {
+        appId: getCurrentAppId(),
         email,
         password,
         cfToken,
@@ -469,12 +529,14 @@ export const httpRegisterWithEmailV2 = (
 
 export async function httpResendLink(email: string) {
   return await http.post('/users/sign-up-resend-email', {
+    appId: getCurrentAppId(),
     email,
   });
 }
 
 export async function httpPostForgotPassword(email: string) {
   return await http.post('/users/forgot', {
+    appId: getCurrentAppId(),
     email,
   });
 }
