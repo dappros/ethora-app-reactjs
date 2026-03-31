@@ -16,13 +16,16 @@ import {
   sendHSFormData,
 } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
+import { isAllowedDomain } from '../../../../utils/isAllowedDomain';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
 import SkeletonLoader from '../../SkeletonLoader';
 
-const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+const ROOT_DOMAIN = String(
+  import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN || import.meta.env.VITE_ROOT_DOMAIN || ''
+).trim();
 
 function setEthoraUserCookie(value: string) {
   const domainPart =
@@ -156,8 +159,6 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       ).then(async () => {
         const website = window.location.origin;
         const currentDomain = window.location.hostname;
-        const allowedDomains =
-          import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
 
         const hubspotData = {
           fields: [
@@ -168,7 +169,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           ],
         };
 
-        if (!allowedDomains.includes(currentDomain)) {
+        if (!isAllowedDomain(currentDomain)) {
           return;
         }
 

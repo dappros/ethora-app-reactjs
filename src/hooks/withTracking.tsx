@@ -1,6 +1,7 @@
 import Clarity from '@microsoft/clarity';
 import { ComponentType, useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore.ts';
+import { isAllowedDomain } from '../utils/isAllowedDomain.ts';
 
 declare global {
   interface Window {
@@ -76,14 +77,12 @@ export function withTracking<T>(Component: ComponentType<T>) {
     const config = useAppStore(
       (state) => state.currentApp?.firebaseConfigParsed
     );
-    const allowedDomains =
-      import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
     const currentDomain = window.location.hostname;
     const GTM_ID = import.meta.env.VITE_GTM_ID;
     const GA_ID = import.meta.env.VITE_GA_ID;
 
     useEffect(() => {
-      if (!allowedDomains.includes(currentDomain)) {
+      if (!isAllowedDomain(currentDomain)) {
         console.warn(`Tracking is disabled on ${currentDomain}`);
         return;
       }
@@ -98,7 +97,7 @@ export function withTracking<T>(Component: ComponentType<T>) {
       setIsInitialized(true);
 
       return () => {};
-    }, [GA_ID, GTM_ID, allowedDomains, config, currentDomain, isInitialized]);
+    }, [GA_ID, GTM_ID, config, currentDomain, isInitialized]);
 
     return <Component {...props} logLogin={logLogin} logLogout={logLogout} />;
   };

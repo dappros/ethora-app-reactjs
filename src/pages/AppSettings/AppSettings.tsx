@@ -493,8 +493,10 @@ export default function AppSettings() {
 
   const onExternalClick = () => {
     if (app) {
+      const hostedAppsRoot =
+        import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN || import.meta.env.VITE_ROOT_DOMAIN;
       window.open(
-        `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+        `https://${app.domainName}.${hostedAppsRoot}`,
         '_blank'
       );
     }

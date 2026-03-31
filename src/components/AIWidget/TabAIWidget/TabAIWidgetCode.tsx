@@ -20,6 +20,11 @@ export const TabAIWidgetCode = ({
   userId,
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
+  const widgetUrl =
+    import.meta.env.VITE_WIDGET_VERSIONED_URL ||
+    import.meta.env.VITE_WIDGET_URL ||
+    'https://widget.ethora.com/assistant.js';
+  const xmppHost = import.meta.env.VITE_XMPP_HOST || 'xmpp.ethoradev.com';
   const doSetAiValues = useAppStore((s) => s.doSetAiValues);
 
   const [displayName, setDisplayName] = useState<string>('');
@@ -55,9 +60,9 @@ export const TabAIWidgetCode = ({
 
     const lines = [
       `<script`,
-      `  src="https://widget.ethora.com/assistant.js"`,
+      `  src="${widgetUrl}"`,
       `  id="chat-content-assistant"`,
-      `  data-bot-id="${appId}_${userId}-bot@xmpp.ethoradev.com"`,
+      `  data-bot-id="${appId}_${userId}-bot@${xmppHost}"`,
     ];
 
     if (avatar) {
@@ -78,10 +83,10 @@ export const TabAIWidgetCode = ({
       return scriptCode;
     }
     if (appId && userId) {
-      return `${appId}_${userId}-bot@xmpp.ethoradev.com`;
+      return `${appId}_${userId}-bot@${xmppHost}`;
     }
     return '';
-  }, [value, scriptCode, appId, userId]);
+  }, [value, scriptCode, appId, userId, xmppHost]);
 
   useEffect(() => {
     setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
@@ -235,7 +240,7 @@ export const TabAIWidgetCode = ({
                   onClick={() =>
                     handleCopy(
                       appId && userId
-                        ? `${appId}_${userId}-bot@xmpp.ethoradev.com`
+                        ? `${appId}_${userId}-bot@${xmppHost}`
                         : ''
                     )
                   }
@@ -287,7 +292,7 @@ export const TabAIWidgetCode = ({
               }}
             >
               {appId && userId
-                ? `${appId}_${userId}-bot@xmpp.ethoradev.com`
+                ? `${appId}_${userId}-bot@${xmppHost}`
                 : ''}
             </SyntaxHighlighter>
           </div>

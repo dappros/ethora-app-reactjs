@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { isAllowedDomain } from '../utils/isAllowedDomain';
 
 interface Params {
   utm_ref?: string;
@@ -33,16 +34,13 @@ export const useCaptureParams = () => {
       params.device_type = deviceType;
     }
 
-    const isAllowedDomain = (() => {
-      const allowed =
-        import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
-      const current = window.location.hostname;
-      return allowed.includes(current);
+    const domainAllowed = (() => {
+      return isAllowedDomain(window.location.hostname);
     })();
 
     const isEmpty = Object.keys(params).length === 0;
 
-    if (isAllowedDomain && isEmpty) {
+    if (domainAllowed && isEmpty) {
       const utm_ref = document.referrer;
       const fallbackFirstPage = window.location.pathname;
       const ua = navigator.userAgent;

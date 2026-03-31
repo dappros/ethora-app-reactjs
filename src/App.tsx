@@ -14,11 +14,49 @@ export function Fallback() {
   return <p>Performing initial data load</p>;
 }
 
+function resolveRuntimeDomainName() {
+  const configuredDomain = String(import.meta.env.VITE_DOMAIN_NAME || '').trim();
+  const webDomain = String(import.meta.env.VITE_WEB_DOMAIN || '').trim().toLowerCase();
+  const hostedAppsRoot = String(
+    import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
+      import.meta.env.VITE_ROOT_DOMAIN ||
+      ''
+  )
+    .trim()
+    .toLowerCase();
+
+  if (typeof window === 'undefined') {
+    return configuredDomain;
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+  if (!hostname || hostname === 'localhost') {
+    return configuredDomain;
+  }
+
+  if (webDomain && hostname === webDomain) {
+    return configuredDomain;
+  }
+
+  if (
+    hostedAppsRoot &&
+    hostname.endsWith(`.${hostedAppsRoot}`) &&
+    hostname !== hostedAppsRoot
+  ) {
+    const subdomain = hostname.slice(0, -(`.${hostedAppsRoot}`).length);
+    if (subdomain && !subdomain.includes('.')) {
+      return subdomain;
+    }
+  }
+
+  return configuredDomain;
+}
+
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
 
   useEffect(() => {
-    actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
+    actionGetConfig(resolveRuntimeDomainName());
   }, []);
 
   useEffect(() => {
