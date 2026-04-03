@@ -118,8 +118,8 @@ const MemoizedChat = React.memo(function ChatComponent({
           enabled: true,
           showInContext: true,
           position: {
-            horizontal: 'right',
-            vertical: 'top',
+            horizontal: 'left',
+            vertical: 'bottom',
             offset: {
               left: 20,
               bottom: 20,
