@@ -126,6 +126,7 @@ const MemoizedChat = React.memo(function ChatComponent({
             },
           },
         },
+        initBeforeLoad:true,
       }}
     />
   );

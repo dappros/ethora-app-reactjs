@@ -21,7 +21,7 @@
     "@emotion/styled": "^11.13.0",
     "@ethersproject/providers": "^5.8.0",
     "@ethora/ai-chat-widget": "^25.10.01",
-    "@ethora/chat-component": "^26.2.2",
+    "@ethora/chat-component": "^26.2.6",
     "@headlessui/react": "^2.1.8",
     "@marsidev/react-turnstile": "^1.3.0",
     "@microsoft/clarity": "^1.0.0",
