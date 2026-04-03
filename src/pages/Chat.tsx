@@ -1,6 +1,6 @@
 import { Chat } from '@ethora/chat-component';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { httpTokens, refreshToken } from '../http';
 import { useAppStore } from '../store/useAppStore';
 
@@ -29,6 +29,26 @@ const MemoizedChat = React.memo(function ChatComponent({
     httpTokens.token = token;
     httpTokens.refreshToken = refresh;
   };
+
+  const firebaseConfig = useMemo(() => {
+    const allowedDomains =
+      import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+    const currentDomain = window.location.hostname;
+    
+    if (!allowedDomains.includes(currentDomain)) {
+      return undefined;
+    }
+
+    return ({
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID,
+      measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+    })
+  }, []);
 
   return (
     // @ts-ignore
@@ -77,6 +97,11 @@ const MemoizedChat = React.memo(function ChatComponent({
         },
         setRoomJidInPath: true,
         enableRoomsRetry: { enabled: false, helperText: '' },
+        pushNotifications: {
+          enabled: true,
+          softAsk: false,
+          firebaseConfig,
+        },
       }}
     />
   );
