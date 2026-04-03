@@ -34,10 +34,12 @@ const MemoizedChat = React.memo(function ChatComponent({
     const allowedDomains =
       import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
     const currentDomain = window.location.hostname;
-    
+
     if (!allowedDomains.includes(currentDomain)) {
       return undefined;
     }
+
+    console.log("currentDomain", currentDomain, allowedDomains.includes(currentDomain));
 
     return ({
       apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
