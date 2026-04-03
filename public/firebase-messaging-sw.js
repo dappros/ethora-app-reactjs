@@ -76,7 +76,7 @@ importScripts(
     if (messageId) params.set('messageId', messageId);
     params.set('fromPush', '1');
   
-    return `${APP_URL}/chat?${params.toString()}`;
+    return `${APP_URL}/app/chat?${params.toString()}`;
   }
   
   function isAnyClientVisible(windowClients) {

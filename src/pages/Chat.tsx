@@ -30,18 +30,16 @@ const MemoizedChat = React.memo(function ChatComponent({
     httpTokens.refreshToken = refresh;
   };
 
-  const firebaseConfig = useMemo(() => {
-    const allowedDomains =
-      import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
-    const currentDomain = window.location.hostname;
+  const allowedDomains = import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+  const currentDomain = window.location.hostname;
+  const pushEnabledByDomain = allowedDomains.includes(currentDomain);
 
-    if (!allowedDomains.includes(currentDomain)) {
+  const firebaseConfig = useMemo(() => {
+    if (!pushEnabledByDomain) {
       return undefined;
     }
 
-    console.log("currentDomain", currentDomain, allowedDomains.includes(currentDomain));
-
-    return ({
+    const fireConfig = {
       apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
       authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
       projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -49,8 +47,20 @@ const MemoizedChat = React.memo(function ChatComponent({
       messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
       appId: import.meta.env.VITE_FIREBASE_APP_ID,
       measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-    })
-  }, []);
+    }
+
+    return fireConfig;
+  }, [pushEnabledByDomain]);
+
+  const hasFirebaseConfig = Boolean(
+    firebaseConfig?.apiKey &&
+      firebaseConfig?.authDomain &&
+      firebaseConfig?.projectId &&
+      firebaseConfig?.messagingSenderId &&
+      firebaseConfig?.appId
+  );
+
+  const pushEnabled = pushEnabledByDomain && hasFirebaseConfig;
 
   return (
     // @ts-ignore
@@ -100,9 +110,21 @@ const MemoizedChat = React.memo(function ChatComponent({
         setRoomJidInPath: true,
         enableRoomsRetry: { enabled: false, helperText: '' },
         pushNotifications: {
-          enabled: true,
+          enabled: pushEnabled,
           softAsk: false,
           firebaseConfig,
+        },
+        inAppNotifications: {
+          enabled: true,
+          showInContext: true,
+          position: {
+            horizontal: 'right',
+            vertical: 'top',
+            offset: {
+              left: 20,
+              bottom: 20,
+            },
+          },
         },
       }}
     />
