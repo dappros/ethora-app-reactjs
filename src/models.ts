@@ -22,6 +22,7 @@ export interface ModelCurrentUser {
     read: boolean;
     write: boolean;
   };
+  signupPlan?: string;
 }
 
 export interface ModelCurrentApp {

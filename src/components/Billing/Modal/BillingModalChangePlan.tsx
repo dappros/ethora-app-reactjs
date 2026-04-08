@@ -1,82 +1,76 @@
-import AddIcon from '@mui/icons-material/Add';
-import { Box, Modal, Typography } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
+import { Box, IconButton, Modal, Typography } from '@mui/material';
 import classNames from 'classnames';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '85%',
-  height: '67%',
-  borderRadius: '25px',
+  width: { xs: '95%', sm: '92%', md: '88%', lg: '80%' },
+  maxWidth: '1100px',
+  maxHeight: '92vh',
+  borderRadius: '20px',
   bgcolor: 'background.paper',
   boxShadow: 24,
-  px: 8,
-  py: 0,
-};
-
-const styleBgColor = {
-  position: 'absolute',
-  top: '0',
-  left: '50%',
-  transform: 'translate(-50%)',
-  width: '90%',
+  px: { xs: 2, sm: 3, md: 4 },
+  py: { xs: 2, sm: 2.5, md: 3 },
+  overflowY: 'auto',
 };
 
 interface Plan {
   id: string;
   title: string;
-  price: string;
-  required: string;
-  description?: string;
-  icon?: boolean;
+  subtitle: string;
+  monthlyPrice?: number;
+  customPriceLabel?: string;
   features: string[];
 }
 
 const plans: Plan[] = [
   {
     id: 'free',
-    title: 'Free',
-    required: '* Enough for you MVP',
-    price: '0$',
+    title: 'Free Plan',
+    subtitle: 'Enough for your MVP',
+    monthlyPrice: 0,
     features: [
-      'Custom level 2 domain (web3)',
-      'Web3, Chat and Push Notifications',
-      'Full API and IPFS (fair use policy)',
-      'Discord & GitHub support',
-      'Shared Cloud hosting',
+      'Users and SSO',
+      'Wallets (profile + assets)',
+      'Messaging (fair use)',
+      'Storage (10 GB)',
+      'Community support',
     ],
   },
   {
     id: 'business',
-    title: 'Business',
-    required: '* Powering SMEs',
-    price: '199$ / month',
-    description: 'Everything in Free',
-    icon: true,
+    title: 'Business Plan',
+    subtitle: 'Powering SMEs',
+    monthlyPrice: 199,
     features: [
       'Everything in Free',
-      'Custom primary domain (web3)',
-      'Advanced L1, L2, IPFS options',
-      'High API and RPC performance',
+      'Integrations',
+      'Compliance basics',
+      'High load allowance',
       'Business Cloud SLA',
+      'Storage (1 TB)',
+      'Technical support',
     ],
   },
   {
     id: 'enterprise',
-    title: 'Enterprise',
-    required: '* Custom and larger needs',
-    price: 'Custom',
-    description: 'Everything in Business',
-    icon: true,
+    title: 'Enterprise Plan',
+    subtitle: 'Custom and larger needs',
+    customPriceLabel: 'Custom',
     features: [
       'Everything in Business',
       'Dedicated / On-prem hosting',
-      'Enterprise custom configuration',
-      '24/7 phone support',
-      'Enterprise-grade SLA',
+      'Compliance advanced',
+      'Custom configuration',
+      'Priority SLA',
+      'Storage (Unlimited)',
+      '24/7 technical support',
     ],
   },
 ];
@@ -84,17 +78,46 @@ const plans: Plan[] = [
 interface BillingModalChangePlanProps {
   isOpen: boolean;
   handleClose: () => void;
+  currentPlanId?: string;
 }
 
 export const BillingModalChangePlan = (
   props: BillingModalChangePlanProps
 ): ReactElement => {
-  const { isOpen, handleClose } = props;
+  const { isOpen, handleClose, currentPlanId } = props;
 
   const [selectedPlan, setSelectedPlan] = useState<string>('');
+  const [isYearly, setIsYearly] = useState<boolean>(false);
+  const DISCOUNT_PERCENT = 15;
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);
+  };
+
+  const normalizedCurrentPlan = useMemo(() => {
+    const value = String(currentPlanId || '').toLowerCase();
+    if (value.includes('enterprise')) return 'enterprise';
+    if (value.includes('business') || value.includes('pro')) return 'business';
+    return 'free';
+  }, [currentPlanId]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedPlan(normalizedCurrentPlan);
+    }
+  }, [isOpen, normalizedCurrentPlan]);
+
+  const getPlanPrice = (plan: Plan): string => {
+    if (typeof plan.monthlyPrice !== 'number') {
+      return plan.customPriceLabel || '';
+    }
+
+    if (!isYearly) {
+      return `$${plan.monthlyPrice}`;
+    }
+
+    const discounted = Math.round(plan.monthlyPrice * (1 - DISCOUNT_PERCENT / 100));
+    return `$${discounted}`;
   };
 
   return (
@@ -105,67 +128,143 @@ export const BillingModalChangePlan = (
       aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
-        <Box sx={styleBgColor} className="bg-brand-500  h-1/2 w-full" />
-        <Box className="flex justify-center items-center gap-5 space-x-4 h-full">
-          {plans.map((plan) => (
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <Typography className="font-varela text-[20px] sm:text-[24px] text-[#141414]">
+              Choose a plan that suits for your business
+            </Typography>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 text-[13px]">
+              <span
+                className={classNames(
+                  'font-semibold transition-colors',
+                  !isYearly ? 'text-[#141414]' : 'text-[#9aa5b1]'
+                )}
+              >
+                Monthly
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsYearly((prev) => !prev)}
+                className={classNames(
+                  'relative h-5 w-9 rounded-full p-[2px] transition-colors',
+                  isYearly ? 'bg-[#0367f5]' : 'bg-[#c7d6ef]'
+                )}
+                aria-label="Billing cycle"
+              >
+                <span
+                  className={classNames(
+                    'absolute top-[2px] h-4 w-4 rounded-full bg-white transition-all',
+                    isYearly ? 'right-[2px]' : 'left-[2px]'
+                  )}
+                />
+              </button>
+              <span
+                className={classNames(
+                  'font-semibold transition-colors',
+                  isYearly ? 'text-[#141414]' : 'text-[#9aa5b1]'
+                )}
+              >
+                Yearly
+              </span>
+              <span className="rounded-full bg-[#fff2d8] px-2 py-[2px] text-[10px] font-semibold text-[#f59e0b]">
+                {DISCOUNT_PERCENT}% OFF
+              </span>
+            </div>
+            <IconButton onClick={handleClose} size="small" aria-label="Close">
+              <CloseIcon />
+            </IconButton>
+          </div>
+        </div>
+
+        <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          {plans.map((plan) => {
+            const isCurrentPlan = plan.id === normalizedCurrentPlan;
+            const buttonLabel = isCurrentPlan
+              ? 'Current Plan'
+              : plan.id === 'enterprise'
+                ? 'Contact Us'
+                : 'Change Plan';
+            const isNumericPrice = typeof plan.monthlyPrice === 'number';
+
+            return (
             <Box
               key={plan.id}
               onClick={() => handleSelectPlan(plan.id)}
               className={classNames(
-                'relative flex flex-col justify-between border rounded-xl',
-                'w-1/3 h-5/6 cursor-pointer transition-all duration-300 bg-white',
-                selectedPlan === plan.id ? 'scale-110' : ''
+                'relative flex flex-col border rounded-xl p-4',
+                'cursor-pointer transition-all duration-200 bg-white min-h-[350px]',
+                selectedPlan === plan.id
+                  ? 'border-[#0367f5] shadow-[0_0_0_1px_#0367f5]'
+                  : 'border-[#e9eef5]'
               )}
             >
-              <Box className="px-4 pt-4">
-                <span className="text-[8px]">{plan.required}</span>
-                <Typography
-                  variant="h4"
-                  className={`font-bold ${
-                    selectedPlan === plan.id
-                      ? 'text-yellow-500'
-                      : 'text-gray-800'
-                  }`}
-                >
-                  {plan.title}
-                </Typography>
-                <p className="text-xl font-semibold mt-2">{plan.price}</p>
-              </Box>
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <Typography className="font-varela text-[20px] leading-none text-[#141414]">
+                    {plan.title}
+                  </Typography>
+                  <Typography className="mt-1 text-[11px] text-[#7b8794]">
+                    {plan.subtitle}
+                  </Typography>
+                </div>
+                {isCurrentPlan && (
+                  <span className="shrink-0 rounded-full bg-[#e8f8ef] px-2 py-[2px] text-[10px] font-semibold text-[#18a957]">
+                    Active
+                  </span>
+                )}
+              </div>
 
-              <Box
+              <button
+                type="button"
                 className={classNames(
-                  'pb-4 px-4 rounded-b-xl rounded-t-3xl pt-4',
-                  selectedPlan === plan.id ? 'bg-yellow-800' : 'bg-brand-250'
+                  'mt-1 h-8 rounded-md text-[13px] font-semibold transition',
+                  isCurrentPlan
+                    ? 'border border-[#a9c9f6] text-[#235aa5] bg-white'
+                    : 'bg-[#0367f5] text-white hover:bg-[#0258d4]'
                 )}
               >
-                <Box className="pl-4">
-                  {plan.description && (
-                    <Typography>{plan.description}</Typography>
-                  )}
-                  {plan.icon && <AddIcon fontSize="small" />}
-                </Box>
-                <ul className=" space-y-1 list-disc pl-4">
-                  {plan.features.map((feature, index) => (
-                    <li
-                      key={index}
-                      className=" text-sm text-gray-900 font-bold py-1"
-                    >
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Box className=" flex justify-center items-center">
-                  <button
-                    className={
-                      'text-center mt-8 px-4 py-2 bg-white shadow-2xl text-brand-500 rounded-full font-semibold transition'
-                    }
+                {buttonLabel}
+              </button>
+
+              <div className="mt-4 mb-3 flex items-end gap-2">
+                <Typography
+                  sx={{ fontSize: '32px', lineHeight: 1 }}
+                  className="font-varela text-[#141414]"
+                >
+                  {getPlanPrice(plan)}
+                </Typography>
+                {isNumericPrice && (
+                  <Typography
+                    sx={{ fontSize: '18px', lineHeight: 1 }}
+                    className="text-[#7b8794] mb-[8px]"
                   >
-                    Choose plan
-                  </button>
-                </Box>
-              </Box>
+                    {isYearly ? 'per month (yearly billing)' : 'per month'}
+                  </Typography>
+                )}
+              </div>
+
+              <ul className="mt-2 space-y-2">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2">
+                    <CheckCircleIcon
+                      className="mt-[2px] text-[#0367f5]"
+                      sx={{ fontSize: 14 }}
+                    />
+                    <span className="text-[12px] text-[#2f3a46]">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-auto" />
+
+              {selectedPlan === plan.id && (
+                <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#0367f5]" />
+              )}
             </Box>
-          ))}
+            );
+          })}
         </Box>
       </Box>
     </Modal>
