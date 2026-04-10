@@ -20,6 +20,28 @@ import { sleep } from './utils/sleep';
 
 const getState = useAppStore.getState;
 
+function getFirebaseConfigFromApp(result: any) {
+  const parsed = getFirebaseConfigFromString(result?.firebaseWebConfigString);
+  if (parsed && typeof parsed === 'object' && parsed.apiKey) {
+    return parsed;
+  }
+
+  const legacyConfig = {
+    apiKey: result?.REACT_APP_FIREBASE_API_KEY || '',
+    authDomain: result?.REACT_APP_FIREBASE_AUTH_DOMAIN || '',
+    projectId: result?.REACT_APP_FIREBASE_PROJECT_ID || '',
+    storageBucket: result?.REACT_APP_FIREBASE_STORAGE_BUCKET || '',
+    messagingSenderId: result?.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '',
+    appId: result?.REACT_APP_FIREBASE_APP_ID || '',
+    measurementId:
+      result?.REACT_APP_FIREBASE_MEASURMENT_ID ||
+      result?.REACT_APP_FIREBASE_MEASUREMENT_ID ||
+      '',
+  };
+
+  return legacyConfig.apiKey ? legacyConfig : undefined;
+}
+
 export async function actionGetConfig(domainName?: string) {
   const state = getState();
   const {
@@ -55,9 +77,7 @@ export async function actionGetConfig(domainName?: string) {
     availableMenuItems: result.availableMenuItems,
     googleServicesJson: result.googleServicesJson,
     googleServiceInfoPlist: result.googleServiceInfoPlist,
-    firebaseConfigParsed: getFirebaseConfigFromString(
-      result.firebaseWebConfigString
-    ),
+    firebaseConfigParsed: getFirebaseConfigFromApp(result),
     appSecret: '',
     allowUsersToCreateRooms: result.allowUsersToCreateRooms,
     aiBot: result.aiBot,

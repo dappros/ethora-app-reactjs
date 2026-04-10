@@ -29,6 +29,14 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
 
+  const loginExistingUser = async (idToken: string, accessToken: string, loginType: string) => {
+    const { data } = await httpLoginSocial(idToken, accessToken, loginType);
+    logLogin('google', data.user._id);
+    await actionAfterLogin(data);
+    setEthoraUserCookie('accregred');
+    navigateToUserPage(navigate, config?.afterLoginPage);
+  };
+
   const onGoogleLogin = async () => {
     try {
       const loginType = 'google';
@@ -52,11 +60,19 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
           toast.error('Email not provided by Google');
           return;
         }
-        const emailExist = await httpCheckEmailExist(
-          user.providerData[0].email
-        );
+        let isNewUser = false;
+        try {
+          const emailExist = await httpCheckEmailExist(user.providerData[0].email);
+          isNewUser = emailExist.data.success === true;
+        } catch (error: any) {
+          if (error?.response?.status === 422) {
+            isNewUser = false;
+          } else {
+            throw error;
+          }
+        }
 
-        if (emailExist.data.success) {
+        if (isNewUser) {
           console.error('new registration');
           try {
             const userResult = await httpRegisterSocial(
@@ -107,31 +123,19 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             toast.error('Social registration failed');
           }
 
-          httpLoginSocial(
+          await loginExistingUser(
             idToken ?? '',
             credential?.accessToken ?? '',
             loginType
-          ).then(async ({ data }) => {
-            await actionAfterLogin(data);
-            setEthoraUserCookie('accregred');
-            localStorage.setItem('newUser', true.toString());
-
-            navigateToUserPage(navigate, config?.afterLoginPage);
-          });
+          );
+          localStorage.setItem('newUser', true.toString());
         } else {
           console.error('existing user');
-          httpLoginSocial(
+          await loginExistingUser(
             idToken ?? '',
             credential?.accessToken ?? '',
             loginType
-          ).then(async ({ data }) => {
-            logLogin('google', data.user._id);
-
-            await actionAfterLogin(data);
-            setEthoraUserCookie('accregred');
-
-            navigateToUserPage(navigate, config?.afterLoginPage);
-          });
+          );
         }
       }
     } catch (error) {
