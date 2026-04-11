@@ -14,6 +14,12 @@ import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
 import { useAppStore } from '../../store/useAppStore';
 import './AIWidget.scss';
 
+const xmppHost = import.meta.env.VITE_XMPP_HOST || 'xmpp.ethoradev.com';
+const xmppConference =
+  import.meta.env.VITE_XMPP_SERVICE || `conference.${xmppHost}`;
+const xmppWebsocketUrl =
+  import.meta.env.VITE_APP_XMPP_SERVICE || `wss://${xmppHost}:5443/ws`;
+
 const assistantChatConfig = {
   colors: { primary: '#1976D2', secondary: '#E1E4FE' },
   assistantButton: {
@@ -33,9 +39,9 @@ const assistantChatConfig = {
   disableInteractions: true,
   disableRooms: true,
   xmppSettings: {
-    devServer: 'wss://xmpp.ethoradev.com:5443/ws',
-    host: 'xmpp.ethoradev.com',
-    conference: 'conference.xmpp.ethoradev.com',
+    devServer: xmppWebsocketUrl,
+    host: xmppHost,
+    conference: xmppConference,
   },
 };
 
@@ -161,7 +167,7 @@ export function AIWidget({
             {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/* @ts-ignore */}
             <AiAssistant
-              roomJID={`${appId}_${aiBot.userId}-bot@xmpp.ethoradev.com`}
+              roomJID={`${appId}_${aiBot.userId}-bot@${xmppHost}`}
               config={{
                 ...assistantChatConfig,
                 assistantMode: { enabled: true, user },
