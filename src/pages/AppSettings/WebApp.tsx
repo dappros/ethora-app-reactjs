@@ -95,6 +95,11 @@ export function WebApp({
     return aiBot.chatId;
   }, [aiBot.chatId]);
 
+  const hostedAppsRootDomain =
+    import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
+    import.meta.env.VITE_ROOT_DOMAIN ||
+    'ethora.com';
+
   return (
     <div className="">
       <p className="font-sans text-[16px] font-semibold mb-2">Domain name</p>
@@ -124,7 +129,7 @@ export function WebApp({
         />
         {/* <button onClick={onExternalClick} className='cursor-pointer'> */}
         <button className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl">
-          .ethora.com
+          .{hostedAppsRootDomain}
         </button>
         {/* </button> */}
         <button
@@ -133,7 +138,7 @@ export function WebApp({
         >
           <IconExternalLink />
         </button>
-        <CopyButtonText textToCopy={`${domainName}.ethora.com`} />
+        <CopyButtonText textToCopy={`${domainName}.${hostedAppsRootDomain}`} />
       </div>
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">

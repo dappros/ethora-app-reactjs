@@ -34,6 +34,10 @@ export function WebMobileApp({
 }: Props) {
   const googleJsonRef = useRef<HTMLInputElement>(null);
   const plistFileRef = useRef<HTMLInputElement>(null);
+  const hostedAppsRootDomain =
+    import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
+    import.meta.env.VITE_ROOT_DOMAIN ||
+    'ethora.com';
 
   const onGoogleJsonRefChanges = (file: File | null) => {
     if (!file) {
@@ -87,7 +91,7 @@ export function WebMobileApp({
         />
         {/* <button onClick={onExternalClick} className='cursor-pointer'> */}
         <button className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl">
-          .ethora.com
+          .{hostedAppsRootDomain}
         </button>
         {/* </button> */}
         <button
@@ -96,7 +100,7 @@ export function WebMobileApp({
         >
           <IconExternalLink />
         </button>
-        <CopyButtonText textToCopy={`${domainName}.ethora.com`} />
+        <CopyButtonText textToCopy={`${domainName}.${hostedAppsRootDomain}`} />
       </div>
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">
