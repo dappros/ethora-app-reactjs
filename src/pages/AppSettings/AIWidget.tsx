@@ -14,6 +14,11 @@ import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
 import { useAppStore } from '../../store/useAppStore';
 import './AIWidget.scss';
 
+const ASSISTANT_USER_STORAGE_KEY = 'ethora-assistant-user';
+const ASSISTANT_MESSAGES_STORAGE_KEY = 'ethora-assistant-messages';
+const ASSISTANT_TIMESTAMP_STORAGE_KEY = 'ethora-assistant-timestamp';
+const ASSISTANT_PERSIST_SLICE_KEY = 'persist:assistanRoomSlice';
+
 const xmppHost = import.meta.env.VITE_XMPP_HOST || 'xmpp.ethoradev.com';
 const xmppConference =
   import.meta.env.VITE_XMPP_SERVICE || `conference.${xmppHost}`;
@@ -50,6 +55,72 @@ const statusAiBot = {
   off: false,
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const hasValidAssistantMessageMap = (value: unknown): boolean => {
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  return Object.values(value).every(Array.isArray);
+};
+
+const hasValidAssistantPersistSlice = (value: unknown): boolean => {
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  const persistedMessages = value.messages;
+  if (typeof persistedMessages === 'string') {
+    try {
+      return hasValidAssistantMessageMap(JSON.parse(persistedMessages));
+    } catch {
+      return false;
+    }
+  }
+
+  return hasValidAssistantMessageMap(persistedMessages);
+};
+
+const sanitizeAssistantWidgetStorage = (): void => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    const storedMessages = window.localStorage.getItem(
+      ASSISTANT_MESSAGES_STORAGE_KEY
+    );
+    if (storedMessages) {
+      const parsed = JSON.parse(storedMessages);
+      if (!hasValidAssistantMessageMap(parsed)) {
+        window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
+      }
+    }
+  } catch {
+    window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
+  }
+
+  try {
+    const persistedSlice = window.localStorage.getItem(ASSISTANT_PERSIST_SLICE_KEY);
+    if (persistedSlice) {
+      const parsed = JSON.parse(persistedSlice);
+      if (!hasValidAssistantPersistSlice(parsed)) {
+        window.localStorage.removeItem(ASSISTANT_PERSIST_SLICE_KEY);
+        window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
+        window.localStorage.removeItem(ASSISTANT_USER_STORAGE_KEY);
+        window.localStorage.removeItem(ASSISTANT_TIMESTAMP_STORAGE_KEY);
+      }
+    }
+  } catch {
+    window.localStorage.removeItem(ASSISTANT_PERSIST_SLICE_KEY);
+    window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
+    window.localStorage.removeItem(ASSISTANT_USER_STORAGE_KEY);
+    window.localStorage.removeItem(ASSISTANT_TIMESTAMP_STORAGE_KEY);
+  }
+};
+
 interface Props {
   appId: string;
   setAiBot: (aiBot: ModelAIbot) => void;
@@ -79,6 +150,7 @@ export function AIWidget({
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
   const [value, setValue] = useState('1');
+  const [assistantStorageReady, setAssistantStorageReady] = useState(false);
 
   const [url, setUrl] = useState<string>('');
   const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
@@ -111,6 +183,11 @@ export function AIWidget({
       (1024 * 1024)
     ).toFixed(2);
   }, [aiBot.siteUrlsV2]);
+
+  useEffect(() => {
+    sanitizeAssistantWidgetStorage();
+    setAssistantStorageReady(true);
+  }, []);
 
   useEffect(() => {
     if (aiBot.status) {
@@ -159,7 +236,7 @@ export function AIWidget({
         />
       )}
 
-      {statusBot && (
+      {statusBot && assistantStorageReady && (
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         <XmppProvider>
