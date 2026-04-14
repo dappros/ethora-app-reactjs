@@ -19,7 +19,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@ethersproject/providers": "^5.8.0",
-    "@ethora/ai-chat-widget": "github:dappros/ai-assistant-ui#4fc81eb591c0538ea7c75c67d977ac7b7c8e020e",
+    "@ethora/ai-chat-widget": "github:dappros/ai-assistant-ui#8e041f94e8329805a8cf5148783bad3ce1ccf303",
     "@ethora/chat-component": "github:dappros/ethora-chat-component#dbf341c",
     "@headlessui/react": "^2.1.8",
     "@marsidev/react-turnstile": "^1.3.0",
