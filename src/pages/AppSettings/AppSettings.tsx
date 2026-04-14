@@ -674,6 +674,7 @@ export default function AppSettings() {
           >
             <AIWidget
               appId={appId as string}
+              app={app}
               aiBot={aiBot}
               setAiBot={setAiBot}
               defaultChatRooms={defaultChatRooms}

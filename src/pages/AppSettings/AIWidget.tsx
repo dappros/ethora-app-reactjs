@@ -12,6 +12,7 @@ import { ModelAIbot, ModelAppDefaulRooom, SiteLinks } from '../../models';
 import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
 import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
 import { useAppStore } from '../../store/useAppStore';
+import { ModelApp } from '../../models';
 import './AIWidget.scss';
 
 const ASSISTANT_USER_STORAGE_KEY = 'ethora-assistant-user';
@@ -112,6 +113,7 @@ const sanitizeAssistantWidgetStorage = (): void => {
 
 interface Props {
   appId: string;
+  app?: ModelApp;
   setAiBot: (aiBot: ModelAIbot) => void;
   aiBot: ModelAIbot;
   defaultChatRooms: Array<ModelAppDefaulRooom>;
@@ -126,6 +128,7 @@ interface Props {
 
 export function AIWidget({
   appId,
+  app,
   aiBot,
   setAiBot,
   handleRagChange,
@@ -135,7 +138,6 @@ export function AIWidget({
   handleCrawlReindex,
 }: Props) {
   const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
-  const currentApp = useAppStore((s) => s.currentApp);
 
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
@@ -146,8 +148,8 @@ export function AIWidget({
   const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
   const user = createAnonymousXmppCredentials();
   const xmppHost = useMemo(
-    () => getXmppDomainFromJid(currentApp?.systemChatAccount?.jid),
-    [currentApp?.systemChatAccount?.jid]
+    () => getXmppDomainFromJid(app?.systemChatAccount?.jid),
+    [app?.systemChatAccount?.jid]
   );
   const xmppConference = useMemo(
     () => (xmppHost ? `conference.${xmppHost}` : ''),
