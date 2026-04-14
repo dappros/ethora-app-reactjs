@@ -22,6 +22,10 @@ export const TabAIWidgetCode = ({
 }: TabAIWidgetCodeProps): ReactElement => {
   const doSetAiValues = useAppStore((s) => s.doSetAiValues);
   const currentApp = useAppStore((s) => s.currentApp);
+  const widgetUrl =
+    import.meta.env.VITE_WIDGET_URL ||
+    import.meta.env.VITE_WIDGET_VERSIONED_URL ||
+    '';
 
   const [displayName, setDisplayName] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
@@ -69,9 +73,13 @@ export const TabAIWidgetCode = ({
       return '<script></script>';
     }
 
+    if (!widgetUrl) {
+      return '<!-- Configure VITE_WIDGET_URL in deploy to generate a self-hosted widget embed -->';
+    }
+
     const lines = [
       `<script`,
-      `  src="https://widget.ethora.com/assistant.js"`,
+      `  src="${widgetUrl}"`,
       `  id="chat-content-assistant"`,
       `  data-bot-id="${botJid}"`,
     ];
@@ -87,7 +95,7 @@ export const TabAIWidgetCode = ({
     lines.push(`></script>`);
 
     return lines.join('\n');
-  }, [appId, userId, avatar, botJid, displayName]);
+  }, [appId, userId, avatar, botJid, displayName, widgetUrl]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
