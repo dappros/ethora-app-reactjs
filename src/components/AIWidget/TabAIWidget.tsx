@@ -7,7 +7,7 @@ import {
   SyntheticEvent,
   useState,
 } from 'react';
-import { ModelAIbot, SiteLinks } from '../../models';
+import { ModelAIbot, ModelApp, SiteLinks } from '../../models';
 import { TabAIWidgetCode } from './TabAIWidget/TabAIWidgetCode';
 import { TabAIWidgetDocument } from './TabAIWidget/TabAIWidgetDocument';
 import { TabAIWidgetPrompt } from './TabAIWidget/TabAIWidgetPrompt';
@@ -17,6 +17,7 @@ interface TabAIWidgetProps {
   aiBot: ModelAIbot;
   value: string;
   appId?: string;
+  app?: ModelApp;
   userId?: string;
   url: string;
   ragRef: RefObject<HTMLDivElement>;
@@ -33,6 +34,7 @@ interface TabAIWidgetProps {
 export const TabAIWidget = ({
   value,
   appId,
+  app,
   userId,
   aiBot,
   url,
@@ -79,6 +81,7 @@ export const TabAIWidget = ({
         <TabAIWidgetCode
           value={value}
           appId={appId}
+          app={app}
           userId={userId}
           handleChange={handleChange}
         />

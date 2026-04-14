@@ -138,6 +138,9 @@ export function AIWidget({
   handleCrawlReindex,
 }: Props) {
   const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
+  const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
+  const envXmppConference = import.meta.env.VITE_XMPP_SERVICE || '';
+  const envXmppWebsocketUrl = import.meta.env.VITE_APP_XMPP_SERVICE || '';
 
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
@@ -148,16 +151,16 @@ export function AIWidget({
   const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
   const user = createAnonymousXmppCredentials();
   const xmppHost = useMemo(
-    () => getXmppDomainFromJid(app?.systemChatAccount?.jid),
-    [app?.systemChatAccount?.jid]
+    () => getXmppDomainFromJid(app?.systemChatAccount?.jid) || envXmppHost,
+    [app?.systemChatAccount?.jid, envXmppHost]
   );
   const xmppConference = useMemo(
-    () => (xmppHost ? `conference.${xmppHost}` : ''),
-    [xmppHost]
+    () => (xmppHost ? envXmppConference || `conference.${xmppHost}` : ''),
+    [envXmppConference, xmppHost]
   );
   const xmppWebsocketUrl = useMemo(
-    () => (xmppHost ? `wss://${xmppHost}:5443/ws` : ''),
-    [xmppHost]
+    () => (xmppHost ? envXmppWebsocketUrl || `wss://${xmppHost}/ws` : ''),
+    [envXmppWebsocketUrl, xmppHost]
   );
   const assistantChatConfig = useMemo(
     () => ({
@@ -197,8 +200,13 @@ export function AIWidget({
     try {
       const status = statusBot ? 'off' : 'on';
       const response = await httpUpdateApp(appId, { botStatus: status });
+      const nextAiBot = response?.data?.result?.aiBot;
 
-      const isNewStatus = response.data.result.aiBot.status === 'on';
+      if (nextAiBot) {
+        setAiBot(nextAiBot);
+      }
+
+      const isNewStatus = nextAiBot?.status === 'on';
       setStatusBot(isNewStatus);
     } catch (error) {
       console.error('Error updating AI bot status:', error);
@@ -245,6 +253,7 @@ export function AIWidget({
       <TabAIWidget
         value={value}
         appId={appId}
+        app={app}
         userId={aiBot.userId}
         handleChange={handleChange}
         aiBot={aiBot}

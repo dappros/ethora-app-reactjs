@@ -5,11 +5,13 @@ import classNames from 'classnames';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { ModelApp } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
 
 interface TabAIWidgetCodeProps {
   value: string;
   appId?: string;
+  app?: ModelApp;
   userId?: string;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
 }
@@ -17,6 +19,7 @@ interface TabAIWidgetCodeProps {
 export const TabAIWidgetCode = ({
   value,
   appId,
+  app,
   userId,
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
@@ -33,14 +36,15 @@ export const TabAIWidgetCode = ({
   // const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>('');
+  const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
   const xmppHost = useMemo(() => {
-    const jid = currentApp?.systemChatAccount?.jid;
+    const jid = app?.systemChatAccount?.jid || currentApp?.systemChatAccount?.jid;
     if (!jid || !jid.includes('@')) {
-      return '';
+      return envXmppHost;
     }
 
-    return jid.split('@')[1] || '';
-  }, [currentApp?.systemChatAccount?.jid]);
+    return jid.split('@')[1] || envXmppHost;
+  }, [app?.systemChatAccount?.jid, currentApp?.systemChatAccount?.jid, envXmppHost]);
   const botJid = useMemo(() => {
     if (!appId || !userId || !xmppHost) {
       return '';
