@@ -23,40 +23,17 @@ const ASSISTANT_ROOMS_PERSIST_KEY = 'persist:roomMessages';
 const ASSISTANT_ROOM_HEAP_PERSIST_KEY = 'persist:roomHeapSlice';
 const ASSISTANT_ROOT_PERSIST_KEY = 'persist:root';
 
-const xmppHost = import.meta.env.VITE_XMPP_HOST || 'xmpp.ethoradev.com';
-const xmppConference =
-  import.meta.env.VITE_XMPP_SERVICE || `conference.${xmppHost}`;
-const xmppWebsocketUrl =
-  import.meta.env.VITE_APP_XMPP_SERVICE || `wss://${xmppHost}:5443/ws`;
-
-const assistantChatConfig = {
-  colors: { primary: '#1976D2', secondary: '#E1E4FE' },
-  assistantButton: {
-    position: { right: 24, bottom: 24 },
-    ariaLabel: 'Open assistant chat',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  assistantPopup: {
-    width: 320,
-    height: 520,
-    closeButtonAriaLabel: 'Close assistant chat',
-  },
-  assistantOpenStateKey: 'EthoraAssistantOpen',
-  disableMedia: true,
-  disableInteractions: true,
-  disableRooms: true,
-  xmppSettings: {
-    devServer: xmppWebsocketUrl,
-    host: xmppHost,
-    conference: xmppConference,
-  },
-};
-
 const statusAiBot = {
   on: true,
   off: false,
+};
+
+const getXmppDomainFromJid = (jid?: string): string => {
+  if (!jid || !jid.includes('@')) {
+    return '';
+  }
+
+  return jid.split('@')[1] || '';
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -158,6 +135,7 @@ export function AIWidget({
   handleCrawlReindex,
 }: Props) {
   const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
+  const currentApp = useAppStore((s) => s.currentApp);
 
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
@@ -167,6 +145,45 @@ export function AIWidget({
   const [url, setUrl] = useState<string>('');
   const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
   const user = createAnonymousXmppCredentials();
+  const xmppHost = useMemo(
+    () => getXmppDomainFromJid(currentApp?.systemChatAccount?.jid),
+    [currentApp?.systemChatAccount?.jid]
+  );
+  const xmppConference = useMemo(
+    () => (xmppHost ? `conference.${xmppHost}` : ''),
+    [xmppHost]
+  );
+  const xmppWebsocketUrl = useMemo(
+    () => (xmppHost ? `wss://${xmppHost}:5443/ws` : ''),
+    [xmppHost]
+  );
+  const assistantChatConfig = useMemo(
+    () => ({
+      colors: { primary: '#1976D2', secondary: '#E1E4FE' },
+      assistantButton: {
+        position: { right: 24, bottom: 24 },
+        ariaLabel: 'Open assistant chat',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      assistantPopup: {
+        width: 320,
+        height: 520,
+        closeButtonAriaLabel: 'Close assistant chat',
+      },
+      assistantOpenStateKey: 'EthoraAssistantOpen',
+      disableMedia: true,
+      disableInteractions: true,
+      disableRooms: true,
+      xmppSettings: {
+        devServer: xmppWebsocketUrl,
+        host: xmppHost,
+        conference: xmppConference,
+      },
+    }),
+    [xmppConference, xmppHost, xmppWebsocketUrl]
+  );
 
   const ragRef = useRef<HTMLDivElement>(null);
 
@@ -248,7 +265,7 @@ export function AIWidget({
         />
       )}
 
-      {statusBot && assistantStorageReady && (
+      {statusBot && assistantStorageReady && xmppHost && xmppWebsocketUrl && (
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         <XmppProvider>

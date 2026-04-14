@@ -21,6 +21,7 @@ export const TabAIWidgetCode = ({
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
   const doSetAiValues = useAppStore((s) => s.doSetAiValues);
+  const currentApp = useAppStore((s) => s.currentApp);
 
   const [displayName, setDisplayName] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
@@ -28,6 +29,21 @@ export const TabAIWidgetCode = ({
   // const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>('');
+  const xmppHost = useMemo(() => {
+    const jid = currentApp?.systemChatAccount?.jid;
+    if (!jid || !jid.includes('@')) {
+      return '';
+    }
+
+    return jid.split('@')[1] || '';
+  }, [currentApp?.systemChatAccount?.jid]);
+  const botJid = useMemo(() => {
+    if (!appId || !userId || !xmppHost) {
+      return '';
+    }
+
+    return `${appId}_${userId}-bot@${xmppHost}`;
+  }, [appId, userId, xmppHost]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -57,7 +73,7 @@ export const TabAIWidgetCode = ({
       `<script`,
       `  src="https://widget.ethora.com/assistant.js"`,
       `  id="chat-content-assistant"`,
-      `  data-bot-id="${appId}_${userId}-bot@xmpp.ethoradev.com"`,
+      `  data-bot-id="${botJid}"`,
     ];
 
     if (avatar) {
@@ -71,17 +87,17 @@ export const TabAIWidgetCode = ({
     lines.push(`></script>`);
 
     return lines.join('\n');
-  }, [appId, userId, avatar, displayName]);
+  }, [appId, userId, avatar, botJid, displayName]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
       return scriptCode;
     }
-    if (appId && userId) {
-      return `${appId}_${userId}-bot@xmpp.ethoradev.com`;
+    if (botJid) {
+      return botJid;
     }
     return '';
-  }, [value, scriptCode, appId, userId]);
+  }, [value, scriptCode, botJid]);
 
   useEffect(() => {
     setCopied(copiedText === currentCopyTarget && currentCopyTarget.length > 0);
@@ -233,11 +249,7 @@ export const TabAIWidgetCode = ({
               <Tooltip title={copied ? 'Copied' : 'Copy'}>
                 <IconButton
                   onClick={() =>
-                    handleCopy(
-                      appId && userId
-                        ? `${appId}_${userId}-bot@xmpp.ethoradev.com`
-                        : ''
-                    )
+                    handleCopy(botJid)
                   }
                   size="small"
                 >
@@ -286,9 +298,7 @@ export const TabAIWidgetCode = ({
                 },
               }}
             >
-              {appId && userId
-                ? `${appId}_${userId}-bot@xmpp.ethoradev.com`
-                : ''}
+              {botJid}
             </SyntaxHighlighter>
           </div>
         </Box>
