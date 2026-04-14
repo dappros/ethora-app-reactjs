@@ -20,6 +20,7 @@ const ASSISTANT_TIMESTAMP_STORAGE_KEY = 'ethora-assistant-timestamp';
 const ASSISTANT_PERSIST_SLICE_KEY = 'persist:assistanRoomSlice';
 const ASSISTANT_CHAT_SETTINGS_PERSIST_KEY = 'persist:chatSettingStore';
 const ASSISTANT_ROOMS_PERSIST_KEY = 'persist:roomMessages';
+const ASSISTANT_ROOM_HEAP_PERSIST_KEY = 'persist:roomHeapSlice';
 const ASSISTANT_ROOT_PERSIST_KEY = 'persist:root';
 
 const xmppHost = import.meta.env.VITE_XMPP_HOST || 'xmpp.ethoradev.com';
@@ -96,6 +97,7 @@ const sanitizeAssistantWidgetStorage = (): void => {
   // previous widget versions while preserving the assistant-specific transcript.
   window.localStorage.removeItem(ASSISTANT_CHAT_SETTINGS_PERSIST_KEY);
   window.localStorage.removeItem(ASSISTANT_ROOMS_PERSIST_KEY);
+  window.localStorage.removeItem(ASSISTANT_ROOM_HEAP_PERSIST_KEY);
   window.localStorage.removeItem(ASSISTANT_ROOT_PERSIST_KEY);
 
   try {
