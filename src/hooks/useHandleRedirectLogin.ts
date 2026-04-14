@@ -10,21 +10,25 @@ import { navigateToUserPage } from '../utils/navigateToUserPage';
 
 export const useHandleRedirectLogin = () => {
   const navigate = useNavigate();
-  const config = useAppStore.getState().currentApp;
+  const config = useAppStore((s) => s.currentApp);
 
   useEffect(() => {
+    if (!config?.firebaseConfigParsed) {
+      return;
+    }
+
+    let cancelled = false;
+
     const handleRedirect = async () => {
       const app = initFirebase();
       if (!app) {
-        console.warn('Firebase not ready yet. Retrying in 500ms...');
-        setTimeout(handleRedirect, 500);
         return;
       }
   
       const auth = getAuth(app);
       try {
         const result = await getRedirectResult(auth);
-        if (!result) return;
+        if (!result || cancelled) return;
   
         GoogleAuthProvider.credentialFromResult(result) ||
           FacebookAuthProvider.credentialFromResult(result);
@@ -45,6 +49,10 @@ export const useHandleRedirectLogin = () => {
     };
   
     handleRedirect();
-  }, [config]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [config, navigate]);
   
 };

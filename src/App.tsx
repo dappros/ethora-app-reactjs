@@ -14,11 +14,30 @@ export function Fallback() {
   return <p>Performing initial data load</p>;
 }
 
+function getBootstrapDomainName(): string | undefined {
+  const configuredDomain = import.meta.env.VITE_DOMAIN_NAME?.trim();
+  if (configuredDomain) {
+    return configuredDomain;
+  }
+
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const hostname = window.location.hostname;
+  if (!hostname || hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+    return undefined;
+  }
+
+  const [subdomain] = hostname.split('.');
+  return subdomain || undefined;
+}
+
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
 
   useEffect(() => {
-    actionGetConfig(import.meta.env.VITE_DOMAIN_NAME);
+    actionGetConfig(getBootstrapDomainName());
   }, []);
 
   useEffect(() => {

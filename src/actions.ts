@@ -22,9 +22,14 @@ const getState = useAppStore.getState;
 
 export async function actionGetConfig(domainName?: string) {
   const state = getState();
-  const {
-    data: { result },
-  } = await httpGetConfig(domainName);
+  const response = await httpGetConfig(domainName);
+  const result = response?.data?.result;
+
+  if (!result) {
+    throw new Error(
+      `App config response is missing result for domainName=${domainName || '<origin>'}`
+    );
+  }
 
   const app: ModelApp = {
     afterLoginPage: result.afterLoginPage,
