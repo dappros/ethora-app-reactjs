@@ -52,11 +52,22 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
           toast.error('Email not provided by Google');
           return;
         }
-        const emailExist = await httpCheckEmailExist(
-          user.providerData[0].email
-        );
+        let shouldRegister = false;
+        try {
+          const emailExist = await httpCheckEmailExist(
+            user.providerData[0].email
+          );
+          shouldRegister = Boolean(emailExist.data.success);
+        } catch (error: any) {
+          const errorCode = error?.response?.data?.code;
+          if (error?.response?.status === 422 && errorCode === 'EMAIL_ALREADY_EXISTS') {
+            shouldRegister = false;
+          } else {
+            throw error;
+          }
+        }
 
-        if (emailExist.data.success) {
+        if (shouldRegister) {
           console.error('new registration');
           try {
             const userResult = await httpRegisterSocial(

@@ -45,9 +45,20 @@ export const FacebookButton = () => {
           return;
         }
 
-        const emailExist = await httpCheckEmailExist(email);
+        let shouldRegister = false;
+        try {
+          const emailExist = await httpCheckEmailExist(email);
+          shouldRegister = Boolean(emailExist.data.success);
+        } catch (error: any) {
+          const errorCode = error?.response?.data?.code;
+          if (error?.response?.status === 422 && errorCode === 'EMAIL_ALREADY_EXISTS') {
+            shouldRegister = false;
+          } else {
+            throw error;
+          }
+        }
 
-        if (emailExist.data.success) {
+        if (shouldRegister) {
           try {
             const userResult = await httpRegisterSocial(
               idToken ?? '',
