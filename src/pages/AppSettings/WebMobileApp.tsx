@@ -1,5 +1,6 @@
 import { Textarea } from '@headlessui/react';
 import { useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { actionPostFile } from '../../actions';
 import { IconDownload } from '../../components/Icons/IconDownload';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
@@ -146,7 +147,9 @@ export function WebMobileApp({
       <Textarea
         className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500"
         value={firebaseWebConfigString}
-        onChange={(e) => setFirebaseWebConfigString(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+          setFirebaseWebConfigString(e.target.value)
+        }
         placeholder='{
 apiKey: "AIzaassdcefSyDgasd.-WrjLQadoYf0ads12dscxzsi_qO4g",
 authDomain: "ethora-668e9.firebaseapp.com",

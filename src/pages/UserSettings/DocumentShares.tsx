@@ -1,6 +1,7 @@
 import { Dialog, DialogPanel, Field, Select } from '@headlessui/react';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { toast } from 'react-toastify';
 import { IconAdd } from '../../components/Icons/IconAdd';
@@ -175,7 +176,7 @@ export function DocumentShares() {
                   <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                     <Select
                       className="w-full bg-[#F5F7F9]"
-                      onChange={(e) =>
+                      onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                         setExpirationTime(Number(e.target.value))
                       }
                     >
@@ -193,7 +194,7 @@ export function DocumentShares() {
                   <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                     <Select
                       className="w-full bg-[#F5F7F9]"
-                      onChange={(e) => {
+                      onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                         setDocumentForShare(e.target.value);
                       }}
                     >

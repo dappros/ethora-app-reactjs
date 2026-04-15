@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel, Field, Select } from '@headlessui/react';
 import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { toast } from 'react-toastify';
 import { IconInfo } from '../../components/Icons/IconInfo';
 import { Loading } from '../../components/Loading';
@@ -117,7 +118,9 @@ export function ProfileShares() {
                 <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                   <Select
                     className="w-full bg-[#F5F7F9]"
-                    onChange={(e) => setExpirationTime(Number(e.target.value))}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                      setExpirationTime(Number(e.target.value))
+                    }
                   >
                     <option value="-1">No Expiration</option>
                     <option value={HOUR}>1 hour</option>

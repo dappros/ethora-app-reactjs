@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import classNames from 'classnames';
 import { useMemo } from 'react';
+import type { ChangeEvent } from 'react';
 import { NavLink } from 'react-router-dom';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { IconInfo } from '../../components/Icons/IconInfo';
@@ -184,7 +185,9 @@ export function WebApp({
       <Textarea
         className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500"
         value={firebaseWebConfigString}
-        onChange={(e) => setFirebaseWebConfigString(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+          setFirebaseWebConfigString(e.target.value)
+        }
         placeholder='{
 apiKey: "AIzaassdcefSyDgasd.-WrjLQadoYf0ads12dscxzsi_qO4g",
 authDomain: "ethora-668e9.firebaseapp.com",

@@ -1,4 +1,5 @@
 import { Textarea } from '@headlessui/react';
+import type { ChangeEvent } from 'react';
 import { ModelAIbot } from '../../../models';
 
 interface TabAIWidgetPromptProps {
@@ -24,7 +25,9 @@ export const TabAIWidgetPrompt = ({
         className="rounded-xl border outline-none w-full p-2 h-[196px] text-gray-500 border-gray-500 mb-8"
         placeholder="Enter prompt instructions here..."
         value={aiBot.prompt}
-        onChange={(e) => setAiBot({ ...aiBot, prompt: e.target.value })}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+          setAiBot({ ...aiBot, prompt: e.target.value })
+        }
       />
     </div>
   );
