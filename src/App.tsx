@@ -15,6 +15,25 @@ export function Fallback() {
 }
 
 function getBootstrapDomainName(): string | undefined {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const hostedRoot = import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN?.trim();
+
+    // On a hosted-apps subdomain (e.g. tenant.chat.ethora.com),
+    // always derive from the URL -- the build-time VITE_DOMAIN_NAME
+    // is the base app's slug and must not override tenant identity.
+    if (hostedRoot && hostname.endsWith('.' + hostedRoot)) {
+      const subdomain = hostname.slice(0, -(hostedRoot.length + 1));
+      if (subdomain && !subdomain.includes('.')) {
+        return subdomain;
+      }
+    }
+
+    if (!hostname || hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+      return import.meta.env.VITE_DOMAIN_NAME?.trim() || undefined;
+    }
+  }
+
   const configuredDomain = import.meta.env.VITE_DOMAIN_NAME?.trim();
   if (configuredDomain) {
     return configuredDomain;
@@ -24,12 +43,7 @@ function getBootstrapDomainName(): string | undefined {
     return undefined;
   }
 
-  const hostname = window.location.hostname;
-  if (!hostname || hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-    return undefined;
-  }
-
-  const [subdomain] = hostname.split('.');
+  const [subdomain] = window.location.hostname.split('.');
   return subdomain || undefined;
 }
 
