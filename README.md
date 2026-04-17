@@ -8,18 +8,49 @@
 
 # Ethora engine for React.js
 
-Full Ethora app engine, React.js version.
+The React.js web frontend that powers Ethora Cloud. Sign up, create apps, manage chats and AI bots, configure widgets, and use the same UI/UX that runs on `app.chat.ethora.com`.
 
-## About
+**Part of the [Ethora SDK ecosystem](https://github.com/dappros/ethora#ecosystem)** — see all SDKs, tools, and sample apps. Follow cross-SDK updates in the [Release Notes](https://github.com/dappros/ethora/blob/main/RELEASE-NOTES.md).
 
-This repository contains the React.js frontend for Ethora. It is the main web client used for Ethora-powered apps and includes authentication, chat and messaging flows, AI-related UI surfaces, admin/app settings, widgets, and integrations used by the wider platform.
+## Live instances
+
+| Environment | URL | Notes |
+|-------------|-----|-------|
+| **Production** | [app.chat.ethora.com](https://app.chat.ethora.com) | Public Ethora Cloud — sign up, create apps, get API credentials. |
+| **QA** | [chat-qa.ethora.com](https://chat-qa.ethora.com) | Pre-production environment used for release validation. |
+| **SDK Playground** | [playground.chat.ethora.com](https://playground.chat.ethora.com) | Live `@ethora/chat-component` playground (separate repo: [ethora-sdk-playground](https://github.com/dappros/ethora-sdk-playground)). |
+| **Status / uptime** | [uptime.chat.ethora.com](https://uptime.chat.ethora.com) | Public uptime + journey checks. |
+
+## What is this?
+
+This repository contains the **React.js frontend** for Ethora — the same code base running at [app.chat.ethora.com](https://app.chat.ethora.com). It includes:
+
+- **Authentication** — email/password, social SSO, JWT exchange.
+- **Chat & messaging** — built on `@ethora/chat-component`, with rooms, threads, push, AI bots.
+- **App admin** — create and manage tenant apps, users, chats, app tokens, billing, and Stripe integration.
+- **AI widget surfaces** — configure AI bots, manage prompts and indexed sources, generate embed snippets that customers paste into their own sites.
+- **Profile, wallet, gamification** — user profile, ERC-20/721 wallet UI, coins/referrals.
 
 This project was previously tracked in the Ethora monorepo under the `client-web` folder. It was moved into its own repository in November 2024.
 
-This frontend is built on top of the Ethora chat component package:
+The frontend is built on top of the Ethora chat component package:
 
 - [`@ethora/chat-component` on npm](https://www.npmjs.com/package/@ethora/chat-component)
-- [`dappros/ethora-chat-component`](https://github.com/dappros/ethora-chat-component)
+- [`dappros/ethora-chat-component`](https://github.com/dappros/ethora-chat-component) — source
+
+## Default backend endpoints
+
+The app talks to the canonical Ethora Cloud endpoints by default:
+
+| Purpose | Default value |
+|---------|---------------|
+| API base URL | `https://api.chat.ethora.com/v1` (legacy), `https://api.chat.ethora.com/v2` (current) |
+| Swagger / API docs | [api.chat.ethora.com/api-docs/#/](https://api.chat.ethora.com/api-docs/#/) |
+| XMPP WebSocket | `wss://xmpp.chat.ethora.com:5443/ws` |
+| XMPP host | `xmpp.chat.ethora.com` |
+| XMPP MUC (conference) | `conference.xmpp.chat.ethora.com` |
+
+All of the above can be overridden via environment variables — see `.env-example` for the full list (`VITE_API`, `VITE_API_V2`, `VITE_APP_XMPP_SERVICE`, `VITE_XMPP_HOST`, `VITE_XMPP_SERVICE`, etc.). To target QA, point `VITE_API` and the XMPP variables at `chat-qa.ethora.com` instead.
 
 ## Branches
 
@@ -29,19 +60,24 @@ This frontend is built on top of the Ethora chat component package:
 
 ## Development
 
-Typical local workflow:
+Prerequisites: **Node.js 18+** (project uses Vite 5 + React 18) and npm.
 
 ```bash
+git clone https://github.com/dappros/ethora-app-reactjs.git
+cd ethora-app-reactjs
+cp .env-example .env
 npm install
 npm run dev
 ```
 
+Open http://localhost:5173. The app will connect to `https://api.chat.ethora.com` and `wss://xmpp.chat.ethora.com:5443/ws` by default; edit `.env` to point at a different backend (for example self-hosted or QA).
+
 Useful commands:
 
 ```bash
-npm run build
-npm run typecheck
-npm run lint
+npm run build       # production build (Vite)
+npm run typecheck   # TypeScript-only check
+npm run lint        # ESLint
 ```
 
 ## Browser Smoke Tests
@@ -52,3 +88,15 @@ This repo also contains a minimal Playwright smoke layer for browser-visible pub
 npm run test:e2e -- --list
 npm run test:e2e
 ```
+
+## Related repositories
+
+- [`@ethora/chat-component`](https://github.com/dappros/ethora-chat-component) — React chat SDK consumed by this app.
+- [`@ethora/sdk-backend`](https://github.com/dappros/ethora-sdk-backend-integration) — Node.js backend SDK and integration guide.
+- [`@ethora/setup`](https://github.com/dappros/ethora-setup) — `npx @ethora/setup` to bootstrap an Ethora app and config files.
+- [`ethora-mcp-cli`](https://github.com/dappros/ethora-mcp-cli) — MCP server for IDE / AI agent integration.
+- [Ethora monorepo](https://github.com/dappros/ethora) — full ecosystem entry point.
+
+## License
+
+AGPL. See [LICENSE](./LICENSE).
