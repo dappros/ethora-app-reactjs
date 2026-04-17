@@ -47,11 +47,11 @@ const MemoizedChat = React.memo(function ChatComponent({
           primary: config?.primaryColor || '#fff',
           secondary: config?.secondaryColor || '#141414',
         },
-        baseUrl: VITE_API ?? 'https://api.ethoradev.com/v1',
+        baseUrl: VITE_API ?? 'https://api.chat.ethora.com/v1',
         // @ts-ignorex
         customAppToken: appToken,
         newArch: true,
-        qrUrl: 'https://app.ethora.com/app/chat/?qrChatId=',
+        qrUrl: 'https://app.chat.ethora.com/app/chat/?qrChatId=',
         xmppSettings: {
           devServer: VITE_APP_XMPP_SERVICE,
           host: VITE_XMPP_HOST,
