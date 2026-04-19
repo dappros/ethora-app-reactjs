@@ -727,3 +727,71 @@ export function setSourcesSiteFilesDelete(appId: string, fileId: string) {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Phase 1 (Agents): Agents and BotInstances HTTP wrappers.
+// All endpoints live under /v2 so the user JWT auth path applies automatically.
+// ---------------------------------------------------------------------------
+
+export function httpListAgents(params?: { visibility?: 'public' | 'mine' | 'all'; appId?: string; limit?: number; offset?: number }) {
+  return httpV2.get('/agents', { params });
+}
+
+export function httpGetAgent(idOrAddress: string) {
+  return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}`);
+}
+
+export function httpCreateAgent(body: any) {
+  return httpV2.post('/agents', body);
+}
+
+export function httpUpdateAgent(idOrAddress: string, body: any) {
+  return httpV2.put(`/agents/${encodeURIComponent(idOrAddress)}`, body);
+}
+
+export function httpDeleteAgent(idOrAddress: string) {
+  return httpV2.delete(`/agents/${encodeURIComponent(idOrAddress)}`);
+}
+
+export function httpCloneAgent(idOrAddress: string, body?: any) {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/clone`, body || {});
+}
+
+export function httpSetAgentVisibility(idOrAddress: string, visibility: 'private' | 'unlisted' | 'public') {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/visibility`, { visibility });
+}
+
+export function httpUpdateAgentSoul(idOrAddress: string, body: { soulMd?: string; append?: string }) {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/soul`, body);
+}
+
+export function httpInviteAgentToChat(idOrAddress: string, body: { appId?: string; chatId?: string; chatJid?: string }) {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/invite-to-chat`, body);
+}
+
+export function httpListBotInstances(params?: { appId?: string; agentId?: string }) {
+  return httpV2.get('/bot-instances', { params });
+}
+
+export function httpGetBotInstance(id: string) {
+  return httpV2.get(`/bot-instances/${id}`);
+}
+
+export function httpSetBotInstanceStatus(id: string, status: 'on' | 'off') {
+  return httpV2.post(`/bot-instances/${id}/status`, { status });
+}
+
+// Per-Agent source ingestion. These reuse the same endpoints as the per-App calls but
+// pass an explicit agentId so docs land in the agent's RAG namespace.
+export function httpAgentSiteCrawl(appId: string, agentId: string, url: string, followLink: boolean) {
+  return httpV2.post(`/apps/${appId}/sources/site-crawl`, { url, followLink, agentId });
+}
+
+export function httpAgentDocsUpload(appId: string, agentId: string, files: File[]) {
+  const formData = new FormData();
+  files.forEach((file) => { formData.append('files', file); });
+  formData.append('agentId', agentId);
+  return httpV2.post(`/apps/${appId}/sources/docs`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}

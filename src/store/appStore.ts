@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { ModelAiWidgetValues, ModelApp, ModelCurrentUser, ModelState } from '../models';
+import { ModelAgent, ModelAiWidgetValues, ModelApp, ModelBotInstance, ModelCurrentUser, ModelState } from '../models';
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -18,6 +18,12 @@ export interface AppSliceInterface extends ModelState {
   doUpdateUser: (userFieldsForUpdate: Record<string, string | boolean>) => void;
   doClearState: () => void;
   doSetAiValues: (app: ModelAiWidgetValues) => void;
+  // Phase 1 (Agents): in-memory agent + bot-instance lists for the AI Bots admin tab.
+  doSetAgents: (agents: Array<ModelAgent>) => void;
+  doUpsertAgent: (agent: ModelAgent) => void;
+  doRemoveAgent: (id: string) => void;
+  doSetBotInstances: (instances: Array<ModelBotInstance>) => void;
+  doSelectAgent: (id: string | null) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -31,6 +37,10 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
     displayName: '',
     avatar: '',
   },
+  // Phase 1 (Agents): default to empty lists; populated by actionListAgents on mount of AIBots page.
+  agents: [],
+  botInstances: [],
+  selectedAgentId: null,
   doSetUser: (user: ModelCurrentUser | null) => {
     set((s) => {
       s.currentUser = user;
@@ -103,6 +113,37 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
 
         s.aiWidgetValues.avatar = avatar;
         s.aiWidgetValues.displayName = displayName;
+    });
+  },
+  doSetAgents: (agents) => {
+    set((s) => {
+      s.agents = agents;
+    });
+  },
+  doUpsertAgent: (agent) => {
+    set((s) => {
+      const idx = s.agents.findIndex((a) => a.id === agent.id);
+      if (idx >= 0) {
+        s.agents[idx] = agent;
+      } else {
+        s.agents.push(agent);
+      }
+    });
+  },
+  doRemoveAgent: (id) => {
+    set((s) => {
+      s.agents = s.agents.filter((a) => a.id !== id);
+      if (s.selectedAgentId === id) s.selectedAgentId = null;
+    });
+  },
+  doSetBotInstances: (instances) => {
+    set((s) => {
+      s.botInstances = instances;
+    });
+  },
+  doSelectAgent: (id) => {
+    set((s) => {
+      s.selectedAgentId = id;
     });
   },
 });

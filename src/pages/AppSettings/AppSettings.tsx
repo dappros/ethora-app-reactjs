@@ -31,6 +31,7 @@ import {
 } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIWidget } from './AIWidget';
+import { AIBots } from './AIBots';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
@@ -52,6 +53,9 @@ const tabs = [
   'Home screen',
   'Menu',
   'Chats',
+  // Phase 1 (Agents): new first-class AI Agents page lives in System, right after Chats.
+  // Order in this array must match the TabPanel order below.
+  'AI Bots',
   'Visibility & Privacy',
   'API',
   'Delete',
@@ -60,7 +64,7 @@ const tabs = [
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
-  System: ['Chats', 'Visibility & Privacy', 'API', 'Delete'],
+  System: ['Chats', 'AI Bots', 'Visibility & Privacy', 'API', 'Delete'],
 };
 
 export default function AppSettings() {
@@ -784,6 +788,19 @@ export default function AppSettings() {
               setDefaultChatRooms={setDefaultChatRooms}
               appId={appId as string}
               domainName={domainName}
+            />
+          </TabPanel>
+
+          {/* Phase 1 (Agents): new AI Bots page - persona, context, indexes, soul.md, heartbeat, chats index. */}
+          <TabPanel
+            key="AI Bots"
+            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
+          >
+            <AIBots
+              appId={appId as string}
+              app={app}
+              isDisabled={app?.creatorId !== currentUser?._id}
+              defaultChatRooms={defaultChatRooms}
             />
           </TabPanel>
 

@@ -224,12 +224,58 @@ export interface ModelAppUser {
   updatedAt: string;
 }
 
+// Phase 1 (Agents): first-class AI Agent and per-App BotInstance projections returned by /v2/agents and /v2/bot-instances.
+export interface ModelAgent {
+  id: string;
+  address: string;
+  ownerId: string;
+  ownerAppId: string | null;
+  displayName: string;
+  avatarUrl: string;
+  bio: string;
+  prompt: string;
+  llmProvider: string;
+  llmModel: string;
+  embeddingModel: string;
+  contextSize: number;
+  responseMode: 'always' | 'mentioned' | 'smart' | 'probability';
+  responseProbability: number;
+  cooldownSec: number;
+  greetingMessage: string;
+  isRAG: boolean;
+  ragTags: string[];
+  soulMd: string;
+  soulMdUpdatedAt: string | null;
+  soulMdUpdatedBy: string;
+  heartbeat: { enabled: boolean; schedule: string; prompt: string };
+  visibility: 'private' | 'unlisted' | 'public';
+  totalSiteSourceSize: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ModelBotInstance {
+  id: string;
+  agentId: string;
+  appId: string;
+  userId: string;
+  xmppUsername: string;
+  status: 'on' | 'off';
+  joinedRooms: string[];
+  lastActiveAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ModelState {
   inited: boolean;
   currentUser: ModelCurrentUser | null;
   currentApp: ModelApp | null;
   apps: Array<ModelApp>;
   aiWidgetValues: ModelAiWidgetValues;
+  agents: Array<ModelAgent>;
+  botInstances: Array<ModelBotInstance>;
+  selectedAgentId: string | null;
 }
 
 export type OrderByType =

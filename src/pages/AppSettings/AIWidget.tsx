@@ -13,6 +13,7 @@ import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
 import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
 import { useAppStore } from '../../store/useAppStore';
 import { ModelApp } from '../../models';
+import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
 import './AIWidget.scss';
 
 const ASSISTANT_USER_STORAGE_KEY = 'ethora-assistant-user';
@@ -242,6 +243,11 @@ export function AIWidget({
 
   return (
     <div className="w-full h-full overflow-x-auto overflow-y-hidden">
+      {/* Phase 1 (Agents): pick which Agent backs the AI Widget. The full set of agents
+          is now managed in the AI Bots tab; this selector just decides which one's
+          persona/avatar/display name the embedded widget surfaces. */}
+      <ActiveAgentSelector appId={appId as string} app={app} />
+
       <HeaderAIWidget
         isRag={aiBot.isRAG}
         statusBot={statusBot}

@@ -11,6 +11,7 @@ import { IconDelete } from '../../components/Icons/IconDelete';
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import { toast } from 'react-toastify';
 import { IconMinus } from '../../components/Icons/IconMinus';
+import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
 
 interface Props {
   allowUsersToCreateRooms: boolean
@@ -31,6 +32,8 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  // Phase 1 (Agents): modal for inviting an Agent into a specific chat row.
+  const [inviteForChat, setInviteForChat] = useState<ModelAppDefaulRooom | null>(null);
 
   // Broadcast Message (async job)
   const [broadcastText, setBroadcastText] = useState('');
@@ -332,6 +335,10 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                     Created By
                   </th>
+                  {/* Phase 1 (Agents): per-row action to invite an Agent into the chat. */}
+                  <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                    Bots
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -354,6 +361,15 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
                       </td>
                       <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                         {el.creator}
+                      </td>
+                      <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                        <button
+                          onClick={() => setInviteForChat(el)}
+                          className="text-brand-500 hover:underline text-xs"
+                          title="Invite an AI agent into this chat"
+                        >
+                          + Add Bot
+                        </button>
                       </td>
                     </tr>
                   );
@@ -579,6 +595,16 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
             </button>
           </div>
         </SubmitModal>
+      )}
+      {/* Phase 1 (Agents): Add-Bot-to-chat modal. Lists this user's Agents and accepts a
+          paste-in agent address (so an unlisted public agent can be invited by someone
+          who only knows the address). */}
+      {inviteForChat && (
+        <InviteAgentToChatModal
+          appId={appId}
+          chat={inviteForChat}
+          onClose={() => setInviteForChat(null)}
+        />
       )}
     </div>
   );

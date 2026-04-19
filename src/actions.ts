@@ -12,6 +12,18 @@ import {
   httpUpdateApp,
   httpUpdateUser,
   refreshToken,
+  // Phase 1 (Agents)
+  httpListAgents,
+  httpGetAgent,
+  httpCreateAgent,
+  httpUpdateAgent,
+  httpDeleteAgent,
+  httpCloneAgent,
+  httpSetAgentVisibility,
+  httpUpdateAgentSoul,
+  httpInviteAgentToChat,
+  httpListBotInstances,
+  httpSetBotInstanceStatus,
 } from './http';
 import { ModelApp, ModelCurrentUser, OrderByType } from './models';
 import { useAppStore } from './store/useAppStore';
@@ -237,3 +249,88 @@ export const actionGetCsvFile = async (appId: string): Promise<any> => {
     console.error(e);
   }
 };
+
+// ---------------------------------------------------------------------------
+// Phase 1 (Agents): actions for the new AI Bots admin tab.
+// ---------------------------------------------------------------------------
+
+export async function actionListAgents(params?: { visibility?: 'public' | 'mine' | 'all'; appId?: string }) {
+  const resp = await httpListAgents(params);
+  const items = resp.data?.items || [];
+  const state = getState();
+  state.doSetAgents(items);
+  return items;
+}
+
+export async function actionCreateAgent(body: any) {
+  const resp = await httpCreateAgent(body);
+  const agent = resp.data?.agent;
+  if (agent) {
+    const state = getState();
+    state.doUpsertAgent(agent);
+    state.doSelectAgent(agent.id);
+  }
+  return agent;
+}
+
+export async function actionUpdateAgent(idOrAddress: string, body: any) {
+  const resp = await httpUpdateAgent(idOrAddress, body);
+  const agent = resp.data?.agent;
+  if (agent) {
+    getState().doUpsertAgent(agent);
+  }
+  return agent;
+}
+
+export async function actionDeleteAgent(idOrAddress: string) {
+  await httpDeleteAgent(idOrAddress);
+  getState().doRemoveAgent(idOrAddress);
+}
+
+export async function actionCloneAgent(idOrAddress: string, body?: any) {
+  const resp = await httpCloneAgent(idOrAddress, body);
+  const agent = resp.data?.agent;
+  if (agent) {
+    getState().doUpsertAgent(agent);
+  }
+  return agent;
+}
+
+export async function actionSetAgentVisibility(idOrAddress: string, visibility: 'private' | 'unlisted' | 'public') {
+  const resp = await httpSetAgentVisibility(idOrAddress, visibility);
+  const agent = resp.data?.agent;
+  if (agent) getState().doUpsertAgent(agent);
+  return agent;
+}
+
+export async function actionUpdateAgentSoul(idOrAddress: string, body: { soulMd?: string; append?: string }) {
+  const resp = await httpUpdateAgentSoul(idOrAddress, body);
+  const agent = resp.data?.agent;
+  if (agent) getState().doUpsertAgent(agent);
+  return agent;
+}
+
+export async function actionInviteAgentToChat(idOrAddress: string, body: { appId?: string; chatId?: string; chatJid?: string }) {
+  const resp = await httpInviteAgentToChat(idOrAddress, body);
+  return resp.data;
+}
+
+export async function actionListBotInstances(params?: { appId?: string; agentId?: string }) {
+  const resp = await httpListBotInstances(params);
+  const items = resp.data?.items || [];
+  getState().doSetBotInstances(items);
+  return items;
+}
+
+export async function actionSetBotInstanceStatus(id: string, status: 'on' | 'off') {
+  const resp = await httpSetBotInstanceStatus(id, status);
+  // The list can be small; refresh it to keep UI consistent.
+  return resp.data?.botInstance;
+}
+
+export async function actionGetAgent(idOrAddress: string) {
+  const resp = await httpGetAgent(idOrAddress);
+  const agent = resp.data?.agent;
+  if (agent) getState().doUpsertAgent(agent);
+  return agent;
+}
