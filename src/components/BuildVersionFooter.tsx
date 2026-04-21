@@ -34,7 +34,10 @@ function shortCommit(c?: string | null) {
 }
 
 function fmtPart(label: string, version: string, branch?: string | null, commit?: string | null) {
-  const parts: string[] = [`${label}`];
+  // Compact format: "f/e 26.04.21 (feat/ai-agents @7814b20)"
+  // - Label is short (f/e | b/e) to keep the footer discreet.
+  // - Branch + commit inside parens; commit shown without a space after '@' to save pixels.
+  const parts: string[] = [label];
   if (version) parts.push(version);
   const tail: string[] = [];
   if (branch) tail.push(branch);
@@ -71,9 +74,9 @@ export const BuildVersionFooter: React.FC = () => {
   const hasBe = !!(be && (be.version || be.build?.version || be.build?.commit));
   if (!hasFe && !hasBe) return null;
 
-  const fePart = hasFe ? fmtPart('frontend', FE_VERSION, FE_BRANCH, FE_COMMIT) : '';
+  const fePart = hasFe ? fmtPart('f/e', FE_VERSION, FE_BRANCH, FE_COMMIT) : '';
   const beVer = be?.build?.version || be?.version || '';
-  const bePart = hasBe ? fmtPart('backend', beVer, be?.build?.branch || null, be?.build?.commit || null) : '';
+  const bePart = hasBe ? fmtPart('b/e', beVer, be?.build?.branch || null, be?.build?.commit || null) : '';
 
   return (
     <div
@@ -88,7 +91,7 @@ export const BuildVersionFooter: React.FC = () => {
       }}
       title="Frontend & backend build versions (build date in yy.mm.dd · branch · commit)"
     >
-      {[fePart, bePart].filter(Boolean).join(' · ')}
+      {[fePart, bePart].filter(Boolean).join(' | ')}
     </div>
   );
 };
