@@ -4,13 +4,16 @@ import {
   createAnonymousXmppCredentials,
 } from '@ethora/ai-chat-widget';
 import { Box } from '@mui/material';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
 import { httpUpdateApp } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom, SiteLinks } from '../../models';
 
 import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
-import { TabAIWidget } from '../../components/AIWidget/TabAIWidget';
+// Phase 1 follow-up: TabAIWidget (multi-tab editor for prompt/web/docs/code) replaced by
+// the standalone Code panel. Persona / Context / Web Index / Docs Index now live under
+// the global /app/admin/agents area, since Agents are tenant-scope, not per-App.
+import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
 import { useAppStore } from '../../store/useAppStore';
 import { ModelApp } from '../../models';
 import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
@@ -127,16 +130,18 @@ interface Props {
   deleteSiteCrawl: (url: string[]) => void;
 }
 
+// Phase 1 follow-up: AIWidget now only renders the embed-Code panel + ActiveAgentSelector
+// + status bar. The legacy Prompt / Add websites / Add documents tabs moved to the global
+// /app/admin/agents area, so loadingTextCrawl / handleCrawlReindex / setChoseUrl /
+// ragRef / url state are no longer used here. Props interface kept stable so the parent
+// AppSettings doesn't need to change.
 export function AIWidget({
   appId,
   app,
   aiBot,
   setAiBot,
   handleRagChange,
-  handleSiteCrawl,
   deleteSiteCrawl,
-  loadingTextCrawl,
-  handleCrawlReindex,
 }: Props) {
   const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
   const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
@@ -148,8 +153,7 @@ export function AIWidget({
   const [value, setValue] = useState('1');
   const [assistantStorageReady, setAssistantStorageReady] = useState(false);
 
-  const [url, setUrl] = useState<string>('');
-  const [choseUrl, setChoseUrl] = useState<SiteLinks[]>([]);
+  const [choseUrl] = useState<SiteLinks[]>([]);
   const user = createAnonymousXmppCredentials();
   const xmppHost = useMemo(
     () => getXmppDomainFromJid(app?.systemChatAccount?.jid) || envXmppHost,
@@ -190,8 +194,6 @@ export function AIWidget({
     }),
     [xmppConference, xmppHost, xmppWebsocketUrl]
   );
-
-  const ragRef = useRef<HTMLDivElement>(null);
 
   const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -235,11 +237,7 @@ export function AIWidget({
     }
   }, [aiBot.status]);
 
-  useEffect(() => {
-    if (aiBot.siteUrlsV2 && !!aiBot.siteUrlsV2.length) {
-      setUrl(aiBot.siteUrlsV2[0].url);
-    }
-  }, [aiBot.siteUrlsV2]);
+  // (Was: prefilling the now-removed Add-website input from aiBot.siteUrlsV2.)
 
   return (
     <div className="w-full h-full overflow-x-auto overflow-y-hidden">
@@ -256,23 +254,18 @@ export function AIWidget({
         size={size}
       />
 
-      <TabAIWidget
-        value={value}
-        appId={appId}
-        app={app}
-        userId={aiBot.userId}
-        handleChange={handleChange}
-        aiBot={aiBot}
-        setAiBot={setAiBot}
-        url={url}
-        ragRef={ragRef}
-        setUrl={setUrl}
-        handleSiteCrawl={handleSiteCrawl}
-        setChoseUrl={setChoseUrl}
-        setShowNewDocModal={setShowNewDocModal}
-        loadingTextCrawl={loadingTextCrawl}
-        handleCrawlReindex={handleCrawlReindex}
-      />
+      {/* Phase 1 follow-up: only the Code panel (embed snippet) remains here. The other
+          legacy tabs (Prompt / Add websites / Add documents) now live under each Agent
+          in the global /app/admin/agents area. */}
+      <div className="w-full h-full overflow-x-auto overflow-y-hidden">
+        <TabAIWidgetCode
+          value={value}
+          appId={appId}
+          app={app}
+          userId={aiBot.userId}
+          handleChange={handleChange}
+        />
+      </div>
 
       {showNewDocModal && (
         <SourcesSiteCrawlModal
