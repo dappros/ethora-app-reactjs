@@ -779,6 +779,13 @@ export function httpListAgentBotInstances(idOrAddress: string) {
   return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances`);
 }
 
+// Diagnostics for one BotInstance: ai-service's in-memory state (online?, joined rooms,
+// last error), persisted bot row, and the last few conversation rows. Used by the
+// Chats Index tab's "Status" expand and chat history preview.
+export function httpDiagAgentBotInstance(idOrAddress: string, botInstanceId: string) {
+  return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/diag`);
+}
+
 export function httpGetBotInstance(id: string) {
   return httpV2.get(`/bot-instances/${id}`);
 }

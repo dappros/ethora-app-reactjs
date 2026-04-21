@@ -8,6 +8,7 @@
 // to know which App to ingest under, since the `documents` table still keys by
 // (appId, agentId) for back-compat).
 
+import classNames from 'classnames';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
@@ -19,6 +20,7 @@ import {
 import {
   httpAgentDocsUpload,
   httpAgentSiteCrawl,
+  httpDiagAgentBotInstance,
   httpListAgentBotInstances,
 } from '../../../http';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
@@ -324,9 +326,175 @@ export const HeartbeatPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean 
 };
 
 // Chats Index now uses the new GET /v2/agents/:id/bot-instances endpoint to enumerate
-// every App this Agent is deployed in (with the rooms it joined per-App). That makes
-// it useful from the global Agents UI which has no per-App context of its own.
+// every App this Agent is deployed in (with the rooms it joined per-App). Each row can
+// be expanded to show:
+//   - live ai-service diagnostic (XMPP online?, joined rooms, last error, response mode)
+//   - last conversation entries from ai-service's conversationModel
+//
+// This is the primary "why isn't my bot responding?" diagnostic surface.
+
 type AgentBotInstance = ModelBotInstance & { appName?: string };
+type DiagState = {
+  ok: boolean;
+  botInstance?: any;
+  aiService?: {
+    inMem?: any;
+    persisted?: any;
+    conversations?: Array<{
+      createdAt: string;
+      chatJID: string;
+      nickname: string;
+      message: string;
+      response: string;
+    }>;
+  } | null;
+  aiServiceError?: string | null;
+};
+
+const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance }> = ({ agent, bi }) => {
+  const [open, setOpen] = useState(false);
+  const [diag, setDiag] = useState<DiagState | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function refresh() {
+    setLoading(true);
+    try {
+      const r = await httpDiagAgentBotInstance(agent.id, bi.id);
+      setDiag(r.data);
+    } catch (e: any) {
+      setDiag({ ok: false, aiServiceError: e?.response?.data?.error || e.message });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (open && !diag) refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const inMem = diag?.aiService?.inMem;
+  const dotClass = !diag
+    ? 'bg-gray-300'
+    : !inMem?.spawned
+      ? 'bg-red-500'
+      : !inMem?.online
+        ? 'bg-yellow-500'
+        : (inMem?.joinedRooms?.length || 0) === 0
+          ? 'bg-yellow-500'
+          : 'bg-green-500';
+  const dotTitle = !diag
+    ? 'Not loaded yet'
+    : !inMem?.spawned
+      ? 'No XmppClient process for this bot in ai-service'
+      : !inMem?.online
+        ? `Spawned but not online${inMem?.lastError ? ': ' + inMem.lastError : ''}`
+        : (inMem?.joinedRooms?.length || 0) === 0
+          ? 'Online but not in any MUC room'
+          : 'Online and in MUC';
+
+  return (
+    <>
+      <tr className="border-t align-top">
+        <td className="p-2">
+          <div className="flex items-center gap-2">
+            <span className={classNames('inline-block w-2 h-2 rounded-full', dotClass)} title={dotTitle} />
+            <div className="min-w-0">
+              <div className="font-semibold truncate">{bi.appName || '(unknown app)'}</div>
+              <div className="text-[10px] text-gray-400 truncate">{bi.appId}</div>
+            </div>
+          </div>
+        </td>
+        <td className="p-2">{bi.status}</td>
+        <td className="p-2">
+          {(bi.joinedRooms || []).length === 0 ? (
+            <span className="text-gray-500">none</span>
+          ) : (
+            (bi.joinedRooms || []).map((r) => (
+              <div key={r} className="font-mono text-[11px] break-all">{r}</div>
+            ))
+          )}
+        </td>
+        <td className="p-2 text-gray-500 text-xs">{bi.lastActiveAt || ''}</td>
+        <td className="p-2 text-right">
+          <button
+            onClick={() => setOpen(!open)}
+            className="text-xs text-brand-500 hover:underline"
+          >
+            {open ? 'Hide' : 'Inspect'}
+          </button>
+        </td>
+      </tr>
+      {open && (
+        <tr className="border-t bg-gray-50">
+          <td colSpan={5} className="p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <button onClick={refresh} disabled={loading} className="text-xs border rounded px-2 py-1 hover:bg-gray-100">
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+              {diag?.aiServiceError && (
+                <span className="text-xs text-red-600">ai-service error: {diag.aiServiceError}</span>
+              )}
+            </div>
+            {diag && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <div className="font-semibold mb-1">In-memory (ai-service runtime)</div>
+                  <dl className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                    <DiagItem label="Spawned" value={String(inMem?.spawned ?? false)} />
+                    <DiagItem label="Online" value={String(inMem?.online ?? false)} />
+                    <DiagItem label="Joined rooms (XMPP)" value={String(inMem?.joinedRooms?.length ?? 0)} />
+                    <DiagItem label="Pending rooms" value={String(inMem?.pendingRooms?.length ?? 0)} />
+                    <DiagItem label="Response mode" value={inMem?.responseMode || inMem?.trigger || 'default'} />
+                    <DiagItem label="RAG" value={String(inMem?.isRAG ?? false)} />
+                    <DiagItem label="Cooldown (s)" value={String(inMem?.cooldownSec ?? 0)} />
+                    <DiagItem label="Prompt length" value={String(inMem?.promptLength ?? 0)} />
+                    <DiagItem label="Last error" value={inMem?.lastError || '—'} />
+                  </dl>
+                  {(inMem?.joinedRooms || []).length > 0 && (
+                    <div className="mt-2">
+                      <div className="text-gray-500 mb-1">XMPP joined rooms:</div>
+                      {inMem.joinedRooms.map((r: string) => (
+                        <div key={r} className="font-mono text-[10px] break-all">{r}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <div className="font-semibold mb-1">Last conversations</div>
+                  {(diag.aiService?.conversations || []).length === 0 ? (
+                    <div className="text-gray-500">
+                      None recorded yet. If the bot is online + in the room but you've sent
+                      messages and see nothing here, the stanza handler in ai-service is
+                      not seeing the messages — check ai-service logs and ejabberd MUC config.
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-72 overflow-auto pr-2">
+                      {diag.aiService!.conversations!.map((c, i) => (
+                        <div key={i} className="border rounded p-2 bg-white">
+                          <div className="text-[10px] text-gray-400">{new Date(c.createdAt).toLocaleString()}</div>
+                          <div><span className="text-gray-500">{c.nickname}:</span> {c.message}</div>
+                          <div className="mt-1 pl-2 border-l-2 border-brand-200 text-gray-700">{c.response}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </td>
+        </tr>
+      )}
+    </>
+  );
+};
+
+const DiagItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <>
+    <dt className="text-gray-500">{label}</dt>
+    <dd className="font-mono break-all">{value}</dd>
+  </>
+);
 
 export const ChatsIndexPanel: React.FC<{
   agent: ModelAgent;
@@ -336,54 +504,46 @@ export const ChatsIndexPanel: React.FC<{
   const [items, setItems] = useState<AgentBotInstance[]>([]);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
+  function reload() {
     httpListAgentBotInstances(agent.id)
       .then((r) => setItems(r.data?.items || []))
       .catch(() => setItems([]));
+  }
+
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.id]);
 
   return (
     <div className="space-y-3">
       <div className="text-sm text-gray-600">
-        Per-App embodiments and rooms this Agent has joined. Phase 2 will surface deep
-        chat history retrieval here.
+        Per-App embodiments of this Agent and the rooms each is in.
+        Click "Inspect" on a row to see live ai-service runtime state (online? in-room?
+        last error?) and the last few message/response pairs — useful for diagnosing
+        "the bot doesn't respond".
       </div>
       <div className="border rounded">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="text-left p-2">App</th>
-              <th className="text-left p-2">Status</th>
+              <th className="text-left p-2 w-1/4">App</th>
+              <th className="text-left p-2 w-20">Status</th>
               <th className="text-left p-2">Rooms joined</th>
-              <th className="text-left p-2">Last active</th>
+              <th className="text-left p-2 w-32">Last active</th>
+              <th className="p-2 w-20"></th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 && (
               <tr>
-                <td colSpan={4} className="p-3 text-gray-500">
+                <td colSpan={5} className="p-3 text-gray-500">
                   Not deployed to any App yet.
                 </td>
               </tr>
             )}
             {items.map((bi) => (
-              <tr key={bi.id} className="border-t align-top">
-                <td className="p-2">
-                  <div className="font-semibold">{bi.appName || '(unknown app)'}</div>
-                  <div className="text-[10px] text-gray-400">{bi.appId}</div>
-                </td>
-                <td className="p-2">{bi.status}</td>
-                <td className="p-2">
-                  {(bi.joinedRooms || []).length === 0 ? (
-                    <span className="text-gray-500">none</span>
-                  ) : (
-                    (bi.joinedRooms || []).map((r) => (
-                      <div key={r} className="font-mono text-[11px]">{r}</div>
-                    ))
-                  )}
-                </td>
-                <td className="p-2 text-gray-500">{bi.lastActiveAt || ''}</td>
-              </tr>
+              <DiagRow key={bi.id} agent={agent} bi={bi} />
             ))}
           </tbody>
         </table>
@@ -404,9 +564,7 @@ export const ChatsIndexPanel: React.FC<{
                   try {
                     await actionInviteAgentToChat(agent.id, { appId: scopedAppId, chatId: r.chatId });
                     toast.success(`Invited to ${r.title}`);
-                    // Refresh listing.
-                    const refreshed = await httpListAgentBotInstances(agent.id);
-                    setItems(refreshed.data?.items || []);
+                    reload();
                     await actionListBotInstances({ appId: scopedAppId });
                   } catch (e: any) {
                     toast.error(`Invite failed: ${e?.response?.data?.error || e.message}`);
