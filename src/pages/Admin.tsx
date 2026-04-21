@@ -10,11 +10,14 @@ export default function Admin() {
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Admin
         </div>
-        <div className="w-full max-w-[400px] h-[40px] flex justify-between">
+        {/* Three top-level admin sections: Apps | Agents | Billing.
+            Apps and Billing are pre-existing; Agents is the new tenant-scope page for
+            managing AI Agents that get deployed across many Apps. */}
+        <div className="w-full max-w-[520px] h-[40px] flex justify-between">
           <NavLink
             className={({ isActive }) =>
               cn(
-                'w-1/2 border flex items-center hover:bg-brand-darker justify-center rounded-l-xl border-brand-500 font-sans text-base',
+                'w-1/3 border flex items-center hover:bg-brand-darker justify-center rounded-l-xl border-brand-500 font-sans text-base',
                 {
                   'bg-brand-500 text-white': isActive,
                   'hover:bg-brand-hover': !isActive,
@@ -28,7 +31,21 @@ export default function Admin() {
           <NavLink
             className={({ isActive }) =>
               cn(
-                'w-1/2 border flex items-center justify-center rounded-r-xl border-brand-500 font-sans text-base',
+                'w-1/3 border-y border-r flex items-center hover:bg-brand-darker justify-center border-brand-500 font-sans text-base',
+                {
+                  'bg-brand-500 text-white': isActive,
+                  'hover:bg-brand-hover': !isActive,
+                }
+              )
+            }
+            to="/app/admin/agents"
+          >
+            Agents
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              cn(
+                'w-1/3 border-y border-r flex items-center justify-center rounded-r-xl border-brand-500 font-sans text-base',
                 {
                   'bg-brand-500 text-white': isActive,
                   'hover:bg-brand-hover': !isActive,

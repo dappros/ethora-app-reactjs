@@ -230,6 +230,11 @@ export interface ModelAgent {
   address: string;
   ownerId: string;
   ownerAppId: string | null;
+  // New (Phase 1 global Agents UI): origin app display name + BotInstances count, used to
+  // disambiguate agents that share the same displayName.
+  originAppId?: string | null;
+  originAppName?: string | null;
+  botInstancesCount?: number | null;
   displayName: string;
   avatarUrl: string;
   bio: string;

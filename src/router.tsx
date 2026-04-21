@@ -12,8 +12,10 @@ import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
 const Admin = lazy(() => import('./pages/Admin'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
+const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
+const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
@@ -84,6 +86,14 @@ export const router = createBrowserRouter(
                     {
                       path: 'billing',
                       Component: AdminBilling,
+                    },
+                    {
+                      path: 'agents',
+                      Component: AdminAgents,
+                    },
+                    {
+                      path: 'agents/:agentId/settings',
+                      Component: AgentSettings,
                     },
                     {
                       path: 'apps/:appId',

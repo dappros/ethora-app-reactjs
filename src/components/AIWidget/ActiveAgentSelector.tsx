@@ -102,8 +102,11 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
         ))}
       </select>
       <span className="text-gray-400">|</span>
-      <Link to={`?tab=AI+Bots`} className="text-brand-500 hover:underline">
-        Manage agents in AI Bots tab
+      {/* Phase 1 follow-up: Agents now live at the tenant-scope /app/admin/agents page.
+          One Agent can be deployed across many Apps; the dropdown above just picks which
+          Agent backs THIS App's AI Widget. */}
+      <Link to="/app/admin/agents" className="text-brand-500 hover:underline">
+        Manage agents
       </Link>
     </div>
   );

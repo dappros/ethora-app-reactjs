@@ -31,7 +31,6 @@ import {
 } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIWidget } from './AIWidget';
-import { AIBots } from './AIBots';
 import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
@@ -53,9 +52,9 @@ const tabs = [
   'Home screen',
   'Menu',
   'Chats',
-  // Phase 1 (Agents): new first-class AI Agents page lives in System, right after Chats.
-  // Order in this array must match the TabPanel order below.
-  'AI Bots',
+  // Phase 1 follow-up: AI Bots tab moved out of per-App settings into a top-level
+  // /app/admin/agents area (Agents are tenant-scoped, not app-scoped). The "Active Agent"
+  // selector inside AI Widget below still handles per-App deployment.
   'Visibility & Privacy',
   'API',
   'Delete',
@@ -64,7 +63,7 @@ const tabs = [
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
-  System: ['Chats', 'AI Bots', 'Visibility & Privacy', 'API', 'Delete'],
+  System: ['Chats', 'Visibility & Privacy', 'API', 'Delete'],
 };
 
 export default function AppSettings() {
@@ -791,18 +790,10 @@ export default function AppSettings() {
             />
           </TabPanel>
 
-          {/* Phase 1 (Agents): new AI Bots page - persona, context, indexes, soul.md, heartbeat, chats index. */}
-          <TabPanel
-            key="AI Bots"
-            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
-          >
-            <AIBots
-              appId={appId as string}
-              app={app}
-              isDisabled={app?.creatorId !== currentUser?._id}
-              defaultChatRooms={defaultChatRooms}
-            />
-          </TabPanel>
+          {/* Phase 1 follow-up: AI Bots tab removed (now lives at /app/admin/agents).
+              Inviting a specific agent into a chat happens from System > Chats > "+ Add Bot",
+              and the per-App AI Widget responder is picked via the ActiveAgentSelector banner
+              at the top of the AI Widget tab. */}
 
           {/* <TabPanel key="Rewards" className="grid grid-rows-1 lg:ml-4 h-full ">
             <CryptoRewards coinName={coinName} setCoinName={setCoinName} />

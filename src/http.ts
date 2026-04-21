@@ -773,6 +773,12 @@ export function httpListBotInstances(params?: { appId?: string; agentId?: string
   return httpV2.get('/bot-instances', { params });
 }
 
+// Convenience: list every BotInstance of an Agent (across all Apps it has been deployed
+// in), enriched with the App display name. Used by the global Agents UI's Chats Index tab.
+export function httpListAgentBotInstances(idOrAddress: string) {
+  return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances`);
+}
+
 export function httpGetBotInstance(id: string) {
   return httpV2.get(`/bot-instances/${id}`);
 }
