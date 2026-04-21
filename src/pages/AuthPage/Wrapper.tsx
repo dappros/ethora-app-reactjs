@@ -2,6 +2,7 @@ import { Box, useMediaQuery } from '@mui/material';
 import { Theme, useTheme } from '@mui/system';
 import React, { ReactNode } from 'react';
 import { useAppStore } from '../../store/useAppStore';
+import { BuildVersionFooter } from '../../components/BuildVersionFooter';
 import './Wrapper.scss';
 import { hexToRGBA } from './hetToRgba';
 
@@ -41,6 +42,9 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
         }}
       >
         {children}
+        {/* Tiny build/version line at the bottom of every auth screen so QA / ops can
+            tell at a glance what's deployed. Falls back to nothing if no info is set. */}
+        <BuildVersionFooter />
       </Box>
     </Box>
   );
