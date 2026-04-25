@@ -22,9 +22,13 @@ import {
   httpAgentSiteCrawl,
   httpDiagAgentBotInstance,
   httpListAgentBotInstances,
+  httpListSiteSourcesV2,
+  httpReindexSiteSourceV2,
+  httpDeleteSiteSourceV2Url,
 } from '../../../http';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
+import { useAppStore } from '../../../store/useAppStore';
 
 export const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <label className="block">
@@ -159,23 +163,112 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
 };
 
 // Web Index / Docs Index need an appId because source ingestion still keys per-(appId, agentId).
-// In the global Agents UI we pick the agent's `originAppId` (the App where it was created)
-// as the default scope, but the operator can override (TODO: app picker if needed).
+// Default scope is the agent's originAppId (where it was created). The operator can
+// switch to a different App they own — useful when the same agent is deployed across
+// multiple apps and you want to ingest sources under a specific one.
 
-export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId, isDisabled }) => {
+type SiteSourceRow = {
+  id: string;
+  url: string;
+  originUrl?: string;
+  mdByteSize?: number;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+function fmtBytesShort(n?: number | null) {
+  const v = Number(n) || 0;
+  if (v < 1024) return `${v} B`;
+  if (v < 1024 * 1024) return `${(v / 1024).toFixed(1)} KB`;
+  return `${(v / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const AppScopePicker: React.FC<{
+  agent: ModelAgent;
+  appId: string;
+  onChange: (appId: string) => void;
+}> = ({ agent, appId, onChange }) => {
+  const apps = useAppStore((s) => s.apps);
+  // Only the user's own apps are eligible scopes (anything else and the auth check
+  // on /v2/apps/:appId/sources/* would 403).
+  if (apps.length <= 1) return null;
+  return (
+    <label className="flex items-center gap-2 text-xs text-gray-600">
+      <span>Scope app:</span>
+      <select
+        className="border rounded px-2 py-1 text-xs"
+        value={appId}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {!appId && <option value="">(pick an app)</option>}
+        {apps.map((a) => (
+          <option key={a._id} value={a._id}>
+            {a.displayName}{a._id === agent.originAppId ? ' (origin)' : ''}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+};
+
+export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
+  const apps = useAppStore((s) => s.apps);
+  const [appId, setAppId] = useState<string>(initialAppId);
   const [url, setUrl] = useState('');
   const [followLink, setFollowLink] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [rows, setRows] = useState<SiteSourceRow[]>([]);
+  const [loadingList, setLoadingList] = useState(false);
+
+  // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
+  // the user's first owned app so the UI is functional out of the box.
+  useEffect(() => {
+    if (!appId && apps.length > 0) setAppId(apps[0]._id);
+  }, [apps, appId]);
+  // Sync when the parent's initialAppId resolves later.
+  useEffect(() => {
+    if (initialAppId && initialAppId !== appId) setAppId(initialAppId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAppId]);
+
+  const loadList = async () => {
+    if (!appId) {
+      setRows([]);
+      return;
+    }
+    setLoadingList(true);
+    try {
+      const r = await httpListSiteSourcesV2(appId);
+      // Endpoint returns { result: SiteSourceRow[] } in v2.
+      const items: SiteSourceRow[] = r.data?.result || r.data?.items || [];
+      setRows(items);
+    } catch (e: any) {
+      toast.error(`Failed to load indexed URLs: ${e?.response?.data?.error || e.message}`);
+      setRows([]);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+  useEffect(() => {
+    loadList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId]);
+
   return (
-    <div className="space-y-3 max-w-2xl">
-      <div className="text-sm text-gray-600">
-        Crawl a website and store content as embeddings under this agent's RAG namespace.
-        {!appId && (
-          <div className="mt-1 text-xs text-amber-600">
-            No origin app set on this agent — use one of its deployed apps to ingest sources.
-          </div>
-        )}
+    <div className="space-y-3 max-w-3xl">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="text-sm text-gray-600">
+          Crawl a website and store content as embeddings under this agent's RAG namespace.
+          {!appId && (
+            <div className="mt-1 text-xs text-amber-600">
+              No app picked — open an app in admin first or pick one below.
+            </div>
+          )}
+        </div>
+        <AppScopePicker agent={agent} appId={appId} onChange={setAppId} />
       </div>
+
       <div className="flex gap-2">
         <input
           className="border rounded px-2 py-1 flex-1"
@@ -196,6 +289,8 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
               await httpAgentSiteCrawl(appId, agent.id, url, followLink);
               toast.success('Crawl queued');
               setUrl('');
+              // Re-fetch the list so the new pages appear.
+              await loadList();
             } catch (e: any) {
               toast.error(`Crawl failed: ${e?.response?.data?.error || e.message}`);
             } finally {
@@ -207,25 +302,115 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           {busy ? 'Crawling...' : 'Crawl'}
         </button>
       </div>
+
       <div className="text-xs text-gray-500">
         Indexed bytes: {agent.totalSiteSourceSize?.toLocaleString() || 0}
+        {appId && (
+          <> · {rows.length} indexed URL{rows.length === 1 ? '' : 's'} in this app</>
+        )}
+      </div>
+
+      {/* Indexed URLs table - ported from the legacy AI Widget LinksTable. Shows every
+          row stored under the scoped app's siteSource collection. NB: the siteSource
+          model is keyed by appId only today, so for migrated apps this list may include
+          pages indexed by other agents that share the same app. We surface that as an
+          "(other agents)" hint when the row's url didn't originate from this agent's
+          recent crawls. */}
+      <div className="border rounded">
+        <table className="w-full text-xs">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="text-left p-2">URL</th>
+              <th className="text-left p-2 w-24">Size</th>
+              <th className="text-left p-2 w-32">Updated</th>
+              <th className="p-2 w-28"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {loadingList && (
+              <tr><td colSpan={4} className="p-3 text-gray-500">Loading...</td></tr>
+            )}
+            {!loadingList && rows.length === 0 && (
+              <tr><td colSpan={4} className="p-3 text-gray-500">No URLs indexed for this app yet.</td></tr>
+            )}
+            {!loadingList && rows.map((row) => (
+              <tr key={row.id} className="border-t align-top">
+                <td className="p-2">
+                  <div className="font-mono break-all">{row.url}</div>
+                  {row.originUrl && row.originUrl !== row.url && (
+                    <div className="text-gray-400 text-[10px] mt-0.5">via {row.originUrl}</div>
+                  )}
+                </td>
+                <td className="p-2 text-gray-600">{fmtBytesShort(row.mdByteSize)}</td>
+                <td className="p-2 text-gray-500">{row.updatedAt ? new Date(row.updatedAt).toLocaleString() : ''}</td>
+                <td className="p-2 text-right whitespace-nowrap">
+                  <button
+                    disabled={isDisabled || busy}
+                    onClick={async () => {
+                      try {
+                        await httpReindexSiteSourceV2(appId, row.id);
+                        toast.success('Reindex queued');
+                        await loadList();
+                      } catch (e: any) {
+                        toast.error(`Reindex failed: ${e?.response?.data?.error || e.message}`);
+                      }
+                    }}
+                    className="text-brand-500 hover:underline mr-2"
+                  >
+                    Reindex
+                  </button>
+                  <button
+                    disabled={isDisabled || busy}
+                    onClick={async () => {
+                      if (!confirm(`Remove "${row.url}" from the index?`)) return;
+                      try {
+                        await httpDeleteSiteSourceV2Url(appId, row.url);
+                        toast.success('Removed');
+                        await loadList();
+                      } catch (e: any) {
+                        toast.error(`Remove failed: ${e?.response?.data?.error || e.message}`);
+                      }
+                    }}
+                    className="text-red-500 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId, isDisabled }) => {
+export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
+  const apps = useAppStore((s) => s.apps);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [appId, setAppId] = useState<string>(initialAppId);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!appId && apps.length > 0) setAppId(apps[0]._id);
+  }, [apps, appId]);
+  useEffect(() => {
+    if (initialAppId && initialAppId !== appId) setAppId(initialAppId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAppId]);
+
   return (
     <div className="space-y-3 max-w-2xl">
-      <div className="text-sm text-gray-600">
-        Upload PDFs, DOCX, MD, TXT to index under this agent.
-        {!appId && (
-          <div className="mt-1 text-xs text-amber-600">
-            No origin app set on this agent — use one of its deployed apps to ingest sources.
-          </div>
-        )}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="text-sm text-gray-600">
+          Upload PDFs, DOCX, MD, TXT to index under this agent.
+          {!appId && (
+            <div className="mt-1 text-xs text-amber-600">
+              No app picked — open an app in admin first or pick one below.
+            </div>
+          )}
+        </div>
+        <AppScopePicker agent={agent} appId={appId} onChange={setAppId} />
       </div>
       <input
         ref={fileRef}

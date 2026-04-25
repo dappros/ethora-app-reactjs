@@ -243,10 +243,19 @@ const CreateAgentModal: React.FC<{
   onCancel: () => void;
   onCreated: (agent: ModelAgent) => void;
 }> = ({ onCancel, onCreated }) => {
+  const apps = useAppStore((s) => s.apps);
+  const currentApp = useAppStore((s) => s.currentApp);
   const [displayName, setDisplayName] = useState('New AI Agent');
   const [bio, setBio] = useState('');
   const [prompt, setPrompt] = useState('You are a helpful assistant.');
   const [visibility, setVisibility] = useState<'private' | 'unlisted' | 'public'>('private');
+  // ownerAppId controls (a) which App appears as "Created in" on the agent card and
+  // (b) the default scope App for Web Index / Docs Index ingestion when the agent
+  // is opened. Default to the currently-selected App if the user has one, otherwise
+  // their first owned App, otherwise empty (and the panels will warn).
+  const [ownerAppId, setOwnerAppId] = useState<string>(
+    currentApp?._id || apps[0]?._id || ''
+  );
   const [busy, setBusy] = useState(false);
 
   return (
@@ -273,6 +282,19 @@ const CreateAgentModal: React.FC<{
             <option value="public">Public</option>
           </select>
         </label>
+        <label className="block">
+          <span className="block text-xs font-semibold text-gray-600 mb-1">Owning app (default scope for Web/Docs Index)</span>
+          <select
+            className="border rounded px-2 py-1 w-full"
+            value={ownerAppId}
+            onChange={(e) => setOwnerAppId(e.target.value)}
+          >
+            {apps.length === 0 && <option value="">(no apps)</option>}
+            {apps.map((a) => (
+              <option key={a._id} value={a._id}>{a.displayName}</option>
+            ))}
+          </select>
+        </label>
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">Cancel</button>
           <button
@@ -280,7 +302,9 @@ const CreateAgentModal: React.FC<{
             onClick={async () => {
               setBusy(true);
               try {
-                const created = await actionCreateAgent({ displayName, bio, prompt, visibility });
+                // Pass ownerAppId so the new agent has a sensible scope from minute one
+                // (Web Index / Docs Index need an App to attribute crawled sources to).
+                const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: ownerAppId || undefined });
                 if (created) onCreated(created);
               } catch (e: any) {
                 toast.error(`Create failed: ${e?.response?.data?.error || e.message}`);

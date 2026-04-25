@@ -786,6 +786,27 @@ export function httpDiagAgentBotInstance(idOrAddress: string, botInstanceId: str
   return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/diag`);
 }
 
+// Send a test system-message into every room a specific BotInstance is in. Returns
+// per-room success/failure so the UI can render a quick confirmation table.
+export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstanceId: string, text?: string) {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/test-message`, { text });
+}
+
+// List indexed Web Index sources for an App. Returns rows with { id, originUrl, url, mdByteSize, tags }.
+// Used by the agent's Web Index tab to show the URL list (not just total bytes).
+export function httpListSiteSourcesV2(appId?: string) {
+  if (appId) return httpV2.get(`/apps/${appId}/sources/site-crawl`);
+  return httpV2.get('/sources/site-crawl');
+}
+
+export function httpDeleteSiteSourceV2Url(appId: string, url: string) {
+  return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { urls: [url] } });
+}
+
+export function httpReindexSiteSourceV2(appId: string, urlId: string) {
+  return httpV2.post(`/apps/${appId}/sources/site-crawl-reindex`, { urlId });
+}
+
 export function httpGetBotInstance(id: string) {
   return httpV2.get(`/bot-instances/${id}`);
 }
