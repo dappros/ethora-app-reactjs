@@ -18,7 +18,8 @@ import {
   actionSetAgentVisibility,
   actionSetBotInstanceStatus,
 } from '../actions';
-import { httpTestMessageAgentBotInstance } from '../http';
+// (Was: httpTestMessageAgentBotInstance import for the now-removed agent-header
+// Test message modal. The per-room Test buttons live in AgentPanels.tsx.)
 import {
   ChatsIndexPanel,
   ContextPanel,
@@ -89,8 +90,9 @@ export default function AgentSettings() {
     actionListAgents({ visibility: 'mine' }).catch(() => {});
   }, [agentId, reloadInstances]);
 
-  // Test message modal state lives at the top level so the header button can open it.
-  const [testMsgOpen, setTestMsgOpen] = useState(false);
+  // (The agent-header "Test message" button moved to per-room buttons inside
+  // ChatsIndexPanel so the test always targets one specific room. No top-level
+  // modal needed any more.)
 
   useEffect(() => {
     if (TABS.includes(tabFromUrl as any) && TABS.indexOf(tabFromUrl as any) !== selectedIndex) {
@@ -128,7 +130,6 @@ export default function AgentSettings() {
         onBack={() => navigate('/app/admin/agents')}
         onVisibilityChanged={(updated) => setAgent(updated)}
         onInstancesChanged={reloadInstances}
-        onTestMessage={() => setTestMsgOpen(true)}
       />
 
       <TabGroup
@@ -164,14 +165,6 @@ export default function AgentSettings() {
           </TabPanel>
         </TabPanels>
       </TabGroup>
-
-      {testMsgOpen && (
-        <TestMessageModal
-          agent={agent}
-          instances={instances}
-          onClose={() => setTestMsgOpen(false)}
-        />
-      )}
     </div>
   );
 }
@@ -182,8 +175,7 @@ const Header: React.FC<{
   onBack: () => void;
   onVisibilityChanged: (a: ModelAgent) => void;
   onInstancesChanged: () => void;
-  onTestMessage?: () => void;
-}> = ({ agent, defaultBotInstance, onBack, onVisibilityChanged, onInstancesChanged, onTestMessage }) => {
+}> = ({ agent, defaultBotInstance, onBack, onVisibilityChanged, onInstancesChanged }) => {
   return (
     <div className="px-4 pt-2 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-3">
       <button onClick={onBack} className="text-sm text-brand-500 hover:underline">
@@ -221,15 +213,8 @@ const Header: React.FC<{
           <option value="public">Public</option>
         </select>
 
-        {onTestMessage && (
-          <button
-            onClick={onTestMessage}
-            className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100"
-            title="Send a test message into every room this Agent is currently in"
-          >
-            Test message
-          </button>
-        )}
+        {/* "Test message" lives per-room inside Chats Index now (one click sends into
+            one specific room). Keeping the header lean. */}
 
         {defaultBotInstance && (
           <button
@@ -291,133 +276,6 @@ const SidebarSections: React.FC<{ selectedIndex: number }> = ({ selectedIndex: _
   );
 };
 
-// "Test message" modal opened from the agent header. Lets the operator pick a target
-// BotInstance (when the agent is deployed to multiple Apps) and send a system message
-// into every room that BotInstance is in. Returned per-room result is rendered as a
-// quick confirmation table - this is the "is the bot reachable?" smoke test.
-const TestMessageModal: React.FC<{
-  agent: ModelAgent;
-  instances: (ModelBotInstance & { appName?: string })[];
-  onClose: () => void;
-}> = ({ agent, instances, onClose }) => {
-  const onlyOne = instances.length === 1;
-  const [selected, setSelected] = useState<string>(instances[0]?.id || '');
-  const [text, setText] = useState<string>(
-    `(test message from ${agent.displayName || 'agent'})`
-  );
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<null | {
-    ok: boolean;
-    sent?: number;
-    total?: number;
-    results?: Array<{ room: string; ok: boolean; error?: string }>;
-    message?: string;
-    code?: string;
-  }>(null);
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-5 w-[560px] max-w-[95%] space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Send test message</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-black">&times;</button>
-        </div>
-        <p className="text-xs text-gray-500">
-          Sends a system message into every room this BotInstance is currently in.
-          Verifies that the bot is genuinely connected and able to deliver stanzas.
-        </p>
-
-        {!onlyOne && instances.length > 0 && (
-          <label className="block">
-            <span className="block text-xs font-semibold text-gray-600 mb-1">Deployed in app</span>
-            <select
-              className="border rounded px-2 py-1 w-full text-sm"
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-            >
-              {instances.map((bi) => (
-                <option key={bi.id} value={bi.id}>
-                  {bi.appName || '(unknown app)'} — {bi.status}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        {instances.length === 0 && (
-          <div className="text-sm text-amber-600">
-            This agent is not deployed in any app yet. Invite it into a chat first.
-          </div>
-        )}
-
-        <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">Message</span>
-          <textarea
-            className="border rounded px-2 py-1 w-full"
-            rows={2}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-        </label>
-
-        {result && (
-          <div className={classNames('rounded p-2 text-xs', result.ok ? 'bg-green-50' : 'bg-red-50')}>
-            {result.ok ? (
-              <>
-                Sent to <b>{result.sent}/{result.total}</b> room(s).
-                {result.results && result.results.length > 0 && (
-                  <ul className="mt-1 space-y-0.5">
-                    {result.results.map((r) => (
-                      <li key={r.room} className={r.ok ? 'text-green-700' : 'text-red-700'}>
-                        {r.ok ? '✓' : '✗'} <span className="font-mono break-all">{r.room}</span>
-                        {r.error && <> — {r.error}</>}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            ) : (
-              <>
-                <div><b>Failed:</b> {result.message || '(no detail)'}</div>
-                {result.code && <div className="text-gray-500">Code: {result.code}</div>}
-                {result.code === 'BOT_NOT_SPAWNED' && (
-                  <div className="mt-1 text-gray-700">
-                    Toggle Stop/Start on this agent to re-spawn it in ai-service.
-                  </div>
-                )}
-                {result.code === 'BOT_NO_ROOMS' && (
-                  <div className="mt-1 text-gray-700">
-                    Re-invite the bot via "Add Bot" on the chat row, or Stop/Start to replay joinedRooms.
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        <div className="flex justify-end gap-2 pt-1">
-          <button onClick={onClose} className="border rounded px-4 py-2 hover:bg-gray-100">Close</button>
-          <button
-            disabled={busy || !selected}
-            onClick={async () => {
-              setBusy(true);
-              setResult(null);
-              try {
-                const r = await httpTestMessageAgentBotInstance(agent.id, selected, text);
-                setResult({ ok: true, sent: r.data?.sent, total: r.data?.total, results: r.data?.results });
-              } catch (e: any) {
-                const data = e?.response?.data;
-                setResult({ ok: false, message: data?.message || data?.error || e.message, code: data?.code });
-              } finally {
-                setBusy(false);
-              }
-            }}
-            className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
-          >
-            {busy ? 'Sending...' : 'Send'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+// (Was: TestMessageModal opened from the agent header. Replaced by per-room [Test]
+// buttons inside ChatsIndexPanel - one click sends a system message into one
+// specific room, no modal needed.)

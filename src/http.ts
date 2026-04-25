@@ -792,10 +792,11 @@ export function httpDiagAgentBotInstance(idOrAddress: string, botInstanceId: str
   return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/diag`);
 }
 
-// Send a test system-message into every room a specific BotInstance is in. Returns
-// per-room success/failure so the UI can render a quick confirmation table.
-export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstanceId: string, text?: string) {
-  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/test-message`, { text });
+// Send a test system-message into one specific room (when `roomJid` is provided) or
+// every room a specific BotInstance is in (when omitted). Returns per-room success/
+// failure so the UI can render a quick confirmation.
+export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstanceId: string, text?: string, roomJid?: string) {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/test-message`, { text, roomJid });
 }
 
 // List indexed Web Index sources for an App. Returns rows with { id, originUrl, url, mdByteSize, tags }.

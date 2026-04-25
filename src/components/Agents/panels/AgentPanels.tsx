@@ -9,7 +9,7 @@
 // (appId, agentId) for back-compat).
 
 import classNames from 'classnames';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   actionUpdateAgent,
@@ -21,10 +21,12 @@ import {
   httpAgentDocsUpload,
   httpAgentSiteCrawl,
   httpDiagAgentBotInstance,
+  httpLeaveChatAgentBotInstance,
   httpListAgentBotInstances,
   httpListSiteSourcesV2,
   httpReindexSiteSourceV2,
   httpDeleteSiteSourceV2Url,
+  httpTestMessageAgentBotInstance,
 } from '../../../http';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
@@ -516,9 +518,19 @@ export const HeartbeatPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean 
 //   - live ai-service diagnostic (XMPP online?, joined rooms, last error, response mode)
 //   - last conversation entries from ai-service's conversationModel
 //
+// Each room within an App row carries [Test] and [Leave] actions so the operator can
+// (a) verify the bot can deliver a stanza into that specific room and (b) remove the
+// bot from a single room without stopping it elsewhere.
+//
 // This is the primary "why isn't my bot responding?" diagnostic surface.
 
-type AgentBotInstance = ModelBotInstance & { appName?: string };
+type RoomDetail = { jid: string; name: string; title: string };
+type AgentBotInstance = ModelBotInstance & {
+  appName?: string;
+  // Optional new field returned by the API: per-room human-readable titles.
+  // Falls back to local-part when missing.
+  joinedRoomsDetails?: RoomDetail[];
+};
 type DiagState = {
   ok: boolean;
   botInstance?: any;
@@ -536,7 +548,94 @@ type DiagState = {
   aiServiceError?: string | null;
 };
 
-const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance }> = ({ agent, bi }) => {
+// Renders the per-App row's "Rooms joined" cell as a list of room titles, each with
+// inline [Test] and [Leave] buttons. Test sends a system message into ONLY that room
+// (uses the test-message endpoint's roomJid filter). Leave removes the BotInstance from
+// only that room without stopping it elsewhere. Refreshes the parent list on success.
+const RoomActionsList: React.FC<{
+  agent: ModelAgent;
+  bi: AgentBotInstance;
+  onChanged?: () => void;
+}> = ({ agent, bi, onChanged }) => {
+  const [busy, setBusy] = useState<string | null>(null);
+
+  // Prefer joinedRoomsDetails (with titles); fall back to plain JIDs if the API hasn't
+  // shipped them yet.
+  const rows: RoomDetail[] = useMemo(() => {
+    if (Array.isArray(bi.joinedRoomsDetails) && bi.joinedRoomsDetails.length > 0) {
+      return bi.joinedRoomsDetails;
+    }
+    return (bi.joinedRooms || []).map((jid) => {
+      const local = String(jid).split('@')[0];
+      return { jid, name: local, title: local };
+    });
+  }, [bi.joinedRoomsDetails, bi.joinedRooms]);
+
+  if (rows.length === 0) {
+    return <span className="text-gray-500 text-xs">none</span>;
+  }
+
+  return (
+    <ul className="space-y-1">
+      {rows.map((r) => {
+        const rowBusy = busy === r.jid;
+        return (
+          <li key={r.jid} className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm" title={r.jid}>{r.title || r.name}</span>
+            <button
+              disabled={rowBusy}
+              onClick={async () => {
+                setBusy(r.jid);
+                try {
+                  const resp = await httpTestMessageAgentBotInstance(agent.id, bi.id, undefined, r.jid);
+                  const data = resp.data;
+                  if (data?.ok && (data.sent ?? 0) > 0) {
+                    toast.success(`Test sent to "${r.title}"`);
+                  } else {
+                    toast.warn(`Sent failed: ${data?.results?.[0]?.error || data?.message || 'unknown'}`);
+                  }
+                } catch (e: any) {
+                  const data = e?.response?.data;
+                  toast.error(`Test failed: ${data?.message || data?.error || e.message}`);
+                } finally {
+                  setBusy(null);
+                }
+              }}
+              className="text-[11px] border rounded px-2 py-0.5 hover:bg-gray-100 disabled:opacity-50"
+              title="Send a system test message into this room only"
+            >
+              {rowBusy ? '...' : 'Test'}
+            </button>
+            <button
+              disabled={rowBusy}
+              onClick={async () => {
+                if (!confirm(`Remove "${agent.displayName || 'agent'}" from "${r.title}"? The bot stays running and can be re-invited later.`)) return;
+                setBusy(r.jid);
+                try {
+                  await httpLeaveChatAgentBotInstance(agent.id, bi.id, r.jid);
+                  toast.success(`Left "${r.title}"`);
+                  onChanged?.();
+                } catch (e: any) {
+                  toast.error(`Leave failed: ${e?.response?.data?.error || e.message}`);
+                } finally {
+                  setBusy(null);
+                }
+              }}
+              className="text-[11px] border rounded px-2 py-0.5 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              title="Remove this BotInstance from this room (does not stop the bot)"
+            >
+              Leave
+            </button>
+            {/* Show the JID as a faint hint - useful for diagnostics, not for everyday use */}
+            <span className="font-mono text-[9px] text-gray-400 break-all hidden lg:inline">{r.jid}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: () => void }> = ({ agent, bi, onChanged }) => {
   const [open, setOpen] = useState(false);
   const [diag, setDiag] = useState<DiagState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -590,15 +689,23 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance }> = ({ agent,
             </div>
           </div>
         </td>
-        <td className="p-2">{bi.status}</td>
         <td className="p-2">
-          {(bi.joinedRooms || []).length === 0 ? (
-            <span className="text-gray-500">none</span>
-          ) : (
-            (bi.joinedRooms || []).map((r) => (
-              <div key={r} className="font-mono text-[11px] break-all">{r}</div>
-            ))
-          )}
+          <span
+            className={classNames(
+              'inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold',
+              bi.status === 'on' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+            )}
+            title={
+              bi.status === 'on'
+                ? 'ai-service has spawned an XmppClient for this BotInstance — bot is connected and will participate in the rooms below.'
+                : 'BotInstance is stopped — XmppClient is torn down. Rooms are still listed (persisted) but the bot is not actually in them and won’t speak. Use the agent header Start to re-spawn.'
+            }
+          >
+            {bi.status}
+          </span>
+        </td>
+        <td className="p-2">
+          <RoomActionsList agent={agent} bi={bi} onChanged={onChanged} />
         </td>
         <td className="p-2 text-gray-500 text-xs">{bi.lastActiveAt || ''}</td>
         <td className="p-2 text-right">
@@ -713,8 +820,13 @@ export const ChatsIndexPanel: React.FC<{
           <thead className="bg-gray-50">
             <tr>
               <th className="text-left p-2 w-1/4">App</th>
-              <th className="text-left p-2 w-20">Status</th>
-              <th className="text-left p-2">Rooms joined</th>
+              <th
+                className="text-left p-2 w-28"
+                title="Bot lifecycle in this app: 'on' = ai-service has spawned an XmppClient and the bot will participate in the rooms below; 'off' = teardown, the bot won't speak in this app even though rooms are still listed."
+              >
+                Bot in app
+              </th>
+              <th className="text-left p-2">Rooms joined (with per-room actions)</th>
               <th className="text-left p-2 w-32">Last active</th>
               <th className="p-2 w-20"></th>
             </tr>
@@ -728,7 +840,7 @@ export const ChatsIndexPanel: React.FC<{
               </tr>
             )}
             {items.map((bi) => (
-              <DiagRow key={bi.id} agent={agent} bi={bi} />
+              <DiagRow key={bi.id} agent={agent} bi={bi} onChanged={reload} />
             ))}
           </tbody>
         </table>
