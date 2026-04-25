@@ -769,8 +769,14 @@ export function httpInviteAgentToChat(idOrAddress: string, body: { appId?: strin
   return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/invite-to-chat`, body);
 }
 
-export function httpListBotInstances(params?: { appId?: string; agentId?: string }) {
+export function httpListBotInstances(params?: { appId?: string; agentId?: string; chatJid?: string }) {
   return httpV2.get('/bot-instances', { params });
+}
+
+// Remove a BotInstance from a single chat (does NOT stop the bot or destroy the
+// instance). Used by the admin Chats "remove bot from this room" button.
+export function httpLeaveChatAgentBotInstance(idOrAddress: string, botInstanceId: string, chatJid: string) {
+  return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/leave-chat`, { chatJid });
 }
 
 // Convenience: list every BotInstance of an Agent (across all Apps it has been deployed

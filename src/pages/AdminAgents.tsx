@@ -11,7 +11,7 @@
 
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   actionCloneAgent,
@@ -143,7 +143,6 @@ export default function AdminAgents() {
               <AgentCard
                 key={a.id}
                 agent={a}
-                appNameFallback={appNameById.get(a.originAppId || '')}
                 onOpen={() => navigate(`/app/admin/agents/${a.id}/settings`)}
                 onDelete={async () => {
                   if (!confirm(`Delete "${a.displayName}"? Disables all its BotInstances.`)) return;
@@ -182,11 +181,11 @@ export default function AdminAgents() {
 
 const AgentCard: React.FC<{
   agent: ModelAgent;
-  appNameFallback?: string;
   onOpen: () => void;
   onDelete: () => void;
-}> = ({ agent, appNameFallback, onOpen, onDelete }) => {
-  const appName = agent.originAppName || appNameFallback || '';
+}> = ({ agent, onOpen, onDelete }) => {
+  // Note: ownerApp is intentionally not surfaced in the card UI - Agents are
+  // tenant-level. Was previously rendered as "Created in: ..." linked to /apps/:id/settings.
   const visibilityClass = VISIBILITY_BADGE[agent.visibility] || VISIBILITY_BADGE.private;
   return (
     <div className="border rounded-xl p-3 hover:border-brand-500 transition-colors flex flex-col gap-2 bg-white">
@@ -207,11 +206,12 @@ const AgentCard: React.FC<{
         </span>
       </div>
 
+      {/* Agents are tenant-level, not app-level — they can be deployed across many
+          apps. We surface "Deployed in N app(s)" instead of the older "Created in"
+          label since the latter implied an ownership relationship that no longer
+          matches the model. originAppId is still kept on the schema as a soft
+          default-scope hint for Web Index / Docs Index, but isn't shown here. */}
       <dl className="text-xs text-gray-600 grid grid-cols-2 gap-x-2 gap-y-0.5">
-        <div className="col-span-2">
-          <dt className="inline text-gray-400">Created in app: </dt>
-          <dd className="inline">{appName ? <Link to={`/app/admin/apps/${agent.originAppId}/settings`} className="text-brand-500 hover:underline">{appName}</Link> : <span className="text-gray-400">unknown</span>}</dd>
-        </div>
         <div>
           <dt className="inline text-gray-400">Updated: </dt>
           <dd className="inline">{fmtDate(agent.updatedAt) || '—'}</dd>
@@ -249,13 +249,10 @@ const CreateAgentModal: React.FC<{
   const [bio, setBio] = useState('');
   const [prompt, setPrompt] = useState('You are a helpful assistant.');
   const [visibility, setVisibility] = useState<'private' | 'unlisted' | 'public'>('private');
-  // ownerAppId controls (a) which App appears as "Created in" on the agent card and
-  // (b) the default scope App for Web Index / Docs Index ingestion when the agent
-  // is opened. Default to the currently-selected App if the user has one, otherwise
-  // their first owned App, otherwise empty (and the panels will warn).
-  const [ownerAppId, setOwnerAppId] = useState<string>(
-    currentApp?._id || apps[0]?._id || ''
-  );
+  // Agents are tenant-level. We auto-pick a default-scope App silently so the Web
+  // Index / Docs Index panels have somewhere to send sources by default; the operator
+  // can switch via the Scope-app picker on those tabs whenever they want.
+  const defaultOwnerAppId = currentApp?._id || apps[0]?._id || '';
   const [busy, setBusy] = useState(false);
 
   return (
@@ -282,19 +279,6 @@ const CreateAgentModal: React.FC<{
             <option value="public">Public</option>
           </select>
         </label>
-        <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">Owning app (default scope for Web/Docs Index)</span>
-          <select
-            className="border rounded px-2 py-1 w-full"
-            value={ownerAppId}
-            onChange={(e) => setOwnerAppId(e.target.value)}
-          >
-            {apps.length === 0 && <option value="">(no apps)</option>}
-            {apps.map((a) => (
-              <option key={a._id} value={a._id}>{a.displayName}</option>
-            ))}
-          </select>
-        </label>
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">Cancel</button>
           <button
@@ -302,9 +286,11 @@ const CreateAgentModal: React.FC<{
             onClick={async () => {
               setBusy(true);
               try {
-                // Pass ownerAppId so the new agent has a sensible scope from minute one
-                // (Web Index / Docs Index need an App to attribute crawled sources to).
-                const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: ownerAppId || undefined });
+                // Silently seed ownerAppId from the current app context so Web/Docs
+                // Index have a default scope. The operator can switch the scope on
+                // those tabs at any time. Tenant-level Agents shouldn't expose an
+                // app-ownership concept in the create flow.
+                const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: defaultOwnerAppId || undefined });
                 if (created) onCreated(created);
               } catch (e: any) {
                 toast.error(`Create failed: ${e?.response?.data?.error || e.message}`);

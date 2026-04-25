@@ -12,6 +12,10 @@ import { SubmitModal } from '../../components/modal/SubmitModal';
 import { toast } from 'react-toastify';
 import { IconMinus } from '../../components/Icons/IconMinus';
 import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
+import { httpListBotInstances, httpLeaveChatAgentBotInstance } from '../../http';
+import { actionListAgents } from '../../actions';
+import { useAppStore } from '../../store/useAppStore';
+import { ModelAgent, ModelBotInstance } from '../../models';
 
 interface Props {
   allowUsersToCreateRooms: boolean
@@ -34,6 +38,30 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   const [showDelete, setShowDelete] = useState(false);
   // Phase 1 (Agents): modal for inviting an Agent into a specific chat row.
   const [inviteForChat, setInviteForChat] = useState<ModelAppDefaulRooom | null>(null);
+  // Phase 1 (Agents): bot-instances + agents loaded for this app, used to render the
+  // "bots in this room" inline list per chat row + the Remove buttons.
+  // We fetch once per app and re-fetch after invite/leave so the row reflects reality.
+  const [botInstances, setBotInstances] = useState<ModelBotInstance[]>([]);
+  const agentsCache = useAppStore((s) => s.agents);
+  const reloadBotInstances = async () => {
+    if (!appId) return;
+    try {
+      const r = await httpListBotInstances({ appId });
+      setBotInstances(r.data?.items || []);
+    } catch (e) {
+      // Silent: a transient failure here just means stale chips on the row,
+      // not a user-actionable failure.
+      console.warn('Failed to load bot instances for chats UI', e);
+    }
+  };
+  useEffect(() => {
+    if (!appId) return;
+    reloadBotInstances();
+    // Hydrate the agents cache so we can show display names + addresses for each bot
+    // chip without an extra round trip per row.
+    actionListAgents({ visibility: 'mine' }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId]);
 
   // Broadcast Message (async job)
   const [broadcastText, setBroadcastText] = useState('');
@@ -362,14 +390,14 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
                       <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                         {el.creator}
                       </td>
-                      <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                        <button
-                          onClick={() => setInviteForChat(el)}
-                          className="text-brand-500 hover:underline text-xs"
-                          title="Invite an AI agent into this chat"
-                        >
-                          + Add Bot
-                        </button>
+                      <td className="px-4 font-sans font-normal text-sm text-left">
+                        <RoomBotsCell
+                          chatJid={el.jid}
+                          botInstances={botInstances}
+                          agents={agentsCache}
+                          onInvite={() => setInviteForChat(el)}
+                          onRemoved={reloadBotInstances}
+                        />
                       </td>
                     </tr>
                   );
@@ -603,9 +631,83 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
         <InviteAgentToChatModal
           appId={appId}
           chat={inviteForChat}
-          onClose={() => setInviteForChat(null)}
+          onClose={() => {
+            setInviteForChat(null);
+            // Refresh chips so a freshly-invited bot appears in the row immediately.
+            reloadBotInstances();
+          }}
         />
       )}
     </div>
   );
 }
+
+// Inline chip list of bots currently in a chat row + an "+ Add Bot" button at the end.
+// Each chip has an x-remove that calls /v2/agents/:id/bot-instances/:biId/leave-chat,
+// which sends "X has left" into the room, drops MUC presence, and unaffiliates the bot
+// user from the room - so it can't slip back in on reconnect.
+const RoomBotsCell: React.FC<{
+  chatJid: string;
+  botInstances: ModelBotInstance[];
+  agents: ModelAgent[];
+  onInvite: () => void;
+  onRemoved: () => void;
+}> = ({ chatJid, botInstances, agents, onInvite, onRemoved }) => {
+  // Filter to bots whose joinedRooms contains this chat. We do the filter client-side
+  // so the parent fetches once for the whole app instead of once per row.
+  const inThisRoom = useMemo(
+    () => botInstances.filter((bi) => Array.isArray(bi.joinedRooms) && bi.joinedRooms.includes(chatJid)),
+    [botInstances, chatJid]
+  );
+  const agentByid = useMemo(() => {
+    const m = new Map<string, ModelAgent>();
+    agents.forEach((a) => m.set(a.id, a));
+    return m;
+  }, [agents]);
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap justify-end">
+      {inThisRoom.map((bi) => {
+        const ag = agentByid.get(bi.agentId);
+        const label = ag?.displayName || bi.xmppUsername.split('_').slice(1).join('_') || 'AI Bot';
+        return (
+          <span
+            key={bi.id}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-[11px] text-gray-700 border"
+            title={`${label}${ag?.address ? ' · ' + ag.address : ''} · BotInstance ${bi.id}`}
+          >
+            <span className="truncate max-w-[140px]">{label}</span>
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!ag) {
+                  toast.error('Cannot remove: agent metadata missing');
+                  return;
+                }
+                if (!confirm(`Remove "${label}" from this chat? The bot stays running and can be re-invited later.`)) return;
+                try {
+                  await httpLeaveChatAgentBotInstance(ag.id, bi.id, chatJid);
+                  toast.success(`${label} removed from chat`);
+                  onRemoved();
+                } catch (err: any) {
+                  toast.error(`Remove failed: ${err?.response?.data?.error || err.message}`);
+                }
+              }}
+              className="text-gray-400 hover:text-red-600"
+              aria-label={`Remove ${label} from chat`}
+            >
+              ×
+            </button>
+          </span>
+        );
+      })}
+      <button
+        onClick={onInvite}
+        className="text-brand-500 hover:underline text-xs ml-1 whitespace-nowrap"
+        title="Invite an AI agent into this chat"
+      >
+        + Add Bot
+      </button>
+    </div>
+  );
+};
