@@ -27,6 +27,7 @@ import {
   httpReindexSiteSourceV2,
   httpDeleteSiteSourceV2Url,
   httpTestMessageAgentBotInstance,
+  httpPostFile,
 } from '../../../http';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
@@ -72,13 +73,95 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
     }
   }
 
+  const avatarFileRef = useRef<HTMLInputElement>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+
+  // Avatar upload flow mirrors how regular user profile images work: POST /v1/files
+  // (multipart), take the returned `results[0].location` URL, and stick it on the agent.
+  // Saved inline so the UI reflects the new avatar without waiting for a second click.
+  async function uploadAvatar(file: File) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const resp = await httpPostFile(file);
+      const location = resp.data?.results?.[0]?.location;
+      if (!location) throw new Error('Upload returned no location');
+      setAvatarUrl(location);
+      await actionUpdateAgent(agent.id, { avatarUrl: location });
+      toast.success('Avatar uploaded');
+    } catch (e: any) {
+      toast.error(`Upload failed: ${e?.response?.data?.error || e.message}`);
+    } finally {
+      setAvatarBusy(false);
+      if (avatarFileRef.current) avatarFileRef.current.value = '';
+    }
+  }
+
+  async function clearAvatar() {
+    if (!avatarUrl) return;
+    if (!confirm('Remove this agent\'s avatar?')) return;
+    setAvatarBusy(true);
+    try {
+      setAvatarUrl('');
+      await actionUpdateAgent(agent.id, { avatarUrl: '' });
+      toast.success('Avatar cleared');
+    } catch (e: any) {
+      toast.error(`Clear failed: ${e?.response?.data?.error || e.message}`);
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-3 max-w-2xl">
       <Field label="Display name">
         <input className="border rounded px-2 py-1 w-full" disabled={isDisabled} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
       </Field>
-      <Field label="Avatar URL">
-        <input className="border rounded px-2 py-1 w-full" disabled={isDisabled} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
+      <Field label="Avatar">
+        <div className="flex items-center gap-3">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full object-cover border" />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">
+              no avatar
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <input
+              ref={avatarFileRef}
+              type="file"
+              accept="image/*"
+              disabled={isDisabled || avatarBusy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadAvatar(f);
+              }}
+              className="text-xs"
+            />
+            <div className="flex items-center gap-2">
+              {avatarUrl && (
+                <button
+                  type="button"
+                  disabled={isDisabled || avatarBusy}
+                  onClick={clearAvatar}
+                  className="text-xs text-red-500 hover:underline disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              )}
+              {avatarBusy && <span className="text-xs text-gray-500">Uploading...</span>}
+            </div>
+          </div>
+        </div>
+      </Field>
+      {/* Advanced: raw URL still editable for operators who already have a hosted image.
+          Hidden-ish via small muted font; saving still happens on "Save persona". */}
+      <Field label="Avatar URL (advanced)">
+        <input className="border rounded px-2 py-1 w-full text-xs font-mono" disabled={isDisabled} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
       </Field>
       <Field label="Bio">
         <textarea className="border rounded px-2 py-1 w-full" rows={3} disabled={isDisabled} value={bio} onChange={(e) => setBio(e.target.value)} />
