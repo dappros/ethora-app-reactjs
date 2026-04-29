@@ -163,6 +163,13 @@ export default function AppSettings() {
   // chats
   const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
 
+  // Default identity stamped on broadcast announcements (per-app default; can
+  // still be overridden per-broadcast in the Chats tab). Without this the
+  // chat-component renders broadcasts as "Deleted User" because the system
+  // chat account JID is not in usersSet.
+  const [broadcastSenderName, setBroadcastSenderName] = useState('');
+  const [broadcastSenderPhotoUrl, setBroadcastSenderPhotoUrl] = useState('');
+
   const [defaultChatRooms, setDefaultChatRooms] = useState<
     Array<ModelAppDefaulRooom>
   >([]);
@@ -198,6 +205,8 @@ export default function AppSettings() {
       defaultAccessProfileOpen,
       usersCanFree,
       allowUsersToCreateRooms,
+      broadcastSenderName,
+      broadcastSenderPhotoUrl,
       aiBot: cloneDeep(aiBot),
     };
     const isModified = !isEqual(initialState, currentState);
@@ -229,6 +238,8 @@ export default function AppSettings() {
     defaultAccessProfileOpen,
     usersCanFree,
     allowUsersToCreateRooms,
+    broadcastSenderName,
+    broadcastSenderPhotoUrl,
     aiBot,
   ]);
 
@@ -257,9 +268,15 @@ export default function AppSettings() {
         defaultAccessProfileOpen: app.defaultAccessProfileOpen,
         usersCanFree: app.usersCanFree,
         allowUsersToCreateRooms: app.allowUsersToCreateRooms,
+        // Pre-fill the broadcast sender fields if previously saved; otherwise
+        // leave blank and rely on the server-side fallback to app.displayName.
+        broadcastSenderName: app.broadcastSender?.name || '',
+        broadcastSenderPhotoUrl: app.broadcastSender?.photoUrl || '',
         aiBot: cloneDeep(app.aiBot),
       };
 
+      setBroadcastSenderName(initialData.broadcastSenderName);
+      setBroadcastSenderPhotoUrl(initialData.broadcastSenderPhotoUrl);
       setInitialState(initialData);
     }
   }, [app]);
@@ -374,6 +391,15 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
 
+    // Default broadcast sender (per-app). Always send both fields so an
+    // operator can blank either of them from the UI; the backend's
+    // putAppV1.service expands this object into dot-notation paths so a
+    // partial update doesn't silently clobber the other field.
+    body.broadcastSender = {
+      name: broadcastSenderName,
+      photoUrl: broadcastSenderPhotoUrl,
+    };
+
     if (appId) {
       actionUpdateApp(appId, body).then(() => {
         toast('Settings applied successfully!');
@@ -400,6 +426,8 @@ export default function AppSettings() {
           defaultAccessProfileOpen,
           usersCanFree,
           allowUsersToCreateRooms,
+          broadcastSenderName,
+          broadcastSenderPhotoUrl,
           aiBot,
         });
         setIsModified(false);
@@ -787,6 +815,10 @@ export default function AppSettings() {
               setDefaultChatRooms={setDefaultChatRooms}
               appId={appId as string}
               domainName={domainName}
+              broadcastSenderName={broadcastSenderName}
+              setBroadcastSenderName={setBroadcastSenderName}
+              broadcastSenderPhotoUrl={broadcastSenderPhotoUrl}
+              setBroadcastSenderPhotoUrl={setBroadcastSenderPhotoUrl}
             />
           </TabPanel>
 

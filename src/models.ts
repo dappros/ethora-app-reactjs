@@ -149,6 +149,15 @@ export interface ModelApp {
   googleServiceInfoPlist: string;
   appSecret: string;
   allowUsersToCreateRooms: boolean;
+  // Per-app default identity stamped on broadcast announcements when the
+  // /v2/chats/broadcast caller doesn't supply `sender` in the request body.
+  // Without this the chat-component renders broadcasts as "Deleted User".
+  // Configured via the Chats tab; see ethora-backend models/apps.js for the
+  // full resolution chain.
+  broadcastSender?: {
+    name?: string;
+    photoUrl?: string;
+  };
   aiBot: ModelAIbot;
 }
 

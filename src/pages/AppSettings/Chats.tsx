@@ -24,6 +24,12 @@ interface Props {
   setDefaultChatRooms: (value: Array<ModelAppDefaulRooom>) => void,
   appId: string,
   domainName?: string,
+  // Per-app default broadcast sender (Save Settings persists; per-broadcast
+  // override below is a separate, session-only toggle).
+  broadcastSenderName: string,
+  setBroadcastSenderName: (value: string) => void,
+  broadcastSenderPhotoUrl: string,
+  setBroadcastSenderPhotoUrl: (value: string) => void,
 }
 
 interface Inputs {
@@ -31,7 +37,18 @@ interface Inputs {
   pinned: false;
 }
 
-export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, defaultChatRooms, setDefaultChatRooms, appId, domainName }: Props) {
+export function Chats({
+  allowUsersToCreateRooms,
+  setAllowUsersToCreateRooms,
+  defaultChatRooms,
+  setDefaultChatRooms,
+  appId,
+  domainName,
+  broadcastSenderName,
+  setBroadcastSenderName,
+  broadcastSenderPhotoUrl,
+  setBroadcastSenderPhotoUrl,
+}: Props) {
   const [showCreate, setShowCreate] = useState(false);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -71,6 +88,18 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
   const [broadcastJobId, setBroadcastJobId] = useState<string | null>(null);
   const [broadcastJob, setBroadcastJob] = useState<any>(null);
   const broadcastToastRef = useRef<{ completed: boolean; failed: boolean }>({ completed: false, failed: false });
+  // Per-broadcast sender override. When unchecked we send the request without
+  // a `sender` field and the API falls back to app.broadcastSender (configured
+  // in the panel above), then to app.displayName. When checked, the inputs
+  // below take precedence for THIS broadcast only and are not persisted.
+  const [overrideSender, setOverrideSender] = useState(false);
+  const [overrideSenderName, setOverrideSenderName] = useState('');
+  const [overrideSenderPhotoUrl, setOverrideSenderPhotoUrl] = useState('');
+  // Toggles isSystemMessage="true" on the wire so chat-component renders the
+  // broadcast as a banner via SystemMessage instead of a regular chat bubble.
+  // Default off (per product decision) so broadcasts look like a normal
+  // message from the configured sender by default.
+  const [broadcastIsSystem, setBroadcastIsSystem] = useState(false);
 
   const [rowsSelected, setRowsSelected] = useState(
     defaultChatRooms.map((_) => false)
@@ -282,6 +311,21 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
       } else {
         payload.chatNames = selectedPinnedRooms.map((r) => getChatNameFromJid(r.jid));
       }
+      // Only send `sender` when the operator explicitly opted in to override
+      // the per-app default. Empty inputs would otherwise silently overwrite
+      // app.broadcastSender / app.displayName fallbacks on the server.
+      if (overrideSender) {
+        const overrideName = overrideSenderName.trim();
+        const overridePhoto = overrideSenderPhotoUrl.trim();
+        if (overrideName || overridePhoto) {
+          payload.sender = {};
+          if (overrideName) payload.sender.name = overrideName;
+          if (overridePhoto) payload.sender.photoUrl = overridePhoto;
+        }
+      }
+      if (broadcastIsSystem) {
+        payload.isSystemMessage = true;
+      }
       const { data } = await httpBroadcastChatsV2(payload);
       setBroadcastJobId(String(data.jobId));
       toast.info('Broadcast enqueued');
@@ -411,6 +455,44 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
         </div>
       </div>
 
+      {/* Default Broadcast Sender (per-app, persisted with Save Settings).
+          Without this set, broadcasts render as "Deleted User" in chat-component
+          because the system chat account JID is not in usersSet. The backend
+          falls back to app.displayName when this is blank, so leaving it empty
+          is fine for most apps. */}
+      <div className="mt-8">
+        <p className="font-semibold font-sans text-[16px] mb-2">Default Broadcast Sender</p>
+        <p className="font-sans text-xs text-gray-500 mb-4">
+          Identity stamped on broadcast announcements when no per-broadcast override is set. Leave blank to use the App display name as the sender.
+        </p>
+        <div className="p-4 border border-gray-200 rounded-xl">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Sender name</label>
+              <input
+                type="text"
+                value={broadcastSenderName}
+                onChange={(e) => setBroadcastSenderName(e.target.value)}
+                placeholder="e.g. Acme Health"
+                maxLength={120}
+                className="rounded-2xl bg-gray-100 py-3 px-6 w-full outline-none font-sans text-sm"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Avatar URL (optional)</label>
+              <input
+                type="url"
+                value={broadcastSenderPhotoUrl}
+                onChange={(e) => setBroadcastSenderPhotoUrl(e.target.value)}
+                placeholder="https://cdn.example.com/logo.png"
+                maxLength={2048}
+                className="rounded-2xl bg-gray-100 py-3 px-6 w-full outline-none font-sans text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Broadcast */}
       <div className="mt-8">
         <p className="font-semibold font-sans text-[16px] mb-2">Broadcast Message</p>
@@ -467,6 +549,48 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
               </div>
             )}
 
+            {/* Per-broadcast sender override (NOT persisted; just for this send).
+                Default-off so the per-app "Default Broadcast Sender" + app
+                fallback chain controls the rendering unless explicitly bypassed. */}
+            <div className="flex flex-col gap-2">
+              <label className="inline-flex items-center gap-2 font-sans text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={overrideSender}
+                  onChange={(e) => setOverrideSender(e.target.checked)}
+                />
+                Override sender for this broadcast
+              </label>
+              {overrideSender && (
+                <div className="flex flex-col md:flex-row gap-3 pl-6">
+                  <input
+                    type="text"
+                    value={overrideSenderName}
+                    onChange={(e) => setOverrideSenderName(e.target.value)}
+                    placeholder="Sender name (e.g. CEO Update)"
+                    maxLength={120}
+                    className="flex-1 rounded-2xl bg-gray-100 py-2 px-4 outline-none font-sans text-sm"
+                  />
+                  <input
+                    type="url"
+                    value={overrideSenderPhotoUrl}
+                    onChange={(e) => setOverrideSenderPhotoUrl(e.target.value)}
+                    placeholder="Avatar URL (optional)"
+                    maxLength={2048}
+                    className="flex-1 rounded-2xl bg-gray-100 py-2 px-4 outline-none font-sans text-sm"
+                  />
+                </div>
+              )}
+              <label className="inline-flex items-center gap-2 font-sans text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={broadcastIsSystem}
+                  onChange={(e) => setBroadcastIsSystem(e.target.checked)}
+                />
+                Render as system announcement (banner)
+              </label>
+            </div>
+
             <textarea
               value={broadcastText}
               onChange={(e) => setBroadcastText(e.target.value)}
@@ -487,6 +611,10 @@ export function Chats({ allowUsersToCreateRooms, setAllowUsersToCreateRooms, def
                     setBroadcastJob(null);
                     setBroadcastSelected({});
                     setBroadcastMode('all');
+                    setOverrideSender(false);
+                    setOverrideSenderName('');
+                    setOverrideSenderPhotoUrl('');
+                    setBroadcastIsSystem(false);
                   }}
                   className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-varela text-sm"
                   type="button"
