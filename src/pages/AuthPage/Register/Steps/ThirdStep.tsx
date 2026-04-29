@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
 import PasswordInput from '../../../../components/input/PasswordInput';
 import { Loading } from '../../../../components/Loading';
-import { logLogin, logSignup } from '../../../../hooks/withTracking';
+import { logSignup } from '../../../../hooks/withTracking';
 import { httpLoginWithEmail, setPermanentPassword } from '../../../../http';
 import { useAppStore } from '../../../../store/useAppStore';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';

@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
 import CustomInput from '../../../../components/input/Input';
 import PasswordInput from '../../../../components/input/PasswordInput';
-import { logLogin, logSignup } from '../../../../hooks/withTracking';
+import { logSignup } from '../../../../hooks/withTracking';
 import {
   httpLoginWithEmail,
   httpRegisterWithEmailV2,
