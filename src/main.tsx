@@ -5,10 +5,10 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Fallback } from './App.tsx';
 import { RouterErrorBoundary } from './components/Error/RouterErrorBoundary';
-import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
+// import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
 import './index.css';
 import { router } from './router.tsx';
-import { useAppStore } from './store/useAppStore';
+// import { useAppStore } from './store/useAppStore';
 
 // Suppress noisy console warnings in development
 // Must be set up BEFORE any imports that might log warnings
@@ -124,17 +124,18 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
   }
 };
 
-function XmppProviderBridge({ children }: { children: React.ReactNode }) {
-  const chatToken = useAppStore((s) => s.currentUser?.token || null);
-  const providerConfig = buildEthoraBaseChatConfig({
-    chat_token: chatToken,
-  });
+//TODO: Add chat component config for provider
+// function XmppProviderBridge({ children }: { children: React.ReactNode }) {
+//   const chatToken = useAppStore((s) => s.currentUser?.token || null);
+//   const providerConfig = buildEthoraBaseChatConfig({
+//     chat_token: chatToken,
+//   });
 
-  return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
-}
+//   return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
+// }
 
 createRoot(document.getElementById('root')!).render(
-  <XmppProviderBridge>
+  <XmppProvider>
     <RouterErrorBoundary>
       <RouterProvider
         router={router}
@@ -145,5 +146,5 @@ createRoot(document.getElementById('root')!).render(
       />
     </RouterErrorBoundary>
     <ToastContainer />
-  </XmppProviderBridge>
+  </XmppProvider>
 );
