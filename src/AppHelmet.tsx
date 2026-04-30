@@ -7,7 +7,7 @@ import { useAppStore } from './store/useAppStore';
 export default function AppHelmet() {
   // const [isViewFeedback, setIsViewFeedback] = useState<boolean>(false);
 
-  const currentApp = useAppStore((s) => s.currentApp as ModelApp);
+  const currentApp = useAppStore((s) => s.currentApp as ModelApp | null);
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token-538');
@@ -46,11 +46,11 @@ export default function AppHelmet() {
     <>
       <Helmet>
         <title>
-          {currentApp.displayName || 'Ethora - Web3 super app engine'}
+          {currentApp?.displayName || 'Ethora - Web3 super app engine'}
         </title>
         <meta
           property="og:title"
-          content={currentApp.displayName || 'Ethora - Web3 super app engine'}
+          content={currentApp?.displayName || 'Ethora - Web3 super app engine'}
         />
       </Helmet>
       {/* <FeedbackButton onClick={handleChangeIsViewFeedback} />
