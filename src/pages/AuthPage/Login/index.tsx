@@ -8,15 +8,13 @@ import Wrapper from '../Wrapper';
 
 export default function LoginComponent() {
   const config = useAppStore((s) => s.currentApp);
+  const [loading] = useState(false);
+  const theme = useTheme();
+  const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024));
 
   if (!config) {
     return null;
   }
-
-  const [loading] = useState(false);
-
-  const theme = useTheme();
-  const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024));
 
   if (loading) {
     return <FullPageSpinner />;

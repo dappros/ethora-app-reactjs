@@ -1,94 +1,25 @@
 import { Chat } from '@ethora/chat-component';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import React from 'react';
-import { httpTokens, refreshToken } from '../http';
+import { createChatConfig } from '../config/chatBootstrap';
 import { useAppStore } from '../store/useAppStore';
-
-export const VITE_APP_XMPP_SERVICE = import.meta.env.VITE_APP_XMPP_SERVICE;
-export const VITE_XMPP_SERVICE = import.meta.env.VITE_XMPP_SERVICE;
-export const VITE_XMPP_HOST = import.meta.env.VITE_XMPP_HOST;
-export const VITE_API = import.meta.env.VITE_API;
+import type { ModelApp, ModelCurrentUser } from '../models';
 
 interface ChatComponentProps {
-  config: any;
-  currentUser: any;
+  config: ModelApp | null;
+  currentUser: ModelCurrentUser | null;
 }
 
 const MemoizedChat = React.memo(function ChatComponent({
   config,
   currentUser,
 }: ChatComponentProps) {
-  const appToken = useAppStore((s) => s.currentApp?.appToken);
+  const chatConfig = createChatConfig({
+    app: config,
+    chatToken: currentUser?.token || null,
+  });
 
-  const handleChangeTokens = async (): Promise<
-    | { accessToken: string; refreshToken?: string | undefined }
-    | null
-  > => {
-    try {
-      const { token, refreshToken: refresh } = await refreshToken();
-
-      if (refresh) localStorage.setItem('refreshToken-538', refresh);
-      localStorage.setItem('token-538', token);
-
-      httpTokens.token = token;
-      httpTokens.refreshToken = refresh;
-
-      return { accessToken: token, refreshToken: refresh };
-    } catch (e) {
-      return null;
-    }
-  };
-
-  return (
-    // @ts-ignore
-    <Chat
-      config={{
-        colors: {
-          primary: config?.primaryColor || '#fff',
-          secondary: config?.secondaryColor || '#141414',
-        },
-        baseUrl: VITE_API ?? 'https://api.chat.ethora.com/v1',
-        // @ts-ignorex
-        customAppToken: appToken,
-        newArch: true,
-        qrUrl: 'https://app.chat.ethora.com/app/chat/?qrChatId=',
-        xmppSettings: {
-          devServer: VITE_APP_XMPP_SERVICE,
-          host: VITE_XMPP_HOST,
-          conference: VITE_XMPP_SERVICE,
-          xmppPingOnSendEnabled: true,
-        },
-        // @ts-ignorex
-        roomListStyles: {
-          maxHeight: 'calc(100%)',
-          height: 'calc(100%)',
-          borderRadius: '16px 0px 0px 16px',
-          border: 'none',
-          padding: '16px',
-          color: '#141414',
-        },
-        chatRoomStyles: {
-          maxHeight: 'calc(100%)',
-          height: 'calc(100%)',
-          borderRadius: '0px 16px 16px 0px',
-          color: '#141414',
-        },
-        userLogin: {
-          enabled: true,
-          user: currentUser,
-        },
-        disableRoomMenu: true,
-        defaultRooms: config?.defaultRooms || [],
-        refreshTokens: {
-          // @ts-ignore
-          refreshFunction: handleChangeTokens,
-          enabled: true,
-        },
-        setRoomJidInPath: true,
-        enableRoomsRetry: { enabled: false, helperText: '' },
-      }}
-    />
-  );
+  return <Chat config={chatConfig} />;
 });
 
 export default function ChatPage() {

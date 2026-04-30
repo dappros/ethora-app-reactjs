@@ -25,7 +25,7 @@ export function AppMenu() {
   }, [location.pathname]);
 
   if (!currentUser) {
-    return;
+    return null;
   }
 
   return (

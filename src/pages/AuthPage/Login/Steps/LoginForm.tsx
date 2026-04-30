@@ -83,7 +83,7 @@ const LoginStep = () => {
   };
 
   if (!config) {
-    return;
+    return null;
   }
 
   return (
