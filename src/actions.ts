@@ -342,6 +342,19 @@ export async function actionGetAgent(idOrAddress: string) {
 // untouched; we only swap the chat-component's per-app credentials.
 // ---------------------------------------------------------------------------
 
+// In-flight de-dup map keyed by appId. Multiple call sites can race to
+// switch into the same app: AdminApp's "Chats" tab onClick fires the
+// switch eagerly so the request is in flight while React Router navigates,
+// and Chat.tsx's hydration useEffect *also* fires it on mount when it
+// sees a persisted chatAppId without a matching ownerSession yet. Without
+// de-dup, both calls reach the backend and both pass the
+// (admin, app) findOne -> both create a Mongo gateway row -> one of the
+// two registerXmppuser calls hits ejabberd's already_registered branch,
+// surfacing as a 502 toast even though the other call succeeded.
+//
+// The per-key Promise lives only for the duration of one round-trip.
+const inFlightOwnerSessions = new Map<string, Promise<ModelOwnerSession | null>>();
+
 // Switch to a specific app: lazily provision (or re-mint) the owner-session
 // for that app and store it. Pass `null` to revert to the base-app end-user
 // identity. Returns the freshly-stored session, or null if we cleared it.
@@ -366,24 +379,38 @@ export async function actionSwitchChatApp(
   // round-trip still lands the user back on the right context.
   state.doSetChatAppId(appId);
 
-  // The owner-session response shape is `{appId, appToken, chatTokens, owner, created}`.
-  // We trust the server contract (validated by the v2 envelope mw) and let
-  // any axios error bubble so the caller (Chat.tsx) can render an error
-  // banner instead of silently rendering an empty chat.
-  const resp = await httpGetOwnerSession(appId);
-  const data = resp.data || {};
-  if (!data.owner || !data.chatTokens?.accessToken) {
-    throw new Error('owner-session response missing required fields');
-  }
+  const existing = inFlightOwnerSessions.get(appId);
+  if (existing) return existing;
 
-  const session: ModelOwnerSession = {
-    appId: data.appId,
-    appToken: data.appToken,
-    chatTokens: data.chatTokens,
-    owner: data.owner,
-  };
-  state.doSetOwnerSession(session);
-  return session;
+  const promise = (async () => {
+    // The owner-session response shape is `{appId, appToken, chatTokens, owner, created}`.
+    // We trust the server contract (validated by the v2 envelope mw) and let
+    // any axios error bubble so the caller (Chat.tsx) can render an error
+    // banner instead of silently rendering an empty chat.
+    const resp = await httpGetOwnerSession(appId);
+    const data = resp.data || {};
+    if (!data.owner || !data.chatTokens?.accessToken) {
+      throw new Error('owner-session response missing required fields');
+    }
+
+    const session: ModelOwnerSession = {
+      appId: data.appId,
+      appToken: data.appToken,
+      chatTokens: data.chatTokens,
+      owner: data.owner,
+    };
+    getState().doSetOwnerSession(session);
+    return session;
+  })();
+
+  inFlightOwnerSessions.set(appId, promise);
+  try {
+    return await promise;
+  } finally {
+    // Clear regardless of outcome so retries after failure aren't
+    // permanently joined to a rejected promise.
+    inFlightOwnerSessions.delete(appId);
+  }
 }
 
 // Re-mint the chat tokens for the *currently-selected* app. Used by the
