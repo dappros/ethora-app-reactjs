@@ -23,6 +23,54 @@ interface ChatComponentProps {
   ownerSession: ModelOwnerSession | null;
 }
 
+// Build a user-readable summary of an axios error from /v2/apps/:id/owner-session.
+// The backend's 502 response shape is:
+//   { error: "Failed to provision owner gateway",
+//     code: "OWNER_PROVISION_FAILED",
+//     details: { reason: "...", xmppResponse: { status, statusText, data, code } } }
+// We collapse those into a single human-readable line for the toast.
+function formatOwnerSessionError(e: unknown): string {
+  const err = e as {
+    response?: {
+      data?: {
+        error?: string;
+        details?: {
+          reason?: string;
+          xmppResponse?: {
+            status?: number | null;
+            statusText?: string | null;
+            code?: string | null;
+            data?: unknown;
+          } | null;
+        };
+      };
+    };
+    message?: string;
+  };
+  const headline = err?.response?.data?.error || err?.message || 'unknown error';
+  const reason = err?.response?.data?.details?.reason;
+  const xmpp = err?.response?.data?.details?.xmppResponse;
+  let xmppExtra = '';
+  if (xmpp && (xmpp.status || xmpp.code || xmpp.data)) {
+    const dataMsg =
+      xmpp.data && typeof xmpp.data === 'object'
+        ? (xmpp.data as { message?: string; reason?: string }).message ||
+          (xmpp.data as { message?: string; reason?: string }).reason ||
+          ''
+        : typeof xmpp.data === 'string'
+          ? xmpp.data
+          : '';
+    const parts = [
+      xmpp.status ? `HTTP ${xmpp.status}` : null,
+      xmpp.statusText || null,
+      xmpp.code || null,
+      dataMsg || null,
+    ].filter(Boolean);
+    if (parts.length) xmppExtra = ` [ejabberd: ${parts.join(' / ')}]`;
+  }
+  return `${headline}${reason ? `: ${reason}` : ''}${xmppExtra}`;
+}
+
 const MemoizedChat = React.memo(function ChatComponent({
   config,
   currentUser,
@@ -161,18 +209,12 @@ export default function ChatPage() {
         // deleted, or ownership was transferred). Drop the persisted
         // chatAppId and fall back to the base-app user so the page still
         // renders something useful. Surface the underlying server reason
-        // (details.reason) into the toast so the operator can see e.g.
-        // "xmpp registration failed" without digging through dev tools.
+        // (details.reason + xmppResponse) into the toast so the operator
+        // can see e.g. "xmpp registration failed (HTTP 401): unauthorized"
+        // without digging through dev tools.
         console.warn('[Chat] Failed to hydrate owner session, reverting to base app:', e);
-        const err = e as {
-          response?: { data?: { error?: string; details?: { reason?: string } } };
-          message?: string;
-        };
-        const reason = err?.response?.data?.details?.reason;
-        const headline = err?.response?.data?.error || err?.message;
         toast.error(
-          'Could not restore Chats context. Reverting to your base app.' +
-            (headline ? ` (${headline}${reason ? `: ${reason}` : ''})` : '')
+          'Could not restore Chats context. Reverting to your base app. ' + formatOwnerSessionError(e)
         );
         actionSwitchChatApp(null).catch(() => {});
       })
@@ -206,21 +248,11 @@ export default function ChatPage() {
     try {
       await actionSwitchChatApp(nextAppId);
     } catch (e: unknown) {
-      // Narrow the unknown to either an axios-shaped error (with
-      // response.data.error + details.reason) or a plain Error so we can
-      // pull a useful message for the toast. Including `details.reason`
-      // here is what made the difference between "Failed to provision
-      // owner gateway" (useless) and the actual root cause (e.g. "xmpp
-      // registration failed", "blockchain RPC unreachable") for QA.
-      const err = e as {
-        response?: { data?: { error?: string; details?: { reason?: string } } };
-        message?: string;
-      };
-      const headline = err?.response?.data?.error || err?.message || 'unknown error';
-      const reason = err?.response?.data?.details?.reason;
-      toast.error(
-        `Failed to switch app: ${headline}${reason ? ` (${reason})` : ''}`
-      );
+      // Surface every diagnostic we have - top-level error, details.reason,
+      // and xmppResponse (status + body from ejabberd's HTTP API) - so the
+      // operator can pinpoint the failure without dev tools or grepping
+      // API logs.
+      toast.error('Failed to switch app: ' + formatOwnerSessionError(e));
     } finally {
       setSwitching(false);
     }
