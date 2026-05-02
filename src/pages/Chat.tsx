@@ -145,14 +145,25 @@ export default function ChatPage() {
     let cancelled = false;
     setSwitching(true);
     actionSwitchChatApp(chatAppId)
-      .catch((e) => {
+      .catch((e: unknown) => {
         if (cancelled) return;
         // Most likely cause: the admin lost ACL on this app (it was
         // deleted, or ownership was transferred). Drop the persisted
         // chatAppId and fall back to the base-app user so the page still
-        // renders something useful.
+        // renders something useful. Surface the underlying server reason
+        // (details.reason) into the toast so the operator can see e.g.
+        // "xmpp registration failed" without digging through dev tools.
         console.warn('[Chat] Failed to hydrate owner session, reverting to base app:', e);
-        toast.error('Could not restore Chats context. Reverting to your base app.');
+        const err = e as {
+          response?: { data?: { error?: string; details?: { reason?: string } } };
+          message?: string;
+        };
+        const reason = err?.response?.data?.details?.reason;
+        const headline = err?.response?.data?.error || err?.message;
+        toast.error(
+          'Could not restore Chats context. Reverting to your base app.' +
+            (headline ? ` (${headline}${reason ? `: ${reason}` : ''})` : '')
+        );
         actionSwitchChatApp(null).catch(() => {});
       })
       .finally(() => {
@@ -186,11 +197,19 @@ export default function ChatPage() {
       await actionSwitchChatApp(nextAppId);
     } catch (e: unknown) {
       // Narrow the unknown to either an axios-shaped error (with
-      // response.data.error) or a plain Error so we can pull a useful
-      // message for the toast without `any`-casting the whole pipeline.
-      const err = e as { response?: { data?: { error?: string } }; message?: string };
+      // response.data.error + details.reason) or a plain Error so we can
+      // pull a useful message for the toast. Including `details.reason`
+      // here is what made the difference between "Failed to provision
+      // owner gateway" (useless) and the actual root cause (e.g. "xmpp
+      // registration failed", "blockchain RPC unreachable") for QA.
+      const err = e as {
+        response?: { data?: { error?: string; details?: { reason?: string } } };
+        message?: string;
+      };
+      const headline = err?.response?.data?.error || err?.message || 'unknown error';
+      const reason = err?.response?.data?.details?.reason;
       toast.error(
-        `Failed to switch app: ${err?.response?.data?.error || err?.message || 'unknown error'}`
+        `Failed to switch app: ${headline}${reason ? ` (${reason})` : ''}`
       );
     } finally {
       setSwitching(false);
