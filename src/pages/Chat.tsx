@@ -32,11 +32,15 @@ const MemoizedChat = React.memo(function ChatComponent({
   // owner JWT and a refreshFunction that re-mints it on expiry. We DON'T
   // touch localStorage / outer admin auth here, so the chat-component's
   // refreshes can never stomp on the admin's own session in this tab.
+  // We also forward ownerSession itself so createChatConfig can build the
+  // owner-shaped userLogin.user (preferred over jwtLogin on this deployment
+  // because /v1/users/client expects type:'client' tokens we don't mint).
   const ownerOverride = useMemo(() => {
     if (!ownerSession) return undefined;
     return {
       appToken: ownerSession.appToken,
       chatToken: ownerSession.chatTokens.accessToken,
+      ownerSession,
       refreshFunction: async () => {
         try {
           const fresh = await actionRefreshOwnerSession();
@@ -55,6 +59,12 @@ const MemoizedChat = React.memo(function ChatComponent({
   const chatConfig = createChatConfig({
     app: config,
     chatToken: currentUser?.token || null,
+    // Forwarding currentUser lets createChatConfig set userLogin from the
+    // base-app User's xmpp creds when no owner override is active. This
+    // is the load-bearing fix for the email-login path because the
+    // upstream-only jwtLogin flow expects a type:'client' JWT from
+    // /v1/users/client that loginWithEmail doesn't produce.
+    currentUser,
     ownerOverride,
   });
 
