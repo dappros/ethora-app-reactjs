@@ -1,48 +1,229 @@
 import { Chat } from '@ethora/chat-component';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
+import {
+  actionRefreshOwnerSession,
+  actionSwitchChatApp,
+} from '../actions';
 import { createChatConfig } from '../config/chatBootstrap';
 import { useAppStore } from '../store/useAppStore';
-import type { ModelApp, ModelCurrentUser } from '../models';
+import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 
 interface ChatComponentProps {
+  // The app whose chat space is being rendered. For the legacy base-app
+  // path this is the user's own currentApp; for owner-session mode this is
+  // the app the admin selected via the switcher (looked up in the apps[]
+  // list so we get the correct displayName / primaryColor / defaultRooms).
   config: ModelApp | null;
+  // The base-app end user. Only used in legacy mode (no ownerSession).
+  // When ownerSession is set, the chat-component binds the owner JID via
+  // chatTokens.accessToken instead and ignores this.
   currentUser: ModelCurrentUser | null;
+  ownerSession: ModelOwnerSession | null;
 }
 
 const MemoizedChat = React.memo(function ChatComponent({
   config,
   currentUser,
+  ownerSession,
 }: ChatComponentProps) {
+  // The override path packs the target app's appToken + a freshly-minted
+  // owner JWT and a refreshFunction that re-mints it on expiry. We DON'T
+  // touch localStorage / outer admin auth here, so the chat-component's
+  // refreshes can never stomp on the admin's own session in this tab.
+  const ownerOverride = useMemo(() => {
+    if (!ownerSession) return undefined;
+    return {
+      appToken: ownerSession.appToken,
+      chatToken: ownerSession.chatTokens.accessToken,
+      refreshFunction: async () => {
+        try {
+          const fresh = await actionRefreshOwnerSession();
+          if (!fresh) return null;
+          return {
+            accessToken: fresh.chatTokens.accessToken,
+            refreshToken: fresh.chatTokens.refreshToken,
+          };
+        } catch {
+          return null;
+        }
+      },
+    };
+  }, [ownerSession]);
+
   const chatConfig = createChatConfig({
     app: config,
     chatToken: currentUser?.token || null,
+    ownerOverride,
   });
 
   return <Chat config={chatConfig} />;
 });
 
+// Header App-switcher (Option A). For tenant admins with at least one
+// owned app, render a dropdown that lets them pick which app's chat space
+// is active in this tab. Two non-obvious decisions baked in here:
+//
+//   1. We always include "Base app (your account)" as the first option so
+//      admins can revert to the default end-user experience without
+//      clearing localStorage by hand.
+//   2. Single-app admins still see a static label ("Acme Health") rather
+//      than a degenerate one-item dropdown, because in that case the
+//      switcher adds noise without choice.
+function ChatAppSwitcher({
+  apps,
+  currentApp,
+  chatAppId,
+  onSwitch,
+  switching,
+}: {
+  apps: Array<ModelApp>;
+  currentApp: ModelApp | null;
+  chatAppId: string | null;
+  onSwitch: (appId: string | null) => void;
+  switching: boolean;
+}) {
+  const ownedApps = apps; // server already filters to the admin's own apps
+  // Visible label for the "no override" option - "(base app)" makes it
+  // obvious to the admin that this is their account-level identity, not
+  // a shadow gateway tied to any particular owned app.
+  const baseLabel = currentApp ? `${currentApp.displayName} (base app)` : 'Base app';
+
+  if (ownedApps.length === 0) {
+    return null;
+  }
+
+  if (ownedApps.length === 1 && !chatAppId) {
+    return (
+      <div className="flex flex-col items-start text-sm font-sans">
+        <span className="text-gray-500 text-xs">Testing chats in</span>
+        <span className="font-medium">{baseLabel}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 text-sm font-sans">
+      <label className="text-gray-500 text-xs whitespace-nowrap">Testing chats in</label>
+      <select
+        value={chatAppId || ''}
+        disabled={switching}
+        onChange={(e) => onSwitch(e.target.value || null)}
+        className="rounded-xl border border-gray-300 px-3 py-2 bg-white outline-none disabled:opacity-50"
+      >
+        <option value="">{baseLabel}</option>
+        {ownedApps.map((a) => (
+          <option key={a._id} value={a._id}>
+            {a.displayName}
+          </option>
+        ))}
+      </select>
+      {switching && <span className="text-xs text-gray-500">Switching…</span>}
+    </div>
+  );
+}
+
 export default function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
+  const apps = useAppStore((s) => s.apps);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
+  const chatAppId = useAppStore((s) => s.chatAppId);
+  const ownerSession = useAppStore((s) => s.ownerSession);
+  const currentUser = useAppStore((s) => s.currentUser);
 
-  const { currentUser } = useAppStore((s) => s);
+  const [switching, setSwitching] = useState(false);
+
+  // Hydrate ownerSession on mount when chatAppId was restored from
+  // localStorage. We don't persist the session itself (it contains
+  // short-lived JWTs); a fresh /owner-session call on mount is cheap and
+  // gives us a long-lived token in one round-trip.
+  useEffect(() => {
+    if (!chatAppId) return;
+    if (ownerSession?.appId === chatAppId) return; // already hydrated
+
+    let cancelled = false;
+    setSwitching(true);
+    actionSwitchChatApp(chatAppId)
+      .catch((e) => {
+        if (cancelled) return;
+        // Most likely cause: the admin lost ACL on this app (it was
+        // deleted, or ownership was transferred). Drop the persisted
+        // chatAppId and fall back to the base-app user so the page still
+        // renders something useful.
+        console.warn('[Chat] Failed to hydrate owner session, reverting to base app:', e);
+        toast.error('Could not restore Chats context. Reverting to your base app.');
+        actionSwitchChatApp(null).catch(() => {});
+      })
+      .finally(() => {
+        if (!cancelled) setSwitching(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // chatAppId is the only input that should re-trigger; ownerSession's
+    // own app-id check above covers the "already hydrated" case.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatAppId]);
+
+  // Resolve which app the chat-component should believe it's in. In
+  // owner-session mode this comes from `apps[chatAppId]`; otherwise we use
+  // the admin's own currentApp.
+  const effectiveApp: ModelApp | null = useMemo(() => {
+    if (ownerSession && chatAppId) {
+      return apps.find((a) => a._id === chatAppId) || null;
+    }
+    return config;
+  }, [apps, chatAppId, config, ownerSession]);
 
   const allowedDomains =
     import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   const currentDomain = window.location.hostname;
 
+  const handleSwitch = async (nextAppId: string | null) => {
+    setSwitching(true);
+    try {
+      await actionSwitchChatApp(nextAppId);
+    } catch (e: unknown) {
+      // Narrow the unknown to either an axios-shaped error (with
+      // response.data.error) or a plain Error so we can pull a useful
+      // message for the toast without `any`-casting the whole pipeline.
+      const err = e as { response?: { data?: { error?: string } }; message?: string };
+      toast.error(
+        `Failed to switch app: ${err?.response?.data?.error || err?.message || 'unknown error'}`
+      );
+    } finally {
+      setSwitching(false);
+    }
+  };
+
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full abc">
-      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row">
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Chats
         </div>
-        {isAdmin && allowedDomains.includes(currentDomain) && (
+        {/* App Switcher: only meaningful for admins with owned apps. End
+            users on a multi-tenant signup have no apps[] entries so the
+            switcher hides itself entirely. */}
+        {isAdmin && (
+          <ChatAppSwitcher
+            apps={apps}
+            currentApp={config}
+            chatAppId={chatAppId}
+            onSwitch={handleSwitch}
+            switching={switching}
+          />
+        )}
+        {/* Demo-server hint preserved as a fallback for environments that
+            still want to nudge users toward the Publish path. Hidden when
+            we already have an active owner session, since at that point
+            the user knows where to test their app's chats. */}
+        {isAdmin && !ownerSession && allowedDomains.includes(currentDomain) && (
           <div className="flex flex-col items-center bg-yellow-100 px-4 py-2 text-sm border">
             <p>This is demo server</p>
             <p className="flex items-center gap-2">
-              <span>To test your own App, go to "Admin"</span>
+              <span>To test your own App, switch app above or go to "Admin"</span>
               <ArrowRightAltIcon /> <span>your App </span>
               <ArrowRightAltIcon /> <span>"Publish"</span>
             </p>
@@ -51,7 +232,17 @@ export default function ChatPage() {
         <div />
       </div>
       <div className="rounded-2xl bg-white px-0 overflow-hidden">
-        <MemoizedChat config={config} currentUser={currentUser} />
+        {/* Keyed remount: when chatAppId changes we want a fresh XMPP
+            socket and fresh chat-component state. React's reconciliation
+            of MemoizedChat alone wouldn't recreate the underlying XMPP
+            connection because the chat-component manages it imperatively
+            in its own provider. The key forces a clean re-mount. */}
+        <MemoizedChat
+          key={chatAppId || 'base'}
+          config={effectiveApp}
+          currentUser={currentUser}
+          ownerSession={ownerSession}
+        />
       </div>
     </div>
   );

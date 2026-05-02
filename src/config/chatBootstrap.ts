@@ -75,17 +75,48 @@ export const chatBootstrapConfig: XmppProviderConfig =
 interface CreateChatConfigOptions {
   app: ModelApp | null;
   chatToken?: string | null;
+  // Tenant-Owner override (Option A): when an admin uses the App Switcher
+  // to test chats inside one of their owned apps, the chat-component is
+  // rebuilt with these app-X-scoped credentials instead of the admin's
+  // own base-app identity. The override carries:
+  //   - the *target* app's appToken (so HTTP calls scope correctly)
+  //   - a chat-JWT signed with the target app's signing context (so XMPP
+  //     binds the prefix-compliant owner JID and mod_ethora accepts MUC
+  //     joins)
+  //   - a `refreshFunction` that re-mints the owner JWT against the same
+  //     /v2/apps/:appId/owner-session endpoint, so the chat session can
+  //     extend past the 1h JWT lifetime without the admin re-clicking.
+  ownerOverride?: {
+    appToken: string;
+    chatToken: string;
+    refreshFunction: () => Promise<{ accessToken: string; refreshToken?: string } | null>;
+  };
 }
 
 export function createChatConfig({
   app,
   chatToken,
+  ownerOverride,
 }: CreateChatConfigOptions): ChatConfig {
+  // When we're in owner-session mode we have to override BOTH the chat
+  // token (XMPP identity) AND the refreshFunction; the default refresh
+  // calls SuperTokens which doesn't know about the owner user. Failing to
+  // override the refresh would result in the chat-component silently
+  // logging the owner out after ~1h with no recovery path.
+  const baseConfig = buildEthoraBaseChatConfig({
+    chat_token: ownerOverride?.chatToken ?? chatToken,
+  });
+
+  if (ownerOverride) {
+    baseConfig.refreshTokens = {
+      enabled: true,
+      refreshFunction: ownerOverride.refreshFunction,
+    };
+  }
+
   return {
-    ...buildEthoraBaseChatConfig({
-      chat_token: chatToken,
-    }),
-    customAppToken: app?.appToken,
+    ...baseConfig,
+    customAppToken: ownerOverride?.appToken ?? app?.appToken,
     colors: {
       primary: app?.primaryColor || '#fff',
       secondary: '#141414',

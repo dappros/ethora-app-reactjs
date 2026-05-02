@@ -24,8 +24,9 @@ import {
   httpInviteAgentToChat,
   httpListBotInstances,
   httpSetBotInstanceStatus,
+  httpGetOwnerSession,
 } from './http';
-import { ModelApp, ModelCurrentUser, OrderByType } from './models';
+import { ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
 import { sleep } from './utils/sleep';
@@ -333,4 +334,69 @@ export async function actionGetAgent(idOrAddress: string) {
   const agent = resp.data?.agent;
   if (agent) getState().doUpsertAgent(agent);
   return agent;
+}
+
+// ---------------------------------------------------------------------------
+// Tenant-Owner App Switcher (Option A): switch the Chats page context to one
+// of the admin's owned apps. The admin's outer auth (cookies + token-538) is
+// untouched; we only swap the chat-component's per-app credentials.
+// ---------------------------------------------------------------------------
+
+// Switch to a specific app: lazily provision (or re-mint) the owner-session
+// for that app and store it. Pass `null` to revert to the base-app end-user
+// identity. Returns the freshly-stored session, or null if we cleared it.
+//
+// Contract: this is the *only* place chatAppId and ownerSession should be
+// mutated together. Components that just need to react to a switch should
+// subscribe to those slots in the store.
+export async function actionSwitchChatApp(
+  appId: string | null
+): Promise<ModelOwnerSession | null> {
+  const state = getState();
+
+  if (!appId) {
+    // Revert to base-app user. We keep the localStorage entry cleared so
+    // the next boot starts fresh.
+    state.doSetChatAppId(null);
+    state.doSetOwnerSession(null);
+    return null;
+  }
+
+  // Optimistic: persist the chosen app immediately so a refresh during the
+  // round-trip still lands the user back on the right context.
+  state.doSetChatAppId(appId);
+
+  // The owner-session response shape is `{appId, appToken, chatTokens, owner, created}`.
+  // We trust the server contract (validated by the v2 envelope mw) and let
+  // any axios error bubble so the caller (Chat.tsx) can render an error
+  // banner instead of silently rendering an empty chat.
+  const resp = await httpGetOwnerSession(appId);
+  const data = resp.data || {};
+  if (!data.owner || !data.chatTokens?.accessToken) {
+    throw new Error('owner-session response missing required fields');
+  }
+
+  const session: ModelOwnerSession = {
+    appId: data.appId,
+    appToken: data.appToken,
+    chatTokens: data.chatTokens,
+    owner: data.owner,
+  };
+  state.doSetOwnerSession(session);
+  return session;
+}
+
+// Re-mint the chat tokens for the *currently-selected* app. Used by the
+// chat-component's `refreshFunction` when its access token is about to
+// expire. No-op if there's no active owner session (we fall through to the
+// regular refresh path).
+export async function actionRefreshOwnerSession(): Promise<ModelOwnerSession | null> {
+  const state = getState();
+  if (!state.chatAppId || !state.ownerSession) return null;
+
+  // Same endpoint, same idempotent contract. The server fetches the
+  // existing owner row (no new provisioning side-effects) and returns a
+  // fresh JWT pair. We replace `ownerSession` so any component reading it
+  // picks up the new tokens on next render.
+  return actionSwitchChatApp(state.chatAppId);
 }

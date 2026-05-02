@@ -6,6 +6,7 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom';
+import { actionSwitchChatApp } from '../actions';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { httpGetApp } from '../http';
 import { useAppStore } from '../store/useAppStore';
@@ -60,7 +61,13 @@ export default function AdminApp() {
             {app?.displayName}
           </div>
         </div>
-        <div className="grid justify-center content-center grid-cols-3 w-auto md:w-full md:max-w-[400px] md:mr-[32px]">
+        {/* Per-App segmented nav. The Chats segment (Option A) opens the
+            sidebar Chats page in this app's owner context, so admins can
+            jump straight into testing without manually picking the app
+            from the switcher. The onClick eagerly switches chatAppId so
+            the destination renders the right context immediately rather
+            than after a hydration round-trip on Chat.tsx mount. */}
+        <div className="grid justify-center content-center grid-cols-4 w-auto md:w-full md:max-w-[520px] md:mr-[32px]">
           <NavLink
             className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/users`}
@@ -68,16 +75,30 @@ export default function AdminApp() {
             Users
           </NavLink>
           <NavLink
-            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center items-center py-2 px-4"
+            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/settings`}
           >
             Settings
           </NavLink>
           <NavLink
-            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-l-0 border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
+            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/statistics`}
           >
             Statistics
+          </NavLink>
+          <NavLink
+            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
+            to="/app/chat"
+            onClick={() => {
+              if (!appId) return;
+              // Fire-and-forget: the destination page will retry on
+              // mount if this fails. We intentionally don't await so
+              // the navigation feels instant; any error toast surfaces
+              // from Chat.tsx's hydration effect.
+              actionSwitchChatApp(appId).catch(() => {});
+            }}
+          >
+            Chats
           </NavLink>
         </div>
       </div>

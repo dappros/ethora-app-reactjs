@@ -836,3 +836,12 @@ export function httpAgentDocsUpload(appId: string, agentId: string, files: File[
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
+
+// Tenant-Owner gateway session (Option A): provision-or-fetch the per-app
+// shadow user the calling admin uses to drive the chat-component against
+// `appId`. Idempotent server-side: repeated calls return the same owner row
+// but always re-mint a fresh chat-token (so the frontend can call this on
+// switch and on token expiry without bookkeeping).
+export function httpGetOwnerSession(appId: string) {
+  return httpV2.post(`/apps/${appId}/owner-session`, {});
+}

@@ -281,6 +281,34 @@ export interface ModelBotInstance {
   updatedAt: string;
 }
 
+// Tenant-Owner gateway session (Option A): the chat-layer credentials the
+// admin uses to drive the chat-component against a child app they own.
+// Minted on demand by `POST /v2/apps/:appId/owner-session`. This shape is
+// intentionally narrow - no email/wallet/etc. - because the gateway User
+// is purely a JID provider for mod_ethora's prefix check.
+export interface ModelOwnerSession {
+  appId: string;
+  appToken: string;
+  // chat-component `jwtLogin.token` payload. Signed with the *target* app's
+  // signing context, carries `${appId}_owner-<adminId>` as the owner JID.
+  chatTokens: {
+    accessToken: string;
+    refreshToken: string;
+    wsToken: string;
+  };
+  owner: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImage: string;
+    defaultWallet: { walletAddress: string };
+    xmppUsername: string;
+    xmppPassword: string;
+    isTenantOwner: true;
+  };
+}
+
 export interface ModelState {
   inited: boolean;
   currentUser: ModelCurrentUser | null;
@@ -290,6 +318,15 @@ export interface ModelState {
   agents: Array<ModelAgent>;
   botInstances: Array<ModelBotInstance>;
   selectedAgentId: string | null;
+  // Which owned app the admin is currently viewing chats for. Persisted to
+  // localStorage (`chatAppId-538`) so re-entering the Chats tab restores the
+  // most-recent context. `null` means "no owner session yet, fall back to
+  // the base-app end-user identity in currentUser" (legacy behaviour).
+  chatAppId: string | null;
+  // Lazily-fetched owner-session payload for the currently-selected
+  // chatAppId. Null when the admin is operating as their plain base-app
+  // user (i.e. before they ever open the App Switcher).
+  ownerSession: ModelOwnerSession | null;
 }
 
 export type OrderByType =

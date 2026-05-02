@@ -1,5 +1,39 @@
 import { StateCreator } from 'zustand';
-import { ModelAgent, ModelAiWidgetValues, ModelApp, ModelBotInstance, ModelCurrentUser, ModelState } from '../models';
+import {
+  ModelAgent,
+  ModelAiWidgetValues,
+  ModelApp,
+  ModelBotInstance,
+  ModelCurrentUser,
+  ModelOwnerSession,
+  ModelState,
+} from '../models';
+
+// localStorage key for the most-recently-selected Chats app context.
+// Suffixed `-538` to match the existing `token-538` convention used
+// elsewhere in this app, so all of our keys are easily greppable.
+const CHAT_APP_ID_LS_KEY = 'chatAppId-538';
+
+function readPersistedChatAppId(): string | null {
+  try {
+    const v = localStorage.getItem(CHAT_APP_ID_LS_KEY);
+    return v && v.length > 0 ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistChatAppId(appId: string | null) {
+  try {
+    if (appId) {
+      localStorage.setItem(CHAT_APP_ID_LS_KEY, appId);
+    } else {
+      localStorage.removeItem(CHAT_APP_ID_LS_KEY);
+    }
+  } catch {
+    // private mode / quota exceeded - non-fatal, just lose persistence.
+  }
+}
 
 type ImmerStateCreator<T> = StateCreator<
   T,
@@ -24,6 +58,12 @@ export interface AppSliceInterface extends ModelState {
   doRemoveAgent: (id: string) => void;
   doSetBotInstances: (instances: Array<ModelBotInstance>) => void;
   doSelectAgent: (id: string | null) => void;
+  // Tenant-Owner App Switcher (Option A). `doSetOwnerSession` is the
+  // primary mutator, called by `actionSwitchChatApp` after the
+  // `/v2/apps/:appId/owner-session` round-trip. Setting `null` reverts to
+  // the base-app end-user identity (used on logout / "use my user" reset).
+  doSetChatAppId: (appId: string | null) => void;
+  doSetOwnerSession: (session: ModelOwnerSession | null) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -41,6 +81,12 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   agents: [],
   botInstances: [],
   selectedAgentId: null,
+  // Hydrate `chatAppId` from localStorage on first store creation so that
+  // re-opening the app picks up where the admin left off. The owner-session
+  // itself is never persisted (it contains short-lived credentials); it
+  // gets re-fetched lazily by Chat.tsx on mount when `chatAppId` is set.
+  chatAppId: readPersistedChatAppId(),
+  ownerSession: null,
   doSetUser: (user: ModelCurrentUser | null) => {
     set((s) => {
       s.currentUser = user;
@@ -144,6 +190,21 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   doSelectAgent: (id) => {
     set((s) => {
       s.selectedAgentId = id;
+    });
+  },
+  doSetChatAppId: (appId) => {
+    // Persist eagerly so a hard reload restores the choice. Note we do NOT
+    // clear `ownerSession` here - the caller (actionSwitchChatApp) is in
+    // charge of pairing chatAppId with a freshly-minted session because
+    // it has the API client.
+    persistChatAppId(appId);
+    set((s) => {
+      s.chatAppId = appId;
+    });
+  },
+  doSetOwnerSession: (session) => {
+    set((s) => {
+      s.ownerSession = session;
     });
   },
 });
