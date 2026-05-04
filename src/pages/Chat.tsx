@@ -297,13 +297,31 @@ export default function ChatPage() {
             socket and fresh chat-component state. React's reconciliation
             of MemoizedChat alone wouldn't recreate the underlying XMPP
             connection because the chat-component manages it imperatively
-            in its own provider. The key forces a clean re-mount. */}
-        <MemoizedChat
-          key={chatAppId || 'base'}
-          config={effectiveApp}
-          currentUser={currentUser}
-          ownerSession={ownerSession}
-        />
+            in its own provider. The key forces a clean re-mount.
+
+            Gated on ownerSession matching chatAppId for child apps -
+            actionSwitchChatApp sets chatAppId optimistically (so a
+            refresh mid-flight lands on the right context) but the
+            owner-session HTTP call lags by ~200-400ms. If we render
+            MemoizedChat while chatAppId is set but ownerSession isn't
+            matched yet, the chat-component opens its WebSocket with
+            currentUser's base-app credentials and SASL-binds as the
+            wrong JID. By the time ownerSession arrives the XMPP
+            connection is already wedged. Rendering a placeholder
+            until the credentials catch up keeps the chat-component
+            from seeing inconsistent state. */}
+        {chatAppId && ownerSession?.appId !== chatAppId ? (
+          <div className="flex items-center justify-center min-h-[400px] text-sm text-gray-500 font-sans">
+            Switching app context…
+          </div>
+        ) : (
+          <MemoizedChat
+            key={chatAppId || 'base'}
+            config={effectiveApp}
+            currentUser={currentUser}
+            ownerSession={ownerSession}
+          />
+        )}
       </div>
     </div>
   );

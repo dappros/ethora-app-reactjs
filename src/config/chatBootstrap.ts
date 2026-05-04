@@ -142,17 +142,28 @@ function makeChatUserLogin(user: {
   xmppUsername?: string;
   xmppPassword?: string;
   defaultWallet?: { walletAddress: string };
+  token?: string;
+  refreshToken?: string;
 } | null | undefined): ChatUserLoginUser | null {
   if (!user) return null;
   const xmppUsername = user.xmppUsername || '';
   const xmppPassword = user.xmppPassword || '';
   if (!xmppUsername || !xmppPassword) return null;
   // Cast to ChatUserLoginUser: we provide the load-bearing fields the
-  // chat-component reads (xmpp creds, name, profile image, wallet) and rely
-  // on the component's own defaults for any optional fields it expects.
+  // chat-component reads (xmpp creds, name, profile image, wallet, HTTP
+  // tokens) and rely on the component's own defaults for any optional
+  // fields it expects.
+  //
+  // `token` is load-bearing for the chat-component's `/chats/my` HTTP
+  // call (rooms.api.ts -> getRooms reads `chatSettingStore.user.token`
+  // and uses it verbatim as the Authorization header). Without it,
+  // every room-list refresh 401s and the response interceptor's refresh
+  // path runs in a loop until it bails.
   return {
     xmppUsername,
     xmppPassword,
+    token: user.token || '',
+    refreshToken: user.refreshToken || '',
     firstName: user.firstName || '',
     lastName: user.lastName || '',
     profileImage: user.profileImage || '',
@@ -199,6 +210,12 @@ export function createChatConfig({
         ...ownerOverride.ownerSession.owner,
         // Mirror the wallet shape the chat-component expects.
         walletAddress: ownerOverride.ownerSession.owner.defaultWallet?.walletAddress || '',
+        // Owner-session HTTP calls (e.g. /chats/my) need the chat JWT we
+        // minted for the gateway user, NOT the admin's outer token.
+        // Without this, every room-list refresh 401s because the owner
+        // user object on its own carries no token.
+        token: ownerOverride.ownerSession.chatTokens?.accessToken || '',
+        refreshToken: ownerOverride.ownerSession.chatTokens?.refreshToken || '',
       })
     : makeChatUserLogin(currentUser);
 

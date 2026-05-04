@@ -367,6 +367,29 @@ export async function actionSwitchChatApp(
 ): Promise<ModelOwnerSession | null> {
   const state = getState();
 
+  // Force the chat-component's parent <XmppProvider/> to disconnect its
+  // current XmppClient and clear it from context. Without this step the
+  // provider is a singleton at the app root and its `client` state
+  // survives MemoizedChat's key-driven remount; useChatWrapperInit then
+  // sees an existing client and reuses it (chat-component's
+  // useChatWrapperInit.ts:411-412 unconditionally `setClient(client)`
+  // without checking whether the JID matches the new user). The reused
+  // client is bound to the previous app's user, so its room presence
+  // stanzas hit mod_ethora's prefix check and get rejected with
+  // "wrong app name" -> presence_timeout -> the new context can't enter
+  // any rooms or create new ones.
+  //
+  // The chat-component already listens for `ethora-xmpp-logout` to do
+  // exactly this disconnect+reset (xmppProvider.tsx:374). Reusing that
+  // event keeps the cleanup logic in one place.
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new Event('ethora-xmpp-logout'));
+    } catch {
+      // Older browsers / non-window envs - non-fatal.
+    }
+  }
+
   if (!appId) {
     // Revert to base-app user. We keep the localStorage entry cleared so
     // the next boot starts fresh.
