@@ -69,7 +69,17 @@ export const buildEthoraBaseChatConfig = ({
         }
       },
     },
-    initBeforeLoad: true,
+    // initBeforeLoad MUST be false because main.tsx mounts <XmppProvider/>
+    // with no config (commit c1d9469 removed XmppProviderBridge). When this
+    // is true, useChatWrapperInit waits for providerBootstrapStatus to
+    // become 'ready', but the unconfigured parent XmppProvider's effect
+    // bails on `if (!config?.initBeforeLoad) { setStatus('idle'); return }`
+    // and never fires runInitBeforeLoad - so the spinner is stuck on
+    // "Connecting..." forever. Falling back to false routes through the
+    // legacy useChatWrapperInit path that calls initializeClient itself
+    // using the userLogin.user xmpp creds, which is what was working
+    // before the commit.
+    initBeforeLoad: false,
   };
 };
 
