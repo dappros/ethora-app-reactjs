@@ -65,6 +65,30 @@ page.on('request', (req) => {
     events.push({ kind: 'request', t: Date.now(), text: `${req.method()} ${u}` });
   }
 });
+
+// Snapshot ownedApps from the zustand store at the end so we can verify the
+// dropdown source list is being populated when we expect.
+async function snapshotZustand(page) {
+  return await page.evaluate(() => {
+    try {
+      const root = document.querySelector('[id=root]') || document.body;
+      const all = Array.from(root.querySelectorAll('*'));
+      // zustand state isn't on context like redux; the store ref isn't easily
+      // walked. Instead, look for known visible UI cues.
+      const switcherText = all.find(e => /Testing chats in/.test(e.textContent || ''));
+      const select = document.querySelector('select');
+      const optionCount = select ? select.querySelectorAll('option').length : 0;
+      return {
+        switcherLabelPresent: !!switcherText,
+        selectVisible: !!select,
+        optionCount,
+        firstOptions: select
+          ? Array.from(select.querySelectorAll('option')).slice(0, 5).map(o => `${o.value}=${o.textContent.slice(0,40)}`)
+          : null,
+      };
+    } catch (e) { return { error: String(e) }; }
+  });
+}
 page.on('response', async (resp) => {
   const u = resp.url();
   if (u.includes('/owner-session') || u.includes('/chats/my') || u.includes('/v1/apps')) {
@@ -127,6 +151,9 @@ await enableChatVerboseLogging(page);
 await page.waitForTimeout(8000);
 
 const baseSnap = await snapshotChatStore(page);
+// Wait a bit longer specifically for actionLoadOwnedApps to complete
+await page.waitForTimeout(2000);
+const dropdownSnap = await snapshotZustand(page);
 console.log('[step] BASE-app snapshot:');
 console.log(JSON.stringify({
   user_xmppUsername: baseSnap.user?.xmppUsername,
@@ -134,6 +161,7 @@ console.log(JSON.stringify({
   ws_opens_so_far: wsOpens,
   ws_closes_so_far: wsCloses,
 }, null, 2));
+console.log('[step] dropdown snapshot:', JSON.stringify(dropdownSnap, null, 2));
 
 const switchT = Date.now();
 console.log(`[step] === SWITCHING APP at t=${switchT} ===`);
