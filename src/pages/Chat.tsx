@@ -3,6 +3,7 @@ import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
+  actionLoadOwnedApps,
   actionRefreshOwnerSession,
   actionSwitchChatApp,
 } from '../actions';
@@ -184,13 +185,31 @@ function ChatAppSwitcher({
 
 export default function ChatPage() {
   const config = useAppStore((s) => s.currentApp);
-  const apps = useAppStore((s) => s.apps);
+  // Use the dedicated ownedApps slot, not the paginated `apps` slot. The
+  // latter only holds whichever page of AdminApps the admin last viewed
+  // (limit=10 by default), so reading it here would mean the dropdown
+  // shows ~5 of N owned apps and changes content based on the AdminApps
+  // page state. ownedApps is loaded with a high limit by
+  // actionLoadOwnedApps below.
+  const apps = useAppStore((s) => s.ownedApps);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
   const chatAppId = useAppStore((s) => s.chatAppId);
   const ownerSession = useAppStore((s) => s.ownerSession);
   const currentUser = useAppStore((s) => s.currentUser);
 
   const [switching, setSwitching] = useState(false);
+
+  // Load the full owned-apps list once on mount, independent of the
+  // paginated AdminApps view. Failures are non-fatal: the dropdown
+  // simply won't render, which is the same behaviour as a fresh tenant
+  // with no owned apps (and matches our existing zero-app guard in
+  // ChatAppSwitcher). Errors are logged so the operator can debug.
+  useEffect(() => {
+    if (!isAdmin) return;
+    actionLoadOwnedApps().catch((e: unknown) => {
+      console.warn('[Chat] Failed to load owned apps for switcher:', e);
+    });
+  }, [isAdmin]);
 
   // Hydrate ownerSession on mount when chatAppId was restored from
   // localStorage. We don't persist the session itself (it contains

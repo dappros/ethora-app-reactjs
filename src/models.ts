@@ -327,6 +327,12 @@ export interface ModelState {
   // chatAppId. Null when the admin is operating as their plain base-app
   // user (i.e. before they ever open the App Switcher).
   ownerSession: ModelOwnerSession | null;
+  // Full list of apps owned by the current admin, used by the Chats App
+  // Switcher dropdown. Kept separate from `apps` because that one is
+  // paginated by the AdminApps page (limit=10 by default), and the
+  // dropdown should always show every owned app regardless of which
+  // page the admin happened to last visit.
+  ownedApps: Array<ModelApp>;
 }
 
 export type OrderByType =

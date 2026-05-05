@@ -228,6 +228,45 @@ const childUsername = childSnap.user?.xmppUsername || '';
 const expectedPrefix = `${CHILD_APP_ID}_`;
 const userJidMatchesChildApp = childUsername.startsWith(expectedPrefix);
 
+// Inspect the chat-component's rooms slice. After a switch the room
+// list should ONLY contain rooms whose JID begins with the new app's
+// prefix. Rooms with the old app's prefix mean the rooms slice
+// wasn't reset on switch and the user sees a stale carry-over list.
+const roomsSnap = await page.evaluate(`(() => {
+  try {
+    const findChatStore = ${`function findChatStore() {
+      const root = document.querySelector('[id=root]') || document.body;
+      const all = Array.from(root.querySelectorAll('*'));
+      const start = all.find(el => Object.keys(el).some(k => k.startsWith('__reactFiber')));
+      if (!start) return null;
+      const fiberKey = Object.keys(start).find(k => k.startsWith('__reactFiber'));
+      let fiber = start[fiberKey];
+      while (fiber && fiber.return) fiber = fiber.return;
+      const stack = [fiber];
+      while (stack.length) {
+        const f = stack.pop();
+        if (!f) continue;
+        const s = f.memoizedProps?.store || f.memoizedProps?.value?.store;
+        if (s && typeof s.dispatch === 'function' && typeof s.getState === 'function') {
+          try { const state = s.getState(); if (state && state.chatSettingStore) return s; } catch {}
+        }
+        if (f.child) stack.push(f.child);
+        if (f.sibling) stack.push(f.sibling);
+      }
+      return null;
+    }`};
+    const store = findChatStore();
+    if (!store) return { error: 'no store' };
+    const rooms = store.getState().rooms?.rooms || {};
+    const jids = Object.keys(rooms);
+    return { count: jids.length, sample: jids.slice(0, 10) };
+  } catch (e) { return { error: String(e) }; }
+})()`);
+console.log('[chat-rooms]', JSON.stringify(roomsSnap, null, 2));
+const baseAppPrefix = `${APP_ID}_`;
+const sawOldAppRooms = (roomsSnap.sample || []).some((j) => j.startsWith(baseAppPrefix));
+const newRoomsAllChildPrefix = (roomsSnap.sample || []).every((j) => j.startsWith(expectedPrefix));
+
 console.log('');
 console.log('[verdict-detail]', JSON.stringify({
   ws_opens: wsOpens,
@@ -242,6 +281,9 @@ console.log('[verdict-detail]', JSON.stringify({
   sawOwnerSession,
   userJidMatchesChildApp,
   childUsername,
+  rooms_count: roomsSnap.count,
+  sawOldAppRooms,
+  newRoomsAllChildPrefix,
 }, null, 2));
 
 if (

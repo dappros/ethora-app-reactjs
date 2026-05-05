@@ -64,6 +64,7 @@ export interface AppSliceInterface extends ModelState {
   // the base-app end-user identity (used on logout / "use my user" reset).
   doSetChatAppId: (appId: string | null) => void;
   doSetOwnerSession: (session: ModelOwnerSession | null) => void;
+  doSetOwnedApps: (apps: Array<ModelApp>) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -87,6 +88,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   // gets re-fetched lazily by Chat.tsx on mount when `chatAppId` is set.
   chatAppId: readPersistedChatAppId(),
   ownerSession: null,
+  ownedApps: [],
   doSetUser: (user: ModelCurrentUser | null) => {
     set((s) => {
       s.currentUser = user;
@@ -205,6 +207,11 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   doSetOwnerSession: (session) => {
     set((s) => {
       s.ownerSession = session;
+    });
+  },
+  doSetOwnedApps: (apps) => {
+    set((s) => {
+      s.ownedApps = apps;
     });
   },
 });

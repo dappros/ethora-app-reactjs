@@ -175,6 +175,26 @@ export async function actionBootsrap() {
   state.doSetApps(apps);
 }
 
+// Load every app the current admin owns (no pagination), into the
+// dedicated `ownedApps` slot. Used by the Chats App Switcher dropdown,
+// which must always show every owned app regardless of which page of
+// AdminApps was last visited.
+//
+// The default `apps` slot is intentionally not touched: AdminApps
+// paginates writes to it (limit=10 + offset) and we don't want the
+// dropdown to clobber that view.
+//
+// 200 is well above the practical tenant size for this product but low
+// enough that we won't accidentally pull half the database if the API
+// ignores the limit. Bump if you ever see a tenant hit it.
+export async function actionLoadOwnedApps() {
+  const state = getState();
+  const {
+    data: { apps },
+  } = await httpGetApps({ limit: 200, offset: 0, order: 'asc', orderBy: 'displayName' });
+  state.doSetOwnedApps(apps);
+}
+
 export async function actionCreateApp(displayName: string) {
   const state = getState();
   const { data } = await httpCreateNewApp(displayName);
