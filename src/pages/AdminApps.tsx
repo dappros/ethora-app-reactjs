@@ -256,13 +256,11 @@ export default function AdminApps() {
                 />
               ))}
 
-            {currentUser?.isSuperAdmin && (
-              <Pagination
-                onPageChange={onPageChange}
-                pageCount={pageCount}
-                forcePage={currentPage}
-              />
-            )}
+            <Pagination
+              onPageChange={onPageChange}
+              pageCount={pageCount}
+              forcePage={currentPage}
+            />
           </div>
 
           {showModal && (
