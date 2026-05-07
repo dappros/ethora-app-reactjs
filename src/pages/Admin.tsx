@@ -3,6 +3,10 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 export default function Admin() {
   const isProd = import.meta.env.VITE_SITE_IS_PRODUCTION;
+  // AI feature umbrella from deploy.yml -> features.ai_service. Surfaced to the
+  // frontend via VITE_AI_FEATURE_ENABLED. When false, the Agents tab below
+  // greys out (same shape as the Billing tab disable on non-prod).
+  const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
@@ -12,7 +16,8 @@ export default function Admin() {
         </div>
         {/* Three top-level admin sections: Apps | Agents | Billing.
             Apps and Billing are pre-existing; Agents is the new tenant-scope page for
-            managing AI Agents that get deployed across many Apps. */}
+            managing AI Agents that get deployed across many Apps. Agents disables
+            (greys out, non-clickable) when this install does not ship AI features. */}
         <div className="w-full max-w-[520px] h-[40px] flex justify-between">
           <NavLink
             className={({ isActive }) =>
@@ -29,12 +34,15 @@ export default function Admin() {
             Apps
           </NavLink>
           <NavLink
+            title={aiEnabled ? undefined : 'AI features are not enabled in this deployment'}
             className={({ isActive }) =>
               cn(
                 'w-1/3 border-y border-r flex items-center hover:bg-brand-darker justify-center border-brand-500 font-sans text-base',
                 {
-                  'bg-brand-500 text-white': isActive,
-                  'hover:bg-brand-hover': !isActive,
+                  'bg-brand-500 text-white': isActive && aiEnabled,
+                  'hover:bg-brand-hover': !isActive && aiEnabled,
+                  'cursor-not-allowed pointer-events-none text-gray-300 border-gray-300':
+                    !aiEnabled,
                 }
               )
             }

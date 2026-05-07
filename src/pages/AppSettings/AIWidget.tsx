@@ -123,6 +123,11 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>;
   primaryColor: string;
   isDisabled: boolean;
+  // True when this install does NOT ship AI features (features.ai_service=false
+  // in deploy.yml). The page still renders so operators on non-AI deployments
+  // can preview what's available, but interactive elements are disabled and a
+  // banner explains the state.
+  aiFeatureDisabled?: boolean;
   loadingTextCrawl?: boolean;
   handleRagChange: () => void;
   handleSiteCrawl: (url: string, followLink: boolean) => void;
@@ -142,6 +147,7 @@ export function AIWidget({
   setAiBot,
   handleRagChange,
   deleteSiteCrawl,
+  aiFeatureDisabled = false,
 }: Props) {
   const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
   const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
@@ -241,30 +247,65 @@ export function AIWidget({
 
   return (
     <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-      {/* Phase 1 (Agents): pick which Agent backs the AI Widget. The full set of agents
-          is now managed in the AI Bots tab; this selector just decides which one's
-          persona/avatar/display name the embedded widget surfaces. */}
-      <ActiveAgentSelector appId={appId as string} app={app} />
+      {aiFeatureDisabled && (
+        // Preview-mode banner. The page below renders normally (so operators
+        // on non-AI deployments can see what AI Widget would offer), but the
+        // content is wrapped in a non-interactive layer below.
+        <Box
+          role="alert"
+          sx={{
+            mx: 2,
+            mt: 2,
+            mb: 1,
+            p: 2,
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'warning.light',
+            backgroundColor: 'warning.lighter',
+            color: 'warning.dark',
+          }}
+        >
+          <div className="font-sans text-sm">
+            <strong>AI features are not enabled in this deployment.</strong>{' '}
+            The AI Widget is shown here in preview mode. Contact your
+            administrator to enable AI features.
+          </div>
+        </Box>
+      )}
 
-      <HeaderAIWidget
-        isRag={aiBot.isRAG}
-        statusBot={statusBot}
-        handleStatusChange={handleStatusChange}
-        handleRagChange={handleRagChange}
-        size={size}
-      />
+      <div
+        className={
+          aiFeatureDisabled
+            ? 'opacity-60 pointer-events-none select-none'
+            : ''
+        }
+        aria-disabled={aiFeatureDisabled || undefined}
+      >
+        {/* Phase 1 (Agents): pick which Agent backs the AI Widget. The full set of agents
+            is now managed in the AI Bots tab; this selector just decides which one's
+            persona/avatar/display name the embedded widget surfaces. */}
+        <ActiveAgentSelector appId={appId as string} app={app} />
 
-      {/* Phase 1 follow-up: only the Code panel (embed snippet) remains here. The other
-          legacy tabs (Prompt / Add websites / Add documents) now live under each Agent
-          in the global /app/admin/agents area. */}
-      <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-        <TabAIWidgetCode
-          value={value}
-          appId={appId}
-          app={app}
-          userId={aiBot.userId}
-          handleChange={handleChange}
+        <HeaderAIWidget
+          isRag={aiBot.isRAG}
+          statusBot={statusBot}
+          handleStatusChange={handleStatusChange}
+          handleRagChange={handleRagChange}
+          size={size}
         />
+
+        {/* Phase 1 follow-up: only the Code panel (embed snippet) remains here. The other
+            legacy tabs (Prompt / Add websites / Add documents) now live under each Agent
+            in the global /app/admin/agents area. */}
+        <div className="w-full h-full overflow-x-auto overflow-y-hidden">
+          <TabAIWidgetCode
+            value={value}
+            appId={appId}
+            app={app}
+            userId={aiBot.userId}
+            handleChange={handleChange}
+          />
+        </div>
       </div>
 
       {showNewDocModal && (
@@ -275,7 +316,7 @@ export function AIWidget({
         />
       )}
 
-      {statusBot && assistantStorageReady && xmppHost && xmppWebsocketUrl && (
+      {!aiFeatureDisabled && statusBot && assistantStorageReady && xmppHost && xmppWebsocketUrl && (
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         <XmppProvider>

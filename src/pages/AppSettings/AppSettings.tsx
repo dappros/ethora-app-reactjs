@@ -531,6 +531,12 @@ export default function AppSettings() {
     }
   };
 
+  // AI feature umbrella surfaced from deploy.yml -> features.ai_service. When
+  // false, the AI Widget tab below renders disabled (visible but non-clickable)
+  // and the AIWidget panel itself goes into read-only "preview" mode.
+  const aiEnabled =
+    import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+
   const tabsMemo = useMemo(() => {
     return Object.entries(tabsNew).flatMap(([sectionTitle, items]) => {
       const sectionHeader = (
@@ -547,14 +553,20 @@ export default function AppSettings() {
           return null;
         }
 
+        const tabDisabled = tab === 'AI Widget' && !aiEnabled;
         return (
-          <TabApp key={`${tab}_${index}`} text={tab} last={tab === 'Delete'} />
+          <TabApp
+            key={`${tab}_${index}`}
+            text={tab}
+            last={tab === 'Delete'}
+            disabled={tabDisabled}
+          />
         );
       });
 
       return [sectionHeader, ...tabItems];
     });
-  }, [DOMAIN_NAME, domainName]);
+  }, [DOMAIN_NAME, domainName, aiEnabled]);
 
   useEffect(() => {
     if (apps) {
@@ -711,6 +723,7 @@ export default function AppSettings() {
               defaultChatRooms={defaultChatRooms}
               primaryColor={app.primaryColor}
               isDisabled={app?.creatorId !== currentUser?._id}
+              aiFeatureDisabled={!aiEnabled}
               handleRagChange={handleRagChange}
               handleSiteCrawl={handleSiteCrawl}
               deleteSiteCrawl={deleteSiteCrawl}
