@@ -29,6 +29,12 @@ export const TabAIWidgetCode = ({
     import.meta.env.VITE_WIDGET_URL ||
     import.meta.env.VITE_WIDGET_VERSIONED_URL ||
     '';
+  // The widget's POST /v2/widget/sessions runs against the install's API
+  // host. We can derive it from the script src (widget.<root> -> api.<root>)
+  // at runtime in the embed itself, so data-api-base is optional in the
+  // generated snippet — but expose VITE_API for installs that intentionally
+  // host the widget JS off-domain.
+  const apiBaseOverride = (import.meta.env.VITE_API as string | undefined) || '';
 
   const [displayName, setDisplayName] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
@@ -73,7 +79,7 @@ export const TabAIWidgetCode = ({
   // };
 
   const scriptCode = useMemo(() => {
-    if (!appId || !userId) {
+    if (!appId) {
       return '<script></script>';
     }
 
@@ -81,12 +87,21 @@ export const TabAIWidgetCode = ({
       return '<!-- Configure VITE_WIDGET_URL in deploy to generate a self-hosted widget embed -->';
     }
 
+    // MUC variant embed: the widget calls POST /v2/widget/sessions on mount
+    // to provision a visitor + persistent room + bot invite, then SASL-binds
+    // and joins the room over XMPP. The host page only has to surface appId
+    // (and optionally an explicit API base when the widget is hosted off
+    // the standard widget./api. subdomain pair).
     const lines = [
       `<script`,
       `  src="${widgetUrl}"`,
       `  id="chat-content-assistant"`,
-      `  data-bot-id="${botJid}"`,
+      `  data-app-id="${appId}"`,
     ];
+
+    if (apiBaseOverride) {
+      lines.push(`  data-api-base="${apiBaseOverride}"`);
+    }
 
     if (avatar) {
       lines.push(`  data-bot-avatar="${avatar}"`);
@@ -99,7 +114,7 @@ export const TabAIWidgetCode = ({
     lines.push(`></script>`);
 
     return lines.join('\n');
-  }, [appId, userId, avatar, botJid, displayName, widgetUrl]);
+  }, [appId, avatar, displayName, widgetUrl, apiBaseOverride]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
