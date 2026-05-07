@@ -251,6 +251,6 @@ export function createChatConfig({
     defaultRooms: app?.defaultRooms || [],
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
-    newArch: true,
+    useStoreConsoleEnabled: true,
   };
 }

@@ -1,15 +1,15 @@
 import { XmppProvider } from '@ethora/chat-component';
-// import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Fallback } from './App.tsx';
 import { RouterErrorBoundary } from './components/Error/RouterErrorBoundary';
-// import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
+import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
 import './index.css';
 import { router } from './router.tsx';
-// import { useAppStore } from './store/useAppStore';
+import { useAppStore } from './store/useAppStore';
 
 // Suppress noisy console warnings in development
 // Must be set up BEFORE any imports that might log warnings
@@ -125,27 +125,22 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
   }
 };
 
-// function XmppProviderBridge({ children }: { children: React.ReactNode }) {
-//   const currentUser = useAppStore((s) => s.currentUser);
-//   const providerConfig = useMemo(
-//     () =>
-//       buildEthoraBaseChatConfig({
-//         chat_token: currentUser?.token || null,
-//         currentUser,
-//       }),
-//     [
-//       currentUser?.token,
-//       currentUser?.xmppUsername,
-//       currentUser?.xmppPassword,
-//       currentUser?._id,
-//     ]
-//   );
+function XmppProviderBridge({ children }: { children: React.ReactNode }) {
+  const currentUser = useAppStore((s) => s.currentUser);
+  const providerConfig = useMemo(
+    () =>
+      buildEthoraBaseChatConfig({
+        chat_token: currentUser?.token || null,
+        currentUser,
+      }),
+    [currentUser]
+  );
 
-//   return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
-// }
+  return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
+}
 
 createRoot(document.getElementById('root')!).render(
-  <XmppProvider>
+  <XmppProviderBridge>
     <RouterErrorBoundary>
       <RouterProvider
         router={router}
@@ -156,5 +151,5 @@ createRoot(document.getElementById('root')!).render(
       />
     </RouterErrorBoundary>
     <ToastContainer />
-  </XmppProvider>
+  </XmppProviderBridge>
 );

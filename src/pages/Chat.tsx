@@ -105,17 +105,28 @@ const MemoizedChat = React.memo(function ChatComponent({
     };
   }, [ownerSession]);
 
-  const chatConfig = createChatConfig({
-    app: config,
-    chatToken: currentUser?.token || null,
-    // Forwarding currentUser lets createChatConfig set userLogin from the
-    // base-app User's xmpp creds when no owner override is active. This
-    // is the load-bearing fix for the email-login path because the
-    // upstream-only jwtLogin flow expects a type:'client' JWT from
-    // /v1/users/client that loginWithEmail doesn't produce.
-    currentUser,
-    ownerOverride,
-  });
+  const chatConfig = useMemo(
+    () =>
+      createChatConfig({
+        app: config,
+        chatToken: currentUser?.token || null,
+        // Forwarding currentUser lets createChatConfig set userLogin from the
+        // base-app User's xmpp creds when no owner override is active. This
+        // is the load-bearing fix for the email-login path because the
+        // upstream-only jwtLogin flow expects a type:'client' JWT from
+        // /v1/users/client that loginWithEmail doesn't produce.
+        currentUser,
+        ownerOverride,
+      }),
+    [
+      config,
+      currentUser?.token,
+      currentUser?.xmppUsername,
+      currentUser?.xmppPassword,
+      currentUser?._id,
+      ownerOverride,
+    ]
+  );
 
   return <Chat config={chatConfig} />;
 });
@@ -311,7 +322,10 @@ export default function ChatPage() {
         )}
         <div />
       </div>
-      <div className="rounded-2xl bg-white px-0 overflow-hidden">
+      <div
+        className="rounded-2xl bg-white px-0 overflow-hidden pt-4"
+        style={{ color: '#141414' }}
+      >
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP
             socket and fresh chat-component state. React's reconciliation
             of MemoizedChat alone wouldn't recreate the underlying XMPP
