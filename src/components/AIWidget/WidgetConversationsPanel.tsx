@@ -1,7 +1,17 @@
-import { Box, Button, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 // `httpV2` (not `httpV2App`) — the widget conversations endpoint uses the
 // tenantActor auth flow on the server, which on the user-token path needs
 // userId+appId claims that only the user JWT carries. The app-only JWT
@@ -76,6 +86,13 @@ export function WidgetConversationsPanel({
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // Modal: the row currently being inspected. We surface conversation
+  // metadata + the room JID; a full message-history view (chat-component
+  // pointed at the room JID, authenticated as the operator's tenant-owner
+  // gateway user) is a follow-up that needs a per-deploy reader endpoint.
+  const [selectedRow, setSelectedRow] = useState<WidgetConversationRow | null>(
+    null
+  );
 
   const fetchPage = useCallback(
     async (nextOffset: number) => {
@@ -116,16 +133,13 @@ export function WidgetConversationsPanel({
 
   const empty = !loading && !error && rows.length === 0;
 
-  // Mongo `chats` listing endpoint supports filtering by name, so as a
-  // first-pass "Open" experience we deep-link the operator to the global
-  // chats page filtered by the conversation's room name. Once a dedicated
-  // chat-component reader lands here we'll switch the link target.
-  const chatLinkFor = useMemo(() => {
-    return (row: WidgetConversationRow) =>
-      `/app/admin/apps/${appId}/settings?tab=Chats&search=${encodeURIComponent(
-        row.name
-      )}`;
-  }, [appId]);
+  const handleCopy = useCallback((value: string) => {
+    try {
+      void navigator.clipboard?.writeText(value);
+    } catch {
+      // ignore — user can select the text manually as a fallback
+    }
+  }, []);
 
   return (
     <div className="w-full px-4 py-6">
@@ -197,12 +211,13 @@ export function WidgetConversationsPanel({
                     {formatDate(row.updatedAt)}
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap text-right">
-                    <a
+                    <button
+                      type="button"
                       className="text-brand-500 hover:underline"
-                      href={chatLinkFor(row)}
+                      onClick={() => setSelectedRow(row)}
                     >
                       Open
-                    </a>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -237,6 +252,79 @@ export function WidgetConversationsPanel({
           </div>
         </div>
       )}
+
+      <Dialog
+        open={Boolean(selectedRow)}
+        onClose={() => setSelectedRow(null)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ pr: 6 }}>
+          Widget conversation
+          <IconButton
+            aria-label="close"
+            onClick={() => setSelectedRow(null)}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedRow && (
+            <div className="font-sans text-sm space-y-3">
+              <div>
+                <div className="text-xs uppercase text-gray-500 mb-1">Visitor</div>
+                <div className="font-medium">{formatVisitor(selectedRow)}</div>
+                {selectedRow.visitor && (
+                  <div className="text-xs text-gray-500 mt-1 break-all">
+                    {selectedRow.visitor.xmppUsername}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="text-xs uppercase text-gray-500 mb-1">Started</div>
+                <div>{formatDate(selectedRow.createdAt)}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase text-gray-500 mb-1">Last activity</div>
+                <div>{formatDate(selectedRow.updatedAt)}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase text-gray-500 mb-1">Room JID</div>
+                <div className="flex items-center gap-2">
+                  <code className="break-all bg-gray-50 px-2 py-1 rounded text-xs">
+                    {selectedRow.name}
+                  </code>
+                  <IconButton
+                    size="small"
+                    aria-label="copy room jid"
+                    onClick={() => handleCopy(selectedRow.name)}
+                  >
+                    <ContentCopyIcon fontSize="small" />
+                  </IconButton>
+                </div>
+              </div>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: '1px dashed',
+                  borderColor: 'grey.300',
+                  backgroundColor: 'grey.50',
+                  color: 'grey.700',
+                }}
+              >
+                <strong className="block mb-1">Message history viewer</strong>
+                Inline message history for widget conversations is on the
+                roadmap — it requires a backend reader that fetches from
+                ejabberd's <code>mod_mam</code> archive for the room JID
+                above. Until that lands, the room JID is the handle to use
+                for any direct XMPP / archive inspection.
+              </Box>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
