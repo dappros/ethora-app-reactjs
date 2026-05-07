@@ -2,7 +2,12 @@ import { Box, Button, CircularProgress } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { httpV2App } from '../../http';
+// `httpV2` (not `httpV2App`) — the widget conversations endpoint uses the
+// tenantActor auth flow on the server, which on the user-token path needs
+// userId+appId claims that only the user JWT carries. The app-only JWT
+// (`httpV2App`) lacks them and the middleware rejects with
+// `TOKEN_MISSING_CLAIMS`.
+import { httpV2 } from '../../http';
 
 // Server response shape — matches the listWidgetConversationsService
 // envelope. Kept minimal (no shared types module yet); when more views
@@ -78,7 +83,7 @@ export function WidgetConversationsPanel({
       setLoading(true);
       setError(null);
       try {
-        const resp = await httpV2App.get<WidgetConversationsResponse>(
+        const resp = await httpV2.get<WidgetConversationsResponse>(
           `/apps/${appId}/widget/conversations`,
           { params: { limit: PAGE_SIZE, offset: nextOffset } }
         );

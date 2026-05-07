@@ -4,7 +4,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { httpUpdateApp, httpV2App } from '../../http';
+import { httpUpdateApp, httpV2 } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
@@ -167,7 +167,7 @@ export function AIWidget({
   useEffect(() => {
     if (!appId || aiFeatureDisabled) return;
     const ac = new AbortController();
-    httpV2App
+    httpV2
       .get(`/apps/${appId}/widget/conversations`, {
         params: { limit: 1, offset: 0 },
         signal: ac.signal,
