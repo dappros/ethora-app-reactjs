@@ -7,6 +7,7 @@ import { IconMenuBurger } from './Icons/IconMenuBurger';
 import { IconSettingsMenu } from './Icons/IconSettingsMenu';
 import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
+import { UnreadBadge } from './UnreadBadge';
 
 export function AppMenu() {
   const location = useLocation();
@@ -56,7 +57,10 @@ export function AppMenu() {
           to="/app/chat"
           className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
-          <IconChat />
+          <div className="relative">
+            <IconChat />
+            <UnreadBadge className="absolute -top-1 -right-2" />
+          </div>
           <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
             Chats
           </div>

@@ -32,12 +32,15 @@ const chatRoomStyles: CSSProperties = {
 
 interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;
+  currentUser?: ModelCurrentUser | null;
 }
 
 export const buildEthoraBaseChatConfig = ({
   chat_token,
+  currentUser,
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
-  return {
+  const userLoginPayload = makeChatUserLogin(currentUser);
+  const config: XmppProviderConfig = {
     baseUrl: import.meta.env.VITE_API,
     xmppSettings: {
       devServer: import.meta.env.VITE_APP_XMPP_SERVICE,
@@ -69,18 +72,21 @@ export const buildEthoraBaseChatConfig = ({
         }
       },
     },
-    // initBeforeLoad MUST be false because main.tsx mounts <XmppProvider/>
-    // with no config (commit c1d9469 removed XmppProviderBridge). When this
-    // is true, useChatWrapperInit waits for providerBootstrapStatus to
-    // become 'ready', but the unconfigured parent XmppProvider's effect
-    // bails on `if (!config?.initBeforeLoad) { setStatus('idle'); return }`
-    // and never fires runInitBeforeLoad - so the spinner is stuck on
-    // "Connecting..." forever. Falling back to false routes through the
-    // legacy useChatWrapperInit path that calls initializeClient itself
-    // using the userLogin.user xmpp creds, which is what was working
-    // before the commit.
-    initBeforeLoad: false,
+    // initBeforeLoad runs the chat-component's own bootstrap (resolve
+    // user -> XMPP bind -> connect WS -> fetch private store -> preload
+    // history) before <Chat/> mounts, so unread counts are correct on
+    // first render. We only enable it once we have a userLogin payload
+    // with xmpp creds; without those, NB() falls back to the broken
+    // /v1/users/client jwt-exchange path on email-login deployments.
+    initBeforeLoad: Boolean(userLoginPayload),
   };
+  if (userLoginPayload) {
+    (config as ChatConfig).userLogin = {
+      enabled: true,
+      user: userLoginPayload,
+    };
+  }
+  return config;
 };
 
 export const chatBootstrapConfig: XmppProviderConfig =

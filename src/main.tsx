@@ -1,4 +1,5 @@
 import { XmppProvider } from '@ethora/chat-component';
+// import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
@@ -124,12 +125,21 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
   }
 };
 
-//TODO: Add chat component config for provider
 // function XmppProviderBridge({ children }: { children: React.ReactNode }) {
-//   const chatToken = useAppStore((s) => s.currentUser?.token || null);
-//   const providerConfig = buildEthoraBaseChatConfig({
-//     chat_token: chatToken,
-//   });
+//   const currentUser = useAppStore((s) => s.currentUser);
+//   const providerConfig = useMemo(
+//     () =>
+//       buildEthoraBaseChatConfig({
+//         chat_token: currentUser?.token || null,
+//         currentUser,
+//       }),
+//     [
+//       currentUser?.token,
+//       currentUser?.xmppUsername,
+//       currentUser?.xmppPassword,
+//       currentUser?._id,
+//     ]
+//   );
 
 //   return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
 // }

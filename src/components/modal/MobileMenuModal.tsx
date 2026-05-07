@@ -6,6 +6,7 @@ import { IconAdmin } from '../Icons/IconAdmin';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
 import { IconSettingsMenu } from '../Icons/IconSettingsMenu';
+import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
 interface Props {
@@ -50,12 +51,13 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
           <NavLink
             to="/app/chat"
             onClick={onClose}
-            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
+            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl items-center"
           >
             <IconChat />
             <span className="ml-2 group-aria-[current=page]:text-brand-500">
               Chats
             </span>
+            <UnreadBadge className="ml-2" />
           </NavLink>
         </div>
         <div className="">
