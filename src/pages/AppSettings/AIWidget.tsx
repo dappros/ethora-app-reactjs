@@ -1,118 +1,21 @@
-import {
-  AiAssistant,
-  XmppProvider,
-  createAnonymousXmppCredentials,
-} from '@ethora/ai-chat-widget';
-import { Box } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
-import { SourcesSiteCrawlModal } from '../../components/modal/SourcesSiteCrawlModal';
-import { httpUpdateApp } from '../../http';
-import { ModelAIbot, ModelAppDefaulRooom, SiteLinks } from '../../models';
+import { Box, Button } from '@mui/material';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { httpUpdateApp, httpV2App } from '../../http';
+import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
-import { HeaderAIWidget } from '../../components/AIWidget/HeaderAIWidget';
-// Phase 1 follow-up: TabAIWidget (multi-tab editor for prompt/web/docs/code) replaced by
-// the standalone Code panel. Persona / Context / Web Index / Docs Index now live under
-// the global /app/admin/agents area, since Agents are tenant-scope, not per-App.
 import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
-import { useAppStore } from '../../store/useAppStore';
 import { ModelApp } from '../../models';
 import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
+import { WidgetConversationsPanel } from '../../components/AIWidget/WidgetConversationsPanel';
 import './AIWidget.scss';
-
-const ASSISTANT_USER_STORAGE_KEY = 'ethora-assistant-user';
-const ASSISTANT_MESSAGES_STORAGE_KEY = 'ethora-assistant-messages';
-const ASSISTANT_TIMESTAMP_STORAGE_KEY = 'ethora-assistant-timestamp';
-const ASSISTANT_PERSIST_SLICE_KEY = 'persist:assistanRoomSlice';
-const ASSISTANT_CHAT_SETTINGS_PERSIST_KEY = 'persist:chatSettingStore';
-const ASSISTANT_ROOMS_PERSIST_KEY = 'persist:roomMessages';
-const ASSISTANT_ROOM_HEAP_PERSIST_KEY = 'persist:roomHeapSlice';
-const ASSISTANT_ROOT_PERSIST_KEY = 'persist:root';
 
 const statusAiBot = {
   on: true,
   off: false,
-};
-
-const getXmppDomainFromJid = (jid?: string): string => {
-  if (!jid || !jid.includes('@')) {
-    return '';
-  }
-
-  return jid.split('@')[1] || '';
-};
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const hasValidAssistantMessageMap = (value: unknown): boolean => {
-  if (!isPlainObject(value)) {
-    return false;
-  }
-
-  return Object.values(value).every(Array.isArray);
-};
-
-const hasValidAssistantPersistSlice = (value: unknown): boolean => {
-  if (!isPlainObject(value)) {
-    return false;
-  }
-
-  const persistedMessages = value.messages;
-  if (typeof persistedMessages === 'string') {
-    try {
-      return hasValidAssistantMessageMap(JSON.parse(persistedMessages));
-    } catch {
-      return false;
-    }
-  }
-
-  return hasValidAssistantMessageMap(persistedMessages);
-};
-
-const sanitizeAssistantWidgetStorage = (): void => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  // The assistant widget keeps its own lightweight assistant history. Clearing
-  // these older shared chat slices avoids rehydrating malformed room state from
-  // previous widget versions while preserving the assistant-specific transcript.
-  window.localStorage.removeItem(ASSISTANT_CHAT_SETTINGS_PERSIST_KEY);
-  window.localStorage.removeItem(ASSISTANT_ROOMS_PERSIST_KEY);
-  window.localStorage.removeItem(ASSISTANT_ROOM_HEAP_PERSIST_KEY);
-  window.localStorage.removeItem(ASSISTANT_ROOT_PERSIST_KEY);
-
-  try {
-    const storedMessages = window.localStorage.getItem(
-      ASSISTANT_MESSAGES_STORAGE_KEY
-    );
-    if (storedMessages) {
-      const parsed = JSON.parse(storedMessages);
-      if (!hasValidAssistantMessageMap(parsed)) {
-        window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
-      }
-    }
-  } catch {
-    window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
-  }
-
-  try {
-    const persistedSlice = window.localStorage.getItem(ASSISTANT_PERSIST_SLICE_KEY);
-    if (persistedSlice) {
-      const parsed = JSON.parse(persistedSlice);
-      if (!hasValidAssistantPersistSlice(parsed)) {
-        window.localStorage.removeItem(ASSISTANT_PERSIST_SLICE_KEY);
-        window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
-        window.localStorage.removeItem(ASSISTANT_USER_STORAGE_KEY);
-        window.localStorage.removeItem(ASSISTANT_TIMESTAMP_STORAGE_KEY);
-      }
-    }
-  } catch {
-    window.localStorage.removeItem(ASSISTANT_PERSIST_SLICE_KEY);
-    window.localStorage.removeItem(ASSISTANT_MESSAGES_STORAGE_KEY);
-    window.localStorage.removeItem(ASSISTANT_USER_STORAGE_KEY);
-    window.localStorage.removeItem(ASSISTANT_TIMESTAMP_STORAGE_KEY);
-  }
 };
 
 interface Props {
@@ -135,71 +38,76 @@ interface Props {
   deleteSiteCrawl: (url: string[]) => void;
 }
 
-// Phase 1 follow-up: AIWidget now only renders the embed-Code panel + ActiveAgentSelector
-// + status bar. The legacy Prompt / Add websites / Add documents tabs moved to the global
-// /app/admin/agents area, so loadingTextCrawl / handleCrawlReindex / setChoseUrl /
-// ragRef / url state are no longer used here. Props interface kept stable so the parent
-// AppSettings doesn't need to change.
+// Inject the production widget bundle into the admin page so the operator
+// preview exercises the same end-to-end flow visitors hit: script load ->
+// POST /v2/widget/sessions -> SASL bind as visitor -> MUC join -> groupchat.
+// The widget bundle owns its own DOM (#chat-widget div appended to body),
+// so we just inject the <script> tag and let it bootstrap. Reset removes
+// the script + the chat widget DOM + any persisted visitor identity, so a
+// subsequent Test mints a fresh visitor and a fresh room.
+const TEST_SCRIPT_ID = 'chat-content-assistant';
+const WIDGET_VISITOR_KEY = 'ethora-widget-visitor';
+
+function injectWidgetScript({
+  widgetUrl,
+  appId,
+  apiBase,
+  displayName,
+  avatar,
+}: {
+  widgetUrl: string;
+  appId: string;
+  apiBase?: string;
+  displayName?: string;
+  avatar?: string;
+}) {
+  if (document.getElementById(TEST_SCRIPT_ID)) return;
+  const s = document.createElement('script');
+  s.id = TEST_SCRIPT_ID;
+  s.src = widgetUrl;
+  s.setAttribute('data-app-id', appId);
+  if (apiBase) s.setAttribute('data-api-base', apiBase);
+  if (displayName) s.setAttribute('data-bot-display-name', displayName);
+  if (avatar) s.setAttribute('data-bot-avatar', avatar);
+  document.body.appendChild(s);
+}
+
+function teardownWidget() {
+  // Remove the injected script.
+  const s = document.getElementById(TEST_SCRIPT_ID);
+  if (s && s.parentNode) s.parentNode.removeChild(s);
+  // Remove the widget's mounted container + any open-state pill it left.
+  const w = document.getElementById('chat-widget');
+  if (w && w.parentNode) w.parentNode.removeChild(w);
+  // Forget the visitor identity so the next Test gets a fresh visitor +
+  // fresh persistent room — relevant when the operator wants to confirm
+  // the "first-time visitor" flow rather than resuming a previous test.
+  try {
+    window.localStorage.removeItem(WIDGET_VISITOR_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export function AIWidget({
   appId,
   app,
   aiBot,
   setAiBot,
-  handleRagChange,
-  deleteSiteCrawl,
+  handleRagChange: _handleRagChange,
   aiFeatureDisabled = false,
 }: Props) {
-  const aiWidgetValues = useAppStore((s) => s.aiWidgetValues);
-  const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
-  const envXmppConference = import.meta.env.VITE_XMPP_SERVICE || '';
-  const envXmppWebsocketUrl = import.meta.env.VITE_APP_XMPP_SERVICE || '';
-
   const [statusBot, setStatusBot] = useState<boolean>(false);
-  const [showNewDocModal, setShowNewDocModal] = useState<boolean>(false);
   const [value, setValue] = useState('1');
-  const [assistantStorageReady, setAssistantStorageReady] = useState(false);
+  const [previewActive, setPreviewActive] = useState<boolean>(false);
+  const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
 
-  const [choseUrl] = useState<SiteLinks[]>([]);
-  const user = createAnonymousXmppCredentials();
-  const xmppHost = useMemo(
-    () => getXmppDomainFromJid(app?.systemChatAccount?.jid) || envXmppHost,
-    [app?.systemChatAccount?.jid, envXmppHost]
-  );
-  const xmppConference = useMemo(
-    () => (xmppHost ? envXmppConference || `conference.${xmppHost}` : ''),
-    [envXmppConference, xmppHost]
-  );
-  const xmppWebsocketUrl = useMemo(
-    () => (xmppHost ? envXmppWebsocketUrl || `wss://${xmppHost}/ws` : ''),
-    [envXmppWebsocketUrl, xmppHost]
-  );
-  const assistantChatConfig = useMemo(
-    () => ({
-      colors: { primary: '#1976D2', secondary: '#E1E4FE' },
-      assistantButton: {
-        position: { right: 24, bottom: 24 },
-        ariaLabel: 'Open assistant chat',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
-      assistantPopup: {
-        width: 320,
-        height: 520,
-        closeButtonAriaLabel: 'Close assistant chat',
-      },
-      assistantOpenStateKey: 'EthoraAssistantOpen',
-      disableMedia: true,
-      disableInteractions: true,
-      disableRooms: true,
-      xmppSettings: {
-        devServer: xmppWebsocketUrl,
-        host: xmppHost,
-        conference: xmppConference,
-      },
-    }),
-    [xmppConference, xmppHost, xmppWebsocketUrl]
-  );
+  const widgetUrl =
+    (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
+    (import.meta.env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
+    '';
+  const apiBaseOverride =
+    (import.meta.env.VITE_API as string | undefined) || '';
 
   const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -210,40 +118,77 @@ export function AIWidget({
       const status = statusBot ? 'off' : 'on';
       const response = await httpUpdateApp(appId, { botStatus: status });
       const nextAiBot = response?.data?.result?.aiBot;
-
-      if (nextAiBot) {
-        setAiBot(nextAiBot);
-      }
-
-      const isNewStatus = nextAiBot?.status === 'on';
-      setStatusBot(isNewStatus);
+      if (nextAiBot) setAiBot(nextAiBot);
+      setStatusBot(nextAiBot?.status === 'on');
     } catch (error) {
       console.error('Error updating AI bot status:', error);
     }
   };
 
-  const size = useMemo(() => {
-    if (!aiBot.siteUrlsV2 || !aiBot.siteUrlsV2.length) {
-      return null;
+  const handleStartPreview = useCallback(() => {
+    if (!widgetUrl || !appId) {
+      console.warn('[AIWidget] cannot start preview: widgetUrl or appId missing');
+      return;
     }
+    injectWidgetScript({
+      widgetUrl,
+      appId,
+      apiBase: apiBaseOverride || undefined,
+    });
+    setPreviewActive(true);
+  }, [widgetUrl, appId, apiBaseOverride]);
+
+  const handleStopPreview = useCallback(() => {
+    teardownWidget();
+    setPreviewActive(false);
+  }, []);
+
+  // Bot RAG size — surfaced at the agent level. Kept here as a quick
+  // glanceable readout; the authoritative editor lives under
+  // /app/admin/agents/:agentId.
+  const ragSize = useMemo(() => {
+    if (!aiBot?.siteUrlsV2 || !aiBot.siteUrlsV2.length) return null;
     return (
       aiBot.siteUrlsV2.reduce((sum, l) => sum + l.mdByteSize, 0) /
       (1024 * 1024)
     ).toFixed(2);
-  }, [aiBot.siteUrlsV2]);
+  }, [aiBot?.siteUrlsV2]);
 
   useEffect(() => {
-    sanitizeAssistantWidgetStorage();
-    setAssistantStorageReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (aiBot.status) {
+    if (aiBot?.status) {
       setStatusBot(statusAiBot[aiBot.status]);
     }
-  }, [aiBot.status]);
+  }, [aiBot?.status]);
 
-  // (Was: prefilling the now-removed Add-website input from aiBot.siteUrlsV2.)
+  // Light conversation-count probe so the "Conversations: N" readout in the
+  // header strip stays honest. Re-fetched whenever the conversations panel
+  // signals a change. AbortController prevents a stale response from
+  // overwriting state if the user switches apps mid-flight.
+  useEffect(() => {
+    if (!appId || aiFeatureDisabled) return;
+    const ac = new AbortController();
+    httpV2App
+      .get(`/apps/${appId}/widget/conversations`, {
+        params: { limit: 1, offset: 0 },
+        signal: ac.signal,
+      })
+      .then((resp) => {
+        const total = resp?.data?.total ?? resp?.data?.pagination?.total;
+        setConversationsTotal(typeof total === 'number' ? total : 0);
+      })
+      .catch(() => {
+        setConversationsTotal(null);
+      });
+    return () => ac.abort();
+  }, [appId, aiFeatureDisabled]);
+
+  // Tear the preview down on unmount — operators navigating away from the
+  // tab shouldn't keep a connected widget hanging in the DOM.
+  useEffect(() => {
+    return () => {
+      teardownWidget();
+    };
+  }, []);
 
   return (
     <div className="w-full h-full overflow-x-auto overflow-y-hidden">
@@ -281,23 +226,92 @@ export function AIWidget({
         }
         aria-disabled={aiFeatureDisabled || undefined}
       >
-        {/* Phase 1 (Agents): pick which Agent backs the AI Widget. The full set of agents
-            is now managed in the AI Bots tab; this selector just decides which one's
-            persona/avatar/display name the embedded widget surfaces. */}
+        {/* Pick which Agent backs this app's widget. The full Agent editor
+            (persona, prompt, RAG sources, model) lives under /app/admin/agents. */}
         <ActiveAgentSelector appId={appId as string} app={app} />
 
-        <HeaderAIWidget
-          isRag={aiBot.isRAG}
-          statusBot={statusBot}
-          handleStatusChange={handleStatusChange}
-          handleRagChange={handleRagChange}
-          size={size}
-        />
+        {/* Slim agent / widget status strip. Replaces the legacy
+            HeaderAIWidget (Status / Local context / Model) — Local context
+            and Model moved to per-Agent settings; Status is reduced to a
+            single-line indicator + toggle here. */}
+        <Box className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 mt-4 border border-gray-200 rounded-xl bg-white">
+          <div className="flex items-center gap-2 text-sm font-sans">
+            <PowerSettingsNewIcon
+              fontSize="small"
+              color={statusBot ? 'success' : 'error'}
+            />
+            <span className="font-semibold">AI bot:</span>
+            <span>{statusBot ? 'enabled' : 'disabled'}</span>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleStatusChange}
+              disabled={aiFeatureDisabled}
+              sx={{ ml: 1 }}
+            >
+              {statusBot ? 'Disable' : 'Enable'}
+            </Button>
+          </div>
 
-        {/* Phase 1 follow-up: only the Code panel (embed snippet) remains here. The other
-            legacy tabs (Prompt / Add websites / Add documents) now live under each Agent
-            in the global /app/admin/agents area. */}
-        <div className="w-full h-full overflow-x-auto overflow-y-hidden">
+          <div className="flex items-center gap-2 text-sm font-sans text-gray-700">
+            <span className="font-semibold">RAG:</span>
+            <span>{ragSize ? `${ragSize} MB` : 'empty'}</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm font-sans text-gray-700">
+            <span className="font-semibold">Conversations:</span>
+            <span>{conversationsTotal === null ? '—' : conversationsTotal}</span>
+          </div>
+
+          <div className="flex items-center gap-2 ml-auto">
+            {previewActive ? (
+              <>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<StopIcon />}
+                  onClick={handleStopPreview}
+                  disabled={aiFeatureDisabled}
+                >
+                  Stop test
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => {
+                    handleStopPreview();
+                    setTimeout(handleStartPreview, 50);
+                  }}
+                  disabled={aiFeatureDisabled}
+                >
+                  New session
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<PlayArrowIcon />}
+                onClick={handleStartPreview}
+                disabled={aiFeatureDisabled || !widgetUrl || !statusBot}
+                title={
+                  !statusBot
+                    ? 'Enable the AI bot first to test the widget here.'
+                    : !widgetUrl
+                    ? 'Widget hosting is not configured for this deployment.'
+                    : undefined
+                }
+              >
+                Test widget
+              </Button>
+            )}
+          </div>
+        </Box>
+
+        {/* Embed Code panel — generates the <script> snippet operators paste
+            into their own site. */}
+        <div className="w-full overflow-x-auto">
           <TabAIWidgetCode
             value={value}
             appId={appId}
@@ -306,35 +320,15 @@ export function AIWidget({
             handleChange={handleChange}
           />
         </div>
-      </div>
 
-      {showNewDocModal && (
-        <SourcesSiteCrawlModal
-          urls={choseUrl}
-          onClose={() => setShowNewDocModal(false)}
-          deleteSiteCrawl={deleteSiteCrawl}
+        {/* Widget Conversations: lists rooms with chats.type='widget' for
+            this app. Operators can review historical visitor sessions
+            here. */}
+        <WidgetConversationsPanel
+          appId={appId}
+          onTotalChange={setConversationsTotal}
         />
-      )}
-
-      {!aiFeatureDisabled && statusBot && assistantStorageReady && xmppHost && xmppWebsocketUrl && (
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        <XmppProvider>
-          <Box className="chatAssistantButton">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore */}
-            <AiAssistant
-              roomJID={`${appId}_${aiBot.userId}-bot@${xmppHost}`}
-              config={{
-                ...assistantChatConfig,
-                assistantMode: { enabled: true, user },
-                botDisplayName: aiWidgetValues.displayName || undefined,
-                botAvatar: aiWidgetValues.avatar || undefined,
-              }}
-            />
-          </Box>
-        </XmppProvider>
-      )}
+      </div>
     </div>
   );
 }
