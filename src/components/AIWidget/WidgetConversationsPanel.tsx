@@ -1,9 +1,12 @@
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   IconButton,
 } from '@mui/material';
@@ -11,6 +14,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 // `httpV2` (not `httpV2App`) — the widget conversations endpoint uses the
 // tenantActor auth flow on the server, which on the user-token path needs
@@ -121,6 +125,16 @@ export function WidgetConversationsPanel({
   const [messagesError, setMessagesError] = useState<string | null>(null);
   const [mamUnavailable, setMamUnavailable] = useState<boolean>(false);
 
+  // Bulk-selection + delete state. `selected` holds chat _ids the
+  // operator has ticked on the *current page*; we deliberately reset
+  // selection on page change to avoid the "wait, did I just confirm
+  // delete on rows I can't see?" trap. Selecting across pages is a
+  // different feature (Select All Across Pages) we don't ship yet.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const fetchPage = useCallback(
     async (nextOffset: number) => {
       if (!appId) return;
@@ -152,6 +166,79 @@ export function WidgetConversationsPanel({
   useEffect(() => {
     void fetchPage(0);
   }, [fetchPage]);
+
+  // Reset selection on page change — see selected-state comment above.
+  useEffect(() => {
+    setSelected(new Set());
+  }, [offset, rows]);
+
+  function toggleOne(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAllOnPage(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r._id)) : new Set());
+  }
+
+  const allOnPageSelected =
+    rows.length > 0 && rows.every((r) => selected.has(r._id));
+  const someOnPageSelected =
+    selected.size > 0 && !allOnPageSelected;
+
+  // Per-row delete: clear MAM history first, then drop the chat row +
+  // user2chats + destroy the MUC room via the existing chat-delete
+  // endpoint. Order matters — destroying the MUC room first orphans
+  // the MAM rows but they'd still show up on a clear-history call. We
+  // swallow individual failures so a partial multi-delete still
+  // reports useful aggregate state.
+  async function deleteOne(row: WidgetConversationRow): Promise<{ ok: boolean; error?: string }> {
+    try {
+      await httpV2.delete(`/apps/${appId}/chats/${row._id}/messages`);
+    } catch (e: any) {
+      // mamUnavailable on the install isn't fatal — keep going so the
+      // chat row still gets removed.
+      const code = e?.response?.data?.code;
+      if (code !== 'MAM_NOT_CONFIGURED') {
+        return { ok: false, error: e?.response?.data?.error || e?.message || 'history clear failed' };
+      }
+    }
+    try {
+      await httpV2.delete(`/apps/${appId}/chats`, { data: { name: row.name } });
+    } catch (e: any) {
+      return { ok: false, error: e?.response?.data?.error || e?.message || 'chat delete failed' };
+    }
+    return { ok: true };
+  }
+
+  async function runBulkDelete() {
+    setDeleting(true);
+    setDeleteError(null);
+    const targets = rows.filter((r) => selected.has(r._id));
+    let okCount = 0;
+    const errors: string[] = [];
+    for (const row of targets) {
+      const r = await deleteOne(row);
+      if (r.ok) okCount++;
+      else errors.push(`${formatVisitor(row)}: ${r.error}`);
+    }
+    setDeleting(false);
+    setConfirmOpen(false);
+    setSelected(new Set());
+    if (errors.length) {
+      setDeleteError(`${okCount}/${targets.length} deleted. ${errors.length} failed: ${errors.slice(0, 3).join('; ')}`);
+    }
+    // Re-fetch the current page so the deleted rows disappear and total
+    // updates. If the current page becomes empty after deletion we
+    // shift back one page so the operator isn't stranded on a blank
+    // pagination state.
+    const stillHasRowsOnPage = rows.length - okCount > 0 || offset === 0;
+    void fetchPage(stillHasRowsOnPage ? offset : Math.max(0, offset - PAGE_SIZE));
+  }
 
   const pageStart = offset + (rows.length ? 1 : 0);
   const pageEnd = offset + rows.length;
@@ -275,9 +362,46 @@ export function WidgetConversationsPanel({
 
       {!error && rows.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-gray-200">
+          {/* Bulk-action bar — appears as a sticky strip above the table
+              once at least one row is ticked, so the operator doesn't
+              lose track of selections while scrolling. Delete-selected
+              opens a confirm modal; nothing destructive happens here. */}
+          {selected.size > 0 && (
+            <div className="flex items-center justify-between bg-red-50 border-b border-red-200 px-4 py-2 text-sm">
+              <span className="text-red-700 font-medium">
+                {selected.size} selected
+              </span>
+              <Button
+                size="small"
+                variant="contained"
+                color="error"
+                startIcon={<DeleteOutlineIcon />}
+                onClick={() => setConfirmOpen(true)}
+                disabled={deleting}
+              >
+                Delete selected
+              </Button>
+            </div>
+          )}
+          {deleteError && (
+            <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-xs text-red-700">
+              {deleteError}
+            </div>
+          )}
           <table className="min-w-full text-sm font-sans">
             <thead className="bg-gray-50 text-left text-gray-700">
               <tr>
+                <th className="px-2 py-2 font-semibold w-1">
+                  <Checkbox
+                    size="small"
+                    checked={allOnPageSelected}
+                    indeterminate={someOnPageSelected}
+                    onChange={(e) => toggleAllOnPage(e.target.checked)}
+                    inputProps={{
+                      'aria-label': 'Select all on this page',
+                    }}
+                  />
+                </th>
                 <th className="px-4 py-2 font-semibold">Visitor</th>
                 <th className="px-4 py-2 font-semibold">Started</th>
                 <th className="px-4 py-2 font-semibold">Last activity</th>
@@ -287,6 +411,16 @@ export function WidgetConversationsPanel({
             <tbody>
               {rows.map((row) => (
                 <tr key={row._id} className="border-t border-gray-100">
+                  <td className="px-2 py-2 w-1">
+                    <Checkbox
+                      size="small"
+                      checked={selected.has(row._id)}
+                      onChange={() => toggleOne(row._id)}
+                      inputProps={{
+                        'aria-label': `Select conversation ${formatVisitor(row)}`,
+                      }}
+                    />
+                  </td>
                   <td className="px-4 py-2 whitespace-nowrap">
                     {formatVisitor(row)}
                   </td>
@@ -472,6 +606,47 @@ export function WidgetConversationsPanel({
             </div>
           )}
         </DialogContent>
+      </Dialog>
+
+      {/* Bulk-delete confirmation. Two-phase to avoid accidental nuke
+          when an operator hits Enter on a focused checkbox. The body
+          is destructive (drops MAM rows + Mongo Chat row + destroys
+          the MUC room) so we name what's about to disappear. */}
+      <Dialog
+        open={confirmOpen}
+        onClose={() => !deleting && setConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete {selected.size} conversation{selected.size === 1 ? '' : 's'}?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This permanently removes the selected conversation
+            {selected.size === 1 ? '' : 's'} — message history, the
+            chat record, and the underlying chat room. Visitors who
+            return will start a fresh conversation.
+          </DialogContentText>
+          {deleting && (
+            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600">
+              <CircularProgress size={14} />
+              <span>Deleting…</span>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={runBulkDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={<DeleteOutlineIcon />}
+          >
+            Delete
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );
