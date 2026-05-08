@@ -9,6 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
@@ -27,6 +28,18 @@ import { httpV2 } from '../../http';
 // Server response shape — matches the listWidgetConversationsService
 // envelope. Kept minimal (no shared types module yet); when more views
 // consume it we can promote into src/models.ts.
+interface VisitorMetadata {
+  userAgent: string;
+  ip: string;
+  country: string; // ISO-3166-1 alpha-2
+  browser: string;
+  browserVersion: string;
+  os: string;
+  osVersion: string;
+  deviceType: string;
+  capturedAt: string | null;
+}
+
 interface WidgetConversationRow {
   _id: string;
   name: string;
@@ -39,6 +52,8 @@ interface WidgetConversationRow {
     uuid: string;
     xmppUsername: string;
     firstSeenAt: string;
+    // null when the visitor row predates the metadata-capture rollout.
+    metadata?: VisitorMetadata | null;
   } | null;
 }
 
@@ -98,6 +113,71 @@ function formatVisitor(row: WidgetConversationRow): string {
   const uuid = row.visitor.uuid;
   if (uuid && uuid.length >= 8) return `Visitor #${uuid.slice(0, 8)}`;
   return row.visitor.xmppUsername || 'unknown visitor';
+}
+
+// Tiny ISO-3166 → flag emoji helper. Skips IP-localhost / private
+// ranges (where country is empty) without trying to be clever — emoji
+// flags are a nice visual cue but never the only signal.
+function flagFor(country: string): string {
+  if (!country || country.length !== 2) return '';
+  const A = 0x1f1e6 - 'A'.charCodeAt(0);
+  const cc = country.toUpperCase();
+  return String.fromCodePoint(cc.charCodeAt(0) + A, cc.charCodeAt(1) + A);
+}
+
+// Rich tooltip body for the visitor row. Renders a small key/value
+// table; missing fields are shown as `—` so the operator can tell
+// "we don't know" apart from "we knew it was Chrome on macOS".
+function VisitorMetadataPopover({
+  row,
+}: {
+  row: WidgetConversationRow;
+}) {
+  const m = row.visitor?.metadata;
+  const def = (v?: string) => (v && v.length ? v : '—');
+  const browserLabel = m
+    ? [m.browser, m.browserVersion].filter(Boolean).join(' ')
+    : '';
+  const osLabel = m ? [m.os, m.osVersion].filter(Boolean).join(' ') : '';
+  return (
+    <div className="text-xs leading-relaxed">
+      <div className="font-semibold mb-1">
+        {formatVisitor(row)}
+      </div>
+      <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-x-2 gap-y-0.5">
+        <div className="text-gray-300">JID</div>
+        <div className="font-mono break-all">
+          {row.visitor?.xmppUsername || '—'}
+        </div>
+        <div className="text-gray-300">Country</div>
+        <div>
+          {m?.country
+            ? `${flagFor(m.country)} ${m.country}`.trim()
+            : '—'}
+        </div>
+        <div className="text-gray-300">Browser</div>
+        <div>{def(browserLabel)}</div>
+        <div className="text-gray-300">OS</div>
+        <div>{def(osLabel)}</div>
+        <div className="text-gray-300">Device</div>
+        <div>{m?.deviceType ? m.deviceType : 'desktop'}</div>
+        <div className="text-gray-300">IP</div>
+        <div className="font-mono">{def(m?.ip)}</div>
+        <div className="text-gray-300">First seen</div>
+        <div>
+          {row.visitor?.firstSeenAt
+            ? new Date(row.visitor.firstSeenAt).toLocaleString()
+            : '—'}
+        </div>
+      </div>
+      {!m && (
+        <div className="mt-2 text-[11px] italic text-gray-300">
+          Captured metadata is unavailable for visitors who started a
+          conversation before this feature was rolled out.
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function WidgetConversationsPanel({
@@ -571,7 +651,37 @@ export function WidgetConversationsPanel({
                     />
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap">
-                    {formatVisitor(row)}
+                    <Tooltip
+                      title={<VisitorMetadataPopover row={row} />}
+                      arrow
+                      placement="right"
+                      enterDelay={150}
+                      // Allow the operator to mouse over the popover
+                      // body itself (e.g. to copy the IP) without it
+                      // dismissing.
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            maxWidth: 360,
+                            bgcolor: 'rgba(17,24,39,0.95)',
+                          },
+                        },
+                      }}
+                    >
+                      {/* Dotted underline = "this label has more
+                          information on hover", standard convention. */}
+                      <span
+                        className="cursor-help"
+                        style={{ borderBottom: '1px dotted rgba(0,0,0,0.3)' }}
+                      >
+                        {row.visitor?.metadata?.country && (
+                          <span className="mr-1" aria-hidden="true">
+                            {flagFor(row.visitor.metadata.country)}
+                          </span>
+                        )}
+                        {formatVisitor(row)}
+                      </span>
+                    </Tooltip>
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap">
                     {formatDate(row.createdAt)}
