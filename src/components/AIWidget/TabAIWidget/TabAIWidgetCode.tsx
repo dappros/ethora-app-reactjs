@@ -32,9 +32,22 @@ export const TabAIWidgetCode = ({
   // resolution chain as ActiveAgentSelector — defaultBotInstanceId ->
   // BotInstance.agentId -> Agent. Persona surfaces here read-only:
   // operators edit it under Manage agents, not in this panel.
+  //
+  // Prefer `currentApp` over the parent's `app` prop because the parent
+  // page captures `app` at mount time and doesn't re-pass a fresh copy
+  // when the operator switches Active Agent above. ActiveAgentSelector
+  // pushes the API's updated app row into the store via doUpdateApp,
+  // so reading `currentApp` (when it's the same _id) gives us the
+  // fresh defaultBotInstanceId without a parent re-render.
   const activeAgent = useMemo(() => {
-    const biId = (app as any)?.defaultBotInstanceId
-      || (currentApp as any)?.defaultBotInstanceId;
+    const isSameApp =
+      (currentApp as any)?._id &&
+      (app as any)?._id &&
+      String((currentApp as any)._id) === String((app as any)._id);
+    const biId = isSameApp
+      ? (currentApp as any).defaultBotInstanceId
+      : (app as any)?.defaultBotInstanceId
+        || (currentApp as any)?.defaultBotInstanceId;
     if (!biId) return null;
     const bi = botInstances.find((b) => b.id === biId);
     if (!bi) return null;
@@ -108,20 +121,38 @@ export const TabAIWidgetCode = ({
     // and joins the room over XMPP. The host page only has to surface appId
     // (and optionally an explicit API base when the widget is hosted off
     // the standard widget./api. subdomain pair).
-    const lines = [
+    //
+    // The required attrs appear inside the <script> tag; optional overrides
+    // appear directly underneath as a commented-out block ready to copy and
+    // uncomment line-by-line. Operators only touch the optional ones when
+    // they want to override the active Agent's persona on a specific embed.
+    const required = [
       `<script`,
       `  src="${widgetUrl}"`,
       `  id="chat-content-assistant"`,
       `  data-app-id="${appId}"`,
     ];
-
     if (apiBaseOverride) {
-      lines.push(`  data-api-base="${apiBaseOverride}"`);
+      required.push(`  data-api-base="${apiBaseOverride}"`);
     }
+    required.push(`></script>`);
 
-    lines.push(`></script>`);
+    const optional = [
+      ``,
+      `<!--`,
+      `  Optional. Move any of these inside the <script ...> tag above to`,
+      `  override the defaults (which come from the active Agent set in your`,
+      `  AI Widget admin):`,
+      ``,
+      `    data-bot-name="Custom Bot Name"          ← shown above bot bubbles`,
+      `    data-bot-avatar="https://your-cdn/avatar.png"`,
+      `    data-title="Help"                        ← chat-window header`,
+      `    data-greeting-title="Hi there!"          ← empty-state heading`,
+      `    data-greeting="Ask me anything"          ← empty-state body line`,
+      `-->`,
+    ];
 
-    return lines.join('\n');
+    return [...required, ...optional].join('\n');
   }, [appId, widgetUrl, apiBaseOverride]);
 
   const currentCopyTarget = useMemo(() => {
@@ -229,39 +260,29 @@ export const TabAIWidgetCode = ({
             )}
           </div>
 
-          {/* Operator-facing note about the script-tag override path.
-              Most installs are happy with the Agent's persona; the
-              data-bot-* attributes are an escape hatch for cases like
-              white-label embeds where the same Agent powers many sites
-              under different visible names. */}
-          <div className="mb-6 flex items-start gap-2 p-3 rounded-xl border border-blue-100 bg-blue-50 text-sm text-blue-900">
+          {/* Inline help replaced by the commented-out block inside the
+              snippet itself (see scriptCode useMemo above). One info
+              line stays here so first-time integrators know overrides
+              exist without reading the snippet end-to-end. */}
+          <div className="mb-4 flex items-start gap-2 text-sm text-gray-600">
             <InfoOutlinedIcon fontSize="small" className="mt-0.5 shrink-0" />
-            <div>
-              <div className="font-medium mb-1">
-                Override persona on a specific embed
-              </div>
-              <div>
-                The widget displays the active Agent's display name and
-                avatar by default. To override on an individual embed —
-                e.g. a white-label site that uses the same bot under a
-                different name — add{' '}
-                <code className="px-1 rounded bg-white border border-blue-200">
-                  data-bot-display-name="Your Name"
-                </code>{' '}
-                and{' '}
-                <code className="px-1 rounded bg-white border border-blue-200">
-                  data-bot-avatar="https://…"
-                </code>{' '}
-                attributes to the <code>&lt;script&gt;</code> tag below.
-                Leave them out to use the Agent's defaults.
-              </div>
-            </div>
+            <span>
+              The widget pulls bot name, avatar, and greeting copy from
+              the active Agent. The snippet below shows optional
+              <code className="mx-1 px-1 rounded bg-gray-100">data-*</code>
+              attributes you can paste into the
+              <code className="mx-1 px-1 rounded bg-gray-100">&lt;script&gt;</code>
+              tag to override any of them per embed.
+            </span>
           </div>
 
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
             {`Insert this code anywhere inside your <body> tag:`}
           </p>
-          <div className="relative rounded-md bg-gray-700">
+          <div
+            className="relative rounded-md bg-gray-700 overflow-y-auto"
+            style={{ maxHeight: 360 }}
+          >
             <div className="absolute top-1 right-1 z-10">
               <Tooltip title={copied ? 'Copied' : 'Copy'}>
                 <IconButton onClick={() => handleCopy(scriptCode)} size="small">

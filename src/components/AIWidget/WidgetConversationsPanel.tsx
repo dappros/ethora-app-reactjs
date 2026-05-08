@@ -161,8 +161,11 @@ function VisitorMetadataPopover({
         <div>{def(osLabel)}</div>
         <div className="text-gray-300">Device</div>
         <div>{m?.deviceType ? m.deviceType : 'desktop'}</div>
-        <div className="text-gray-300">IP</div>
-        <div className="font-mono">{def(m?.ip)}</div>
+        {/* IP is captured (drives the country lookup) but not shown by
+            default — visitor IP is sensitive and showing it routinely
+            puts operators in a tricky data-protection posture. A future
+            "enterprise" flag will gate its visibility for installs that
+            have a specific contract permitting it. */}
         <div className="text-gray-300">First seen</div>
         <div>
           {row.visitor?.firstSeenAt

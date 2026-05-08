@@ -25,6 +25,7 @@ interface ActiveAgentSelectorProps {
 export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId, app }) => {
   const agents = useAppStore((s) => s.agents);
   const botInstances = useAppStore((s) => s.botInstances);
+  const doUpdateApp = useAppStore((s) => s.doUpdateApp);
   const [busy, setBusy] = useState(false);
   const [defaultBotInstanceId, setDefaultBotInstanceId] = useState<string | null>(
     (app as any)?.defaultBotInstanceId || null
@@ -51,13 +52,24 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
     return agents.find((a) => a.id === bi.agentId) || null;
   }, [defaultBotInstanceId, botInstances, agents]);
 
+  // After the API mutates the App row, mirror the new state into the
+  // shared store so siblings reading `currentApp` (e.g. the persona
+  // card under TabAIWidgetCode) re-render with the fresh
+  // defaultBotInstanceId. Without this, the selector's own dropdown
+  // updates (it has its own local state) but the persona card below
+  // continues showing the previous Agent until the page is reloaded.
+  function pushAppToStore(updated: any) {
+    if (updated && updated._id) doUpdateApp(updated as any);
+  }
+
   async function pick(agentId: string) {
     if (!agentId) {
       // Clear pointer.
       setBusy(true);
       try {
-        await httpUpdateApp(appId, { defaultBotInstanceId: '' });
+        const r = await httpUpdateApp(appId, { defaultBotInstanceId: '' });
         setDefaultBotInstanceId(null);
+        pushAppToStore(r?.data?.result);
         toast.success('Cleared default agent');
       } finally {
         setBusy(false);
@@ -74,8 +86,9 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
       const out = await actionInviteAgentToChat(agentId, { appId, chatId: widgetChatId });
       const bi = (out as any)?.botInstance || (out as any)?.respData?.botInstance;
       if (bi?.id) {
-        await httpUpdateApp(appId, { defaultBotInstanceId: bi.id });
+        const r = await httpUpdateApp(appId, { defaultBotInstanceId: bi.id });
         setDefaultBotInstanceId(bi.id);
+        pushAppToStore(r?.data?.result);
         // `currentAgent` is a useMemo that hasn't recomputed yet (the state
         // update we just dispatched flushes after this microtask), so it
         // still points at the previously-selected agent. Resolve the new
