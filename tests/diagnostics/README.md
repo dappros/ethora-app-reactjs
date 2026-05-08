@@ -82,6 +82,30 @@ classifies the failure:
 Use first when an operator reports "Widget Conversations modal shows no
 messages." Doesn't drive a browser, so it's quick.
 
+### `widget-full-flow-probe.mjs`
+
+End-to-end provisioning + smoke test for a brand-new tenant App. Per
+run it: creates an App, creates an AI Agent (`responseMode: always`,
+deterministic prompt), invites the agent into the App's widget chat
+(creating a BotInstance), sets that BotInstance as `defaultBotInstanceId`
+and turns the bot on, then drives the widget UI as a visitor and
+verifies both the visitor message and the bot reply landed in MAM.
+
+Use this to validate a release branch end-to-end on a target stack,
+or after touching any link in the chain (apps schema, agents flow,
+widget bundle, MAM read-back). Each run leaves a fresh app + agent
+on the target — set `SKIP_CLEANUP=1` to inspect the leftover artifacts;
+otherwise the agent is deleted at the end (the app is left because
+there is no public delete endpoint).
+
+Verdict line:
+
+- `WIDGET_DID_NOT_SEND` — visitor groupchat never left the client.
+- `VISITOR_NOT_ARCHIVED` — message left the client but no MAM row.
+- `FULL_FLOW_OK` — both sides archived.
+- `BOT_DID_NOT_REPLY` — visitor archived but no bot reply seen.
+  Likely ai-service didn't auto-join the visitor's persistent room.
+
 ### `widget-e2e-probe.mjs`
 
 End-to-end probe for the full AI Widget pipeline. Hosts a synthetic
