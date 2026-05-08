@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import CircularProgress from '@mui/material/CircularProgress';
 import { actionInviteAgentToChat, actionListAgents, actionListBotInstances } from '../../actions';
 import { httpUpdateApp } from '../../http';
 import { ModelAgent, ModelApp } from '../../models';
@@ -75,7 +76,14 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
       if (bi?.id) {
         await httpUpdateApp(appId, { defaultBotInstanceId: bi.id });
         setDefaultBotInstanceId(bi.id);
-        toast.success(`Default agent set to "${currentAgent?.displayName || bi.xmppUsername}"`);
+        // `currentAgent` is a useMemo that hasn't recomputed yet (the state
+        // update we just dispatched flushes after this microtask), so it
+        // still points at the previously-selected agent. Resolve the new
+        // one from the agents store using the agentId we picked, falling
+        // back to the bot's xmppUsername if the agent isn't loaded yet.
+        const newAgent = agents.find((a) => a.id === agentId);
+        const newAgentLabel = newAgent?.displayName || bi.xmppUsername;
+        toast.success(`Default agent set to "${newAgentLabel}"`);
         await actionListBotInstances({ appId });
       }
     } catch (e: any) {
@@ -89,7 +97,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
     <div className="border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm">
       <span className="text-gray-600">Active agent for AI Widget:</span>
       <select
-        className="border rounded px-2 py-1 text-sm bg-white"
+        className="border rounded px-2 py-1 text-sm bg-white disabled:bg-gray-100 disabled:cursor-wait"
         value={currentAgent?.id || ''}
         disabled={busy}
         onChange={(e) => pick(e.target.value)}
@@ -101,6 +109,16 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
           </option>
         ))}
       </select>
+      {/* Spinner + status text while the bind is in flight. The full
+          chain (invite-to-chat → updateApp → reload bot instances) takes
+          ~10s on QA-class hardware, which is long enough that operators
+          start clicking other things if there's no progress signal. */}
+      {busy && (
+        <span className="flex items-center gap-1 text-gray-500 text-xs">
+          <CircularProgress size={12} />
+          <span>Binding agent…</span>
+        </span>
+      )}
       <span className="text-gray-400">|</span>
       {/* Phase 1 follow-up: Agents now live at the tenant-scope /app/admin/agents page.
           One Agent can be deployed across many Apps; the dropdown above just picks which
