@@ -229,15 +229,15 @@ const sent = await page.evaluate((msg) => {
   if (setter) setter.call(input, msg); else input.value = msg;
   input.dispatchEvent(new Event('input', { bubbles: true }));
   input.focus();
+  // Single Enter — don't ALSO click a send-button fallback. Earlier
+  // versions of this probe did both, which produced two stanzas on the
+  // wire and two bubbles in the UI. Looks identical to the dedupe bug
+  // so we'd hide it from ourselves. If Enter doesn't fire (e.g. the
+  // widget changes its UX to require button clicks), we'll see
+  // "no groupchat tx" in the verdict and revisit.
   input.dispatchEvent(
     new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true })
   );
-  let p = input.parentElement;
-  while (p) {
-    const btn = p.querySelector('button, [role="button"], svg[role="button"]');
-    if (btn) { btn.click(); break; }
-    p = p.parentElement;
-  }
   return { ok: true, value: input.value };
 }, TEST_MESSAGE);
 console.log(`[step] widget-send: ${JSON.stringify(sent)}`);
