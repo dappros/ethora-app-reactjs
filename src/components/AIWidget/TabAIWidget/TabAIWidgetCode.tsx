@@ -1,8 +1,9 @@
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Box, Button, ButtonGroup, IconButton, Tooltip } from '@mui/material';
-import classNames from 'classnames';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ModelApp } from '../../../models';
@@ -23,8 +24,22 @@ export const TabAIWidgetCode = ({
   userId,
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
-  const doSetAiValues = useAppStore((s) => s.doSetAiValues);
   const currentApp = useAppStore((s) => s.currentApp);
+  const agents = useAppStore((s) => s.agents);
+  const botInstances = useAppStore((s) => s.botInstances);
+
+  // Resolve the Agent the active widget bot draws persona from. Same
+  // resolution chain as ActiveAgentSelector — defaultBotInstanceId ->
+  // BotInstance.agentId -> Agent. Persona surfaces here read-only:
+  // operators edit it under Manage agents, not in this panel.
+  const activeAgent = useMemo(() => {
+    const biId = (app as any)?.defaultBotInstanceId
+      || (currentApp as any)?.defaultBotInstanceId;
+    if (!biId) return null;
+    const bi = botInstances.find((b) => b.id === biId);
+    if (!bi) return null;
+    return agents.find((a) => a.id === bi.agentId) || null;
+  }, [agents, botInstances, app, currentApp]);
   const widgetUrl =
     import.meta.env.VITE_WIDGET_URL ||
     import.meta.env.VITE_WIDGET_VERSIONED_URL ||
@@ -36,10 +51,11 @@ export const TabAIWidgetCode = ({
   // host the widget JS off-domain.
   const apiBaseOverride = (import.meta.env.VITE_API as string | undefined) || '';
 
-  const [displayName, setDisplayName] = useState<string>('');
-  const [avatar, setAvatar] = useState<string>('');
-  // const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  // const [avatarPreview, setAvatarPreview] = useState<string>('');
+  // displayName / avatar state removed — persona comes from the active
+  // Agent now (rendered above as a read-only summary). The script-tag
+  // override path (data-bot-display-name / data-bot-avatar) is still
+  // documented for white-label scenarios; operators add those attrs by
+  // hand to the snippet below if they need them.
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>('');
   const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
@@ -103,18 +119,10 @@ export const TabAIWidgetCode = ({
       lines.push(`  data-api-base="${apiBaseOverride}"`);
     }
 
-    if (avatar) {
-      lines.push(`  data-bot-avatar="${avatar}"`);
-    }
-
-    if (displayName) {
-      lines.push(`  data-bot-display-name="${displayName}"`);
-    }
-
     lines.push(`></script>`);
 
     return lines.join('\n');
-  }, [appId, avatar, displayName, widgetUrl, apiBaseOverride]);
+  }, [appId, widgetUrl, apiBaseOverride]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
@@ -169,39 +177,85 @@ export const TabAIWidgetCode = ({
 
       {value === '1' && (
         <Box sx={{ pt: 3 }}>
-          <div className="flex flex-col gap-2 mb-8">
-            <p className="font-sans text-sm pb-4 flex items-center gap-1">
-              Which Display Name should the bot use?
-            </p>
-            <input
-              type="text"
-              maxLength={24}
-              className={classNames(
-                'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4'
-              )}
-              placeholder="Display name"
-              value={displayName}
-              onChange={(e) => {
-                setDisplayName(e.target.value);
-                doSetAiValues({ displayName: e.target.value, avatar });
-              }}
-            />
+          {/* Persona summary — read-only. The widget pulls displayName +
+              avatar straight from the active Agent at runtime via the
+              bot's outbound stanza <data fullName=... photo=.../>, so
+              there's nothing to set here. Operators wanting to change
+              the persona edit it under Manage agents. */}
+          <div className="mb-6">
+            <div className="text-sm font-semibold mb-2 text-gray-700">
+              Bot persona (from active Agent)
+            </div>
+            {activeAgent ? (
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50">
+                {activeAgent.avatarUrl ? (
+                  <img
+                    src={activeAgent.avatarUrl}
+                    alt={activeAgent.displayName}
+                    className="w-12 h-12 rounded-full object-cover bg-gray-200"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
+                    }}
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-semibold">
+                    {activeAgent.displayName.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold truncate">
+                    {activeAgent.displayName}
+                  </div>
+                  {activeAgent.bio && (
+                    <div className="text-xs text-gray-500 truncate">
+                      {activeAgent.bio}
+                    </div>
+                  )}
+                </div>
+                <Link
+                  to={`/app/admin/agents/${activeAgent.id}`}
+                  className="text-brand-500 hover:underline text-sm"
+                >
+                  Edit in Manage agents
+                </Link>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
+                No Agent bound to this widget yet — the legacy AI bot
+                will answer with a generic persona. Pick an Agent in
+                the <span className="font-medium">Active agent for AI Widget</span> selector
+                above.
+              </div>
+            )}
+          </div>
 
-            <p className="font-sans text-sm pb-4 flex items-center gap-1">
-              Bot avatar URL (optional)
-            </p>
-            <input
-              type="text"
-              className={classNames(
-                'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4'
-              )}
-              placeholder="url"
-              value={avatar}
-              onChange={(e) => {
-                setAvatar(e.target.value);
-                doSetAiValues({ avatar: e.target.value, displayName });
-              }}
-            />
+          {/* Operator-facing note about the script-tag override path.
+              Most installs are happy with the Agent's persona; the
+              data-bot-* attributes are an escape hatch for cases like
+              white-label embeds where the same Agent powers many sites
+              under different visible names. */}
+          <div className="mb-6 flex items-start gap-2 p-3 rounded-xl border border-blue-100 bg-blue-50 text-sm text-blue-900">
+            <InfoOutlinedIcon fontSize="small" className="mt-0.5 shrink-0" />
+            <div>
+              <div className="font-medium mb-1">
+                Override persona on a specific embed
+              </div>
+              <div>
+                The widget displays the active Agent's display name and
+                avatar by default. To override on an individual embed —
+                e.g. a white-label site that uses the same bot under a
+                different name — add{' '}
+                <code className="px-1 rounded bg-white border border-blue-200">
+                  data-bot-display-name="Your Name"
+                </code>{' '}
+                and{' '}
+                <code className="px-1 rounded bg-white border border-blue-200">
+                  data-bot-avatar="https://…"
+                </code>{' '}
+                attributes to the <code>&lt;script&gt;</code> tag below.
+                Leave them out to use the Agent's defaults.
+              </div>
+            </div>
           </div>
 
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
