@@ -65,6 +65,48 @@ Originally written to diagnose the c1d9469 regression (top-level
 `<XmppProvider/>` lost its `config` prop, leaving the chat-component
 permanently waiting on a parent bootstrap that never ran).
 
+### `widget-history-probe.mjs`
+
+Pure-HTTP probe for the AI Widget message-history pipeline. Logs in as
+the admin, lists `widget` chats for an app, and pulls each conversation
+through `GET /v2/apps/:appId/chats/:chatId/messages`. Verdict line
+classifies the failure:
+
+- `MAM_NOT_CONFIGURED` — backend has no `MAM_MYSQL_*` env vars.
+- `MAM_EMPTY` — backend reaches MySQL but the archive has no rows for
+  these rooms (mod_mam disabled / muc default not set / wrong domain).
+- `VISITOR_ONLY` — visitor messages archived, no bot replies. AI bot
+  isn't joining or isn't sending groupchat.
+- `HISTORY_OK` — full pipeline works.
+
+Use first when an operator reports "Widget Conversations modal shows no
+messages." Doesn't drive a browser, so it's quick.
+
+### `widget-e2e-probe.mjs`
+
+End-to-end probe for the full AI Widget pipeline. Hosts a synthetic
+page on the widget origin (so localStorage works), injects the
+production `assistant.js`, drives it as a visitor (open popup, type
+test message, send), and reports what landed on XMPP and in MAM.
+
+Verdict tree:
+
+- `NO_SESSION` — `POST /v2/widget/sessions` never landed.
+- `NO_WS` — session minted but bundle never opened a WebSocket
+  (CORS, mixed content, hardcoded WS URL).
+- `SASL_FAILED` — visitor password mismatch / wrong auth path.
+- `NO_MUC_JOIN` — SASL OK but no MUC `<presence>` sent.
+- `NO_SEND` — joined the room but no groupchat sent (input
+  automation likely failed; check `widget-send` line).
+- `SENT_BUT_NOT_ARCHIVED` — message left the client but MAM has no
+  rows. Inspect `mod_mam` config / MUC service domain coverage.
+- `ARCHIVED` — full pipeline works.
+
+Originally written to diagnose the `ReduxWrapper.tsx` bug where the
+widget overwrote the server-issued visitor JID with an `anon-<uuid>`
+credential, causing `mod_ethora`'s per-app prefix guard to reject MUC
+presence and leaving the Widget Conversations panel permanently empty.
+
 ## Reusable helpers (`tests/diagnostics/lib/`)
 
 These are designed for other probes to import as-needed. Browser-side
