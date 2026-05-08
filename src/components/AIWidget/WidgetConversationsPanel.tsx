@@ -15,6 +15,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 // `httpV2` (not `httpV2App`) — the widget conversations endpoint uses the
 // tenantActor auth flow on the server, which on the user-token path needs
@@ -135,6 +136,12 @@ export function WidgetConversationsPanel({
   const [deleting, setDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // CSV export progress. Walks N conversations sequentially fetching
+  // messages — fast for tens, slow for thousands. The progress label
+  // gives the operator a signal so they don't navigate away mid-export.
+  const [exporting, setExporting] = useState<boolean>(false);
+  const [exportProgress, setExportProgress] = useState<string | null>(null);
+
   const fetchPage = useCallback(
     async (nextOffset: number) => {
       if (!appId) return;
@@ -213,6 +220,121 @@ export function WidgetConversationsPanel({
       return { ok: false, error: e?.response?.data?.error || e?.message || 'chat delete failed' };
     }
     return { ok: true };
+  }
+
+  // CSV export — used by both "Export selected" and "Export all" flows.
+  // We escape with the standard double-double-quote rule: anything that
+  // contains a comma, quote, or newline gets wrapped in quotes with
+  // internal quotes doubled. Any spreadsheet that opens CSV will read
+  // it back correctly.
+  function csvCell(value: unknown): string {
+    const s = value == null ? '' : String(value);
+    if (s === '') return '';
+    if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function downloadCsv(filename: string, rowsCsv: string[][]) {
+    // BOM so Excel opens UTF-8 with the right encoding.
+    const csv = '﻿' + rowsCsv.map((r) => r.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
+
+  // Given a list of conversation rows, fetch their messages and emit a
+  // single CSV. Rows: convoIndex, timestamp, conversationId, visitor,
+  // sender (visitor|bot|system), nick, body.
+  async function exportConversationsAsCsv(
+    convos: WidgetConversationRow[],
+    fileLabel: string
+  ) {
+    setExporting(true);
+    setExportProgress(`0/${convos.length}`);
+    const out: string[][] = [
+      ['timestamp', 'conversation_id', 'visitor', 'sender', 'nick', 'body'],
+    ];
+    let done = 0;
+    for (const row of convos) {
+      try {
+        const resp = await httpV2.get<ChatMessagesResponse>(
+          `/apps/${appId}/chats/${row._id}/messages`,
+          { params: { limit: 500 } }
+        );
+        const visitorJid = row.visitor?.xmppUsername || '';
+        for (const m of resp?.data?.results || []) {
+          const isVisitor =
+            visitorJid &&
+            (m.from === visitorJid ||
+              m.from.startsWith(`${visitorJid}@`) ||
+              m.nick === visitorJid);
+          const sender = isVisitor ? 'visitor' : 'bot';
+          out.push([
+            new Date(m.ts).toISOString(),
+            row._id,
+            formatVisitor(row),
+            sender,
+            m.nick || '',
+            m.body || '',
+          ]);
+        }
+      } catch (e) {
+        // Per-conversation failure is non-fatal — log a sentinel row so
+        // the operator can see what's missing rather than silently
+        // skipping it.
+        out.push([
+          new Date().toISOString(),
+          row._id,
+          formatVisitor(row),
+          'error',
+          '',
+          `[fetch failed: ${(e as any)?.message || e}]`,
+        ]);
+      }
+      done++;
+      setExportProgress(`${done}/${convos.length}`);
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    downloadCsv(`widget-conversations-${fileLabel}-${stamp}.csv`, out);
+    setExporting(false);
+    setExportProgress(null);
+  }
+
+  async function exportSelected() {
+    const targets = rows.filter((r) => selected.has(r._id));
+    if (!targets.length) return;
+    await exportConversationsAsCsv(targets, `selected-${targets.length}`);
+  }
+
+  // Walk the full paginated list (all pages, ignoring the current
+  // viewport offset) and export every conversation. Bounded by the
+  // server-side total — operators with very large datasets should
+  // export in batches via Select-All-on-page.
+  async function exportAll() {
+    setExporting(true);
+    setExportProgress('Fetching conversation list…');
+    const all: WidgetConversationRow[] = [];
+    try {
+      for (let off = 0; off < total; off += PAGE_SIZE) {
+        const r = await httpV2.get<WidgetConversationsResponse>(
+          `/apps/${appId}/widget/conversations`,
+          { params: { limit: PAGE_SIZE, offset: off } }
+        );
+        all.push(...(r?.data?.results || []));
+      }
+    } catch (e: any) {
+      setExporting(false);
+      setExportProgress(null);
+      setDeleteError(`Export failed: ${e?.message || e}`);
+      return;
+    }
+    await exportConversationsAsCsv(all, `all-${all.length}`);
   }
 
   async function runBulkDelete() {
@@ -328,6 +450,16 @@ export function WidgetConversationsPanel({
           <Button
             size="small"
             variant="outlined"
+            startIcon={<FileDownloadIcon />}
+            onClick={exportAll}
+            disabled={loading || exporting || total === 0}
+            title="Export every conversation in this app as a CSV"
+          >
+            Export all
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={() => fetchPage(offset)}
             disabled={loading}
@@ -336,6 +468,12 @@ export function WidgetConversationsPanel({
           </Button>
         </div>
       </div>
+      {exportProgress && (
+        <div className="mb-2 flex items-center gap-2 text-sm text-gray-600">
+          <CircularProgress size={14} />
+          <span>Exporting CSV — {exportProgress}</span>
+        </div>
+      )}
 
       {error && (
         <Box
@@ -371,16 +509,27 @@ export function WidgetConversationsPanel({
               <span className="text-red-700 font-medium">
                 {selected.size} selected
               </span>
-              <Button
-                size="small"
-                variant="contained"
-                color="error"
-                startIcon={<DeleteOutlineIcon />}
-                onClick={() => setConfirmOpen(true)}
-                disabled={deleting}
-              >
-                Delete selected
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<FileDownloadIcon />}
+                  onClick={exportSelected}
+                  disabled={deleting || exporting}
+                >
+                  Export selected
+                </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="error"
+                  startIcon={<DeleteOutlineIcon />}
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={deleting || exporting}
+                >
+                  Delete selected
+                </Button>
+              </div>
             </div>
           )}
           {deleteError && (
