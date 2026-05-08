@@ -45,6 +45,24 @@ interface WidgetConversationsResponse {
   offset?: number;
 }
 
+// Single message row from GET /v2/apps/:appId/chats/:chatId/messages.
+interface ChatMessageRow {
+  id: string;
+  originId: string | null;
+  ts: number; // ms since epoch
+  from: string; // bare JID of sender
+  nick: string;
+  body: string;
+}
+
+interface ChatMessagesResponse {
+  results: ChatMessageRow[];
+  total: number;
+  nextBefore: number | null;
+  chat: { _id: string; name: string; type: string };
+  mamUnavailable: boolean;
+}
+
 interface WidgetConversationsPanelProps {
   appId: string;
   // Tells the parent how many conversations exist so the slim "Conversations:
@@ -93,6 +111,15 @@ export function WidgetConversationsPanel({
   const [selectedRow, setSelectedRow] = useState<WidgetConversationRow | null>(
     null
   );
+  // Messages for the open conversation. Reset on every open. Page size of
+  // 100 is the same default the backend uses; we don't paginate further
+  // for now since the modal is a quick-look UX, not a deep-archive
+  // browser. Older history is reachable by re-opening with a `before`
+  // cursor in a future iteration.
+  const [messages, setMessages] = useState<ChatMessageRow[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
+  const [messagesError, setMessagesError] = useState<string | null>(null);
+  const [mamUnavailable, setMamUnavailable] = useState<boolean>(false);
 
   const fetchPage = useCallback(
     async (nextOffset: number) => {
@@ -140,6 +167,65 @@ export function WidgetConversationsPanel({
       // ignore — user can select the text manually as a fallback
     }
   }, []);
+
+  // Fetch a fresh page of messages whenever a conversation is opened.
+  // AbortController so re-opening a different row mid-flight doesn't
+  // race the previous fetch into the new modal.
+  useEffect(() => {
+    if (!selectedRow) {
+      setMessages([]);
+      setMessagesError(null);
+      setMamUnavailable(false);
+      return;
+    }
+    const ac = new AbortController();
+    setMessagesLoading(true);
+    setMessagesError(null);
+    setMamUnavailable(false);
+    httpV2
+      .get<ChatMessagesResponse>(
+        `/apps/${appId}/chats/${selectedRow._id}/messages`,
+        { params: { limit: 100 }, signal: ac.signal }
+      )
+      .then((resp) => {
+        const data = resp?.data;
+        setMessages(data?.results || []);
+        setMamUnavailable(Boolean(data?.mamUnavailable));
+      })
+      .catch((e: any) => {
+        if (e?.name === 'CanceledError' || e?.code === 'ERR_CANCELED') return;
+        setMessagesError(
+          e?.response?.data?.error || e?.message || 'Failed to load messages'
+        );
+      })
+      .finally(() => setMessagesLoading(false));
+    return () => ac.abort();
+  }, [appId, selectedRow]);
+
+  // Heuristic: visitors have JID prefix `${appId}_widget-`, the bot is the
+  // App's `${appId}_${aiBot.userId}-bot`. We don't know the exact bot
+  // userId here, so anything not visitor-shaped is rendered as the bot
+  // side. For widget rooms there are exactly two participants so this
+  // is unambiguous; for non-widget rooms (when this modal gets reused
+  // beyond Widget Conversations) we'd want a richer attribution model.
+  function isVisitorMessage(row: ChatMessageRow): boolean {
+    if (!selectedRow?.visitor) return false;
+    const visJid = selectedRow.visitor.xmppUsername;
+    return (
+      row.from === visJid ||
+      row.from.startsWith(`${visJid}@`) ||
+      row.nick === visJid
+    );
+  }
+
+  function formatTs(ms: number): string {
+    if (!ms) return '';
+    try {
+      return new Date(ms).toLocaleString();
+    } catch {
+      return String(ms);
+    }
+  }
 
   return (
     <div className="w-full px-4 py-6">
@@ -304,23 +390,85 @@ export function WidgetConversationsPanel({
                   </IconButton>
                 </div>
               </div>
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  border: '1px dashed',
-                  borderColor: 'grey.300',
-                  backgroundColor: 'grey.50',
-                  color: 'grey.700',
-                }}
-              >
-                <strong className="block mb-1">Message history viewer</strong>
-                Inline message history for widget conversations is on the
-                roadmap — it requires a backend reader that fetches from
-                ejabberd's <code>mod_mam</code> archive for the room JID
-                above. Until that lands, the room JID is the handle to use
-                for any direct XMPP / archive inspection.
-              </Box>
+              <div>
+                <div className="text-xs uppercase text-gray-500 mb-1 flex items-center justify-between">
+                  <span>Messages</span>
+                  {messagesLoading && <CircularProgress size={12} />}
+                </div>
+                {mamUnavailable && (
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: '1px dashed',
+                      borderColor: 'warning.light',
+                      backgroundColor: 'warning.lighter',
+                      color: 'warning.dark',
+                      fontSize: 12,
+                    }}
+                  >
+                    Message history is not available on this deployment —
+                    backend MAM_MYSQL_* env vars are not configured.
+                  </Box>
+                )}
+                {messagesError && !mamUnavailable && (
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'error.light',
+                      backgroundColor: 'error.lighter',
+                      color: 'error.dark',
+                      fontSize: 12,
+                    }}
+                  >
+                    Couldn't load messages: {messagesError}
+                  </Box>
+                )}
+                {!messagesLoading &&
+                  !messagesError &&
+                  !mamUnavailable &&
+                  messages.length === 0 && (
+                    <div className="text-xs text-gray-500 italic px-1">
+                      No messages in this conversation yet.
+                    </div>
+                  )}
+                {messages.length > 0 && (
+                  <div className="rounded-md border border-gray-200 bg-gray-50 max-h-[420px] overflow-y-auto p-2 space-y-2">
+                    {messages.map((m) => {
+                      const visitor = isVisitorMessage(m);
+                      return (
+                        <div
+                          key={m.id}
+                          className={
+                            'flex ' +
+                            (visitor ? 'justify-start' : 'justify-end')
+                          }
+                        >
+                          <div
+                            className={
+                              'max-w-[78%] rounded-lg px-3 py-2 text-sm ' +
+                              (visitor
+                                ? 'bg-white border border-gray-200 text-gray-900'
+                                : 'bg-brand-100 text-gray-900')
+                            }
+                          >
+                            <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-0.5">
+                              {visitor ? 'visitor' : 'bot'} · {formatTs(m.ts)}
+                            </div>
+                            <div className="whitespace-pre-wrap break-words">
+                              {m.body || (
+                                <em className="text-gray-400">(empty body)</em>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
