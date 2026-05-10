@@ -48,9 +48,37 @@ npm run lint
 
 ## Browser Smoke Tests
 
-This repo also contains a minimal Playwright smoke layer for browser-visible public routes. To list or run the suite:
+This repo also contains a Playwright e2e layer for browser-visible
+public routes and for the chat-component flows that mount under
+`/app/chat`. To list or run the suite:
 
 ```bash
 npm run test:e2e -- --list
 npm run test:e2e
 ```
+
+### What's covered
+
+| Spec | Tests | Notes |
+|------|-------|-------|
+| `tests/e2e/smoke.spec.ts` | Public-page renders (login, register, 404) | Mocks `/v1/apps/get-config` |
+| `tests/e2e/auth-flows.spec.ts` | Host login form validation + POST body shape | Mocks login endpoint; doesn't need full bootstrap |
+| `tests/e2e/chat-flows.spec.ts` | Chat-component room list, send-text, attach button | `test.fixme` stubs until post-login bootstrap mocks land |
+
+### Cross-platform testing overview
+
+This repo is the Layer 2 (browser e2e) home for chat-component. The
+testid constants in `tests/e2e/_chatComponentTestIds.ts` mirror the
+public testIds exported by `@ethora/chat-component` and match the
+Compose `testTag` / SwiftUI `accessibilityIdentifier` strings used
+by the mobile SDKs and their Maestro flows.
+
+| Layer 1 (hermetic) | Layer 2 (E2E) |
+|--------------------|----------------|
+| [`ethora-chat-component`](https://github.com/dappros/ethora-chat-component) — Vitest + RTL + `data-testid` | `ethora-app-reactjs/tests/e2e/` — Playwright (this repo) |
+| [`ethora-sdk-android`](https://github.com/dappros/ethora-sdk-android) — Compose UI tests | [`ethora-sample-android/.maestro/`](https://github.com/dappros/ethora-sample-android) — 19 Maestro flows |
+| [`ethora-sdk-swift`](https://github.com/dappros/ethora-sdk-swift) — XCTest + accessibility-id markers | [`ethora-sample-swift/.maestro/`](https://github.com/dappros/ethora-sample-swift) — same 19 Maestro flows on iOS Simulator |
+
+A Playwright spec using `[data-testid="chat_input"]` and a Maestro
+flow using `id: "chat_input"` resolve the same intent — one selector
+contract across all four runtime targets.
