@@ -111,6 +111,12 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
     }
   }
 
+  // Split agents into "my tenant" vs "system / public" so the dropdown groups
+  // tenant-owned personas separately from the platform-supplied ones (Support
+  // Agent etc.). Falls back to a flat list when there's nothing in one bucket.
+  const myAgents = agents.filter((a) => a.visibility !== 'public');
+  const publicAgents = agents.filter((a) => a.visibility === 'public');
+
   return (
     <div className="border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm">
       <span className="text-gray-600">Active agent for AI Widget:</span>
@@ -120,12 +126,28 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
         disabled={busy}
         onChange={(e) => pick(e.target.value)}
       >
-        <option value="">(legacy aiBot - no agent)</option>
-        {agents.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.displayName} {a.visibility === 'public' ? '(public)' : ''}
-          </option>
-        ))}
+        {/* "None" lets an operator deliberately unbind the widget (default
+            assistant is already attached on App creation; this is the
+            opt-out). The legacy "aiBot" path is gone as of Phase B.5. */}
+        <option value="">— None —</option>
+        {myAgents.length > 0 && (
+          <optgroup label="My agents">
+            {myAgents.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.displayName}
+              </option>
+            ))}
+          </optgroup>
+        )}
+        {publicAgents.length > 0 && (
+          <optgroup label="System / Public agents">
+            {publicAgents.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.displayName}
+              </option>
+            ))}
+          </optgroup>
+        )}
       </select>
       {/* Spinner + status text while the bind is in flight. The full
           chain (invite-to-chat → updateApp → reload bot instances) takes
