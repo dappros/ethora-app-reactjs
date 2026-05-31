@@ -36,9 +36,14 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
   }, [app]);
 
   // Lazy-load only if the store is empty; the AI Bots tab will populate when opened.
+  // No visibility filter: the backend defaults to "own + public", which is what we
+  // need so the platform-level Support Agent (ownerId='system', visibility='public')
+  // also lands in `agents` and resolves as `currentAgent` when an App is bound to it
+  // - without this the dropdown defaults to "(legacy aiBot - no agent)" on fresh Apps
+  // even though defaultBotInstanceId is set.
   useEffect(() => {
     if (!agents.length) {
-      actionListAgents({ visibility: 'mine' }).catch(() => {});
+      actionListAgents({}).catch(() => {});
     }
     if (!botInstances.length && appId) {
       actionListBotInstances({ appId }).catch(() => {});
