@@ -56,10 +56,16 @@ export default function AdminAgents() {
   const [filter, setFilter] = useState('');
   const [showAll, setShowAll] = useState(false);
 
-  // Initial fetch: only own agents. The +Browse public modal does its own fetch.
+  // Initial fetch: own + public agents (backend default when no `visibility` is
+  // passed). Public agents include the platform-supplied Support Agent that
+  // every App's AI Widget points to by default; surfacing it here means
+  // operators can click "Edit in Manage agents" from the persona card and
+  // actually land on something they can browse. AgentCard already shows the
+  // visibility badge, so private and public agents render side-by-side without
+  // confusion.
   useEffect(() => {
     setLoading(true);
-    actionListAgents({ visibility: 'mine' })
+    actionListAgents({})
       .catch((e) => toast.error(`Failed to load agents: ${e?.response?.data?.error || e.message}`))
       .finally(() => setLoading(false));
   }, []);
@@ -172,7 +178,7 @@ export default function AdminAgents() {
       {showBrowsePublic && (
         <BrowsePublicModal
           onClose={() => setShowBrowsePublic(false)}
-          onCloned={() => actionListAgents({ visibility: 'mine' })}
+          onCloned={() => actionListAgents({})}
         />
       )}
     </div>

@@ -244,7 +244,7 @@ export const TabAIWidgetCode = ({
                   )}
                 </div>
                 <Link
-                  to={`/app/admin/agents/${activeAgent.id}`}
+                  to={`/app/admin/agents/${activeAgent.id}/settings`}
                   className="text-brand-500 hover:underline text-sm"
                 >
                   Edit in Manage agents
