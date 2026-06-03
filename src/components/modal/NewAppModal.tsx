@@ -156,6 +156,7 @@ export function NewAppModal({ onClose, show }: Props) {
               </div>
               <div className="flex gap-4">
                 <button
+                  type="button"
                   className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
                   onClick={onClose}
                 >
