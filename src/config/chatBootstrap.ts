@@ -35,10 +35,6 @@ interface BuildEthoraBaseChatConfigProps {
   currentUser?: ModelCurrentUser | null;
 }
 
-const LIVEKIT_URL =
-  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env) || {})
-    .VITE_LIVEKIT_URL || 'https://livekit.ethora-qa.com';
-
 export const buildEthoraBaseChatConfig = ({
   chat_token,
   currentUser,
@@ -83,11 +79,6 @@ export const buildEthoraBaseChatConfig = ({
     // with xmpp creds; without those, NB() falls back to the broken
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
-    videoCalls: {
-        enabled: true,
-        livekitUrl: LIVEKIT_URL,
-        allowedRoomTypes: ['private'],
-      },
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {
