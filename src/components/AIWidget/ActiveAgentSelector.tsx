@@ -35,20 +35,28 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
     setDefaultBotInstanceId((app as any)?.defaultBotInstanceId || null);
   }, [app]);
 
-  // Lazy-load only if the store is empty; the AI Bots tab will populate when opened.
-  // No visibility filter: the backend defaults to "own + public", which is what we
-  // need so the platform-level Support Agent (ownerId='system', visibility='public')
-  // also lands in `agents` and resolves as `currentAgent` when an App is bound to it
-  // - without this the dropdown defaults to "(legacy aiBot - no agent)" on fresh Apps
-  // even though defaultBotInstanceId is set.
+  // Always refresh agents + this App's BotInstances when the selector mounts
+  // or when appId changes. The previous lazy-load ("only if store empty")
+  // produced a confusing "— None —" state on freshly-created Apps: the App
+  // record correctly carried defaultBotInstanceId pointing at the auto-
+  // attached Support Agent, but the BotInstance for the NEW app wasn't in
+  // the store yet (it still held the previous App's instances) and the
+  // agents store might have been seeded earlier with a "mine only" call
+  // that excluded the public Support Agent — so the currentAgent useMemo
+  // resolved to null, and the dropdown defaulted to "— None —" until a
+  // full page reload triggered a fresh fetch. Eager-refetching here is
+  // cheap (both endpoints return small lean payloads) and removes the
+  // "first-paint after navigation" stale-data window entirely.
+  //
+  // No visibility filter on agents: the backend defaults to "own + public",
+  // so the platform-level Support Agent (ownerId='system', visibility='public')
+  // is included.
   useEffect(() => {
-    if (!agents.length) {
-      actionListAgents({}).catch(() => {});
-    }
-    if (!botInstances.length && appId) {
+    actionListAgents({}).catch(() => {});
+    if (appId) {
       actionListBotInstances({ appId }).catch(() => {});
     }
-  }, [agents.length, botInstances.length, appId]);
+  }, [appId]);
 
   const currentAgent: ModelAgent | null = useMemo(() => {
     if (!defaultBotInstanceId) return null;
