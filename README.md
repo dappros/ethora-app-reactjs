@@ -94,7 +94,7 @@ npm run test:e2e
 - [`@ethora/chat-component`](https://github.com/dappros/ethora-chat-component) — React chat SDK consumed by this app.
 - [`@ethora/sdk-backend`](https://github.com/dappros/ethora-sdk-backend-integration) — Node.js backend SDK and integration guide.
 - [`@ethora/setup`](https://github.com/dappros/ethora-setup) — `npx @ethora/setup` to bootstrap an Ethora app and config files.
-- [`ethora-mcp-cli`](https://github.com/dappros/ethora-mcp-cli) — MCP server for IDE / AI agent integration.
+- [`ethora-mcp-server`](https://github.com/dappros/ethora-mcp-server) — MCP server for IDE / AI agent integration.
 - [Ethora monorepo](https://github.com/dappros/ethora) — full ecosystem entry point.
 
 ## License
