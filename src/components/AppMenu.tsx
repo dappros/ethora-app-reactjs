@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconChat } from './Icons/IconChat';
+import { IconHelp } from './Icons/IconHelp';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
 import { IconSettingsMenu } from './Icons/IconSettingsMenu';
 import { MobileMenuModal } from './modal/MobileMenuModal';
@@ -63,6 +64,15 @@ export function AppMenu() {
           </div>
           <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
             Chats
+          </div>
+        </NavLink>
+        <NavLink
+          to="/app/help"
+          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
+        >
+          <IconHelp />
+          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
+            Help
           </div>
         </NavLink>
         <div className="my-2 border-b border-b-gray-200"></div>

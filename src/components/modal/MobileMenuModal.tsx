@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom';
 import { IconAdmin } from '../Icons/IconAdmin';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
+import { IconHelp } from '../Icons/IconHelp';
 import { IconSettingsMenu } from '../Icons/IconSettingsMenu';
 import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
@@ -58,6 +59,16 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               Chats
             </span>
             <UnreadBadge className="ml-2" />
+          </NavLink>
+          <NavLink
+            to="/app/help"
+            onClick={onClose}
+            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl items-center"
+          >
+            <IconHelp />
+            <span className="ml-2 group-aria-[current=page]:text-brand-500">
+              Help
+            </span>
           </NavLink>
         </div>
         <div className="">

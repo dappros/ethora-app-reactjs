@@ -10,6 +10,7 @@ import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
 const Admin = lazy(() => import('./pages/Admin'));
+const Help = lazy(() => import('./pages/Help'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
 const AdminAgents = lazy(() => import('./pages/AdminAgents'));
@@ -120,6 +121,10 @@ export const router = createBrowserRouter(
                   ],
                 },
 
+                {
+                  path: 'help',
+                  Component: Help,
+                },
                 {
                   path: 'profile',
                   Component: Profile,
