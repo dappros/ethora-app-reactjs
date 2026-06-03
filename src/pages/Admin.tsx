@@ -9,7 +9,7 @@ export default function Admin() {
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
 
   return (
-    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
+    <div className="grid grid-rows-[auto,_1fr,_auto] gap-4 h-full">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Admin
@@ -74,6 +74,12 @@ export default function Admin() {
       >
         <Outlet />
       </div>
+      <p className="text-xs text-gray-500 text-center pb-2">
+        Need assistance?{' '}
+        <NavLink to="/app/help" className="text-brand-500 underline">
+          Visit our Help &amp; Support page.
+        </NavLink>
+      </p>
     </div>
   );
 }

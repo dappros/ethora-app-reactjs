@@ -872,18 +872,6 @@ export default function AppSettings() {
           )}
         </TabPanels>
       </TabGroup>
-      <div className="border-t border-t-gray-200">
-        <p className="text-xs text-gray-500 py-4 text-center">
-          Need assistance? Create a topic in our{' '}
-          <a
-            href="https://forum.ethora.com/"
-            target="_blank"
-            className="text-brand-500 underline"
-          >
-            Community Forum.
-          </a>
-        </p>
-      </div>
 
       {isDelete && (
         <DeleteAppModal
