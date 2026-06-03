@@ -116,7 +116,7 @@ export default function Help() {
           <ResourceCard
             title="SDK"
             description={
-              'Integrating Ethora into your existing apps or building a new web/mobile app? Check out our SDK monorepo on GitHub — it contains the chat component, backend integration helpers, and ready-to-run examples.'
+              'Integrating Ethora into your existing apps or building a new web/mobile app? Check out our SDK monorepo on GitHub - it contains the chat component, backend integration helpers, and ready-to-run examples.'
             }
             href="https://github.com/dappros/ethora/"
             ctaLabel="Open SDK on GitHub"
@@ -124,7 +124,7 @@ export default function Help() {
           <ResourceCard
             title="MCP"
             description={
-              'Use our MCP server with your AI IDE — it has knowledge of all Ethora features, tools, and APIs. Just tell your AI IDE what you want to build and it will use the Ethora MCP to set up your project.'
+              'Use our MCP server with your AI IDE - it has knowledge of all Ethora features, tools, and APIs. Just tell your AI IDE what you want to build and it will use the Ethora MCP to set up your project.'
             }
             href="https://github.com/dappros/ethora-mcp-server"
             ctaLabel="Open MCP on GitHub"
@@ -132,7 +132,7 @@ export default function Help() {
           <ResourceCard
             title="Forum"
             description={
-              'Have technical or product questions? Create a topic in our community forum — the team and other developers reply there.'
+              'Have technical or product questions? Create a topic in our community forum - the team and other developers reply there.'
             }
             href="https://forum.ethora.com/"
             ctaLabel="Visit the forum"
