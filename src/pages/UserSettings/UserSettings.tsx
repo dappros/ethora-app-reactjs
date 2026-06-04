@@ -1,13 +1,18 @@
+import { logoutService } from '@ethora/chat-component';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import cn from 'classnames';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { actionLogout } from '../../actions';
 import TabApp from '../../components/TabApp';
-import { ModelCurrentUser } from '../../models';
-import { useAppStore } from '../../store/useAppStore';
+import { logLogout } from '../../hooks/withTracking.tsx';
+import { httpLogout } from '../../http';
 import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
-import { Referrals } from './Referrals';
+// Referrals intentionally kept in source; the tab is hidden for now but
+// the page may be re-enabled later.
+// import { Referrals } from './Referrals';
 import { Visibility } from './Visibility';
 
 const tabs = [
@@ -16,51 +21,77 @@ const tabs = [
   'Profile Shares',
   'Document Shares',
   'Blocked Users',
-  'Referrals'
 ];
 
 export default function UserSettings() {
-  const user = useAppStore((s) => s.currentUser as ModelCurrentUser);
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Получаем текущий таб из URL
+  const navigate = useNavigate();
+
   const tabFromUrl = searchParams.get('tab');
-  const initialTabIndex = tabs.includes(tabFromUrl ?? '') 
-    ? tabs.indexOf(tabFromUrl!) 
+  const initialTabIndex = tabs.includes(tabFromUrl ?? '')
+    ? tabs.indexOf(tabFromUrl!)
     : 0;
-  
+
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
 
-  // Обновляем URL при изменении таба
   useEffect(() => {
-    setSearchParams(params => {
+    setSearchParams((params) => {
       params.set('tab', tabs[selectedIndex]);
       return params;
     });
   }, [selectedIndex, setSearchParams]);
 
+  const onLogout = async () => {
+    try {
+      await httpLogout();
+    } catch {
+      // ignore HTTP failures - the local-side cleanup below still needs to run
+    }
+    logLogout();
+    actionLogout();
+    logoutService.performLogout();
+    document.cookie =
+      'ethora_user=; domain=.ethora.com; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Settings
+          Account
         </div>
       </div>
-      {/* overflow-hidden */}
-      <div className="rounded-2xl bg-white px-4 py-4 h-full ">
-        <TabGroup 
+      <div className="rounded-2xl bg-white px-4 py-4 h-full">
+        <TabGroup
           className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr]"
           selectedIndex={selectedIndex}
           onChange={setSelectedIndex}
         >
-          <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0  border-b border-gray-200 md:pr-4 md:border-b-0 overflow-auto  md:border-r md:border-gray-200">
-            <TabApp text="Manage Data" />
-            <TabApp text="Visiblility" />
-            <TabApp text="Profile Shares" />
-            <TabApp text="Document Shares" />
-            <TabApp text="Blocked Users" disabled />
-            <TabApp text="Referrals" last />
-          </TabList>
+          <div className="flex flex-row md:flex-col md:h-full md:border-r md:border-gray-200 md:pr-4">
+            <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0 border-b border-gray-200 md:border-b-0 overflow-auto md:flex-1">
+              <TabApp text="Manage Data" />
+              <TabApp text="Visiblility" />
+              <TabApp text="Profile Shares" />
+              <TabApp text="Document Shares" />
+              <TabApp text="Blocked Users" last disabled />
+            </TabList>
+            {/* Logout sits where Referrals used to live (bottom of the left
+                rail on desktop). Some users instinctively look for Logout on
+                the Account page; Profile already has it but having it in
+                both places keeps people from getting stuck. */}
+            <button
+              type="button"
+              onClick={onLogout}
+              className={cn(
+                'md:mb-2 md:rounded-xl md:py-3 md:px-4 md:w-full md:text-left md:text-base',
+                'md:text-red-400 md:hover:bg-red-50',
+                'py-[10px] px-[8px] text-red-400 whitespace-nowrap'
+              )}
+            >
+              Logout
+            </button>
+          </div>
           <TabPanels className="h-full overflow-hidden">
             <TabPanel key="Manage Data" className="">
               <ManageData />
@@ -71,7 +102,6 @@ export default function UserSettings() {
             <TabPanel key="Profile Shares" className="h-full overflow-hidden ">
               <ProfileShares />
             </TabPanel>
-            {/* grid grid-rows-1 md:ml-4 h-full  */}
             <TabPanel key="Document Shares" className="">
               <DocumentShares />
             </TabPanel>
@@ -80,13 +110,6 @@ export default function UserSettings() {
               className="grid grid-rows-1 md:ml-4 h-full "
             >
               {/* <BlockedUsers /> */}
-            </TabPanel>
-
-            <TabPanel
-              key="Referrals"
-              className="grid grid-rows-1 md:ml-4 h-full "
-            >
-              <Referrals id={user._id} />
             </TabPanel>
           </TabPanels>
         </TabGroup>

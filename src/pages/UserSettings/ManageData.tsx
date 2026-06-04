@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { IconInfo } from '../../components/Icons/IconInfo';
+// IconInfo intentionally retained for the disabled DLT-disclaimer block
+// below; re-import if the block is re-enabled.
+// import { IconInfo } from '../../components/Icons/IconInfo';
 import { Loading } from '../../components/Loading';
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import { deleteMe, getExportMyData } from '../../http';
@@ -77,6 +79,10 @@ export function ManageData() {
         Use this only if you want to permanently delete your account & data from
         our system.
       </div>
+      {/* Hidden: the DLT immutability disclaimer below is no longer
+          relevant since the current platform no longer surfaces on-chain
+          state to end users. Kept in source for posterity in case the
+          blockchain side is re-enabled later.
       <div className="bg-[#F3F6FC] p-2 rounded-lg grid grid-cols-[16px,_1fr] gap-2 font-sans text-[12px] mb-4">
         <IconInfo />
         <p>
@@ -87,6 +93,7 @@ export function ManageData() {
           storage etc will be removed. Any of your digital assets will be lost.
         </p>
       </div>
+      */}
       <button
         className="mb-8 rounded-xl hover:bg-brand-hover border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2"
         onClick={() => setWarning(true)}

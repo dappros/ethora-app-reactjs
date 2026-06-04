@@ -1,6 +1,27 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { IconExternalLink } from '../components/Icons/IconExternalLink';
 import { BookACallModal } from '../components/modal/BookACallModal';
+
+// Derive the uptime/status page URL from the current hostname.
+// Convention: the uptime service is hosted on a sibling subdomain to the
+// admin frontend, with the leading "app" label swapped for "uptime"
+// (e.g. app.chat-qa.ethora.com -> uptime.chat-qa.ethora.com). If the
+// hostname doesn't start with "app." we prepend "uptime." which still
+// produces a sensible default for enterprise/self-hosted installs.
+function deriveStatusUrl(): string {
+  if (typeof window === 'undefined') return '';
+  const host = window.location.hostname;
+  if (!host || host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)) {
+    return '';
+  }
+  const parts = host.split('.');
+  if (parts[0] === 'app') {
+    parts[0] = 'uptime';
+  } else {
+    parts.unshift('uptime');
+  }
+  return `https://${parts.join('.')}/`;
+}
 
 interface ResourceCardProps {
   title: string;
@@ -52,6 +73,7 @@ function ResourceCard({
 
 export default function Help() {
   const [showBookACall, setShowBookACall] = useState(false);
+  const statusUrl = useMemo(deriveStatusUrl, []);
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
@@ -97,6 +119,16 @@ export default function Help() {
             ctaLabel="Book a call"
             onClick={() => setShowBookACall(true)}
           />
+          {statusUrl && (
+            <ResourceCard
+              title="Status"
+              description={
+                'Live infrastructure health and uptime for this environment - API, XMPP, push, AI and more. Check here first if something looks off.'
+              }
+              href={statusUrl}
+              ctaLabel="Open status page"
+            />
+          )}
         </div>
       </div>
       {showBookACall && (
