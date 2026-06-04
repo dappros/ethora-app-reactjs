@@ -1,6 +1,6 @@
 import { Chat } from '@ethora/chat-component';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import React, { useEffect, useMemo, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   actionLoadOwnedApps,
@@ -306,20 +306,60 @@ export default function ChatPage() {
             switching={switching}
           />
         )}
-        {/* Demo-server hint preserved as a fallback for environments that
-            still want to nudge users toward the Publish path. Hidden when
-            we already have an active owner session, since at that point
-            the user knows where to test their app's chats. */}
-        {isAdmin && !ownerSession && allowedDomains.includes(currentDomain) && (
-          <div className="flex flex-col items-center bg-yellow-100 px-4 py-2 text-sm border">
-            <p>This is demo server</p>
-            <p className="flex items-center gap-2">
-              <span>To test your own App, switch app above or go to "Admin"</span>
-              <ArrowRightAltIcon /> <span>your App </span>
-              <ArrowRightAltIcon /> <span>"Publish"</span>
-            </p>
-          </div>
-        )}
+        {/* Context-aware admin nudge. Three variants:
+            (1) Base app, no owned apps yet  -> invite to create one.
+            (2) Base app, has owned apps     -> point at the switcher above.
+            (3) Own-app context, no default rooms yet -> deep link to the
+                Chats tab in that app's Settings.
+            Variants 1 and 2 only render on the hosted-demo domains
+            (allowedDomains); variant 3 is universally useful so we show it
+            in enterprise installs too. */}
+        {isAdmin && (() => {
+          if (chatAppId) {
+            // Variant 3: in a child-app context with no chats configured.
+            // Read defaultRooms straight off the ownedApps list (not via
+            // effectiveApp, which is gated on ownerSession landing -
+            // during the switch transition that would briefly point at
+            // the base app and we'd misjudge the chat count).
+            const targetApp = apps.find((a) => a._id === chatAppId);
+            if (!targetApp) return null; // owned-apps list still loading
+            if ((targetApp.defaultRooms?.length || 0) > 0) return null;
+            return (
+              <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
+                You are within your own App context, but it seems there are
+                no chats available yet. Go to{' '}
+                <NavLink
+                  to={`/app/admin/apps/${chatAppId}/settings?tab=Chats`}
+                  className="text-brand-500 underline"
+                >
+                  App Settings &rarr; Chats
+                </NavLink>{' '}
+                to create Pinned Chats, invite AI bots etc.
+              </div>
+            );
+          }
+          if (!allowedDomains.includes(currentDomain)) return null;
+          if (apps.length === 0) {
+            // Variant 1: hosted demo, no owned apps yet.
+            return (
+              <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
+                You are testing the public chats in our demo base app.
+                Explore as an end user or{' '}
+                <NavLink to="/app/admin/apps" className="text-brand-500 underline">
+                  create your own App
+                </NavLink>{' '}
+                where you will set up your own chats.
+              </div>
+            );
+          }
+          // Variant 2: hosted demo, has owned apps - point at the switcher.
+          return (
+            <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
+              You are testing the public chats in our demo base app. Use the
+              drop-down selector above to switch to your own Apps and chats.
+            </div>
+          );
+        })()}
         <div />
       </div>
       <div

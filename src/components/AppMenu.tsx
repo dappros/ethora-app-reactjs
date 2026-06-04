@@ -101,7 +101,7 @@ export function AppMenu() {
         </NavLink>
         <div className="hidden md:block my-2 border-b border-b-gray-200"></div>
         <NavLink
-          to="/app/settings"
+          to="/app/account"
           className="hidden group hover:bg-[#F5F7F9] flex-col items-center justify-center md:flex md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
           <IconAccount />

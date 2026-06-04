@@ -134,7 +134,7 @@ export const router = createBrowserRouter(
                   Component: ProfileEdit,
                 },
                 {
-                  path: 'settings',
+                  path: 'account',
                   Component: UserSettings,
                 },
               ],

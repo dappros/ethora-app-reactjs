@@ -73,7 +73,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
         </div>
         <div className="">
           <NavLink
-            to="/app/settings"
+            to="/app/account"
             onClick={onClose}
             className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
           >

@@ -32,7 +32,7 @@ const ROUTE_TABS: RouteEntry[] = [
   { pattern: '/app/help', tab: 'Help & Support' },
   { pattern: '/app/profile/edit', tab: 'Edit Profile' },
   { pattern: '/app/profile', tab: 'Profile' },
-  { pattern: '/app/settings', tab: 'Account' },
+  { pattern: '/app/account', tab: 'Account' },
 ];
 
 function matchRoute(pathname: string): {
