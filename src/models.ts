@@ -3,6 +3,7 @@ export interface ModelCurrentUser {
   appId: string;
   firstName: string;
   lastName: string;
+  email?: string;
   homeScreen: string;
   isAgreeWithTerms: boolean;
   isAssetsOpen: boolean;
