@@ -32,7 +32,7 @@ export default function AdminApps() {
   const currentApp = useAppStore((s) => s.currentApp as ModelApp);
 
   const limit = useMemo(
-    () => Number(searchParams.get('limit')) || 5,
+    () => Number(searchParams.get('limit')) || 10,
     [searchParams]
   );
   const pageIndex = useMemo(() => {
@@ -172,8 +172,6 @@ export default function AdminApps() {
     }
     setShowModal(!apps.length);
   }, [apps.length]);
-
-  console.log('newShowModal', newShowModal);
 
   useEffect(() => {
     fetchApps();

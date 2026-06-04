@@ -42,6 +42,7 @@ console.log(`[step] post-login URL: ${page.url()}`);
 const pages = [
   { name: 'admin-apps',     url: `${QA_BASE}/app/admin/apps` },
   { name: 'admin-agents',   url: `${QA_BASE}/app/admin/agents` },
+  { name: 'admin-billing',  url: `${QA_BASE}/app/admin/billing` },
   { name: 'app-settings',   url: `${QA_BASE}/app/admin/apps/${CHILD_APP_ID}/settings` },
   { name: 'app-users',      url: `${QA_BASE}/app/admin/apps/${CHILD_APP_ID}/users` },
   { name: 'app-statistics', url: `${QA_BASE}/app/admin/apps/${CHILD_APP_ID}/statistics` },
@@ -65,12 +66,13 @@ for (const p of pages) {
     );
     return link ? link.getAttribute('href') : null;
   });
-  results.push({ name: p.name, url: p.url, hasFooter, linkHref });
+  const title = await page.title();
+  results.push({ name: p.name, url: p.url, hasFooter, linkHref, title });
 }
 
 console.log('[step] summary');
 for (const r of results) {
-  console.log(`  ${r.hasFooter ? 'OK' : 'MISSING'}  ${r.name}  link=${r.linkHref || '(none)'}`);
+  console.log(`  ${r.hasFooter ? 'OK' : 'MISSING'}  ${r.name}  link=${r.linkHref || '(none)'}  title="${r.title}"`);
 }
 
 const adminPages = results.filter((r) => r.name !== 'help');

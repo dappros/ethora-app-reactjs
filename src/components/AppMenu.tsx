@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
+import { IconAccount } from './Icons/IconAccount';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconChat } from './Icons/IconChat';
 import { IconHelp } from './Icons/IconHelp';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
-import { IconSettingsMenu } from './Icons/IconSettingsMenu';
 import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { UnreadBadge } from './UnreadBadge';
@@ -104,9 +104,9 @@ export function AppMenu() {
           to="/app/settings"
           className="hidden group hover:bg-[#F5F7F9] flex-col items-center justify-center md:flex md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
         >
-          <IconSettingsMenu />
+          <IconAccount />
           <div className="hidden md:block text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
-            Settings
+            Account
           </div>
         </NavLink>
       </div>

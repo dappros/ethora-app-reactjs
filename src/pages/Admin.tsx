@@ -5,10 +5,9 @@ import { BookACallModal } from '../components/modal/BookACallModal';
 
 export default function Admin() {
   const [showBookACall, setShowBookACall] = useState(false);
-  const isProd = import.meta.env.VITE_SITE_IS_PRODUCTION;
   // AI feature umbrella from deploy.yml -> features.ai_service. Surfaced to the
   // frontend via VITE_AI_FEATURE_ENABLED. When false, the Agents tab below
-  // greys out (same shape as the Billing tab disable on non-prod).
+  // greys out.
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
 
   return (
@@ -60,8 +59,6 @@ export default function Admin() {
                 {
                   'bg-brand-500 text-white': isActive,
                   'hover:bg-brand-hover': !isActive,
-                  'cursor-not-allowed pointer-events-none text-gray-300 border-gray-300':
-                    isProd === 'true',
                 }
               )
             }

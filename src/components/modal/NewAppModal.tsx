@@ -88,7 +88,9 @@ export function NewAppModal({ onClose, show }: Props) {
       key={fixKey}
       className="fixed inset-0 z-50 flex justify-center items-center bg-black/50 transition duration-300"
       open={show}
-      onClose={() => {}}
+      onClose={() => {
+        if (!loading) onClose();
+      }}
     >
       <DialogPanel className="p-4 sm:py-8 sm:px-[20px] bg-white rounded-3xl w-full max-w-[640px] m-8 relative">
         <button
@@ -154,19 +156,19 @@ export function NewAppModal({ onClose, show }: Props) {
                   </p>
                 )}
               </div>
-              <div className="flex gap-4">
+              <button
+                className="w-full py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
+                type="submit"
+              >
+                Continue
+              </button>
+              <div className="text-center mt-3">
                 <button
                   type="button"
-                  className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
+                  className="text-sm text-gray-500 hover:text-gray-700 underline"
                   onClick={onClose}
                 >
                   Cancel
-                </button>
-                <button
-                  className="w-full py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
-                  type="submit"
-                >
-                  Continue
                 </button>
               </div>
             </form>

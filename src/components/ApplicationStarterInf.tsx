@@ -15,7 +15,7 @@ export function ApplicationStarterInf({ onClose }: Props) {
             permissions.
           </p>
           <ul className="list-disc pl-6">
-            <li>Create: use the “Add New App” button.</li>
+            <li>Create: use the "Create App" button.</li>
             <li>Manage / View: click one of the available apps in the list.</li>
           </ul>
         </div>
