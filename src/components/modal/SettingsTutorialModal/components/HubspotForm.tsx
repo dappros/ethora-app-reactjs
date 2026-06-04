@@ -59,29 +59,20 @@ export const HubspotForm = () => {
     message?: string;
   }>({ status: 'idle' });
 
-  // Short-circuit when this install hasn't been wired up with HubSpot
-  // (typical for enterprise/self-hosted + our QA env where we deliberately
-  // don't surface test signups into prod HubSpot). Show the same form
-  // shell so the modal feels consistent across environments, then point
-  // the user at email instead of pretending submit will work.
-  if (!isConfigured) {
-    return (
-      <div className="font-sans text-sm text-gray-700">
-        <p className="mb-4">
-          Online booking isn't configured on this install. Drop us a line
-          and we'll get back to you to schedule a call.
-        </p>
-        <a
-          href="mailto:hello@ethora.com?subject=Book%20a%20call%20with%20the%20Ethora%20team"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm"
-        >
-          Email hello@ethora.com
-        </a>
-      </div>
-    );
-  }
-
+  // We always render the form (even when HubSpot isn't configured on this
+  // install) so the UI is identical across environments - QA can exercise
+  // the same shape users see on prod. If the env vars are missing, submit
+  // surfaces the "not configured + email us" notice as the error state
+  // instead of pretending to POST.
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+    if (!isConfigured) {
+      setSubmitState({
+        status: 'error',
+        message:
+          "Online booking isn't configured on this install. Email hello@ethora.com and we'll schedule a call.",
+      });
+      return;
+    }
     const payload = {
       fields: [
         { objectTypeId: '0-1', name: 'firstname', value: data.firstname },
@@ -214,7 +205,15 @@ export const HubspotForm = () => {
       </div>
 
       {submitState.status === 'error' && (
-        <p className="text-sm text-red-600">{submitState.message}</p>
+        <div className="text-sm text-red-600">
+          <p>{submitState.message}</p>
+          <a
+            href="mailto:hello@ethora.com?subject=Book%20a%20call%20with%20the%20Ethora%20team"
+            className="inline-block mt-2 underline text-brand-500"
+          >
+            Email hello@ethora.com
+          </a>
+        </div>
       )}
 
       <button
