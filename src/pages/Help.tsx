@@ -1,8 +1,6 @@
-import { Dialog, DialogPanel } from '@headlessui/react';
 import { useState } from 'react';
-import { IconClose } from '../components/Icons/IconClose';
 import { IconExternalLink } from '../components/Icons/IconExternalLink';
-import { HubspotForm } from '../components/modal/SettingsTutorialModal/components/HubspotForm';
+import { BookACallModal } from '../components/modal/BookACallModal';
 
 interface ResourceCardProps {
   title: string;
@@ -49,52 +47,6 @@ function ResourceCard({
         )}
       </div>
     </div>
-  );
-}
-
-function BookACallModal({ onClose }: { onClose: () => void }) {
-  const hubspotConfigured =
-    String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() ===
-      'true' &&
-    !!String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim() &&
-    !!String(import.meta.env.VITE_HUBSPOT_FORM_ID_TUTORIAL || '').trim();
-
-  return (
-    <Dialog
-      className="fixed inset-0 z-50 flex justify-center items-center bg-black/50"
-      open={true}
-      onClose={onClose}
-    >
-      <DialogPanel className="relative bg-white rounded-3xl m-8 p-6 md:p-8 w-[90%] md:w-[560px] max-h-[90vh] overflow-y-auto">
-        <button
-          className="absolute top-[20px] right-[20px]"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <IconClose />
-        </button>
-        <div className="font-varela text-[20px] md:text-[24px] mb-4 pr-8">
-          Book a call
-        </div>
-        {hubspotConfigured ? (
-          <HubspotForm />
-        ) : (
-          <div className="font-sans text-sm text-gray-700">
-            <p className="mb-4">
-              Online booking isn't configured on this install yet. In the
-              meantime, drop us a line and we'll get back to you to schedule
-              a call.
-            </p>
-            <a
-              href="mailto:hello@ethora.com?subject=Book%20a%20call%20with%20the%20Ethora%20team"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm"
-            >
-              Email hello@ethora.com
-            </a>
-          </div>
-        )}
-      </DialogPanel>
-    </Dialog>
   );
 }
 

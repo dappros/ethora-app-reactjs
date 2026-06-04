@@ -1,7 +1,10 @@
 import cn from 'classnames';
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { BookACallModal } from '../components/modal/BookACallModal';
 
 export default function Admin() {
+  const [showBookACall, setShowBookACall] = useState(false);
   const isProd = import.meta.env.VITE_SITE_IS_PRODUCTION;
   // AI feature umbrella from deploy.yml -> features.ai_service. Surfaced to the
   // frontend via VITE_AI_FEATURE_ENABLED. When false, the Agents tab below
@@ -77,9 +80,21 @@ export default function Admin() {
       <p className="text-xs text-gray-500 text-center pb-2">
         Need assistance?{' '}
         <NavLink to="/app/help" className="text-brand-500 underline">
-          Visit our Help &amp; Support page.
-        </NavLink>
+          Help &amp; Support page
+        </NavLink>{' '}
+        or{' '}
+        <button
+          type="button"
+          onClick={() => setShowBookACall(true)}
+          className="text-brand-500 underline"
+        >
+          Book a Call
+        </button>
+        .
       </p>
+      {showBookACall && (
+        <BookACallModal onClose={() => setShowBookACall(false)} />
+      )}
     </div>
   );
 }
