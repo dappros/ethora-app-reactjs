@@ -718,7 +718,7 @@ const RoomActionsList: React.FC<{
   );
 };
 
-const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: () => void }> = ({ agent, bi, onChanged }) => {
+const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: () => void; isDisabled?: boolean }> = ({ agent, bi, onChanged, isDisabled }) => {
   const [open, setOpen] = useState(false);
   const [diag, setDiag] = useState<DiagState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -792,12 +792,27 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
         </td>
         <td className="p-2 text-gray-500 text-xs">{bi.lastActiveAt || ''}</td>
         <td className="p-2 text-right">
-          <button
-            onClick={() => setOpen(!open)}
-            className="text-xs text-brand-500 hover:underline"
-          >
-            {open ? 'Hide' : 'Inspect'}
-          </button>
+          {/* Inspect surfaces the bot's live ai-service runtime state +
+              recent message/response pairs. That's privileged info — it
+              would let a non-owner viewer (e.g. a cross-tenant superadmin
+              audit, or anyone browsing public agents) read chat content
+              from another tenant's rooms. Gate it on ownership; non-
+              owners just see the row identity. */}
+          {isDisabled ? (
+            <span
+              className="text-xs text-gray-400 cursor-not-allowed"
+              title="Inspect is disabled for agents you don't own. Chat content in this bot's rooms belongs to its owner."
+            >
+              Inspect disabled
+            </span>
+          ) : (
+            <button
+              onClick={() => setOpen(!open)}
+              className="text-xs text-brand-500 hover:underline"
+            >
+              {open ? 'Hide' : 'Inspect'}
+            </button>
+          )}
         </td>
       </tr>
       {open && (
@@ -875,7 +890,8 @@ export const ChatsIndexPanel: React.FC<{
   agent: ModelAgent;
   defaultChatRooms?: ModelAppDefaulRooom[];
   scopedAppId?: string;
-}> = ({ agent, defaultChatRooms, scopedAppId }) => {
+  isDisabled?: boolean;
+}> = ({ agent, defaultChatRooms, scopedAppId, isDisabled }) => {
   const [items, setItems] = useState<AgentBotInstance[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -923,7 +939,7 @@ export const ChatsIndexPanel: React.FC<{
               </tr>
             )}
             {items.map((bi) => (
-              <DiagRow key={bi.id} agent={agent} bi={bi} onChanged={reload} />
+              <DiagRow key={bi.id} agent={agent} bi={bi} onChanged={reload} isDisabled={isDisabled} />
             ))}
           </tbody>
         </table>

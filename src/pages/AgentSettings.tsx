@@ -44,6 +44,7 @@ const TABS = [
   'SOUL.MD',
   'Heartbeat',
   'Chats Index',
+  'Visibility',
 ] as const;
 
 const SECTIONS: { label: string; tabs: (typeof TABS[number])[] }[] = [
@@ -51,6 +52,7 @@ const SECTIONS: { label: string; tabs: (typeof TABS[number])[] }[] = [
   { label: 'Knowledge', tabs: ['Web Index', 'Docs Index'] },
   { label: 'Behaviour', tabs: ['SOUL.MD', 'Heartbeat'] },
   { label: 'Activity', tabs: ['Chats Index'] },
+  { label: 'Sharing', tabs: ['Visibility'] },
 ];
 
 export default function AgentSettings() {
@@ -119,6 +121,17 @@ export default function AgentSettings() {
 
   const defaultBotInstance = instances[0] || null;
 
+  // The viewer is read-only here unless they own the agent. The backend
+  // already 403s any non-owner PATCH / DELETE / soul.md write, but
+  // surfacing this in the UI (disabled inputs, hidden Inspect on per-app
+  // bot rows) makes the constraint visible instead of letting the user
+  // discover it on save failure. Superadmins can land on this page for
+  // private agents owned by other tenants; they are NOT being given an
+  // edit affordance here (audit-only).
+  const currentUser = useAppStore((s) => s.currentUser);
+  const isOwned = !!(agent && currentUser?._id && agent.ownerId === currentUser._id);
+  const readOnly = !isOwned;
+
   if (loading && !agent) return <div className="p-4 text-gray-500">Loading agent...</div>;
   if (!agent) return <div className="p-4 text-gray-500">Agent not found.</div>;
 
@@ -130,7 +143,20 @@ export default function AgentSettings() {
         onBack={() => navigate('/app/admin/agents')}
         onVisibilityChanged={(updated) => setAgent(updated)}
         onInstancesChanged={reloadInstances}
+        readOnly={readOnly}
       />
+
+      {readOnly && (
+        <div className="mx-4 -mt-2 rounded-md border border-gray-300 bg-gray-50 p-2 text-xs text-gray-700">
+          <strong>Read-only.</strong> You're viewing an agent owned by another
+          tenant{agent.visibility === 'public' ? ' (public)' : ''}. Editing,
+          deleting, and inspecting per-room runtime state are disabled.{' '}
+          {agent.visibility === 'public' && (
+            <>Use the <em>Clone to my agents</em> action on the Agents list
+            page to create your own editable copy.</>
+          )}
+        </div>
+      )}
 
       <TabGroup
         className="grid h-full overflow-hidden grid-rows-[46px,1fr] gap-y-4 lg:grid-rows-1 lg:grid-cols-[260px,1fr] px-4"
@@ -143,25 +169,33 @@ export default function AgentSettings() {
 
         <TabPanels className="h-full overflow-y-auto px-2">
           <TabPanel className="p-2">
-            <PersonaPanel agent={agent} />
+            <PersonaPanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <ContextPanel agent={agent} />
+            <ContextPanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <WebIndexPanel agent={agent} appId={scopedAppId} />
+            <WebIndexPanel agent={agent} appId={scopedAppId} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <DocsIndexPanel agent={agent} appId={scopedAppId} />
+            <DocsIndexPanel agent={agent} appId={scopedAppId} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <SoulMdPanel agent={agent} />
+            <SoulMdPanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <HeartbeatPanel agent={agent} />
+            <HeartbeatPanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <ChatsIndexPanel agent={agent} />
+            <ChatsIndexPanel agent={agent} isDisabled={readOnly} />
+          </TabPanel>
+          <TabPanel className="p-2">
+            <VisibilityPanel
+              agent={agent}
+              isOwned={isOwned}
+              isSuperWriteAdmin={!!currentUser?.isSuperAdmin?.write}
+              onChanged={(updated) => setAgent(updated)}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>
@@ -169,13 +203,132 @@ export default function AgentSettings() {
   );
 }
 
+const VisibilityPanel: React.FC<{
+  agent: ModelAgent;
+  isOwned: boolean;
+  isSuperWriteAdmin: boolean;
+  onChanged: (a: ModelAgent) => void;
+}> = ({ agent, isOwned, isSuperWriteAdmin, onChanged }) => {
+  const canEdit = isOwned || isSuperWriteAdmin;
+  return (
+    <div className="space-y-4 max-w-xl">
+      <div>
+        <h3 className="text-lg font-semibold mb-1">Visibility</h3>
+        <p className="text-sm text-gray-600">
+          Controls who can see this agent on this Ethora server.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <VisibilityOption
+          value="private"
+          current={agent.visibility}
+          canEdit={canEdit}
+          onChange={(v) => doSet(agent.id, v, onChanged)}
+          label="Private"
+          description="Only you can see this agent. Recommended for agents built for your own business, app, or website."
+        />
+        <VisibilityOption
+          value="unlisted"
+          current={agent.visibility}
+          canEdit={canEdit}
+          onChange={(v) => doSet(agent.id, v, onChanged)}
+          label="Unlisted"
+          description="Not listed publicly, but discoverable by other tenants who know the agent's address. Useful for sharing with specific partners without making it broadcast-visible."
+        />
+        <VisibilityOption
+          value="public"
+          current={agent.visibility}
+          canEdit={canEdit}
+          onChange={(v) => doSet(agent.id, v, onChanged)}
+          label="Public"
+          description="Listed for every tenant on this Ethora server. They can view the persona and clone it. Pick this only when the agent is intended to be universally useful (e.g. a generic Support Agent or a published persona for the community)."
+        />
+      </div>
+
+      {!canEdit && (
+        <div className="rounded-md border border-gray-300 bg-gray-50 p-2 text-xs text-gray-700">
+          You're viewing an agent owned by another tenant. Only the owner can
+          change its visibility.
+          {agent.visibility === 'public' && (
+            <> Use <em>Clone to my agents</em> on the Agents list to create
+            your own editable copy.</>
+          )}
+        </div>
+      )}
+
+      {!isOwned && isSuperWriteAdmin && (
+        <div className="rounded-md border border-purple-300 bg-purple-50 p-2 text-xs text-purple-900">
+          <strong>Superadmin moderation:</strong> you can flip this agent's
+          visibility on behalf of its owner. Use this to take down public
+          agents that contain spam, abuse, or otherwise breach platform
+          policy. Setting <em>Private</em> immediately removes it from every
+          other tenant's <em>Public agents</em> list. Owner-facing
+          notifications are not sent — coordinate out-of-band when
+          appropriate.
+        </div>
+      )}
+    </div>
+  );
+};
+
+async function doSet(
+  agentId: string,
+  v: 'private' | 'unlisted' | 'public',
+  onChanged: (a: ModelAgent) => void
+) {
+  try {
+    const updated = await actionSetAgentVisibility(agentId, v);
+    if (updated) onChanged(updated);
+    toast.success(`Visibility set to ${v}`);
+  } catch (err: any) {
+    toast.error(`Failed: ${err?.response?.data?.error || err.message}`);
+  }
+}
+
+const VisibilityOption: React.FC<{
+  value: 'private' | 'unlisted' | 'public';
+  current: string;
+  canEdit: boolean;
+  onChange: (v: 'private' | 'unlisted' | 'public') => void;
+  label: string;
+  description: string;
+}> = ({ value, current, canEdit, onChange, label, description }) => {
+  const isChecked = current === value;
+  return (
+    <label className={classNames(
+      'flex items-start gap-3 border rounded-lg p-3 cursor-pointer',
+      isChecked ? 'border-brand-500 bg-brand-50' : 'border-gray-200 bg-white',
+      !canEdit && 'cursor-not-allowed opacity-70'
+    )}>
+      <input
+        type="radio"
+        name="visibility"
+        value={value}
+        checked={isChecked}
+        disabled={!canEdit}
+        onChange={() => onChange(value)}
+        className="mt-1"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold">{label}</div>
+        <div className="text-xs text-gray-600">{description}</div>
+      </div>
+    </label>
+  );
+};
+
 const Header: React.FC<{
   agent: ModelAgent;
   defaultBotInstance: (ModelBotInstance & { appName?: string }) | null;
   onBack: () => void;
   onVisibilityChanged: (a: ModelAgent) => void;
   onInstancesChanged: () => void;
-}> = ({ agent, defaultBotInstance, onBack, onVisibilityChanged, onInstancesChanged }) => {
+  readOnly: boolean;
+}> = ({ agent, defaultBotInstance, onBack, onInstancesChanged, readOnly }) => {
+  // The visibility selector moved out of the header into its own
+  // "Visibility" tab (see VisibilityPanel below). Header is now identity
+  // + the per-app Start/Stop affordance, gated on ownership.
   return (
     <div className="px-4 pt-2 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-3">
       <button onClick={onBack} className="text-sm text-brand-500 hover:underline">
@@ -195,36 +348,13 @@ const Header: React.FC<{
         </div>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
-        <select
-          value={agent.visibility}
-          onChange={async (e) => {
-            try {
-              const updated = await actionSetAgentVisibility(agent.id, e.target.value as any);
-              if (updated) onVisibilityChanged(updated);
-              toast.success(`Visibility set to ${e.target.value}`);
-            } catch (err: any) {
-              toast.error(`Failed: ${err?.response?.data?.error || err.message}`);
-            }
-          }}
-          className="border rounded px-2 py-1 text-sm"
-        >
-          <option value="private">Private</option>
-          <option value="unlisted">Unlisted</option>
-          <option value="public">Public</option>
-        </select>
-
-        {/* "Test message" lives per-room inside Chats Index now (one click sends into
-            one specific room). Keeping the header lean. */}
-
-        {defaultBotInstance && (
+        {!readOnly && defaultBotInstance && (
           <button
             onClick={async () => {
               const next = defaultBotInstance.status === 'on' ? 'off' : 'on';
               try {
                 await actionSetBotInstanceStatus(defaultBotInstance.id, next);
                 toast.success(`Bot ${next}`);
-                // Trigger re-fetch of bot instances so the button label flips
-                // immediately instead of requiring a page reload.
                 onInstancesChanged();
               } catch (e: any) {
                 toast.error(`Failed: ${e?.response?.data?.error || e.message}`);

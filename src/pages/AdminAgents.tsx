@@ -1,13 +1,18 @@
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 //
 // AdminAgents: top-level Agents list (sibling of AdminApps).
-// Lists every Agent the current user owns + a "+ New Agent" affordance and a public
-// browser. Agents are tenant-level (one user can own many that get deployed across
-// many Apps), so this page deliberately does not live under a per-App context.
 //
-// Each row carries enough metadata (origin app name, updatedAt, RAG size, # of
-// BotInstances) to disambiguate identically-named entries (e.g. the wave of
-// "AI Bot" rows the migration creates from legacy App.aiBot rows).
+// Visibility model and sections in this view:
+//   - "My agents" - this tenant owns them. Editable.
+//   - "Public agents" - other tenants marked them visibility=public. Visible
+//     across the platform, but read-only from any tenant that isn't the owner;
+//     a Clone action is available so the viewer can spin up their own editable
+//     copy.
+//   - "Private (other tenants)" - shown only to superadmins (isSuperAdmin.read).
+//     Cross-tenant audit cohort. Read-only.
+//
+// Both "My" and "Public" are shown by default; the viewer can toggle either
+// off. The superadmin "Private" cohort is gated and off by default.
 
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
@@ -45,24 +50,36 @@ const VISIBILITY_BADGE: Record<string, string> = {
   private: 'bg-gray-100 text-gray-600',
 };
 
+const PAGE_LIMIT = 100;
+
 export default function AdminAgents() {
   const agents = useAppStore((s) => s.agents);
   const apps = useAppStore((s) => s.apps);
+  const currentUser = useAppStore((s) => s.currentUser);
   const navigate = useNavigate();
+
+  const currentUserId = currentUser?._id || '';
+  const isSuperReadAdmin = !!currentUser?.isSuperAdmin?.read;
 
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [showBrowsePublic, setShowBrowsePublic] = useState(false);
   const [filter, setFilter] = useState('');
-  const [showAll, setShowAll] = useState(false);
 
-  // Initial fetch: own + public agents (backend default when no `visibility` is
-  // passed). Public agents include the platform-supplied Support Agent that
-  // every App's AI Widget points to by default; surfacing it here means
-  // operators can click "Edit in Manage agents" from the persona card and
-  // actually land on something they can browse. AgentCard already shows the
-  // visibility badge, so private and public agents render side-by-side without
-  // confusion.
+  // Per-section "show all" toggles so each cohort paginates independently.
+  const [showAllMine, setShowAllMine] = useState(false);
+  const [showAllPublic, setShowAllPublic] = useState(false);
+  const [showAllOtherPrivate, setShowAllOtherPrivate] = useState(false);
+
+  // Section visibility checkboxes. "Mine" and "Public" default on. The
+  // superadmin "Private (other tenants)" cohort is gated on isSuperReadAdmin
+  // and defaults off so superadmins don't accidentally see other tenants'
+  // private agents on every page load.
+  const [showMine, setShowMine] = useState(true);
+  const [showPublic, setShowPublic] = useState(true);
+  const [showOtherPrivate, setShowOtherPrivate] = useState(false);
+
+  // Fetch the "own + public" cohort (backend default). The store holds the
+  // union; partition below by ownerId / visibility.
   useEffect(() => {
     setLoading(true);
     actionListAgents({})
@@ -70,29 +87,136 @@ export default function AdminAgents() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Map appId -> displayName for fallback when the API didn't populate originAppName
-  // (e.g. for newly-created agents pre-refresh).
+  // Superadmin "private (other tenants)" cohort fetched lazily when the
+  // checkbox is first ticked so the default page load stays cheap.
+  const [otherPrivate, setOtherPrivate] = useState<ModelAgent[]>([]);
+  const [otherPrivateLoaded, setOtherPrivateLoaded] = useState(false);
+  useEffect(() => {
+    if (!isSuperReadAdmin || !showOtherPrivate || otherPrivateLoaded) return;
+    actionListAgents({ visibility: 'private' as any })
+      .then((items: ModelAgent[] | undefined) => {
+        const filtered = (items || []).filter((a) => a.ownerId !== currentUserId);
+        setOtherPrivate(filtered);
+        setOtherPrivateLoaded(true);
+      })
+      .catch((e) => {
+        toast.error(`Failed to load private agents: ${e?.response?.data?.error || e.message}`);
+        setOtherPrivateLoaded(true);
+      });
+  }, [isSuperReadAdmin, showOtherPrivate, otherPrivateLoaded, currentUserId]);
+
   const appNameById = useMemo(() => {
     const m = new Map<string, string>();
     apps.forEach((a) => m.set(a._id, a.displayName));
     return m;
   }, [apps]);
 
-  const filtered = useMemo(() => {
+  function matchesFilter(a: ModelAgent): boolean {
     const q = filter.trim().toLowerCase();
-    if (!q) return agents;
-    return agents.filter((a) => {
-      return (
-        (a.displayName || '').toLowerCase().includes(q) ||
-        (a.address || '').toLowerCase().includes(q) ||
-        (a.bio || '').toLowerCase().includes(q) ||
-        (a.originAppName || '').toLowerCase().includes(q) ||
-        (appNameById.get(a.originAppId || '') || '').toLowerCase().includes(q)
-      );
-    });
-  }, [agents, filter, appNameById]);
+    if (!q) return true;
+    return (
+      (a.displayName || '').toLowerCase().includes(q) ||
+      (a.address || '').toLowerCase().includes(q) ||
+      (a.bio || '').toLowerCase().includes(q) ||
+      (a.originAppName || '').toLowerCase().includes(q) ||
+      (appNameById.get(a.originAppId || '') || '').toLowerCase().includes(q)
+    );
+  }
 
-  const visible = showAll ? filtered : filtered.slice(0, 100);
+  // Partition + filter. The store may contain duplicates between the
+  // mine/public buckets if an operator marked one of their own as public;
+  // we bucket by ownership first (mine wins) so each agent appears once.
+  const mine = useMemo(
+    () => agents.filter((a) => a.ownerId === currentUserId).filter(matchesFilter),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [agents, currentUserId, filter, appNameById]
+  );
+  const publicOthers = useMemo(
+    () => agents.filter((a) => a.visibility === 'public' && a.ownerId !== currentUserId).filter(matchesFilter),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [agents, currentUserId, filter, appNameById]
+  );
+  const privateOthers = useMemo(
+    () => otherPrivate.filter(matchesFilter),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [otherPrivate, filter, appNameById]
+  );
+
+  function onDelete(a: ModelAgent) {
+    return async () => {
+      if (!confirm(`Delete "${a.displayName}"? Disables all its BotInstances.`)) return;
+      try {
+        await actionDeleteAgent(a.id);
+        toast.success('Agent deleted');
+      } catch (e: any) {
+        toast.error(`Delete failed: ${e?.response?.data?.error || e.message}`);
+      }
+    };
+  }
+
+  async function onClone(a: ModelAgent) {
+    try {
+      await actionCloneAgent(a.id, {});
+      toast.success(`Cloned "${a.displayName}" to your agents`);
+      await actionListAgents({}); // refresh the store so the clone appears in My
+    } catch (e: any) {
+      toast.error(`Clone failed: ${e?.response?.data?.error || e.message}`);
+    }
+  }
+
+  function renderSection(
+    title: string,
+    description: string,
+    rows: ModelAgent[],
+    showAll: boolean,
+    setShowAll: (b: boolean) => void,
+    cardMode: 'owned' | 'public' | 'private-other'
+  ) {
+    const visible = showAll ? rows : rows.slice(0, PAGE_LIMIT);
+    return (
+      <section className="mb-6">
+        <div className="flex items-baseline gap-3 mb-2">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <span className="text-xs text-gray-500">{rows.length} agent{rows.length === 1 ? '' : 's'}</span>
+        </div>
+        <div className="text-xs text-gray-500 mb-2">{description}</div>
+        {rows.length === 0 ? (
+          <div className="p-4 border border-dashed rounded-xl text-gray-500 text-sm">
+            {cardMode === 'owned'
+              ? 'You haven\'t created any agents yet. Click "+ New Agent" above.'
+              : cardMode === 'public'
+              ? 'No public agents from other tenants right now.'
+              : 'No private agents from other tenants right now.'}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {visible.map((a) => (
+                <AgentCard
+                  key={a.id}
+                  agent={a}
+                  cardMode={cardMode}
+                  onOpen={() => navigate(`/app/admin/agents/${a.id}/settings`)}
+                  onDelete={onDelete(a)}
+                  onClone={() => onClone(a)}
+                />
+              ))}
+            </div>
+            {rows.length > PAGE_LIMIT && (
+              <div className="text-xs text-gray-500 mt-2">
+                Showing {visible.length} of {rows.length}
+                {!showAll && (
+                  <button onClick={() => setShowAll(true)} className="ml-2 text-brand-500 hover:underline">
+                    show all
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </section>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -111,12 +235,6 @@ export default function AdminAgents() {
             className="border rounded px-2 py-1 text-sm w-64"
           />
           <button
-            onClick={() => setShowBrowsePublic(true)}
-            className="border border-gray-300 hover:bg-gray-100 rounded-xl px-4 py-2 text-sm"
-          >
-            Browse public
-          </button>
-          <button
             onClick={() => setShowCreate(true)}
             className="bg-brand-500 hover:bg-brand-400 text-white rounded-xl px-4 py-2 text-sm"
           >
@@ -125,44 +243,57 @@ export default function AdminAgents() {
         </div>
       </div>
 
+      {/* Section visibility checkboxes. Each toggles a band of the list. */}
+      <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
+        <span className="text-gray-500">Show:</span>
+        <label className="inline-flex items-center gap-1 cursor-pointer">
+          <input type="checkbox" checked={showMine} onChange={(e) => setShowMine(e.target.checked)} />
+          <span>My agents</span>
+        </label>
+        <label className="inline-flex items-center gap-1 cursor-pointer">
+          <input type="checkbox" checked={showPublic} onChange={(e) => setShowPublic(e.target.checked)} />
+          <span>Public agents</span>
+        </label>
+        {isSuperReadAdmin && (
+          <label className="inline-flex items-center gap-1 cursor-pointer">
+            <input type="checkbox" checked={showOtherPrivate} onChange={(e) => setShowOtherPrivate(e.target.checked)} />
+            <span className="text-purple-700">Private (other tenants)</span>
+            <span className="text-[10px] text-purple-700/70">superadmin</span>
+          </label>
+        )}
+      </div>
+
       {loading && agents.length === 0 && <div className="text-gray-500">Loading...</div>}
 
-      {!loading && agents.length === 0 && (
-        <div className="p-6 border border-dashed rounded-xl text-gray-500">
-          No agents yet. Click "+ New Agent" to create one.
-        </div>
+      {showMine && renderSection(
+        'My agents',
+        'Created by you. You can edit, deploy across your Apps, change visibility, or delete.',
+        mine,
+        showAllMine,
+        setShowAllMine,
+        'owned'
       )}
 
-      {agents.length > 0 && (
-        <>
-          <div className="text-xs text-gray-500 mb-2">
-            Showing {visible.length} of {filtered.length}
-            {filtered.length !== agents.length && ` (filtered from ${agents.length})`}
-            {filtered.length > 100 && !showAll && (
-              <button onClick={() => setShowAll(true)} className="ml-2 text-brand-500 hover:underline">
-                show all
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {visible.map((a) => (
-              <AgentCard
-                key={a.id}
-                agent={a}
-                onOpen={() => navigate(`/app/admin/agents/${a.id}/settings`)}
-                onDelete={async () => {
-                  if (!confirm(`Delete "${a.displayName}"? Disables all its BotInstances.`)) return;
-                  try {
-                    await actionDeleteAgent(a.id);
-                    toast.success('Agent deleted');
-                  } catch (e: any) {
-                    toast.error(`Delete failed: ${e?.response?.data?.error || e.message}`);
-                  }
-                }}
-              />
-            ))}
-          </div>
-        </>
+      {showMine && showPublic && <hr className="my-6 border-gray-200" />}
+
+      {showPublic && renderSection(
+        'Public agents (from other tenants)',
+        'Marked public by their owners on this server. Read-only — clone to your agents to customise.',
+        publicOthers,
+        showAllPublic,
+        setShowAllPublic,
+        'public'
+      )}
+
+      {showOtherPrivate && (showMine || showPublic) && <hr className="my-6 border-gray-200" />}
+
+      {isSuperReadAdmin && showOtherPrivate && renderSection(
+        'Private (other tenants)',
+        'Superadmin-only view of private agents owned by other tenants. Read-only.',
+        privateOthers,
+        showAllOtherPrivate,
+        setShowAllOtherPrivate,
+        'private-other'
       )}
 
       {showCreate && (
@@ -174,25 +305,21 @@ export default function AdminAgents() {
           }}
         />
       )}
-
-      {showBrowsePublic && (
-        <BrowsePublicModal
-          onClose={() => setShowBrowsePublic(false)}
-          onCloned={() => actionListAgents({})}
-        />
-      )}
     </div>
   );
 }
 
+type AgentCardMode = 'owned' | 'public' | 'private-other';
+
 const AgentCard: React.FC<{
   agent: ModelAgent;
+  cardMode: AgentCardMode;
   onOpen: () => void;
   onDelete: () => void;
-}> = ({ agent, onOpen, onDelete }) => {
-  // Note: ownerApp is intentionally not surfaced in the card UI - Agents are
-  // tenant-level. Was previously rendered as "Created in: ..." linked to /apps/:id/settings.
+  onClone: () => void;
+}> = ({ agent, cardMode, onOpen, onDelete, onClone }) => {
   const visibilityClass = VISIBILITY_BADGE[agent.visibility] || VISIBILITY_BADGE.private;
+  const isOwned = cardMode === 'owned';
   return (
     <div className="border rounded-xl p-3 hover:border-brand-500 transition-colors flex flex-col gap-2 bg-white">
       <div className="flex items-start gap-3">
@@ -212,11 +339,6 @@ const AgentCard: React.FC<{
         </span>
       </div>
 
-      {/* Agents are tenant-level, not app-level — they can be deployed across many
-          apps. We surface "Deployed in N app(s)" instead of the older "Created in"
-          label since the latter implied an ownership relationship that no longer
-          matches the model. originAppId is still kept on the schema as a soft
-          default-scope hint for Web Index / Docs Index, but isn't shown here. */}
       <dl className="text-xs text-gray-600 grid grid-cols-2 gap-x-2 gap-y-0.5">
         <div>
           <dt className="inline text-gray-400">Updated: </dt>
@@ -237,9 +359,33 @@ const AgentCard: React.FC<{
       </dl>
 
       <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
-        <button onClick={onOpen} className="text-xs text-brand-500 hover:underline">Open</button>
-        <span className="text-gray-300">|</span>
-        <button onClick={onDelete} className="text-xs text-red-500 hover:underline">Delete</button>
+        {/* The settings page renders editable fields for the owner, read-only
+            for everyone else. The verb on this button matches what the viewer
+            will actually see when they land there. */}
+        <button onClick={onOpen} className="text-xs text-brand-500 hover:underline">
+          {isOwned ? 'Edit' : 'View'}
+        </button>
+        {/* Clone is offered for non-owned PUBLIC agents (the prior "Browse
+            public" modal's affordance, inlined into the card). Private
+            (other tenants) intentionally has no clone — those are
+            other tenants' work, not meant for redistribution; the
+            superadmin who can see them is auditing, not shopping. */}
+        {cardMode === 'public' && (
+          <>
+            <span className="text-gray-300">|</span>
+            <button onClick={onClone} className="text-xs text-brand-500 hover:underline">
+              Clone to my agents
+            </button>
+          </>
+        )}
+        {isOwned && (
+          <>
+            <span className="text-gray-300">|</span>
+            <button onClick={onDelete} className="text-xs text-red-500 hover:underline">
+              Delete
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -255,9 +401,6 @@ const CreateAgentModal: React.FC<{
   const [bio, setBio] = useState('');
   const [prompt, setPrompt] = useState('You are a helpful assistant.');
   const [visibility, setVisibility] = useState<'private' | 'unlisted' | 'public'>('private');
-  // Agents are tenant-level. We auto-pick a default-scope App silently so the Web
-  // Index / Docs Index panels have somewhere to send sources by default; the operator
-  // can switch via the Scope-app picker on those tabs whenever they want.
   const defaultOwnerAppId = currentApp?._id || apps[0]?._id || '';
   const [busy, setBusy] = useState(false);
 
@@ -285,6 +428,22 @@ const CreateAgentModal: React.FC<{
             <option value="public">Public</option>
           </select>
         </label>
+        {/* Public is platform-wide visible. Operators who skim through "+ New
+            Agent" defaults sometimes pick Public for an internal-only persona
+            without realising other tenants will see it in their AI Agents
+            list and be able to clone it. Make the trade-off explicit at
+            create time so this is a deliberate choice. */}
+        {visibility === 'public' && (
+          <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug">
+            <strong>Public visibility:</strong> this agent will appear in the
+            "Public agents" section for <em>every other tenant</em> on this
+            Ethora server. They can view its persona, prompt, and clone it as
+            their own. Pick <em>Public</em> only when the agent is intended to
+            be universally useful (e.g. a generic Support Agent or a published
+            persona for the community). For agents you're building for your
+            own brand, business, or website, leave this as <em>Private</em>.
+          </div>
+        )}
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">Cancel</button>
           <button
@@ -292,10 +451,6 @@ const CreateAgentModal: React.FC<{
             onClick={async () => {
               setBusy(true);
               try {
-                // Silently seed ownerAppId from the current app context so Web/Docs
-                // Index have a default scope. The operator can switch the scope on
-                // those tabs at any time. Tenant-level Agents shouldn't expose an
-                // app-ownership concept in the create flow.
                 const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: defaultOwnerAppId || undefined });
                 if (created) onCreated(created);
               } catch (e: any) {
@@ -309,53 +464,6 @@ const CreateAgentModal: React.FC<{
             {busy ? 'Creating...' : 'Create'}
           </button>
         </div>
-      </div>
-    </div>
-  );
-};
-
-const BrowsePublicModal: React.FC<{ onClose: () => void; onCloned: () => void }> = ({ onClose, onCloned }) => {
-  const [list, setList] = useState<ModelAgent[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    actionListAgents({ visibility: 'public' })
-      .then((items) => setList(items))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-5 w-[640px] max-w-[95%] max-h-[80vh] overflow-auto space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Public agents</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-black">&times;</button>
-        </div>
-        {loading && <div className="text-gray-500">Loading...</div>}
-        {!loading && list.length === 0 && <div className="text-gray-500">No public agents available.</div>}
-        {list.map((a) => (
-          <div key={a.id} className="border rounded p-3 flex items-center gap-3">
-            <div className="flex-1">
-              <div className="font-semibold">{a.displayName}</div>
-              <div className="text-xs text-gray-500">{a.bio}</div>
-              <div className="text-[10px] text-gray-400 break-all">{a.address}</div>
-            </div>
-            <button
-              onClick={async () => {
-                try {
-                  await actionCloneAgent(a.id, {});
-                  toast.success(`Cloned "${a.displayName}"`);
-                  onCloned();
-                  onClose();
-                } catch (e: any) {
-                  toast.error(`Clone failed: ${e?.response?.data?.error || e.message}`);
-                }
-              }}
-              className="border rounded px-3 py-1 text-sm hover:bg-gray-100"
-            >
-              Clone to my agents
-            </button>
-          </div>
-        ))}
       </div>
     </div>
   );
