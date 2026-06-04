@@ -74,7 +74,7 @@ export default function UserSettings() {
               <TabApp text="Visiblility" />
               <TabApp text="Profile Shares" />
               <TabApp text="Document Shares" />
-              <TabApp text="Blocked Users" last disabled />
+              <TabApp text="Blocked Users" disabled />
             </TabList>
             {/* Logout sits where Referrals used to live (bottom of the left
                 rail on desktop). Some users instinctively look for Logout on
