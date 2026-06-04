@@ -3,7 +3,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { cloneDeep, isEqual } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import {
   useLocation,
   useNavigate,
@@ -41,7 +41,14 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
-import { SettingTutorialModal } from '../../components/modal/SettingsTutorialModal/SettingTutorialModal';
+// Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
+// step content - we only want that chunk over the wire when firstAdd is
+// true, not on every Settings visit.
+const SettingTutorialModal = lazy(() =>
+  import('../../components/modal/SettingsTutorialModal/SettingTutorialModal').then(
+    (m) => ({ default: m.SettingTutorialModal })
+  )
+);
 
 const tabs = [
   'AI Widget',
@@ -894,13 +901,15 @@ export default function AppSettings() {
         />
       )} */}
       {isInfo && (
-        <SettingTutorialModal
-          show={isInfo}
-          onClose={() => {
-            setIsInfo(false);
-            localStorage.removeItem('firstAdd');
-          }}
-        />
+        <Suspense fallback={null}>
+          <SettingTutorialModal
+            show={isInfo}
+            onClose={() => {
+              setIsInfo(false);
+              localStorage.removeItem('firstAdd');
+            }}
+          />
+        </Suspense>
       )}
 
       {loading && <Loading />}

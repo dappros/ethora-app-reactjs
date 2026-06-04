@@ -54,6 +54,9 @@ export function NewAppModal({ onClose, show }: Props) {
 
         setProgress(100);
 
+        // Brief pause so the 100% progress flashes into the user's eye
+        // before we navigate away; previously 1500ms which felt like
+        // dead time on top of an already-slow modal transition.
         setTimeout(() => {
           toast('Application created successfully!');
           setLoading(false);
@@ -64,7 +67,7 @@ export function NewAppModal({ onClose, show }: Props) {
           localStorage.setItem('firstAdd', true.toString());
 
           onClose();
-        }, 1500);
+        }, 400);
       })
       .catch(() => {
         toast.error('Error creating application.');
