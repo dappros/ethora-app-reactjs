@@ -136,7 +136,7 @@ export default function AgentSettings() {
   if (!agent) return <div className="p-4 text-gray-500">Agent not found.</div>;
 
   return (
-    <div className="h-full grid grid-rows-[auto,1fr] gap-y-4">
+    <div className="h-full rounded-2xl bg-white p-4 grid grid-rows-[auto,1fr] gap-y-4 overflow-hidden">
       <Header
         agent={agent}
         defaultBotInstance={defaultBotInstance}

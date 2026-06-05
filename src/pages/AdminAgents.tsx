@@ -219,15 +219,13 @@ export default function AdminAgents() {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <div>
-          <h2 className="text-2xl font-varela">AI Agents</h2>
-          <p className="text-sm text-gray-500">
-            Agents are owned by your account and can be deployed into any of your Apps.
-          </p>
+    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
+      {/* Page-level header outside the white card - same shape as Apps. */}
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row gap-4">
+        <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
+          AI Agents
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <input
             placeholder="Filter (name, address, app, bio)"
             value={filter}
@@ -236,12 +234,17 @@ export default function AdminAgents() {
           />
           <button
             onClick={() => setShowCreate(true)}
-            className="bg-brand-500 hover:bg-brand-400 text-white rounded-xl px-4 py-2 text-sm"
+            className="flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
           >
             + New Agent
           </button>
         </div>
       </div>
+
+      <div className="rounded-2xl bg-white p-4 overflow-y-auto">
+        <p className="text-sm text-gray-500 mb-4">
+          Agents are owned by your account and can be deployed into any of your Apps.
+        </p>
 
       {/* Section visibility checkboxes. Each toggles a band of the list. */}
       <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
@@ -305,6 +308,7 @@ export default function AdminAgents() {
           }}
         />
       )}
+      </div>{/* end white card */}
     </div>
   );
 }

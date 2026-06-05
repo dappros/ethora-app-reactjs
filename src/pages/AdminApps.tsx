@@ -205,42 +205,51 @@ export default function AdminApps() {
   // }, [data]);
 
   return (
-    <>
-      {loading ? (
-        <Loading />
-      ) : (
-        <div id="admin-apps">
-          <div>
-            <div className="text-center pb-2 font-varela text-[18px] md:text-2xl block sm:hidden">
+    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
+      {/* Page-level header (outside the white card) - matches the Chats
+          shell. The old inner 'Apps' h2 + Create App row inside the card
+          and the 'Admin' / tab row above used to be the navigation chrome;
+          since Apps / Agents / Billing are now sidebar items, the title +
+          primary action live here on their own. */}
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row gap-4">
+        <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
+          Apps
+        </div>
+        <div className="flex items-center gap-4">
+          {renderSorting()}
+          {currentUser?.isSuperAdmin && <CsvButton onClick={getCsvFile} />}
+          <button
+            onClick={() => setShowModal(true)}
+            className={classNames(
+              'flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4'
+            )}
+          >
+            <IconAdd color="white" className="mr-2" />
+            <span>Create App</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="admin-apps" className="rounded-2xl bg-white p-4 overflow-y-auto">
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+            <div className="text-center pb-2 font-varela text-[18px] block sm:hidden">
               Apps
             </div>
 
-            <div className="flex justify-between items-center px-4">
-              <div className="font-varela text-[18px] md:text-2xl hidden sm:block">
-                Apps
-              </div>
-              <div className="flex items-center gap-4">
-                {renderSorting()}
-                {currentUser?.isSuperAdmin && (
-                  <CsvButton onClick={getCsvFile} />
-                )}
-                <button
-                  onClick={() => setShowModal(true)}
-                  className={classNames(
-                    'flex items-center justify-center sm:w-full h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela',
-                    currentUser?.isSuperAdmin ? 'px-0' : 'px-4'
-                  )}
-                >
-                  <IconAdd color="white" className="md:mr-2" />
-                  <span className="hidden md:block">Create App</span>
-                </button>
-              </div>
+            {/* mobile-only Create App button (keeps mobile UX since the
+                outer top bar is desktop-only). */}
+            <div className="flex sm:hidden justify-end mb-3">
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex items-center justify-center h-[40px] w-[60px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
+              >
+                <IconAdd color="white" />
+              </button>
             </div>
-            <div className="my-4 border-b border-b-gray-200"></div>
-          </div>
 
-          {/* apps list */}
-          <div className="">
             {showStarterInf && !apps.length && (
               <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
             )}
@@ -259,25 +268,25 @@ export default function AdminApps() {
               pageCount={pageCount}
               forcePage={currentPage}
             />
-          </div>
 
-          {showModal && (
-            <NewAppModal
-              haveApps={!!apps.length}
-              show={showModal}
-              onClose={() => setShowModal(false)}
-            />
-          )}
+            {showModal && (
+              <NewAppModal
+                haveApps={!!apps.length}
+                show={showModal}
+                onClose={() => setShowModal(false)}
+              />
+            )}
 
-          {newShowModal && (
-            <PreviewAppModal
-              haveApps={!!apps.length}
-              show={newShowModal}
-              onClose={() => setNewShowModal(false)}
-            />
-          )}
-        </div>
-      )}
-    </>
+            {newShowModal && (
+              <PreviewAppModal
+                haveApps={!!apps.length}
+                show={newShowModal}
+                onClose={() => setNewShowModal(false)}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
