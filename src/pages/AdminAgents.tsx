@@ -18,6 +18,7 @@ import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { IconAdd } from '../components/Icons/IconAdd';
 import {
   actionCloneAgent,
   actionCreateAgent,
@@ -221,22 +222,23 @@ export default function AdminAgents() {
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       {/* Page-level header outside the white card - same shape as Apps. */}
-      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row gap-4">
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          AI Agents
+          Agents
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <input
             placeholder="Filter (name, address, app, bio)"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="border rounded px-2 py-1 text-sm w-64"
+            className="border rounded px-3 h-[40px] text-sm w-64"
           />
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
           >
-            + New Agent
+            <IconAdd color="white" className="mr-2" />
+            <span>New Agent</span>
           </button>
         </div>
       </div>

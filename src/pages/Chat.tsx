@@ -290,7 +290,7 @@ export default function ChatPage() {
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full abc">
-      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row gap-4">
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Chats
         </div>

@@ -211,7 +211,7 @@ export default function AdminApps() {
           and the 'Admin' / tab row above used to be the navigation chrome;
           since Apps / Agents / Billing are now sidebar items, the title +
           primary action live here on their own. */}
-      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row gap-4">
+      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Apps
         </div>

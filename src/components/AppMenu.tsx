@@ -18,12 +18,30 @@ const ITEM_CLASS =
 const LABEL_CLASS =
   'text-center font-sans text-sm group-aria-[current=page]:text-brand-500';
 
+// Billing surfaces a "You're on a Free plan" copy that's specific to our
+// hosted SaaS (chat.ethora.com and chat-qa.ethora.com). Enterprise / self-
+// hosted customers shouldn't see it - it would imply an Ethora-Inc billing
+// relationship that doesn't apply to their install. Hide the icon and link
+// in the sidebar unless the host is one of ours; the route itself stays so
+// internal tooling that deep-links keeps working.
+function isEthoraHostedEnv(): boolean {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  return (
+    host === 'chat.ethora.com' ||
+    host === 'chat-qa.ethora.com' ||
+    host.endsWith('.chat.ethora.com') ||
+    host.endsWith('.chat-qa.ethora.com')
+  );
+}
+
 export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+  const showBilling = isEthoraHostedEnv();
 
   const getPageTitle = useMemo(() => {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -85,7 +103,7 @@ export function AppMenu() {
             <div className={LABEL_CLASS}>Agents</div>
           </NavLink>
         )}
-        {isAdmin && (
+        {isAdmin && showBilling && (
           <NavLink to="/app/admin/billing" className={ITEM_CLASS}>
             <IconBilling />
             <div className={LABEL_CLASS}>Billing</div>

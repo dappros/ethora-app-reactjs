@@ -18,8 +18,21 @@ interface Props {
   onClose: () => void;
 }
 
+// Mirror of the desktop sidebar's Billing gate: Ethora-hosted only.
+function isEthoraHostedEnv(): boolean {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  return (
+    host === 'chat.ethora.com' ||
+    host === 'chat-qa.ethora.com' ||
+    host.endsWith('.chat.ethora.com') ||
+    host.endsWith('.chat-qa.ethora.com')
+  );
+}
+
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+  const showBilling = isEthoraHostedEnv();
 
   useEffect(() => {
     function onResize() {
@@ -75,7 +88,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               <span className={labelBase}>Agents</span>
             </NavLink>
           )}
-          {isAdmin && (
+          {isAdmin && showBilling && (
             <NavLink
               to="/app/admin/billing"
               onClick={onClose}
