@@ -806,8 +806,12 @@ export function httpListSiteSourcesV2(appId?: string) {
   return httpV2.get('/sources/site-crawl');
 }
 
-export function httpDeleteSiteSourceV2Url(appId: string, url: string) {
-  return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { urls: [url] } });
+// NB: despite the name, the backend expects an array of SiteSource document
+// _ids (24-hex ObjectIds), not URL strings. Joi rejects URL strings with a
+// 422 VALIDATION_ERROR, which is why an earlier 'pass row.url' call from
+// AgentPanels silently failed. Use the row.id from listSiteSources.
+export function httpDeleteSiteSourceV2Url(appId: string, siteSourceId: string) {
+  return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { ids: [siteSourceId] } });
 }
 
 export function httpReindexSiteSourceV2(appId: string, urlId: string) {
@@ -830,11 +834,25 @@ export function httpAgentSiteCrawl(appId: string, agentId: string, url: string, 
 
 export function httpAgentDocsUpload(appId: string, agentId: string, files: File[]) {
   const formData = new FormData();
-  files.forEach((file) => { formData.append('files', file); });
+  // NB: multer in Express parses fields in order, and certain configurations
+  // only populate req.body from fields that arrive BEFORE the file stream.
+  // Append agentId first so the backend's docsUpload controller can read it.
   formData.append('agentId', agentId);
+  files.forEach((file) => { formData.append('files', file); });
   return httpV2.post(`/apps/${appId}/sources/docs`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+}
+
+// List uploaded doc sources for an App (ordered by createdAt, newest first
+// per the repo). Used by the Agents > Knowledge panel to confirm uploads
+// landed and to surface a delete affordance.
+export function httpListDocSourcesV2(appId: string) {
+  return httpV2.get(`/apps/${appId}/sources/docs`);
+}
+
+export function httpDeleteDocSourceV2(appId: string, docId: string) {
+  return httpV2.delete(`/apps/${appId}/sources/docs/${docId}`);
 }
 
 // Tenant-Owner gateway session (Option A): provision-or-fetch the per-app

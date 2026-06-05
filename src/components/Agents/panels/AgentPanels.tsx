@@ -20,14 +20,16 @@ import {
 import {
   httpAgentDocsUpload,
   httpAgentSiteCrawl,
+  httpDeleteDocSourceV2,
+  httpDeleteSiteSourceV2Url,
   httpDiagAgentBotInstance,
   httpLeaveChatAgentBotInstance,
   httpListAgentBotInstances,
+  httpListDocSourcesV2,
   httpListSiteSourcesV2,
-  httpReindexSiteSourceV2,
-  httpDeleteSiteSourceV2Url,
-  httpTestMessageAgentBotInstance,
   httpPostFile,
+  httpReindexSiteSourceV2,
+  httpTestMessageAgentBotInstance,
 } from '../../../http';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
@@ -449,7 +451,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                     onClick={async () => {
                       if (!confirm(`Remove "${row.url}" from the index?`)) return;
                       try {
-                        await httpDeleteSiteSourceV2Url(appId, row.url);
+                        await httpDeleteSiteSourceV2Url(appId, row.id);
                         toast.success('Removed');
                         await loadList();
                       } catch (e: any) {
@@ -470,11 +472,23 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   );
 };
 
+type DocSourceRow = {
+  id: string;
+  originalName: string;
+  title?: string;
+  mimeType?: string;
+  size: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
   const apps = useAppStore((s) => s.apps);
   const fileRef = useRef<HTMLInputElement>(null);
   const [appId, setAppId] = useState<string>(initialAppId);
   const [busy, setBusy] = useState(false);
+  const [rows, setRows] = useState<DocSourceRow[]>([]);
+  const [loadingList, setLoadingList] = useState(false);
 
   useEffect(() => {
     if (!appId && apps.length > 0) setAppId(apps[0]._id);
@@ -483,6 +497,28 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
     if (initialAppId && initialAppId !== appId) setAppId(initialAppId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialAppId]);
+
+  const loadList = async () => {
+    if (!appId) return;
+    setLoadingList(true);
+    try {
+      const resp = await httpListDocSourcesV2(appId);
+      const result = resp?.data?.result;
+      setRows(Array.isArray(result) ? result : []);
+    } catch (e: any) {
+      // Non-fatal: just leave rows empty + surface the error so user knows
+      // why nothing's listed (was a silent gap previously - user got a
+      // success toast on upload then saw an empty panel and reported a bug).
+      toast.error(`Could not load docs list: ${e?.response?.data?.error || e.message}`);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  useEffect(() => {
+    if (appId) loadList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId]);
 
   return (
     <div className="space-y-3 max-w-2xl">
@@ -509,6 +545,7 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
           try {
             await httpAgentDocsUpload(appId, agent.id, files);
             toast.success(`Uploaded ${files.length} file(s)`);
+            await loadList();
           } catch (err: any) {
             toast.error(`Upload failed: ${err?.response?.data?.error || err.message}`);
           } finally {
@@ -518,6 +555,55 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
         }}
       />
       {busy && <div className="text-sm text-gray-500">Uploading + parsing + embedding...</div>}
+
+      {/* Indexed files list - this used to be missing entirely, so users
+          got a 'success' toast on upload but saw no confirmation that the
+          file landed. Includes a delete affordance per row. */}
+      <div className="border rounded">
+        <table className="w-full text-xs">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="text-left p-2">File</th>
+              <th className="text-left p-2 w-24">Size</th>
+              <th className="text-left p-2 w-32">Uploaded</th>
+              <th className="p-2 w-20"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {loadingList && (
+              <tr><td colSpan={4} className="p-3 text-gray-500">Loading...</td></tr>
+            )}
+            {!loadingList && rows.length === 0 && (
+              <tr><td colSpan={4} className="p-3 text-gray-500">No files indexed for this app yet.</td></tr>
+            )}
+            {!loadingList && rows.map((row) => (
+              <tr key={row.id} className="border-t align-top">
+                <td className="p-2 break-all">{row.originalName || row.title || row.id}</td>
+                <td className="p-2 text-gray-600">{fmtBytesShort(row.size)}</td>
+                <td className="p-2 text-gray-500">{row.createdAt ? new Date(row.createdAt).toLocaleString() : ''}</td>
+                <td className="p-2 text-right whitespace-nowrap">
+                  <button
+                    disabled={isDisabled || busy}
+                    onClick={async () => {
+                      if (!confirm(`Remove "${row.originalName || row.title || row.id}" from the index?`)) return;
+                      try {
+                        await httpDeleteDocSourceV2(appId, row.id);
+                        toast.success('Removed');
+                        await loadList();
+                      } catch (e: any) {
+                        toast.error(`Remove failed: ${e?.response?.data?.error || e.message}`);
+                      }
+                    }}
+                    className="text-red-500 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -1,8 +1,11 @@
+import cn from 'classnames';
 import { useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { IconAccount } from './Icons/IconAccount';
 import { IconAdmin } from './Icons/IconAdmin';
+import { IconAgents } from './Icons/IconAgents';
+import { IconBilling } from './Icons/IconBilling';
 import { IconChat } from './Icons/IconChat';
 import { IconHelp } from './Icons/IconHelp';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
@@ -10,11 +13,17 @@ import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { UnreadBadge } from './UnreadBadge';
 
+const ITEM_CLASS =
+  'flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150';
+const LABEL_CLASS =
+  'text-center font-sans text-sm group-aria-[current=page]:text-brand-500';
+
 export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
+  const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
 
   const getPageTitle = useMemo(() => {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -31,8 +40,7 @@ export function AppMenu() {
   }
 
   return (
-    // md:min-h-[640px]
-    <div className="bg-white md:fixed p-2 flex justify-between items-center md:rounded-2xl md:self-start md:h-[calc(100vh-32px)]  md:flex-col">
+    <div className="bg-white md:fixed p-2 flex justify-between items-center md:rounded-2xl md:self-start md:h-[calc(100vh-32px)] md:flex-col">
       <button
         onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}
         className="md:hidden"
@@ -43,37 +51,49 @@ export function AppMenu() {
         {getPageTitle}
       </div>
       <div className="hidden md:flex flex-col">
+        {/* Order: Apps (admin landing) -> Chats -> Agents -> Billing -> Help.
+            Apps / Agents / Billing are admin-gated; Chats and Help are open
+            to every signed-in user. The inner Apps / Agents / Billing tab
+            row inside the Admin layout is kept for now while we observe
+            how the sidebar variant performs. */}
         {isAdmin && (
-          <NavLink
-            to="/app/admin"
-            className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-          >
+          <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
             <IconAdmin />
-            <div className="text-center group-aria-[current=page]:text-brand-500 font-sans text-sm">
-              Admin
-            </div>
+            <div className={LABEL_CLASS}>Apps</div>
           </NavLink>
         )}
-        <NavLink
-          to="/app/chat"
-          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-        >
+        <NavLink to="/app/chat" className={ITEM_CLASS}>
           <div className="relative">
             <IconChat />
             <UnreadBadge className="absolute -top-1 -right-2" />
           </div>
-          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
-            Chats
-          </div>
+          <div className={LABEL_CLASS}>Chats</div>
         </NavLink>
-        <NavLink
-          to="/app/help"
-          className="flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-        >
+        {isAdmin && (
+          <NavLink
+            to="/app/admin/agents"
+            title={
+              aiEnabled
+                ? undefined
+                : 'AI features are not enabled in this deployment'
+            }
+            className={cn(ITEM_CLASS, {
+              'cursor-not-allowed pointer-events-none opacity-50': !aiEnabled,
+            })}
+          >
+            <IconAgents />
+            <div className={LABEL_CLASS}>Agents</div>
+          </NavLink>
+        )}
+        {isAdmin && (
+          <NavLink to="/app/admin/billing" className={ITEM_CLASS}>
+            <IconBilling />
+            <div className={LABEL_CLASS}>Billing</div>
+          </NavLink>
+        )}
+        <NavLink to="/app/help" className={ITEM_CLASS}>
           <IconHelp />
-          <div className="text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
-            Help
-          </div>
+          <div className={LABEL_CLASS}>Help</div>
         </NavLink>
         <div className="my-2 border-b border-b-gray-200"></div>
       </div>
@@ -91,10 +111,6 @@ export function AppMenu() {
             className="border border-brand-500 rounded-full"
             small={true}
           />
-          {/* <div
-            className="bg-cover w-[40px] h-[40px] rounded-full"
-            style={{ backgroundImage: `url(${profileImage})` }}
-          ></div> */}
           <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-sm ">
             Profile
           </div>

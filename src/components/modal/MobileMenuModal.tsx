@@ -2,8 +2,11 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 
 import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import classNames from 'classnames';
 import { IconAccount } from '../Icons/IconAccount';
 import { IconAdmin } from '../Icons/IconAdmin';
+import { IconAgents } from '../Icons/IconAgents';
+import { IconBilling } from '../Icons/IconBilling';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
 import { IconHelp } from '../Icons/IconHelp';
@@ -16,6 +19,8 @@ interface Props {
 }
 
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
+  const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+
   useEffect(() => {
     function onResize() {
       onClose();
@@ -26,6 +31,11 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
       window.removeEventListener('resize', onResize);
     };
   }, []);
+
+  const itemBase =
+    'group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl items-center';
+  const labelBase = 'ml-2 group-aria-[current=page]:text-brand-500';
+
   return (
     <Dialog
       className="fixed inset-0 bg-black/30 flex z-50 justify-start items-stretch "
@@ -38,37 +48,46 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
         </button>
         <div className="mt-[72px]">
           {isAdmin && (
-            <NavLink
-              to="/app/admin/apps"
-              onClick={onClose}
-              className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl"
-            >
+            <NavLink to="/app/admin/apps" onClick={onClose} className={itemBase}>
               <IconAdmin />
-              <span className="ml-2 group-aria-[current=page]:text-brand-500">
-                Admin
-              </span>
+              <span className={labelBase}>Apps</span>
             </NavLink>
           )}
-          <NavLink
-            to="/app/chat"
-            onClick={onClose}
-            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl items-center"
-          >
+          <NavLink to="/app/chat" onClick={onClose} className={itemBase}>
             <IconChat />
-            <span className="ml-2 group-aria-[current=page]:text-brand-500">
-              Chats
-            </span>
+            <span className={labelBase}>Chats</span>
             <UnreadBadge className="ml-2" />
           </NavLink>
-          <NavLink
-            to="/app/help"
-            onClick={onClose}
-            className="group flex p-[12px] aria-[current=page]:bg-brand-150 rounded-xl items-center"
-          >
+          {isAdmin && (
+            <NavLink
+              to="/app/admin/agents"
+              onClick={onClose}
+              title={
+                aiEnabled
+                  ? undefined
+                  : 'AI features are not enabled in this deployment'
+              }
+              className={classNames(itemBase, {
+                'cursor-not-allowed pointer-events-none opacity-50': !aiEnabled,
+              })}
+            >
+              <IconAgents />
+              <span className={labelBase}>Agents</span>
+            </NavLink>
+          )}
+          {isAdmin && (
+            <NavLink
+              to="/app/admin/billing"
+              onClick={onClose}
+              className={itemBase}
+            >
+              <IconBilling />
+              <span className={labelBase}>Billing</span>
+            </NavLink>
+          )}
+          <NavLink to="/app/help" onClick={onClose} className={itemBase}>
             <IconHelp />
-            <span className="ml-2 group-aria-[current=page]:text-brand-500">
-              Help
-            </span>
+            <span className={labelBase}>Help</span>
           </NavLink>
         </div>
         <div className="">
