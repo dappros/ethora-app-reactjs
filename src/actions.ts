@@ -213,9 +213,10 @@ export async function actionGetUsers(
   limit: number = 10,
   offset: number = 0,
   orderBy: OrderByType = 'lastName',
-  order: 'asc' | 'desc' = 'asc'
+  order: 'asc' | 'desc' = 'asc',
+  lifecycle?: { status?: 'archived'; includeArchived?: boolean }
 ) {
-  return httpGetUsers(appId, limit, offset, orderBy, order);
+  return httpGetUsers(appId, limit, offset, orderBy, order, lifecycle);
 }
 
 export async function actionDeleteManyUsers(

@@ -12,7 +12,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
-  actionDeleteManyUsers,
   actionGetUsers,
   actionResetPasswords,
 } from '../actions';
@@ -22,10 +21,15 @@ import { IconDelete } from '../components/Icons/IconDelete';
 import { IconSettings } from '../components/Icons/IconSettings';
 import {
   getExportCsv,
+  httpArchiveUsers,
   httpCraeteUser,
+  httpGetUsers,
+  httpHardDeleteUsers,
+  httpRestoreUser,
   httpTagsSet,
   httpUpdateAcl,
 } from '../http';
+import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
 
 import classNames from 'classnames';
@@ -55,9 +59,13 @@ export default function AppUsers() {
   const [total, setTotal] = useState(0);
   const [showManageTags, setShowManageTags] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
+  const [showHardDelete, setShowHardDelete] = useState(false);
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
+  // Active vs Archived view. ?lifecycle=archived persists across refresh so the
+  // operator can land directly on the restore screen.
+  const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'archived') || 'active';
 
   // const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   // const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
@@ -158,7 +166,8 @@ export default function AppUsers() {
           itemsPerTable,
           page * itemsPerTable,
           orderBy,
-          order
+          order,
+          lifecycleTab === 'archived' ? { status: 'archived' } : undefined
         ).then((response) => {
           const { total, items } = response.data;
           setItems(items);
@@ -204,7 +213,8 @@ export default function AppUsers() {
   const fetchUsers = useCallback(() => {
     if (!appId) return;
 
-    actionGetUsers(appId, limit, page * limit, orderBy, order).then(
+    const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
+    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle).then(
       (response) => {
         const { total, items } = response.data;
         setItems(items);
@@ -212,7 +222,7 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / limit));
       }
     );
-  }, [appId, limit, page, orderBy, order]);
+  }, [appId, limit, page, orderBy, order, lifecycleTab]);
 
   useEffect(() => {
     fetchUsers();
@@ -223,12 +233,14 @@ export default function AppUsers() {
       return;
     }
 
-    actionGetUsers(
+    const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
+    httpGetUsers(
       appId,
       itemsPerTable,
       page * itemsPerTable,
       orderBy,
-      order
+      order,
+      lifecycle
     ).then((response) => {
       const { total, items } = response.data;
       setItems(items);
@@ -236,7 +248,7 @@ export default function AppUsers() {
       setPageCount(Math.ceil(total / itemsPerTable));
       setRowsSelected((selected) => selected.map(() => false));
     });
-  }, [orderBy, order]);
+  }, [orderBy, order, lifecycleTab]);
 
   const renderTo = () => {
     return itemsPerTable * (page + 1);
@@ -317,7 +329,8 @@ export default function AppUsers() {
           itemsPerTable,
           page * itemsPerTable,
           orderBy,
-          order
+          order,
+          lifecycleTab === 'archived' ? { status: 'archived' } : undefined
         ).then((response) => {
           const { total, items } = response.data;
           setItems(items);
@@ -343,38 +356,73 @@ export default function AppUsers() {
     });
   };
 
-  const onDelete = () => {
-    if (!appId) {
-      return;
-    }
-
-    const selectedUserIds: Array<string> = [];
+  const selectedIds = (): string[] => {
+    const out: string[] = [];
     rowsSelected.forEach((el, index) => {
-      if (el) {
-        const item = items[index];
-        selectedUserIds.push(item._id);
-      }
+      if (el) out.push(items[index]._id);
     });
+    return out;
+  };
 
-    actionDeleteManyUsers(appId, selectedUserIds).then(() => {
-      actionGetUsers(
-        appId,
-        itemsPerTable,
-        page * itemsPerTable,
-        orderBy,
-        order
-      ).then((response) => {
-        const { total, items } = response.data;
-        setItems(items);
-        setTotal(total);
-        setPageCount(Math.ceil(total / itemsPerTable));
-        setRowsSelected((selected) => selected.map(() => false));
-        setShowDelete(false);
-        toast(
-          `${selectedUserIds.length > 1 ? 'Users' : 'User'} deleted successfully`
-        );
-      });
+  const refreshAndClearSelection = () => {
+    if (!appId) return;
+    const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
+    httpGetUsers(
+      appId,
+      itemsPerTable,
+      page * itemsPerTable,
+      orderBy,
+      order,
+      lifecycle
+    ).then((response) => {
+      const { total, items } = response.data;
+      setItems(items);
+      setTotal(total);
+      setPageCount(Math.ceil(total / itemsPerTable));
+      setRowsSelected((selected) => selected.map(() => false));
     });
+  };
+
+  // Soft archive (the new default). Renamed from the old hard "Delete" - on
+  // ethora-backend 2607+ this calls POST /v1/users/delete-many-with-app-id
+  // which now archives by default (login refused, all data retained). Admin
+  // can restore from the Archived tab.
+  const onArchive = () => {
+    if (!appId) return;
+    const ids = selectedIds();
+    httpArchiveUsers(appId, ids).then(() => {
+      setShowArchive(false);
+      refreshAndClearSelection();
+      toast(`${ids.length > 1 ? 'Users' : 'User'} archived successfully`);
+    }).catch((e: any) => {
+      toast.error(`Archive failed: ${e?.response?.data?.error || e.message}`);
+    });
+  };
+
+  // Hard delete (cascade purge). Drops the user(s) + wallets + files + XMPP
+  // + any rooms they own (room-owner cascade). Irreversible.
+  const onHardDelete = () => {
+    if (!appId) return;
+    const ids = selectedIds();
+    httpHardDeleteUsers(appId, ids).then(() => {
+      setShowHardDelete(false);
+      refreshAndClearSelection();
+      toast(`${ids.length > 1 ? 'Users' : 'User'} permanently deleted`);
+    }).catch((e: any) => {
+      toast.error(`Hard delete failed: ${e?.response?.data?.error || e.message}`);
+    });
+  };
+
+  // Restore one user (used from the per-row button in the Archived tab).
+  const onRestoreOne = async (userId: string) => {
+    if (!appId) return;
+    try {
+      await httpRestoreUser(appId, userId);
+      toast.success('User restored');
+      refreshAndClearSelection();
+    } catch (e: any) {
+      toast.error(`Restore failed: ${e?.response?.data?.error || e.message}`);
+    }
   };
 
   const renderAuthMethodIcon = (name: string) => {
@@ -441,14 +489,43 @@ export default function AppUsers() {
             >
               Reset Password
             </button>
+            {lifecycleTab === 'active' ? (
+              <button
+                className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
+                onClick={() => setShowArchive(true)}
+                title="Archive these users (reversible). Login is blocked but data is retained."
+              >
+                <div className="mr-2">
+                  <IconDelete />
+                </div>
+                Archive
+              </button>
+            ) : (
+              <button
+                className="text-green-600 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+                onClick={async () => {
+                  const ids = selectedIds();
+                  try {
+                    for (const id of ids) {
+                      // eslint-disable-next-line no-await-in-loop
+                      await httpRestoreUser(appId, id);
+                    }
+                    toast(`${ids.length > 1 ? 'Users' : 'User'} restored successfully`);
+                    refreshAndClearSelection();
+                  } catch (e: any) {
+                    toast.error(`Restore failed: ${e?.response?.data?.error || e.message}`);
+                  }
+                }}
+              >
+                Restore
+              </button>
+            )}
             <button
-              className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
-              onClick={() => setShowDelete(true)}
+              className="text-red-600 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+              onClick={() => setShowHardDelete(true)}
+              title="Permanently delete (irreversible)"
             >
-              <div className="mr-2">
-                <IconDelete />
-              </div>
-              Delete
+              Hard delete
             </button>
           </div>
         </div>
@@ -462,8 +539,25 @@ export default function AppUsers() {
     // overflow-hidden
     <div className="admin-app-users h-full w-full  grid lg:grid-rows-[57px,_1fr] grid-rows-[97px,_1fr] gap-y-[16px]">
       <div className="md:row-start-1 flex w-full md:justify-between items-center border-b border-b-gray-200">
-        <div className="ml-4 hidden md:block font-varela text-[24px]">
-          Users
+        <div className="ml-4 hidden md:flex items-center gap-4">
+          <div className="font-varela text-[24px]">Users</div>
+          {/* Active / Archived filter, mirrors the Apps page. */}
+          <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
+            {(['active', 'archived'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => updateSearchParams({ lifecycle: tab, page: 0 })}
+                className={classNames(
+                  'px-3 py-1 rounded-lg font-varela',
+                  lifecycleTab === tab
+                    ? 'bg-white text-brand-500 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                )}
+              >
+                {tab === 'active' ? 'Active' : 'Archived'}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex lg:flex-row flex-col w-full md:w-auto lg:items-center items-end lg:justify-end justify-start gap-4">
           <Sorting<OrderByType>
@@ -615,9 +709,20 @@ export default function AppUsers() {
                           -
                         </td>
                         <td className="px-4 rounded-r-lg font-sans font-normal text-sm text-center whitespace-nowrap">
-                          <button onClick={() => setEditAcl(el.acl)}>
-                            <IconSettings width={16} height={16} />
-                          </button>
+                          <div className="flex items-center justify-center gap-3">
+                            {lifecycleTab === 'archived' && (
+                              <button
+                                onClick={() => onRestoreOne(el._id)}
+                                className="text-xs text-green-700 hover:underline"
+                                title="Restore this user (clears archive status, login re-enabled)"
+                              >
+                                Restore
+                              </button>
+                            )}
+                            <button onClick={() => setEditAcl(el.acl)} title="Permissions">
+                              <IconSettings width={16} height={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -721,29 +826,32 @@ export default function AppUsers() {
           </div>
         </SubmitModal>
       )}
-      {showDelete && (
-        <SubmitModal onClose={() => setShowDelete(false)}>
-          <div className="font-varela text-[24px] text-center mb-8">
-            Delete user
-          </div>
-          <p className="font-sans text-[14px] mb-8 text-center">
-            {`Are you sure you want to delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
-          </p>
-          <div className="flex gap-8">
-            <button
-              onClick={() => setShowDelete(false)}
-              className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onDelete}
-              className="w-full py-[12px] rounded-xl bg-red-600 hover:bg-red-700 text-white"
-            >
-              Submit
-            </button>
-          </div>
-        </SubmitModal>
+      {showArchive && (
+        <ConfirmModal
+          title={`Archive ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
+          message={
+            'These accounts will be hidden and their owners will not be able to log in, ' +
+            'but all of their data (chat history, files, memberships) is retained. ' +
+            'You can restore them later from the Archived tab.'
+          }
+          confirmLabel="Archive"
+          onConfirm={onArchive}
+          onCancel={() => setShowArchive(false)}
+        />
+      )}
+      {showHardDelete && (
+        <ConfirmModal
+          title={`Permanently delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
+          message={
+            'This irreversibly deletes the selected users along with their wallets, ' +
+            'files, XMPP accounts, chat memberships, and any rooms they own (along with ' +
+            "those rooms' messages). This cannot be undone."
+          }
+          confirmLabel="Yes, hard delete"
+          danger
+          onConfirm={onHardDelete}
+          onCancel={() => setShowHardDelete(false)}
+        />
       )}
       {editAcl && (
         <AclModal

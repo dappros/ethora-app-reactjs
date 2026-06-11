@@ -314,11 +314,22 @@ export function httpGetUsers(
   limit: number = 10,
   offset: number = 0,
   orderBy: OrderByType = 'lastName',
-  order: 'asc' | 'desc' = 'asc'
+  order: 'asc' | 'desc' = 'asc',
+  // Lifecycle filter, wired in ethora-backend 2607+:
+  //   status='archived' -> only archived users (restore screen)
+  //   includeArchived=true -> active + archived
+  //   default -> active only (current behavior)
+  lifecycle?: { status?: 'archived'; includeArchived?: boolean }
 ) {
-  return http.get(
-    `/users/${appId}?limit=${limit}&offset=${offset}&orderBy=${orderBy}&order=${order}`
-  );
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+    orderBy,
+    order,
+  });
+  if (lifecycle?.status) params.set('status', lifecycle.status);
+  if (lifecycle?.includeArchived) params.set('includeArchived', 'true');
+  return http.get(`/users/${appId}?${params.toString()}`);
 }
 
 export function httpDeleteManyUsers(appId: string, usersIdList: Array<string>) {

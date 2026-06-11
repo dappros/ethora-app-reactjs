@@ -239,6 +239,12 @@ export interface ModelAppUser {
   profileImage: string;
   tags: Array<string>;
   updatedAt: string;
+  // Lifecycle status (server-side soft-delete: see ethora-backend 2607+).
+  // Undefined on old users still in the DB - render as 'active'.
+  status?: 'active' | 'archived' | 'deleting' | 'deleted';
+  archivedAt?: string;
+  archivedBy?: string;
+  archiveReason?: string;
 }
 
 // Phase 1 (Agents): first-class AI Agent and per-App BotInstance projections returned by /v2/agents and /v2/bot-instances.
