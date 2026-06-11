@@ -12,7 +12,8 @@ import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useCentrifugeAppUpdater } from '../hooks/useCentrifugeAppUpdater.ts';
-import { getExportAppsCsv, httpGetApps } from '../http';
+import { getExportAppsCsv, httpGetAppsWithStatus, httpImportApp } from '../http';
+import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -23,6 +24,10 @@ export default function AdminApps() {
   const [showModal, setShowModal] = useState(false);
   const [newShowModal, setNewShowModal] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  // 'active' (default) / 'archived' (restore screen) - the new lifecycle filter
+  // wired in ethora-backend 2607+. Tab persists via the URL so refresh stays put.
+  const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'archived') || 'active';
 
   const apps = useAppStore((s) => s.apps);
   const [appsState, setAppState] = useState<ModelApp[]>(apps);
@@ -54,11 +59,12 @@ export default function AdminApps() {
   const fetchApps = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await httpGetApps({
+      const response = await httpGetAppsWithStatus({
         limit,
         offset: limit * pageIndex,
         order,
         orderBy,
+        ...(lifecycleTab === 'archived' ? { status: 'archived' as const } : {}),
       });
 
       setPageCount(Math.ceil(response.data.total / limit));
@@ -68,7 +74,7 @@ export default function AdminApps() {
     } finally {
       setLoading(false);
     }
-  }, [limit, pageIndex, order, orderBy, doSetApps]);
+  }, [limit, pageIndex, order, orderBy, doSetApps, lifecycleTab]);
 
   const updateSearchParams = useCallback(
     (newParams: Record<string, string | number>) => {
@@ -216,8 +222,33 @@ export default function AdminApps() {
           Apps
         </div>
         <div className="flex items-center gap-4">
+          {/* Active / Archived filter. Persists via ?lifecycle=... so a refresh
+              keeps the operator on the restore screen. */}
+          <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
+            {(['active', 'archived'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => updateSearchParams({ lifecycle: tab, page: 1 })}
+                className={classNames(
+                  'px-3 py-1 rounded-lg font-varela',
+                  lifecycleTab === tab
+                    ? 'bg-white text-brand-500 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                )}
+              >
+                {tab === 'active' ? 'Active' : 'Archived'}
+              </button>
+            ))}
+          </div>
           {renderSorting()}
           {currentUser?.isSuperAdmin && <CsvButton onClick={getCsvFile} />}
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center justify-center h-[40px] rounded-xl text-brand-500 border border-brand-500 hover:bg-brand-hover text-sm font-varela px-4"
+            title="Import an app from a previously-exported JSON or ZIP bundle"
+          >
+            Import App
+          </button>
           <button
             onClick={() => setShowModal(true)}
             className={classNames(
@@ -260,8 +291,16 @@ export default function AdminApps() {
                   key={app._id}
                   app={app}
                   primaryColor={currentApp.primaryColor}
+                  onChanged={fetchApps}
                 />
               ))}
+
+            {!loading && appsState && appsState.length === 0 && lifecycleTab === 'archived' && (
+              <div className="text-center text-gray-500 py-12 font-varela">
+                No archived apps. Archived apps appear here so you can restore
+                them or permanently delete their data.
+              </div>
+            )}
 
             <Pagination
               onPageChange={onPageChange}
@@ -282,6 +321,17 @@ export default function AdminApps() {
                 haveApps={!!apps.length}
                 show={newShowModal}
                 onClose={() => setNewShowModal(false)}
+              />
+            )}
+
+            {showImportModal && (
+              <ImportAppModal
+                onClose={() => setShowImportModal(false)}
+                onImported={() => {
+                  setShowImportModal(false);
+                  fetchApps();
+                }}
+                doImport={httpImportApp}
               />
             )}
           </>

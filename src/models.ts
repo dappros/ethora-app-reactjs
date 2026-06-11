@@ -116,6 +116,13 @@ export interface ModelApp {
     measurementId: string;
   };
 
+  // Lifecycle status (server-side soft-delete: see ethora-backend 2607+).
+  // Undefined on old apps still in the DB - render as 'active'.
+  status?: 'active' | 'archived' | 'deleting' | 'deleted';
+  archivedAt?: string;
+  archivedBy?: string;
+  archiveReason?: string;
+
   stats: {
     recentlyApiCalls: number;
     recentlyFiles: number;

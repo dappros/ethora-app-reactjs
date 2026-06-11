@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { useNavigate } from 'react-router-dom';
 import { ModelApp } from '../models';
+import { AppActionsMenu } from './AppActionsMenu';
 import { IconArrowRight } from './Icons/IconArrowRight';
 import { IconExternalLink } from './Icons/IconExternalLink';
 import { IconInfo } from './Icons/IconInfo';
@@ -9,6 +10,7 @@ import { Tooltip } from './Tooltip';
 interface Props {
   app: ModelApp;
   primaryColor: string;
+  onChanged?: () => void;
 }
 
 function initialsFromName(name: string): string {
@@ -23,7 +25,7 @@ function initialsFromName(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export function ApplicationPreview({ app, primaryColor }: Props) {
+export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
   const navigate = useNavigate();
   const numberFormatter = new Intl.NumberFormat('en-US');
   const onClick = () => {
@@ -103,16 +105,17 @@ export function ApplicationPreview({ app, primaryColor }: Props) {
           <div className="hidden md:flex items-ceter justify-center">
             <button
               onClick={onExternalClick}
-              className="mr-4 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover"
+              className="mr-2 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover"
             >
               <IconExternalLink color={primaryColor} />
             </button>
+            <AppActionsMenu app={app} onChanged={onChanged} />
             <button
               onClick={onClick}
-              className="flex justify-center hover:bg-brand-hover items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
+              className="ml-2 flex justify-center hover:bg-brand-hover items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
             >
               <span className="text-brand-500 font-varela text-sm mr-2">
-                Details
+                {app.status === 'archived' ? 'Archived' : 'Details'}
               </span>
               <IconArrowRight stroke={primaryColor} />
             </button>

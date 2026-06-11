@@ -25,6 +25,8 @@ import {
   actionDeleteAgent,
   actionListAgents,
 } from '../actions';
+import { httpExportAgent, httpImportAgent, saveBlobAs } from '../http';
+import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -64,6 +66,7 @@ export default function AdminAgents() {
 
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [filter, setFilter] = useState('');
 
   // Per-section "show all" toggles so each cohort paginates independently.
@@ -165,6 +168,16 @@ export default function AdminAgents() {
     }
   }
 
+  async function onExport(a: ModelAgent, format: 'json' | 'zip') {
+    try {
+      const r = await httpExportAgent(a.id, format);
+      saveBlobAs(r.data, `ethora-agent-${a.id}-${Date.now()}.${format}`);
+      toast.success(`Exported "${a.displayName}" (${format.toUpperCase()})`);
+    } catch (e: any) {
+      toast.error(`Export failed: ${e?.response?.data?.error || e.message}`);
+    }
+  }
+
   function renderSection(
     title: string,
     description: string,
@@ -198,6 +211,7 @@ export default function AdminAgents() {
                   agent={a}
                   cardMode={cardMode}
                   onOpen={() => navigate(`/app/admin/agents/${a.id}/settings`)}
+                  onExport={(fmt) => onExport(a, fmt)}
                   onDelete={onDelete(a)}
                   onClone={() => onClone(a)}
                 />
@@ -233,6 +247,13 @@ export default function AdminAgents() {
             onChange={(e) => setFilter(e.target.value)}
             className="border rounded px-3 h-[40px] text-sm w-64"
           />
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4"
+            title="Import an agent from a previously-exported JSON or ZIP bundle"
+          >
+            Import Agent
+          </button>
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
@@ -301,6 +322,21 @@ export default function AdminAgents() {
         'private-other'
       )}
 
+      {showImport && (
+        <ImportAppModal
+          title="Import Agent"
+          helperText="Pick a JSON or ZIP file exported from another Ethora environment, or paste the JSON directly. The new agent will be created under your account with a fresh address, set to 'private' visibility."
+          showDomainOverride={false}
+          onClose={() => setShowImport(false)}
+          onImported={() => {
+            setShowImport(false);
+            setLoading(true);
+            actionListAgents().finally(() => setLoading(false));
+          }}
+          doImport={(input) => httpImportAgent(input)}
+        />
+      )}
+
       {showCreate && (
         <CreateAgentModal
           onCancel={() => setShowCreate(false)}
@@ -323,7 +359,8 @@ const AgentCard: React.FC<{
   onOpen: () => void;
   onDelete: () => void;
   onClone: () => void;
-}> = ({ agent, cardMode, onOpen, onDelete, onClone }) => {
+  onExport: (format: 'json' | 'zip') => void;
+}> = ({ agent, cardMode, onOpen, onDelete, onClone, onExport }) => {
   const visibilityClass = VISIBILITY_BADGE[agent.visibility] || VISIBILITY_BADGE.private;
   const isOwned = cardMode === 'owned';
   return (
@@ -384,6 +421,17 @@ const AgentCard: React.FC<{
             </button>
           </>
         )}
+        {/* Export is available to anyone who can see the agent (owners always,
+            public-others because the bundle holds nothing private). Backend
+            enforces final authz. */}
+        <span className="text-gray-300">|</span>
+        <button onClick={() => onExport('json')} className="text-xs text-brand-500 hover:underline">
+          Export JSON
+        </button>
+        <span className="text-gray-300">|</span>
+        <button onClick={() => onExport('zip')} className="text-xs text-brand-500 hover:underline">
+          Export ZIP
+        </button>
         {isOwned && (
           <>
             <span className="text-gray-300">|</span>

@@ -863,3 +863,127 @@ export function httpDeleteDocSourceV2(appId: string, docId: string) {
 export function httpGetOwnerSession(appId: string) {
   return httpV2.post(`/apps/${appId}/owner-session`, {});
 }
+
+// ---------------------------------------------------------------------------
+// Soft-delete (archive/restore) + hard-delete (cascade purge) + export/import
+// ---------------------------------------------------------------------------
+// Apps:
+
+// List apps with the new lifecycle filters. Defaults to active apps.
+//   status='archived' -> Restore screen
+//   includeArchived=true -> All apps
+export function httpGetAppsWithStatus(opts: {
+  limit?: number;
+  offset?: number;
+  order?: 'asc' | 'desc';
+  orderBy?: OrderByType;
+  includeArchived?: boolean;
+  status?: 'archived';
+}) {
+  const params = new URLSearchParams();
+  if (opts.limit !== undefined) params.set('limit', String(opts.limit));
+  if (opts.offset !== undefined) params.set('offset', String(opts.offset));
+  if (opts.order) params.set('order', opts.order);
+  if (opts.orderBy) params.set('orderBy', opts.orderBy);
+  if (opts.includeArchived) params.set('includeArchived', 'true');
+  if (opts.status) params.set('status', opts.status);
+  return http.get(`/apps?${params.toString()}`);
+}
+
+// Archive (soft-delete) an app. Hits the v1 admin endpoint (default mode=soft).
+export function httpArchiveApp(appId: string, reason?: string) {
+  const qs = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+  return http.delete(`/apps/${appId}${qs}`);
+}
+
+// Hard-delete: enqueue a cascade purge job. Returns 202 with jobId.
+export function httpHardDeleteApp(appId: string, reason?: string) {
+  const params = new URLSearchParams({ mode: 'hard' });
+  if (reason) params.set('reason', reason);
+  return http.delete(`/apps/${appId}?${params.toString()}`);
+}
+
+// Restore (un-archive) an app.
+export function httpRestoreApp(appId: string) {
+  return http.post(`/apps/${appId}/restore`, {});
+}
+
+// Poll a purge job started by httpHardDeleteApp.
+export function httpGetPurgeAppJob(jobId: string) {
+  return httpV2.get(`/apps/purge-jobs/${encodeURIComponent(jobId)}`);
+}
+
+// Export an App bundle. Returns a Blob the caller can save.
+// `format='zip'` returns application/zip; default is JSON.
+export function httpExportApp(appId: string, opts: { format?: 'json' | 'zip'; include?: string } = {}) {
+  const params = new URLSearchParams();
+  if (opts.format) params.set('format', opts.format);
+  if (opts.include) params.set('include', opts.include);
+  return httpV2.get(`/apps/${appId}/export?${params.toString()}`, { responseType: 'blob' });
+}
+
+// Import an App from a bundle. Accepts a File (JSON or zip) or a parsed
+// JSON object. Server creates a new App under the calling tenant.
+export function httpImportApp(input: File | object, domainNameOverride?: string) {
+  if (input instanceof File) {
+    const fd = new FormData();
+    fd.append('bundle', input);
+    if (domainNameOverride) fd.append('domainNameOverride', domainNameOverride);
+    return httpV2.post('/apps/import', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
+  const url = domainNameOverride
+    ? `/apps/import?domainNameOverride=${encodeURIComponent(domainNameOverride)}`
+    : '/apps/import';
+  return httpV2.post(url, input);
+}
+
+// Users: archive / restore / hard-delete.
+// The v1 batch endpoints already default to soft-archive in the new backend;
+// pass mode=hard to opt into the cascade purge.
+export function httpArchiveUsers(appId: string, usersIdList: string[], reason?: string) {
+  const qs = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+  return http.post(`/users/delete-many-with-app-id/${appId}${qs}`, { usersIdList });
+}
+
+export function httpHardDeleteUsers(appId: string, usersIdList: string[], reason?: string) {
+  const params = new URLSearchParams({ mode: 'hard' });
+  if (reason) params.set('reason', reason);
+  return http.post(`/users/delete-many-with-app-id/${appId}?${params.toString()}`, { usersIdList });
+}
+
+export function httpRestoreUser(appId: string, userId: string) {
+  return httpV2.post(`/apps/${appId}/users/${userId}/restore`, {});
+}
+
+// Agents: export / import.
+export function httpExportAgent(idOrAddress: string, format: 'json' | 'zip' = 'json') {
+  return httpV2.get(`/agents/${encodeURIComponent(idOrAddress)}/export?format=${format}`, { responseType: 'blob' });
+}
+
+export function httpImportAgent(input: File | object, ownerAppId?: string) {
+  if (input instanceof File) {
+    const fd = new FormData();
+    fd.append('bundle', input);
+    if (ownerAppId) fd.append('ownerAppId', ownerAppId);
+    return httpV2.post('/agents/import', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
+  const url = ownerAppId ? `/agents/import?ownerAppId=${encodeURIComponent(ownerAppId)}` : '/agents/import';
+  return httpV2.post(url, input);
+}
+
+// Browser helper: save a Blob as a file. Used by export buttons to trigger
+// a download from the JSON/zip response without opening a new tab.
+export function saveBlobAs(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
