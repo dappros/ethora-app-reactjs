@@ -50,6 +50,11 @@ const SettingTutorialModal = lazy(() =>
   )
 );
 
+// Lifecycle tab name: "Delete or Archive" replaces the old "Delete" label.
+// The page now exposes both reversible Archive and irreversible Hard delete
+// (see DeleteSetting), so the tab name needs to advertise both.
+const LIFECYCLE_TAB = 'Delete or Archive';
+
 const tabs = [
   'AI Widget',
   'Web App',
@@ -64,13 +69,13 @@ const tabs = [
   // selector inside AI Widget below still handles per-App deployment.
   'Visibility & Privacy',
   'API',
-  'Delete',
+  LIFECYCLE_TAB,
 ];
 
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
-  System: ['Chats', 'Visibility & Privacy', 'API', 'Delete'],
+  System: ['Chats', 'Visibility & Privacy', 'API', LIFECYCLE_TAB],
 };
 
 export default function AppSettings() {
@@ -556,7 +561,7 @@ export default function AppSettings() {
       );
 
       const tabItems = items.map((tab, index) => {
-        if (tab === 'Delete' && domainName === DOMAIN_NAME) {
+        if (tab === LIFECYCLE_TAB && domainName === DOMAIN_NAME) {
           return null;
         }
 
@@ -565,7 +570,7 @@ export default function AppSettings() {
           <TabApp
             key={`${tab}_${index}`}
             text={tab}
-            last={tab === 'Delete'}
+            last={tab === LIFECYCLE_TAB}
             disabled={tabDisabled}
           />
         );
@@ -870,16 +875,18 @@ export default function AppSettings() {
           </TabPanel>
 
           {domainName !== DOMAIN_NAME && (
-            <TabPanel key="Delete" className="grid grid-rows-1 lg:ml-4 h-full">
-              <DeleteSetting
-                displayName={displayName}
-                onDelete={() => setIsDelete(true)}
-              />
+            <TabPanel key={LIFECYCLE_TAB} className="grid grid-rows-1 lg:ml-4 h-full overflow-y-auto">
+              {/* DeleteSetting now owns the archive/restore/hard-delete UI in
+                  full; the old DeleteAppModal call below is kept dark until
+                  removed in a follow-up sweep so the imports don't strand. */}
+              <DeleteSetting app={app} onChanged={() => navigate('/app/admin/apps', { replace: true })} />
             </TabPanel>
           )}
         </TabPanels>
       </TabGroup>
 
+      {/* Legacy modal kept wired but no longer reachable from DeleteSetting.
+          Slated for removal once we're sure nothing else opens it. */}
       {isDelete && (
         <DeleteAppModal
           appName={displayName}

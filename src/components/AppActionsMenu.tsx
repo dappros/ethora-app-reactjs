@@ -18,11 +18,19 @@ interface Props {
   onChanged?: () => void; // callback so the parent list refreshes
 }
 
+const numberFormatter = new Intl.NumberFormat('en-US');
+
 // Per-app "..." action menu. Different items show depending on app.status:
-//   active   -> Export JSON / Export ZIP / Archive / Hard delete
-//   archived -> Export JSON / Export ZIP / Restore / Hard delete
+//   active   -> Export / Archive / Hard delete
+//   archived -> Export / Restore / Hard delete
 //   deleting -> (no actions; purge in flight)
 //   deleted  -> (entity is gone; menu should never render)
+//
+// Export is one item and always produces a zipped JSON bundle; two separate
+// items (JSON vs ZIP) felt like noise. The bundle inside the zip is the same
+// JSON you'd get from the JSON path - the zip is just better for storing and
+// passing around (smaller, single artifact). Operators who want the raw JSON
+// can unzip it client-side.
 export function AppActionsMenu({ app, onChanged }: Props) {
   const status = app.status || 'active';
 
@@ -31,13 +39,12 @@ export function AppActionsMenu({ app, onChanged }: Props) {
 
   const filenameStem = `ethora-app-${app._id || app.displayName}-${Date.now()}`;
 
-  const handleExport = async (format: 'json' | 'zip') => {
+  const handleExport = async () => {
     try {
       setBusy(true);
-      const r = await httpExportApp(app._id, { format });
-      const ext = format === 'zip' ? 'zip' : 'json';
-      saveBlobAs(r.data, `${filenameStem}.${ext}`);
-      toast.success(`Exported ${app.displayName} (${format.toUpperCase()})`);
+      const r = await httpExportApp(app._id, { format: 'zip' });
+      saveBlobAs(r.data, `${filenameStem}.zip`);
+      toast.success(`Exported ${app.displayName}`);
     } catch (e: any) {
       toast.error(`Export failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
     } finally {
@@ -98,6 +105,8 @@ export function AppActionsMenu({ app, onChanged }: Props) {
     return null;
   }
 
+  const stats = app.stats || ({} as ModelApp['stats']);
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left">
@@ -120,20 +129,10 @@ export function AppActionsMenu({ app, onChanged }: Props) {
           <MenuItem>
             {({ focus }) => (
               <button
-                onClick={() => handleExport('json')}
+                onClick={handleExport}
                 className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm`}
               >
-                Export as JSON
-              </button>
-            )}
-          </MenuItem>
-          <MenuItem>
-            {({ focus }) => (
-              <button
-                onClick={() => handleExport('zip')}
-                className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm`}
-              >
-                Export as ZIP
+                Export
               </button>
             )}
           </MenuItem>
@@ -156,7 +155,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                   onClick={() => setConfirmKind('archive')}
                   className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm`}
                 >
-                  Archive (soft delete)
+                  Archive
                 </button>
               )}
             </MenuItem>
@@ -167,7 +166,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                 onClick={() => setConfirmKind('hard')}
                 className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm text-red-600`}
               >
-                Hard delete (cascade)...
+                Hard delete
               </button>
             )}
           </MenuItem>
@@ -187,7 +186,26 @@ export function AppActionsMenu({ app, onChanged }: Props) {
       {confirmKind === 'hard' && (
         <ConfirmModal
           title="Permanently delete this app?"
-          message={`"${app.displayName}" and ALL related data (users, chats, files, sources, bot instances) will be irreversibly purged. This cannot be undone.`}
+          message={
+            <>
+              <div>
+                <span className="font-semibold">"{app.displayName}"</span> and all related data will
+                be irreversibly purged.
+              </div>
+              <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                Will be purged:
+                <ul className="mt-1 list-disc list-inside space-y-0.5">
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> messages</li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
+                </ul>
+                <div className="mt-2 text-xs text-gray-600">
+                  Chat rooms, sources, and bot instances tied to this app will also be removed.
+                </div>
+              </div>
+              <div className="mt-3 text-red-700 font-semibold">This cannot be undone.</div>
+            </>
+          }
           confirmLabel="Yes, hard delete"
           danger
           onConfirm={handleHardDelete}

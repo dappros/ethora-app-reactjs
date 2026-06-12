@@ -85,8 +85,22 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
     );
   };
 
+  const isArchived = app.status === 'archived';
+  // Tile is visually muted (greyed background, slightly desaturated logo) when
+  // archived so a glance at the list distinguishes lifecycle state from a
+  // healthy app, and the operator never confuses an archived app for one
+  // they could still onboard users into.
+  const containerClass = isArchived
+    ? 'grid grid-rows-[auto,_1fr] md:grid-cols-[auto,_1fr] gap-x-4 p-4 rounded-xl border border-gray-200 mb-4 bg-gray-50 grayscale-[40%]'
+    : 'grid grid-rows-[auto,_1fr] md:grid-cols-[auto,_1fr] gap-x-4 p-4 rounded-xl border border-gray-200 mb-4';
+
   return (
-    <div className="grid grid-rows-[auto,_1fr] md:grid-cols-[auto,_1fr] gap-x-4 p-4 rounded-xl border border-gray-200 mb-4">
+    <div className={containerClass}>
+      {isArchived && (
+        <div className="md:col-span-2 -mt-2 mb-2 text-xs text-gray-500 font-varela uppercase tracking-wide">
+          Archived
+        </div>
+      )}
       <div className="flex justify-center items-center">{renderLogo()}</div>
       <div className="flex flex-col gap-8">
         {/* app title */}

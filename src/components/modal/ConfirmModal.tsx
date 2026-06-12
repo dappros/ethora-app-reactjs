@@ -1,12 +1,15 @@
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 
 import { Dialog, DialogPanel } from '@headlessui/react';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { IconClose } from '../Icons/IconClose';
 
 interface Props {
   title: string;
-  message: string;
+  // ReactNode rather than string so callers can embed bold counts
+  // ("5 users, 3 chats will be permanently deleted") without each consumer
+  // re-implementing the dialog shell.
+  message: ReactNode;
   confirmLabel: string;
   cancelLabel?: string;
   danger?: boolean;
