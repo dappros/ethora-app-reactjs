@@ -255,7 +255,11 @@ export function httpGetOneUserWallet(wallet: string) {
 }
 
 export function httpCreateNewApp(displayName: string) {
-  return http.post(`/apps`, { displayName });
+  // createDefaultChat: true preserves the admin-panel first-run UX (the
+  // operator lands in a "Main chat" room after creation). The backend
+  // default is OFF so external API callers get an empty app, but the
+  // panel explicitly opts in here.
+  return http.post(`/apps`, { displayName, createDefaultChat: true });
 }
 
 export interface GetAppsPaginator {
