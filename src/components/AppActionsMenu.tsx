@@ -1,11 +1,12 @@
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   httpArchiveApp,
   httpExportApp,
+  httpGetAppChatRoomsCount,
   httpHardDeleteApp,
   httpRestoreApp,
   saveBlobAs,
@@ -36,6 +37,19 @@ export function AppActionsMenu({ app, onChanged }: Props) {
 
   const [busy, setBusy] = useState(false);
   const [confirmKind, setConfirmKind] = useState<'archive' | 'hard' | null>(null);
+  // Chat rooms count for the hard-delete confirmation. Lazy-loaded when the
+  // user opens the dialog so the listing page itself doesn't pay an extra
+  // round-trip per app. `null` = unknown / still loading; the modal renders
+  // a dash in that case rather than blocking the user.
+  const [chatRoomsCount, setChatRoomsCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (confirmKind !== 'hard') return;
+    setChatRoomsCount(null);
+    httpGetAppChatRoomsCount(app._id)
+      .then((r) => setChatRoomsCount(r?.data?.total ?? 0))
+      .catch(() => setChatRoomsCount(null));
+  }, [confirmKind, app._id]);
 
   const filenameStem = `ethora-app-${app._id || app.displayName}-${Date.now()}`;
 
@@ -193,15 +207,21 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                 be irreversibly purged.
               </div>
               <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                Will be purged:
+                The following will be permanently purged:
                 <ul className="mt-1 list-disc list-inside space-y-0.5">
                   <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> messages</li>
+                  <li>
+                    <span className="font-bold">
+                      {chatRoomsCount === null ? '-' : numberFormatter.format(chatRoomsCount)}
+                    </span> chat rooms
+                  </li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> chat messages</li>
                   <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
+                  <li>Appearance configuration (logo, colours etc)</li>
+                  <li>Default chat rooms settings</li>
+                  <li>AI data (website and documents RAG)</li>
+                  <li>Bot instances and in-app AI Widget configuration</li>
                 </ul>
-                <div className="mt-2 text-xs text-gray-600">
-                  Chat rooms, sources, and bot instances tied to this app will also be removed.
-                </div>
               </div>
               <div className="mt-3 text-red-700 font-semibold">This cannot be undone.</div>
             </>

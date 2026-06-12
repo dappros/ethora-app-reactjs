@@ -17,6 +17,10 @@ import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
+// Thousands-separated counts ("2,056") on the lifecycle tab labels. Cached
+// at module scope so each tab-toggle render doesn't reconstruct it.
+const numberFormatter = new Intl.NumberFormat('en-US');
+
 export default function AdminApps() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -201,13 +205,29 @@ export default function AdminApps() {
   }, [pageIndex]);
 
   useEffect(() => {
-    const newUser = localStorage.getItem('newUser');
+    // Onboarding modals are only for first-time signups (the tenant has no
+    // active apps at all). They previously fired whenever the current PAGE
+    // was empty, which:
+    //   - Triggered on the Archived tab as soon as the user restored their
+    //     only archived app (the page legitimately empties, but the tenant
+    //     still has many active apps).
+    //   - Triggered on any out-of-range Active pagination page (e.g. /apps?page=205
+    //     when the tenant has 84 pages of apps).
+    //
+    // Gate strictly on activeCount === 0 (the tenant-wide count returned by
+    // the list endpoint) AND we're on the Active tab's first page. Anything
+    // else is a normal "page happens to be empty" state and we let the empty
+    // list speak for itself.
+    if (lifecycleTab !== 'active' || pageIndex > 0) return;
+    if (activeCount === null) return; // wait until we know the tenant-wide count
+    if (activeCount > 0) return; // tenant has apps; nothing to onboard
 
-    if (newUser && !apps.length) {
+    const newUser = localStorage.getItem('newUser');
+    if (newUser) {
       return setNewShowModal(true);
     }
-    setShowModal(!apps.length);
-  }, [apps.length]);
+    setShowModal(true);
+  }, [activeCount, lifecycleTab, pageIndex]);
 
   useEffect(() => {
     fetchApps();
@@ -273,7 +293,7 @@ export default function AdminApps() {
                   {tab === 'active' ? 'Active' : 'Archived'}
                   {n !== null && (
                     <span className={classNames('ml-1', lifecycleTab === tab ? 'text-brand-500' : 'text-gray-400')}>
-                      ({n})
+                      ({numberFormatter.format(n)})
                     </span>
                   )}
                 </button>

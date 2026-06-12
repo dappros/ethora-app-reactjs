@@ -986,6 +986,13 @@ export function httpImportAgent(input: File | object, ownerAppId?: string) {
   return httpV2.post(url, input);
 }
 
+// Tiny helper for the hard-delete confirm modal: returns the total number
+// of chat rooms in an app. We hit the v2 chats list endpoint with limit=1
+// so the response is small but `total` reflects the full set.
+export function httpGetAppChatRoomsCount(appId: string) {
+  return httpV2.get(`/apps/${appId}/chats`, { params: { limit: 1, offset: 0 } });
+}
+
 // Browser helper: save a Blob as a file. Used by export buttons to trigger
 // a download from the JSON/zip response without opening a new tab.
 export function saveBlobAs(blob: Blob, filename: string) {

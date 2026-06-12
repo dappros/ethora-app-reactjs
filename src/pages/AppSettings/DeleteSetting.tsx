@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { ConfirmModal } from '../../components/modal/ConfirmModal';
 import {
   httpArchiveApp,
+  httpGetAppChatRoomsCount,
   httpHardDeleteApp,
   httpRestoreApp,
 } from '../../http';
@@ -43,6 +44,16 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
 
   const [confirmKind, setConfirmKind] = useState<'archive' | 'hard' | null>(null);
   const [busy, setBusy] = useState(false);
+  // Chat rooms count appears in BOTH the inline blast-radius card and the
+  // confirmation dialog, so we fetch it on mount rather than on confirm-open.
+  // The list page only carries totalRegistered/totalChats/totalFiles in
+  // app.stats; chat ROOMS is a separate query.
+  const [chatRoomsCount, setChatRoomsCount] = useState<number | null>(null);
+  useEffect(() => {
+    httpGetAppChatRoomsCount(app._id)
+      .then((r) => setChatRoomsCount(r?.data?.total ?? 0))
+      .catch(() => setChatRoomsCount(null));
+  }, [app._id]);
 
   const stats = app.stats || ({} as ModelApp['stats']);
 
@@ -135,21 +146,18 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
         <div className="bg-white border border-red-200 rounded-lg px-4 py-3 mb-4 font-sans text-sm">
           The following will be permanently purged:
           <ul className="mt-2 list-disc list-inside space-y-1">
+            <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
             <li>
-              <span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users
-              {' '}(and their XMPP accounts, wallets, files)
+              <span className="font-bold">
+                {chatRoomsCount === null ? '-' : numberFormatter.format(chatRoomsCount)}
+              </span> chat rooms
             </li>
-            <li>
-              <span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> messages
-              {' '}(across all chat rooms in this app)
-            </li>
-            <li>
-              <span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files
-              {' '}(Mongo metadata + MinIO blobs)
-            </li>
-            <li>Default chat rooms + MUC rooms on the XMPP server</li>
-            <li>RAG sources (site crawls + uploaded documents)</li>
-            <li>Bot instances and any in-app AI Widget configuration</li>
+            <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> chat messages</li>
+            <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
+            <li>Appearance configuration (logo, colours etc)</li>
+            <li>Default chat rooms settings</li>
+            <li>AI data (website and documents RAG)</li>
+            <li>Bot instances and in-app AI Widget configuration</li>
           </ul>
           <div className="mt-2 text-xs text-gray-600">
             Audit log rows are retained so the action remains traceable after the app is gone.
@@ -184,15 +192,21 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
                 be irreversibly purged.
               </div>
               <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                Will be purged:
+                The following will be permanently purged:
                 <ul className="mt-1 list-disc list-inside space-y-0.5">
                   <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> messages</li>
+                  <li>
+                    <span className="font-bold">
+                      {chatRoomsCount === null ? '-' : numberFormatter.format(chatRoomsCount)}
+                    </span> chat rooms
+                  </li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> chat messages</li>
                   <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
+                  <li>Appearance configuration (logo, colours etc)</li>
+                  <li>Default chat rooms settings</li>
+                  <li>AI data (website and documents RAG)</li>
+                  <li>Bot instances and in-app AI Widget configuration</li>
                 </ul>
-                <div className="mt-2 text-xs text-gray-600">
-                  Chat rooms, sources, and bot instances tied to this app will also be removed.
-                </div>
               </div>
               <div className="mt-3 text-red-700 font-semibold">This cannot be undone.</div>
             </>
