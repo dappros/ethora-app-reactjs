@@ -1,8 +1,10 @@
+import { usePushNotifications } from '@ethora/chat-component';
 import hexToRgba from 'hex-to-rgba';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Outlet } from 'react-router-dom';
 import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
+import { buildPushNotificationsConfig } from './config/chatBootstrap';
 import { useCaptureParams } from './hooks/useCaptureParams';
 import { useTrackUrl } from './hooks/useTrackUrl';
 import { withTracking } from './hooks/withTracking';
@@ -53,6 +55,14 @@ function App() {
   useEffect(() => {
     actionGetConfig(getBootstrapDomainName());
   }, []);
+
+  const pushConfig = useMemo(() => buildPushNotificationsConfig(), []);
+  usePushNotifications({
+    enabled: pushConfig.enabled,
+    softAsk: pushConfig.softAsk,
+    firebaseConfig: pushConfig.firebaseConfig,
+    vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+  });
 
   useEffect(() => {
     if (currentApp) {
