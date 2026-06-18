@@ -44,7 +44,7 @@ export default function AdminApps() {
     [searchParams]
   );
   const orderBy = useMemo(
-    () => (searchParams.get('orderBy') as OrderByType) || 'totalRegistered',
+    () => (searchParams.get('orderBy') as OrderByType) || 'createdAt',
     [searchParams]
   );
 
@@ -172,8 +172,6 @@ export default function AdminApps() {
     }
     setShowModal(!apps.length);
   }, [apps.length]);
-
-  console.log('newShowModal', newShowModal);
 
   useEffect(() => {
     fetchApps();

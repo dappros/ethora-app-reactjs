@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Centrifuge } from 'centrifuge';
-import { useAppStore } from '../store/useAppStore';import { refreshToken } from '../http';
+import { refreshToken } from '../http';
+import { useAppStore } from '../store/useAppStore';
 
-const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE;
+function getDefaultCentrifugeEndpoint() {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}/connection/websocket`;
+}
+
+const VITE_APP_CENTRIFUGE_SERVICE =
+  import.meta.env.VITE_APP_CENTRIFUGE_SERVICE || getDefaultCentrifugeEndpoint();
 
 type CounterType =
   | 'counter_chats'
@@ -32,6 +43,11 @@ export function useCentrifugeChannel() {
   }
 
   useEffect(() => {
+    if (!VITE_APP_CENTRIFUGE_SERVICE) {
+      setConnected(false);
+      return;
+    }
+
     const token = currentUser?.wsToken;
     
     const centrifuge = new Centrifuge(VITE_APP_CENTRIFUGE_SERVICE, {

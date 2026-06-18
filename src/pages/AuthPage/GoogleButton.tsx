@@ -14,6 +14,13 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import GoogleIcon from './Icons/socials/googleIcon';
 
+const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+function setEthoraUserCookie(value: string) {
+  const domainPart =
+    ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
+  document.cookie = `ethora_user=${value}; path=/${domainPart}; secure; samesite=lax; max-age=604800`;
+}
+
 interface GoogleButtonProps {
   utm?: string | null;
 }
@@ -79,23 +86,22 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
               return;
             }
 
-            const hubspotData = {
-              fields: [
-                { name: 'firstname', value: firstName },
-                { name: 'lastname', value: lastName },
-                { name: 'email', value: email },
-                { name: 'website', value: website },
-              ],
-            };
+            const hubspotEnabled = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+            const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+            const formId = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+            if (hubspotEnabled && portalId && formId) {
+              const hubspotData = {
+                fields: [
+                  { name: 'firstname', value: firstName },
+                  { name: 'lastname', value: lastName },
+                  { name: 'email', value: email },
+                  { name: 'website', value: website },
+                ],
+              };
+              await sendHSFormData(portalId, formId, hubspotData);
+            }
 
-            await sendHSFormData(
-              '4732608',
-              '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
-              hubspotData
-            );
-
-            document.cookie =
-              'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+            setEthoraUserCookie('accregred');
           } catch (error) {
             console.error(error);
             toast.error('Social registration failed');
@@ -107,8 +113,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             loginType
           ).then(async ({ data }) => {
             await actionAfterLogin(data);
-            document.cookie =
-              'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+            setEthoraUserCookie('accregred');
             localStorage.setItem('newUser', true.toString());
 
             navigateToUserPage(navigate, config?.afterLoginPage);
@@ -123,8 +128,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             logLogin('google', data.user._id);
 
             await actionAfterLogin(data);
-            document.cookie =
-              'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+            setEthoraUserCookie('accregred');
 
             navigateToUserPage(navigate, config?.afterLoginPage);
           });

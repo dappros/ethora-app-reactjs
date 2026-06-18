@@ -18,6 +18,13 @@ import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
 
+const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+function setEthoraUserCookie(value: string) {
+  const domainPart =
+    ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
+  document.cookie = `ethora_user=${value}; path=/${domainPart}; secure; samesite=lax; max-age=604800`;
+}
+
 declare global {
   interface Window {
     ethereum?: any;
@@ -55,8 +62,7 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
 
     toast.success('Successfully logged in with Metamask!');
 
-    document.cookie =
-      'ethora_user=accregred; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+    setEthoraUserCookie('accregred');
 
     if (config?.afterLoginPage) {
       navigateToUserPage(navigate, config.afterLoginPage as string);

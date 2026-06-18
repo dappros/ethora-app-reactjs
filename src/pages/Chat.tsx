@@ -20,14 +20,23 @@ const MemoizedChat = React.memo(function ChatComponent({
 }: ChatComponentProps) {
   const appToken = useAppStore((s) => s.currentApp?.appToken);
 
-  const handleChangeTokens = async () => {
-    const { token, refreshToken: refresh } = await refreshToken();
+  const handleChangeTokens = async (): Promise<
+    | { accessToken: string; refreshToken?: string | undefined }
+    | null
+  > => {
+    try {
+      const { token, refreshToken: refresh } = await refreshToken();
 
-    localStorage.setItem('refreshToken-538', refresh);
-    localStorage.setItem('token-538', token);
+      if (refresh) localStorage.setItem('refreshToken-538', refresh);
+      localStorage.setItem('token-538', token);
 
-    httpTokens.token = token;
-    httpTokens.refreshToken = refresh;
+      httpTokens.token = token;
+      httpTokens.refreshToken = refresh;
+
+      return { accessToken: token, refreshToken: refresh };
+    } catch (e) {
+      return null;
+    }
   };
 
   const allowedDomains = import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];

@@ -19,7 +19,7 @@ interface OrderItem {
 
 interface Props<T extends string> {
   orderByList: Array<OrderItem>;
-  order: string;
+  order: 'asc' | 'desc';
   setOrder: (s: 'asc' | 'desc') => void;
   orderBy: T;
   setOrderBy: (s: T) => void;

@@ -13,6 +13,13 @@ import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
 
+const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+function setEthoraUserCookie(value: string) {
+  const domainPart =
+    ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
+  document.cookie = `ethora_user=${value}; path=/${domainPart}; secure; samesite=lax; max-age=604800`;
+}
+
 interface Inputs {
   newPassword: string;
   repeatPassword: string;
@@ -103,8 +110,7 @@ const ThirdStep = () => {
 
         httpLoginWithEmail(email, newPassword)
           .then(async ({ data }) => {
-            document.cookie =
-              'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+            setEthoraUserCookie('1');
 
             await actionAfterLogin(data);
 

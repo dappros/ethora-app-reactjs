@@ -22,7 +22,16 @@ import { GoogleButton } from '../GoogleButton';
 import { MetamaskButton } from '../MetamaskButton';
 import SkeletonLoader from '../SkeletonLoader';
 
-const SITE_KEY = import.meta.env.VITE_SITE_KEY;
+const SITE_KEY = (import.meta.env.VITE_SITE_KEY || '').trim();
+const TURNSTILE_ENABLED = SITE_KEY.length > 0;
+const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+
+function setEthoraUserCookie(value: string) {
+  const domainPart =
+    ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
+  // Keep existing behavior, but avoid hardcoding ethora.com for enterprise/self-hosted installs
+  document.cookie = `ethora_user=${value}; path=/${domainPart}; secure; samesite=lax; max-age=604800`;
+}
 
 interface FirstStepProps {
   isSmallDevice?: boolean;
@@ -129,7 +138,10 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     const formData = new FormData(formRef.current!);
     const cfToken = formData.get('cf-turnstile-response');
 
-    if (!cfToken || typeof cfToken !== 'string' || cfToken.trim() === '') {
+    // Turnstile is optional for enterprise installs; if VITE_SITE_KEY is empty we skip it.
+    const cfTokenValue =
+      typeof cfToken === 'string' ? cfToken.trim() : '';
+    if (TURNSTILE_ENABLED && !cfTokenValue) {
       return;
     }
 
@@ -137,7 +149,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       await httpRegisterWithEmailV2(
         email,
         password,
-        cfToken,
+        cfTokenValue,
         firstName,
         lastName,
         utmParams || ''
@@ -160,9 +172,16 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           return;
         }
 
+        const hubspotEnabled = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+        const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+        const formId = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+        if (!hubspotEnabled || !portalId || !formId) {
+          return;
+        }
+
         await sendHSFormData(
-          '4732608',
-          '1bf4cbda-8d42-4bfc-8015-c41304eabf19',
+          portalId,
+          formId,
           hubspotData
         );
       });
@@ -174,8 +193,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
 
       httpLoginWithEmail(email, password)
         .then(async ({ data }) => {
-          document.cookie =
-            'ethora_user=1; path=/; domain=.ethora.com; secure; samesite=lax; max-age=604800';
+          setEthoraUserCookie('1');
           localStorage.setItem('newUser', true.toString());
 
           await actionAfterLogin(data);
@@ -311,12 +329,14 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
             helperText={errors.password?.message}
           />
           <Box className="flex justify-center items-center">
-            <Turnstile
-              options={{
-                theme: 'light',
-              }}
-              siteKey={SITE_KEY}
-            />
+            {TURNSTILE_ENABLED && (
+              <Turnstile
+                options={{
+                  theme: 'light',
+                }}
+                siteKey={SITE_KEY}
+              />
+            )}
           </Box>
           <CustomButton
             type="submit"
