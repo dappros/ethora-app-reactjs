@@ -13,6 +13,9 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
 const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
+const LIVEKIT_URL =
+  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env) || {})
+    .VITE_LIVEKIT_URL || 'https://livekit.ethora-qa.com';
 
 // Domain-gated push config shared by the app. Consumed by the
 // chat-component's usePushNotifications hook (mounted in App so the
@@ -318,5 +321,10 @@ export function createChatConfig({
         },
       },
     },
+    videoCalls: {
+    enabled: true,
+    livekitUrl: LIVEKIT_URL,
+    allowedRoomTypes: ['private'],
+  },
   };
 }
