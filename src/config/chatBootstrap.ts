@@ -12,10 +12,18 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 // outgoing messages without hitting the API again.
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
-const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
+const DEFAULT_QR_URL = 'https://app.chat-qa.ethora.com/app/chat/?qrChatId=';
 const LIVEKIT_URL =
   (((import.meta as unknown as { env?: Record<string, string | undefined> }).env) || {})
     .VITE_LIVEKIT_URL || 'https://livekit.ethora-qa.com';
+
+ console.log('LIVEKIT_URL',LIVEKIT_URL)
+
+const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
+  enabled: true,
+  livekitUrl: LIVEKIT_URL,
+  allowedRoomTypes: ['private'],
+};
 
 // Domain-gated push config shared by the app. Consumed by the
 // chat-component's usePushNotifications hook (mounted in App so the
@@ -132,6 +140,7 @@ export const buildEthoraBaseChatConfig = ({
     // with xmpp creds; without those, NB() falls back to the broken
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
+    videoCalls: videoCallsConfig,
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {
@@ -300,11 +309,11 @@ export function createChatConfig({
     qrUrl: DEFAULT_QR_URL,
     roomListStyles,
     chatRoomStyles,
-    disableRoomMenu: true,
+    disableRoomMenu: false,
     defaultRooms: app?.defaultRooms || [],
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
-    useStoreConsoleEnabled: true,
+    // useStoreConsoleEnabled: true,
     // NOTE: push permission is driven by usePushNotifications() in App.tsx
     // (fires after login on any page), so we intentionally do NOT set
     // pushNotifications here - that would make <Chat> trigger a second,
@@ -321,10 +330,5 @@ export function createChatConfig({
         },
       },
     },
-    videoCalls: {
-    enabled: true,
-    livekitUrl: LIVEKIT_URL,
-    allowedRoomTypes: ['private'],
-  },
   };
 }
