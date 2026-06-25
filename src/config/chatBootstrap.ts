@@ -12,7 +12,7 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 // outgoing messages without hitting the API again.
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
-const DEFAULT_QR_URL = 'https://app.chat-qa.ethora.com/app/chat/?qrChatId=';
+const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
 // Domain-gated push config shared by the app. Consumed by the
 // chat-component's usePushNotifications hook (mounted in App so the
 // permission prompt fires right after login, not only on the Chats page).
