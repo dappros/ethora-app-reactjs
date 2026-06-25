@@ -29,6 +29,7 @@ const ROUTE_TABS: RouteEntry[] = [
   { pattern: '/app/admin/billing', tab: 'Billing' },
   // Other top-level routes
   { pattern: '/app/chat', tab: 'Chats' },
+  { pattern: '/app/help/whats-new', tab: "What's new" },
   { pattern: '/app/help', tab: 'Help & Support' },
   { pattern: '/app/profile/edit', tab: 'Edit Profile' },
   { pattern: '/app/profile', tab: 'Profile' },
