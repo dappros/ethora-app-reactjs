@@ -3,7 +3,7 @@ import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { actionAfterLogin } from '../actions.ts';
 import { httpGetOneUser } from '../http.ts';
 
-const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile'];
+const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup'];
 
 export const useTrackUrl = () => {
   const navigate = useNavigate();

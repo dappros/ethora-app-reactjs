@@ -1,8 +1,11 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const apiProxyTarget = env.VITE_DEV_API_TARGET || 'http://localhost:8080';
+  return ({
   plugins: [react()],
   css: {
     preprocessorOptions: {
@@ -50,7 +53,7 @@ export default defineConfig({
     // Proxy API requests to backend to avoid CORS issues
     proxy: {
       '/v1': {
-        target: 'http://localhost:8080',
+        target: apiProxyTarget,
         changeOrigin: true,
         secure: false,
         timeout: 30000, // 30 seconds timeout
@@ -61,7 +64,7 @@ export default defineConfig({
         },
       },
       '/v2': {
-        target: 'http://localhost:8080',
+        target: apiProxyTarget,
         changeOrigin: true,
         secure: false,
         timeout: 30000, // 30 seconds timeout
@@ -73,4 +76,5 @@ export default defineConfig({
       },
     },
   },
+  });
 });

@@ -26,6 +26,7 @@ const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
 import App from './App';
 import AdminLayout from './pages/AdminLayout';
 import TurnstileBridge from './pages/TurnstileBridge';
+import WpSetup from './pages/WpSetup';
 
 export const router = createBrowserRouter(
   [
@@ -56,6 +57,10 @@ export const router = createBrowserRouter(
             {
               path: '/turnstile',
               Component: TurnstileBridge,
+            },
+            {
+              path: '/wp-setup',
+              Component: WpSetup,
             },
             {
               path: '/app',

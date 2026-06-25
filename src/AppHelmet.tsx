@@ -64,7 +64,8 @@ export default function AppHelmet() {
         location.pathname.startsWith('/tempPassword') ||
         location.pathname.startsWith('/resetPassword') ||
         location.pathname === '/register' ||
-        location.pathname === '/turnstile'
+        location.pathname === '/turnstile' ||
+        location.pathname === '/wp-setup'
       ) {
         return;
       } else {
