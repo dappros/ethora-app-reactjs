@@ -12,7 +12,56 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 // outgoing messages without hitting the API again.
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
-const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
+const DEFAULT_QR_URL = 'https://app.chat-qa.ethora.com/app/chat/?qrChatId=';
+// Domain-gated push config shared by the app. Consumed by the
+// chat-component's usePushNotifications hook (mounted in App so the
+// permission prompt fires right after login, not only on the Chats page).
+export function buildPushNotificationsConfig(): {
+  enabled: boolean;
+  softAsk: boolean;
+  firebaseConfig?: {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
+    measurementId: string;
+  };
+} {
+  const allowedDomains =
+    import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+  const currentDomain = window.location.hostname;
+  const pushEnabledByDomain = allowedDomains.includes(currentDomain);
+
+  if (!pushEnabledByDomain) {
+    return { enabled: false, softAsk: false };
+  }
+
+  const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  };
+
+  const hasFirebaseConfig = Boolean(
+    firebaseConfig.apiKey &&
+      firebaseConfig.authDomain &&
+      firebaseConfig.projectId &&
+      firebaseConfig.messagingSenderId &&
+      firebaseConfig.appId
+  );
+
+  if (!hasFirebaseConfig) {
+    return { enabled: false, softAsk: false };
+  }
+
+  return { enabled: true, softAsk: false, firebaseConfig };
+}
 
 const roomListStyles: CSSProperties = {
   maxHeight: 'calc(100%)',
@@ -247,10 +296,26 @@ export function createChatConfig({
     qrUrl: DEFAULT_QR_URL,
     roomListStyles,
     chatRoomStyles,
-    disableRoomMenu: true,
+    disableRoomMenu: false,
     defaultRooms: app?.defaultRooms || [],
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
-    useStoreConsoleEnabled: true,
+    // useStoreConsoleEnabled: true,
+    // NOTE: push permission is driven by usePushNotifications() in App.tsx
+    // (fires after login on any page), so we intentionally do NOT set
+    // pushNotifications here - that would make <Chat> trigger a second,
+    // chat-page-only subscription flow.
+    inAppNotifications: {
+      enabled: true,
+      showInContext: true,
+      position: {
+        horizontal: 'left',
+        vertical: 'bottom',
+        offset: {
+          left: 20,
+          bottom: 20,
+        },
+      },
+    },
   };
 }
