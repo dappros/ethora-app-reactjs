@@ -13,18 +13,6 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
 const DEFAULT_QR_URL = 'https://app.chat-qa.ethora.com/app/chat/?qrChatId=';
-const LIVEKIT_URL =
-  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env) || {})
-    .VITE_LIVEKIT_URL || 'https://livekit.ethora-qa.com';
-
- console.log('LIVEKIT_URL',LIVEKIT_URL)
-
-const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
-  enabled: true,
-  livekitUrl: LIVEKIT_URL,
-  allowedRoomTypes: ['private'],
-};
-
 // Domain-gated push config shared by the app. Consumed by the
 // chat-component's usePushNotifications hook (mounted in App so the
 // permission prompt fires right after login, not only on the Chats page).
@@ -140,7 +128,6 @@ export const buildEthoraBaseChatConfig = ({
     // with xmpp creds; without those, NB() falls back to the broken
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
-    videoCalls: videoCallsConfig,
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {
