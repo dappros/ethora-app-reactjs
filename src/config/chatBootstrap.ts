@@ -73,21 +73,27 @@ export function buildPushNotificationsConfig(): {
   return { enabled: true, softAsk: false, firebaseConfig };
 }
 
-const roomListStyles: CSSProperties = {
+// `satisfies` (not a `: CSSProperties` annotation) so these validate against
+// CSSProperties but keep their narrow literal type. The chat-component is
+// linked from the local submodule, which ships its own nested
+// @types/react/csstype; annotating as CSSProperties would force tsc to compare
+// the two csstype copies at the config boundary and fail on divergent props
+// (e.g. alignmentBaseline). Inferring the literal only checks the keys we set.
+const roomListStyles = {
   maxHeight: 'calc(100%)',
   height: 'calc(100%)',
   borderRadius: '16px 0px 0px 16px',
   border: 'none',
   padding: '16px',
   color: '#141414',
-};
+} satisfies CSSProperties;
 
-const chatRoomStyles: CSSProperties = {
+const chatRoomStyles = {
   maxHeight: 'calc(100%)',
   height: 'calc(100%)',
   borderRadius: '0px 16px 16px 0px',
   color: '#141414',
-};
+} satisfies CSSProperties;
 
 interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;
