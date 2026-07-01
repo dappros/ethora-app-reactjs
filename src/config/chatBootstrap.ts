@@ -12,17 +12,17 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 // outgoing messages without hitting the API again.
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
-const DEFAULT_QR_URL = 'https://app.chat-qa.ethora.com/app/chat/?qrChatId=';
-const LIVEKIT_URL =
-  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env) || {})
-    .VITE_LIVEKIT_URL || 'https://livekit.ethora-qa.com';
+const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
 
+// Video/audio calls (LiveKit). Gated by VITE_VIDEO_CALLS_ENABLED, which the
+// deploy system renders from features.video_calls in deploy.yml. The
+// chat-component only surfaces call UI when enabled; livekitUrl points at the
+// LiveKit server for the instance (VITE_LIVEKIT_URL).
 const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
-  enabled: true,
-  livekitUrl: LIVEKIT_URL,
+  enabled: import.meta.env.VITE_VIDEO_CALLS_ENABLED === 'true',
+  livekitUrl: import.meta.env.VITE_LIVEKIT_URL || '',
   allowedRoomTypes: ['private'],
 };
-
 // Domain-gated push config shared by the app. Consumed by the
 // chat-component's usePushNotifications hook (mounted in App so the
 // permission prompt fires right after login, not only on the Chats page).
@@ -73,46 +73,27 @@ export function buildPushNotificationsConfig(): {
   return { enabled: true, softAsk: false, firebaseConfig };
 }
 
-const isMobileViewport = (): boolean =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(max-width: 768px)').matches;
+// `satisfies` (not a `: CSSProperties` annotation) so these validate against
+// CSSProperties but keep their narrow literal type. The chat-component is
+// linked from the local submodule, which ships its own nested
+// @types/react/csstype; annotating as CSSProperties would force tsc to compare
+// the two csstype copies at the config boundary and fail on divergent props
+// (e.g. alignmentBaseline). Inferring the literal only checks the keys we set.
+const roomListStyles = {
+  maxHeight: 'calc(100%)',
+  height: 'calc(100%)',
+  borderRadius: '16px 0px 0px 16px',
+  border: 'none',
+  padding: '16px',
+  color: '#141414',
+} satisfies CSSProperties;
 
-const mobile = isMobileViewport();
-
-const roomListStyles: CSSProperties = mobile
-  ? {
-      height: '100%',
-      maxHeight: '100%',
-      width: '100%',
-      border: 'none',
-      borderRadius: 0,
-      padding: '8px',
-      color: '#141414',
-    }
-  : {
-      maxHeight: 'calc(100%)',
-      height: 'calc(100%)',
-      borderRadius: '16px 0px 0px 16px',
-      border: 'none',
-      padding: '16px',
-      color: '#141414',
-    };
-
-const chatRoomStyles: CSSProperties = mobile
-  ? {
-      height: '100%',
-      maxHeight: '100%',
-      width: '100%',
-      borderRadius: 0,
-      color: '#141414',
-    }
-  : {
-      maxHeight: 'calc(100%)',
-      height: 'calc(100%)',
-      borderRadius: '0px 16px 16px 0px',
-      color: '#141414',
-    };
+const chatRoomStyles = {
+  maxHeight: 'calc(100%)',
+  height: 'calc(100%)',
+  borderRadius: '0px 16px 16px 0px',
+  color: '#141414',
+} satisfies CSSProperties;
 
 interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;

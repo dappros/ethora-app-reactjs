@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IconExternalLink } from '../components/Icons/IconExternalLink';
 import { BookACallModal } from '../components/modal/BookACallModal';
+import { useWhatsNew } from '../hooks/useWhatsNew';
+import { LATEST_VERSION } from '../whatsNew/releases';
 
 // Derive the uptime/status page URL from the current hostname.
 // Convention: the uptime service is hosted on a sibling subdomain to the
@@ -74,6 +77,8 @@ function ResourceCard({
 export default function Help() {
   const [showBookACall, setShowBookACall] = useState(false);
   const statusUrl = useMemo(deriveStatusUrl, []);
+  const navigate = useNavigate();
+  const { hasUnseen } = useWhatsNew();
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
@@ -87,6 +92,14 @@ export default function Help() {
           Resources to help you get started and get the most out of Ethora.
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl">
+          <ResourceCard
+            title={hasUnseen ? `What's new in ${LATEST_VERSION}` : "What's new"}
+            description={
+              `See what we shipped recently - features, improvements, and quick links to try each one.`
+            }
+            onClick={() => navigate('/app/help/whats-new')}
+            ctaLabel="See what's new"
+          />
           <ResourceCard
             title="SDK"
             description={
