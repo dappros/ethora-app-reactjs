@@ -73,21 +73,46 @@ export function buildPushNotificationsConfig(): {
   return { enabled: true, softAsk: false, firebaseConfig };
 }
 
-const roomListStyles: CSSProperties = {
-  maxHeight: 'calc(100%)',
-  height: 'calc(100%)',
-  borderRadius: '16px 0px 0px 16px',
-  border: 'none',
-  padding: '16px',
-  color: '#141414',
-};
+const isMobileViewport = (): boolean =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(max-width: 768px)').matches;
 
-const chatRoomStyles: CSSProperties = {
-  maxHeight: 'calc(100%)',
-  height: 'calc(100%)',
-  borderRadius: '0px 16px 16px 0px',
-  color: '#141414',
-};
+const mobile = isMobileViewport();
+
+const roomListStyles: CSSProperties = mobile
+  ? {
+      height: '100%',
+      maxHeight: '100%',
+      width: '100%',
+      border: 'none',
+      borderRadius: 0,
+      padding: '8px',
+      color: '#141414',
+    }
+  : {
+      maxHeight: 'calc(100%)',
+      height: 'calc(100%)',
+      borderRadius: '16px 0px 0px 16px',
+      border: 'none',
+      padding: '16px',
+      color: '#141414',
+    };
+
+const chatRoomStyles: CSSProperties = mobile
+  ? {
+      height: '100%',
+      maxHeight: '100%',
+      width: '100%',
+      borderRadius: 0,
+      color: '#141414',
+    }
+  : {
+      maxHeight: 'calc(100%)',
+      height: 'calc(100%)',
+      borderRadius: '0px 16px 16px 0px',
+      color: '#141414',
+    };
 
 interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;
