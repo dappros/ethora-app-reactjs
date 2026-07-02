@@ -145,6 +145,13 @@ export const buildEthoraBaseChatConfig = ({
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
     videoCalls: videoCallsConfig,
+    // In-app message notifications (toasts). Enabled here, on the app-wide
+    // XmppProvider (mounted above the router in main.tsx), so they fire on
+    // any page - not only while the Chats page is open.
+    inAppNotifications: {
+      enabled: true,
+      showInContext: true,
+    },
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {
@@ -307,7 +314,9 @@ export function createChatConfig({
     ...baseConfig,
     customAppToken: ownerOverride?.appToken ?? app?.appToken,
     colors: {
-      primary: app?.primaryColor || '#fff',
+      // Ethora brand blue as the fallback (was '#fff', which rendered the
+      // unread-count badge white/invisible when a tenant has no primaryColor).
+      primary: app?.primaryColor || '#0052CD',
       secondary: '#141414',
     },
     qrUrl: DEFAULT_QR_URL,
