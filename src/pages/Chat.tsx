@@ -363,7 +363,7 @@ export default function ChatPage() {
         <div />
       </div>
       <div
-        className="row-start-2 min-h-0 -m-4 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden pt-0 md:pt-4"
+        className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden pt-0 md:pt-4"
         style={{ color: '#141414' }}
       >
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP
