@@ -98,11 +98,13 @@ const chatRoomStyles = {
 interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;
   currentUser?: ModelCurrentUser | null;
+  primaryColor?: string | null;
 }
 
 export const buildEthoraBaseChatConfig = ({
   chat_token,
   currentUser,
+  primaryColor,
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
   const userLoginPayload = makeChatUserLogin(currentUser);
   const config: XmppProviderConfig = {
@@ -151,6 +153,13 @@ export const buildEthoraBaseChatConfig = ({
     inAppNotifications: {
       enabled: true,
       showInContext: true,
+    },
+    // Keep the brand color on the app-wide config so it survives a refresh
+    // (before <Chat> mounts with createChatConfig). Without this, colors are
+    // undefined after reload and unread badges / accents render grey/white.
+    colors: {
+      primary: primaryColor || '#0052CD',
+      secondary: '#141414',
     },
   };
   if (userLoginPayload) {
