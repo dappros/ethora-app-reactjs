@@ -57,12 +57,16 @@ function App() {
   }, []);
 
   const pushConfig = useMemo(() => buildPushNotificationsConfig(), []);
-  usePushNotifications({
-    enabled: pushConfig.enabled,
-    softAsk: pushConfig.softAsk,
-    firebaseConfig: pushConfig.firebaseConfig,
-    vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
-  });
+  const pushOptions = useMemo(
+    () => ({
+      enabled: pushConfig.enabled,
+      softAsk: pushConfig.softAsk,
+      firebaseConfig: pushConfig.firebaseConfig,
+      vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+    }),
+    [pushConfig]
+  );
+  usePushNotifications(pushOptions);
 
   useEffect(() => {
     if (currentApp) {

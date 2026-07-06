@@ -59,22 +59,16 @@ export const useTrackUrl = () => {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
         } catch (e: any) {
-          // If 401/400, token is invalid - clear it and redirect to login
           if (e?.response?.status === 401 || e?.response?.status === 400) {
             localStorage.removeItem('token-538');
             localStorage.removeItem('refreshToken-538');
             if (!isResetPassword && !isTempPassword) {
               navigate(`/login${location.search}`, { replace: true });
             }
-          } else if (isResetPassword || isTempPassword) {
-            return;
-          } else {
-            navigate(`/login${location.search}`, { replace: true });
-          }
-          // Don't log expected auth errors
-          if (e?.response?.status !== 401 && e?.response?.status !== 400) {
             console.error(e);
+            return;
           }
+          console.error(e);
         }
       } else {
         if (publicPath) {
@@ -88,5 +82,14 @@ export const useTrackUrl = () => {
     };
 
     getUrl();
-  }, [location.pathname, location.search]);
+    // Run ONCE per app load, not on every location change. The chat-component
+    // rewrites the URL with ?chatId=... as it resolves the active room
+    // (setRoomJidInPath: true); re-running this on every such change used to
+    // call actionAfterLogin() again each time, producing a brand-new
+    // currentUser object even though nothing changed. XmppProviderBridge's
+    // config is memoized on currentUser (main.tsx), so each spurious update
+    // tore down and rebuilt the whole XmppProvider/chat tree - the source of
+    // the violent first-load flicker and DOM reconciliation errors.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 };

@@ -188,6 +188,7 @@ function attachAuthInterceptors(client: AxiosInstance) {
     }
 
     if ((request as { _retry?: boolean })._retry) {
+      actionLogout();
       return Promise.reject(error);
     }
     (request as { _retry?: boolean })._retry = true;
