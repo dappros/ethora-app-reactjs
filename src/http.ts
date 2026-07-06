@@ -23,6 +23,9 @@ export const httpTokens = {
   },
   set wsToken(wsToken: string) {
     this._wsToken = wsToken;
+  },
+  get wsToken() {
+    return this._wsToken;
   }
 };
 
@@ -184,13 +187,28 @@ function attachAuthInterceptors(client: AxiosInstance) {
       return Promise.reject(error);
     }
 
+    if ((request as { _retry?: boolean })._retry) {
+      return Promise.reject(error);
+    }
+    (request as { _retry?: boolean })._retry = true;
+
     try {
-      await refreshToken();
+      await refreshOnce();
       return client(request);
     } catch (err) {
       return Promise.reject(err);
     }
   });
+}
+
+let inFlightRefresh: Promise<unknown> | null = null;
+export function refreshOnce(): Promise<unknown> {
+  if (!inFlightRefresh) {
+    inFlightRefresh = refreshToken().finally(() => {
+      inFlightRefresh = null;
+    });
+  }
+  return inFlightRefresh;
 }
 
 attachAuthInterceptors(http);
