@@ -12,7 +12,11 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 // outgoing messages without hitting the API again.
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
-const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
+// QR deep-link base for "scan to open chat". Taken from env so each
+// deployment (prod / QA / self-host) points at its own web host; falls back to
+// the prod host when VITE_QR_URL is unset so existing builds are unaffected.
+const DEFAULT_QR_URL =
+  import.meta.env.VITE_QR_URL || 'https://app.chat.ethora.com/app/chat/?qrChatId=';
 
 // Video/audio calls (LiveKit). Gated by VITE_VIDEO_CALLS_ENABLED, which the
 // deploy system renders from features.video_calls in deploy.yml. The
@@ -79,12 +83,18 @@ export function buildPushNotificationsConfig(): {
 // @types/react/csstype; annotating as CSSProperties would force tsc to compare
 // the two csstype copies at the config boundary and fail on divergent props
 // (e.g. alignmentBaseline). Inferring the literal only checks the keys we set.
+// Mobile web (same breakpoint the chat-component uses): the search bar already
+// supplies the top spacing, so drop the room-list top padding to sit flush.
+const isMobileView =
+  typeof window !== 'undefined' && window.innerWidth < 768;
+
 const roomListStyles = {
   maxHeight: 'calc(100%)',
   height: 'calc(100%)',
   borderRadius: '16px 0px 0px 16px',
   border: 'none',
   padding: '16px',
+  paddingTop: isMobileView ? '0px' : '16px',
   color: '#141414',
 } satisfies CSSProperties;
 
@@ -331,7 +341,7 @@ export function createChatConfig({
     qrUrl: DEFAULT_QR_URL,
     roomListStyles,
     chatRoomStyles,
-    disableRoomMenu: false,
+    disableRoomMenu: true,
     defaultRooms: app?.defaultRooms || [],
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
