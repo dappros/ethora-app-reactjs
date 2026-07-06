@@ -171,6 +171,11 @@ export const buildEthoraBaseChatConfig = ({
     colors: {
       primary: primaryColor || '#0052CD',
       secondary: '#141414',
+      // Icon "chip" background. Without this the chat-component falls back to
+      // `secondary` (#141414), which rendered the attach / mic / send buttons
+      // as harsh black squares. A soft neutral chip keeps the blue icons
+      // readable and matches the search bar / menu-hover surfaces.
+      iconsBg: '#F0F3F7',
     },
   };
   if (userLoginPayload) {
@@ -342,6 +347,9 @@ export function createChatConfig({
       // unread-count badge white/invisible when a tenant has no primaryColor).
       primary: app?.primaryColor || '#0052CD',
       secondary: '#141414',
+      // Soft neutral chip behind the attach / mic / send icons. Without it the
+      // chat-component falls back to `secondary` (#141414) -> black squares.
+      iconsBg: '#F0F3F7',
     },
     qrUrl: DEFAULT_QR_URL,
     roomListStyles: getRoomListStyles(isMobileView),
