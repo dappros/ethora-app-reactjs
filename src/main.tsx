@@ -127,13 +127,15 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
 
 function XmppProviderBridge({ children }: { children: React.ReactNode }) {
   const currentUser = useAppStore((s) => s.currentUser);
+  const currentApp = useAppStore((s) => s.currentApp);
   const providerConfig = useMemo(
     () =>
       buildEthoraBaseChatConfig({
         chat_token: currentUser?.token || null,
         currentUser,
+        primaryColor: currentApp?.primaryColor,
       }),
-    [currentUser]
+    [currentUser, currentApp?.primaryColor]
   );
 
   return <XmppProvider config={providerConfig}>{children}</XmppProvider>;

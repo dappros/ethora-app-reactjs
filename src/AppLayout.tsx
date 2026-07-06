@@ -25,8 +25,9 @@ export default function AppLayout() {
             <div className="h-full overflow-hidden">
               <AppMenu />
             </div>
-            {/* router content */}
-            <div className="p-4 min-h-[calc(100vh-72px)] md:p-0">
+            {/* router content — edge-to-edge on mobile (no grey inset between
+                the top bar and the chat panel); padded card on desktop. */}
+            <div className="min-h-[calc(100vh-72px)] md:p-0">
               <Outlet />
             </div>
           </div>

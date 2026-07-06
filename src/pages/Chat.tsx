@@ -8,6 +8,7 @@ import {
   actionSwitchChatApp,
 } from '../actions';
 import { createChatConfig } from '../config/chatBootstrap';
+import { useIsMobileView } from '../hooks/useIsMobileView';
 import { useAppStore } from '../store/useAppStore';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 
@@ -84,6 +85,10 @@ const MemoizedChat = React.memo(function ChatComponent({
   // We also forward ownerSession itself so createChatConfig can build the
   // owner-shaped userLogin.user (preferred over jwtLogin on this deployment
   // because /v1/users/client expects type:'client' tokens we don't mint).
+  // Reactive: recomputes chatConfig when the viewport crosses the mobile
+  // breakpoint so room-list paddings update on resize, not just at load.
+  const isMobileView = useIsMobileView();
+
   const ownerOverride = useMemo(() => {
     if (!ownerSession) return undefined;
     return {
@@ -110,6 +115,7 @@ const MemoizedChat = React.memo(function ChatComponent({
       createChatConfig({
         app: config,
         chatToken: currentUser?.token || null,
+        isMobileView,
         // Forwarding currentUser lets createChatConfig set userLogin from the
         // base-app User's xmpp creds when no owner override is active. This
         // is the load-bearing fix for the email-login path because the
@@ -125,6 +131,7 @@ const MemoizedChat = React.memo(function ChatComponent({
       currentUser?.xmppPassword,
       currentUser?._id,
       ownerOverride,
+      isMobileView,
     ]
   );
 
@@ -289,7 +296,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full abc">
+    <div className="grid grid-rows-[auto,_1fr] gap-0 md:gap-4 h-full abc">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           Chats
@@ -363,7 +370,7 @@ export default function ChatPage() {
         <div />
       </div>
       <div
-        className="rounded-2xl bg-white px-0 overflow-hidden pt-4"
+        className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden pt-0 md:pt-4"
         style={{ color: '#141414' }}
       >
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP

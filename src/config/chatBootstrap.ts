@@ -12,7 +12,11 @@ type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 // outgoing messages without hitting the API again.
 type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user']>;
 
-const DEFAULT_QR_URL = 'https://app.chat.ethora.com/app/chat/?qrChatId=';
+// QR deep-link base for "scan to open chat". Taken from env so each
+// deployment (prod / QA / self-host) points at its own web host; falls back to
+// the prod host when VITE_QR_URL is unset so existing builds are unaffected.
+const DEFAULT_QR_URL =
+  import.meta.env.VITE_QR_URL || 'https://app.chat.ethora.com/app/chat/?qrChatId=';
 
 // Video/audio calls (LiveKit). Gated by VITE_VIDEO_CALLS_ENABLED, which the
 // deploy system renders from features.video_calls in deploy.yml. The
@@ -79,14 +83,21 @@ export function buildPushNotificationsConfig(): {
 // @types/react/csstype; annotating as CSSProperties would force tsc to compare
 // the two csstype copies at the config boundary and fail on divergent props
 // (e.g. alignmentBaseline). Inferring the literal only checks the keys we set.
-const roomListStyles = {
-  maxHeight: 'calc(100%)',
-  height: 'calc(100%)',
-  borderRadius: '16px 0px 0px 16px',
-  border: 'none',
-  padding: '16px',
-  color: '#141414',
-} satisfies CSSProperties;
+// Room-list container styles. `paddingTop` is viewport-dependent: on mobile
+// the search bar already supplies the top spacing, so we drop it (otherwise
+// the list sits offset below the header). Computed from a reactive flag the
+// caller passes in (see useIsMobileView) so it updates on resize, not just at
+// load. `satisfies` keeps the narrow literal type - see the note below.
+const getRoomListStyles = (isMobile: boolean) =>
+  ({
+    maxHeight: 'calc(100%)',
+    height: 'calc(100%)',
+    borderRadius: '16px 0px 0px 16px',
+    border: 'none',
+    padding: '16px',
+    paddingTop: isMobile ? '0px' : '16px',
+    color: '#141414',
+  }) satisfies CSSProperties;
 
 const chatRoomStyles = {
   maxHeight: 'calc(100%)',
@@ -98,11 +109,13 @@ const chatRoomStyles = {
 interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;
   currentUser?: ModelCurrentUser | null;
+  primaryColor?: string | null;
 }
 
 export const buildEthoraBaseChatConfig = ({
   chat_token,
   currentUser,
+  primaryColor,
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
   const userLoginPayload = makeChatUserLogin(currentUser);
   const config: XmppProviderConfig = {
@@ -145,6 +158,20 @@ export const buildEthoraBaseChatConfig = ({
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
     videoCalls: videoCallsConfig,
+    // In-app message notifications (toasts). Enabled here, on the app-wide
+    // XmppProvider (mounted above the router in main.tsx), so they fire on
+    // any page - not only while the Chats page is open.
+    inAppNotifications: {
+      enabled: true,
+      showInContext: true,
+    },
+    // Keep the brand color on the app-wide config so it survives a refresh
+    // (before <Chat> mounts with createChatConfig). Without this, colors are
+    // undefined after reload and unread badges / accents render grey/white.
+    colors: {
+      primary: primaryColor || '#0052CD',
+      secondary: '#141414',
+    },
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {
@@ -198,6 +225,9 @@ interface CreateChatConfigOptions {
     ownerSession: ModelOwnerSession;
     refreshFunction: () => Promise<{ accessToken: string; refreshToken?: string } | null>;
   };
+  // Reactive mobile-viewport flag (from useIsMobileView). Drives the
+  // room-list top padding so it updates on resize, not just at load.
+  isMobileView?: boolean;
 }
 
 // Build the userLogin.user payload for chat-component. Returns null when
@@ -253,6 +283,7 @@ export function createChatConfig({
   chatToken,
   currentUser,
   ownerOverride,
+  isMobileView = false,
 }: CreateChatConfigOptions): ChatConfig {
   // When we're in owner-session mode we have to override BOTH the chat
   // token (XMPP identity) AND the refreshFunction; the default refresh
@@ -307,13 +338,15 @@ export function createChatConfig({
     ...baseConfig,
     customAppToken: ownerOverride?.appToken ?? app?.appToken,
     colors: {
-      primary: app?.primaryColor || '#fff',
+      // Ethora brand blue as the fallback (was '#fff', which rendered the
+      // unread-count badge white/invisible when a tenant has no primaryColor).
+      primary: app?.primaryColor || '#0052CD',
       secondary: '#141414',
     },
     qrUrl: DEFAULT_QR_URL,
-    roomListStyles,
+    roomListStyles: getRoomListStyles(isMobileView),
     chatRoomStyles,
-    disableRoomMenu: false,
+    disableRoomMenu: true,
     defaultRooms: app?.defaultRooms || [],
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },

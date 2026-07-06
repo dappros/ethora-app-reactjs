@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Centrifuge } from 'centrifuge';
 import { useAppStore } from '../store/useAppStore';
-import { refreshToken } from '../http';
+import { httpTokens, refreshOnce } from '../http';
+
+const WS_TOKEN_MIN_INTERVAL_MS = 30_000;
+let lastWsTokenRefresh = 0;
 
 // Use environment variable or default to localhost for development
 // Centrifuge v6 requires ws:// or wss:// scheme with full WebSocket path
@@ -29,11 +32,17 @@ export function useCentrifugeChannel() {
   const [connected, setConnected] = useState(false);
 
   const getToken = async () => {
-    console.log('[centrifuge] getToken CALLED!');
-    const newTokens = await refreshToken();
-
-    return newTokens.wsToken;
-  }
+    // Reuse the existing wsToken if we refreshed recently. This caps how often
+    // a reconnect loop can hit /users/login/refresh, regardless of how many
+    // times Centrifuge retries.
+    const now = Date.now();
+    if (httpTokens.wsToken && now - lastWsTokenRefresh < WS_TOKEN_MIN_INTERVAL_MS) {
+      return httpTokens.wsToken;
+    }
+    await refreshOnce();
+    lastWsTokenRefresh = Date.now();
+    return httpTokens.wsToken;
+  };
 
   useEffect(() => {
     // Skip Centrifuge if endpoint is not configured

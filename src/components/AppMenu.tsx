@@ -58,7 +58,7 @@ export function AppMenu() {
   }
 
   return (
-    <div className="bg-white md:fixed p-2 flex justify-between items-center md:rounded-2xl md:self-start md:h-[calc(100vh-32px)] md:flex-col">
+    <div className="bg-white md:fixed p-2 flex justify-between items-center h-full md:h-[calc(100vh-32px)] md:rounded-2xl md:self-start md:flex-col">
       <button
         onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}
         className="md:hidden"
