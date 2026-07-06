@@ -83,20 +83,21 @@ export function buildPushNotificationsConfig(): {
 // @types/react/csstype; annotating as CSSProperties would force tsc to compare
 // the two csstype copies at the config boundary and fail on divergent props
 // (e.g. alignmentBaseline). Inferring the literal only checks the keys we set.
-// Mobile web (same breakpoint the chat-component uses): the search bar already
-// supplies the top spacing, so drop the room-list top padding to sit flush.
-const isMobileView =
-  typeof window !== 'undefined' && window.innerWidth < 768;
-
-const roomListStyles = {
-  maxHeight: 'calc(100%)',
-  height: 'calc(100%)',
-  borderRadius: '16px 0px 0px 16px',
-  border: 'none',
-  padding: '16px',
-  paddingTop: isMobileView ? '0px' : '16px',
-  color: '#141414',
-} satisfies CSSProperties;
+// Room-list container styles. `paddingTop` is viewport-dependent: on mobile
+// the search bar already supplies the top spacing, so we drop it (otherwise
+// the list sits offset below the header). Computed from a reactive flag the
+// caller passes in (see useIsMobileView) so it updates on resize, not just at
+// load. `satisfies` keeps the narrow literal type - see the note below.
+const getRoomListStyles = (isMobile: boolean) =>
+  ({
+    maxHeight: 'calc(100%)',
+    height: 'calc(100%)',
+    borderRadius: '16px 0px 0px 16px',
+    border: 'none',
+    padding: '16px',
+    paddingTop: isMobile ? '0px' : '16px',
+    color: '#141414',
+  }) satisfies CSSProperties;
 
 const chatRoomStyles = {
   maxHeight: 'calc(100%)',
@@ -224,6 +225,9 @@ interface CreateChatConfigOptions {
     ownerSession: ModelOwnerSession;
     refreshFunction: () => Promise<{ accessToken: string; refreshToken?: string } | null>;
   };
+  // Reactive mobile-viewport flag (from useIsMobileView). Drives the
+  // room-list top padding so it updates on resize, not just at load.
+  isMobileView?: boolean;
 }
 
 // Build the userLogin.user payload for chat-component. Returns null when
@@ -279,6 +283,7 @@ export function createChatConfig({
   chatToken,
   currentUser,
   ownerOverride,
+  isMobileView = false,
 }: CreateChatConfigOptions): ChatConfig {
   // When we're in owner-session mode we have to override BOTH the chat
   // token (XMPP identity) AND the refreshFunction; the default refresh
@@ -339,7 +344,7 @@ export function createChatConfig({
       secondary: '#141414',
     },
     qrUrl: DEFAULT_QR_URL,
-    roomListStyles,
+    roomListStyles: getRoomListStyles(isMobileView),
     chatRoomStyles,
     disableRoomMenu: true,
     defaultRooms: app?.defaultRooms || [],
