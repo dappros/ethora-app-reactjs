@@ -26,6 +26,16 @@ const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
   enabled: import.meta.env.VITE_VIDEO_CALLS_ENABLED === 'true',
   livekitUrl: import.meta.env.VITE_LIVEKIT_URL || '',
   allowedRoomTypes: ['private'],
+  enableAudioCalls: true,
+  startWithMicOn: true,
+};
+const webNotificationsConfig: NonNullable<ChatConfig['pushNotifications']> = {
+  enabled: true,
+  vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+  permissionBanner: {
+    enabled: true,
+    showWhenBlocked: true,
+  },
 };
 // Domain-gated push config shared by the app. Consumed by the
 // chat-component's usePushNotifications hook (mounted in App so the
@@ -165,6 +175,7 @@ export const buildEthoraBaseChatConfig = ({
       enabled: true,
       showInContext: true,
     },
+    pushNotifications: webNotificationsConfig,
     // Keep the brand color on the app-wide config so it survives a refresh
     // (before <Chat> mounts with createChatConfig). Without this, colors are
     // undefined after reload and unread badges / accents render grey/white.
@@ -338,23 +349,19 @@ export function createChatConfig({
     ...baseConfig,
     customAppToken: ownerOverride?.appToken ?? app?.appToken,
     colors: {
-      // Ethora brand blue as the fallback (was '#fff', which rendered the
-      // unread-count badge white/invisible when a tenant has no primaryColor).
       primary: app?.primaryColor || '#0052CD',
       secondary: '#141414',
     },
     qrUrl: DEFAULT_QR_URL,
     roomListStyles: getRoomListStyles(isMobileView),
     chatRoomStyles,
-    disableRoomMenu: true,
+    chatHeaderSettings: {
+      disableMenu: true,
+      disableCreate: app?.allowUsersToCreateRooms === false,
+    },
     defaultRooms: app?.defaultRooms || [],
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
-    // useStoreConsoleEnabled: true,
-    // NOTE: push permission is driven by usePushNotifications() in App.tsx
-    // (fires after login on any page), so we intentionally do NOT set
-    // pushNotifications here - that would make <Chat> trigger a second,
-    // chat-page-only subscription flow.
     inAppNotifications: {
       enabled: true,
       showInContext: true,
@@ -367,5 +374,6 @@ export function createChatConfig({
         },
       },
     },
+    pushNotifications: webNotificationsConfig,
   };
 }
