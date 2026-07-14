@@ -98,6 +98,57 @@ export function buildPushNotificationsConfig(): {
 // the list sits offset below the header). Computed from a reactive flag the
 // caller passes in (see useIsMobileView) so it updates on resize, not just at
 // load. `satisfies` keeps the narrow literal type - see the note below.
+// Device/user locale for static UI captions AND as the reader locale for
+// message translation. navigator.language is the browser/device language
+// ("en-US", "fr-CA", "es-US"); a deployment that stores a per-user language
+// could pass that instead. Captions resolve to the base language; the full
+// locale (with region) is forwarded to the translation service.
+const deviceLocale: string =
+  (typeof navigator !== 'undefined' && navigator.language) || 'en';
+
+// Optional message-translation endpoint. When VITE_TRANSLATE_ENDPOINT is set,
+// the chat shows an on-demand "Translate" link that POSTs { text, source,
+// target } and expects { translatedText }. Swap the endpoint for Google /
+// OpenAI / your own service. See docs/translation-code-sample.md.
+const translateEndpoint = import.meta.env.VITE_TRANSLATE_ENDPOINT as
+  | string
+  | undefined;
+
+const onTranslateMessage = translateEndpoint
+  ? async (
+      text: string,
+      ctx: { sourceLocale?: string; targetLocale: string }
+    ): Promise<string> => {
+      const res = await fetch(translateEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          source: ctx.sourceLocale || null,
+          target: ctx.targetLocale,
+        }),
+      });
+      if (!res.ok) throw new Error(`translate ${res.status}`);
+      const data = await res.json();
+      return String(data?.translatedText ?? data?.translation ?? '');
+    }
+  : undefined;
+
+// Static UI i18n (captions) - always on; resolves to en if the locale isn't
+// a built-in language (en/fr/es).
+const i18nConfig = { locale: deviceLocale };
+
+// Dynamic per-message translation. On-demand "Translate" link, enabled only
+// when a translation endpoint is configured (otherwise the link would have
+// nothing to call). readerLocale carries the region so the service can pick
+// fr-CA vs fr-FR.
+const messageTranslationConfig = {
+  enabled: !!translateEndpoint,
+  mode: 'on-demand' as const,
+  readerLocale: deviceLocale,
+  onTranslate: onTranslateMessage,
+};
+
 const getRoomListStyles = (isMobile: boolean) =>
   ({
     maxHeight: 'calc(100%)',
@@ -176,6 +227,9 @@ export const buildEthoraBaseChatConfig = ({
       showInContext: true,
     },
     pushNotifications: webNotificationsConfig,
+    // Static UI localization (device language) + dynamic message translation.
+    i18n: i18nConfig,
+    translates: messageTranslationConfig,
     // Keep the brand color on the app-wide config so it survives a refresh
     // (before <Chat> mounts with createChatConfig). Without this, colors are
     // undefined after reload and unread badges / accents render grey/white.
@@ -375,5 +429,8 @@ export function createChatConfig({
       },
     },
     pushNotifications: webNotificationsConfig,
+    // Static UI localization (device language) + dynamic message translation.
+    i18n: i18nConfig,
+    translates: messageTranslationConfig,
   };
 }

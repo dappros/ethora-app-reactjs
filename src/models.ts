@@ -361,4 +361,4 @@ export type OrderByType =
   | 'email'
   | 'firstName';
 
-export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'zh';
+export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'fr' | 'zh';
