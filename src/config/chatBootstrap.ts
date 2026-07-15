@@ -193,11 +193,11 @@ export const buildEthoraBaseChatConfig = ({
     },
     pushNotifications: webNotificationsConfig,
     // Static UI localization (device language) + dynamic message translation.
-     translates: {
-        enabled: true,
-        mode: 'auto',
-        targets: TRANSLATE_LANGUAGE_CODES,
-      },
+    translates: {
+      enabled: true,
+      mode: 'auto',
+      targets: TRANSLATE_LANGUAGE_CODES,
+    },
     colors: {
       primary: primaryColor || '#0052CD',
       secondary: '#141414',
@@ -394,8 +394,11 @@ export function createChatConfig({
       },
     },
     pushNotifications: webNotificationsConfig,
-    // Static UI localization (device language) + dynamic message translation.
     i18n: i18nConfig,
-    translates: messageTranslationConfig,
+    translates: {
+      enabled: true,
+      mode: 'auto',
+      targets: TRANSLATE_LANGUAGE_CODES,
+    },
   };
 }
