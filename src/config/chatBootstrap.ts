@@ -2,6 +2,9 @@ import { Chat, XmppProvider } from '@ethora/chat-component';
 import Session from 'supertokens-web-js/recipe/session';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
+import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
+
+const TRANSLATE_LANGUAGE_CODES = LANGUAGE_OPTIONS.map((l) => l.id);
 
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
@@ -106,48 +109,10 @@ export function buildPushNotificationsConfig(): {
 const deviceLocale: string =
   (typeof navigator !== 'undefined' && navigator.language) || 'en';
 
-// Optional message-translation endpoint. When VITE_TRANSLATE_ENDPOINT is set,
-// the chat shows an on-demand "Translate" link that POSTs { text, source,
-// target } and expects { translatedText }. Swap the endpoint for Google /
-// OpenAI / your own service. See docs/translation-code-sample.md.
-const translateEndpoint = import.meta.env.VITE_TRANSLATE_ENDPOINT as
-  | string
-  | undefined;
-
-const onTranslateMessage = translateEndpoint
-  ? async (
-      text: string,
-      ctx: { sourceLocale?: string; targetLocale: string }
-    ): Promise<string> => {
-      const res = await fetch(translateEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          source: ctx.sourceLocale || null,
-          target: ctx.targetLocale,
-        }),
-      });
-      if (!res.ok) throw new Error(`translate ${res.status}`);
-      const data = await res.json();
-      return String(data?.translatedText ?? data?.translation ?? '');
-    }
-  : undefined;
 
 // Static UI i18n (captions) - always on; resolves to en if the locale isn't
 // a built-in language (en/fr/es).
 const i18nConfig = { locale: deviceLocale };
-
-// Dynamic per-message translation. On-demand "Translate" link, enabled only
-// when a translation endpoint is configured (otherwise the link would have
-// nothing to call). readerLocale carries the region so the service can pick
-// fr-CA vs fr-FR.
-const messageTranslationConfig = {
-  enabled: !!translateEndpoint,
-  mode: 'on-demand' as const,
-  readerLocale: deviceLocale,
-  onTranslate: onTranslateMessage,
-};
 
 const getRoomListStyles = (isMobile: boolean) =>
   ({
@@ -228,11 +193,11 @@ export const buildEthoraBaseChatConfig = ({
     },
     pushNotifications: webNotificationsConfig,
     // Static UI localization (device language) + dynamic message translation.
-    i18n: i18nConfig,
-    translates: messageTranslationConfig,
-    // Keep the brand color on the app-wide config so it survives a refresh
-    // (before <Chat> mounts with createChatConfig). Without this, colors are
-    // undefined after reload and unread badges / accents render grey/white.
+     translates: {
+        enabled: true,
+        mode: 'auto',
+        targets: TRANSLATE_LANGUAGE_CODES,
+      },
     colors: {
       primary: primaryColor || '#0052CD',
       secondary: '#141414',
