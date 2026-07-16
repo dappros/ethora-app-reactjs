@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import BackButton from '../BackButton';
 import RegisterForm from '../Register/RegisterForm';
@@ -15,6 +16,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const config = useAppStore((s) => s.currentApp);
+  const { t } = useTranslation();
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -74,7 +76,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
               m: 0,
             }}
           >
-            Sign Up
+            {t('authRegisterLayout.title')}
           </Typography>
         </Box>
         <RegisterForm />
@@ -86,7 +88,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
           fontSize: '14px',
         }}
       >
-        Already have an account?{' '}
+        {t('authRegisterLayout.alreadyHaveAccount')}{' '}
         <Typography
           style={{
             textDecoration: 'underline',
@@ -97,7 +99,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
           }}
           onClick={() => navigate('/login')}
         >
-          Sign In
+          {t('authRegisterLayout.signIn')}
         </Typography>
       </Typography>
     </Box>

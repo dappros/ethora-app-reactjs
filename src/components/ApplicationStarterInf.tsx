@@ -1,4 +1,5 @@
 import appCreateImage from '../assets/app-craete-image.png';
+import { useTranslation } from '../i18n/useTranslation';
 import { IconClose } from './Icons/IconClose';
 
 interface Props {
@@ -6,17 +7,15 @@ interface Props {
 }
 
 export function ApplicationStarterInf({ onClose }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="p-4 bg-[#F3F6FC] relative grid grid-rows-[3fr,_2fr] lg:grid-rows-1 lg:grid-cols-[minmax(600px,_3fr),_2fr] mb-4 rounded-xl">
       <div className="text-regular flex items-end lg:items-start font-varela">
         <div>
-          <p>
-            Here you can Create, Manage and View applications depending on your
-            permissions.
-          </p>
+          <p>{t('applicationStarterInf.intro')}</p>
           <ul className="list-disc pl-6">
-            <li>Create: use the "Create App" button.</li>
-            <li>Manage / View: click one of the available apps in the list.</li>
+            <li>{t('applicationStarterInf.createBullet')}</li>
+            <li>{t('applicationStarterInf.manageBullet')}</li>
           </ul>
         </div>
       </div>

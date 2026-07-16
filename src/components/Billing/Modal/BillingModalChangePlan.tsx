@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Box, Modal, Typography } from '@mui/material';
 import classNames from 'classnames';
 import { ReactElement, useState } from 'react';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 const style = {
   position: 'absolute',
@@ -35,52 +36,6 @@ interface Plan {
   features: string[];
 }
 
-const plans: Plan[] = [
-  {
-    id: 'free',
-    title: 'Free',
-    required: '* Enough for you MVP',
-    price: '0$',
-    features: [
-      'Custom level 2 domain (web3)',
-      'Web3, Chat and Push Notifications',
-      'Full API and IPFS (fair use policy)',
-      'Discord & GitHub support',
-      'Shared Cloud hosting',
-    ],
-  },
-  {
-    id: 'business',
-    title: 'Business',
-    required: '* Powering SMEs',
-    price: '199$ / month',
-    description: 'Everything in Free',
-    icon: true,
-    features: [
-      'Everything in Free',
-      'Custom primary domain (web3)',
-      'Advanced L1, L2, IPFS options',
-      'High API and RPC performance',
-      'Business Cloud SLA',
-    ],
-  },
-  {
-    id: 'enterprise',
-    title: 'Enterprise',
-    required: '* Custom and larger needs',
-    price: 'Custom',
-    description: 'Everything in Business',
-    icon: true,
-    features: [
-      'Everything in Business',
-      'Dedicated / On-prem hosting',
-      'Enterprise custom configuration',
-      '24/7 phone support',
-      'Enterprise-grade SLA',
-    ],
-  },
-];
-
 interface BillingModalChangePlanProps {
   isOpen: boolean;
   handleClose: () => void;
@@ -91,11 +46,58 @@ export const BillingModalChangePlan = (
 ): ReactElement => {
   const { isOpen, handleClose } = props;
 
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<string>('');
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);
   };
+
+  const plans: Plan[] = [
+    {
+      id: 'free',
+      title: t('billingModalChangePlan.free.title'),
+      required: t('billingModalChangePlan.free.required'),
+      price: '0$',
+      features: [
+        t('billingModalChangePlan.free.feature1'),
+        t('billingModalChangePlan.free.feature2'),
+        t('billingModalChangePlan.free.feature3'),
+        t('billingModalChangePlan.free.feature4'),
+        t('billingModalChangePlan.free.feature5'),
+      ],
+    },
+    {
+      id: 'business',
+      title: t('billingModalChangePlan.business.title'),
+      required: t('billingModalChangePlan.business.required'),
+      price: t('billingModalChangePlan.business.price'),
+      description: t('billingModalChangePlan.everythingInFree'),
+      icon: true,
+      features: [
+        t('billingModalChangePlan.everythingInFree'),
+        t('billingModalChangePlan.business.feature2'),
+        t('billingModalChangePlan.business.feature3'),
+        t('billingModalChangePlan.business.feature4'),
+        t('billingModalChangePlan.business.feature5'),
+      ],
+    },
+    {
+      id: 'enterprise',
+      title: t('billingModalChangePlan.enterprise.title'),
+      required: t('billingModalChangePlan.enterprise.required'),
+      price: t('billingModalChangePlan.enterprise.price'),
+      description: t('billingModalChangePlan.everythingInBusiness'),
+      icon: true,
+      features: [
+        t('billingModalChangePlan.everythingInBusiness'),
+        t('billingModalChangePlan.enterprise.feature2'),
+        t('billingModalChangePlan.enterprise.feature3'),
+        t('billingModalChangePlan.enterprise.feature4'),
+        t('billingModalChangePlan.enterprise.feature5'),
+      ],
+    },
+  ];
 
   return (
     <Modal
@@ -160,7 +162,7 @@ export const BillingModalChangePlan = (
                       'text-center mt-8 px-4 py-2 bg-white shadow-2xl text-brand-500 rounded-full font-semibold transition'
                     }
                   >
-                    Choose plan
+                    {t('billingModalChangePlan.choosePlan')}
                   </button>
                 </Box>
               </Box>

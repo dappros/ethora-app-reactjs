@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import YouLogo from '../../assets/YouLogo.svg';
 import { useAppStore } from '../../store/useAppStore';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface LogoContentProps {
   isMobile?: boolean;
@@ -10,6 +11,7 @@ interface LogoContentProps {
 const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const [imageError, setImageError] = useState(false);
+  const { t } = useTranslation();
 
   const allowedDomains =
     import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
@@ -23,7 +25,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
     if (imageError || !config?.logoImage) {
       return (
         <img
-          alt="logoImage"
+          alt={t('authLogoContent.logoAlt')}
           src={YouLogo}
           onError={() => setImageError(true)}
           style={{ maxWidth: '100%' }}
@@ -35,7 +37,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
       return (
         <a href="https://ethora.com/" target="_blank" rel="noopener noreferrer">
           <img
-            alt="logoImage"
+            alt={t('authLogoContent.logoAlt')}
             src={config.logoImage}
             onError={() => setImageError(true)}
             style={{ maxWidth: '100%' }}
@@ -46,13 +48,16 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
 
     return (
       <img
-        alt="logoImage"
+        alt={t('authLogoContent.logoAlt')}
         src={config.logoImage}
         onError={() => setImageError(true)}
         style={{ maxWidth: '100%' }}
       />
     );
-  }, [config?.logoImage, imageError]);
+    // `t` is a dep: the memo renders translated alt text, so it must
+    // recompute when the app language changes (useTranslation returns a new
+    // `t` bound to the active locale).
+  }, [config?.logoImage, imageError, t]);
 
   if (!config) return null;
 
@@ -95,7 +100,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
         >
           {config?.appTagline
             ? config.appTagline
-            : `${config.displayName || ''}: join our community`}
+            : `${config.displayName || ''}${t('authLogoContent.taglineSuffix')}`}
         </Typography>
       )}
     </Box>

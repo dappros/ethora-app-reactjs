@@ -8,6 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from '@headlessui/react';
+import { useTranslation } from '../i18n/useTranslation';
 import { IconAdd } from './Icons/IconAdd';
 import { IconArrowDown } from './Icons/IconArrowDown';
 import { IconMarked } from './Icons/IconMarked';
@@ -34,13 +35,14 @@ export function Sorting<T extends string>({
   setOrderBy,
   className,
 }: Props<T>) {
+  const { t } = useTranslation();
   const orderItemList: Array<OrderItem> = [
     {
-      title: '(A-Z)',
+      title: t('sorting.az'),
       key: 'asc',
     },
     {
-      title: '(Z-A)',
+      title: t('sorting.za'),
       key: 'desc',
     },
   ];
@@ -57,7 +59,7 @@ export function Sorting<T extends string>({
 
   return (
     <div className={`flex ${className}`}>
-      <span className="text-[#8C8C8C] text-[14px] mr-2">Sort by</span>
+      <span className="text-[#8C8C8C] text-[14px] mr-2">{t('sorting.sortBy')}</span>
       <Popover className="relative">
         <PopoverButton className="flex items-center">
           <div className="mr-2 text-brand-500 font-semibold">
@@ -68,14 +70,14 @@ export function Sorting<T extends string>({
         </PopoverButton>
         <PopoverPanel anchor="bottom" className="bg-transparent rounded-xl">
           <div className="w-[240px] m-2 bg-white shadow p-4 rounded-xl">
-            <Field className="font-semibold text-regular mb-2">Order</Field>
+            <Field className="font-semibold text-regular mb-2">{t('sorting.order')}</Field>
             <RadioGroup
               className="flex flex-col"
               value={order}
               onChange={(value: 'asc' | 'desc') => {
                 setOrder(value);
               }}
-              aria-label="Server size"
+              aria-label={t('sorting.ariaLabel')}
             >
               {orderItemList.map((el) => (
                 <Field key={el.key} className="flex">
@@ -100,12 +102,12 @@ export function Sorting<T extends string>({
                 </Field>
               ))}
             </RadioGroup>
-            <Field className="font-semibold text-regular mb-2">Sort</Field>
+            <Field className="font-semibold text-regular mb-2">{t('sorting.sort')}</Field>
             <RadioGroup
               className="flex flex-col"
               value={orderBy}
               onChange={setOrderBy}
-              aria-label="Server size"
+              aria-label={t('sorting.ariaLabel')}
             >
               {orderByList.map((el) => (
                 <Field key={el.key} className="flex">

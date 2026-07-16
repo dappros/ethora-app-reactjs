@@ -1,4 +1,5 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
+import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 import { HubspotForm } from './SettingsTutorialModal/components/HubspotForm';
 
@@ -7,6 +8,8 @@ interface Props {
 }
 
 export function BookACallModal({ onClose }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       className="fixed inset-0 z-50 flex justify-center items-center bg-black/50"
@@ -17,12 +20,12 @@ export function BookACallModal({ onClose }: Props) {
         <button
           className="absolute top-[20px] right-[20px]"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('bookACallModal.closeLabel')}
         >
           <IconClose />
         </button>
         <div className="font-varela text-[20px] md:text-[24px] mb-4 pr-8">
-          Book a call
+          {t('bookACallModal.title')}
         </div>
         {/* HubspotForm handles the "not configured on this install" case
             internally with a friendly message + email fallback, so we

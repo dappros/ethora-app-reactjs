@@ -1,3 +1,5 @@
+import type { UiLanguageCode } from './constants/languageOptionsConstants';
+
 export interface ModelCurrentUser {
   _id: string;
   appId: string;
@@ -347,6 +349,13 @@ export interface ModelState {
   // dropdown should always show every owned app regardless of which
   // page the admin happened to last visit.
   ownedApps: Array<ModelApp>;
+  // App-wide UI language (not just the chat panel). Constrained to
+  // UI_LANGUAGE_OPTIONS (en/fr/es - see constants/languageOptionsConstants.ts).
+  // Kept in the store (not read straight from localStorage on every render)
+  // so switching it re-renders every subscribed component immediately.
+  // Initialized from utils/uiLanguage.ts (persisted choice, else browser
+  // detection, else 'en').
+  uiLanguage: UiLanguageCode;
 }
 
 export type OrderByType =

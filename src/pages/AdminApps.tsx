@@ -14,6 +14,7 @@ import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useCentrifugeAppUpdater } from '../hooks/useCentrifugeAppUpdater.ts';
 import { getExportAppsCsv, httpGetAppsWithStatus, httpImportApp } from '../http';
 import { ImportAppModal } from '../components/modal/ImportAppModal';
+import { useTranslation } from '../i18n/useTranslation';
 import { ModelApp, OrderByType } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -22,6 +23,7 @@ import { useAppStore } from '../store/useAppStore';
 const numberFormatter = new Intl.NumberFormat('en-US');
 
 export default function AdminApps() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const [showStarterInf, setShowStarterInf] = useState(true);
@@ -149,15 +151,15 @@ export default function AdminApps() {
           orderBy={orderBy}
           setOrderBy={(newOrderBy) => handleSortChange(newOrderBy, order)}
           orderByList={[
-            { key: 'displayName', title: 'Display Name' },
-            { key: 'totalRegistered', title: 'Users' },
-            { key: 'totalSessions', title: 'Sessions' },
-            { key: 'totalApiCalls', title: 'API' },
-            { key: 'totalTokens', title: 'AI' },
-            { key: 'totalFiles', title: 'Files' },
-            { key: 'totalTransactions', title: 'Transactions' },
-            { key: 'createdAt', title: 'Date' },
-            { key: 'totalChats', title: 'Chats' },
+            { key: 'displayName', title: t('adminApps.sortDisplayName') },
+            { key: 'totalRegistered', title: t('adminApps.sortUsers') },
+            { key: 'totalSessions', title: t('adminApps.sortSessions') },
+            { key: 'totalApiCalls', title: t('adminApps.sortApi') },
+            { key: 'totalTokens', title: t('adminApps.sortAi') },
+            { key: 'totalFiles', title: t('adminApps.sortFiles') },
+            { key: 'totalTransactions', title: t('adminApps.sortTransactions') },
+            { key: 'createdAt', title: t('adminApps.sortDate') },
+            { key: 'totalChats', title: t('adminApps.sortChats') },
           ]}
         />
       );
@@ -269,7 +271,7 @@ export default function AdminApps() {
           primary action live here on their own. */}
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Apps
+          {t('adminApps.title')}
         </div>
         <div className="flex items-center gap-4">
           {/* Active / Archived filter. Persists via ?lifecycle=... so a refresh
@@ -290,7 +292,7 @@ export default function AdminApps() {
                       : 'text-gray-500 hover:text-gray-700'
                   )}
                 >
-                  {tab === 'active' ? 'Active' : 'Archived'}
+                  {tab === 'active' ? t('adminApps.tabActive') : t('adminApps.tabArchived')}
                   {n !== null && (
                     <span className={classNames('ml-1', lifecycleTab === tab ? 'text-brand-500' : 'text-gray-400')}>
                       ({numberFormatter.format(n)})
@@ -312,7 +314,7 @@ export default function AdminApps() {
             )}
           >
             <IconAdd color="white" className="mr-2" />
-            <span>Create App</span>
+            <span>{t('adminApps.createApp')}</span>
           </button>
         </div>
       </div>
@@ -323,7 +325,7 @@ export default function AdminApps() {
         ) : (
           <>
             <div className="text-center pb-2 font-varela text-[18px] block sm:hidden">
-              Apps
+              {t('adminApps.title')}
             </div>
 
             {/* mobile-only Create App button (keeps mobile UX since the
@@ -353,8 +355,7 @@ export default function AdminApps() {
 
             {!loading && appsState && appsState.length === 0 && lifecycleTab === 'archived' && (
               <div className="text-center text-gray-500 py-12 font-varela">
-                No archived apps. Archived apps appear here so you can restore
-                them or permanently delete their data.
+                {t('adminApps.emptyArchived')}
               </div>
             )}
 
@@ -369,9 +370,9 @@ export default function AdminApps() {
                   </div>
                 </div>
                 <div className="flex flex-col justify-center md:ml-[40px] gap-2 mt-4 md:mt-0">
-                  <div className="font-varela text-[18px]">Add another app</div>
+                  <div className="font-varela text-[18px]">{t('adminApps.addAnotherApp')}</div>
                   <div className="font-sans text-[12px] text-gray-500 mb-2">
-                    Start a fresh app, or bring one in from a JSON / ZIP bundle.
+                    {t('adminApps.addAnotherAppDesc')}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
@@ -379,14 +380,14 @@ export default function AdminApps() {
                       className="flex items-center justify-center h-[40px] bg-brand-500 hover:bg-brand-darker rounded-xl text-white text-sm font-varela px-5"
                     >
                       <IconAdd color="white" className="mr-2" />
-                      Create App
+                      {t('adminApps.createApp')}
                     </button>
                     <button
                       onClick={() => setShowImportModal(true)}
                       className="text-sm text-brand-500 hover:underline font-varela self-center"
-                      title="Import an app from a previously-exported JSON or ZIP bundle"
+                      title={t('adminApps.importTitle')}
                     >
-                      or import from a bundle
+                      {t('adminApps.importFromBundle')}
                     </button>
                   </div>
                 </div>

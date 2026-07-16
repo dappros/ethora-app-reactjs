@@ -1,6 +1,7 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { IconClose } from '../Icons/IconClose';
 
+import { useTranslation } from '../../i18n/useTranslation';
 import { SiteLinks } from '../../models';
 import './CreateDocumentModal.scss';
 
@@ -15,6 +16,7 @@ export function SourcesSiteCrawlModal({
   onClose,
   deleteSiteCrawl,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
       className="fixed inset-0 flex justify-center items-center bg-black/30 z-[9999]"
@@ -23,12 +25,12 @@ export function SourcesSiteCrawlModal({
     >
       <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px] m-4">
         <div className="ont-varela text-[24px] text-center mb-8">
-          Delete Site Crawl
+          {t('sourcesSiteCrawlModal.title')}
         </div>
 
         <div className="flex flex-col items-center">
           <div className="max-h-48 overflow-y-auto w-full px-4">
-            <span className="block mb-2 font-medium text-center">Delete:</span>
+            <span className="block mb-2 font-medium text-center">{t('sourcesSiteCrawlModal.deleteLabel')}</span>
             {urls &&
               urls.map((urlOb) => (
                 <p key={urlOb.id} className="text-sm break-all">
@@ -43,7 +45,7 @@ export function SourcesSiteCrawlModal({
             className="w-full rounded-xl hover:bg-brand-hover border py-[12px] border-brand-500 text-brand-500"
             onClick={onClose}
           >
-            Cancel
+            {t('sourcesSiteCrawlModal.cancelButton')}
           </button>
           <button
             onClick={() => {
@@ -52,7 +54,7 @@ export function SourcesSiteCrawlModal({
             }}
             className="w-full hover:bg-red-700 py-[12px] rounded-xl bg-red-600 text-white"
           >
-            Delete
+            {t('sourcesSiteCrawlModal.deleteButton')}
           </button>
         </div>
         <button

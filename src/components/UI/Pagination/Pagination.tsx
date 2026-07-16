@@ -1,5 +1,6 @@
 import ReactPaginate from "react-paginate";
 import {FC} from "react";
+import {useTranslation} from "../../../i18n/useTranslation";
 
 interface PaginationProps {
   onPageChange: (selectedItem: { selected: number }) => void;
@@ -12,13 +13,14 @@ export const Pagination: FC<PaginationProps> = ({
   pageCount,
   forcePage,
 }) => {
+  const { t } = useTranslation();
   return (
     <ReactPaginate
       className="flex flex-wrap items-center justify-center gap-2 mt-4 text-gray-500 w-full max-w-full overflow-hidden"
       onPageChange={onPageChange}
       breakLabel="..."
-      nextLabel="Next →"
-      previousLabel="← Prev"
+      nextLabel={t('pagination.next')}
+      previousLabel={t('pagination.previous')}
       pageRangeDisplayed={2}
       pageCount={pageCount}
       forcePage={forcePage}

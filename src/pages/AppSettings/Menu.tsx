@@ -1,5 +1,6 @@
 import { Checkbox, Field, Label } from '@headlessui/react';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
+import { useTranslation } from '../../i18n/useTranslation';
 import './Menu.scss';
 
 interface MenuItems {
@@ -14,13 +15,14 @@ interface Props {
 }
 
 export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
+  const { t } = useTranslation();
   const onChange = (isOn: boolean, name: 'profile' | 'chats' | 'settings') => {
     setAvailableMenuItems({ ...availableMenuItems, [name]: isOn });
   };
   return (
     <div className="">
       <p className="font-sans text-sm mb-8">
-        Manage items that are displayed in your App menu.
+        {t('appSettingsMenu.description')}
       </p>
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
@@ -31,14 +33,11 @@ export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">
-          Email + Password
+          {t('appSettingsMenu.emailPasswordLabel')}
         </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        Each of your Users is equipped with a personal digital wallet. User will
-        see their Assets (wallet contents) in their Profile screen. Depending on
-        configuration, the Profile and Assets can also be visible to other
-        Users.
+        {t('appSettingsMenu.emailPasswordDescription')}
       </p>
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
@@ -48,11 +47,12 @@ export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Chats</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsMenu.chatsLabel')}
+        </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        Shows a list of Chats including your default Pinned Chats and also group
-        and private conversations that your User is a part of.
+        {t('appSettingsMenu.chatsDescription')}
       </p>
 
       <Field className="flex items-center cursor-pointer mb-2">
@@ -63,12 +63,12 @@ export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Settings</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsMenu.settingsLabel')}
+        </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        This is where your User can manage their visibility and privacy
-        settings, as well as download their data or delete their account (GDPR
-        and CCPA compliance requirement).
+        {t('appSettingsMenu.settingsDescription')}
       </p>
     </div>
   );

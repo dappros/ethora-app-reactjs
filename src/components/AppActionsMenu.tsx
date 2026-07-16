@@ -11,6 +11,7 @@ import {
   httpRestoreApp,
   saveBlobAs,
 } from '../http';
+import { useTranslation } from '../i18n/useTranslation';
 import { ModelApp } from '../models';
 import { ConfirmModal } from './modal/ConfirmModal';
 
@@ -33,6 +34,7 @@ const numberFormatter = new Intl.NumberFormat('en-US');
 // passing around (smaller, single artifact). Operators who want the raw JSON
 // can unzip it client-side.
 export function AppActionsMenu({ app, onChanged }: Props) {
+  const { t } = useTranslation();
   const status = app.status || 'active';
 
   const [busy, setBusy] = useState(false);
@@ -53,14 +55,19 @@ export function AppActionsMenu({ app, onChanged }: Props) {
 
   const filenameStem = `ethora-app-${app._id || app.displayName}-${Date.now()}`;
 
+  const errorMessage = (e: any) =>
+    e?.response?.data?.error || e?.message || t('appActionsMenu.unknownError');
+
   const handleExport = async () => {
     try {
       setBusy(true);
       const r = await httpExportApp(app._id, { format: 'zip' });
       saveBlobAs(r.data, `${filenameStem}.zip`);
-      toast.success(`Exported ${app.displayName}`);
+      toast.success(t('appActionsMenu.toast.exported').replace('{name}', app.displayName));
     } catch (e: any) {
-      toast.error(`Export failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appActionsMenu.toast.exportFailed').replace('{error}', errorMessage(e))
+      );
     } finally {
       setBusy(false);
     }
@@ -70,10 +77,12 @@ export function AppActionsMenu({ app, onChanged }: Props) {
     try {
       setBusy(true);
       await httpArchiveApp(app._id);
-      toast.success(`Archived ${app.displayName}`);
+      toast.success(t('appActionsMenu.toast.archived').replace('{name}', app.displayName));
       onChanged?.();
     } catch (e: any) {
-      toast.error(`Archive failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appActionsMenu.toast.archiveFailed').replace('{error}', errorMessage(e))
+      );
     } finally {
       setBusy(false);
       setConfirmKind(null);
@@ -84,10 +93,12 @@ export function AppActionsMenu({ app, onChanged }: Props) {
     try {
       setBusy(true);
       await httpRestoreApp(app._id);
-      toast.success(`Restored ${app.displayName}`);
+      toast.success(t('appActionsMenu.toast.restored').replace('{name}', app.displayName));
       onChanged?.();
     } catch (e: any) {
-      toast.error(`Restore failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appActionsMenu.toast.restoreFailed').replace('{error}', errorMessage(e))
+      );
     } finally {
       setBusy(false);
     }
@@ -100,12 +111,16 @@ export function AppActionsMenu({ app, onChanged }: Props) {
       const jobId = r?.data?.jobId;
       toast.info(
         jobId
-          ? `Hard delete queued for ${app.displayName} (job ${jobId}). The cascade runs in the background.`
-          : `Hard delete started for ${app.displayName}.`,
+          ? t('appActionsMenu.toast.hardDeleteQueued')
+              .replace('{name}', app.displayName)
+              .replace('{jobId}', jobId)
+          : t('appActionsMenu.toast.hardDeleteStarted').replace('{name}', app.displayName)
       );
       onChanged?.();
     } catch (e: any) {
-      toast.error(`Hard delete failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appActionsMenu.toast.hardDeleteFailed').replace('{error}', errorMessage(e))
+      );
     } finally {
       setBusy(false);
       setConfirmKind(null);
@@ -113,7 +128,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
   };
 
   if (status === 'deleting') {
-    return <span className="text-gray-400 text-xs">purging...</span>;
+    return <span className="text-gray-400 text-xs">{t('appActionsMenu.purging')}</span>;
   }
   if (status === 'deleted') {
     return null;
@@ -127,8 +142,8 @@ export function AppActionsMenu({ app, onChanged }: Props) {
         <MenuButton
           disabled={busy}
           className="w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover disabled:opacity-50"
-          aria-label="More actions"
-          title="More actions"
+          aria-label={t('appActionsMenu.moreActions')}
+          title={t('appActionsMenu.moreActions')}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <circle cx="4" cy="10" r="1.6" fill="currentColor" />
@@ -146,7 +161,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                 onClick={handleExport}
                 className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm`}
               >
-                Export
+                {t('appActionsMenu.export')}
               </button>
             )}
           </MenuItem>
@@ -158,7 +173,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                   onClick={handleRestore}
                   className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm text-green-700`}
                 >
-                  Restore
+                  {t('appActionsMenu.restore')}
                 </button>
               )}
             </MenuItem>
@@ -169,7 +184,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                   onClick={() => setConfirmKind('archive')}
                   className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm`}
                 >
-                  Archive
+                  {t('appActionsMenu.archive')}
                 </button>
               )}
             </MenuItem>
@@ -180,7 +195,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                 onClick={() => setConfirmKind('hard')}
                 className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm text-red-600`}
               >
-                Hard delete
+                {t('appActionsMenu.hardDelete')}
               </button>
             )}
           </MenuItem>
@@ -189,9 +204,12 @@ export function AppActionsMenu({ app, onChanged }: Props) {
 
       {confirmKind === 'archive' && (
         <ConfirmModal
-          title="Archive this app?"
-          message={`"${app.displayName}" will be hidden and its users won't be able to log in, but all data is retained. You can restore it later.`}
-          confirmLabel="Archive"
+          title={t('appActionsMenu.confirmArchive.title')}
+          message={t('appActionsMenu.confirmArchive.message').replace(
+            '{name}',
+            app.displayName
+          )}
+          confirmLabel={t('appActionsMenu.confirmArchive.confirmLabel')}
           onConfirm={handleArchive}
           onCancel={() => setConfirmKind(null)}
           busy={busy}
@@ -199,34 +217,46 @@ export function AppActionsMenu({ app, onChanged }: Props) {
       )}
       {confirmKind === 'hard' && (
         <ConfirmModal
-          title="Permanently delete this app?"
+          title={t('appActionsMenu.confirmHardDelete.title')}
           message={
             <>
               <div>
-                <span className="font-semibold">"{app.displayName}"</span> and all related data will
-                be irreversibly purged.
+                <span className="font-semibold">"{app.displayName}"</span>{' '}
+                {t('appActionsMenu.confirmHardDelete.intro')}
               </div>
               <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                The following will be permanently purged:
+                {t('appActionsMenu.confirmHardDelete.purgeListTitle')}
                 <ul className="mt-1 list-disc list-inside space-y-0.5">
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
+                  <li>
+                    <span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span>{' '}
+                    {t('appActionsMenu.confirmHardDelete.users')}
+                  </li>
                   <li>
                     <span className="font-bold">
                       {chatRoomsCount === null ? '-' : numberFormatter.format(chatRoomsCount)}
-                    </span> chat rooms
+                    </span>{' '}
+                    {t('appActionsMenu.confirmHardDelete.chatRooms')}
                   </li>
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> chat messages</li>
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
-                  <li>Appearance configuration (logo, colours etc)</li>
-                  <li>Default chat rooms settings</li>
-                  <li>AI data (website and documents RAG)</li>
-                  <li>Bot instances and in-app AI Widget configuration</li>
+                  <li>
+                    <span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span>{' '}
+                    {t('appActionsMenu.confirmHardDelete.chatMessages')}
+                  </li>
+                  <li>
+                    <span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span>{' '}
+                    {t('appActionsMenu.confirmHardDelete.files')}
+                  </li>
+                  <li>{t('appActionsMenu.confirmHardDelete.appearanceConfig')}</li>
+                  <li>{t('appActionsMenu.confirmHardDelete.defaultChatRoomsSettings')}</li>
+                  <li>{t('appActionsMenu.confirmHardDelete.aiData')}</li>
+                  <li>{t('appActionsMenu.confirmHardDelete.botInstances')}</li>
                 </ul>
               </div>
-              <div className="mt-3 text-red-700 font-semibold">This cannot be undone.</div>
+              <div className="mt-3 text-red-700 font-semibold">
+                {t('appActionsMenu.confirmHardDelete.cannotBeUndone')}
+              </div>
             </>
           }
-          confirmLabel="Yes, hard delete"
+          confirmLabel={t('appActionsMenu.confirmHardDelete.confirmLabel')}
           danger
           onConfirm={handleHardDelete}
           onCancel={() => setConfirmKind(null)}

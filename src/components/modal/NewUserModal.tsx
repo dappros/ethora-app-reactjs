@@ -2,6 +2,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { IconClose } from '../Icons/IconClose';
 
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Loading } from '../Loading';
 import './NewUserModal.scss';
 
@@ -19,22 +20,23 @@ type Inputs = {
 
 export function NewUserModal({ onClose, onSubmit, loading }: Props) {
   const { register, handleSubmit } = useForm<Inputs>();
+  const { t } = useTranslation();
   return (
     <Dialog className="new-user-modal" open={true} onClose={() => {}}>
       <DialogPanel className="inner">
-        <div className="title">Add New User</div>
+        <div className="title">{t('newUserModal.title')}</div>
         <form onSubmit={handleSubmit(onSubmit)} action="">
           <div className="form">
             <input
               type="text"
               className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
-              placeholder="First Name"
+              placeholder={t('newUserModal.firstNamePlaceholder')}
               {...register('firstName', { required: true })}
             />
             <input
               type="text"
               className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
-              placeholder="Last Name"
+              placeholder={t('newUserModal.lastNamePlaceholder')}
               {...register('lastName', { required: true })}
             />
 
@@ -42,7 +44,7 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
               <input
                 type="text"
                 className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
-                placeholder="Email"
+                placeholder={t('newUserModal.emailPlaceholder')}
                 {...register('email', { required: true })}
               />
             </div>
@@ -52,13 +54,13 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
               className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
               onClick={onClose}
             >
-              Cancel
+              {t('newUserModal.cancelButton')}
             </button>
             <button
               onClick={() => {}}
               className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white"
             >
-              Continue
+              {t('newUserModal.continueButton')}
             </button>
           </div>
         </form>

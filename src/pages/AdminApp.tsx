@@ -9,10 +9,12 @@ import {
 import { actionSwitchChatApp } from '../actions';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { httpGetApp } from '../http';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { Error404Page } from './ErrorPage/Error404Page';
 
 export default function AdminApp() {
+  const { t } = useTranslation();
   const { appId } = useParams();
   const location = useLocation();
   const apps = useAppStore((s) => s.apps);
@@ -72,19 +74,19 @@ export default function AdminApp() {
             className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/users`}
           >
-            Users
+            {t('adminApp.tabUsers')}
           </NavLink>
           <NavLink
             className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/settings`}
           >
-            Settings
+            {t('adminApp.tabSettings')}
           </NavLink>
           <NavLink
             className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/statistics`}
           >
-            Statistics
+            {t('adminApp.tabStatistics')}
           </NavLink>
           <NavLink
             className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
@@ -98,7 +100,7 @@ export default function AdminApp() {
               actionSwitchChatApp(appId).catch(() => {});
             }}
           >
-            Chats
+            {t('adminApp.tabChats')}
           </NavLink>
         </div>
       </div>

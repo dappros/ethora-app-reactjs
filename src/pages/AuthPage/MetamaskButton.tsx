@@ -15,6 +15,7 @@ import { logLogin, logSignup } from '../../hooks/withTracking';
 import { loginSignature, registerSignature } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
+import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
 
@@ -47,6 +48,7 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
   const [signer, setSigner] = useState<any>(null);
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const {
     register,
@@ -60,7 +62,7 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
     logLogin('metamask', data.user._id);
     await actionAfterLogin(data);
 
-    toast.success('Successfully logged in with Metamask!');
+    toast.success(t('authMetamaskButton.loginSuccess'));
 
     setEthoraUserCookie('accregred');
 
@@ -71,7 +73,7 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
 
   const tryLogin = async () => {
     if (!window.ethereum) {
-      toast.info('Install Metamask first!');
+      toast.info(t('authMetamaskButton.installFirst'));
       return;
     }
 
@@ -100,7 +102,7 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
       ) {
         setIsModalOpen(true);
       } else {
-        toast.error('Failed to sign with Metamask.');
+        toast.error(t('authMetamaskButton.loginFailed'));
         console.error(err);
       }
     }
@@ -118,13 +120,13 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
         data.lastName,
         utm || ''
       );
-      toast.success('Successfully registered with Metamask!');
+      toast.success(t('authMetamaskButton.registerSuccess'));
       logSignup('metamask', res.data?.user?._id);
       setIsModalOpen(false);
 
       await actionAfterMetamask(res.data);
     } catch (err) {
-      toast.error('Registration failed.');
+      toast.error(t('authMetamaskButton.registrationFailed'));
       console.error(err);
     }
   };
@@ -142,7 +144,8 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
         }}
       >
         <MetamaskIcon />
-        {config?.signonOptions.length < 8 && 'Continue with Metamask'}
+        {config?.signonOptions.length < 8 &&
+          t('authMetamaskButton.continueLabel')}
       </CustomButton>
 
       <Dialog
@@ -152,24 +155,28 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
         fullWidth
         sx={{ borderRadius: '48px', padding: '40px 40px' }}
       >
-        <DialogTitle>Register with Metamask</DialogTitle>
+        <DialogTitle>{t('authMetamaskButton.dialogTitle')}</DialogTitle>
         <form onSubmit={handleSubmit(onRegister)}>
           <DialogContent dividers>
             <CustomInput
-              label="First Name"
+              label={t('authMetamaskButton.firstNameLabel')}
               fullWidth
               margin="normal"
               {...register('firstName', { required: true })}
               error={!!errors.firstName}
-              helperText={errors.firstName && 'First name is required'}
+              helperText={
+                errors.firstName && t('authMetamaskButton.firstNameRequired')
+              }
             />
             <CustomInput
-              label="Last Name"
+              label={t('authMetamaskButton.lastNameLabel')}
               fullWidth
               margin="normal"
               {...register('lastName', { required: true })}
               error={!!errors.lastName}
-              helperText={errors.lastName && 'Last name is required'}
+              helperText={
+                errors.lastName && t('authMetamaskButton.lastNameRequired')
+              }
             />
           </DialogContent>
           <DialogActions>
@@ -177,10 +184,10 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
               onClick={() => setIsModalOpen(false)}
               variant="outlined"
             >
-              Cancel
+              {t('authMetamaskButton.cancel')}
             </CustomButton>
             <CustomButton type="submit" variant="contained" color="primary">
-              Register
+              {t('authMetamaskButton.register')}
             </CustomButton>
           </DialogActions>
         </form>

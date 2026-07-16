@@ -2,6 +2,7 @@ import { Checkbox, Field, Label, RadioGroup } from '@headlessui/react';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { IconInfo } from '../../components/Icons/IconInfo';
 import { RadioButton } from '../../components/RadioButton';
+import { useTranslation } from '../../i18n/useTranslation';
 import './HomeScreen.scss';
 import './Menu.scss';
 
@@ -26,6 +27,7 @@ export function Widget({
   availableMenuItems,
   setAvailableMenuItems,
 }: Props) {
+  const { t } = useTranslation();
   const onChange = (isOn: boolean, name: 'profile' | 'chats' | 'settings') => {
     setAvailableMenuItems({ ...availableMenuItems, [name]: isOn });
   };
@@ -33,73 +35,85 @@ export function Widget({
   return (
     <div className="">
       <p className="font-sans text-[24px] font-medium pb-4 border-b border-gray-200">
-        Home screen
+        {t('appSettingsWidget.homeScreenHeading')}
       </p>
       <div className="text-sm text-gray-950 mb-8 py-4">
-        Choose which screen your Users will see immediately after log in.
+        {t('appSettingsWidget.homeScreenDescription')}
       </div>
       <RadioGroup
         value={afterLoginPage}
         onChange={setAfterLoginPage}
-        aria-label="Server size"
+        aria-label={t('appSettingsWidget.radioGroupAriaLabel')}
       >
-        <RadioButton className="mb-2" value="chats" label="List of Chats" />
+        <RadioButton
+          className="mb-2"
+          value="chats"
+          label={t('appSettingsWidget.listOfChatsLabel')}
+        />
         <p className="font-sans text-gray-500 text-[12px] mb-4">
-          User will be see the list of chats available to them with tabs for
-          Pinned, group and private chats.
+          {t('appSettingsWidget.listOfChatsDescription')}
         </p>
         <p className="p-2 flex items-center rounded-[8px] bg-brand-150 mb-8">
           <div className="mr-2">
             <IconInfo stroke={primaryColor} />
           </div>
           <span className="font-sans text-[12px]">
-            Good for: <span className="font-bold">community</span> use case
-            where quick access to multiple conversations is important.
+            {t('appSettingsWidget.goodForLabel')}{' '}
+            <span className="font-bold">
+              {t('appSettingsWidget.communityWord')}
+            </span>{' '}
+            {t('appSettingsWidget.communityUseCase')}
           </span>
         </p>
 
         <RadioButton
           className="mb-2"
           value="profile"
-          label="Profile / Wallet"
+          label={t('appSettingsWidget.profileWalletLabel')}
         />
         <p className="font-sans text-gray-500 text-[12px] mb-4">
-          User will see their Profile and any documents or assets stored there.
-          User will be able to share their profile or individual documents /
-          assets.
+          {t('appSettingsWidget.profileWalletDescription')}
         </p>
         <p className="p-2 flex items-center rounded-[8px] bg-brand-150 mb-8">
           <div className="mr-2">
             <IconInfo stroke={primaryColor} />
           </div>
           <span className="font-sans text-[12px]">
-            Good for: <span className="font-bold">digital wallet</span> use case
-            where quick access to User’s documents, assets or QR pass is
-            important.
+            {t('appSettingsWidget.goodForLabel')}{' '}
+            <span className="font-bold">
+              {t('appSettingsWidget.digitalWalletWord')}
+            </span>{' '}
+            {t('appSettingsWidget.digitalWalletUseCase')}
           </span>
         </p>
 
-        <RadioButton className="mb-2" value="admin" label="Admin panel" />
+        <RadioButton
+          className="mb-2"
+          value="admin"
+          label={t('appSettingsWidget.adminPanelLabel')}
+        />
         <p className="font-sans text-gray-500 text-[12px] mb-4">
-          Users will see Admin first, as long as they have permissions.
+          {t('appSettingsWidget.adminPanelDescription')}
         </p>
         <p className="p-2 flex items-center rounded-[8px] bg-brand-150 mb-8">
           <div className="mr-2">
             <IconInfo stroke={primaryColor} />
           </div>
           <span className="font-sans text-[12px]">
-            Useful when you on-board many{' '}
-            <span className="font-bold">admin users</span> or for a Base App on
-            your dedicated server.
+            {t('appSettingsWidget.usefulWhenPrefix')}{' '}
+            <span className="font-bold">
+              {t('appSettingsWidget.adminUsersWord')}
+            </span>{' '}
+            {t('appSettingsWidget.adminUsersSuffix')}
           </span>
         </p>
       </RadioGroup>
 
       <p className="font-sans text-[24px] font-medium pb-4 border-b border-gray-200">
-        Menu
+        {t('appSettingsWidget.menuHeading')}
       </p>
       <p className="font-sans text-sm py-8">
-        Manage items that are displayed in your App menu.
+        {t('appSettingsWidget.menuDescription')}
       </p>
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
@@ -110,14 +124,11 @@ export function Widget({
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">
-          Email + Password
+          {t('appSettingsWidget.emailPasswordLabel')}
         </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        Each of your Users is equipped with a personal digital wallet. User will
-        see their Assets (wallet contents) in their Profile screen. Depending on
-        configuration, the Profile and Assets can also be visible to other
-        Users.
+        {t('appSettingsWidget.emailPasswordDescription')}
       </p>
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
@@ -127,11 +138,12 @@ export function Widget({
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Chats</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsWidget.chatsLabel')}
+        </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        Shows a list of Chats including your default Pinned Chats and also group
-        and private conversations that your User is a part of.
+        {t('appSettingsWidget.chatsDescription')}
       </p>
 
       <Field className="flex items-center cursor-pointer mb-2">
@@ -142,12 +154,12 @@ export function Widget({
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Settings</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsWidget.settingsLabel')}
+        </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        This is where your User can manage their visibility and privacy
-        settings, as well as download their data or delete their account (GDPR
-        and CCPA compliance requirement).
+        {t('appSettingsWidget.settingsDescription')}
       </p>
     </div>
   );

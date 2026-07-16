@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { httpResendLink } from '../../../../http';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
@@ -14,6 +15,7 @@ const SecondStep = () => {
   const email = queryParams.get('email');
   const navigate = useNavigate();
   const config = useAppStore((s) => s.currentApp);
+  const { t } = useTranslation();
   const [resendTimer, setResendTimer] = useState(0);
 
   useEffect(() => {
@@ -35,11 +37,11 @@ const SecondStep = () => {
   const handleResend = () => {
     httpResendLink(email as string)
       .then(() => {
-        toast.success('Email has been resent');
+        toast.success(t('authRegisterSecondStep.resendSuccess'));
         setResendTimer(RESEND_TIMEOUT);
       })
       .catch(() => {
-        toast.error('An error occured');
+        toast.error(t('authRegisterSecondStep.resendError'));
       });
   };
 
@@ -60,7 +62,7 @@ const SecondStep = () => {
             color: '#141414',
           }}
         >
-          Confirm your email address
+          {t('authRegisterSecondStep.title')}
         </Typography>
         <Typography
           sx={{
@@ -70,7 +72,8 @@ const SecondStep = () => {
             color: '#8C8C8C',
           }}
         >
-          We`ve sent an email to {email ? email : 'your email'}
+          {t('authRegisterSecondStep.sentEmailPrefix')}{' '}
+          {email ? email : t('authRegisterSecondStep.yourEmailFallback')}
         </Typography>
         <Box component="ul" sx={{ paddingLeft: '0', margin: 0 }}>
           <Typography
@@ -83,8 +86,7 @@ const SecondStep = () => {
               marginBottom: '8px',
             }}
           >
-            Just click on the link in the email to continue the registration
-            process.
+            {t('authRegisterSecondStep.instructionClickLink')}
           </Typography>
           <Typography
             component="li"
@@ -95,7 +97,7 @@ const SecondStep = () => {
               color: '#141414',
             }}
           >
-            If you don’t see it, check your spam folder.
+            {t('authRegisterSecondStep.instructionCheckSpam')}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -108,7 +110,7 @@ const SecondStep = () => {
               width: '100%',
             }}
           >
-            Still can`t find the email?
+            {t('authRegisterSecondStep.stillCantFind')}
           </Typography>
           <CustomButton
             fullWidth
@@ -125,7 +127,9 @@ const SecondStep = () => {
               color: resendTimer > 0 ? '#ffffff' : '#ffffff',
             }}
           >
-            {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Email'}
+            {resendTimer > 0
+              ? `${t('authRegisterSecondStep.resendIn')} ${resendTimer}s`
+              : t('authRegisterSecondStep.resendEmail')}
           </CustomButton>
         </Box>
       </Box>

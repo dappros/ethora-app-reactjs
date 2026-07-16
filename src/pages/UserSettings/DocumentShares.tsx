@@ -19,6 +19,7 @@ import {
   getDocuments,
   getSharedLinks,
 } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelCurrentUser } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -42,6 +43,7 @@ const WEEK = DAY * 7;
 const MONTH = WEEK * 4;
 
 export function DocumentShares() {
+  const { t } = useTranslation();
   const [showNew, setShowNew] = useState(false);
   const [items, setItems] = useState<Array<ModelProfileShare>>([]);
   const [showDelete, setShowDelete] = useState<ModelProfileShare>();
@@ -57,13 +59,13 @@ export function DocumentShares() {
     setLoading(true);
     deleteSharedLink(showDelete?.token as string)
       .then(() => {
-        toast.success('Success');
+        toast.success(t('userSettingsDocumentShares.toastSuccess'));
         getItems();
         setShowDelete(undefined);
       })
       .catch((error) => {
         console.error(error);
-        toast.error('Error');
+        toast.error(t('userSettingsDocumentShares.toastError'));
       })
       .finally(() => {
         setLoading(false);
@@ -93,7 +95,7 @@ export function DocumentShares() {
 
   const renderExpiration = (exp: number) => {
     if (exp === -1) {
-      return 'infinit';
+      return t('userSettingsDocumentShares.noExpirationValue');
     } else {
       return DateTime.fromMillis(exp).toFormat('dd LLL yyyy t');
     }
@@ -119,12 +121,12 @@ export function DocumentShares() {
     setLoading(true);
     createSharedLink(body)
       .then(() => {
-        toast.success('Success');
+        toast.success(t('userSettingsDocumentShares.toastSuccess'));
         setShowNew(false);
         getItems();
       })
       .catch(() => {
-        toast.error('Error');
+        toast.error(t('userSettingsDocumentShares.toastError'));
       })
       .finally(() => {
         setLoading(false);
@@ -150,28 +152,25 @@ export function DocumentShares() {
               <div className="grid overflow-auto grid-rows-[96px,_1fr]">
                 <div>
                   <h2 className="font-varela text-[24px] text-center pl-2">
-                    Create a Document Sharing link
+                    {t('userSettingsDocumentShares.modalTitle')}
                   </h2>
                 </div>
                 <div className="overflow-auto">
                   <p className="font-sans text-[14px] text-center mb-8">
-                    Send this link to your trusted contact(s) so they can access
-                    your profile when you're in Restricted mode.
+                    {t('userSettingsDocumentShares.modalDescription')}
                   </p>
                   <div className="p-2 bg-[#F3F6FC] rounded-lg grid grid-cols-[16px,_1fr] gap-2 items-center mb-8">
                     <IconInfo />
                     <span className="text-[12px]">
-                      You'll be able to remove this link any time if you change
-                      your mind.
+                      {t('userSettingsDocumentShares.modalInfo')}
                     </span>
                   </div>
 
                   <h3 className="font-semibold text-[16px] text-left mb-4">
-                    Expiration
+                    {t('userSettingsDocumentShares.expirationLabel')}
                   </h3>
                   <div className="text-[12px] text-[#8C8C8C] mb-4">
-                    If you set this, this link will only be valid for the given
-                    period of time.
+                    {t('userSettingsDocumentShares.expirationHint')}
                   </div>
                   <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                     <Select
@@ -180,16 +179,26 @@ export function DocumentShares() {
                         setExpirationTime(Number(e.target.value))
                       }
                     >
-                      <option value="-1">No Expiration</option>
-                      <option value={HOUR}>1 hour</option>
-                      <option value={DAY}>1 day</option>
-                      <option value={WEEK}>1 week</option>
-                      <option value={MONTH}>1 month</option>
+                      <option value="-1">
+                        {t('userSettingsDocumentShares.optionNoExpiration')}
+                      </option>
+                      <option value={HOUR}>
+                        {t('userSettingsDocumentShares.optionOneHour')}
+                      </option>
+                      <option value={DAY}>
+                        {t('userSettingsDocumentShares.optionOneDay')}
+                      </option>
+                      <option value={WEEK}>
+                        {t('userSettingsDocumentShares.optionOneWeek')}
+                      </option>
+                      <option value={MONTH}>
+                        {t('userSettingsDocumentShares.optionOneMonth')}
+                      </option>
                     </Select>
                   </Field>
 
                   <h3 className="font-semibold text-[16px] text-left mb-4">
-                    Document
+                    {t('userSettingsDocumentShares.documentLabel')}
                   </h3>
                   <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
                     <Select
@@ -198,7 +207,9 @@ export function DocumentShares() {
                         setDocumentForShare(e.target.value);
                       }}
                     >
-                      <option value="-1">Choose Document</option>
+                      <option value="-1">
+                        {t('userSettingsDocumentShares.optionChooseDocument')}
+                      </option>
                       {documents.map((el) => {
                         return (
                           <option
@@ -215,16 +226,15 @@ export function DocumentShares() {
                   </Field>
 
                   <div className="font-semibold text-[16px] text-left mb-4">
-                    Memo
+                    {t('userSettingsDocumentShares.memoLabel')}
                   </div>
                   <div className="text-[12px] text-[#8C8C8C] mb-4">
-                    Add an optional note so that you remember who you shared
-                    this with.
+                    {t('userSettingsDocumentShares.memoHint')}
                   </div>
                   <input
                     type="text"
                     onChange={(e) => setMemo(e.target.value)}
-                    placeholder="Add note"
+                    placeholder={t('userSettingsDocumentShares.memoPlaceholder')}
                     className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
                   />
                 </div>
@@ -234,13 +244,13 @@ export function DocumentShares() {
                   onClick={() => setShowNew(false)}
                   className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
                 >
-                  Cancel
+                  {t('userSettingsDocumentShares.cancelButton')}
                 </button>
                 <button
                   onClick={doCreateNewLink}
                   className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
                 >
-                  Continue
+                  {t('userSettingsDocumentShares.continueButton')}
                 </button>
               </div>
 
@@ -275,19 +285,19 @@ export function DocumentShares() {
             <thead>
               <tr className="bg-[#FCFCFC]">
                 <th className="rounded-l-lg r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Document Name
+                  {t('userSettingsDocumentShares.tableDocumentName')}
                 </th>
                 <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Memo
+                  {t('userSettingsDocumentShares.tableMemo')}
                 </th>
                 <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Creation Date
+                  {t('userSettingsDocumentShares.tableCreationDate')}
                 </th>
                 <th className="px-4 py-2 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Expired Date
+                  {t('userSettingsDocumentShares.tableExpiredDate')}
                 </th>
                 <th className="rounded-r-lg  px-4 py-2 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Action
+                  {t('userSettingsDocumentShares.tableAction')}
                 </th>
               </tr>
             </thead>
@@ -318,7 +328,11 @@ export function DocumentShares() {
                         </button>
                         <CopyToClipboard
                           text={`${import.meta.env.VITE_API}/docs/share/${el.token}`}
-                          onCopy={() => toast.success('Copied')}
+                          onCopy={() =>
+                            toast.success(
+                              t('userSettingsDocumentShares.toastCopied')
+                            )
+                          }
                         >
                           <button className="w-[32px] h-[32px] flex items-center justify center">
                             <IconCopy />
@@ -339,23 +353,23 @@ export function DocumentShares() {
             {showDelete && (
               <SubmitModal onClose={() => setShowDelete(undefined)}>
                 <div className="font-varela text-[24px] text-center mb-8">
-                  Delete Share Link
+                  {t('userSettingsDocumentShares.deleteModalTitle')}
                 </div>
                 <p className="font-sans text-[14px] mb-8 text-center">
-                  {`Are you sure you want to delete share link?`}
+                  {t('userSettingsDocumentShares.deleteConfirm')}
                 </p>
                 <div className="flex gap-8">
                   <button
                     onClick={() => setShowDelete(undefined)}
                     className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
                   >
-                    Cancel
+                    {t('userSettingsDocumentShares.cancelButton')}
                   </button>
                   <button
                     onClick={() => onDelete()}
                     className="rounded-xl bg-red-600 border max-w-[416px] w-full text-center text-white p-2"
                   >
-                    Submit
+                    {t('userSettingsDocumentShares.submitButton')}
                   </button>
                   {loading && <Loading />}
                 </div>
@@ -376,16 +390,15 @@ export function DocumentShares() {
   return (
     <div className="document-shares md:ml-4">
       <div className="font-sans font-semibold text-[16px] mb-2">
-        Current Document Shares
+        {t('userSettingsDocumentShares.heading')}
       </div>
       <div className="text-[#8C8C8C] text-[12px] mb-4">
-        Listed below are your currently active document sharing links. You can
-        share or delete them.
+        {t('userSettingsDocumentShares.description')}
       </div>
       <div className="border border-[#F0F0F0] rounded-xl p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="font-sans font-semibold text-[16px]">
-            List of shares
+            {t('userSettingsDocumentShares.listOfShares')}
           </div>
           <div className="">
             {' '}
@@ -394,14 +407,15 @@ export function DocumentShares() {
               className="flex items-center hover:bg-brand-darker justify-center md:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
             >
               <IconAdd color="white" className="md:mr-2" />
-              <span className="hidden md:block">Add New Share</span>
+              <span className="hidden md:block">
+                {t('userSettingsDocumentShares.addNewShare')}
+              </span>
             </button>
           </div>
         </div>
         {!items.length && (
           <div className="bg-[#F3F6FC] py-[16px] font-sans text-[14px] px-[16px] rounded-xl">
-            There are no shares yet, or you can add them by clicking the “Add
-            New Share” button
+            {t('userSettingsDocumentShares.emptyState')}
           </div>
         )}
         {renderItems()}

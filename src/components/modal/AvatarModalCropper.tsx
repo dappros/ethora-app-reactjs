@@ -7,6 +7,7 @@ import ReactCrop, {
   makeAspectCrop,
   PixelCrop,
 } from 'react-image-crop';
+import { useTranslation } from '../../i18n/useTranslation';
 
 // import './AvatarModalCropper.scss';
 
@@ -60,6 +61,7 @@ interface Props {
 }
 
 export function AvatarModalCropper({ onClose, image, setProfileImage }: Props) {
+  const { t } = useTranslation();
   const imgRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -112,7 +114,7 @@ export function AvatarModalCropper({ onClose, image, setProfileImage }: Props) {
             <img
               ref={imgRef}
               src={image}
-              alt="Upload"
+              alt={t('avatarModalCropper.uploadAlt')}
               style={{ maxHeight: '70vh' }}
               onLoad={onImageLoad}
             />
@@ -122,10 +124,10 @@ export function AvatarModalCropper({ onClose, image, setProfileImage }: Props) {
         <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
         <div className="flex gap-8 mt-8">
           <button className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2" onClick={() => onClose()}>
-            Cancel
+            {t('avatarModalCropper.cancelButton')}
           </button>
           <button className="rounded-xl bg-brand-500 border max-w-[416px] w-full text-center text-white p-2" onClick={() => onCrop()}>
-            Done
+            {t('avatarModalCropper.doneButton')}
           </button>
         </div>
       </DialogPanel>

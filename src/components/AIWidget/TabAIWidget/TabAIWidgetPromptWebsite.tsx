@@ -10,6 +10,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAIbot, SiteLinks } from '../../../models';
 import { Rag } from '../Rag';
 import { LinksTable } from './TabAIWidgetPromptWebsite/LinksTable';
@@ -37,6 +38,7 @@ export const TabAIWidgetPromptWebsite = ({
   loadingTextCrawl,
   handleCrawlReindex,
 }: TabAIWidgetPromptWebsiteProps): ReactElement => {
+  const { t } = useTranslation();
   const [disabled, setDisabled] = useState<boolean>(false);
   const [followLink, setFollowLink] = useState<boolean>(true);
 
@@ -58,18 +60,17 @@ export const TabAIWidgetPromptWebsite = ({
   return (
     <div className="py-6 p-0 md:p-6">
       <Box className="font-semibold font-sans text-[16px] my-4">
-        <span>Add Website (</span>
+        <span>{t('aiWidgetWebsite.titlePrefix')}</span>
         <button
           onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
           className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
         >
-          <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
+          <span>{t('aiWidgetWebsite.ragFeature')}</span> <InfoOutlinedIcon fontSize="small" />
         </button>
         <span>)</span>
       </Box>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Provide your website URL(s) in order for the system to ingest data from
-        there.
+        {t('aiWidgetWebsite.description')}
       </p>
       <Box className="flex lg:flex-row flex-col gap-4 lg:gap-2 lg:items-center justify-start">
         <Box className="flex gap-2 items-center justify-start">
@@ -95,7 +96,7 @@ export const TabAIWidgetPromptWebsite = ({
         </Box>
         {loadingTextCrawl && (
           <Box className="text-gray-600 font-medium animate-pulse">
-            Indexing in progress, please wait or come back later...
+            {t('aiWidgetWebsite.indexingProgress')}
           </Box>
         )}
       </Box>
@@ -110,13 +111,13 @@ export const TabAIWidgetPromptWebsite = ({
         <p className="font-sans text-sm">
           {followLink ? (
             <span>
-              Links will be followed (same domain only). Use this to index the{' '}
-              <span className="font-semibold">whole website</span>.
+              {t('aiWidgetWebsite.followLinksPrefix')}{' '}
+              <span className="font-semibold">{t('aiWidgetWebsite.followLinksBold')}</span>.
             </span>
           ) : (
             <span>
-              Links will not be followed. Use this to index{' '}
-              <span className="font-semibold">one specific page</span> only
+              {t('aiWidgetWebsite.noFollowLinksPrefix')}{' '}
+              <span className="font-semibold">{t('aiWidgetWebsite.noFollowLinksBold')}</span> {t('aiWidgetWebsite.noFollowLinksSuffix')}
             </span>
           )}
         </p>

@@ -18,6 +18,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 // `httpV2` (not `httpV2App`) — the widget conversations endpoint uses the
 // tenantActor auth flow on the server, which on the user-token path needs
 // userId+appId claims that only the user JWT carries. The app-only JWT
@@ -133,6 +134,7 @@ function VisitorMetadataPopover({
 }: {
   row: WidgetConversationRow;
 }) {
+  const { t } = useTranslation();
   const m = row.visitor?.metadata;
   const def = (v?: string) => (v && v.length ? v : '—');
   const browserLabel = m
@@ -145,28 +147,28 @@ function VisitorMetadataPopover({
         {formatVisitor(row)}
       </div>
       <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-x-2 gap-y-0.5">
-        <div className="text-gray-300">JID</div>
+        <div className="text-gray-300">{t('aiWidgetConversations.jidLabel')}</div>
         <div className="font-mono break-all">
           {row.visitor?.xmppUsername || '—'}
         </div>
-        <div className="text-gray-300">Country</div>
+        <div className="text-gray-300">{t('aiWidgetConversations.countryLabel')}</div>
         <div>
           {m?.country
             ? `${flagFor(m.country)} ${m.country}`.trim()
             : '—'}
         </div>
-        <div className="text-gray-300">Browser</div>
+        <div className="text-gray-300">{t('aiWidgetConversations.browserLabel')}</div>
         <div>{def(browserLabel)}</div>
-        <div className="text-gray-300">OS</div>
+        <div className="text-gray-300">{t('aiWidgetConversations.osLabel')}</div>
         <div>{def(osLabel)}</div>
-        <div className="text-gray-300">Device</div>
-        <div>{m?.deviceType ? m.deviceType : 'desktop'}</div>
+        <div className="text-gray-300">{t('aiWidgetConversations.deviceLabel')}</div>
+        <div>{m?.deviceType ? m.deviceType : t('aiWidgetConversations.desktopDefault')}</div>
         {/* IP is captured (drives the country lookup) but not shown by
             default — visitor IP is sensitive and showing it routinely
             puts operators in a tricky data-protection posture. A future
             "enterprise" flag will gate its visibility for installs that
             have a specific contract permitting it. */}
-        <div className="text-gray-300">First seen</div>
+        <div className="text-gray-300">{t('aiWidgetConversations.firstSeenLabel')}</div>
         <div>
           {row.visitor?.firstSeenAt
             ? new Date(row.visitor.firstSeenAt).toLocaleString()
@@ -175,8 +177,7 @@ function VisitorMetadataPopover({
       </div>
       {!m && (
         <div className="mt-2 text-[11px] italic text-gray-300">
-          Captured metadata is unavailable for visitors who started a
-          conversation before this feature was rolled out.
+          {t('aiWidgetConversations.metadataUnavailable')}
         </div>
       )}
     </div>
@@ -187,6 +188,7 @@ export function WidgetConversationsPanel({
   appId,
   onTotalChange,
 }: WidgetConversationsPanelProps): ReactElement | null {
+  const { t } = useTranslation();
   const [rows, setRows] = useState<WidgetConversationRow[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [offset, setOffset] = useState<number>(0);
@@ -245,12 +247,16 @@ export function WidgetConversationsPanel({
         setOffset(nextOffset);
         if (onTotalChange) onTotalChange(t);
       } catch (e: any) {
-        setError(e?.response?.data?.error || e?.message || 'Failed to load');
+        setError(
+          e?.response?.data?.error ||
+            e?.message ||
+            t('aiWidgetConversations.loadFailedFallback')
+        );
       } finally {
         setLoading(false);
       }
     },
-    [appId, onTotalChange]
+    [appId, onTotalChange, t]
   );
 
   useEffect(() => {
@@ -401,7 +407,7 @@ export function WidgetConversationsPanel({
   // export in batches via Select-All-on-page.
   async function exportAll() {
     setExporting(true);
-    setExportProgress('Fetching conversation list…');
+    setExportProgress(t('aiWidgetConversations.fetchingList'));
     const all: WidgetConversationRow[] = [];
     try {
       for (let off = 0; off < total; off += PAGE_SIZE) {
@@ -414,7 +420,9 @@ export function WidgetConversationsPanel({
     } catch (e: any) {
       setExporting(false);
       setExportProgress(null);
-      setDeleteError(`Export failed: ${e?.message || e}`);
+      setDeleteError(
+        `${t('aiWidgetConversations.exportFailedPrefix')} ${e?.message || e}`
+      );
       return;
     }
     await exportConversationsAsCsv(all, `all-${all.length}`);
@@ -487,12 +495,14 @@ export function WidgetConversationsPanel({
       .catch((e: any) => {
         if (e?.name === 'CanceledError' || e?.code === 'ERR_CANCELED') return;
         setMessagesError(
-          e?.response?.data?.error || e?.message || 'Failed to load messages'
+          e?.response?.data?.error ||
+            e?.message ||
+            t('aiWidgetConversations.loadMessagesFailedFallback')
         );
       })
       .finally(() => setMessagesLoading(false));
     return () => ac.abort();
-  }, [appId, selectedRow]);
+  }, [appId, selectedRow, t]);
 
   // Heuristic: visitors have JID prefix `${appId}_widget-`, the bot is the
   // App's `${appId}_${aiBot.userId}-bot`. We don't know the exact bot
@@ -524,11 +534,11 @@ export function WidgetConversationsPanel({
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold font-sans text-[16px] flex items-center gap-2">
           <ChatBubbleOutlineIcon fontSize="small" />
-          Widget conversations
+          {t('aiWidgetConversations.heading')}
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
-            {loading ? 'Loading…' : `${total} total`}
+            {loading ? t('aiWidgetConversations.loading') : `${total} ${t('aiWidgetConversations.totalSuffix')}`}
           </span>
           <Button
             size="small"
@@ -536,9 +546,9 @@ export function WidgetConversationsPanel({
             startIcon={<FileDownloadIcon />}
             onClick={exportAll}
             disabled={loading || exporting || total === 0}
-            title="Export every conversation in this app as a CSV"
+            title={t('aiWidgetConversations.exportAllTitle')}
           >
-            Export all
+            {t('aiWidgetConversations.exportAll')}
           </Button>
           <Button
             size="small"
@@ -547,14 +557,14 @@ export function WidgetConversationsPanel({
             onClick={() => fetchPage(offset)}
             disabled={loading}
           >
-            Refresh
+            {t('aiWidgetConversations.refresh')}
           </Button>
         </div>
       </div>
       {exportProgress && (
         <div className="mb-2 flex items-center gap-2 text-sm text-gray-600">
           <CircularProgress size={14} />
-          <span>Exporting CSV — {exportProgress}</span>
+          <span>{t('aiWidgetConversations.exportingCsvPrefix')} {exportProgress}</span>
         </div>
       )}
 
@@ -570,14 +580,13 @@ export function WidgetConversationsPanel({
             color: 'error.dark',
           }}
         >
-          <span className="text-sm">Couldn't load conversations: {error}</span>
+          <span className="text-sm">{t('aiWidgetConversations.loadErrorPrefix')} {error}</span>
         </Box>
       )}
 
       {!error && empty && (
         <div className="rounded-xl border border-dashed border-gray-300 px-4 py-8 text-center text-sm text-gray-500 font-sans">
-          No widget conversations yet. They appear here once visitors start
-          chatting via the embedded widget.
+          {t('aiWidgetConversations.emptyState')}
         </div>
       )}
 
@@ -590,7 +599,7 @@ export function WidgetConversationsPanel({
           {selected.size > 0 && (
             <div className="flex items-center justify-between bg-red-50 border-b border-red-200 px-4 py-2 text-sm">
               <span className="text-red-700 font-medium">
-                {selected.size} selected
+                {selected.size} {t('aiWidgetConversations.selectedSuffix')}
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -600,7 +609,7 @@ export function WidgetConversationsPanel({
                   onClick={exportSelected}
                   disabled={deleting || exporting}
                 >
-                  Export selected
+                  {t('aiWidgetConversations.exportSelected')}
                 </Button>
                 <Button
                   size="small"
@@ -610,7 +619,7 @@ export function WidgetConversationsPanel({
                   onClick={() => setConfirmOpen(true)}
                   disabled={deleting || exporting}
                 >
-                  Delete selected
+                  {t('aiWidgetConversations.deleteSelected')}
                 </Button>
               </div>
             </div>
@@ -630,13 +639,13 @@ export function WidgetConversationsPanel({
                     indeterminate={someOnPageSelected}
                     onChange={(e) => toggleAllOnPage(e.target.checked)}
                     inputProps={{
-                      'aria-label': 'Select all on this page',
+                      'aria-label': t('aiWidgetConversations.selectAllOnPage'),
                     }}
                   />
                 </th>
-                <th className="px-4 py-2 font-semibold">Visitor</th>
-                <th className="px-4 py-2 font-semibold">Started</th>
-                <th className="px-4 py-2 font-semibold">Last activity</th>
+                <th className="px-4 py-2 font-semibold">{t('aiWidgetConversations.visitorHeader')}</th>
+                <th className="px-4 py-2 font-semibold">{t('aiWidgetConversations.startedHeader')}</th>
+                <th className="px-4 py-2 font-semibold">{t('aiWidgetConversations.lastActivityHeader')}</th>
                 <th className="px-4 py-2 font-semibold w-1"></th>
               </tr>
             </thead>
@@ -649,7 +658,7 @@ export function WidgetConversationsPanel({
                       checked={selected.has(row._id)}
                       onChange={() => toggleOne(row._id)}
                       inputProps={{
-                        'aria-label': `Select conversation ${formatVisitor(row)}`,
+                        'aria-label': `${t('aiWidgetConversations.selectConversationPrefix')} ${formatVisitor(row)}`,
                       }}
                     />
                   </td>
@@ -698,7 +707,7 @@ export function WidgetConversationsPanel({
                       className="text-brand-500 hover:underline"
                       onClick={() => setSelectedRow(row)}
                     >
-                      Open
+                      {t('aiWidgetConversations.open')}
                     </button>
                   </td>
                 </tr>
@@ -711,7 +720,7 @@ export function WidgetConversationsPanel({
       {!error && (rows.length > 0 || hasPrev || hasNext) && (
         <div className="flex items-center justify-between mt-3">
           <span className="text-xs text-gray-500">
-            {rows.length > 0 ? `${pageStart}–${pageEnd} of ${total}` : ''}
+            {rows.length > 0 ? `${pageStart}–${pageEnd} ${t('aiWidgetConversations.paginationOf')} ${total}` : ''}
           </span>
           <div className="flex items-center gap-2">
             <Button
@@ -720,7 +729,7 @@ export function WidgetConversationsPanel({
               onClick={() => fetchPage(Math.max(0, offset - PAGE_SIZE))}
               disabled={!hasPrev || loading}
             >
-              Previous
+              {t('aiWidgetConversations.previous')}
             </Button>
             <Button
               size="small"
@@ -728,7 +737,7 @@ export function WidgetConversationsPanel({
               onClick={() => fetchPage(offset + PAGE_SIZE)}
               disabled={!hasNext || loading}
             >
-              Next
+              {t('aiWidgetConversations.next')}
             </Button>
             {loading && <CircularProgress size={16} />}
           </div>
@@ -742,7 +751,7 @@ export function WidgetConversationsPanel({
         maxWidth="sm"
       >
         <DialogTitle sx={{ pr: 6 }}>
-          Widget conversation
+          {t('aiWidgetConversations.dialogTitle')}
           <IconButton
             aria-label="close"
             onClick={() => setSelectedRow(null)}
@@ -755,7 +764,7 @@ export function WidgetConversationsPanel({
           {selectedRow && (
             <div className="font-sans text-sm space-y-3">
               <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">Visitor</div>
+                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.visitorLabel')}</div>
                 <div className="font-medium">{formatVisitor(selectedRow)}</div>
                 {selectedRow.visitor && (
                   <div className="text-xs text-gray-500 mt-1 break-all">
@@ -764,15 +773,15 @@ export function WidgetConversationsPanel({
                 )}
               </div>
               <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">Started</div>
+                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.startedLabel')}</div>
                 <div>{formatDate(selectedRow.createdAt)}</div>
               </div>
               <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">Last activity</div>
+                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.lastActivityLabel')}</div>
                 <div>{formatDate(selectedRow.updatedAt)}</div>
               </div>
               <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">Room JID</div>
+                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.roomJidLabel')}</div>
                 <div className="flex items-center gap-2">
                   <code className="break-all bg-gray-50 px-2 py-1 rounded text-xs">
                     {selectedRow.name}
@@ -788,7 +797,7 @@ export function WidgetConversationsPanel({
               </div>
               <div>
                 <div className="text-xs uppercase text-gray-500 mb-1 flex items-center justify-between">
-                  <span>Messages</span>
+                  <span>{t('aiWidgetConversations.messagesLabel')}</span>
                   {messagesLoading && <CircularProgress size={12} />}
                 </div>
                 {mamUnavailable && (
@@ -803,8 +812,7 @@ export function WidgetConversationsPanel({
                       fontSize: 12,
                     }}
                   >
-                    Message history is not available on this deployment —
-                    backend MAM_MYSQL_* env vars are not configured.
+                    {t('aiWidgetConversations.mamUnavailable')}
                   </Box>
                 )}
                 {messagesError && !mamUnavailable && (
@@ -819,7 +827,7 @@ export function WidgetConversationsPanel({
                       fontSize: 12,
                     }}
                   >
-                    Couldn't load messages: {messagesError}
+                    {t('aiWidgetConversations.loadMessagesErrorPrefix')} {messagesError}
                   </Box>
                 )}
                 {!messagesLoading &&
@@ -827,7 +835,7 @@ export function WidgetConversationsPanel({
                   !mamUnavailable &&
                   messages.length === 0 && (
                     <div className="text-xs text-gray-500 italic px-1">
-                      No messages in this conversation yet.
+                      {t('aiWidgetConversations.noMessagesYet')}
                     </div>
                   )}
                 {messages.length > 0 && (
@@ -851,11 +859,11 @@ export function WidgetConversationsPanel({
                             }
                           >
                             <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-0.5">
-                              {visitor ? 'visitor' : 'bot'} · {formatTs(m.ts)}
+                              {visitor ? t('aiWidgetConversations.visitorTag') : t('aiWidgetConversations.botTag')} · {formatTs(m.ts)}
                             </div>
                             <div className="whitespace-pre-wrap break-words">
                               {m.body || (
-                                <em className="text-gray-400">(empty body)</em>
+                                <em className="text-gray-400">{t('aiWidgetConversations.emptyBody')}</em>
                               )}
                             </div>
                           </div>
@@ -880,24 +888,27 @@ export function WidgetConversationsPanel({
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Delete {selected.size} conversation{selected.size === 1 ? '' : 's'}?</DialogTitle>
+        <DialogTitle>
+          {selected.size === 1
+            ? t('aiWidgetConversations.confirmDeleteTitleOne').replace('{count}', String(selected.size))
+            : t('aiWidgetConversations.confirmDeleteTitleOther').replace('{count}', String(selected.size))}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            This permanently removes the selected conversation
-            {selected.size === 1 ? '' : 's'} — message history, the
-            chat record, and the underlying chat room. Visitors who
-            return will start a fresh conversation.
+            {selected.size === 1
+              ? t('aiWidgetConversations.confirmDeleteBodyOne')
+              : t('aiWidgetConversations.confirmDeleteBodyOther')}
           </DialogContentText>
           {deleting && (
             <div className="flex items-center gap-2 mt-3 text-sm text-gray-600">
               <CircularProgress size={14} />
-              <span>Deleting…</span>
+              <span>{t('aiWidgetConversations.deleting')}</span>
             </div>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>
-            Cancel
+            {t('aiWidgetConversations.cancel')}
           </Button>
           <Button
             onClick={runBulkDelete}
@@ -906,7 +917,7 @@ export function WidgetConversationsPanel({
             disabled={deleting}
             startIcon={<DeleteOutlineIcon />}
           >
-            Delete
+            {t('aiWidgetConversations.delete')}
           </Button>
         </DialogActions>
       </Dialog>

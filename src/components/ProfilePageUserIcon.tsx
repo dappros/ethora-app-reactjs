@@ -15,6 +15,7 @@ import { AvatarModalCropper } from './modal/AvatarModalCropper';
 import './ProfilePageUserIcon.scss';
 import cn from "classnames"
 import { sha256 } from 'js-sha256'
+import { useTranslation } from '../i18n/useTranslation';
 
 
 function getColorFromString(str: string) {
@@ -45,6 +46,7 @@ export function ProfilePageUserIcon({
   lastName,
   small
 }: Props) {
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [imageSrc, setImageSrc] = useState('');
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -118,21 +120,21 @@ export function ProfilePageUserIcon({
               >
                 <MenuItem>
                   <button className="pointer-events-none text-gray-300" onClick={() => {}}>
-                    <span>Make photo</span>
+                    <span>{t('profilePageUserIcon.makePhoto')}</span>
                     <IconCamera />
                   </button>
                 </MenuItem>
                 <MenuSeparator className="separator" />
                 <MenuItem>
                   <button onClick={onMenuPhotoClick}>
-                    <span>Choose photo</span>
+                    <span>{t('profilePageUserIcon.choosePhoto')}</span>
                     <IconMedia />
                   </button>
                 </MenuItem>
                 <MenuSeparator className="separator" />
                 <MenuItem>
                   <button onClick={() => setProfileImage('')}>
-                    <span>Delete</span>
+                    <span>{t('profilePageUserIcon.delete')}</span>
                     <IconDelete />
                   </button>
                 </MenuItem>

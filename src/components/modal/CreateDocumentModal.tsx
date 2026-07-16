@@ -5,6 +5,7 @@ import { IconClose } from '../Icons/IconClose';
 import { toast } from 'react-toastify';
 
 import { postDocument } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { IconPaperclip } from '../Icons/IconPaperclip';
 import { Loading } from '../Loading';
 import './CreateDocumentModal.scss';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
       setLoading(true);
       postDocument(name, file)
         .then(() => {
-          toast.success('Document created successfully');
+          toast.success(t('createDocumentModal.successToast'));
           componentGetDocs();
           onClose();
         })
@@ -57,11 +59,11 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
   return (
     <Dialog className="fixed inset-0 flex justify-center items-center bg-black/30" open={true} onClose={() => { }}>
       <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px] m-4">
-        <div className="ont-varela text-[24px] text-center mb-8">New Document</div>
+        <div className="ont-varela text-[24px] text-center mb-8">{t('createDocumentModal.title')}</div>
         <input
           type="text"
           value={name}
-          placeholder='Document title'
+          placeholder={t('createDocumentModal.titlePlaceholder')}
           onChange={(e) => setName(e.target.value)}
           className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
         />
@@ -70,7 +72,7 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
             <IconPaperclip />
           </button>
           {!file && (
-            <div className="">No file chosen</div>
+            <div className="">{t('createDocumentModal.noFileChosen')}</div>
           )}
           {file && <div className="">{file.name}</div>}
           <input
@@ -83,10 +85,10 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
 
         <div className="flex gap-8 mt-8">
           <button className="w-full rounded-xl hover:bg-brand-hover border py-[12px] border-brand-500 text-brand-500" onClick={onClose}>
-            Cancel
+            {t('createDocumentModal.cancelButton')}
           </button>
           <button onClick={onCreate} className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white">
-            Create
+            {t('createDocumentModal.createButton')}
           </button>
         </div>
         <button className="absolute top-[36px] right-[36px]" onClick={() => onClose()}>

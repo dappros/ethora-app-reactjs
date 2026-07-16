@@ -6,6 +6,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelApp } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
 
@@ -24,6 +25,7 @@ export const TabAIWidgetCode = ({
   userId,
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
+  const { t } = useTranslation();
   const currentApp = useAppStore((s) => s.currentApp);
   const agents = useAppStore((s) => s.agents);
   const botInstances = useAppStore((s) => s.botInstances);
@@ -182,9 +184,9 @@ export const TabAIWidgetCode = ({
 
   return (
     <div className="py-6 p-0 md:p-6">
-      <div className="font-semibold font-sans text-[16px] my-4">Code</div>
+      <div className="font-semibold font-sans text-[16px] my-4">{t('aiWidgetCode.title')}</div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Use this code to integrate widget into your website or external app.
+        {t('aiWidgetCode.description')}
       </p>
 
       <Box>
@@ -194,14 +196,14 @@ export const TabAIWidgetCode = ({
             variant={value === '1' ? 'contained' : 'outlined'}
             aria-pressed={value === '1'}
           >
-            HTML Widget
+            {t('aiWidgetCode.htmlWidgetButton')}
           </Button>
           <Button
             onClick={(e) => handleChange(e, '2')}
             variant={value === '2' ? 'contained' : 'outlined'}
             aria-pressed={value === '2'}
           >
-            Wordpress
+            {t('aiWidgetCode.wordpressButton')}
           </Button>
         </ButtonGroup>
       </Box>
@@ -215,7 +217,7 @@ export const TabAIWidgetCode = ({
               the persona edit it under Manage agents. */}
           <div className="mb-6">
             <div className="text-sm font-semibold mb-2 text-gray-700">
-              Bot persona (from active Agent)
+              {t('aiWidgetCode.personaLabel')}
             </div>
             {activeAgent ? (
               <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50">
@@ -247,15 +249,14 @@ export const TabAIWidgetCode = ({
                   to={`/app/admin/agents/${activeAgent.id}/settings`}
                   className="text-brand-500 hover:underline text-sm"
                 >
-                  Edit in Manage agents
+                  {t('aiWidgetCode.editInManageAgents')}
                 </Link>
               </div>
             ) : (
               <div className="p-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
-                No Agent bound to this widget yet — the legacy AI bot
-                will answer with a generic persona. Pick an Agent in
-                the <span className="font-medium">Active agent for AI Widget</span> selector
-                above.
+                {t('aiWidgetCode.noAgentPrefix')}{' '}
+                <span className="font-medium">{t('aiWidgetCode.noAgentSelectorLabel')}</span>{' '}
+                {t('aiWidgetCode.noAgentSuffix')}
               </div>
             )}
           </div>
@@ -267,24 +268,23 @@ export const TabAIWidgetCode = ({
           <div className="mb-4 flex items-start gap-2 text-sm text-gray-600">
             <InfoOutlinedIcon fontSize="small" className="mt-0.5 shrink-0" />
             <span>
-              The widget pulls bot name, avatar, and greeting copy from
-              the active Agent. The snippet below shows optional
+              {t('aiWidgetCode.infoLinePrefix')}
               <code className="mx-1 px-1 rounded bg-gray-100">data-*</code>
-              attributes you can paste into the
+              {t('aiWidgetCode.infoLineMiddle')}
               <code className="mx-1 px-1 rounded bg-gray-100">&lt;script&gt;</code>
-              tag to override any of them per embed.
+              {t('aiWidgetCode.infoLineSuffix')}
             </span>
           </div>
 
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
-            {`Insert this code anywhere inside your <body> tag:`}
+            {t('aiWidgetCode.insertBodyText')}
           </p>
           <div
             className="relative rounded-md bg-gray-700 overflow-y-auto"
             style={{ maxHeight: 360 }}
           >
             <div className="absolute top-1 right-1 z-10">
-              <Tooltip title={copied ? 'Copied' : 'Copy'}>
+              <Tooltip title={copied ? t('aiWidgetCode.copied') : t('aiWidgetCode.copy')}>
                 <IconButton onClick={() => handleCopy(scriptCode)} size="small">
                   {copied ? (
                     <CheckIcon
@@ -340,15 +340,15 @@ export const TabAIWidgetCode = ({
       {value === '2' && (
         <Box sx={{ pt: 3 }}>
           <p className="font-sans text-sm pb-4 flex items-center gap-1">
-            Insert this bot ID in your Wordpress{' '}
+            {t('aiWidgetCode.wordpressInsertPrefix')}{' '}
             <a href="" className="text-brand-500">
               Ethora AI Assistant plugin
             </a>{' '}
-            settings:
+            {t('aiWidgetCode.wordpressInsertSuffix')}
           </p>
           <div className="relative rounded-md bg-gray-700">
             <div className="absolute top-1 right-1 z-10">
-              <Tooltip title={copied ? 'Copied' : 'Copy'}>
+              <Tooltip title={copied ? t('aiWidgetCode.copied') : t('aiWidgetCode.copy')}>
                 <IconButton
                   onClick={() =>
                     handleCopy(botJid)

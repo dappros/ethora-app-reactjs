@@ -14,14 +14,13 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   isAppearanceAdjusted: boolean;
   isEndUserCreated: boolean;
   onClose: () => void;
 }
-
-const steps = ['App Created', 'Appearance Adjusted', 'End User Created'];
 
 const CustomStepIcon = ({ completed, icon }: StepIconProps) => {
   const isCompleted = completed || icon === 1;
@@ -45,6 +44,13 @@ const ProgressCreateApp = ({
   const [searchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
+
+  const steps = [
+    t('appSettingsProgressCreateApp.stepAppCreated'),
+    t('appSettingsProgressCreateApp.stepAppearanceAdjusted'),
+    t('appSettingsProgressCreateApp.stepEndUserCreated'),
+  ];
 
   const activeStep = !isAppearanceAdjusted ? 1 : !isEndUserCreated ? 2 : 3;
 
@@ -64,29 +70,29 @@ const ProgressCreateApp = ({
     if (activeStep === 1) {
       return (
         <Typography variant="body2" color="textSecondary">
-          Hint: open{' '}
+          {t('appSettingsProgressCreateApp.hintOpenPrefix')}{' '}
           <Button variant="text" onClick={() => handleNavigateTo('Appearance')}>
-            Appearance tab
+            {t('appSettingsProgressCreateApp.appearanceTabButton')}
           </Button>{' '}
-          to adjust your branding.
+          {t('appSettingsProgressCreateApp.hintOpenSuffix')}
         </Typography>
       );
     }
     if (activeStep === 2) {
       return (
         <Typography variant="body2" color="textSecondary">
-          Hint: go to{' '}
+          {t('appSettingsProgressCreateApp.hintGoToPrefix')}{' '}
           <Button variant="text" onClick={() => handleNavigateTo('Web app')}>
-            Web app tab
+            {t('appSettingsProgressCreateApp.webAppTabButton')}
           </Button>{' '}
-          and copy your app link to test as end-user.
+          {t('appSettingsProgressCreateApp.hintGoToSuffix')}
         </Typography>
       );
     }
 
     return (
       <Typography variant="body2" color="textSecondary">
-        🎉 Well done! You have successfully completed the Initial Setup!
+        {t('appSettingsProgressCreateApp.completedMessage')}
       </Typography>
     );
   };

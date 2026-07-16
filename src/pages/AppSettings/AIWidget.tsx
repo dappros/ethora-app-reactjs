@@ -11,6 +11,7 @@ import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidg
 import { ModelApp } from '../../models';
 import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
 import { WidgetConversationsPanel } from '../../components/AIWidget/WidgetConversationsPanel';
+import { useTranslation } from '../../i18n/useTranslation';
 import './AIWidget.scss';
 
 const statusAiBot = {
@@ -97,6 +98,7 @@ export function AIWidget({
   handleRagChange: _handleRagChange,
   aiFeatureDisabled = false,
 }: Props) {
+  const { t } = useTranslation();
   const [statusBot, setStatusBot] = useState<boolean>(false);
   const [value, setValue] = useState('1');
   const [previewActive, setPreviewActive] = useState<boolean>(false);
@@ -211,9 +213,8 @@ export function AIWidget({
           }}
         >
           <div className="font-sans text-sm">
-            <strong>AI features are not enabled in this deployment.</strong>{' '}
-            The AI Widget is shown here in preview mode. Contact your
-            administrator to enable AI features.
+            <strong>{t('appSettingsAIWidget.disabledBannerStrong')}</strong>{' '}
+            {t('appSettingsAIWidget.disabledBannerText')}
           </div>
         </Box>
       )}
@@ -240,8 +241,12 @@ export function AIWidget({
               fontSize="small"
               color={statusBot ? 'success' : 'error'}
             />
-            <span className="font-semibold">AI bot:</span>
-            <span>{statusBot ? 'enabled' : 'disabled'}</span>
+            <span className="font-semibold">{t('appSettingsAIWidget.aiBotLabel')}</span>
+            <span>
+              {statusBot
+                ? t('appSettingsAIWidget.statusEnabled')
+                : t('appSettingsAIWidget.statusDisabled')}
+            </span>
             <Button
               size="small"
               variant="outlined"
@@ -249,17 +254,19 @@ export function AIWidget({
               disabled={aiFeatureDisabled}
               sx={{ ml: 1 }}
             >
-              {statusBot ? 'Disable' : 'Enable'}
+              {statusBot
+                ? t('appSettingsAIWidget.disableButton')
+                : t('appSettingsAIWidget.enableButton')}
             </Button>
           </div>
 
           <div className="flex items-center gap-2 text-sm font-sans text-gray-700">
-            <span className="font-semibold">RAG:</span>
-            <span>{ragSize ? `${ragSize} MB` : 'empty'}</span>
+            <span className="font-semibold">{t('appSettingsAIWidget.ragLabel')}</span>
+            <span>{ragSize ? `${ragSize} MB` : t('appSettingsAIWidget.ragEmpty')}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm font-sans text-gray-700">
-            <span className="font-semibold">Conversations:</span>
+            <span className="font-semibold">{t('appSettingsAIWidget.conversationsLabel')}</span>
             <span>{conversationsTotal === null ? '—' : conversationsTotal}</span>
           </div>
 
@@ -273,7 +280,7 @@ export function AIWidget({
                   onClick={handleStopPreview}
                   disabled={aiFeatureDisabled}
                 >
-                  Stop test
+                  {t('appSettingsAIWidget.stopTestButton')}
                 </Button>
                 <Button
                   size="small"
@@ -285,7 +292,7 @@ export function AIWidget({
                   }}
                   disabled={aiFeatureDisabled}
                 >
-                  New session
+                  {t('appSettingsAIWidget.newSessionButton')}
                 </Button>
               </>
             ) : (
@@ -297,13 +304,13 @@ export function AIWidget({
                 disabled={aiFeatureDisabled || !widgetUrl || !statusBot}
                 title={
                   !statusBot
-                    ? 'Enable the AI bot first to test the widget here.'
+                    ? t('appSettingsAIWidget.enableBotFirstTooltip')
                     : !widgetUrl
-                    ? 'Widget hosting is not configured for this deployment.'
+                    ? t('appSettingsAIWidget.widgetHostingNotConfiguredTooltip')
                     : undefined
                 }
               >
-                Test widget
+                {t('appSettingsAIWidget.testWidgetButton')}
               </Button>
             )}
           </div>

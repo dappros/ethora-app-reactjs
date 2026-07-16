@@ -22,9 +22,15 @@ import { IconLogout } from '../components/Icons/IconLogout';
 import { IconQr } from '../components/Icons/IconQr';
 import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
+import { LanguageModal } from '../components/modal/LanguageModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
+import {
+  UI_LANGUAGE_OPTIONS,
+  UiLanguageCode,
+} from '../constants/languageOptionsConstants';
 import { logLogout } from '../hooks/withTracking.tsx';
 import { deleteDocuments, getDocuments, httpLogout } from '../http';
+import { useTranslation } from '../i18n/useTranslation';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -34,6 +40,16 @@ export default function Profile() {
   const [documents, setDocuments] = useState<Array<any>>([]);
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [deleteDocumentId, setDeleteDocumentId] = useState('');
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const { t } = useTranslation();
+  // App-wide UI language (see store/appStore.ts's uiLanguage /
+  // doSetUiLanguage). Reading it from the store - not local state - means
+  // every component using useTranslation() re-renders together when it
+  // changes here.
+  const uiLanguage = useAppStore((s) => s.uiLanguage);
+  const doSetUiLanguage = useAppStore((s) => s.doSetUiLanguage);
+  const currentLanguageName =
+    UI_LANGUAGE_OPTIONS.find((l) => l.id === uiLanguage)?.name ?? uiLanguage;
   const {
     firstName,
     lastName,
@@ -68,12 +84,18 @@ export default function Profile() {
         setDocuments((prevDocs) =>
           prevDocs.filter((doc) => doc._id !== deleteDocumentId)
         );
-        toast.success('Document delete successfully');
+        toast.success(t('profile.deleteDocument.success'));
       })
       .catch(() => {
-        toast.success('document delete error');
+        toast.error(t('profile.deleteDocument.error'));
       });
     setShowDelete(false);
+  };
+
+  const onChangeUiLanguage = (code: UiLanguageCode) => {
+    doSetUiLanguage(code);
+    setShowLanguageModal(false);
+    toast.success(t('language.savedToast'));
   };
 
   const onLogout = async () => {
@@ -91,7 +113,7 @@ export default function Profile() {
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px]">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Profile
+          {t('nav.profile')}
         </div>
       </div>
       <div className="rounded-2xl bg-white px-4 h-full grid grid-rows-[72px,_1fr]">
@@ -123,11 +145,13 @@ export default function Profile() {
             <div>
               <p className="text-center font-varela text-[24px]">{`${firstName} ${lastName}`}</p>
               <p className="text-center font-sans text-[16px] text-[#8C8C8C]">
-                Online / Offline
+                {t('profile.onlineOffline')}
               </p>
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
-              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">About</p>
+              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
+                {t('profile.about')}
+              </p>
               <p className="text-black text-regular">{description}</p>
             </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4">
@@ -138,7 +162,7 @@ export default function Profile() {
                     // w-1/2 if there's a collection
                     className="border-b border-b-[#F0F0F0] w-full data-[selected]:text-brand-500 data-[selected]:border-b-brand-500"
                   >
-                    Documents
+                    {t('profile.documents')}
                   </Tab>
                   {/* <Tab
                     key="collections"
@@ -153,7 +177,7 @@ export default function Profile() {
                       onClick={() => setShowNewDocModal(true)}
                       className="w-full hover:bg-brand-darker bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
                     >
-                      Add Document
+                      {t('profile.addDocument')}
                     </button>
                     {documents.map((el) => (
                       <div
@@ -186,13 +210,24 @@ export default function Profile() {
                 </TabPanels>
               </TabGroup>
             </div>
+            <div className="border border-[#F0F0F0] rounded-xl p-4">
+              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
+                {t('profile.language')}
+              </p>
+              <button
+                onClick={() => setShowLanguageModal(true)}
+                className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
+              >
+                {currentLanguageName}
+              </button>
+            </div>
             <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
               <button
                 className="text-[#F44336] p-4 w-full rounded-xl hover:bg-brand-hover font-varela text-regular inline-flex items-center justify-center"
                 onClick={() => onLogout()}
               >
                 <IconLogout />
-                <span className="ml-2">Logout</span>
+                <span className="ml-2">{t('profile.logout')}</span>
               </button>
             </div>
           </div>
@@ -208,6 +243,13 @@ export default function Profile() {
         <CreateDocumentModal
           componentGetDocs={componentGetDocs}
           onClose={() => setShowNewDocModal(false)}
+        />
+      )}
+      {showLanguageModal && (
+        <LanguageModal
+          value={uiLanguage}
+          onSelect={onChangeUiLanguage}
+          onClose={() => setShowLanguageModal(false)}
         />
       )}
 
@@ -226,23 +268,23 @@ export default function Profile() {
               <IconClose />
             </button>
             <div className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
-              Delete Document
+              {t('profile.deleteDocument.title')}
             </div>
             <p className="font-sans text-[14px] mb-8 text-center">
-              Are you sure you want to delete document?
+              {t('profile.deleteDocument.confirm')}
             </p>
             <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
               <button
                 className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500 hover:bg-brand-hover"
                 onClick={() => setShowDelete(false)}
               >
-                Cancel
+                {t('profile.deleteDocument.cancel')}
               </button>
               <button
                 className="bg-[#F44336] w-full py-[12px] rounded-xl bg-brand-500 text-white"
                 onClick={handleDeleteDocument}
               >
-                Delete
+                {t('profile.deleteDocument.delete')}
               </button>
             </div>
           </DialogPanel>

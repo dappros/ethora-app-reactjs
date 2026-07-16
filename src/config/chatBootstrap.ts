@@ -90,38 +90,29 @@ export function buildPushNotificationsConfig(): {
   return { enabled: true, softAsk: false, firebaseConfig };
 }
 
-// `satisfies` (not a `: CSSProperties` annotation) so these validate against
-// CSSProperties but keep their narrow literal type. The chat-component is
-// linked from the local submodule, which ships its own nested
-// @types/react/csstype; annotating as CSSProperties would force tsc to compare
-// the two csstype copies at the config boundary and fail on divergent props
-// (e.g. alignmentBaseline). Inferring the literal only checks the keys we set.
-// Room-list container styles. `paddingTop` is viewport-dependent: on mobile
-// the search bar already supplies the top spacing, so we drop it (otherwise
-// the list sits offset below the header). Computed from a reactive flag the
-// caller passes in (see useIsMobileView) so it updates on resize, not just at
-// load. `satisfies` keeps the narrow literal type - see the note below.
-// Device/user locale for static UI captions AND as the reader locale for
-// message translation. navigator.language is the browser/device language
-// ("en-US", "fr-CA", "es-US"); a deployment that stores a per-user language
-// could pass that instead. Captions resolve to the base language; the full
-// locale (with region) is forwarded to the translation service.
-const deviceLocale: string =
+const browserLocale: string =
   (typeof navigator !== 'undefined' && navigator.language) || 'en';
 
+// Resolve the effective locale for both the chat-component's static UI
+// captions (`config.i18n.locale`) and the message-translation reader locale.
+// `uiLanguage` is the Profile language picker's choice (store/appStore.ts,
+// UI_LANGUAGE_OPTIONS: en/fr/es) - it wins when set. Falls back to raw
+// browser detection so deployments that haven't touched the picker yet keep
+// working exactly as before. Callers must pass their OWN reactive read of
+// `useAppStore((s) => s.uiLanguage)` (see main.tsx / Chat.tsx) - this is a
+// plain function, not a hook, so it can't subscribe to the store itself.
+function resolveLocale(uiLanguage?: string | null): string {
+  return uiLanguage || browserLocale;
+}
 
-// Static UI i18n (captions) - always on; resolves to en if the locale isn't
-// a built-in language (en/fr/es).
-const i18nConfig = { locale: deviceLocale };
-
-const getRoomListStyles = (isMobile: boolean) =>
+const getRoomListStyles = () =>
   ({
     maxHeight: 'calc(100%)',
     height: 'calc(100%)',
     borderRadius: '16px 0px 0px 16px',
     border: 'none',
     padding: '16px',
-    paddingTop: isMobile ? '0px' : '16px',
+    paddingTop: '0px',
     color: '#141414',
   }) satisfies CSSProperties;
 
@@ -258,6 +249,15 @@ interface CreateChatConfigOptions {
   // Reactive mobile-viewport flag (from useIsMobileView). Drives the
   // room-list top padding so it updates on resize, not just at load.
   isMobileView?: boolean;
+  // App-wide UI language from the Profile language picker (store/appStore.ts's
+  // uiLanguage, UI_LANGUAGE_OPTIONS: en/fr/es). Drives the chat-component's
+  // static caption locale (config.i18n.locale). Callers must pass a reactive
+  // `useAppStore((s) => s.uiLanguage)` read and include it in their useMemo
+  // deps (see Chat.tsx) so switching language in Profile actually re-renders
+  // the chat captions - this function itself isn't a hook and can't
+  // subscribe to the store on its own. Falls back to browser detection when
+  // omitted.
+  uiLanguage?: string | null;
 }
 
 // Build the userLogin.user payload for chat-component. Returns null when
@@ -313,7 +313,11 @@ export function createChatConfig({
   chatToken,
   currentUser,
   ownerOverride,
-  isMobileView = false,
+  uiLanguage,
+  // isMobileView: kept in the options contract (Chat.tsx still passes it)
+  // but no longer read here - getRoomListStyles() dropped its
+  // mobile-conditional padding upstream. Not destructured to a local so
+  // it doesn't trip noUnusedLocals.
 }: CreateChatConfigOptions): ChatConfig {
   // When we're in owner-session mode we have to override BOTH the chat
   // token (XMPP identity) AND the refreshFunction; the default refresh
@@ -372,7 +376,7 @@ export function createChatConfig({
       secondary: '#141414',
     },
     qrUrl: DEFAULT_QR_URL,
-    roomListStyles: getRoomListStyles(isMobileView),
+    roomListStyles: getRoomListStyles(),
     chatRoomStyles,
     chatHeaderSettings: {
       disableMenu: true,
@@ -394,7 +398,7 @@ export function createChatConfig({
       },
     },
     pushNotifications: webNotificationsConfig,
-    i18n: i18nConfig,
+    i18n: { locale: resolveLocale(uiLanguage) },
     translates: {
       enabled: true,
       mode: 'auto',

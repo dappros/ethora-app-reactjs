@@ -7,6 +7,7 @@ import {
   SyntheticEvent,
   useState,
 } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAIbot, ModelApp, SiteLinks } from '../../models';
 import { TabAIWidgetCode } from './TabAIWidget/TabAIWidgetCode';
 import { TabAIWidgetDocument } from './TabAIWidget/TabAIWidgetDocument';
@@ -48,6 +49,7 @@ export const TabAIWidget = ({
   loadingTextCrawl,
   handleCrawlReindex,
 }: TabAIWidgetProps): ReactElement => {
+  const { t } = useTranslation();
   const [valueTabs, setValueTabs] = useState('1');
 
   const handleChangeTabs = (_: SyntheticEvent, newValue: string) => {
@@ -71,10 +73,10 @@ export const TabAIWidget = ({
             }
           }}
         >
-          <Tab label="Code" value="1" />
-          <Tab label="Prompt" value="2" />
-          <Tab label="Add websites" value="3" />
-          <Tab label="Add documents" value="4" />
+          <Tab label={t('aiWidgetTabs.code')} value="1" />
+          <Tab label={t('aiWidgetTabs.prompt')} value="2" />
+          <Tab label={t('aiWidgetTabs.addWebsites')} value="3" />
+          <Tab label={t('aiWidgetTabs.addDocuments')} value="4" />
         </TabList>
       </Box>
       <TabPanel value="1" sx={{ p: 0 }}>

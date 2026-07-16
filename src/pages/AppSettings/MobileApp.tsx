@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { actionPostFile } from '../../actions';
 import { IconUpload } from '../../components/Icons/IconUpload';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   appId: string;
@@ -15,6 +16,7 @@ export function MobileApp({
   setGoogleServicesJson,
   primaryColor,
 }: Props) {
+  const { t } = useTranslation();
   const googleJsonRef = useRef<HTMLInputElement>(null);
 
   const onGoogleJsonRefChanges = (file: File | null) => {
@@ -29,18 +31,20 @@ export function MobileApp({
 
   return (
     <div>
-      <div className="font-semibold font-sans text-[16px] mb-2">Mobile App</div>
+      <div className="font-semibold font-sans text-[16px] mb-2">
+        {t('appSettingsMobileApp.heading')}
+      </div>
       <div className="font-semibold font-sans text-[14px] mb-2">
-        Quick no code options
+        {t('appSettingsMobileApp.quickNoCodeHeading')}
       </div>
       <div className="text-gray-500 font-sans text-[12px] mb-4">
-      For quick no code integration, please check our <NavLink
+      {t('appSettingsMobileApp.quickNoCodePrefix')} <NavLink
           to={`/app/admin/apps/${appId}/settings?tab=Web+App`}
           className="text-blue-600 underline"
-        >Web app</NavLink> and <NavLink
+        >{t('appSettingsMobileApp.webAppLinkText')}</NavLink> {t('appSettingsMobileApp.and')} <NavLink
         to={`/app/admin/apps/${appId}/settings?tab=AI+Widget`}
         className="text-blue-600 underline"
-      >AI Widget</NavLink> sections. Our web app is responsive and you can try using it on your mobile devices before you commit to building a native app.
+      >{t('appSettingsMobileApp.aiWidgetLinkText')}</NavLink> {t('appSettingsMobileApp.quickNoCodeSuffix')}
       </div>
       <div className="max-w-[600px] w-full">
         <div className="font-bold font-sans text-[14px] mb-2">
@@ -56,18 +60,18 @@ export function MobileApp({
             >
               https://github.com/dappros/ethora-chat-component-rn
             </a>
-            <span className="font-sans text-sm leading-relaxed mb-4"> - Ethora Chat Component for React Native. Handy when you need to integrate chat or AI agent into your existing RN app.</span>
+            <span className="font-sans text-sm leading-relaxed mb-4"> - {t('appSettingsMobileApp.reactNativeComponentDesc')}</span>
           </li>
           <li>
-            <a 
-              href="https://github.com/dappros/ethora-app-react-native" 
-              target="_blank" 
+            <a
+              href="https://github.com/dappros/ethora-app-react-native"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-[#4a9a9a] hover:underline text-sm"
             >
               https://github.com/dappros/ethora-app-react-native
             </a>
-            <span className="font-sans text-sm leading-relaxed mb-4"> - a full app template. Handy when you don't have an app and prefer a ready solution.</span>
+            <span className="font-sans text-sm leading-relaxed mb-4"> - {t('appSettingsMobileApp.reactNativeTemplateDesc')}</span>
           </li>
         </ul>
 
@@ -84,7 +88,7 @@ export function MobileApp({
             >
               https://github.com/dappros/ethora-sdk-swift
             </a>
-            <span className="font-sans text-sm leading-relaxed mb-4"> - Swift SDK</span>
+            <span className="font-sans text-sm leading-relaxed mb-4"> - {t('appSettingsMobileApp.swiftSdkDesc')}</span>
           </li>
         </ul>
 
@@ -101,14 +105,14 @@ export function MobileApp({
             >
               https://github.com/dappros/ethora-sdk-kotlin
             </a>
-            <span className="font-sans text-sm leading-relaxed mb-4"> - Kotlin SDK</span>
+            <span className="font-sans text-sm leading-relaxed mb-4"> - {t('appSettingsMobileApp.kotlinSdkDesc')}</span>
           </li>
         </ul>
         <div className="font-bold font-sans text-[14px] mb-2 mt-2">
-          Push Notifications
+          {t('appSettingsMobileApp.pushNotificationsHeading')}
         </div>
         <p className="font-sans text-sm leading-relaxed mb-4">
-        Follow <a href="https://forum.ethora.com/topic/75-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this manual</a> to set up your Firebase account. Extract and upload your <strong>service-account.json</strong>. This will enable your users to receive push notifications for chat messages they missed while being offline.
+        {t('appSettingsMobileApp.followPrefix')} <a href="https://forum.ethora.com/topic/75-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{t('appSettingsMobileApp.thisManualLinkText')}</a> {t('appSettingsMobileApp.followMiddle')} <strong>service-account.json</strong>. {t('appSettingsMobileApp.followSuffix')}
         </p>
         <input
           type="file"
@@ -124,9 +128,9 @@ export function MobileApp({
           onClick={() => googleJsonRef.current?.click()}
         >
           <IconUpload stroke={primaryColor}></IconUpload>
-          <span className="ml-2">Upload</span>
+          <span className="ml-2">{t('appSettingsMobileApp.uploadButton')}</span>
         </button>
-        
+
       </div>
     </div>
   );

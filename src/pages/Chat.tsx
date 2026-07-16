@@ -9,6 +9,7 @@ import {
 } from '../actions';
 import { createChatConfig } from '../config/chatBootstrap';
 import { useIsMobileView } from '../hooks/useIsMobileView';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 
@@ -88,6 +89,10 @@ const MemoizedChat = React.memo(function ChatComponent({
   // Reactive: recomputes chatConfig when the viewport crosses the mobile
   // breakpoint so room-list paddings update on resize, not just at load.
   const isMobileView = useIsMobileView();
+  // App-wide UI language (Profile's LanguageModal, store/appStore.ts). Feeds
+  // createChatConfig's i18n.locale so switching language in Profile
+  // re-renders the chat-component's static captions live.
+  const uiLanguage = useAppStore((s) => s.uiLanguage);
 
   const ownerOverride = useMemo(() => {
     if (!ownerSession) return undefined;
@@ -116,6 +121,7 @@ const MemoizedChat = React.memo(function ChatComponent({
         app: config,
         chatToken: currentUser?.token || null,
         isMobileView,
+        uiLanguage,
         // Forwarding currentUser lets createChatConfig set userLogin from the
         // base-app User's xmpp creds when no owner override is active. This
         // is the load-bearing fix for the email-login path because the
@@ -132,6 +138,7 @@ const MemoizedChat = React.memo(function ChatComponent({
       currentUser?._id,
       ownerOverride,
       isMobileView,
+      uiLanguage,
     ]
   );
 
@@ -161,11 +168,14 @@ function ChatAppSwitcher({
   onSwitch: (appId: string | null) => void;
   switching: boolean;
 }) {
+  const { t } = useTranslation();
   const ownedApps = apps; // server already filters to the admin's own apps
   // Visible label for the "no override" option - "(base app)" makes it
   // obvious to the admin that this is their account-level identity, not
   // a shadow gateway tied to any particular owned app.
-  const baseLabel = currentApp ? `${currentApp.displayName} (base app)` : 'Base app';
+  const baseLabel = currentApp
+    ? `${currentApp.displayName} ${t('chat.baseAppSuffix')}`
+    : t('chat.baseApp');
 
   if (ownedApps.length === 0) {
     return null;
@@ -174,7 +184,9 @@ function ChatAppSwitcher({
   if (ownedApps.length === 1 && !chatAppId) {
     return (
       <div className="flex flex-col items-start text-sm font-sans">
-        <span className="text-gray-500 text-xs">Testing chats in</span>
+        <span className="text-gray-500 text-xs">
+          {t('chat.switcherLabel')}
+        </span>
         <span className="font-medium">{baseLabel}</span>
       </div>
     );
@@ -182,7 +194,9 @@ function ChatAppSwitcher({
 
   return (
     <div className="flex items-center gap-2 text-sm font-sans">
-      <label className="text-gray-500 text-xs whitespace-nowrap">Testing chats in</label>
+      <label className="text-gray-500 text-xs whitespace-nowrap">
+        {t('chat.switcherLabel')}
+      </label>
       <select
         value={chatAppId || ''}
         disabled={switching}
@@ -196,12 +210,17 @@ function ChatAppSwitcher({
           </option>
         ))}
       </select>
-      {switching && <span className="text-xs text-gray-500">Switching…</span>}
+      {switching && (
+        <span className="text-xs text-gray-500">
+          {t('chat.switching')}
+        </span>
+      )}
     </div>
   );
 }
 
 export default function ChatPage() {
+  const { t } = useTranslation();
   const config = useAppStore((s) => s.currentApp);
   // Use the dedicated ownedApps slot, not the paginated `apps` slot. The
   // latter only holds whichever page of AdminApps the admin last viewed
@@ -251,7 +270,7 @@ export default function ChatPage() {
         // without digging through dev tools.
         console.warn('[Chat] Failed to hydrate owner session, reverting to base app:', e);
         toast.error(
-          'Could not restore Chats context. Reverting to your base app. ' + formatOwnerSessionError(e)
+          t('chat.toastRestoreFailed') + formatOwnerSessionError(e)
         );
         actionSwitchChatApp(null).catch(() => {});
       })
@@ -289,7 +308,7 @@ export default function ChatPage() {
       // and xmppResponse (status + body from ejabberd's HTTP API) - so the
       // operator can pinpoint the failure without dev tools or grepping
       // API logs.
-      toast.error('Failed to switch app: ' + formatOwnerSessionError(e));
+      toast.error(t('chat.toastSwitchFailed') + formatOwnerSessionError(e));
     } finally {
       setSwitching(false);
     }
@@ -299,7 +318,7 @@ export default function ChatPage() {
     <div className="grid grid-rows-[auto,_1fr] gap-0 md:gap-4 h-full abc">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Chats
+          {t('chat.heading')}
         </div>
         {/* App Switcher: only meaningful for admins with owned apps. End
             users on a multi-tenant signup have no apps[] entries so the
@@ -333,15 +352,14 @@ export default function ChatPage() {
             if ((targetApp.defaultRooms?.length || 0) > 0) return null;
             return (
               <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
-                You are within your own App context, but it seems there are
-                no chats available yet. Go to{' '}
+                {t('chat.noChatsBanner.prefix')}
                 <NavLink
                   to={`/app/admin/apps/${chatAppId}/settings?tab=Chats`}
                   className="text-brand-500 underline"
                 >
-                  App Settings &rarr; Chats
-                </NavLink>{' '}
-                to create Pinned Chats, invite AI bots etc.
+                  {t('chat.noChatsBanner.linkText')}
+                </NavLink>
+                {t('chat.noChatsBanner.suffix')}
               </div>
             );
           }
@@ -350,20 +368,18 @@ export default function ChatPage() {
             // Variant 1: hosted demo, no owned apps yet.
             return (
               <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
-                You are testing the public chats in our demo base app.
-                Explore as an end user or{' '}
+                {t('chat.demoNoAppsBanner.prefix')}
                 <NavLink to="/app/admin/apps" className="text-brand-500 underline">
-                  create your own App
-                </NavLink>{' '}
-                where you will set up your own chats.
+                  {t('chat.demoNoAppsBanner.linkText')}
+                </NavLink>
+                {t('chat.demoNoAppsBanner.suffix')}
               </div>
             );
           }
           // Variant 2: hosted demo, has owned apps - point at the switcher.
           return (
             <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
-              You are testing the public chats in our demo base app. Use the
-              drop-down selector above to switch to your own Apps and chats.
+              {t('chat.demoHasAppsBanner')}
             </div>
           );
         })()}
@@ -392,7 +408,7 @@ export default function ChatPage() {
             from seeing inconsistent state. */}
         {chatAppId && ownerSession?.appId !== chatAppId ? (
           <div className="flex items-center justify-center min-h-[400px] text-sm text-gray-500 font-sans">
-            Switching app context…
+            {t('chat.switchingContext')}
           </div>
         ) : (
           <MemoizedChat

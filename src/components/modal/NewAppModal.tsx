@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
 import { useGoogleTranslateFix } from '../../hooks/useGoogleTranslateFix';
+import { useTranslation } from '../../i18n/useTranslation';
 // import { TextInput } from '../ui/TextInput';
 
 interface Props {
@@ -24,6 +25,7 @@ export function NewAppModal({ onClose, show }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const fixKey = useGoogleTranslateFix();
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -58,7 +60,7 @@ export function NewAppModal({ onClose, show }: Props) {
         // before we navigate away; previously 1500ms which felt like
         // dead time on top of an already-slow modal transition.
         setTimeout(() => {
-          toast('Application created successfully!');
+          toast(t('newAppModal.createSuccessToast'));
           setLoading(false);
           navigate(`/app/admin/apps/${app._id}/settings`, {
             state: { from: location.pathname + location.search },
@@ -70,7 +72,7 @@ export function NewAppModal({ onClose, show }: Props) {
         }, 400);
       })
       .catch(() => {
-        toast.error('Error creating application.');
+        toast.error(t('newAppModal.createErrorToast'));
         clearInterval(interval);
         setLoading(false);
       });
@@ -106,11 +108,11 @@ export function NewAppModal({ onClose, show }: Props) {
         {loading ? (
           <>
             <div className="font-varela text-[18px] md:text-[24px] text-center mb-4 text-brand-500">
-              Application creation in progress!
+              {t('newAppModal.creatingTitle')}
             </div>
             <p className="font-sans text-base text-left mb-4">
-              Your app is being deployed. Please wait, this might take up to
-              10-15 seconds{dots}
+              {t('newAppModal.creatingMessage')}
+              {dots}
             </p>
 
             <div className="flex flex-col items-center justify-center">
@@ -133,18 +135,18 @@ export function NewAppModal({ onClose, show }: Props) {
         ) : (
           <>
             <div className="font-varela text-[18px] md:text-[24px] text-center mb-8">
-              Get Started with Your New App
+              {t('newAppModal.title')}
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
                 <input
                   type="text"
-                  placeholder="App Name"
+                  placeholder={t('newAppModal.namePlaceholder')}
                   {...register('appName', {
-                    required: 'App name is required',
+                    required: t('newAppModal.nameRequired'),
                     minLength: {
                       value: 3,
-                      message: 'App name must be at least 3 characters',
+                      message: t('newAppModal.nameMinLength'),
                     },
                   })}
                   className={`rounded-2xl bg-gray-100 py-3 px-6 w-full outline-none ${
@@ -163,7 +165,7 @@ export function NewAppModal({ onClose, show }: Props) {
                 className="w-full py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
                 type="submit"
               >
-                Continue
+                {t('newAppModal.continueButton')}
               </button>
               <div className="text-center mt-3">
                 <button
@@ -171,7 +173,7 @@ export function NewAppModal({ onClose, show }: Props) {
                   className="text-sm text-gray-500 hover:text-gray-700 underline"
                   onClick={onClose}
                 >
-                  Cancel
+                  {t('newAppModal.cancelButton')}
                 </button>
               </div>
             </form>

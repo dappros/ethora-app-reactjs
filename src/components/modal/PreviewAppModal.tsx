@@ -11,6 +11,7 @@ import { actionCreateApp } from '../../actions';
 import backgroundImage from '../../assets/tutorial/background.png';
 import welcomeImage from '../../assets/tutorial/welcome.png';
 import { useGoogleTranslateFix } from '../../hooks/useGoogleTranslateFix';
+import { useTranslation } from '../../i18n/useTranslation';
 // import { TextInput } from '../ui/TextInput';
 
 interface Props {
@@ -27,6 +28,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const fixKey = useGoogleTranslateFix();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -60,7 +62,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
         setProgress(100);
 
         setTimeout(() => {
-          toast('Application created successfully!');
+          toast(t('previewAppModal.toastCreatedSuccess'));
           setLoading(false);
           navigate(`/app/admin/apps/${app._id}/settings`, {
             state: { from: location.pathname + location.search },
@@ -72,7 +74,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
         }, 1500);
       })
       .catch(() => {
-        toast.error('Error creating application.');
+        toast.error(t('previewAppModal.toastCreateError'));
         clearInterval(interval);
         setLoading(false);
       });
@@ -118,19 +120,28 @@ export function PreviewAppModal({ onClose, show }: Props) {
 
         {step === 0 && (
           <div className="flex md:flex-row flex-col items-center justify-center gap-4 pt-4">
-            <img src={welcomeImage} alt="Welcome" className="rounded-t-2xl w-full md:w-[60%]" />
+            <img
+              src={welcomeImage}
+              alt={t('previewAppModal.welcomeImageAlt')}
+              className="rounded-t-2xl w-full md:w-[60%]"
+            />
             <div className="p-4 md:pl-0">
-              <p className="text-2xl font-bold pt-4">Welcome to Ethora</p>
+              <p className="text-2xl font-bold pt-4">{t('previewAppModal.welcomeTitle')}</p>
               <div className="py-4">
-              Thank you for joining! This is your admin panel. Here you can <strong>create Apps </strong> 
-              for your projects. Also, you can manage various features such as <strong>Chats</strong> and <strong>AI bots</strong>.
+                {t('previewAppModal.welcomeIntroPart1')}
+                <strong>{t('previewAppModal.welcomeIntroCreateApps')}</strong>
+                {t('previewAppModal.welcomeIntroPart2')}
+                <strong>{t('previewAppModal.welcomeIntroChats')}</strong>
+                {t('previewAppModal.welcomeIntroAnd')}
+                <strong>{t('previewAppModal.welcomeIntroAiBots')}</strong>
+                {t('previewAppModal.welcomeIntroEnd')}
               </div>
               <div className="flex justify-start">
                 <button
                   onClick={() => setStep(1)}
                   className="flex items-center justify-center py-[8px] px-6 bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela"
                 >
-                  <span>Let's start</span>
+                  <span>{t('previewAppModal.letsStart')}</span>
                 </button>
               </div>
             </div>
@@ -140,21 +151,21 @@ export function PreviewAppModal({ onClose, show }: Props) {
         {step === 1 && (
           <>
             <div className="font-varela text-[18px] md:text-[24px] text-center mb-8">
-              Create your first App!
+              {t('previewAppModal.createFirstAppTitle')}
             </div>
             <p className="text-start pb-6 px-2 text-gray-600">
-              To handle project contexts, you can create multiple Apps. What would be the name for your first App?
+              {t('previewAppModal.createFirstAppDescription')}
             </p>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
                 <input
                   type="text"
-                  placeholder="App Name"
+                  placeholder={t('previewAppModal.appNamePlaceholder')}
                   {...register('appName', {
-                    required: 'App name is required',
+                    required: t('previewAppModal.appNameRequired'),
                     minLength: {
                       value: 3,
-                      message: 'App name must be at least 3 characters',
+                      message: t('previewAppModal.appNameMinLength'),
                     },
                   })}
                   className={`rounded-2xl bg-gray-100 py-3 px-6 w-full outline-none ${
@@ -180,7 +191,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
                   className="w-full py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
                   type="submit"
                 >
-                  Continue
+                  {t('previewAppModal.continue')}
                 </button>
               </div>
             </form>
@@ -190,11 +201,11 @@ export function PreviewAppModal({ onClose, show }: Props) {
         {step == 2 && (
           <>
             <div className="font-varela text-[18px] md:text-[24px] text-center mb-4 text-brand-500">
-              Application creation in progress!
+              {t('previewAppModal.creationInProgressTitle')}
             </div>
             <p className="font-sans text-base text-left mb-4">
-              Your app is being deployed. Please wait, this might take up to
-              10-15 seconds{dots}
+              {t('previewAppModal.deployingMessage')}
+              {dots}
             </p>
 
             <div className="flex flex-col items-center justify-center">

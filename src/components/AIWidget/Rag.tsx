@@ -1,31 +1,30 @@
 import { ReactElement, RefObject } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface RagProps {
   ragRef: RefObject<HTMLDivElement>;
 }
 
 export const Rag = ({ ragRef }: RagProps): ReactElement => {
+  const { t } = useTranslation();
   return (
     <>
       <div
         ref={ragRef}
         className="font-semibold font-sans text-[16px] pb-4 pt-8 text-blue-600"
       >
-        RAG (Retrieval Augmented Generation)
+        {t('aiWidgetRag.title')}
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600">
-        This feature allows you to augment your LLM-powered AI agent chat bot
-        with your own context data. Just index your website or upload documents
-        that provide additional information e.g. your products and services.
+        {t('aiWidgetRag.paragraph1')}
       </p>
       <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600">
-        Your data will be converted into vector space embeddings used by your AI
-        agent as its “external memory” when answering users queries.
+        {t('aiWidgetRag.paragraph2')}
       </p>
       <p className="font-sans text-sm pb-4 text-blue-600 items-center gap-1 mb-8 inline-block">
-        This allows you to{' '}
-        <strong>create your own project-specific AI agents</strong> without
-        being limited by the prompt context window size.
+        {t('aiWidgetRag.paragraph3Prefix')}{' '}
+        <strong>{t('aiWidgetRag.paragraph3Bold')}</strong>{' '}
+        {t('aiWidgetRag.paragraph3Suffix')}
       </p>
     </>
   );

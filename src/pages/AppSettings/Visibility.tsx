@@ -1,5 +1,6 @@
 import { RadioGroup } from '@headlessui/react';
 import { RadioButton } from '../../components/RadioButton';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   defaultAccessAssetsOpen: boolean;
@@ -18,27 +19,23 @@ export function Visibility({
   usersCanFree,
   setUsersCanFree,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="">
       <div className="font-sans text-sm">
-        These are the default permissions to be applied to all Users created in
-        your App. 
+        {t('appSettingsVisibility.description1')}
       </div>
       <div className="font-sans text-sm mb-8">
-        Keep the recommended settings if you are not sure and you can come back
-        to this later.
+        {t('appSettingsVisibility.description2')}
       </div>
       <div className="text-base font-semibold font-sans mb-2">
-        Profiles Visibility
+        {t('appSettingsVisibility.profilesVisibilityHeading')}
       </div>
       <p className="text-gray-500 text-sm font-sans">
-        By default, User profiles can be viewed by any other Users and bots
-        after they follow a correct link, a QR code or tap on it in the Chat. 
+        {t('appSettingsVisibility.profilesVisibilityDesc1')}
       </p>
       <p className="text-gray-500 text-sm font-sans mb-4">
-        For tighter security and business logic driven sharing, you can disable
-        this. Your Users will still be able to share their profiles with others,
-        but they will have to do it explicitly via a special sharing link. 
+        {t('appSettingsVisibility.profilesVisibilityDesc2')}
       </p>
 
       <RadioGroup
@@ -49,35 +46,29 @@ export function Visibility({
         <RadioButton
           className="mb-4"
           value={true}
-          label="User Profiles can be viewed by others"
+          label={t('appSettingsVisibility.profilesViewableLabel')}
         />
         <RadioButton
           className="mb-2"
           value={false}
-          label="User Profiles need to be explicitly shared by the User for others to see"
+          label={t('appSettingsVisibility.profilesSharedExplicitlyLabel')}
         />
       </RadioGroup>
 
       <div className="text-base font-semibold font-sans mb-2">
-        Assets Visibility
+        {t('appSettingsVisibility.assetsVisibilityHeading')}
       </div>
       <div className="text-gray-500 text-sm font-sans">
-        Assets are Documents, Files, Media, Tokens (depending on what your App
-        supports), stored within Users wallets.
+        {t('appSettingsVisibility.assetsVisibilityDesc1')}
       </div>
       <div className="text-gray-500 text-sm font-sans">
-        Depending on your App settings, Users either upload/create Assets
-        themselves or these are managed by your own business logic via API.
+        {t('appSettingsVisibility.assetsVisibilityDesc2')}
       </div>
       <div className="text-gray-500 text-sm font-sans">
-        By default, other Users can see one’s Assets in one’s Profile. 
+        {t('appSettingsVisibility.assetsVisibilityDesc3')}
       </div>
       <div className="text-gray-500 text-sm font-sans mb-4">
-        Alternative, more restricted setting, is where Assets are hidden.
-        Profile will only display items such as name, photo, description, but no
-        Assets. Users will still be able to share their Assets with others, but
-        they will have to do it explicitly via a special sharing link,
-        individually for each Asset.
+        {t('appSettingsVisibility.assetsVisibilityDesc4')}
       </div>
       <RadioGroup
         value={defaultAccessAssetsOpen}
@@ -87,29 +78,23 @@ export function Visibility({
         <RadioButton
           className="mb-4"
           value={true}
-          label="All User’s Assets can be viewed by all who can view User’s Profile"
+          label={t('appSettingsVisibility.assetsViewableLabel')}
         />
         <RadioButton
           className="mb-2"
           value={false}
-          label="User’s Assets are hidden. User has to explicitly share each Asset
-            individually via a sharing link for others to see."
+          label={t('appSettingsVisibility.assetsHiddenLabel')}
         />
       </RadioGroup>
 
       <div className="text-base font-semibold font-sans mb-2">
-        App-locked accounts
+        {t('appSettingsVisibility.appLockedAccountsHeading')}
       </div>
       <div className="text-gray-500 text-sm font-sans">
-        By default, your User accounts are App locked. This means that your
-        Users can NOT sign on into other Apps within your Organization or any
-        other Apps within the Server.
+        {t('appSettingsVisibility.appLockedDesc1')}
       </div>
       <div className="text-gray-500 text-sm font-sans mb-4">
-        You may switch this setting to Unlocked if you want your Users to have
-        self-sovereign accounts which makes them free to login into other Apps
-        in the Server, discover their content and fully control their own
-        account.
+        {t('appSettingsVisibility.appLockedDesc2')}
       </div>
       <RadioGroup
         value={usersCanFree}
@@ -119,12 +104,12 @@ export function Visibility({
         <RadioButton
           className="mb-4"
           value={true}
-          label="All User accounts are tied to your App"
+          label={t('appSettingsVisibility.accountsTiedLabel')}
         />
         <RadioButton
           className="mb-2"
           value={false}
-          label="User accounts are unlocked (self-sovereign)"
+          label={t('appSettingsVisibility.accountsUnlockedLabel')}
         />
       </RadioGroup>
     </div>

@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../i18n/useTranslation';
 import { ModelApp } from '../models';
 import { AppActionsMenu } from './AppActionsMenu';
 import { IconArrowRight } from './Icons/IconArrowRight';
@@ -27,6 +28,7 @@ function initialsFromName(name: string): string {
 
 export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const numberFormatter = new Intl.NumberFormat('en-US');
   const onClick = () => {
     navigate(`/app/admin/apps/${app._id}/settings`, {
@@ -48,7 +50,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           onClick={onClick}
           className="w-[120px] h-[120px] rounded-xl flex justify-center bg-gray-100 items-center bg-contain bg-no-repeat bg-center cursor-pointer p-3"
         >
-          <img src={app.logoImage} alt="Logo" className="w-full h-full object-contain rounded-md" />
+          <img src={app.logoImage} alt={t('applicationPreview.logoAlt')} className="w-full h-full object-contain rounded-md" />
         </div>
       );
     }
@@ -98,7 +100,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
     <div className={containerClass}>
       {isArchived && (
         <div className="md:col-span-2 -mt-2 mb-2 text-xs text-gray-500 font-varela uppercase tracking-wide">
-          Archived
+          {t('applicationPreview.archivedBadge')}
         </div>
       )}
       <div className="flex justify-center items-center">{renderLogo()}</div>
@@ -113,7 +115,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
               {app.displayName}
             </div>
             <div className="font-sans text-[12px] text-gray-500">
-              Created {DateTime.fromISO(app.createdAt).toFormat('dd LLL yyyy')}
+              {t('applicationPreview.createdPrefix')} {DateTime.fromISO(app.createdAt).toFormat('dd LLL yyyy')}
             </div>
           </div>
           <div className="hidden md:flex items-ceter justify-center">
@@ -129,7 +131,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
               className="ml-2 flex justify-center hover:bg-brand-hover items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
             >
               <span className="text-brand-500 font-varela text-sm mr-2">
-                {app.status === 'archived' ? 'Archived' : 'Details'}
+                {app.status === 'archived' ? t('applicationPreview.archived') : t('applicationPreview.details')}
               </span>
               <IconArrowRight stroke={primaryColor} />
             </button>
@@ -139,9 +141,9 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
         <div className="grid grid-cols-2 gap-x-[33px] gap-y-4 grid-rows-3 md:grid-cols-3 md:grid-rows-2 lg:grid-cols-7 lg:grid-rows-1">
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">Users</span>
+              <span className="mr-2">{t('applicationPreview.stats.users')}</span>
               <Tooltip
-                title="Users registered (total vs 24h)"
+                title={t('applicationPreview.stats.usersTooltip')}
                 className="relative"
               >
                 <IconInfo />
@@ -159,9 +161,9 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">Sessions</span>
+              <span className="mr-2">{t('applicationPreview.stats.sessions')}</span>
               <Tooltip
-                title="User sessions (total vs 24h)"
+                title={t('applicationPreview.stats.sessionsTooltip')}
                 className="relative"
               >
                 <IconInfo />
@@ -179,9 +181,9 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">Chats</span>
+              <span className="mr-2">{t('applicationPreview.stats.chats')}</span>
               <Tooltip
-                title="Chat messages (total vs 24h)"
+                title={t('applicationPreview.stats.chatsTooltip')}
                 className="relative"
               >
                 <IconInfo />
@@ -199,8 +201,8 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">API</span>
-              <Tooltip title="API calls (total vs 24h)" className="relative">
+              <span className="mr-2">{t('applicationPreview.stats.api')}</span>
+              <Tooltip title={t('applicationPreview.stats.apiTooltip')} className="relative">
                 <IconInfo />
               </Tooltip>
             </div>
@@ -217,8 +219,8 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
 
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">AI</span>
-              <Tooltip title="API calls (total vs 24h)" className="relative">
+              <span className="mr-2">{t('applicationPreview.stats.ai')}</span>
+              <Tooltip title={t('applicationPreview.stats.apiTooltip')} className="relative">
                 <IconInfo />
               </Tooltip>
             </div>
@@ -235,8 +237,8 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
 
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">Files</span>
-              <Tooltip title="Files (total vs 24h)" className="relative">
+              <span className="mr-2">{t('applicationPreview.stats.files')}</span>
+              <Tooltip title={t('applicationPreview.stats.filesTooltip')} className="relative">
                 <IconInfo />
               </Tooltip>
             </div>
@@ -252,9 +254,9 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
-              <span className="mr-2">Web3</span>
+              <span className="mr-2">{t('applicationPreview.stats.web3')}</span>
               <Tooltip
-                title="Blockchain transactions (total vs 24h)"
+                title={t('applicationPreview.stats.web3Tooltip')}
                 className="relative"
               >
                 <IconInfo />
@@ -280,7 +282,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
             className="flex justify-center items-center p-2 rounded-xl w-full h-[40px] border border-brand-500"
           >
             <span className="text-brand-500 font-varela text-sm mr-2">
-              Details
+              {t('applicationPreview.details')}
             </span>
             <IconArrowRight stroke={primaryColor} />
           </button>

@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { FC } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 
 interface DeleteAppModalProps {
@@ -15,6 +16,8 @@ const DeleteAppModal: FC<DeleteAppModalProps> = ({
   handleDelete,
   appName,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       className="fixed inset-0 z-50 flex justify-center items-center bg-black/50 transition duration-300"
@@ -30,7 +33,7 @@ const DeleteAppModal: FC<DeleteAppModalProps> = ({
         </button>
 
         <div className="font-varela text-[18px] md:text-[20px] text-center mt-4 my-10">
-          {`Are you sure? This irreversibly deletes ${appName} and all of its contents`}
+          {t('deleteAppModal.confirm').replace('{appName}', appName)}
         </div>
 
         <div className="flex gap-4">
@@ -38,14 +41,14 @@ const DeleteAppModal: FC<DeleteAppModalProps> = ({
             className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
             onClick={onClose}
           >
-            Cancel
+            {t('deleteAppModal.cancel')}
           </button>
           <button
             className="w-full py-3 hover:bg-red-300 p-2 border bg-red-400 border-red-800 rounded-xl text-white"
             type="submit"
             onClick={handleDelete}
           >
-            Delete
+            {t('deleteAppModal.delete')}
           </button>
         </div>
       </DialogPanel>

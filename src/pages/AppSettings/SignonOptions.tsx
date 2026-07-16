@@ -1,6 +1,7 @@
 import { Checkbox, Field, Label } from '@headlessui/react';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   enableEmail: boolean;
@@ -29,6 +30,7 @@ export function SignonOptions({
   setEnableMetamask,
   firebaseWebConfigString,
 }: Props) {
+  const { t } = useTranslation();
   const isEmptyFirebaseConfig = !firebaseWebConfigString || firebaseWebConfigString.trim() === '';
 
   const WarningMessage = ({ text }: { text: string }) => {
@@ -56,14 +58,13 @@ export function SignonOptions({
   return (
     <div className="">
       <p className="font-sans text-sm mb-8">
-        Choose which sign on options to enable in your App. This controls how
-        your Users create new accounts and login.
+        {t('appSettingsSignonOptions.description')}
       </p>
-      <p className="font-sans text-[24px] font-medium mb-2">Standard login</p>
+      <p className="font-sans text-[24px] font-medium mb-2">
+        {t('appSettingsSignonOptions.standardLoginHeading')}
+      </p>
       <p className="font-sans text-[12px] text-gray-500 mb-4">
-        User is required to create an account with their e-mail and memorize the
-        password. They will need to confirm their e-mail address by clicking a
-        link. E-mails from the platform can be customized with your branding.
+        {t('appSettingsSignonOptions.standardLoginDescription')}
       </p>
       {/* checkbox */}
       <Field className="flex items-center cursor-pointer mb-8">
@@ -75,14 +76,14 @@ export function SignonOptions({
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">
-          Email + Password
+          {t('appSettingsSignonOptions.emailPasswordLabel')}
         </Label>
       </Field>
-      <p className="font-sans text-[24px] font-medium mb-2">Social Sign-On</p>
+      <p className="font-sans text-[24px] font-medium mb-2">
+        {t('appSettingsSignonOptions.socialSignOnHeading')}
+      </p>
       <p className="font-sans text-[12px] text-gray-500 mb-4">
-        Allows your users to sign on into your app with popular platform
-        accounts. It will still create an account but the User won’t have to
-        memorize their password.
+        {t('appSettingsSignonOptions.socialSignOnDescription')}
       </p>
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
@@ -92,9 +93,11 @@ export function SignonOptions({
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Google</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsSignonOptions.googleLabel')}
+        </Label>
       </Field>
-      <WarningMessage text="Make sure to add your App Firebase settings for this to work." />
+      <WarningMessage text={t('appSettingsSignonOptions.firebaseWarning')} />
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
           className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
@@ -103,9 +106,11 @@ export function SignonOptions({
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Apple</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsSignonOptions.appleLabel')}
+        </Label>
       </Field>
-      <WarningMessage text="Make sure to add your App Firebase settings for this to work." />
+      <WarningMessage text={t('appSettingsSignonOptions.firebaseWarning')} />
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
           className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
@@ -114,9 +119,11 @@ export function SignonOptions({
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Facebook</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsSignonOptions.facebookLabel')}
+        </Label>
       </Field>
-      <WarningMessage text="Make sure to add your App Firebase settings for this to work." />
+      <WarningMessage text={t('appSettingsSignonOptions.firebaseWarning')} />
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
           className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
@@ -125,28 +132,23 @@ export function SignonOptions({
         >
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
-        <Label className="cursor-pointer font-sans text-sm">Metamask</Label>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsSignonOptions.metamaskLabel')}
+        </Label>
       </Field>
       <p className="font-sans text-[12px] text-gray-500 mb-8">
-        Web3 projects will benefit from signing in with their existing crypto
-        wallet. 
+        {t('appSettingsSignonOptions.web3Description')}
       </p>
       <p className="font-sans text-[24px] font-medium mb-2">
-        Custom backend integration
+        {t('appSettingsSignonOptions.customBackendHeading')}
       </p>
       <p className="font-sans text-[12px] text-gray-500 mb-4">
-        Some projects prefer to create accounts for Users programmatically,
-        connecting their existing legacy software with Ethora. In this case,
-        your legacy software will control accounts via our Users API (or a
-        custom endpoint) and your Users will either (a) login via e-mail +
-        password route, (b) login via a custom login screen, or (c) be logged on
-        automatically as part of an embedded experience. See Documentation and
-        use Forum or contact us for help with this option.
+        {t('appSettingsSignonOptions.customBackendDescription')}
       </p>
       <Field className="flex items-center cursor-pointer mb-2" disabled>
         <Checkbox className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 data-[disabled]:border-gray-300 flex justify-center items-center"></Checkbox>
         <Label className="cursor-pointer font-sans text-sm data-[disabled]:text-gray-300">
-          API integration with your backend
+          {t('appSettingsSignonOptions.apiIntegrationLabel')}
         </Label>
       </Field>
     </div>

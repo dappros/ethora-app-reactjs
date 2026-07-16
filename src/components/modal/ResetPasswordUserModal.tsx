@@ -3,6 +3,7 @@ import cn from 'classnames';
 import { IconClose } from '../Icons/IconClose';
 
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { useTranslation } from '../../i18n/useTranslation';
 import './ResetPasswordUserModal.scss';
 
 interface Props {
@@ -18,13 +19,14 @@ type Inputs = {
 export function ResetPasswordUserModal({ onClose }: Props) {
   // @ts-ignore
   const { register, handleSubmit } = useForm<Inputs>();
+  const { t } = useTranslation();
 
   const onSubmit: SubmitHandler<Inputs> = () => {};
 
   return (
     <Dialog className="reset-password-user-modal" open={true} onClose={onClose}>
       <DialogPanel className="inner">
-        <div className="title">Reset password</div>
+        <div className="title">{t('resetPasswordUserModal.title')}</div>
         <form onSubmit={handleSubmit(onSubmit)} action="">
           <div className="form">
             {/* <TextInput
@@ -48,10 +50,10 @@ export function ResetPasswordUserModal({ onClose }: Props) {
           </div>
           <div className="buttons">
             <button className="gen-secondary-btn mbc-16" onClick={onClose}>
-              Cancel
+              {t('resetPasswordUserModal.cancelButton')}
             </button>
             <button onClick={() => {}} className={cn('gen-primary-btn mbc-16')}>
-              Continue
+              {t('resetPasswordUserModal.continueButton')}
             </button>
           </div>
         </form>

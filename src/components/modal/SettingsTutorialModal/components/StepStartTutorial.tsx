@@ -1,28 +1,32 @@
 import classNames from 'classnames';
 import { ReactElement } from 'react';
-import { stepsStartView } from '../DataTutorial';
+import { getStepsStartView } from '../DataTutorial';
 import { Step } from '../typeTutorial';
+import { useTranslation } from '../../../../i18n/useTranslation';
 
 export const StepStartTutorial = ({
   onSelect,
 }: {
   onSelect: (step: Step) => void;
 }): ReactElement => {
+  const { t } = useTranslation();
+  const stepsStartView = getStepsStartView(t);
+
   return (
     <div>
       <p className='text-2xl font-bold pt-4 pb-2'>
-        Choose Your Path
+        {t('stepStartTutorial.heading')}
       </p>
       <p className='text-sm text-gray-500 pb-4'>
-        Select one of the three approaches to continue with your personalized experience.
+        {t('stepStartTutorial.subheading')}
       </p>
       <div className='flex md:flex-row flex-col gap-6 items-center justify-center'>
       {stepsStartView.map(
-        ({ title, description, icon }, index) => (
+        ({ step, title, description, icon }, index) => (
           <div className="flex md:flex-col flex-row md:gap-4 gap-8 items-center justify-center">
             <button
               key={`${title}-${index}`}
-              onClick={() => onSelect(title as Step)}
+              onClick={() => onSelect(step)}
               className={classNames(
                 'group relative overflow-hidden rounded-lg border-2 transition-all duration-300 p-0',
                 'hover:scale-105 hover:shadow-lg'

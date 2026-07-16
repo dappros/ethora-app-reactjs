@@ -1,6 +1,7 @@
 import {FC} from "react";
 import {IconDownload} from "../../Icons/IconDownload.tsx";
 import {useAppStore} from "../../../store/useAppStore.ts";
+import {useTranslation} from "../../../i18n/useTranslation";
 
 interface CsvButtonProps {
   onClick: () => void;
@@ -8,6 +9,7 @@ interface CsvButtonProps {
 
 const CsvButton: FC<CsvButtonProps> = ({onClick}) => {
   const currentApp = useAppStore((s) => s.currentApp);
+  const { t } = useTranslation();
 
   return (
       <button
@@ -16,7 +18,7 @@ const CsvButton: FC<CsvButtonProps> = ({onClick}) => {
       >
         <IconDownload stroke={(currentApp && currentApp.primaryColor) || "#0052CD"}/>
         <span className="pl-3">
-          Export CSV
+          {t('csvButton.exportCsv')}
         </span>
       </button>
   );

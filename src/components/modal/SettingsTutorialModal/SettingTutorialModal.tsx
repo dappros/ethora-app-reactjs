@@ -12,6 +12,7 @@ import {
 } from './DataTutorial';
 import { Step } from './typeTutorial';
 import { DemoComponentForm } from './components/DemoComponentForm';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 interface SettingTutorialModalProps {
   show: boolean;
@@ -27,8 +28,9 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
   const [selectedQuestionId] = useState<string | undefined>();
   const [animate, setAnimate] = useState(false);
   const { appId } = useParams();
-  const questionsChat = getQuestionsChat(appId);
-  const questionsAi = getQuestionsAi(appId);
+  const { t } = useTranslation();
+  const questionsChat = getQuestionsChat(t, appId);
+  const questionsAi = getQuestionsAi(t, appId);
 
   const handleChangeStep = (next: Step) => {
     setAnimate(true);
@@ -72,8 +74,8 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       case 'ChatList':
         return (
           <ListQuestion
-            title="Chat"
-            subtitle="Build or integrate instant messaging experience."
+            title={t('settingTutorialModal.chatList.title')}
+            subtitle={t('settingTutorialModal.chatList.subtitle')}
             questions={questionsChat}
             onClose={onClose}
             goBack={goBack}
@@ -83,8 +85,8 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
       case 'AIList':
         return (
           <ListQuestion
-            title="AI"
-            subtitle="Deploy AI agent for your visitors or your team."
+            title={t('settingTutorialModal.aiList.title')}
+            subtitle={t('settingTutorialModal.aiList.subtitle')}
             questions={questionsAi}
             onClose={onClose}
             goBack={goBack}

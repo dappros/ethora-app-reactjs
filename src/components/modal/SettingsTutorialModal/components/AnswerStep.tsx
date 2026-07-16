@@ -2,6 +2,7 @@ import { Rating } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
 import { StepLayout } from '.';
 import { QuestionsType } from '../typeTutorial';
+import { useTranslation } from '../../../../i18n/useTranslation';
 
 interface AnswerStepProps {
   questions: QuestionsType;
@@ -14,6 +15,7 @@ export const AnswerStep = ({
   answer,
   setQuestionStep,
 }: AnswerStepProps): ReactElement => {
+  const { t } = useTranslation();
   const filteredAnswer = useMemo(() => {
     return questions.filter((question) => question.id === answer)[0];
   }, [answer, questions]);
@@ -33,34 +35,34 @@ export const AnswerStep = ({
       </div>
       <div className="flex flex-col items-start gap-2 pt-4 pl-2">
         <div className="py-2">
-          <strong>Answer:</strong> {filteredAnswer.answer.description[0]}
+          <strong>{t('answerStep.answerLabel')}</strong> {filteredAnswer.answer.description[0]}
         </div>
         {filteredAnswer.answer.images && (
           <img
             src={filteredAnswer.answer.images[0]}
-            alt="Demo animation"
+            alt={t('answerStep.imageAlt')}
             className="w-full"
           />
         )}
         <div className="py-2">
-          <strong>Answer:</strong> {filteredAnswer.answer.description[1]}
+          <strong>{t('answerStep.answerLabel')}</strong> {filteredAnswer.answer.description[1]}
         </div>
         {filteredAnswer.answer.images && (
           <img
             src={filteredAnswer.answer.images[1]}
-            alt="Demo animation"
+            alt={t('answerStep.imageAlt')}
             className="w-full"
           />
         )}
         {filteredAnswer.answer.time && (
           <div>
-            <strong>Time: </strong>
+            <strong>{t('answerStep.timeLabel')}</strong>
             {filteredAnswer.answer.time}
           </div>
         )}
         {filteredAnswer.answer.complexity && (
           <div className="flex items-center gap-2">
-            <strong>Complexity: </strong>
+            <strong>{t('answerStep.complexityLabel')}</strong>
             <Rating
               name="read-only"
               value={filteredAnswer.answer.complexity}

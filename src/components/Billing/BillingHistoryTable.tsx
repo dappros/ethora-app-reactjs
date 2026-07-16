@@ -1,4 +1,5 @@
 import { ReactElement } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface BillingHistoryTableProps {
   history: Record<string, string>[];
@@ -8,15 +9,24 @@ export const BillingHistoryTable = (
   props: BillingHistoryTableProps
 ): ReactElement => {
   const { history } = props;
+  const { t } = useTranslation();
 
   return (
     <table className="w-full overflow-x-auto scrollbar-hide">
       <thead>
         <tr>
-          <th className="text-sm text-gray-600 text-left">Date</th>
-          <th className="text-sm text-gray-600 text-center">Amount</th>
-          <th className="text-sm text-gray-600 text-center">Status</th>
-          <th className="text-sm text-gray-600 text-center">Invoice</th>
+          <th className="text-sm text-gray-600 text-left">
+            {t('billingHistoryTable.date')}
+          </th>
+          <th className="text-sm text-gray-600 text-center">
+            {t('billingHistoryTable.amount')}
+          </th>
+          <th className="text-sm text-gray-600 text-center">
+            {t('billingHistoryTable.status')}
+          </th>
+          <th className="text-sm text-gray-600 text-center">
+            {t('billingHistoryTable.invoice')}
+          </th>
         </tr>
       </thead>
       <tbody>

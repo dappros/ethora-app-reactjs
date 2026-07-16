@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { httpPostForgotPassword } from '../../../../http';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 
@@ -13,6 +14,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
   const queryParams = new URLSearchParams(location.search);
   const email = queryParams.get('email');
   const config = useAppStore((s) => s.currentApp);
+  const { t } = useTranslation();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timer, setTimer] = useState(60);
@@ -74,7 +76,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
           color: '#141414',
         }}
       >
-        Check your email address
+        {t('authForgetPasswordSecondStep.title')}
       </Typography>
       <Typography
         sx={{
@@ -84,7 +86,8 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
           color: '#8C8C8C',
         }}
       >
-        We’ve sent an email to {email ? email : 'your email'}
+        {t('authForgetPasswordSecondStep.sentEmailPrefix')}{' '}
+        {email ? email : t('authForgetPasswordSecondStep.yourEmailFallback')}
       </Typography>
       <Box component="ul" sx={{ paddingLeft: '20px', margin: 0 }}>
         <Typography
@@ -97,8 +100,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             marginBottom: '8px',
           }}
         >
-          Just click on the link in the email to continue the registration
-          process.
+          {t('authForgetPasswordSecondStep.instructionClickLink')}
         </Typography>
         <Typography
           component="li"
@@ -109,7 +111,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             color: '#141414',
           }}
         >
-          If you don’t see it, check your spam folder.
+          {t('authForgetPasswordSecondStep.instructionCheckSpam')}
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -122,7 +124,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             width: '100%',
           }}
         >
-          Still can’t find the email?
+          {t('authForgetPasswordSecondStep.stillCantFind')}
         </Typography>
         <CustomButton
           fullWidth
@@ -136,7 +138,9 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             color: isSubmitting ? '#e6e1e1' : 'white',
           }}
         >
-          {isSubmitting ? `Resend Email in ${timer}s` : 'Resend Email'}
+          {isSubmitting
+            ? `${t('authForgetPasswordSecondStep.resendIn')} ${timer}s`
+            : t('authForgetPasswordSecondStep.resendEmail')}
         </CustomButton>
       </Box>
     </Box>

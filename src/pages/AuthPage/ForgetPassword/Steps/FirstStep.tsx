@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import CustomInput from '../../../../components/input/Input';
 import { httpPostForgotPassword } from '../../../../http';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 
@@ -19,6 +20,7 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
   const config = useAppStore((s) => s.currentApp);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const {
     register,
@@ -63,19 +65,18 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
             color: '#8C8C8C',
           }}
         >
-          Please, enter your email, and we will send you a link to reset your
-          password.
+          {t('authForgetPasswordFirstStep.description')}
         </Typography>
         <CustomInput
           fullWidth
-          placeholder="Email"
+          placeholder={t('authForgetPasswordFirstStep.emailPlaceholder')}
           id="email"
           type="email"
           {...register('email', {
-            required: 'Email is required',
+            required: t('authForgetPasswordFirstStep.emailRequired'),
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address',
+              message: t('authForgetPasswordFirstStep.emailInvalid'),
             },
           })}
           error={Boolean(errors.email)}
@@ -94,7 +95,7 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
               : '#0052CD',
           }}
         >
-          Send Email
+          {t('authForgetPasswordFirstStep.submit')}
         </CustomButton>
       </Box>
     </Box>

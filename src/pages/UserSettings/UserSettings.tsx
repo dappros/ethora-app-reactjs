@@ -7,6 +7,7 @@ import { actionLogout } from '../../actions';
 import TabApp from '../../components/TabApp';
 import { logLogout } from '../../hooks/withTracking.tsx';
 import { httpLogout } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
@@ -24,6 +25,7 @@ const tabs = [
 ];
 
 export default function UserSettings() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -59,7 +61,7 @@ export default function UserSettings() {
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px]">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Account
+          {t('userSettingsPage.heading')}
         </div>
       </div>
       <div className="rounded-2xl bg-white px-4 py-4 h-full">
@@ -70,11 +72,11 @@ export default function UserSettings() {
         >
           <div className="flex flex-row md:flex-col md:h-full md:border-r md:border-gray-200 md:pr-4">
             <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0 border-b border-gray-200 md:border-b-0 overflow-auto md:flex-1">
-              <TabApp text="Manage Data" />
-              <TabApp text="Visiblility" />
-              <TabApp text="Profile Shares" />
-              <TabApp text="Document Shares" />
-              <TabApp text="Blocked Users" disabled />
+              <TabApp text={t('userSettingsPage.tabManageData')} />
+              <TabApp text={t('userSettingsPage.tabVisibility')} />
+              <TabApp text={t('userSettingsPage.tabProfileShares')} />
+              <TabApp text={t('userSettingsPage.tabDocumentShares')} />
+              <TabApp text={t('userSettingsPage.tabBlockedUsers')} disabled />
             </TabList>
             {/* Logout sits where Referrals used to live (bottom of the left
                 rail on desktop). Some users instinctively look for Logout on
@@ -89,7 +91,7 @@ export default function UserSettings() {
                 'py-[10px] px-[8px] text-red-400 whitespace-nowrap'
               )}
             >
-              Logout
+              {t('userSettingsPage.logoutButton')}
             </button>
           </div>
           <TabPanels className="h-full overflow-hidden">

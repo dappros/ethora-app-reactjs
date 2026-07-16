@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateUser } from '../actions';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import './ProfilePageEdit.scss';
 
@@ -25,6 +26,7 @@ type Inputs = {
 };
 
 export default function ProfileEdit() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm<Inputs>();
   const profileImage_ = useAppStore((s) => s.currentUser?.profileImage);
@@ -58,11 +60,11 @@ export default function ProfileEdit() {
     actionUpdateUser(fd)
       .then(({ profileImage }) => {
         setProfileImage(profileImage);
-        toast.success('Profile updated successfully');
+        toast.success(t('profileEdit.toastSuccess'));
         navigate('/app/profile');
       })
       .catch((_) => {
-        toast.error('Error happens while saving profile');
+        toast.error(t('profileEdit.toastError'));
       });
   };
 
@@ -76,7 +78,7 @@ export default function ProfileEdit() {
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 flex flex-col justify-between items-stretch md:items-center md:flex-row">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Profile
+          {t('profileEdit.heading')}
         </div>
       </div>
       <div className="rounded-2xl bg-white px-4 h-full grid grid-rows-[72px,_1fr] overflow-hidden">
@@ -85,13 +87,13 @@ export default function ProfileEdit() {
             className="w-full max-w-[128px] py-2 rounded-xl hover:bg-[#F3F6FC] text-brand-500"
             onClick={() => navigate('/app/profile')}
           >
-            Cancel
+            {t('profileEdit.cancelButton')}
           </button>
           <button
             className="w-full max-w-[128px] py-2 rounded-xl border text-brand-500 hover:bg-[#F3F6FC] border-brand-500"
             onClick={onSave}
           >
-            Save
+            {t('profileEdit.saveButton')}
           </button>
         </div>
         <div className="">
@@ -110,22 +112,22 @@ export default function ProfileEdit() {
             >
               <div>
                 <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
-                  First Name
+                  {t('profileEdit.firstNameLabel')}
                 </div>
                 <input
                   type="text"
                   className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
-                  placeholder="First Name"
+                  placeholder={t('profileEdit.firstNamePlaceholder')}
                   {...register('firstName', { required: true, value: fName })}
                 />
               </div>
               <div>
                 <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
-                  Last Name
+                  {t('profileEdit.lastNameLabel')}
                 </div>
                 <input
                   className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
-                  placeholder="Last Name"
+                  placeholder={t('profileEdit.lastNamePlaceholder')}
                   type="text"
                   {...register('lastName', { required: true, value: lName })}
                 />
@@ -133,11 +135,11 @@ export default function ProfileEdit() {
 
               <div>
                 <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
-                  About
+                  {t('profileEdit.aboutLabel')}
                 </div>
                 <input
                   className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
-                  placeholder="About"
+                  placeholder={t('profileEdit.aboutPlaceholder')}
                   type="text"
                   {...register('description', { value: descr })}
                 />

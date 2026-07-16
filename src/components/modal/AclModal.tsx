@@ -6,6 +6,7 @@ import './AclModal.scss';
 //@ts-ignore
 import { set, get } from 'lodash';
 import { CheckboxApp } from '../CheckboxApp';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   onClose: () => void;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
+  const { t } = useTranslation();
+
   const onChange = (isSet: boolean, path: string) => {
     let newAcl = JSON.parse(JSON.stringify(acl));
     set(newAcl, path, isSet);
@@ -30,19 +33,18 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
     >
       <DialogPanel className="p-8 bg-white rounded-2xl relative w-full max-w-[640px]">
         <div className="font-varela text-[24px] text-center relative flex justify-center items-center mb-8">
-          <span>ACL Editing</span>
+          <span>{t('aclModal.title')}</span>
           <button className="absolute top-0 right-0" onClick={() => onClose()}>
             <IconClose />
           </button>
         </div>
 
         <div className="font-sans font-semibold text-regular mb-2">
-          App level
+          {t('aclModal.appLevelTitle')}
         </div>
 
         <div className="font-sans text-xs text-[#8C8C8C] mb-4">
-          Here you can assign or remove User's access rights to certain objects
-          within the current App.
+          {t('aclModal.appLevelDescription')}
         </div>
 
         <div className="mb-8">
@@ -50,31 +52,31 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
             <thead>
               <tr className="bg-[#FCFCFC]">
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Name
+                  {t('aclModal.colName')}
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Create
+                  {t('aclModal.colCreate')}
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Read
+                  {t('aclModal.colRead')}
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Update
+                  {t('aclModal.colUpdate')}
                 </th>
 
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Delete
+                  {t('aclModal.colDelete')}
                 </th>
 
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Admin
+                  {t('aclModal.colAdmin')}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Create Apps
+                  {t('aclModal.rowCreateApps')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -112,7 +114,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Settings
+                  {t('aclModal.rowSettings')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -154,7 +156,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Users
+                  {t('aclModal.rowUsers')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -211,7 +213,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Tokens
+                  {t('aclModal.rowTokens')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -263,7 +265,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Push Notifications
+                  {t('aclModal.rowPushNotifications')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -315,7 +317,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
 
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Statistics
+                  {t('aclModal.rowStatistics')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -355,12 +357,11 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
         </div>
 
         <div className="font-sans font-semibold text-regular mb-2">
-          Server level
+          {t('aclModal.serverLevelTitle')}
         </div>
 
         <div className="font-sans text-xs text-[#8C8C8C] mb-4">
-          Here you can assign or remove User's access to infrastructure level
-          objects, above the context of any Apps. Available for Enterprise Plan.
+          {t('aclModal.serverLevelDescription')}
         </div>
 
         <div className="mb-8">
@@ -368,31 +369,31 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
             <thead>
               <tr className="bg-[#FCFCFC]">
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                  Name
+                  {t('aclModal.colName')}
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Create
+                  {t('aclModal.colCreate')}
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                  Read
+                  {t('aclModal.colRead')}
                 </th>
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Update
+                  {t('aclModal.colUpdate')}
                 </th>
 
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Delete
+                  {t('aclModal.colDelete')}
                 </th>
 
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                  Admin
+                  {t('aclModal.colAdmin')}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="pl-4 py-2 w-[32px] rounded-l-lg font-inter text-xs whitespace-nowrap">
-                  Statistics
+                  {t('aclModal.rowStatistics')}
                 </td>
                 <td className="px-4 py-[13px] text-center font-sans font-normal text-sm">
                   <div className="flex justify-center">
@@ -432,13 +433,13 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
             className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500"
             onClick={onClose}
           >
-            Cancel
+            {t('aclModal.cancel')}
           </button>
           <button
             onClick={() => updateAcl()}
             className="w-full py-[12px] rounded-xl bg-brand-500 text-white"
           >
-            Update ACL
+            {t('aclModal.updateAcl')}
           </button>
         </div>
       </DialogPanel>

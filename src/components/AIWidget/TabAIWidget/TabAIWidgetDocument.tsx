@@ -8,6 +8,7 @@ import { ReactElement, RefObject, useState, useRef, useMemo, useEffect } from 'r
 import { Rag } from '../Rag';
 import { setSourcesSiteFiles, setSourcesSiteFilesDelete } from '../../../http';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { Files } from '../../../models';
 
 interface TabAIWidgetDocumentProps {
@@ -19,6 +20,7 @@ export const TabAIWidgetDocument = ({
   ragRef,
   arrayFiles,
 }: TabAIWidgetDocumentProps): ReactElement => {
+  const { t } = useTranslation();
   const { appId } = useParams();
   const [localFiles, setLocalFiles] = useState<Files[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -144,21 +146,20 @@ export const TabAIWidgetDocument = ({
   return (
     <div className="py-6 p-0 md:p-6">
       <div className="font-semibold font-sans text-[16px] pb-4 pt-10">
-        <span> Upload documents (</span>
+        <span>{t('aiWidgetDocuments.title')}</span>
         <button
           onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
           className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
         >
-          <span>RAG feature</span> <InfoOutlinedIcon fontSize="small" />
+          <span>{t('aiWidgetDocuments.ragFeature')}</span> <InfoOutlinedIcon fontSize="small" />
         </button>
         <span>)</span>
         <span className="text-xs text-gray-600 ml-2 p-2 border rounded-sm">
-          Available in paid plans
+          {t('aiWidgetDocuments.paidPlansOnly')}
         </span>
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1 mb-8">
-        Drag & Drop your documents here for the system to ingest data from
-        there. Supported formats: TXT, CSV, JSON, DOC, PDF.
+        {t('aiWidgetDocuments.description')}
       </p>
 
       <div className="flex flex-wrap gap-4">
@@ -282,7 +283,7 @@ export const TabAIWidgetDocument = ({
               paddingX: 1,
             }}
           >
-            Drag & Drop or click to select files
+            {t('aiWidgetDocuments.dropzoneHint')}
           </Typography>
         </Box>
       </div>
@@ -301,7 +302,7 @@ export const TabAIWidgetDocument = ({
           onClick={handleSetFiles}
           className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          Upload files
+          {t('aiWidgetDocuments.uploadButton')}
         </button>
       )}
 

@@ -9,6 +9,7 @@ import {
   httpHardDeleteApp,
   httpRestoreApp,
 } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelApp } from '../../models';
 
 interface Props {
@@ -26,6 +27,7 @@ const numberFormatter = new Intl.NumberFormat('en-US');
 // is not) and a stats panel surfaces what would be purged so the operator
 // sees the blast radius before confirming.
 export const DeleteSetting = ({ app, onChanged }: Props) => {
+  const { t } = useTranslation();
   const status = app.status || 'active';
   const isArchived = status === 'archived';
 
@@ -61,10 +63,15 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
     try {
       setBusy(true);
       await httpArchiveApp(app._id);
-      toast.success(`Archived ${app.displayName}`);
+      toast.success(t('appSettingsDelete.archivedToast').replace('{name}', app.displayName));
       onChanged?.();
     } catch (e: any) {
-      toast.error(`Archive failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appSettingsDelete.archiveFailedToast').replace(
+          '{error}',
+          e?.response?.data?.error || e?.message || t('appSettingsDelete.unknownErrorFallback')
+        )
+      );
     } finally {
       setBusy(false);
       setConfirmKind(null);
@@ -75,10 +82,15 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
     try {
       setBusy(true);
       await httpRestoreApp(app._id);
-      toast.success(`Restored ${app.displayName}`);
+      toast.success(t('appSettingsDelete.restoredToast').replace('{name}', app.displayName));
       onChanged?.();
     } catch (e: any) {
-      toast.error(`Restore failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appSettingsDelete.restoreFailedToast').replace(
+          '{error}',
+          e?.response?.data?.error || e?.message || t('appSettingsDelete.unknownErrorFallback')
+        )
+      );
     } finally {
       setBusy(false);
     }
@@ -91,12 +103,19 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
       const jobId = r?.data?.jobId;
       toast.info(
         jobId
-          ? `Hard delete queued for ${app.displayName} (job ${jobId}). The cascade runs in the background.`
-          : `Hard delete started for ${app.displayName}.`,
+          ? t('appSettingsDelete.hardDeleteQueuedToast')
+              .replace('{name}', app.displayName)
+              .replace('{jobId}', jobId)
+          : t('appSettingsDelete.hardDeleteStartedToast').replace('{name}', app.displayName),
       );
       onChanged?.();
     } catch (e: any) {
-      toast.error(`Hard delete failed: ${e?.response?.data?.error || e?.message || 'unknown'}`);
+      toast.error(
+        t('appSettingsDelete.hardDeleteFailedToast').replace(
+          '{error}',
+          e?.response?.data?.error || e?.message || t('appSettingsDelete.unknownErrorFallback')
+        )
+      );
     } finally {
       setBusy(false);
       setConfirmKind(null);
@@ -105,17 +124,19 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
 
   return (
     <div ref={containerRef} className="overflow-y-auto pb-8">
-      <div className="font-semibold font-sans text-[16px] mb-4">Delete or Archive</div>
+      <div className="font-semibold font-sans text-[16px] mb-4">{t('appSettingsDelete.heading')}</div>
 
       {/* Archive (reversible) */}
       <section className="mb-8 border border-gray-200 rounded-xl p-4">
         <div className="font-varela text-[16px] mb-2">
-          {isArchived ? 'Restore (un-archive)' : 'Archive (soft delete)'}
+          {isArchived ? t('appSettingsDelete.restoreHeading') : t('appSettingsDelete.archiveHeading')}
         </div>
         <p className="font-sans text-sm text-gray-700 mb-4">
-          {isArchived
-            ? `"${app.displayName}" is currently archived. Restoring re-enables login for its users and brings the app back into the active list. All data is intact.`
-            : `"${app.displayName}" will be hidden and its users will be blocked from logging in. All data (users, chats, files, sources, bot instances) is retained and the app can be restored later from the Archived list.`}
+          {isArchived ? (
+            <>"{app.displayName}" {t('appSettingsDelete.archivedDescriptionSuffix')}</>
+          ) : (
+            <>"{app.displayName}" {t('appSettingsDelete.notArchivedDescriptionSuffix')}</>
+          )}
         </p>
         {isArchived ? (
           <button
@@ -123,7 +144,7 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
             disabled={busy}
             className="w-full sm:w-auto px-6 py-3 rounded-xl border border-green-700 text-green-700 hover:bg-green-50 disabled:opacity-50"
           >
-            Restore {app.displayName}
+            {t('appSettingsDelete.restoreWord')} {app.displayName}
           </button>
         ) : (
           <button
@@ -131,36 +152,35 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
             disabled={busy}
             className="w-full sm:w-auto px-6 py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover disabled:opacity-50"
           >
-            Archive {app.displayName}
+            {t('appSettingsDelete.archiveWord')} {app.displayName}
           </button>
         )}
       </section>
 
       {/* Hard delete (irreversible) */}
       <section className="border border-red-200 rounded-xl p-4 bg-red-50/30">
-        <div className="font-varela text-[16px] mb-2 text-red-700">Hard delete (irreversible)</div>
+        <div className="font-varela text-[16px] mb-2 text-red-700">{t('appSettingsDelete.hardDeleteHeading')}</div>
         <p className="font-sans text-sm text-gray-700 mb-3">
-          Permanently deletes the app and every entity tied to it. There is no
-          restore after this point.
+          {t('appSettingsDelete.hardDeleteDescription')}
         </p>
         <div className="bg-white border border-red-200 rounded-lg px-4 py-3 mb-4 font-sans text-sm">
-          The following will be permanently purged:
+          {t('appSettingsDelete.purgeListIntro')}
           <ul className="mt-2 list-disc list-inside space-y-1">
-            <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
+            <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> {t('appSettingsDelete.usersSuffix')}</li>
             <li>
               <span className="font-bold">
                 {chatRoomsCount === null ? '-' : numberFormatter.format(chatRoomsCount)}
-              </span> chat rooms
+              </span> {t('appSettingsDelete.chatRoomsSuffix')}
             </li>
-            <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> chat messages</li>
-            <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
-            <li>Appearance configuration (logo, colours etc)</li>
-            <li>Default chat rooms settings</li>
-            <li>AI data (website and documents RAG)</li>
-            <li>Bot instances and in-app AI Widget configuration</li>
+            <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> {t('appSettingsDelete.chatMessagesSuffix')}</li>
+            <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> {t('appSettingsDelete.filesSuffix')}</li>
+            <li>{t('appSettingsDelete.appearanceConfigItem')}</li>
+            <li>{t('appSettingsDelete.defaultChatRoomsSettingsItem')}</li>
+            <li>{t('appSettingsDelete.aiDataItem')}</li>
+            <li>{t('appSettingsDelete.botInstancesItem')}</li>
           </ul>
           <div className="mt-2 text-xs text-gray-600">
-            Audit log rows are retained so the action remains traceable after the app is gone.
+            {t('appSettingsDelete.auditLogNote')}
           </div>
         </div>
         <button
@@ -168,15 +188,17 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
           disabled={busy}
           className="w-full sm:w-auto px-6 py-3 hover:bg-red-300 border bg-red-400 border-red-800 rounded-xl text-white font-varela disabled:opacity-50"
         >
-          Hard delete {app.displayName}
+          {t('appSettingsDelete.hardDeleteWord')} {app.displayName}
         </button>
       </section>
 
       {confirmKind === 'archive' && (
         <ConfirmModal
-          title="Archive this app?"
-          message={`"${app.displayName}" will be hidden and its users won't be able to log in, but all data is retained. You can restore it later.`}
-          confirmLabel="Archive"
+          title={t('appSettingsDelete.archiveModalTitle')}
+          message={
+            <>"{app.displayName}" {t('appSettingsDelete.archiveModalMessageSuffix')}</>
+          }
+          confirmLabel={t('appSettingsDelete.archiveWord')}
           onConfirm={handleArchive}
           onCancel={() => setConfirmKind(null)}
           busy={busy}
@@ -184,34 +206,34 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
       )}
       {confirmKind === 'hard' && (
         <ConfirmModal
-          title="Permanently delete this app?"
+          title={t('appSettingsDelete.hardDeleteModalTitle')}
           message={
             <>
               <div>
-                <span className="font-semibold">"{app.displayName}"</span> and all related data will
-                be irreversibly purged.
+                <span className="font-semibold">"{app.displayName}"</span>{' '}
+                {t('appSettingsDelete.hardDeleteModalIntroSuffix')}
               </div>
               <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                The following will be permanently purged:
+                {t('appSettingsDelete.purgeListIntro')}
                 <ul className="mt-1 list-disc list-inside space-y-0.5">
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> users</li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> {t('appSettingsDelete.usersSuffix')}</li>
                   <li>
                     <span className="font-bold">
                       {chatRoomsCount === null ? '-' : numberFormatter.format(chatRoomsCount)}
-                    </span> chat rooms
+                    </span> {t('appSettingsDelete.chatRoomsSuffix')}
                   </li>
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> chat messages</li>
-                  <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> files</li>
-                  <li>Appearance configuration (logo, colours etc)</li>
-                  <li>Default chat rooms settings</li>
-                  <li>AI data (website and documents RAG)</li>
-                  <li>Bot instances and in-app AI Widget configuration</li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalChats || 0)}</span> {t('appSettingsDelete.chatMessagesSuffix')}</li>
+                  <li><span className="font-bold">{numberFormatter.format(stats.totalFiles || 0)}</span> {t('appSettingsDelete.filesSuffix')}</li>
+                  <li>{t('appSettingsDelete.appearanceConfigItem')}</li>
+                  <li>{t('appSettingsDelete.defaultChatRoomsSettingsItem')}</li>
+                  <li>{t('appSettingsDelete.aiDataItem')}</li>
+                  <li>{t('appSettingsDelete.botInstancesItem')}</li>
                 </ul>
               </div>
-              <div className="mt-3 text-red-700 font-semibold">This cannot be undone.</div>
+              <div className="mt-3 text-red-700 font-semibold">{t('appSettingsDelete.cannotBeUndone')}</div>
             </>
           }
-          confirmLabel="Yes, hard delete"
+          confirmLabel={t('appSettingsDelete.hardDeleteConfirmLabel')}
           danger
           onConfirm={handleHardDelete}
           onCancel={() => setConfirmKind(null)}

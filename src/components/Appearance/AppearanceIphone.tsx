@@ -1,10 +1,10 @@
 import IPhoneMiniImage from '../../assets/iPhone-13Mini.png';
+import { useTranslation } from '../../i18n/useTranslation';
 import AppleIcon from '../../pages/AuthPage/Icons/socials/appleIcon';
 import FacebookIcon from '../../pages/AuthPage/Icons/socials/facebookIcon';
 import GoogleIcon from '../../pages/AuthPage/Icons/socials/googleIcon';
 import MetamaskIcon from '../../pages/AuthPage/Icons/socials/metamaskIcon';
 
-const inputPlaceholder = ['First Name', 'Last Name', 'Email'];
 const socialImage = [FacebookIcon, AppleIcon, MetamaskIcon];
 
 interface AppearanceIphoneProps {
@@ -16,6 +16,12 @@ export const AppearanceIphone = ({
   logoImage,
   color,
 }: AppearanceIphoneProps) => {
+  const { t } = useTranslation();
+  const inputPlaceholder = [
+    t('appearanceIphone.placeholderFirstName'),
+    t('appearanceIphone.placeholderLastName'),
+    t('appearanceIphone.placeholderEmail'),
+  ];
   return (
     <div
       className=" max-w-full h-[368px] absolute top-[-40px] right-[-40px] "
@@ -39,7 +45,9 @@ export const AppearanceIphone = ({
             />
           )}
         </div>
-        <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
+        <h3 className="text-[10px] text-center mb-2">
+          {t('appearanceIphone.signUp')}
+        </h3>
         <div className="grid grid-cols-3 gap-2 mb-2">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
@@ -62,17 +70,19 @@ export const AppearanceIphone = ({
           className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"
           style={{ backgroundColor: color }}
         >
-          Sign Up
+          {t('appearanceIphone.signUp')}
         </button>
         <div className="text-[6px] mb-2">
           <div className="text-center color-gray-500">
-            By clicking the "Sign Up" button, you agree to our
+            {t('appearanceIphone.agreementPrefix')}
           </div>
           <div className="text-center" style={{ color: color }}>
-            Terms & Conditions.
+            {t('appearanceIphone.termsAndConditions')}
           </div>
         </div>
-        <div className="text-center color text-[6px] mb-2">or</div>
+        <div className="text-center color text-[6px] mb-2">
+          {t('appearanceIphone.or')}
+        </div>
         <button
           className="border w-full rounded-xl py-[3px] text-[9px] mb-2 flex align-center justify-center"
           style={{ borderColor: color, color: color }}
@@ -80,7 +90,7 @@ export const AppearanceIphone = ({
           <div className="mr-2">
             <GoogleIcon width={10} height={10} />
           </div>
-          <span>Continue with Google</span>
+          <span>{t('appearanceIphone.continueWithGoogle')}</span>
         </button>
         <div className="grid grid-cols-3 gap-2 mb-2">
           {socialImage.map((Image, index) => (
@@ -94,9 +104,11 @@ export const AppearanceIphone = ({
           ))}
         </div>
         <div className="text-[8px] text-center text">
-          <span className="mr-1">Already have an account?</span>
+          <span className="mr-1">
+            {t('appearanceIphone.alreadyHaveAccount')}
+          </span>
           <a href="#" style={{ color: color }}>
-            Sign In
+            {t('appearanceIphone.signIn')}
           </a>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { IconInfo } from '../../components/Icons/IconInfo';
 import { IconUpload } from '../../components/Icons/IconUpload';
 import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   domainName: string;
@@ -33,6 +34,7 @@ export function WebMobileApp({
   setGoogleServicesJson,
   setGoogleServiceInfoPlist,
 }: Props) {
+  const { t } = useTranslation();
   const googleJsonRef = useRef<HTMLInputElement>(null);
   const plistFileRef = useRef<HTMLInputElement>(null);
   const hostedAppsRootDomain =
@@ -63,28 +65,27 @@ export function WebMobileApp({
   return (
     <div className="">
       <p className="font-sans text-[24px] font-medium pb-4 border-b border-gray-200">
-        Web app
+        {t('appSettingsWebMobileApp.webAppHeading')}
       </p>
-      <p className="font-sans text-[16px] font-semibold py-2">Domain name</p>
+      <p className="font-sans text-[16px] font-semibold py-2">
+        {t('appSettingsWebMobileApp.domainNameHeading')}
+      </p>
       <p className="font-sans text-sm mb-2">
-        Your web app is hosted in our cloud with a complimentary 2nd level
-        domain name available for Free plan users and 1st level domain name for
-        Business plan users.
+        {t('appSettingsWebMobileApp.domainNameDescription')}
       </p>
       <div className="p-2 flex rounded-[8px] bg-brand-150 mb-4">
         <div className="mr-2">
           <IconInfo stroke={primaryColor} />
         </div>
         <span className="font-sans text-[12px]">
-          Self-host option: just clone our engine from github, build and run it
-          on your server.
+          {t('appSettingsWebMobileApp.selfHostInfo')}
         </span>
       </div>
       <div className="flex w-full max-w-[459px] relative mb-4 items-center">
         <input
           value={domainName}
           onChange={(e) => setDomainName(e.target.value)}
-          placeholder="Your App Name"
+          placeholder={t('appSettingsWebMobileApp.appNamePlaceholder')}
           type="text"
           className=" p-2 w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-500"
           name=""
@@ -106,7 +107,7 @@ export function WebMobileApp({
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">
           <input
-            placeholder="Your App Name"
+            placeholder={t('appSettingsWebMobileApp.appNamePlaceholder')}
             type="text"
             className="p-2  w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-300"
             name=""
@@ -121,27 +122,24 @@ export function WebMobileApp({
         </div>
         <div className="flex items-center">
           <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300">
-            Upgrade to Business
+            {t('appSettingsWebMobileApp.upgradeToBusinessButton')}
           </button>
-          <span>to unlock</span>
+          <span>{t('appSettingsWebMobileApp.toUnlockText')}</span>
         </div>
       </div>
 
       <p className="font-sans text-base font-semibold mb-2">
-        Google sign-in and Firebase analytics
+        {t('appSettingsWebMobileApp.googleFirebaseHeading')}
       </p>
       <p className="font-sans text-sm leading-relaxed mb-4">
-        Firebase credentials are required to allow your users to sign on via
-        Google Account. Also this allows you to track your app usage analytics
-        in your Firebase console. These options will be disabled if credentials
-        are not provided.
+        {t('appSettingsWebMobileApp.googleFirebaseDescription')}
       </p>
       <div className="p-2 flex rounded-[8px] bg-brand-150 mb-2">
         <div className="mr-2">
           <IconInfo stroke={primaryColor} />
         </div>
         <span className="font-sans text-[12px]">
-          Copy paste the configuration from your Firebase Console
+          {t('appSettingsWebMobileApp.firebaseConfigInfo')}
         </span>
       </div>
       <Textarea
@@ -162,30 +160,33 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
       />
 
       <p className="font-sans text-[24px] font-medium py-4 border-b border-gray-200">
-        Mobile app
+        {t('appSettingsWebMobileApp.mobileAppSectionHeading')}
       </p>
-      <div className="font-semibold font-sans text-[16px] mb-2">Mobile App</div>
+      <div className="font-semibold font-sans text-[16px] mb-2">
+        {t('appSettingsWebMobileApp.mobileAppHeading')}
+      </div>
       <div className="text-gray-500 font-sans text-[12px] mb-4">
-        Please enter Bundle ID. Bundle ID should be unique to identify your app
-        for Appstore and other purposes.
+        {t('appSettingsWebMobileApp.bundleIdDescription')}
       </div>
       <div className="max-w-[416px] w-full">
         <input
           type="text"
           className="w-full py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4"
-          placeholder="Bundle ID"
+          placeholder={t('appSettingsWebMobileApp.bundleIdPlaceholder')}
           value={bundleId}
           onChange={(e) => setBundleId(e.target.value)}
         />
         <button className="w-full rounded-xl hover:bg-brand-hover border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8">
           <IconDownload stroke={primaryColor}></IconDownload>
-          <span className="ml-2">Prepare React Native Build</span>
+          <span className="ml-2">
+            {t('appSettingsWebMobileApp.prepareReactNativeBuildButton')}
+          </span>
         </button>
         <div className="font-semibold font-sans text-[16px] mb-4">
-          Android build
+          {t('appSettingsWebMobileApp.androidBuildHeading')}
         </div>
         <div className="font-semibold font-sans text-[14px] mb-2">
-          Google Services JSON
+          {t('appSettingsWebMobileApp.googleServicesJsonHeading')}
         </div>
         <input
           type="file"
@@ -201,18 +202,22 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
           onClick={() => googleJsonRef.current?.click()}
         >
           <IconUpload stroke={primaryColor}></IconUpload>
-          <span className="ml-2">Upload</span>
+          <span className="ml-2">{t('appSettingsWebMobileApp.uploadButton')}</span>
         </button>
         <div className="font-semibold text-sm mb-2">
-          Firebase server key (for push notifications)
+          {t('appSettingsWebMobileApp.firebaseServerKeyHeading')}
         </div>
         <input
           type="text"
-          placeholder="Firebase Server Key"
+          placeholder={t('appSettingsWebMobileApp.firebaseServerKeyPlaceholder')}
           className="w-full py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-8"
         />
-        <div className="font-semibold text-[16px] mb-4">IOS build</div>
-        <div className="font-semibold text-sm mb-2">Google Services PLIST</div>
+        <div className="font-semibold text-[16px] mb-4">
+          {t('appSettingsWebMobileApp.iosBuildHeading')}
+        </div>
+        <div className="font-semibold text-sm mb-2">
+          {t('appSettingsWebMobileApp.googleServicesPlistHeading')}
+        </div>
         <input
           type="file"
           ref={plistFileRef}
@@ -227,14 +232,14 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
           className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4"
         >
           <IconUpload></IconUpload>
-          <span className="ml-2">Upload</span>
+          <span className="ml-2">{t('appSettingsWebMobileApp.uploadButton')}</span>
         </button>
         <div className="font-semibold text-sm mb-2">
-          Push Notifications Certificate (Apple)
+          {t('appSettingsWebMobileApp.pushNotificationsCertHeading')}
         </div>
         <button className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-4">
           <IconUpload></IconUpload>
-          <span className="ml-2">Upload</span>
+          <span className="ml-2">{t('appSettingsWebMobileApp.uploadButton')}</span>
         </button>
       </div>
     </div>

@@ -14,6 +14,7 @@ import { IconMinus } from '../../components/Icons/IconMinus';
 import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
 import { httpListBotInstances, httpLeaveChatAgentBotInstance } from '../../http';
 import { actionListAgents } from '../../actions';
+import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { ModelAgent, ModelBotInstance } from '../../models';
 
@@ -49,6 +50,7 @@ export function Chats({
   broadcastSenderPhotoUrl,
   setBroadcastSenderPhotoUrl,
 }: Props) {
+  const { t } = useTranslation();
   const [showCreate, setShowCreate] = useState(false);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -152,7 +154,7 @@ export function Chats({
             <div className="mr-2">
               <IconDelete />
             </div>
-            Delete
+            {t('appSettingsChats.deleteButton')}
           </button>
         </div>
       );
@@ -198,11 +200,11 @@ export function Chats({
       setShowLoading(false)
       reset()
       setShowCreate(false)
-      toast.success('Chat created successfully')
+      toast.success(t('appSettingsChats.chatCreatedToast'))
     } catch (error: any) {
       setShowLoading(false)
       console.error('Failed to create chat:', error)
-      toast.error(error?.response?.data?.error || 'Failed to create chat')
+      toast.error(error?.response?.data?.error || t('appSettingsChats.createChatFailedToast'))
     }
   }
 
@@ -263,13 +265,22 @@ export function Chats({
           broadcastToastRef.current.completed = true;
           const total = data?.result?.total ?? 0;
           const sent = (data?.result?.results || []).filter((r: any) => r.status === 'sent').length;
-          toast.success(`Broadcast completed: sent ${sent}/${total}`);
+          toast.success(
+            t('appSettingsChats.broadcastCompletedToast')
+              .replace('{sent}', String(sent))
+              .replace('{total}', String(total))
+          );
           if (timerId) window.clearInterval(timerId);
           alive = false;
         }
         if (data?.state === 'failed' && !broadcastToastRef.current.failed) {
           broadcastToastRef.current.failed = true;
-          toast.error(`Broadcast failed: ${data?.error || 'unknown error'}`);
+          toast.error(
+            t('appSettingsChats.broadcastFailedToast').replace(
+              '{error}',
+              data?.error || t('appSettingsChats.unknownError')
+            )
+          );
           if (timerId) window.clearInterval(timerId);
           alive = false;
         }
@@ -328,9 +339,9 @@ export function Chats({
       }
       const { data } = await httpBroadcastChatsV2(payload);
       setBroadcastJobId(String(data.jobId));
-      toast.info('Broadcast enqueued');
+      toast.info(t('appSettingsChats.broadcastEnqueuedToast'));
     } catch (e: any) {
-      toast.error(e?.response?.data?.error || 'Failed to start broadcast');
+      toast.error(e?.response?.data?.error || t('appSettingsChats.broadcastStartFailedToast'));
     } finally {
       setBroadcastSending(false);
     }
@@ -338,7 +349,7 @@ export function Chats({
 
   return (
     <div className="overflow-hidden">
-      <p className="font-semibold font-sans text-[16px] mb-2">New Chats</p>
+      <p className="font-semibold font-sans text-[16px] mb-2">{t('appSettingsChats.newChatsHeading')}</p>
 
       <Field className="flex items-center cursor-pointer mb-2">
         <Checkbox
@@ -349,26 +360,23 @@ export function Chats({
           <IconCheckbox className="hidden group-data-[checked]:block" />
         </Checkbox>
         <Label className="cursor-pointer font-sans text-sm">
-          Allow Users to create new Chats
+          {t('appSettingsChats.allowUsersCreateLabel')}
         </Label>
       </Field>
       <p className="font-sans text-xs text-gray-500 mb-8">
-        When enabled, your Users can create new Chats and invite other Users
-        there. When disabled, only pre-existing Chats or Chats created by your
-        business can be used.
+        {t('appSettingsChats.allowUsersCreateHelp')}
       </p>
-      <p className="font-semibold font-sans text-[16px] mb-2">Pinned Chats</p>
+      <p className="font-semibold font-sans text-[16px] mb-2">{t('appSettingsChats.pinnedChatsHeading')}</p>
       <p className="font-sans text-xs text-gray-500 mb-4">
-        Pinned or “starred” Chats are permanent chat rooms that your Users will
-        automatically see and join.
+        {t('appSettingsChats.pinnedChatsHelp')}
       </p>
       <div className="p-4 border border-gray-200 rounded-xl">
         <div className="flex justify-between items-center mb-4">
-          <div className="font-sans font-semibold text-base">List of chats</div>
+          <div className="font-sans font-semibold text-base">{t('appSettingsChats.listOfChatsLabel')}</div>
           <div>
             <button onClick={() => setShowCreate(true)} className="flex items-center justify-center md:w-[184px] h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela">
               <IconAdd color="white" className="md:mr-2" />
-              <span className="hidden md:block">Add New Chat</span>
+              <span className="hidden md:block">{t('appSettingsChats.addNewChatButton')}</span>
             </button>
           </div>
         </div>
@@ -376,8 +384,7 @@ export function Chats({
 
           {!defaultChatRooms.length && (
             <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
-              There are no chats yet, or you can add them by clicking the 'Add New Chat'
-              button
+              {t('appSettingsChats.noChatsEmptyState')}
             </div>
           )}
 
@@ -402,14 +409,14 @@ export function Chats({
                     </Field>
                   </th>
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                    Chat Name
+                    {t('appSettingsChats.chatNameColumn')}
                   </th>
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                    Created By
+                    {t('appSettingsChats.createdByColumn')}
                   </th>
                   {/* Phase 1 (Agents): per-row action to invite an Agent into the chat. */}
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                    Bots
+                    {t('appSettingsChats.botsColumn')}
                   </th>
                 </tr>
               </thead>
@@ -461,25 +468,25 @@ export function Chats({
           falls back to app.displayName when this is blank, so leaving it empty
           is fine for most apps. */}
       <div className="mt-8">
-        <p className="font-semibold font-sans text-[16px] mb-2">Default Broadcast Sender</p>
+        <p className="font-semibold font-sans text-[16px] mb-2">{t('appSettingsChats.defaultBroadcastSenderHeading')}</p>
         <p className="font-sans text-xs text-gray-500 mb-4">
-          Identity stamped on broadcast announcements when no per-broadcast override is set. Leave blank to use the App display name as the sender.
+          {t('appSettingsChats.defaultBroadcastSenderHelp')}
         </p>
         <div className="p-4 border border-gray-200 rounded-xl">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">Sender name</label>
+              <label className="block text-xs text-gray-500 mb-1">{t('appSettingsChats.senderNameLabel')}</label>
               <input
                 type="text"
                 value={broadcastSenderName}
                 onChange={(e) => setBroadcastSenderName(e.target.value)}
-                placeholder="e.g. Acme Health"
+                placeholder={t('appSettingsChats.senderNamePlaceholder')}
                 maxLength={120}
                 className="rounded-2xl bg-gray-100 py-3 px-6 w-full outline-none font-sans text-sm"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">Avatar URL (optional)</label>
+              <label className="block text-xs text-gray-500 mb-1">{t('appSettingsChats.avatarUrlOptionalLabel')}</label>
               <input
                 type="url"
                 value={broadcastSenderPhotoUrl}
@@ -495,9 +502,9 @@ export function Chats({
 
       {/* Broadcast */}
       <div className="mt-8">
-        <p className="font-semibold font-sans text-[16px] mb-2">Broadcast Message</p>
+        <p className="font-semibold font-sans text-[16px] mb-2">{t('appSettingsChats.broadcastMessageHeading')}</p>
         <p className="font-sans text-xs text-gray-500 mb-4">
-          Send an announcement to your chats. You can broadcast to all chats, or choose a subset from your pinned rooms list.
+          {t('appSettingsChats.broadcastMessageHelp')}
         </p>
 
         <div className="p-4 border border-gray-200 rounded-xl">
@@ -510,7 +517,7 @@ export function Chats({
                   checked={broadcastMode === 'all'}
                   onChange={() => setBroadcastMode('all')}
                 />
-                All chats (recommended)
+                {t('appSettingsChats.allChatsRadioLabel')}
               </label>
               <label className="inline-flex items-center gap-2 font-sans text-sm cursor-pointer">
                 <input
@@ -519,7 +526,7 @@ export function Chats({
                   checked={broadcastMode === 'selected'}
                   onChange={() => setBroadcastMode('selected')}
                 />
-                Selected pinned chats
+                {t('appSettingsChats.selectedPinnedChatsRadioLabel')}
               </label>
             </div>
 
@@ -527,7 +534,7 @@ export function Chats({
               <div className="bg-[#F3F6FC] p-4 rounded-xl">
                 {!pinnedRooms.length && (
                   <div className="font-sans text-sm text-gray-700">
-                    No pinned rooms found. Add pinned chats above or switch to “All chats”.
+                    {t('appSettingsChats.noPinnedRoomsFound')}
                   </div>
                 )}
                 {!!pinnedRooms.length && (
@@ -559,7 +566,7 @@ export function Chats({
                   checked={overrideSender}
                   onChange={(e) => setOverrideSender(e.target.checked)}
                 />
-                Override sender for this broadcast
+                {t('appSettingsChats.overrideSenderLabel')}
               </label>
               {overrideSender && (
                 <div className="flex flex-col md:flex-row gap-3 pl-6">
@@ -567,7 +574,7 @@ export function Chats({
                     type="text"
                     value={overrideSenderName}
                     onChange={(e) => setOverrideSenderName(e.target.value)}
-                    placeholder="Sender name (e.g. CEO Update)"
+                    placeholder={t('appSettingsChats.overrideSenderNamePlaceholder')}
                     maxLength={120}
                     className="flex-1 rounded-2xl bg-gray-100 py-2 px-4 outline-none font-sans text-sm"
                   />
@@ -575,7 +582,7 @@ export function Chats({
                     type="url"
                     value={overrideSenderPhotoUrl}
                     onChange={(e) => setOverrideSenderPhotoUrl(e.target.value)}
-                    placeholder="Avatar URL (optional)"
+                    placeholder={t('appSettingsChats.avatarUrlOptionalLabel')}
                     maxLength={2048}
                     className="flex-1 rounded-2xl bg-gray-100 py-2 px-4 outline-none font-sans text-sm"
                   />
@@ -587,14 +594,14 @@ export function Chats({
                   checked={broadcastIsSystem}
                   onChange={(e) => setBroadcastIsSystem(e.target.checked)}
                 />
-                Render as system announcement (banner)
+                {t('appSettingsChats.systemAnnouncementLabel')}
               </label>
             </div>
 
             <textarea
               value={broadcastText}
               onChange={(e) => setBroadcastText(e.target.value)}
-              placeholder="Type your broadcast message…"
+              placeholder={t('appSettingsChats.broadcastTextPlaceholder')}
               className="rounded-2xl bg-gray-100 py-3 px-6 w-full min-h-[96px] outline-none font-sans text-sm"
               maxLength={4000}
             />
@@ -619,7 +626,7 @@ export function Chats({
                   className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-varela text-sm"
                   type="button"
                 >
-                  Clear
+                  {t('appSettingsChats.clearButton')}
                 </button>
                 <button
                   onClick={onSendBroadcast}
@@ -627,42 +634,47 @@ export function Chats({
                   className="px-4 py-2 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-varela text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   type="button"
                 >
-                  {broadcastSending ? 'Sending…' : 'Send Broadcast'}
+                  {broadcastSending ? t('appSettingsChats.sendingButton') : t('appSettingsChats.sendBroadcastButton')}
                 </button>
               </div>
             </div>
 
             {broadcastJobId && (
               <div className="mt-2 bg-[#FCFCFC] border border-gray-200 rounded-xl p-4">
-                <div className="font-sans text-sm font-semibold mb-1">Broadcast job</div>
+                <div className="font-sans text-sm font-semibold mb-1">{t('appSettingsChats.broadcastJobHeading')}</div>
                 <div className="font-sans text-xs text-gray-600">
-                  Job ID: <span className="font-mono">{broadcastJobId}</span>
+                  {t('appSettingsChats.jobIdLabel')} <span className="font-mono">{broadcastJobId}</span>
                 </div>
                 <div className="font-sans text-xs text-gray-600 mt-1">
-                  State: <span className="font-mono">{broadcastJob?.state || 'loading…'}</span>
+                  {t('appSettingsChats.stateLabel')} <span className="font-mono">{broadcastJob?.state || t('appSettingsChats.loadingEllipsis')}</span>
                 </div>
                 {broadcastJob?.progress && typeof broadcastJob.progress === 'object' && (
                   <div className="font-sans text-xs text-gray-600 mt-1">
-                    Progress: {broadcastJob.progress.processed}/{broadcastJob.progress.total}
+                    {t('appSettingsChats.progressLabel')
+                      .replace('{processed}', String(broadcastJob.progress.processed))
+                      .replace('{total}', String(broadcastJob.progress.total))}
                   </div>
                 )}
                 {broadcastJob?.state === 'completed' && (
                   <div className="font-sans text-xs text-gray-700 mt-2">
-                    Completed. Sent:{' '}
-                    {(broadcastJob?.result?.results || []).filter((r: any) => r.status === 'sent').length}/
-                    {(broadcastJob?.result?.total ?? 0)}
+                    {t('appSettingsChats.completedSentLabel')
+                      .replace(
+                        '{sent}',
+                        String((broadcastJob?.result?.results || []).filter((r: any) => r.status === 'sent').length)
+                      )
+                      .replace('{total}', String(broadcastJob?.result?.total ?? 0))}
                   </div>
                 )}
                 {broadcastJob?.state === 'completed' && Array.isArray(broadcastJob?.result?.results) && (
                   <div className="mt-3">
-                    <div className="font-sans text-xs text-gray-600 mb-1">Details (first 20)</div>
+                    <div className="font-sans text-xs text-gray-600 mb-1">{t('appSettingsChats.detailsFirst20')}</div>
                     <div className="max-h-[180px] overflow-auto border border-gray-200 rounded-lg bg-white">
                       <table className="w-full border-collapse">
                         <thead>
                           <tr className="bg-[#FCFCFC]">
-                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">Room</th>
-                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">Status</th>
-                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">Error</th>
+                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">{t('appSettingsChats.roomColumn')}</th>
+                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">{t('appSettingsChats.statusColumn')}</th>
+                            <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">{t('appSettingsChats.errorColumn')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -680,7 +692,10 @@ export function Chats({
                 )}
                 {broadcastJob?.state === 'failed' && (
                   <div className="font-sans text-xs text-red-700 mt-2">
-                    Failed: {broadcastJob?.error || 'unknown error'}
+                    {t('appSettingsChats.failedLabel').replace(
+                      '{error}',
+                      broadcastJob?.error || t('appSettingsChats.unknownError')
+                    )}
                   </div>
                 )}
               </div>
@@ -706,12 +721,12 @@ export function Chats({
               <IconClose />
             </button>
             <div className="font-varela text-[18px] md:text-[24px] text-center md:mb-8 mb-[24px]">
-              Create New Chat for your App Users
+              {t('appSettingsChats.createChatDialogTitle')}
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <input
                 type="text"
-                placeholder="Chat Title"
+                placeholder={t('appSettingsChats.chatTitlePlaceholder')}
                 {...register('chatTitle', { required: true })}
                 className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-[24px] md:mb-8 outline-none"
               />
@@ -720,10 +735,10 @@ export function Chats({
                   className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500 hover:bg-brand-hover"
                   onClick={() => setShowCreate(false)}
                 >
-                  Cancel
+                  {t('appSettingsChats.cancelButton')}
                 </button>
                 <button className="w-full py-[12px] rounded-xl bg-brand-500 text-white hover:bg-brand-darker">
-                  Continue
+                  {t('appSettingsChats.continueButton')}
                 </button>
               </div>
             </form>
@@ -732,22 +747,25 @@ export function Chats({
       )}
       {showDelete && (
         <SubmitModal onClose={() => setShowDelete(false)}>
-          <div className="font-varela text-[24px] text-center mb-8">Delete App Room</div>
+          <div className="font-varela text-[24px] text-center mb-8">{t('appSettingsChats.deleteRoomDialogTitle')}</div>
           <p className="font-sans text-[14px] mb-8 text-center">
-            {`Are you sure you want to delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'rooms' : 'room'}?`}
+            {(getSelectedIndexes().length > 1
+              ? t('appSettingsChats.deleteConfirmPlural')
+              : t('appSettingsChats.deleteConfirmSingular')
+            ).replace('{count}', String(getSelectedIndexes().length))}
           </p>
           <div className="flex gap-8">
             <button
               onClick={() => setShowDelete(false)}
               className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
             >
-              Cancel
+              {t('appSettingsChats.cancelButton')}
             </button>
             <button
               onClick={() => onDelete()}
               className="w-full py-[12px] rounded-xl bg-red-600 hover:bg-red-700 text-white"
             >
-              Submit
+              {t('appSettingsChats.submitButton')}
             </button>
           </div>
         </SubmitModal>
@@ -781,6 +799,7 @@ const RoomBotsCell: React.FC<{
   onInvite: () => void;
   onRemoved: () => void;
 }> = ({ chatJid, botInstances, agents, onInvite, onRemoved }) => {
+  const { t } = useTranslation();
   // Filter to bots whose joinedRooms contains this chat. We do the filter client-side
   // so the parent fetches once for the whole app instead of once per row.
   const inThisRoom = useMemo(
@@ -797,32 +816,37 @@ const RoomBotsCell: React.FC<{
     <div className="flex items-center gap-1 flex-wrap justify-end">
       {inThisRoom.map((bi) => {
         const ag = agentByid.get(bi.agentId);
-        const label = ag?.displayName || bi.xmppUsername.split('_').slice(1).join('_') || 'AI Bot';
+        const label = ag?.displayName || bi.xmppUsername.split('_').slice(1).join('_') || t('appSettingsChats.aiBotFallbackLabel');
         return (
           <span
             key={bi.id}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-[11px] text-gray-700 border"
-            title={`${label}${ag?.address ? ' · ' + ag.address : ''} · BotInstance ${bi.id}`}
+            title={`${label}${ag?.address ? ' · ' + ag.address : ''} · ${t('appSettingsChats.botInstanceLabel')} ${bi.id}`}
           >
             <span className="truncate max-w-[140px]">{label}</span>
             <button
               onClick={async (e) => {
                 e.stopPropagation();
                 if (!ag) {
-                  toast.error('Cannot remove: agent metadata missing');
+                  toast.error(t('appSettingsChats.cannotRemoveToast'));
                   return;
                 }
-                if (!confirm(`Remove "${label}" from this chat? The bot stays running and can be re-invited later.`)) return;
+                if (!confirm(t('appSettingsChats.removeConfirm').replace('{label}', label))) return;
                 try {
                   await httpLeaveChatAgentBotInstance(ag.id, bi.id, chatJid);
-                  toast.success(`${label} removed from chat`);
+                  toast.success(t('appSettingsChats.removedToast').replace('{label}', label));
                   onRemoved();
                 } catch (err: any) {
-                  toast.error(`Remove failed: ${err?.response?.data?.error || err.message}`);
+                  toast.error(
+                    t('appSettingsChats.removeFailedToast').replace(
+                      '{error}',
+                      err?.response?.data?.error || err.message
+                    )
+                  );
                 }
               }}
               className="text-gray-400 hover:text-red-600"
-              aria-label={`Remove ${label} from chat`}
+              aria-label={t('appSettingsChats.removeAriaLabel').replace('{label}', label)}
             >
               ×
             </button>
@@ -832,9 +856,9 @@ const RoomBotsCell: React.FC<{
       <button
         onClick={onInvite}
         className="text-brand-500 hover:underline text-xs ml-1 whitespace-nowrap"
-        title="Invite an AI agent into this chat"
+        title={t('appSettingsChats.inviteAgentTitle')}
       >
-        + Add Bot
+        {t('appSettingsChats.addBotButton')}
       </button>
     </div>
   );

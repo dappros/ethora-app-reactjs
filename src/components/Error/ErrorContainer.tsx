@@ -1,6 +1,7 @@
 import { Box, Container, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from '../../pages/AuthPage/Button';
 import { IconArrowLeft } from '../Icons/IconArrowLeft';
 
@@ -16,6 +17,7 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
   const { status, title, description, image, navigateUrl } = props;
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Container className="w-full h-screen flex flex-col md:flex-row items-center justify-center md:justify-around md:gap-10">
@@ -33,7 +35,7 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
               : navigate(-1)
           }
         >
-          Go Back
+          {t('errorContainer.goBack')}
         </CustomButton>
       </Box>
       <Box>

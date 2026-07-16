@@ -10,6 +10,7 @@ import {
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
+import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button.tsx';
 import { getUserCredsFromFacebook } from './firebase';
 import FacebookIcon from './Icons/socials/facebookIcon';
@@ -21,6 +22,7 @@ const HUBSPOT_FORM_ID_SIGNUP = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNU
 export const FacebookButton = () => {
   const config = useAppStore((s) => s.currentApp);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (!config) return null;
 
@@ -41,7 +43,7 @@ export const FacebookButton = () => {
       if (user) {
         const email = user.providerData[0]?.email;
         if (!email) {
-          toast.error('Email not provided by Facebook');
+          toast.error(t('authFacebookButton.emailNotProvided'));
           return;
         }
 
@@ -93,7 +95,7 @@ export const FacebookButton = () => {
             }
           } catch (error) {
             console.error(error);
-            toast.error('Social registration failed');
+            toast.error(t('authFacebookButton.registrationFailed'));
           }
 
           httpLoginSocial(
@@ -132,7 +134,8 @@ export const FacebookButton = () => {
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
       }}
     >
-      {config?.signonOptions.length < 3 && 'Continue with Facebook'}
+      {config?.signonOptions.length < 3 &&
+        t('authFacebookButton.continueLabel')}
     </CustomButton>
   );
 };

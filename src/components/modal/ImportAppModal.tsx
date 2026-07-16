@@ -4,6 +4,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { IconClose } from '../Icons/IconClose';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   onClose: () => void;
@@ -27,10 +28,14 @@ export function ImportAppModal({
   onClose,
   onImported,
   doImport,
-  title = 'Import App',
-  helperText = 'Pick a JSON or ZIP file exported from another Ethora environment, or paste the JSON directly. The new app will be created under your tenant with a fresh ID.',
+  title,
+  helperText,
   showDomainOverride = true,
 }: Props) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('importAppModal.defaultTitle');
+  const resolvedHelperText = helperText ?? t('importAppModal.defaultHelperText');
+
   const [file, setFile] = useState<File | null>(null);
   const [pastedJson, setPastedJson] = useState('');
   const [domainNameOverride, setDomainNameOverride] = useState('');
@@ -46,26 +51,28 @@ export function ImportAppModal({
       } else {
         const trimmed = pastedJson.trim();
         if (!trimmed) {
-          toast.error('Please pick a file or paste the bundle JSON.');
+          toast.error(t('importAppModal.pickFileOrPaste'));
           return;
         }
         let bundle: object;
         try {
           bundle = JSON.parse(trimmed);
         } catch (e: any) {
-          toast.error(`Pasted JSON is invalid: ${e?.message || 'parse failed'}`);
+          toast.error(
+            `${t('importAppModal.pastedJsonInvalid')}${e?.message || t('importAppModal.parseFailed')}`
+          );
           return;
         }
         r = await doImport(bundle, domainNameOverride || undefined);
       }
       setResult(r.data);
-      toast.success('Imported successfully');
+      toast.success(t('importAppModal.importedSuccessfully'));
       const summary = r?.data?.summary || {};
       if (summary.newAppId) onImported(summary.newAppId);
       else if (r?.data?.agent?.id) onImported(r.data.agent.id);
     } catch (e: any) {
-      const msg = e?.response?.data?.error || e?.message || 'unknown error';
-      toast.error(`Import failed: ${msg}`);
+      const msg = e?.response?.data?.error || e?.message || t('importAppModal.unknownError');
+      toast.error(`${t('importAppModal.importFailed')}${msg}`);
     } finally {
       setBusy(false);
     }
@@ -79,17 +86,21 @@ export function ImportAppModal({
     >
       <DialogPanel className="p-4 sm:py-8 sm:px-[24px] bg-white rounded-3xl w-full max-w-[720px] m-8 relative max-h-[90vh] overflow-y-auto">
         {!busy && (
-          <button className="absolute top-[15px] right-[15px]" onClick={onClose} aria-label="Close">
+          <button
+            className="absolute top-[15px] right-[15px]"
+            onClick={onClose}
+            aria-label={t('importAppModal.close')}
+          >
             <IconClose />
           </button>
         )}
-        <div className="font-varela text-[20px] mt-4 mb-2">{title}</div>
-        <div className="font-sans text-sm text-gray-600 mb-6">{helperText}</div>
+        <div className="font-varela text-[20px] mt-4 mb-2">{resolvedTitle}</div>
+        <div className="font-sans text-sm text-gray-600 mb-6">{resolvedHelperText}</div>
 
         <div className="grid gap-4">
           <div>
             <label className="block font-varela text-sm text-gray-700 mb-1">
-              Bundle file (.json or .zip)
+              {t('importAppModal.bundleFileLabel')}
             </label>
             <input
               type="file"
@@ -100,15 +111,20 @@ export function ImportAppModal({
             />
             {file && (
               <div className="text-xs text-gray-500 mt-1">
-                Selected: {file.name} ({Math.round(file.size / 1024)} KB)
+                {t('importAppModal.selectedPrefix')} {file.name} ({Math.round(file.size / 1024)}{' '}
+                {t('importAppModal.kb')})
               </div>
             )}
           </div>
 
-          <div className="text-center text-xs text-gray-400">or paste JSON below</div>
+          <div className="text-center text-xs text-gray-400">
+            {t('importAppModal.orPasteBelow')}
+          </div>
 
           <div>
-            <label className="block font-varela text-sm text-gray-700 mb-1">Bundle JSON</label>
+            <label className="block font-varela text-sm text-gray-700 mb-1">
+              {t('importAppModal.bundleJsonLabel')}
+            </label>
             <textarea
               value={pastedJson}
               onChange={(e) => setPastedJson(e.target.value)}
@@ -122,14 +138,14 @@ export function ImportAppModal({
           {showDomainOverride && (
             <div>
               <label className="block font-varela text-sm text-gray-700 mb-1">
-                Domain name (optional override)
+                {t('importAppModal.domainNameLabel')}
               </label>
               <input
                 type="text"
                 value={domainNameOverride}
                 onChange={(e) => setDomainNameOverride(e.target.value)}
                 disabled={busy}
-                placeholder="leave blank to keep the source domain (auto-suffix on collision)"
+                placeholder={t('importAppModal.domainNamePlaceholder')}
                 className="block w-full text-sm border border-gray-200 rounded-lg p-2"
               />
             </div>
@@ -137,7 +153,7 @@ export function ImportAppModal({
 
           {result && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs">
-              <div className="font-varela text-sm mb-1">Import result</div>
+              <div className="font-varela text-sm mb-1">{t('importAppModal.importResultLabel')}</div>
               <pre className="whitespace-pre-wrap break-words">{JSON.stringify(result, null, 2)}</pre>
             </div>
           )}
@@ -149,14 +165,14 @@ export function ImportAppModal({
             className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover disabled:opacity-50"
             onClick={onClose}
           >
-            Cancel
+            {t('importAppModal.cancel')}
           </button>
           <button
             disabled={busy || (!file && !pastedJson.trim())}
             onClick={handleSubmit}
             className="w-full py-3 hover:bg-brand-darker p-2 border bg-brand-500 border-brand-darker rounded-xl text-white disabled:opacity-50"
           >
-            {busy ? 'Importing...' : 'Import'}
+            {busy ? t('importAppModal.importing') : t('importAppModal.import')}
           </button>
         </div>
       </DialogPanel>

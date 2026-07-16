@@ -4,6 +4,7 @@ import hexToRgba from 'hex-to-rgba';
 import { actionPostFile } from '../../actions';
 import { AppearanceRightImage } from '../../components/Appearance/AppearanceRightImage';
 import { PopoverColorPicker } from '../../components/PopoverColorPicker';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   displayName: string;
@@ -27,6 +28,7 @@ export function Appearance({
   setLogoImage,
 }: Props) {
   const logoRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const onChangeColor = (color: string) => {
     document.documentElement.style.setProperty(
@@ -52,32 +54,38 @@ export function Appearance({
     <>
       <div className="appearance-left">
         <div className="font-sans font-semibold text-base mb-4">
-          Display Name
+          {t('appSettingsAppearance.displayNameLabel')}
         </div>
         <input
-          placeholder="Enter App's Name"
+          placeholder={t('appSettingsAppearance.displayNamePlaceholder')}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
           type="text"
         />
-        <div className="font-sans font-semibold text-base mb-4">Tagline</div>
+        <div className="font-sans font-semibold text-base mb-4">
+          {t('appSettingsAppearance.taglineLabel')}
+        </div>
         <input
-          placeholder="Enter Tagline of Your App"
+          placeholder={t('appSettingsAppearance.taglinePlaceholder')}
           className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
           type="text"
           value={tagline}
           onChange={(e) => setTagline(e.target.value)}
         />
-        <div className="font-sans font-semibold text-base mb-4">Color</div>
+        <div className="font-sans font-semibold text-base mb-4">
+          {t('appSettingsAppearance.colorLabel')}
+        </div>
         <div className="mb-4">
           <PopoverColorPicker color={color} onChange={onChangeColor} />
         </div>
         <div className="xs:flex items-center justify-between">
-          <div className="font-sans font-semibold text-base mb-4">Logo</div>
+          <div className="font-sans font-semibold text-base mb-4">
+            {t('appSettingsAppearance.logoLabel')}
+          </div>
           <div className="flex items-center mb-2">
             <span className="text-xs inline-block ml-auto text-gray-500">
-              (Recommended size: 500px x 500px)
+              {t('appSettingsAppearance.logoRecommendedSize')}
             </span>
           </div>
         </div>
@@ -92,7 +100,7 @@ export function Appearance({
           onClick={() => logoRef.current?.click()}
           className="w-full hover:bg-brand-hover p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
         >
-          Add logo
+          {t('appSettingsAppearance.addLogoButton')}
         </button>
       </div>
       <AppearanceRightImage

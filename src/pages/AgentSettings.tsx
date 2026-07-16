@@ -30,12 +30,16 @@ import {
   WebIndexPanel,
 } from '../components/Agents/panels/AgentPanels';
 import { httpListAgentBotInstances } from '../http';
+import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
 // (TestMessageModal is defined below.)
 
 // Keep the tab list flat (single source of truth for tab order, panel content, and URL).
+// These stay fixed English identifiers - matched against the `tab` URL
+// search param and TABS.indexOf() - only the rendered label (in
+// SidebarSections, via TAB_LABEL_KEYS) is translated.
 const TABS = [
   'Persona',
   'Context',
@@ -47,15 +51,27 @@ const TABS = [
   'Visibility',
 ] as const;
 
-const SECTIONS: { label: string; tabs: (typeof TABS[number])[] }[] = [
-  { label: 'Identity', tabs: ['Persona', 'Context'] },
-  { label: 'Knowledge', tabs: ['Web Index', 'Docs Index'] },
-  { label: 'Behaviour', tabs: ['SOUL.MD', 'Heartbeat'] },
-  { label: 'Activity', tabs: ['Chats Index'] },
-  { label: 'Sharing', tabs: ['Visibility'] },
+const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
+  Persona: 'agentSettings.tabPersona',
+  Context: 'agentSettings.tabContext',
+  'Web Index': 'agentSettings.tabWebIndex',
+  'Docs Index': 'agentSettings.tabDocsIndex',
+  'SOUL.MD': 'agentSettings.tabSoulMd',
+  Heartbeat: 'agentSettings.tabHeartbeat',
+  'Chats Index': 'agentSettings.tabChatsIndex',
+  Visibility: 'agentSettings.tabVisibility',
+};
+
+const SECTIONS: { labelKey: string; tabs: (typeof TABS[number])[] }[] = [
+  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Context'] },
+  { labelKey: 'agentSettings.sectionKnowledge', tabs: ['Web Index', 'Docs Index'] },
+  { labelKey: 'agentSettings.sectionBehaviour', tabs: ['SOUL.MD', 'Heartbeat'] },
+  { labelKey: 'agentSettings.sectionActivity', tabs: ['Chats Index'] },
+  { labelKey: 'agentSettings.sectionSharing', tabs: ['Visibility'] },
 ];
 
 export default function AgentSettings() {
+  const { t } = useTranslation();
   const { agentId } = useParams<{ agentId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -85,7 +101,7 @@ export default function AgentSettings() {
     setLoading(true);
     actionGetAgent(agentId)
       .then((a) => setAgent(a))
-      .catch((e) => toast.error(`Failed to load agent: ${e?.response?.data?.error || e.message}`))
+      .catch((e) => toast.error(`${t('agentSettings.loadAgentFailedPrefix')} ${e?.response?.data?.error || e.message}`))
       .finally(() => setLoading(false));
     reloadInstances();
     // Load the user's apps so the Web/Docs Index panels can resolve their scoped App.
@@ -132,8 +148,8 @@ export default function AgentSettings() {
   const isOwned = !!(agent && currentUser?._id && agent.ownerId === currentUser._id);
   const readOnly = !isOwned;
 
-  if (loading && !agent) return <div className="p-4 text-gray-500">Loading agent...</div>;
-  if (!agent) return <div className="p-4 text-gray-500">Agent not found.</div>;
+  if (loading && !agent) return <div className="p-4 text-gray-500">{t('agentSettings.loadingAgent')}</div>;
+  if (!agent) return <div className="p-4 text-gray-500">{t('agentSettings.agentNotFound')}</div>;
 
   return (
     <div className="h-full rounded-2xl bg-white p-4 grid grid-rows-[auto,1fr] gap-y-4 overflow-hidden">
@@ -148,13 +164,11 @@ export default function AgentSettings() {
 
       {readOnly && (
         <div className="mx-4 -mt-2 rounded-md border border-gray-300 bg-gray-50 p-2 text-xs text-gray-700">
-          <strong>Read-only.</strong> You're viewing an agent owned by another
-          tenant{agent.visibility === 'public' ? ' (public)' : ''}. Editing,
-          deleting, and inspecting per-room runtime state are disabled.{' '}
-          {agent.visibility === 'public' && (
-            <>Use the <em>Clone to my agents</em> action on the Agents list
-            page to create your own editable copy.</>
-          )}
+          <strong>{t('agentSettings.readOnlyTitle')}</strong>{' '}
+          {t('agentSettings.readOnlyBodyMain')}
+          {agent.visibility === 'public' ? t('agentSettings.publicParenthetical') : ''}
+          {t('agentSettings.readOnlyBodyRest')}{' '}
+          {agent.visibility === 'public' && t('agentSettings.readOnlyCloneHint')}
         </div>
       )}
 
@@ -209,13 +223,14 @@ const VisibilityPanel: React.FC<{
   isSuperWriteAdmin: boolean;
   onChanged: (a: ModelAgent) => void;
 }> = ({ agent, isOwned, isSuperWriteAdmin, onChanged }) => {
+  const { t } = useTranslation();
   const canEdit = isOwned || isSuperWriteAdmin;
   return (
     <div className="space-y-4 max-w-xl">
       <div>
-        <h3 className="text-lg font-semibold mb-1">Visibility</h3>
+        <h3 className="text-lg font-semibold mb-1">{t('agentSettings.visibilityHeading')}</h3>
         <p className="text-sm text-gray-600">
-          Controls who can see this agent on this Ethora server.
+          {t('agentSettings.visibilityDescription')}
         </p>
       </div>
 
@@ -224,65 +239,65 @@ const VisibilityPanel: React.FC<{
           value="private"
           current={agent.visibility}
           canEdit={canEdit}
-          onChange={(v) => doSet(agent.id, v, onChanged)}
-          label="Private"
-          description="Only you can see this agent. Recommended for agents built for your own business, app, or website."
+          onChange={(v) => doSet(agent.id, v, onChanged, t)}
+          label={t('agentSettings.visibilityPrivateLabel')}
+          description={t('agentSettings.visibilityPrivateDesc')}
         />
         <VisibilityOption
           value="unlisted"
           current={agent.visibility}
           canEdit={canEdit}
-          onChange={(v) => doSet(agent.id, v, onChanged)}
-          label="Unlisted"
-          description="Not listed publicly, but discoverable by other tenants who know the agent's address. Useful for sharing with specific partners without making it broadcast-visible."
+          onChange={(v) => doSet(agent.id, v, onChanged, t)}
+          label={t('agentSettings.visibilityUnlistedLabel')}
+          description={t('agentSettings.visibilityUnlistedDesc')}
         />
         <VisibilityOption
           value="public"
           current={agent.visibility}
           canEdit={canEdit}
-          onChange={(v) => doSet(agent.id, v, onChanged)}
-          label="Public"
-          description="Listed for every tenant on this Ethora server. They can view the persona and clone it. Pick this only when the agent is intended to be universally useful (e.g. a generic Support Agent or a published persona for the community)."
+          onChange={(v) => doSet(agent.id, v, onChanged, t)}
+          label={t('agentSettings.visibilityPublicLabel')}
+          description={t('agentSettings.visibilityPublicDesc')}
         />
       </div>
 
       {!canEdit && (
         <div className="rounded-md border border-gray-300 bg-gray-50 p-2 text-xs text-gray-700">
-          You're viewing an agent owned by another tenant. Only the owner can
-          change its visibility.
+          {t('agentSettings.visibilityNotEditableMain')}
           {agent.visibility === 'public' && (
-            <> Use <em>Clone to my agents</em> on the Agents list to create
-            your own editable copy.</>
+            <> {t('agentSettings.visibilityNotEditableCloneHint')}</>
           )}
         </div>
       )}
 
       {!isOwned && isSuperWriteAdmin && (
         <div className="rounded-md border border-purple-300 bg-purple-50 p-2 text-xs text-purple-900">
-          <strong>Superadmin moderation:</strong> you can flip this agent's
-          visibility on behalf of its owner. Use this to take down public
-          agents that contain spam, abuse, or otherwise breach platform
-          policy. Setting <em>Private</em> immediately removes it from every
-          other tenant's <em>Public agents</em> list. Owner-facing
-          notifications are not sent — coordinate out-of-band when
-          appropriate.
+          <strong>{t('agentSettings.superadminModerationTitle')}</strong>{' '}
+          {t('agentSettings.superadminModerationBody')}
         </div>
       )}
     </div>
   );
 };
 
+const VISIBILITY_LABEL_KEY: Record<'private' | 'unlisted' | 'public', string> = {
+  private: 'agentSettings.visibilityPrivateLabel',
+  unlisted: 'agentSettings.visibilityUnlistedLabel',
+  public: 'agentSettings.visibilityPublicLabel',
+};
+
 async function doSet(
   agentId: string,
   v: 'private' | 'unlisted' | 'public',
-  onChanged: (a: ModelAgent) => void
+  onChanged: (a: ModelAgent) => void,
+  t: (key: string) => string
 ) {
   try {
     const updated = await actionSetAgentVisibility(agentId, v);
     if (updated) onChanged(updated);
-    toast.success(`Visibility set to ${v}`);
+    toast.success(`${t('agentSettings.visibilitySetToastPrefix')} ${t(VISIBILITY_LABEL_KEY[v])}`);
   } catch (err: any) {
-    toast.error(`Failed: ${err?.response?.data?.error || err.message}`);
+    toast.error(`${t('agentSettings.failedPrefix')} ${err?.response?.data?.error || err.message}`);
   }
 }
 
@@ -326,13 +341,14 @@ const Header: React.FC<{
   onInstancesChanged: () => void;
   readOnly: boolean;
 }> = ({ agent, defaultBotInstance, onBack, onInstancesChanged, readOnly }) => {
+  const { t } = useTranslation();
   // The visibility selector moved out of the header into its own
   // "Visibility" tab (see VisibilityPanel below). Header is now identity
   // + the per-app Start/Stop affordance, gated on ownership.
   return (
     <div className="px-4 pt-2 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-3">
       <button onClick={onBack} className="text-sm text-brand-500 hover:underline">
-        &larr; Agents
+        &larr; {t('agentSettings.backToAgents')}
       </button>
       <div className="flex items-center gap-2 flex-1 min-w-[240px]">
         {agent.avatarUrl ? (
@@ -354,10 +370,10 @@ const Header: React.FC<{
               const next = defaultBotInstance.status === 'on' ? 'off' : 'on';
               try {
                 await actionSetBotInstanceStatus(defaultBotInstance.id, next);
-                toast.success(`Bot ${next}`);
+                toast.success(`${t('agentSettings.botStatusToastPrefix')} ${next === 'on' ? t('agentSettings.statusOn') : t('agentSettings.statusOff')}`);
                 onInstancesChanged();
               } catch (e: any) {
-                toast.error(`Failed: ${e?.response?.data?.error || e.message}`);
+                toast.error(`${t('agentSettings.failedPrefix')} ${e?.response?.data?.error || e.message}`);
               }
             }}
             className={classNames(
@@ -366,9 +382,9 @@ const Header: React.FC<{
                 ? 'bg-red-500 hover:bg-red-400'
                 : 'bg-green-500 hover:bg-green-400'
             )}
-            title={`Toggle status of this Agent's BotInstance in app "${defaultBotInstance.appName || defaultBotInstance.appId}"`}
+            title={`${t('agentSettings.toggleStatusTitlePrefix')} "${defaultBotInstance.appName || defaultBotInstance.appId}"`}
           >
-            {defaultBotInstance.status === 'on' ? 'Stop' : 'Start'}
+            {defaultBotInstance.status === 'on' ? t('agentSettings.stop') : t('agentSettings.start')}
           </button>
         )}
       </div>
@@ -377,15 +393,16 @@ const Header: React.FC<{
 };
 
 const SidebarSections: React.FC<{ selectedIndex: number }> = ({ selectedIndex: _ignored }) => {
+  const { t } = useTranslation();
   // Render section labels + Tabs. Each Tab is a Headless-UI Tab inside the parent TabList.
   // Headless UI tracks Tab DOM order to map them to TabPanels, so we render them in the
   // same flat order as the TABS constant — sections are visual grouping only.
   return (
     <div className="flex flex-row lg:flex-col gap-1 lg:gap-3 lg:p-2 w-full">
       {SECTIONS.map((section) => (
-        <div key={section.label} className="flex flex-row lg:flex-col gap-1">
+        <div key={section.labelKey} className="flex flex-row lg:flex-col gap-1">
           <div className="hidden lg:block text-[11px] uppercase font-semibold text-gray-400 px-2 mt-2">
-            {section.label}
+            {t(section.labelKey)}
           </div>
           {section.tabs.map((label) => (
             <Tab
@@ -397,7 +414,7 @@ const SidebarSections: React.FC<{ selectedIndex: number }> = ({ selectedIndex: _
                 )
               }
             >
-              {label}
+              {t(TAB_LABEL_KEYS[label])}
             </Tab>
           ))}
         </div>

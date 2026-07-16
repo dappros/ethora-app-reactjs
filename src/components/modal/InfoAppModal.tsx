@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { IconClose } from '../Icons/IconClose';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface InfoAppModalProps {
   appName: string;
@@ -22,6 +23,8 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
   show,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       className="fixed inset-0 z-50 flex justify-center items-center bg-black/50 transition duration-300"
@@ -37,14 +40,16 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
         </button>
 
         <div className="font-varela text-[18px] md:text-[20px] mt-4 py-6">
-          {`Awesome - your “${appName}” app is here! You will now see your Admin dashboard where you can:`}
+          {t('infoAppModal.headerPrefix')}
+          {appName}
+          {t('infoAppModal.headerSuffix')}
         </div>
 
         <p className="font-sans text-[16px] font-semibold mb-2">
-          1. Change appearance
+          {t('infoAppModal.step1Title')}
         </p>
         <p className="font-sans text-sm p-4 pl-5">
-          Open{' '}
+          {t('infoAppModal.step1OpenPrefix')}
           <button
             onClick={() => {
               navigate(`/app/admin/apps/${appId}/settings?tab=Appearance`, {
@@ -54,20 +59,19 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
             }}
             className="text-blue-600 hover:underline cursor-pointer"
           >
-            Appearance
-          </button>{' '}
-          tab where you can add your logo, change colors etc for your App.
+            {t('infoAppModal.appearanceLink')}
+          </button>
+          {t('infoAppModal.step1Suffix')}
         </p>
 
         <p className="font-sans text-[16px] font-semibold mb-2">
-          2. Manage chats
+          {t('infoAppModal.step2Title')}
         </p>
         <p className="font-sans text-sm p-4 pl-5">
-          A default “Main Chat” room has been pre-created and pinned for your
-          Users.
+          {t('infoAppModal.mainChatCreated')}
         </p>
         <p className="font-sans text-sm p-4 pl-5">
-          Manage pinned chats in{' '}
+          {t('infoAppModal.manageChatsPrefix')}
           <button
             onClick={() => {
               navigate(`/app/admin/apps/${appId}/settings?tab=Chats`, {
@@ -77,17 +81,16 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
             }}
             className="text-blue-600 hover:underline cursor-pointer"
           >
-            Chats
-          </button>{' '}
-          tab here. You and your users can also create and join chats via your
-          App interface.
+            {t('infoAppModal.chatsLink')}
+          </button>
+          {t('infoAppModal.manageChatsSuffix')}
         </p>
 
         <p className="font-sans text-[16px] font-semibold mb-2">
-          3. Test and on-board users
+          {t('infoAppModal.step3Title')}
         </p>
         <p className="font-sans text-sm p-4 pl-5">
-          {`Your temporary web app URL is `}
+          {t('infoAppModal.tempUrlPrefix')}
           <a
             href={`https://${domainName}.ethora.com`}
             target="_blank"
@@ -99,31 +102,26 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
           <button
             onClick={() => {
               navigator.clipboard.writeText(`${domainName}.ethora.com`);
-              toast.success('Copied to clipboard!');
+              toast.success(t('infoAppModal.copiedToClipboard'));
             }}
             className="ml-2 text-blue-600 hover:underline cursor-pointer"
           >
-            📋 Copy
+            {'📋 '}
+            {t('infoAppModal.copy')}
           </button>
-          {`. You can send it to your beta testers or test it yourself in another browser.`}
+          {t('infoAppModal.tempUrlSuffix')}
         </p>
 
         <p className="font-sans text-sm p-4 pl-5">
-          You’re logged as App Owner within our Base App. To test your own app
-          as your End User, open the above URL in another browser or incognito
-          mode. A disposable e-mail via a service like Mailinator or another
-          Google account may be handy for your test “End User” account.
+          {t('infoAppModal.testAsEndUser')}
         </p>
 
         <p className="font-sans text-sm p-4 pl-5">
-          There are many more things you can do such as AI bots and
-          integrations, changing your app URL, building your iOS/Android app,
-          setting up your own Ethora server, internal Coin and gamification, but
-          we suggest you start with the basics first.
+          {t('infoAppModal.moreFeatures')}
         </p>
 
         <p className="text-center font-sans text-[16px] font-semibold pt-4 pb-6">
-          Good luck!
+          {t('infoAppModal.goodLuck')}
         </p>
 
         <div className="flex gap-4">
@@ -131,7 +129,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
             className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover"
             onClick={onClose}
           >
-            OK
+            {t('infoAppModal.ok')}
           </button>
         </div>
       </DialogPanel>

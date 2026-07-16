@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { RadioButton } from '../../components/RadioButton';
 import { updateMe } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelCurrentUser } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 
 export function Visibility() {
+  const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser as ModelCurrentUser);
   const doUpdateUser = useAppStore((s) => s.doUpdateUser);
   const [isProfileOpen, setIsProfileOpen] = useState(currentUser.isProfileOpen);
@@ -17,10 +19,10 @@ export function Visibility() {
       updateMe({ isProfileOpen })
         .then(({ data }) => {
           doUpdateUser(data.user);
-          toast.success('Saved');
+          toast.success(t('userSettingsVisibility.toastSaved'));
         })
         .catch(() => {
-          toast.error('Error');
+          toast.error(t('userSettingsVisibility.toastError'));
         });
     }
   }, [isProfileOpen]);
@@ -30,15 +32,17 @@ export function Visibility() {
       updateMe({ isAssetsOpen })
         .then(({ data }) => {
           doUpdateUser(data.user);
-          toast.success('Saved');
+          toast.success(t('userSettingsVisibility.toastSaved'));
         })
-        .catch(() => toast.error('Error'));
+        .catch(() => toast.error(t('userSettingsVisibility.toastError')));
     }
   }, [isAssetsOpen]);
 
   return (
     <div className="md:ml-4">
-      <div className="font-sans font-semibold text-[16px] mb-4">Profile Visiblility</div>
+      <div className="font-sans font-semibold text-[16px] mb-4">
+        {t('userSettingsVisibility.profileVisibilityHeading')}
+      </div>
       <RadioGroup
         value={isProfileOpen}
         onChange={(value) => {
@@ -47,18 +51,26 @@ export function Visibility() {
         aria-label="Server size"
         className="mb-8"
       >
-        <RadioButton value={true} label="Open (default)" className="mb-2" />
+        <RadioButton
+          value={true}
+          label={t('userSettingsVisibility.radioOpenLabel')}
+          className="mb-2"
+        />
         <p className="font-sans text-[12px] text-[#8C8C8C] mb-4">
-          Your profile can be viewed by anyone who follows your profile link or
-          QR code
+          {t('userSettingsVisibility.profileOpenDescription')}
         </p>
-        <RadioButton value={false} label="Restricted" className="mb-2" />
+        <RadioButton
+          value={false}
+          label={t('userSettingsVisibility.radioRestrictedLabel')}
+          className="mb-2"
+        />
         <p className="font-sans text-[12px] text-[#8C8C8C]">
-          Only users with your permission or temporary secure link can see your
-          profile
+          {t('userSettingsVisibility.profileRestrictedDescription')}
         </p>
       </RadioGroup>
-      <div className="font-sans font-semibold text-[16px] mb-4">Documents Visiblility</div>
+      <div className="font-sans font-semibold text-[16px] mb-4">
+        {t('userSettingsVisibility.documentsVisibilityHeading')}
+      </div>
       <RadioGroup
         value={isAssetsOpen}
         onChange={(value) => {
@@ -66,14 +78,21 @@ export function Visibility() {
         }}
         aria-label="Server size"
       >
-        <RadioButton value={true} label="Full (default)" className="mb-2" />
+        <RadioButton
+          value={true}
+          label={t('userSettingsVisibility.radioFullLabel')}
+          className="mb-2"
+        />
         <p className="font-sans text-[12px] text-[#8C8C8C] mb-4">
-          Show all Documents to those who can see your profile
+          {t('userSettingsVisibility.documentsFullDescription')}
         </p>
-        <RadioButton value={false} label="Individual" className="mb-2" />
+        <RadioButton
+          value={false}
+          label={t('userSettingsVisibility.radioIndividualLabel')}
+          className="mb-2"
+        />
         <p className="font-sans text-[12px] text-[#8C8C8C]">
-          You need to share each document individually before others can see
-          them
+          {t('userSettingsVisibility.documentsIndividualDescription')}
         </p>
       </RadioGroup>
     </div>

@@ -1,6 +1,7 @@
 import cn from 'classnames';
 import { useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { IconAccount } from './Icons/IconAccount';
 import { IconAdmin } from './Icons/IconAdmin';
@@ -38,6 +39,7 @@ function isEthoraHostedEnv(): boolean {
 export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
@@ -77,7 +79,7 @@ export function AppMenu() {
         {isAdmin && (
           <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
             <IconAdmin />
-            <div className={LABEL_CLASS}>Apps</div>
+            <div className={LABEL_CLASS}>{t('nav.apps')}</div>
           </NavLink>
         )}
         <NavLink to="/app/chat" className={ITEM_CLASS}>
@@ -85,7 +87,7 @@ export function AppMenu() {
             <IconChat />
             <UnreadBadge className="absolute -top-1 -right-2" />
           </div>
-          <div className={LABEL_CLASS}>Chats</div>
+          <div className={LABEL_CLASS}>{t('nav.chats')}</div>
         </NavLink>
         {isAdmin && (
           <NavLink
@@ -100,18 +102,18 @@ export function AppMenu() {
             })}
           >
             <IconAgents />
-            <div className={LABEL_CLASS}>Agents</div>
+            <div className={LABEL_CLASS}>{t('nav.agents')}</div>
           </NavLink>
         )}
         {isAdmin && showBilling && (
           <NavLink to="/app/admin/billing" className={ITEM_CLASS}>
             <IconBilling />
-            <div className={LABEL_CLASS}>Billing</div>
+            <div className={LABEL_CLASS}>{t('nav.billing')}</div>
           </NavLink>
         )}
         <NavLink to="/app/help" className={ITEM_CLASS}>
           <IconHelp />
-          <div className={LABEL_CLASS}>Help</div>
+          <div className={LABEL_CLASS}>{t('nav.help')}</div>
         </NavLink>
         <div className="my-2 border-b border-b-gray-200"></div>
       </div>
@@ -130,7 +132,7 @@ export function AppMenu() {
             small={true}
           />
           <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-sm ">
-            Profile
+            {t('nav.profile')}
           </div>
         </NavLink>
         <div className="hidden md:block my-2 border-b border-b-gray-200"></div>
@@ -140,7 +142,7 @@ export function AppMenu() {
         >
           <IconAccount />
           <div className="hidden md:block text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
-            Account
+            {t('nav.account')}
           </div>
         </NavLink>
       </div>

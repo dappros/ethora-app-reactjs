@@ -8,6 +8,7 @@ import PasswordInput from '../../../../components/input/PasswordInput';
 import { Loading } from '../../../../components/Loading';
 import { logSignup } from '../../../../hooks/withTracking';
 import { httpLoginWithEmail, setPermanentPassword } from '../../../../http';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
@@ -46,6 +47,7 @@ const ThirdStep = () => {
 
   const navigate = useNavigate();
   const config = useAppStore((state) => state.currentApp);
+  const { t } = useTranslation();
 
   const newPassword = watch('newPassword');
   const repeatPassword = watch('repeatPassword');
@@ -99,13 +101,13 @@ const ThirdStep = () => {
     const email = queryParams.get('email') || '';
 
     if (newPassword !== repeatPassword) {
-      toast.error('Password do not match!');
+      toast.error(t('authRegisterThirdStep.passwordMismatch'));
       return;
     }
     setLoading(true);
     setPermanentPassword(tempPassword, newPassword)
       .then(() => {
-        toast.success('Success');
+        toast.success(t('authRegisterThirdStep.success'));
         // navigate('/login');
 
         httpLoginWithEmail(email, newPassword)
@@ -125,7 +127,7 @@ const ThirdStep = () => {
           });
       })
       .catch(() => {
-        toast.error('Error');
+        toast.error(t('authRegisterThirdStep.error'));
       })
       .finally(() => setLoading(false));
   };
@@ -154,7 +156,7 @@ const ThirdStep = () => {
               color: '#141414',
             }}
           >
-            Set your own password
+            {t('authRegisterThirdStep.title')}
           </Typography>
           <Box
             sx={{
@@ -188,17 +190,17 @@ const ThirdStep = () => {
             /> */}
             <PasswordInput
               type="password"
-              placeholder={'Enter Your Password'}
+              placeholder={t('authRegisterThirdStep.enterPasswordPlaceholder')}
               sx={{ flex: 1, width: '100%' }}
-              {...register('newPassword', { required: 'Required field' })}
+              {...register('newPassword', { required: t('authRegisterThirdStep.requiredField') })}
               error={!!errors.newPassword}
               helperText={errors.newPassword?.message}
             />
             <PasswordInput
               type="password"
-              placeholder={'Repeat Your Password'}
+              placeholder={t('authRegisterThirdStep.repeatPasswordPlaceholder')}
               sx={{ flex: 1, width: '100%' }}
-              {...register('repeatPassword', { required: 'Required field' })}
+              {...register('repeatPassword', { required: t('authRegisterThirdStep.requiredField') })}
               error={!!errors.repeatPassword}
               helperText={errors.repeatPassword?.message}
             />
@@ -219,7 +221,7 @@ const ThirdStep = () => {
               cursor: isDisabled ? 'no-drop' : 'pointer',
             }}
           >
-            Set Password
+            {t('authRegisterThirdStep.submit')}
           </CustomButton>
         </Box>
       </Box>

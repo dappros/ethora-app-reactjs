@@ -1,6 +1,7 @@
 import cn from 'classnames';
 import { CopyButton } from '../../components/CopyButton';
 import { Secret } from '../../components/Secret';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelApp } from '../../models';
 import './Api.scss';
 
@@ -9,20 +10,17 @@ interface Props {
 }
 
 export const Api = ({ app }: Props) => {
+  const { t } = useTranslation();
   return (
     <div className="overflow-hidden">
       <div className="font-semibold font-sans text-normal mb-4">
-        App Access Key
+        {t('appSettingsApi.heading')}
       </div>
       <p className="text-gray-500 text-sm font-sans">
-        For accessing Ethora API and infrastructure, your App uses a Key and
-        Secret pair. With this key pair, your applications can generate JWT
-        tokens etc for authentication and signing API requests.
+        {t('appSettingsApi.description')}
       </p>
       <p className="text-gray-500 text-sm font-sans mb-4">
-        Note: “Rotate” will replace your key pair with a new one. This will
-        invalidate access for your application code until it’s updated with new
-        credentials.
+        {t('appSettingsApi.rotateNote')}
       </p>
 
       <div className="p-4 border border-gray-200 rounded-xl">
@@ -31,10 +29,10 @@ export const Api = ({ app }: Props) => {
             <thead>
               <tr className="bg-[#FCFCFC]">
                 <th className="w-1/2 r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap rounded-l-lg">
-                  Key
+                  {t('appSettingsApi.keyColumn')}
                 </th>
                 <th className="w-1/2 px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap rounded-r-lg">
-                  Secret
+                  {t('appSettingsApi.secretColumn')}
                 </th>
               </tr>
             </thead>

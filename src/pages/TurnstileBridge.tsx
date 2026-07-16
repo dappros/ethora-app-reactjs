@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../i18n/useTranslation';
 
 const TEST_SITE_KEY = import.meta.env.VITE_SITE_KEY as string;
 
 export default function TurnstileBridge() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -82,7 +84,7 @@ export default function TurnstileBridge() {
         }}
       >
         <h2 style={{ marginBottom: '20px', color: '#333' }}>
-          Confirm that you are not a robot
+          {t('turnstileBridge.heading')}
         </h2>
         <div
           ref={containerRef}
@@ -94,7 +96,7 @@ export default function TurnstileBridge() {
           }}
         />
         <p style={{ marginTop: '20px', color: '#666', fontSize: '14px' }}>
-          Complete the verification to continue
+          {t('turnstileBridge.subtext')}
         </p>
       </div>
     </div>

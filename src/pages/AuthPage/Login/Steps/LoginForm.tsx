@@ -8,6 +8,7 @@ import CustomInput from '../../../../components/input/Input';
 import PasswordInput from '../../../../components/input/PasswordInput';
 import { logLogin } from '../../../../hooks/withTracking.tsx';
 import { httpLoginWithEmail } from '../../../../http.ts';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
@@ -29,6 +30,7 @@ type Inputs = {
 const LoginStep = () => {
   const navigate = useNavigate();
   const config = useAppStore((s) => s.currentApp);
+  const { t } = useTranslation();
 
   const {
     register,
@@ -57,26 +59,26 @@ const LoginStep = () => {
           }
         } catch (error: any) {
           console.error('Error processing login response:', error);
-          toast.error(error?.message || 'Failed to process login. Please try again.');
+          toast.error(error?.message || t('authLoginStep.processError'));
         }
       })
       .catch((error) => {
         console.error('Login error:', error);
-        
-        let errorMessage = 'Login failed. Please check your credentials.';
-        
+
+        let errorMessage = t('authLoginStep.loginFailed');
+
         if (error.code === 'ECONNABORTED' || error.message === 'Request aborted') {
-          errorMessage = 'Request timed out. Please check if the backend server is running on port 8080.';
+          errorMessage = t('authLoginStep.timeoutError');
         } else if (error.response) {
           // Server responded with error status
-          errorMessage = error.response.data?.error || `Server error: ${error.response.status}`;
+          errorMessage = error.response.data?.error || `${t('authLoginStep.serverErrorPrefix')}: ${error.response.status}`;
         } else if (error.request) {
           // Request was made but no response received
-          errorMessage = 'No response from server. Please check if the backend is running.';
+          errorMessage = t('authLoginStep.noResponseError');
         } else {
-          errorMessage = error.message || 'An unexpected error occurred.';
+          errorMessage = error.message || t('authLoginStep.unexpectedError');
         }
-        
+
         toast.error(errorMessage);
         localStorage.removeItem('token-538');
       });
@@ -109,13 +111,13 @@ const LoginStep = () => {
       >
         <CustomInput
           fullWidth
-          placeholder="Email"
+          placeholder={t('authLoginStep.emailPlaceholder')}
           type="email"
           {...register('email', {
-            required: 'Email is required',
+            required: t('authLoginStep.emailRequired'),
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address',
+              message: t('authLoginStep.emailInvalid'),
             },
           })}
           error={errors['email']?.message ? true : false}
@@ -123,8 +125,8 @@ const LoginStep = () => {
         />
         <PasswordInput
           fullWidth
-          placeholder="Password"
-          {...register('password', { required: 'Required field' })}
+          placeholder={t('authLoginStep.passwordPlaceholder')}
+          {...register('password', { required: t('authLoginStep.requiredField') })}
           error={errors['password']?.message ? true : false}
           helperText={errors['password']?.message}
         />
@@ -138,7 +140,7 @@ const LoginStep = () => {
           }}
           onClick={() => navigate('/resetPassword')}
         >
-          Forgot password ?
+          {t('authLoginStep.forgotPassword')}
         </Typography>
         <CustomButton
           fullWidth
@@ -151,7 +153,7 @@ const LoginStep = () => {
               : '#0052CD',
           }}
         >
-          Sign In
+          {t('authLoginStep.submit')}
         </CustomButton>
       </Box>
       <Box
@@ -166,7 +168,7 @@ const LoginStep = () => {
           <Typography
             sx={{ width: '100%', textAlign: 'center', color: '#8C8C8C' }}
           >
-            or
+            {t('authLoginStep.or')}
           </Typography>
         )}
         {config?.signonOptions.includes('google') && <GoogleButton />}

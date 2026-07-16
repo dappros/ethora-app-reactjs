@@ -6,6 +6,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { Layout } from '@stripe/stripe-js';
 import { FormEvent, ReactElement, useState } from 'react';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 interface BillingModalChangePlanProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const BillingModalCheckoutForm = (
 ): ReactElement => {
   const { isOpen, handleClose, dpmCheckerLink } = props;
 
+  const { t } = useTranslation();
   const stripe = useStripe();
   const elements = useElements();
 
@@ -51,7 +53,7 @@ export const BillingModalCheckoutForm = (
     if (error.type === 'card_error' || error.type === 'validation_error') {
       setMessage(error.message);
     } else {
-      setMessage('An unexpected error occurred.');
+      setMessage(t('billingModalCheckoutForm.unexpectedError'));
     }
 
     setIsLoading(false);
@@ -79,7 +81,7 @@ export const BillingModalCheckoutForm = (
               {isLoading ? (
                 <div className="spinner" id="spinner"></div>
               ) : (
-                'Pay now'
+                t('billingModalCheckoutForm.payNow')
               )}
             </span>
           </button>
@@ -89,15 +91,15 @@ export const BillingModalCheckoutForm = (
         {/* [DEV]: Display dynamic payment methods annotation and integration checker */}
         <div id="dpm-annotation">
           <p>
-            Payment methods are dynamically displayed based on customer
-            location, order amount, and currency.&nbsp;
+            {t('billingModalCheckoutForm.dynamicPaymentMethodsNote')}
+            &nbsp;
             <a
               href={dpmCheckerLink}
               target="_blank"
               rel="noopener noreferrer"
               id="dpm-integration-checker"
             >
-              Preview payment methods by transaction
+              {t('billingModalCheckoutForm.previewPaymentMethods')}
             </a>
           </p>
         </div>

@@ -3,12 +3,14 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 interface CopyButtonTextProps {
   textToCopy: string;
 }
 
 const CopyButtonText: React.FC<CopyButtonTextProps> = ({ textToCopy }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const checkClipboard = async () => {
@@ -40,10 +42,10 @@ const CopyButtonText: React.FC<CopyButtonTextProps> = ({ textToCopy }) => {
   }, []);
 
   return (
-    <Tooltip title={copied ? 'Copied!' : 'Copy'}>
+    <Tooltip title={copied ? t('copyButtonText.copied') : t('copyButtonText.copy')}>
       <IconButton
         onClick={handleCopy}
-        aria-label="copy"
+        aria-label={t('copyButtonText.ariaLabel')}
         className="hover:bg-brand-hover"
       >
         {copied ? (

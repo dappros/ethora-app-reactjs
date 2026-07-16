@@ -41,6 +41,7 @@ import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
+import { useTranslation } from '../i18n/useTranslation';
 import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
@@ -48,6 +49,7 @@ import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
 import MetamaskIcon from './AuthPage/Icons/socials/metamaskIcon';
 
 export default function AppUsers() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { appId } = useParams();
   const [allRowsSelected, setAllRowsSelected] = useState(false);
@@ -303,7 +305,7 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / itemsPerTable));
         setShowManageTags(false);
         setTags('');
-        toast('Tags applied successfully!');
+        toast(t('appUsers.tagsAppliedToast'));
       });
     });
   };
@@ -337,7 +339,7 @@ export default function AppUsers() {
           setTotal(total);
           setPageCount(Math.ceil(total / itemsPerTable));
           setShowNewUserModal(false);
-          toast('User created successfully!');
+          toast(t('appUsers.userCreatedToast'));
         });
       })
       .finally(() => setLoading(false));
@@ -352,7 +354,7 @@ export default function AppUsers() {
 
     actionResetPasswords(appId, selectedUserIds).then(() => {
       setShowResetPassword(false);
-      toast('Password reset successfully!');
+      toast(t('appUsers.passwordResetToast'));
     });
   };
 
@@ -393,9 +395,9 @@ export default function AppUsers() {
     httpArchiveUsers(appId, ids).then(() => {
       setShowArchive(false);
       refreshAndClearSelection();
-      toast(`${ids.length > 1 ? 'Users' : 'User'} archived successfully`);
+      toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.archivedSuccessSuffix')}`);
     }).catch((e: any) => {
-      toast.error(`Archive failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('appUsers.archiveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     });
   };
 
@@ -407,9 +409,9 @@ export default function AppUsers() {
     httpHardDeleteUsers(appId, ids).then(() => {
       setShowHardDelete(false);
       refreshAndClearSelection();
-      toast(`${ids.length > 1 ? 'Users' : 'User'} permanently deleted`);
+      toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.deletedPermanentlySuffix')}`);
     }).catch((e: any) => {
-      toast.error(`Hard delete failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('appUsers.hardDeleteFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     });
   };
 
@@ -418,10 +420,10 @@ export default function AppUsers() {
     if (!appId) return;
     try {
       await httpRestoreUser(appId, userId);
-      toast.success('User restored');
+      toast.success(t('appUsers.userRestoredToast'));
       refreshAndClearSelection();
     } catch (e: any) {
-      toast.error(`Restore failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('appUsers.restoreFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     }
   };
 
@@ -469,7 +471,7 @@ export default function AppUsers() {
               'p-[22px] md:p-0 shadow-lg md:shadow-none rounded-xl md:rounded-none'
             )}
           >
-            Selected {length} of {itemsPerTable} users
+            {t('appUsers.selectedPrefix')} {length} {t('appUsers.paginationOf')} {itemsPerTable} {t('appUsers.usersWord')}
           </div>
           <div
             className={classNames(
@@ -481,24 +483,24 @@ export default function AppUsers() {
               className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
               onClick={() => setShowManageTags(true)}
             >
-              Manage Tags
+              {t('appUsers.manageTags')}
             </button>
             <button
               className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
               onClick={() => setShowResetPassword(true)}
             >
-              Reset Password
+              {t('appUsers.resetPassword')}
             </button>
             {lifecycleTab === 'active' ? (
               <button
                 className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
                 onClick={() => setShowArchive(true)}
-                title="Archive these users (reversible). Login is blocked but data is retained."
+                title={t('appUsers.archiveTitle')}
               >
                 <div className="mr-2">
                   <IconDelete />
                 </div>
-                Archive
+                {t('appUsers.archive')}
               </button>
             ) : (
               <button
@@ -510,22 +512,22 @@ export default function AppUsers() {
                       // eslint-disable-next-line no-await-in-loop
                       await httpRestoreUser(appId, id);
                     }
-                    toast(`${ids.length > 1 ? 'Users' : 'User'} restored successfully`);
+                    toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.restoredSuccessSuffix')}`);
                     refreshAndClearSelection();
                   } catch (e: any) {
-                    toast.error(`Restore failed: ${e?.response?.data?.error || e.message}`);
+                    toast.error(`${t('appUsers.restoreFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                   }
                 }}
               >
-                Restore
+                {t('appUsers.restore')}
               </button>
             )}
             <button
               className="text-red-600 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
               onClick={() => setShowHardDelete(true)}
-              title="Permanently delete (irreversible)"
+              title={t('appUsers.hardDeleteTitle')}
             >
-              Hard delete
+              {t('appUsers.hardDelete')}
             </button>
           </div>
         </div>
@@ -540,7 +542,7 @@ export default function AppUsers() {
     <div className="admin-app-users h-full w-full  grid lg:grid-rows-[57px,_1fr] grid-rows-[97px,_1fr] gap-y-[16px]">
       <div className="md:row-start-1 flex w-full md:justify-between items-center border-b border-b-gray-200">
         <div className="ml-4 hidden md:flex items-center gap-4">
-          <div className="font-varela text-[24px]">Users</div>
+          <div className="font-varela text-[24px]">{t('appUsers.title')}</div>
           {/* Active / Archived filter, mirrors the Apps page. */}
           <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
             {(['active', 'archived'] as const).map((tab) => (
@@ -554,7 +556,7 @@ export default function AppUsers() {
                     : 'text-gray-500 hover:text-gray-700'
                 )}
               >
-                {tab === 'active' ? 'Active' : 'Archived'}
+                {tab === 'active' ? t('appUsers.tabActive') : t('appUsers.tabArchived')}
               </button>
             ))}
           </div>
@@ -566,10 +568,10 @@ export default function AppUsers() {
             setOrder={setOrder}
             orderBy={orderBy}
             orderByList={[
-              { key: 'createdAt', title: 'Creation Date' },
-              { key: 'firstName', title: 'First Name' },
-              { key: 'lastName', title: 'Last Name' },
-              { key: 'email', title: 'Email' },
+              { key: 'createdAt', title: t('appUsers.sortCreationDate') },
+              { key: 'firstName', title: t('appUsers.sortFirstName') },
+              { key: 'lastName', title: t('appUsers.sortLastName') },
+              { key: 'email', title: t('appUsers.sortEmail') },
             ]}
             setOrderBy={setOrderBy}
           />
@@ -580,7 +582,7 @@ export default function AppUsers() {
               className="flex hover:bg-brand-darker items-center justify-center sm:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
             >
               <IconAdd color="white" className="sm:mr-2" />
-              <span className="hidden sm:block">Add User</span>
+              <span className="hidden sm:block">{t('appUsers.addUser')}</span>
             </button>
           </div>
         </div>
@@ -588,8 +590,7 @@ export default function AppUsers() {
       <div className="overflow-hidden">
         {!items.length && (
           <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
-            There are no users yet, or you can add them by clicking the 'Add
-            User' button
+            {t('appUsers.emptyState')}
           </div>
         )}
         {!!items.length && (
@@ -611,16 +612,16 @@ export default function AppUsers() {
                       </Field>
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                      First Name
+                      {t('appUsers.colFirstName')}
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                      Last Name
+                      {t('appUsers.colLastName')}
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                      Email
+                      {t('appUsers.colEmail')}
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                      Tags
+                      {t('appUsers.colTags')}
                     </th>
                     {/* <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                       Creation Date
@@ -630,17 +631,17 @@ export default function AppUsers() {
                     </th> */}
 
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      Creation Date/Seen Date
+                      {t('appUsers.colCreationSeenDate')}
                     </th>
 
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      Auth method
+                      {t('appUsers.colAuthMethod')}
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      Attribution
+                      {t('appUsers.colAttribution')}
                     </th>
                     <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      Actions
+                      {t('appUsers.colActions')}
                     </th>
                   </tr>
                 </thead>
@@ -714,12 +715,12 @@ export default function AppUsers() {
                               <button
                                 onClick={() => onRestoreOne(el._id)}
                                 className="text-xs text-green-700 hover:underline"
-                                title="Restore this user (clears archive status, login re-enabled)"
+                                title={t('appUsers.restoreRowTitle')}
                               >
-                                Restore
+                                {t('appUsers.restore')}
                               </button>
                             )}
-                            <button onClick={() => setEditAcl(el.acl)} title="Permissions">
+                            <button onClick={() => setEditAcl(el.acl)} title={t('appUsers.permissionsTitle')}>
                               <IconSettings width={16} height={16} />
                             </button>
                           </div>
@@ -733,10 +734,10 @@ export default function AppUsers() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mx-8 my-[12px]">
               <div className="flex justify-between lg:justify-start items-center">
                 <div className="text-[#71717A] text-xs mr-8 whitespace-nowrap">
-                  {renderFrom()} to {renderTo()} of {total}
+                  {renderFrom()} {t('appUsers.paginationTo')} {renderTo()} {t('appUsers.paginationOf')} {total}
                 </div>
                 <div className="flex">
-                  <div className="text-[#71717A] mr-8">show</div>
+                  <div className="text-[#71717A] mr-8">{t('appUsers.showLabel')}</div>
                   <Menu>
                     <MenuButton className="flex mr-4">
                       <span className="text-brand-500 mr-4 font-semibold">
@@ -759,7 +760,7 @@ export default function AppUsers() {
                       </div>
                     </MenuItems>
                   </Menu>
-                  <div className="text-[#71717A]">users</div>
+                  <div className="text-[#71717A]">{t('appUsers.usersWord')}</div>
                 </div>
               </div>
               <div className="flex justify-center lg:justify-end lg:items-center">
@@ -775,12 +776,12 @@ export default function AppUsers() {
       </div>
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
-          <div className="font-varela text-[24px] text-center mb-8">Tags</div>
-          <div className="font-sans text-[14px] mb-8 text-center">Add Tags</div>
+          <div className="font-varela text-[24px] text-center mb-8">{t('appUsers.tagsModalTitle')}</div>
+          <div className="font-sans text-[14px] mb-8 text-center">{t('appUsers.addTagsSubtext')}</div>
           <div>
             <input
               type="text"
-              placeholder="Tags"
+              placeholder={t('appUsers.tagsPlaceholder')}
               className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
@@ -791,13 +792,13 @@ export default function AppUsers() {
               onClick={() => setShowManageTags(false)}
               className="rounded-xl hover:bg-brand-hover border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
             >
-              Cancel
+              {t('appUsers.cancel')}
             </button>
             <button
               onClick={onTagsSumbmit}
               className="rounded-xl hover:bg-brand-darker  bg-brand-500 border max-w-[416px] w-full text-center text-white p-2"
             >
-              Submit
+              {t('appUsers.submit')}
             </button>
           </div>
         </SubmitModal>
@@ -805,49 +806,41 @@ export default function AppUsers() {
       {showResetPassword && (
         <SubmitModal onClose={() => setShowResetPassword(false)}>
           <div className="font-varela text-[24px] text-center mb-8">
-            Password Reset
+            {t('appUsers.passwordResetTitle')}
           </div>
           <p className="font-sans text-[14px] mb-8 text-center">
-            {`Are you sure you want to force a password reset for ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
+            {`${t('appUsers.passwordResetConfirmPrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
           </p>
           <div className="flex gap-8">
             <button
               onClick={() => setShowResetPassword(false)}
               className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
             >
-              Cancel
+              {t('appUsers.cancel')}
             </button>
             <button
               onClick={onResetPassword}
               className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white"
             >
-              Submit
+              {t('appUsers.submit')}
             </button>
           </div>
         </SubmitModal>
       )}
       {showArchive && (
         <ConfirmModal
-          title={`Archive ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
-          message={
-            'These accounts will be hidden and their owners will not be able to log in, ' +
-            'but all of their data (chat history, files, memberships) is retained. ' +
-            'You can restore them later from the Archived tab.'
-          }
-          confirmLabel="Archive"
+          title={`${t('appUsers.archiveConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
+          message={t('appUsers.archiveConfirmMessage')}
+          confirmLabel={t('appUsers.archive')}
           onConfirm={onArchive}
           onCancel={() => setShowArchive(false)}
         />
       )}
       {showHardDelete && (
         <ConfirmModal
-          title={`Permanently delete ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? 'users' : 'user'}?`}
-          message={
-            'This irreversibly deletes the selected users along with their wallets, ' +
-            'files, XMPP accounts, chat memberships, and any rooms they own (along with ' +
-            "those rooms' messages). This cannot be undone."
-          }
-          confirmLabel="Yes, hard delete"
+          title={`${t('appUsers.hardDeleteConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
+          message={t('appUsers.hardDeleteConfirmMessage')}
+          confirmLabel={t('appUsers.hardDeleteConfirmLabel')}
           danger
           onConfirm={onHardDelete}
           onCancel={() => setShowHardDelete(false)}

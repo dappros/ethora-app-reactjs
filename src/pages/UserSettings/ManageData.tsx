@@ -7,9 +7,11 @@ import { toast } from 'react-toastify';
 import { Loading } from '../../components/Loading';
 import { SubmitModal } from '../../components/modal/SubmitModal';
 import { deleteMe, getExportMyData } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 
 export function ManageData() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [warning, setWarning] = useState(false);
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ export function ManageData() {
         // Release the URL once done
         URL.revokeObjectURL(url);
       })
-      .catch(() => toast.error('Error'))
+      .catch(() => toast.error(t('userSettingsManageData.toastError')))
       .finally(() => setLoading(false));
   };
 
@@ -49,7 +51,7 @@ export function ManageData() {
     setLoading(true);
     deleteMe()
       .then(() => {
-        toast.success('Success');
+        toast.success(t('userSettingsManageData.toastSuccess'));
         doClearState();
         localStorage.removeItem('token-538');
         localStorage.removeItem('lastPath');
@@ -61,23 +63,22 @@ export function ManageData() {
   return (
     <div className="md:ml-4">
       <p className="font-sans text-regular font-semibold mb-2">
-        Download your data
+        {t('userSettingsManageData.downloadHeading')}
       </p>
       <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
-        You own your data. Tap the button below to download a copy of your data
+        {t('userSettingsManageData.downloadDescription')}
       </div>
       <button
         className="mb-8 rounded-xl hover:bg-brand-hover border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
         onClick={onDownloadMyData}
       >
-        Download My Data
+        {t('userSettingsManageData.downloadButton')}
       </button>
       <div className="font-sans text-regular font-semibold mb-2">
-        Delete your data
+        {t('userSettingsManageData.deleteHeading')}
       </div>
       <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
-        Use this only if you want to permanently delete your account & data from
-        our system.
+        {t('userSettingsManageData.deleteDescription')}
       </div>
       {/* Hidden: the DLT immutability disclaimer below is no longer
           relevant since the current platform no longer surfaces on-chain
@@ -98,28 +99,28 @@ export function ManageData() {
         className="mb-8 rounded-xl hover:bg-brand-hover border-red-600 border max-w-[416px] w-full text-center text-red-600 p-2"
         onClick={() => setWarning(true)}
       >
-        Delete My Account
+        {t('userSettingsManageData.deleteButton')}
       </button>
       {warning && (
         <SubmitModal onClose={() => setWarning(false)}>
           <p className="font-varela text-[24px] text-center mb-8">
-            Delete Account
+            {t('userSettingsManageData.modalTitle')}
           </p>
           <p className="font-sans text-[14px] mb-8">
-            {`Are you sure you want to delete your all data from the platform?`}
+            {t('userSettingsManageData.modalConfirm')}
           </p>
           <div className="flex gap-8">
             <button
               onClick={() => setWarning(false)}
               className="rounded-xl border-brand-500 border max-w-[416px] w-full text-center text-brand-500 p-2"
             >
-              Cancel
+              {t('userSettingsManageData.cancelButton')}
             </button>
             <button
               onClick={() => onDelete()}
               className="rounded-xl bg-red-600 border max-w-[416px] w-full text-center text-white p-2"
             >
-              Submit
+              {t('userSettingsManageData.submitButton')}
             </button>
           </div>
         </SubmitModal>

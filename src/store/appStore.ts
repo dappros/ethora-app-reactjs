@@ -8,6 +8,11 @@ import {
   ModelOwnerSession,
   ModelState,
 } from '../models';
+import type { UiLanguageCode } from '../constants/languageOptionsConstants';
+import {
+  getPreferredUiLanguage,
+  setPreferredUiLanguage,
+} from '../utils/uiLanguage';
 
 // localStorage key for the most-recently-selected Chats app context.
 // Suffixed `-538` to match the existing `token-538` convention used
@@ -65,6 +70,10 @@ export interface AppSliceInterface extends ModelState {
   doSetChatAppId: (appId: string | null) => void;
   doSetOwnerSession: (session: ModelOwnerSession | null) => void;
   doSetOwnedApps: (apps: Array<ModelApp>) => void;
+  // App-wide UI language (see ModelState.uiLanguage). Persists to
+  // localStorage via utils/uiLanguage.ts AND updates the store so every
+  // subscribed component (nav, Profile, ...) re-renders immediately.
+  doSetUiLanguage: (language: UiLanguageCode) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -89,6 +98,13 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   chatAppId: readPersistedChatAppId(),
   ownerSession: null,
   ownedApps: [],
+  uiLanguage: getPreferredUiLanguage(),
+  doSetUiLanguage: (language) => {
+    setPreferredUiLanguage(language);
+    set((s) => {
+      s.uiLanguage = language;
+    });
+  },
   doSetUser: (user: ModelCurrentUser | null) => {
     set((s) => {
       s.currentUser = user;

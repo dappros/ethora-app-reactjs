@@ -11,6 +11,7 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import { getUserCredsFromGoogle, IUser } from '../../utils/firebase';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
+import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import GoogleIcon from './Icons/socials/googleIcon';
 
@@ -28,6 +29,7 @@ interface GoogleButtonProps {
 export const GoogleButton = ({ utm }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const onGoogleLogin = async () => {
     try {
@@ -37,7 +39,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
       try {
         creds = await getUserCredsFromGoogle();
         if (!creds) {
-          toast.error('Google login failed');
+          toast.error(t('authGoogleButton.loginFailed'));
           return;
         }
         user = creds.user;
@@ -49,7 +51,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
       if (user) {
         if (!user.providerData[0].email) {
-          toast.error('Email not provided by Google');
+          toast.error(t('authGoogleButton.emailNotProvided'));
           return;
         }
         let shouldRegister = false;
@@ -80,7 +82,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             );
 
             if (!userResult?.data?.user) {
-              toast.error('Social registration failed');
+              toast.error(t('authGoogleButton.registrationFailed'));
               return;
             }
 
@@ -115,7 +117,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             setEthoraUserCookie('accregred');
           } catch (error) {
             console.error(error);
-            toast.error('Social registration failed');
+            toast.error(t('authGoogleButton.registrationFailed'));
           }
 
           httpLoginSocial(
@@ -161,7 +163,7 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
         color: config?.primaryColor ? config.primaryColor : '#0052CD',
       }}
     >
-      Continue with Google
+      {t('authGoogleButton.continueLabel')}
     </CustomButton>
   );
 };

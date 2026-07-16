@@ -27,6 +27,7 @@ import {
 } from '../actions';
 import { httpExportAgent, httpImportAgent, saveBlobAs } from '../http';
 import { ImportAppModal } from '../components/modal/ImportAppModal';
+import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -56,6 +57,7 @@ const VISIBILITY_BADGE: Record<string, string> = {
 const PAGE_LIMIT = 100;
 
 export default function AdminAgents() {
+  const { t } = useTranslation();
   const agents = useAppStore((s) => s.agents);
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
@@ -87,7 +89,7 @@ export default function AdminAgents() {
   useEffect(() => {
     setLoading(true);
     actionListAgents({})
-      .catch((e) => toast.error(`Failed to load agents: ${e?.response?.data?.error || e.message}`))
+      .catch((e) => toast.error(`${t('adminAgents.loadAgentsFailedPrefix')} ${e?.response?.data?.error || e.message}`))
       .finally(() => setLoading(false));
   }, []);
 
@@ -104,7 +106,7 @@ export default function AdminAgents() {
         setOtherPrivateLoaded(true);
       })
       .catch((e) => {
-        toast.error(`Failed to load private agents: ${e?.response?.data?.error || e.message}`);
+        toast.error(`${t('adminAgents.loadPrivateAgentsFailedPrefix')} ${e?.response?.data?.error || e.message}`);
         setOtherPrivateLoaded(true);
       });
   }, [isSuperReadAdmin, showOtherPrivate, otherPrivateLoaded, currentUserId]);
@@ -148,12 +150,12 @@ export default function AdminAgents() {
 
   function onDelete(a: ModelAgent) {
     return async () => {
-      if (!confirm(`Delete "${a.displayName}"? Disables all its BotInstances.`)) return;
+      if (!confirm(`${t('adminAgents.deleteConfirmQuestion')} "${a.displayName}"? ${t('adminAgents.deleteConfirmDetail')}`)) return;
       try {
         await actionDeleteAgent(a.id);
-        toast.success('Agent deleted');
+        toast.success(t('adminAgents.agentDeletedToast'));
       } catch (e: any) {
-        toast.error(`Delete failed: ${e?.response?.data?.error || e.message}`);
+        toast.error(`${t('adminAgents.deleteFailedPrefix')} ${e?.response?.data?.error || e.message}`);
       }
     };
   }
@@ -161,10 +163,10 @@ export default function AdminAgents() {
   async function onClone(a: ModelAgent) {
     try {
       await actionCloneAgent(a.id, {});
-      toast.success(`Cloned "${a.displayName}" to your agents`);
+      toast.success(`${t('adminAgents.clonedToastPrefix')} "${a.displayName}" ${t('adminAgents.clonedToastSuffix')}`);
       await actionListAgents({}); // refresh the store so the clone appears in My
     } catch (e: any) {
-      toast.error(`Clone failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('adminAgents.cloneFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     }
   }
 
@@ -172,9 +174,9 @@ export default function AdminAgents() {
     try {
       const r = await httpExportAgent(a.id, format);
       saveBlobAs(r.data, `ethora-agent-${a.id}-${Date.now()}.${format}`);
-      toast.success(`Exported "${a.displayName}" (${format.toUpperCase()})`);
+      toast.success(`${t('adminAgents.exportedToastPrefix')} "${a.displayName}" (${format.toUpperCase()})`);
     } catch (e: any) {
-      toast.error(`Export failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('adminAgents.exportFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     }
   }
 
@@ -191,16 +193,16 @@ export default function AdminAgents() {
       <section className="mb-6">
         <div className="flex items-baseline gap-3 mb-2">
           <h3 className="text-lg font-semibold">{title}</h3>
-          <span className="text-xs text-gray-500">{rows.length} agent{rows.length === 1 ? '' : 's'}</span>
+          <span className="text-xs text-gray-500">{rows.length} {rows.length === 1 ? t('adminAgents.agentSingular') : t('adminAgents.agentPlural')}</span>
         </div>
         <div className="text-xs text-gray-500 mb-2">{description}</div>
         {rows.length === 0 ? (
           <div className="p-4 border border-dashed rounded-xl text-gray-500 text-sm">
             {cardMode === 'owned'
-              ? 'You haven\'t created any agents yet. Click "+ New Agent" above.'
+              ? t('adminAgents.emptyOwned')
               : cardMode === 'public'
-              ? 'No public agents from other tenants right now.'
-              : 'No private agents from other tenants right now.'}
+              ? t('adminAgents.emptyPublic')
+              : t('adminAgents.emptyPrivateOther')}
           </div>
         ) : (
           <>
@@ -219,10 +221,10 @@ export default function AdminAgents() {
             </div>
             {rows.length > PAGE_LIMIT && (
               <div className="text-xs text-gray-500 mt-2">
-                Showing {visible.length} of {rows.length}
+                {t('adminAgents.showing')} {visible.length} {t('adminAgents.of')} {rows.length}
                 {!showAll && (
                   <button onClick={() => setShowAll(true)} className="ml-2 text-brand-500 hover:underline">
-                    show all
+                    {t('adminAgents.showAll')}
                   </button>
                 )}
               </div>
@@ -238,11 +240,11 @@ export default function AdminAgents() {
       {/* Page-level header outside the white card - same shape as Apps. */}
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Agents
+          {t('adminAgents.title')}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <input
-            placeholder="Filter (name, address, app, bio)"
+            placeholder={t('adminAgents.filterPlaceholder')}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="border rounded px-3 h-[40px] text-sm w-64"
@@ -250,50 +252,50 @@ export default function AdminAgents() {
           <button
             onClick={() => setShowImport(true)}
             className="flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4"
-            title="Import an agent from a previously-exported JSON or ZIP bundle"
+            title={t('adminAgents.importAgentTitle')}
           >
-            Import Agent
+            {t('adminAgents.importAgent')}
           </button>
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
           >
             <IconAdd color="white" className="mr-2" />
-            <span>New Agent</span>
+            <span>{t('adminAgents.newAgent')}</span>
           </button>
         </div>
       </div>
 
       <div className="rounded-2xl bg-white p-4 overflow-y-auto">
         <p className="text-sm text-gray-500 mb-4">
-          Agents are owned by your account and can be deployed into any of your Apps.
+          {t('adminAgents.description')}
         </p>
 
       {/* Section visibility checkboxes. Each toggles a band of the list. */}
       <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
-        <span className="text-gray-500">Show:</span>
+        <span className="text-gray-500">{t('adminAgents.showLabel')}</span>
         <label className="inline-flex items-center gap-1 cursor-pointer">
           <input type="checkbox" checked={showMine} onChange={(e) => setShowMine(e.target.checked)} />
-          <span>My agents</span>
+          <span>{t('adminAgents.myAgents')}</span>
         </label>
         <label className="inline-flex items-center gap-1 cursor-pointer">
           <input type="checkbox" checked={showPublic} onChange={(e) => setShowPublic(e.target.checked)} />
-          <span>Public agents</span>
+          <span>{t('adminAgents.publicAgents')}</span>
         </label>
         {isSuperReadAdmin && (
           <label className="inline-flex items-center gap-1 cursor-pointer">
             <input type="checkbox" checked={showOtherPrivate} onChange={(e) => setShowOtherPrivate(e.target.checked)} />
-            <span className="text-purple-700">Private (other tenants)</span>
-            <span className="text-[10px] text-purple-700/70">superadmin</span>
+            <span className="text-purple-700">{t('adminAgents.privateOtherTenants')}</span>
+            <span className="text-[10px] text-purple-700/70">{t('adminAgents.superadminBadge')}</span>
           </label>
         )}
       </div>
 
-      {loading && agents.length === 0 && <div className="text-gray-500">Loading...</div>}
+      {loading && agents.length === 0 && <div className="text-gray-500">{t('adminAgents.loading')}</div>}
 
       {showMine && renderSection(
-        'My agents',
-        'Created by you. You can edit, deploy across your Apps, change visibility, or delete.',
+        t('adminAgents.myAgents'),
+        t('adminAgents.myAgentsDesc'),
         mine,
         showAllMine,
         setShowAllMine,
@@ -303,8 +305,8 @@ export default function AdminAgents() {
       {showMine && showPublic && <hr className="my-6 border-gray-200" />}
 
       {showPublic && renderSection(
-        'Public agents (from other tenants)',
-        'Marked public by their owners on this server. Read-only — clone to your agents to customise.',
+        t('adminAgents.publicAgentsTitle'),
+        t('adminAgents.publicAgentsDesc'),
         publicOthers,
         showAllPublic,
         setShowAllPublic,
@@ -314,8 +316,8 @@ export default function AdminAgents() {
       {showOtherPrivate && (showMine || showPublic) && <hr className="my-6 border-gray-200" />}
 
       {isSuperReadAdmin && showOtherPrivate && renderSection(
-        'Private (other tenants)',
-        'Superadmin-only view of private agents owned by other tenants. Read-only.',
+        t('adminAgents.privateOtherTenants'),
+        t('adminAgents.privateOtherDesc'),
         privateOthers,
         showAllOtherPrivate,
         setShowAllOtherPrivate,
@@ -324,8 +326,8 @@ export default function AdminAgents() {
 
       {showImport && (
         <ImportAppModal
-          title="Import Agent"
-          helperText="Pick a JSON or ZIP file exported from another Ethora environment, or paste the JSON directly. The new agent will be created under your account with a fresh address, set to 'private' visibility."
+          title={t('adminAgents.importAgent')}
+          helperText={t('adminAgents.importAgentHelperText')}
           showDomainOverride={false}
           onClose={() => setShowImport(false)}
           onImported={() => {
@@ -361,6 +363,7 @@ const AgentCard: React.FC<{
   onClone: () => void;
   onExport: (format: 'json' | 'zip') => void;
 }> = ({ agent, cardMode, onOpen, onDelete, onClone, onExport }) => {
+  const { t } = useTranslation();
   const visibilityClass = VISIBILITY_BADGE[agent.visibility] || VISIBILITY_BADGE.private;
   const isOwned = cardMode === 'owned';
   return (
@@ -384,20 +387,20 @@ const AgentCard: React.FC<{
 
       <dl className="text-xs text-gray-600 grid grid-cols-2 gap-x-2 gap-y-0.5">
         <div>
-          <dt className="inline text-gray-400">Updated: </dt>
+          <dt className="inline text-gray-400">{t('adminAgents.updatedLabel')}</dt>
           <dd className="inline">{fmtDate(agent.updatedAt) || '—'}</dd>
         </div>
         <div>
-          <dt className="inline text-gray-400">Created: </dt>
+          <dt className="inline text-gray-400">{t('adminAgents.createdLabel')}</dt>
           <dd className="inline">{fmtDate(agent.createdAt) || '—'}</dd>
         </div>
         <div>
-          <dt className="inline text-gray-400">RAG: </dt>
+          <dt className="inline text-gray-400">{t('adminAgents.ragLabel')}</dt>
           <dd className="inline">{fmtBytes(agent.totalSiteSourceSize)}</dd>
         </div>
         <div>
-          <dt className="inline text-gray-400">Deployed: </dt>
-          <dd className="inline">{typeof agent.botInstancesCount === 'number' ? `${agent.botInstancesCount} app${agent.botInstancesCount === 1 ? '' : 's'}` : '—'}</dd>
+          <dt className="inline text-gray-400">{t('adminAgents.deployedLabel')}</dt>
+          <dd className="inline">{typeof agent.botInstancesCount === 'number' ? `${agent.botInstancesCount} ${agent.botInstancesCount === 1 ? t('adminAgents.appSingular') : t('adminAgents.appPlural')}` : '—'}</dd>
         </div>
       </dl>
 
@@ -406,7 +409,7 @@ const AgentCard: React.FC<{
             for everyone else. The verb on this button matches what the viewer
             will actually see when they land there. */}
         <button onClick={onOpen} className="text-xs text-brand-500 hover:underline">
-          {isOwned ? 'Edit' : 'View'}
+          {isOwned ? t('adminAgents.edit') : t('adminAgents.view')}
         </button>
         {/* Clone is offered for non-owned PUBLIC agents (the prior "Browse
             public" modal's affordance, inlined into the card). Private
@@ -417,7 +420,7 @@ const AgentCard: React.FC<{
           <>
             <span className="text-gray-300">|</span>
             <button onClick={onClone} className="text-xs text-brand-500 hover:underline">
-              Clone to my agents
+              {t('adminAgents.cloneToMyAgents')}
             </button>
           </>
         )}
@@ -426,17 +429,17 @@ const AgentCard: React.FC<{
             enforces final authz. */}
         <span className="text-gray-300">|</span>
         <button onClick={() => onExport('json')} className="text-xs text-brand-500 hover:underline">
-          Export JSON
+          {t('adminAgents.exportJson')}
         </button>
         <span className="text-gray-300">|</span>
         <button onClick={() => onExport('zip')} className="text-xs text-brand-500 hover:underline">
-          Export ZIP
+          {t('adminAgents.exportZip')}
         </button>
         {isOwned && (
           <>
             <span className="text-gray-300">|</span>
             <button onClick={onDelete} className="text-xs text-red-500 hover:underline">
-              Delete
+              {t('adminAgents.delete')}
             </button>
           </>
         )}
@@ -449,6 +452,7 @@ const CreateAgentModal: React.FC<{
   onCancel: () => void;
   onCreated: (agent: ModelAgent) => void;
 }> = ({ onCancel, onCreated }) => {
+  const { t } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   const currentApp = useAppStore((s) => s.currentApp);
   const [displayName, setDisplayName] = useState('New AI Agent');
@@ -461,25 +465,25 @@ const CreateAgentModal: React.FC<{
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-5 w-[480px] max-w-[90%] space-y-3">
-        <h3 className="text-lg font-semibold">Create new Agent</h3>
+        <h3 className="text-lg font-semibold">{t('adminAgents.createModalTitle')}</h3>
         <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">Display name</span>
+          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.displayNameLabel')}</span>
           <input className="border rounded px-2 py-1 w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
         </label>
         <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">Bio (short)</span>
+          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.bioLabel')}</span>
           <textarea className="border rounded px-2 py-1 w-full" rows={2} value={bio} onChange={(e) => setBio(e.target.value)} />
         </label>
         <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">Initial prompt</span>
+          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.initialPromptLabel')}</span>
           <textarea className="border rounded px-2 py-1 w-full font-mono text-sm" rows={5} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
         </label>
         <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">Visibility</span>
+          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.visibilityLabel')}</span>
           <select className="border rounded px-2 py-1" value={visibility} onChange={(e) => setVisibility(e.target.value as any)}>
-            <option value="private">Private</option>
-            <option value="unlisted">Unlisted (invite by address)</option>
-            <option value="public">Public</option>
+            <option value="private">{t('adminAgents.visibilityPrivate')}</option>
+            <option value="unlisted">{t('adminAgents.visibilityUnlistedInviteByAddress')}</option>
+            <option value="public">{t('adminAgents.visibilityPublic')}</option>
           </select>
         </label>
         {/* Public is platform-wide visible. Operators who skim through "+ New
@@ -489,17 +493,12 @@ const CreateAgentModal: React.FC<{
             create time so this is a deliberate choice. */}
         {visibility === 'public' && (
           <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug">
-            <strong>Public visibility:</strong> this agent will appear in the
-            "Public agents" section for <em>every other tenant</em> on this
-            Ethora server. They can view its persona, prompt, and clone it as
-            their own. Pick <em>Public</em> only when the agent is intended to
-            be universally useful (e.g. a generic Support Agent or a published
-            persona for the community). For agents you're building for your
-            own brand, business, or website, leave this as <em>Private</em>.
+            <strong>{t('adminAgents.publicVisibilityWarningTitle')}</strong>{' '}
+            {t('adminAgents.publicVisibilityWarningBody')}
           </div>
         )}
         <div className="flex justify-end gap-2 pt-2">
-          <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">Cancel</button>
+          <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">{t('adminAgents.cancel')}</button>
           <button
             disabled={busy}
             onClick={async () => {
@@ -508,14 +507,14 @@ const CreateAgentModal: React.FC<{
                 const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: defaultOwnerAppId || undefined });
                 if (created) onCreated(created);
               } catch (e: any) {
-                toast.error(`Create failed: ${e?.response?.data?.error || e.message}`);
+                toast.error(`${t('adminAgents.createFailedPrefix')} ${e?.response?.data?.error || e.message}`);
               } finally {
                 setBusy(false);
               }
             }}
             className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
           >
-            {busy ? 'Creating...' : 'Create'}
+            {busy ? t('adminAgents.creating') : t('adminAgents.create')}
           </button>
         </div>
       </div>

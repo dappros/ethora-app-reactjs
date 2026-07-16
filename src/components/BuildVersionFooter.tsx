@@ -13,6 +13,7 @@
 // Backend values are fetched from /v1/ping/version (already exposed by the api).
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from '../i18n/useTranslation';
 
 type BackendVersionInfo = {
   version: string | null;
@@ -47,6 +48,7 @@ function fmtPart(label: string, version: string, branch?: string | null, commit?
 }
 
 export const BuildVersionFooter: React.FC = () => {
+  const { t } = useTranslation();
   const [be, setBe] = useState<BackendVersionInfo | null>(null);
 
   useEffect(() => {
@@ -89,7 +91,7 @@ export const BuildVersionFooter: React.FC = () => {
         padding: '8px 12px 4px',
         userSelect: 'all',
       }}
-      title="Frontend & backend build versions (build date in yy.mm.dd · branch · commit)"
+      title={t('buildVersionFooter.tooltip')}
     >
       {[fePart, bePart].filter(Boolean).join(' | ')}
     </div>

@@ -18,6 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useMemo, useState } from 'react';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { SiteLinks } from '../../../../models';
 import { MarkDown } from '../../../../utils/MarkDown';
 import { IconClose } from '../../../Icons/IconClose';
@@ -34,6 +35,7 @@ export const LinksTable = ({
   handleShowDeleteModal,
   handleCrawlReindex,
 }: EnhancedTableProps): ReactElement => {
+  const { t } = useTranslation();
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -162,8 +164,8 @@ export const LinksTable = ({
                 <TableCell
                   sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                 >
-                  <div>Page Url</div>
-                  <div>total: {siteLinks.length}</div>
+                  <div>{t('aiWidgetLinksTable.pageUrl')}</div>
+                  <div>{t('aiWidgetLinksTable.totalLabel')} {siteLinks.length}</div>
                 </TableCell>
 
                 <TableCell
@@ -171,29 +173,29 @@ export const LinksTable = ({
                   sx={{ width: 120, whiteSpace: 'nowrap' }}
                 >
                   <div>
-                    <p>Size (Mb)</p>
+                    <p>{t('aiWidgetLinksTable.sizeHeader')}</p>
                     <p>
-                      total:{' '}
+                      {t('aiWidgetLinksTable.totalLabel')}{' '}
                       {(
                         siteLinks.reduce((sum, l) => sum + l.mdByteSize, 0) /
                         (1024 * 1024)
                       ).toFixed(2)}{' '}
-                      Mb
+                      {t('aiWidgetLinksTable.mbUnit')}
                     </p>
                   </div>
                 </TableCell>
 
                 <TableCell align="center" sx={{ width: 100 }}>
-                  Preview
+                  {t('aiWidgetLinksTable.preview')}
                 </TableCell>
 
                 <TableCell align="center" sx={{ width: 100 }}>
-                  Reindex
+                  {t('aiWidgetLinksTable.reindex')}
                 </TableCell>
 
                 <TableCell align="right" sx={{ width: 72 }}>
                   {selectedIndexes.length > 0 && (
-                    <Tooltip title="Delete chosen links">
+                    <Tooltip title={t('aiWidgetLinksTable.deleteChosenLinks')}>
                       <IconButton onClick={handleDeleteSelected}>
                         <DeleteIcon />
                       </IconButton>
@@ -288,7 +290,7 @@ export const LinksTable = ({
       >
         <DialogPanel className="p-6 bg-white rounded-2xl relative w-full max-w-[640px] m-4 max-h-[80%] flex flex-col">
           <div className="text-xl font-semibold text-center mb-4">
-            Markdown Preview
+            {t('aiWidgetLinksTable.markdownPreview')}
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2">

@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import { ReactElement } from 'react';
 import { StepLayout } from '.';
 import { QuestionsType } from '../typeTutorial';
+import { useTranslation } from '../../../../i18n/useTranslation';
 
 interface QuestionsStepDefaultProps {
   questions: QuestionsType;
@@ -14,10 +15,11 @@ export const QuestionsStepDefault = ({
   goBack,
   setQuestionStep,
 }: QuestionsStepDefaultProps): ReactElement => {
+  const { t } = useTranslation();
   return (
     <StepLayout
-      title="Choose a Chat Setting"
-      description="I want to.."
+      title={t('questionsStepDefault.title')}
+      description={t('questionsStepDefault.description')}
       goBack={goBack}
     >
       {questions.map(({ id, question }, index) => (

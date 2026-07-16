@@ -10,6 +10,7 @@ import { IconBilling } from '../Icons/IconBilling';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
 import { IconHelp } from '../Icons/IconHelp';
+import { useTranslation } from '../../i18n/useTranslation';
 import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
@@ -31,6 +32,7 @@ function isEthoraHostedEnv(): boolean {
 }
 
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
+  const { t } = useTranslation();
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
   const showBilling = isEthoraHostedEnv();
 
@@ -63,12 +65,12 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
           {isAdmin && (
             <NavLink to="/app/admin/apps" onClick={onClose} className={itemBase}>
               <IconAdmin />
-              <span className={labelBase}>Apps</span>
+              <span className={labelBase}>{t('nav.apps')}</span>
             </NavLink>
           )}
           <NavLink to="/app/chat" onClick={onClose} className={itemBase}>
             <IconChat />
-            <span className={labelBase}>Chats</span>
+            <span className={labelBase}>{t('nav.chats')}</span>
             <UnreadBadge className="ml-2" />
           </NavLink>
           {isAdmin && (
@@ -85,7 +87,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               })}
             >
               <IconAgents />
-              <span className={labelBase}>Agents</span>
+              <span className={labelBase}>{t('nav.agents')}</span>
             </NavLink>
           )}
           {isAdmin && showBilling && (
@@ -95,12 +97,12 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               className={itemBase}
             >
               <IconBilling />
-              <span className={labelBase}>Billing</span>
+              <span className={labelBase}>{t('nav.billing')}</span>
             </NavLink>
           )}
           <NavLink to="/app/help" onClick={onClose} className={itemBase}>
             <IconHelp />
-            <span className={labelBase}>Help</span>
+            <span className={labelBase}>{t('nav.help')}</span>
           </NavLink>
         </div>
         <div className="">
@@ -111,7 +113,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
           >
             <IconAccount />
             <span className="ml-2 group-aria-[current=page]:text-brand-500 font-sans ">
-              Account
+              {t('nav.account')}
             </span>
           </NavLink>
         </div>

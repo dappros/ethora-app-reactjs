@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { IconExternalLink } from '../components/Icons/IconExternalLink';
 import { BookACallModal } from '../components/modal/BookACallModal';
 import { useWhatsNew } from '../hooks/useWhatsNew';
+import { useTranslation } from '../i18n/useTranslation';
 import {
   LATEST_BLOG_URL,
   RELEASE_NOTES_URL,
@@ -18,6 +19,7 @@ function HighlightCard({
   onBookACall: () => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const ctaClass =
     'inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover font-sans text-sm';
 
@@ -30,14 +32,14 @@ function HighlightCard({
           onClick={() => navigate(to)}
           className={ctaClass}
         >
-          Open
+          {t('whatsNew.cardOpen')}
         </button>
       );
     }
     if (highlight.deepLink?.kind === 'modal' && highlight.deepLink.id === 'book-a-call') {
       return (
         <button type="button" onClick={onBookACall} className={ctaClass}>
-          Book a call
+          {t('whatsNew.cardBookACall')}
         </button>
       );
     }
@@ -49,7 +51,7 @@ function HighlightCard({
           rel="noopener noreferrer"
           className={ctaClass}
         >
-          Learn more
+          {t('whatsNew.cardLearnMore')}
           <IconExternalLink width={14} height={14} />
         </a>
       );
@@ -73,6 +75,7 @@ function HighlightCard({
 export default function WhatsNew() {
   const { markSeen } = useWhatsNew();
   const [showBookACall, setShowBookACall] = useState(false);
+  const { t } = useTranslation();
 
   // Mark the latest version as seen on mount. Idempotent - landing here via
   // a deep link, refresh, or the sidebar all behave the same.
@@ -84,20 +87,19 @@ export default function WhatsNew() {
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px]">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          What's new
+          {t('whatsNew.title')}
         </div>
         <NavLink
           to="/app/help"
           className="font-sans text-sm text-brand-500 hover:underline"
         >
-          Back to Help &amp; Support
+          {t('whatsNew.backToHelp')}
         </NavLink>
       </div>
 
       <div className="rounded-2xl bg-gray-50 p-4 md:p-6 overflow-y-auto">
         <div className="font-sans text-base text-gray-700 mb-6 max-w-3xl">
-          See what shipped in the latest releases. Each item links into the
-          app or to the deeper story.
+          {t('whatsNew.subtitle')}
         </div>
 
         {RELEASES.map((release) => (
@@ -130,7 +132,7 @@ export default function WhatsNew() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-brand-500 hover:underline"
             >
-              Full release notes on GitHub
+              {t('whatsNew.releaseNotesLink')}
               <IconExternalLink width={12} height={12} />
             </a>
             <a
@@ -139,7 +141,7 @@ export default function WhatsNew() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-brand-500 hover:underline"
             >
-              Read more on the blog
+              {t('whatsNew.blogLink')}
               <IconExternalLink width={12} height={12} />
             </a>
           </div>

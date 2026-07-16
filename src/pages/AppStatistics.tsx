@@ -19,20 +19,35 @@ import downloadIcon from '../assets/icons/Download.svg';
 // Styles
 import './AppStatistics.scss';
 import { Loading } from '../components/Loading';
+import { useTranslation } from '../i18n/useTranslation';
 
 // Data
+// `name` stays a fixed English identifier - it's compared against itself
+// (selectedTab.name === tab.name) and surfaced as the stats-box title. Only
+// the rendered label goes through t(labelKey); the canonical value never
+// changes, so URL persistence / internal comparisons are unaffected.
 const tabs: Record<string, string>[] = [
-  { name: 'Users', value: 'users' },
-  { name: 'Sessions', value: 'sessions' },
-  { name: 'Chats', value: 'chats' },
-  { name: 'API calls', value: 'apiCalls' },
-  { name: 'Assets', value: 'issuance' },
-  { name: 'Transactions', value: 'transactions' },
-  { name: 'Files', value: 'files' },
+  { name: 'Users', value: 'users', labelKey: 'appStatistics.tabUsers' },
+  { name: 'Sessions', value: 'sessions', labelKey: 'appStatistics.tabSessions' },
+  { name: 'Chats', value: 'chats', labelKey: 'appStatistics.tabChats' },
+  { name: 'API calls', value: 'apiCalls', labelKey: 'appStatistics.tabApiCalls' },
+  { name: 'Assets', value: 'issuance', labelKey: 'appStatistics.tabAssets' },
+  { name: 'Transactions', value: 'transactions', labelKey: 'appStatistics.tabTransactions' },
+  { name: 'Files', value: 'files', labelKey: 'appStatistics.tabFiles' },
 ];
 const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
+// Time-period display labels. `timePeriod` itself stays the canonical
+// English string - it's switched on in calculateDates() and persisted in
+// the URL - only the rendered text is looked up through this map.
+const PERIOD_LABEL_KEYS: Record<string, string> = {
+  '24 hours': 'appStatistics.period24h',
+  '7 days': 'appStatistics.period7d',
+  '30 days': 'appStatistics.period30d',
+  'Select period': 'appStatistics.periodSelect',
+};
 
 export const AppStatistics = (): ReactElement => {
+  const { t } = useTranslation();
   const { appId } = useParams<string>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -181,18 +196,20 @@ export const AppStatistics = (): ReactElement => {
       const endDateFormatted = DateTime.fromISO(dates.endDate).toFormat(
         'dd MMM yyyy'
       );
-      formattedPeriod = `${timePeriod} (${startDateFormatted} - ${endDateFormatted})`;
+      formattedPeriod = `${t(PERIOD_LABEL_KEYS[timePeriod] ?? timePeriod)} (${startDateFormatted} - ${endDateFormatted})`;
     }
 
     return {
-      title: selectedTab.name,
+      title: t(selectedTab.labelKey),
       value: graphStatisticsCont[selectedTab.value],
       period: formattedPeriod,
     };
   }, [
+    t,
     timePeriod,
     selectedTab.name,
     selectedTab.value,
+    selectedTab.labelKey,
     graphStatisticsCont,
     dates.startDate,
     dates.endDate,
@@ -258,7 +275,7 @@ export const AppStatistics = (): ReactElement => {
   return (
     <div className="h-full w-full overflow-hidden">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold hidden md:block">Statistics</h2>
+        <h2 className="text-lg font-semibold hidden md:block">{t('appStatistics.heading')}</h2>
 
         <div className="flex items-center gap-4 justify-between md:justify-end w-full">
           <div className="relative w-64">
@@ -271,7 +288,7 @@ export const AppStatistics = (): ReactElement => {
                 dateRange[0].startDate &&
                 dateRange[0].endDate
                   ? `${DateTime.fromJSDate(dateRange[0].startDate).toFormat('dd MMM yyyy')} - ${DateTime.fromJSDate(dateRange[0].endDate).toFormat('dd MMM yyyy')}`
-                  : timePeriod}
+                  : t(PERIOD_LABEL_KEYS[timePeriod] ?? timePeriod)}
               </span>
               <span
                 className={`transform transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`}
@@ -298,7 +315,7 @@ export const AppStatistics = (): ReactElement => {
                         <span className=" text-brand-500">&#10003;</span>
                       )}
                     </div>
-                    {option}
+                    {t(PERIOD_LABEL_KEYS[option] ?? option)}
                   </div>
                 ))}
               </div>
@@ -326,13 +343,13 @@ export const AppStatistics = (): ReactElement => {
                     onClick={() => setCustomRangeVisible(false)}
                     className="border border-gray-300 px-4 py-2 rounded-xl flex-1"
                   >
-                    Cancel
+                    {t('appStatistics.cancel')}
                   </button>
                   <button
                     onClick={handleApplyCustomPeriod}
                     className="bg-brand-500 text-white px-4 py-2 rounded-xl flex-1"
                   >
-                    Apply
+                    {t('appStatistics.apply')}
                   </button>
                 </div>
               </div>
@@ -345,9 +362,9 @@ export const AppStatistics = (): ReactElement => {
               onClick={onUploadCsv}
               className="flex items-center px-2 sm:px-7 py-2 bg-gray-100 border border-gray-300 rounded-xl"
             >
-              <img src={downloadIcon} alt="Download" />
+              <img src={downloadIcon} alt={t('appStatistics.downloadAlt')} />
               <span className="text-gray-300 pl-3 hidden xs:block">
-                Export CSV
+                {t('appStatistics.exportCsv')}
               </span>
             </button>
           </div>
@@ -385,7 +402,7 @@ export const AppStatistics = (): ReactElement => {
                       tab.disabled ? 'text-gray-400 md:text-gray-400' : ''
                     )}
                   >
-                    {tab.name}
+                    {t(tab.labelKey)}
                   </span>
                 </div>
               </li>
@@ -410,7 +427,7 @@ export const AppStatistics = (): ReactElement => {
               <span className="text-sm text-gray-500">
                 {statistics.title}
               </span>
-              <p className="text-gray-500 text-sm">For {statistics.period}</p>
+              <p className="text-gray-500 text-sm">{t('appStatistics.forPrefix')} {statistics.period}</p>
             </div>
           </div>
           <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center relative">

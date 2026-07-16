@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconExternalLink } from '../components/Icons/IconExternalLink';
 import { BookACallModal } from '../components/modal/BookACallModal';
 import { useWhatsNew } from '../hooks/useWhatsNew';
+import { useTranslation } from '../i18n/useTranslation';
 import { LATEST_VERSION } from '../whatsNew/releases';
 
 // Derive the uptime/status page URL from the current hostname.
@@ -79,67 +80,63 @@ export default function Help() {
   const statusUrl = useMemo(deriveStatusUrl, []);
   const navigate = useNavigate();
   const { hasUnseen } = useWhatsNew();
+  const { t } = useTranslation();
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px]">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          Help &amp; Support
+          {t('help.title')}
         </div>
       </div>
       <div className="rounded-2xl bg-gray-50 p-4 md:p-6 overflow-y-auto">
         <div className="font-sans text-base text-gray-700 mb-6 max-w-3xl">
-          Resources to help you get started and get the most out of Ethora.
+          {t('help.subtitle')}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl">
           <ResourceCard
-            title={hasUnseen ? `What's new in ${LATEST_VERSION}` : "What's new"}
-            description={
-              `See what we shipped recently - features, improvements, and quick links to try each one.`
+            title={
+              hasUnseen
+                ? t('help.whatsNew.titleWithVersion').replace(
+                    '{version}',
+                    LATEST_VERSION
+                  )
+                : t('help.whatsNew.title')
             }
+            description={t('help.whatsNew.description')}
             onClick={() => navigate('/app/help/whats-new')}
-            ctaLabel="See what's new"
+            ctaLabel={t('help.whatsNew.cta')}
           />
           <ResourceCard
-            title="SDK"
-            description={
-              'Integrating Ethora into your existing apps or building a new web/mobile app? Check out our SDK monorepo on GitHub - it contains the chat component, backend integration helpers, and ready-to-run examples.'
-            }
+            title={t('help.sdk.title')}
+            description={t('help.sdk.description')}
             href="https://github.com/dappros/ethora/"
-            ctaLabel="Open SDK on GitHub"
+            ctaLabel={t('help.sdk.cta')}
           />
           <ResourceCard
-            title="MCP"
-            description={
-              'Use our MCP server with your AI IDE - it has knowledge of all Ethora features, tools, and APIs. Just tell your AI IDE what you want to build and it will use the Ethora MCP to set up your project.'
-            }
+            title={t('help.mcp.title')}
+            description={t('help.mcp.description')}
             href="https://github.com/dappros/ethora-mcp-server"
-            ctaLabel="Open MCP on GitHub"
+            ctaLabel={t('help.mcp.cta')}
           />
           <ResourceCard
-            title="Forum"
-            description={
-              'Have technical or product questions? Create a topic in our community forum - the team and other developers reply there.'
-            }
+            title={t('help.forum.title')}
+            description={t('help.forum.description')}
             href="https://forum.ethora.com/"
-            ctaLabel="Visit the forum"
+            ctaLabel={t('help.forum.cta')}
           />
           <ResourceCard
-            title="Book a call"
-            description={
-              'Get on a call with our product team. We will point you in the right direction so you can leverage Ethora quickly and efficiently.'
-            }
-            ctaLabel="Book a call"
+            title={t('help.bookACall.title')}
+            description={t('help.bookACall.description')}
+            ctaLabel={t('help.bookACall.cta')}
             onClick={() => setShowBookACall(true)}
           />
           {statusUrl && (
             <ResourceCard
-              title="Status"
-              description={
-                'Live infrastructure health and uptime for this environment - API, XMPP, push, AI and more. Check here first if something looks off.'
-              }
+              title={t('help.status.title')}
+              description={t('help.status.description')}
               href={statusUrl}
-              ctaLabel="Open status page"
+              ctaLabel={t('help.status.cta')}
             />
           )}
         </div>

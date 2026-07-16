@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PasswordInput from '../../../../components/input/PasswordInput';
 import { httpResetPassword } from '../../../../http';
+import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 
@@ -17,6 +18,7 @@ interface Inputs {
 const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
   const config = useAppStore((s) => s.currentApp);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const {
     register,
@@ -36,14 +38,14 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
     setLoading(true);
     const token = getTokenFromUrl();
     if (!token) {
-      toast.error('Bad reset url. Try reset again');
+      toast.error(t('authForgetPasswordThirdStep.badResetUrl'));
       setLoading(false);
       navigate('/login');
       return;
     }
     httpResetPassword(token, data.newPassword)
       .then(() => {
-        toast.success('Password was successfully reset');
+        toast.success(t('authForgetPasswordThirdStep.resetSuccess'));
         navigate('/login');
       })
       .catch((error) => {
@@ -60,9 +62,9 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
             }
           }
           // @ts-ignore
-          toast.error('error', errors.join(', '));
+          toast.error(t('authForgetPasswordThirdStep.error'), errors.join(', '));
         }
-        toast.error('error', error.response.data.error);
+        toast.error(t('authForgetPasswordThirdStep.error'), error.response.data.error);
       })
       .finally(() => {
         setLoading(false);
@@ -92,7 +94,7 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
             color: '#141414',
           }}
         >
-          Set your new password
+          {t('authForgetPasswordThirdStep.title')}
         </Typography>
         <Box
           sx={{
@@ -104,12 +106,12 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
           }}
         >
           <PasswordInput
-            placeholder="Enter New Password"
+            placeholder={t('authForgetPasswordThirdStep.newPasswordPlaceholder')}
             {...register('newPassword', {
-              required: 'Password is required',
+              required: t('authForgetPasswordThirdStep.passwordRequired'),
               minLength: {
                 value: 4,
-                message: 'Password must be at least 4 characters',
+                message: t('authForgetPasswordThirdStep.passwordMinLength'),
               },
             })}
             error={Boolean(errors.newPassword)}
@@ -117,12 +119,12 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
             sx={{ flex: 1, width: '100%' }}
           />
           <PasswordInput
-            placeholder="Repeat New Password"
+            placeholder={t('authForgetPasswordThirdStep.repeatPasswordPlaceholder')}
             {...register('repeatPassword', {
-              required: 'Password is required',
+              required: t('authForgetPasswordThirdStep.passwordRequired'),
               minLength: {
                 value: 4,
-                message: 'Password must be at least 4 characters',
+                message: t('authForgetPasswordThirdStep.passwordMinLength'),
               },
             })}
             error={Boolean(errors.repeatPassword)}
@@ -143,7 +145,7 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
               : '#0052CD',
           }}
         >
-          Reset password
+          {t('authForgetPasswordThirdStep.submit')}
         </CustomButton>
       </Box>
     </Box>

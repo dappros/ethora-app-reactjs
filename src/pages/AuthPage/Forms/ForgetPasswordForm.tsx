@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import BackButton from '../BackButton';
 import FirstStep from '../ForgetPassword/Steps/FirstStep';
@@ -21,6 +22,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
   const config = useAppStore((s) => s.currentApp);
   const navigate = useNavigate();
   const { token } = useParams();
+  const { t } = useTranslation();
 
   const steps = [
     <FirstStep setStep={setActiveStep} />,
@@ -29,7 +31,9 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
   ];
 
   const StepComponent: React.FC<{ step: number }> = ({ step }) => {
-    return steps[step] || <div>Step not found</div>;
+    return (
+      steps[step] || <div>{t('authForgetPasswordForm.stepNotFound')}</div>
+    );
   };
 
   const handleBackButtonClick = () => {
@@ -95,7 +99,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
               m: 0,
             }}
           >
-            Forgot Password
+            {t('authForgetPasswordForm.title')}
           </Typography>
         </Box>
         <CustomStepper
@@ -136,7 +140,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
               lineHeight: '24px',
             }}
           >
-            Back to Sign In
+            {t('authForgetPasswordForm.backToSignIn')}
           </Typography>
         </Box>
         <Typography
@@ -146,7 +150,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
             fontSize: '14px',
           }}
         >
-          Don't have an account?{' '}
+          {t('authForgetPasswordForm.noAccount')}{' '}
           <Typography
             style={{
               textDecoration: 'underline',
@@ -157,7 +161,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
             }}
             onClick={() => navigate('signUp')}
           >
-            Sign Up
+            {t('authForgetPasswordForm.signUp')}
           </Typography>
         </Typography>
       </Box>

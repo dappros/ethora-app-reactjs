@@ -18,6 +18,7 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppStore } from '../../../../store/useAppStore';
+import { useTranslation } from '../../../../i18n/useTranslation';
 
 interface FormInputs {
   firstname: string;
@@ -30,6 +31,7 @@ interface FormInputs {
 const SUBMIT_API = 'https://api.hsforms.com/submissions/v3/integration/submit';
 
 export const HubspotForm = () => {
+  const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
 
   const enabled =
@@ -68,8 +70,7 @@ export const HubspotForm = () => {
     if (!isConfigured) {
       setSubmitState({
         status: 'error',
-        message:
-          "Online booking isn't configured on this install. Email hello@ethora.com and we'll schedule a call.",
+        message: t('hubspotForm.notConfiguredError'),
       });
       return;
     }
@@ -115,24 +116,19 @@ export const HubspotForm = () => {
       if (errorType === 'FORM_HAS_RECAPTCHA_ENABLED') {
         setSubmitState({
           status: 'error',
-          message:
-            'Online booking is temporarily unavailable. Please email hello@ethora.com or message us on the forum and we will schedule a call.',
+          message: t('hubspotForm.recaptchaError'),
         });
         return;
       }
       setSubmitState({
         status: 'error',
-        message:
-          serverMsg ||
-          'Sorry, we could not submit your request. Please email hello@ethora.com instead.',
+        message: serverMsg || t('hubspotForm.genericError'),
       });
     } catch (e: unknown) {
       const err = e as { message?: string };
       setSubmitState({
         status: 'error',
-        message:
-          err?.message ||
-          'Network error - please email hello@ethora.com instead.',
+        message: err?.message || t('hubspotForm.networkError'),
       });
     }
   };
@@ -141,11 +137,10 @@ export const HubspotForm = () => {
     return (
       <div className="font-sans text-sm text-gray-700">
         <p className="mb-2 font-semibold text-brand-500">
-          Thanks - we'll be in touch!
+          {t('hubspotForm.successTitle')}
         </p>
         <p>
-          Our team will reach out shortly to schedule a call. In the meantime
-          feel free to keep exploring.
+          {t('hubspotForm.successBody')}
         </p>
       </div>
     );
@@ -162,7 +157,7 @@ export const HubspotForm = () => {
         <div>
           <input
             type="text"
-            placeholder="First name"
+            placeholder={t('hubspotForm.firstNamePlaceholder')}
             className={fieldClass(!!errors.firstname)}
             {...register('firstname', { required: true })}
           />
@@ -170,7 +165,7 @@ export const HubspotForm = () => {
         <div>
           <input
             type="text"
-            placeholder="Last name"
+            placeholder={t('hubspotForm.lastNamePlaceholder')}
             className={fieldClass(!!errors.lastname)}
             {...register('lastname', { required: true })}
           />
@@ -179,7 +174,7 @@ export const HubspotForm = () => {
       <div>
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t('hubspotForm.emailPlaceholder')}
           className={fieldClass(!!errors.email)}
           {...register('email', {
             required: true,
@@ -190,14 +185,14 @@ export const HubspotForm = () => {
       <div>
         <input
           type="text"
-          placeholder="Company"
+          placeholder={t('hubspotForm.companyPlaceholder')}
           className={fieldClass(false)}
           {...register('company')}
         />
       </div>
       <div>
         <textarea
-          placeholder="What would you like to discuss? (optional)"
+          placeholder={t('hubspotForm.messagePlaceholder')}
           rows={3}
           className={fieldClass(false)}
           {...register('message')}
@@ -211,7 +206,7 @@ export const HubspotForm = () => {
             href="mailto:hello@ethora.com?subject=Book%20a%20call%20with%20the%20Ethora%20team"
             className="inline-block mt-2 underline text-brand-500"
           >
-            Email hello@ethora.com
+            {t('hubspotForm.emailLinkText')}
           </a>
         </div>
       )}
@@ -221,7 +216,7 @@ export const HubspotForm = () => {
         disabled={isSubmitting}
         className="rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm py-3 disabled:opacity-50"
       >
-        {isSubmitting ? 'Sending...' : 'Request a call'}
+        {isSubmitting ? t('hubspotForm.sendingButton') : t('hubspotForm.submitButton')}
       </button>
     </form>
   );

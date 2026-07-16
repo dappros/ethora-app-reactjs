@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from '../i18n/useTranslation';
 
 interface Props {
   value: string;
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export function Secret({ value, className }: Props) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   return (
     <div className={className}>
@@ -14,7 +16,7 @@ export function Secret({ value, className }: Props) {
           className="text-brand-500 underline cursor-pointer"
           onClick={() => setShow(true)}
         >
-          Click to reveal
+          {t('secret.clickToReveal')}
         </a>
       )}
       {show && (
@@ -24,7 +26,7 @@ export function Secret({ value, className }: Props) {
             className="text-brand-500 underline cursor-pointer"
             onClick={() => setShow(false)}
           >
-            Hide
+            {t('secret.hide')}
           </a>
         </div>
       )}

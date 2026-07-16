@@ -31,6 +31,7 @@ import {
   httpReindexSiteSourceV2,
   httpTestMessageAgentBotInstance,
 } from '../../../http';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
 import { useAppStore } from '../../../store/useAppStore';
@@ -43,6 +44,7 @@ export const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ 
 );
 
 export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState(agent.displayName);
   const [avatarUrl, setAvatarUrl] = useState(agent.avatarUrl);
   const [bio, setBio] = useState(agent.bio);
@@ -69,9 +71,9 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         responseProbability,
         cooldownSec,
       });
-      toast.success('Saved');
+      toast.success(t('agentPanels.saved'));
     } catch (e: any) {
-      toast.error(`Save failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('agentPanels.saveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     }
   }
 
@@ -84,7 +86,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   async function uploadAvatar(file: File) {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+      toast.error(t('agentPanels.selectImageFile'));
       return;
     }
     setAvatarBusy(true);
@@ -94,9 +96,9 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
       if (!location) throw new Error('Upload returned no location');
       setAvatarUrl(location);
       await actionUpdateAgent(agent.id, { avatarUrl: location });
-      toast.success('Avatar uploaded');
+      toast.success(t('agentPanels.avatarUploaded'));
     } catch (e: any) {
-      toast.error(`Upload failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('agentPanels.uploadFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     } finally {
       setAvatarBusy(false);
       if (avatarFileRef.current) avatarFileRef.current.value = '';
@@ -105,14 +107,14 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
 
   async function clearAvatar() {
     if (!avatarUrl) return;
-    if (!confirm('Remove this agent\'s avatar?')) return;
+    if (!confirm(t('agentPanels.confirmRemoveAvatar'))) return;
     setAvatarBusy(true);
     try {
       setAvatarUrl('');
       await actionUpdateAgent(agent.id, { avatarUrl: '' });
-      toast.success('Avatar cleared');
+      toast.success(t('agentPanels.avatarCleared'));
     } catch (e: any) {
-      toast.error(`Clear failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('agentPanels.clearFailedPrefix')} ${e?.response?.data?.error || e.message}`);
     } finally {
       setAvatarBusy(false);
     }
@@ -120,16 +122,16 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
 
   return (
     <div className="space-y-3 max-w-2xl">
-      <Field label="Display name">
+      <Field label={t('agentPanels.displayNameLabel')}>
         <input className="border rounded px-2 py-1 w-full" disabled={isDisabled} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
       </Field>
-      <Field label="Avatar">
+      <Field label={t('agentPanels.avatarLabel')}>
         <div className="flex items-center gap-3">
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full object-cover border" />
           ) : (
             <div className="w-16 h-16 rounded-full bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">
-              no avatar
+              {t('agentPanels.noAvatar')}
             </div>
           )}
           <div className="flex flex-col gap-1">
@@ -152,32 +154,32 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
                   onClick={clearAvatar}
                   className="text-xs text-red-500 hover:underline disabled:opacity-50"
                 >
-                  Remove
+                  {t('agentPanels.remove')}
                 </button>
               )}
-              {avatarBusy && <span className="text-xs text-gray-500">Uploading...</span>}
+              {avatarBusy && <span className="text-xs text-gray-500">{t('agentPanels.uploading')}</span>}
             </div>
           </div>
         </div>
       </Field>
       {/* Advanced: raw URL still editable for operators who already have a hosted image.
           Hidden-ish via small muted font; saving still happens on "Save persona". */}
-      <Field label="Avatar URL (advanced)">
+      <Field label={t('agentPanels.avatarUrlAdvancedLabel')}>
         <input className="border rounded px-2 py-1 w-full text-xs font-mono" disabled={isDisabled} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
       </Field>
-      <Field label="Bio">
+      <Field label={t('agentPanels.bioLabel')}>
         <textarea className="border rounded px-2 py-1 w-full" rows={3} disabled={isDisabled} value={bio} onChange={(e) => setBio(e.target.value)} />
       </Field>
-      <Field label="Response mode">
+      <Field label={t('agentPanels.responseModeLabel')}>
         <select className="border rounded px-2 py-1" disabled={isDisabled} value={responseMode} onChange={(e) => setResponseMode(e.target.value as any)}>
-          <option value="always">Always</option>
-          <option value="mentioned">Mentioned only</option>
-          <option value="smart">Smart (LLM gate)</option>
-          <option value="probability">Probability</option>
+          <option value="always">{t('agentPanels.responseModeAlways')}</option>
+          <option value="mentioned">{t('agentPanels.responseModeMentioned')}</option>
+          <option value="smart">{t('agentPanels.responseModeSmart')}</option>
+          <option value="probability">{t('agentPanels.responseModeProbability')}</option>
         </select>
       </Field>
       {responseMode === 'probability' && (
-        <Field label={`Probability (${(responseProbability * 100).toFixed(0)}%)`}>
+        <Field label={t('agentPanels.probabilityLabel').replace('{pct}', (responseProbability * 100).toFixed(0))}>
           <input
             type="range"
             min={0}
@@ -189,7 +191,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
           />
         </Field>
       )}
-      <Field label="Cooldown (seconds between replies in the same room)">
+      <Field label={t('agentPanels.cooldownLabel')}>
         <input
           type="number"
           min={0}
@@ -200,19 +202,20 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         />
       </Field>
       <button onClick={save} disabled={isDisabled} className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50">
-        Save persona
+        {t('agentPanels.savePersona')}
       </button>
     </div>
   );
 };
 
 export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
+  const { t } = useTranslation();
   const [prompt, setPrompt] = useState(agent.prompt);
   useEffect(() => setPrompt(agent.prompt), [agent.id]);
   return (
     <div className="space-y-3 max-w-3xl">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-gray-500">Templates:</span>
+        <span className="text-sm text-gray-500">{t('agentPanels.templatesLabel')}</span>
         {agentPromptTemplates.map((t) => (
           <button
             key={t.id}
@@ -235,15 +238,15 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         onClick={async () => {
           try {
             await actionUpdateAgent(agent.id, { prompt });
-            toast.success('Context saved');
+            toast.success(t('agentPanels.contextSaved'));
           } catch (e: any) {
-            toast.error(`Save failed: ${e?.response?.data?.error || e.message}`);
+            toast.error(`${t('agentPanels.saveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
           }
         }}
         disabled={isDisabled}
         className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
       >
-        Save context
+        {t('agentPanels.saveContext')}
       </button>
     </div>
   );
@@ -276,22 +279,23 @@ const AppScopePicker: React.FC<{
   appId: string;
   onChange: (appId: string) => void;
 }> = ({ agent, appId, onChange }) => {
+  const { t } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   // Only the user's own apps are eligible scopes (anything else and the auth check
   // on /v2/apps/:appId/sources/* would 403).
   if (apps.length <= 1) return null;
   return (
     <label className="flex items-center gap-2 text-xs text-gray-600">
-      <span>Scope app:</span>
+      <span>{t('agentPanels.scopeAppLabel')}</span>
       <select
         className="border rounded px-2 py-1 text-xs"
         value={appId}
         onChange={(e) => onChange(e.target.value)}
       >
-        {!appId && <option value="">(pick an app)</option>}
+        {!appId && <option value="">{t('agentPanels.pickAnApp')}</option>}
         {apps.map((a) => (
           <option key={a._id} value={a._id}>
-            {a.displayName}{a._id === agent.originAppId ? ' (origin)' : ''}
+            {a.displayName}{a._id === agent.originAppId ? t('agentPanels.originSuffix') : ''}
           </option>
         ))}
       </select>
@@ -300,6 +304,7 @@ const AppScopePicker: React.FC<{
 };
 
 export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
+  const { t } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   const [appId, setAppId] = useState<string>(initialAppId);
   const [url, setUrl] = useState('');
@@ -331,7 +336,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       const items: SiteSourceRow[] = r.data?.result || r.data?.items || [];
       setRows(items);
     } catch (e: any) {
-      toast.error(`Failed to load indexed URLs: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('agentPanels.failedToLoadUrlsPrefix')} ${e?.response?.data?.error || e.message}`);
       setRows([]);
     } finally {
       setLoadingList(false);
@@ -346,10 +351,10 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     <div className="space-y-3 max-w-3xl">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="text-sm text-gray-600">
-          Crawl a website and store content as embeddings under this agent's RAG namespace.
+          {t('agentPanels.webIndexDescription')}
           {!appId && (
             <div className="mt-1 text-xs text-amber-600">
-              No app picked — open an app in admin first or pick one below.
+              {t('agentPanels.noAppPicked')}
             </div>
           )}
         </div>
@@ -366,7 +371,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         />
         <label className="flex items-center gap-1 text-sm">
           <input type="checkbox" disabled={isDisabled || busy || !appId} checked={followLink} onChange={(e) => setFollowLink(e.target.checked)} />
-          follow links
+          {t('agentPanels.followLinks')}
         </label>
         <button
           disabled={isDisabled || busy || !url || !appId}
@@ -374,26 +379,26 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
             setBusy(true);
             try {
               await httpAgentSiteCrawl(appId, agent.id, url, followLink);
-              toast.success('Crawl queued');
+              toast.success(t('agentPanels.crawlQueued'));
               setUrl('');
               // Re-fetch the list so the new pages appear.
               await loadList();
             } catch (e: any) {
-              toast.error(`Crawl failed: ${e?.response?.data?.error || e.message}`);
+              toast.error(`${t('agentPanels.crawlFailedPrefix')} ${e?.response?.data?.error || e.message}`);
             } finally {
               setBusy(false);
             }
           }}
           className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
         >
-          {busy ? 'Crawling...' : 'Crawl'}
+          {busy ? t('agentPanels.crawling') : t('agentPanels.crawl')}
         </button>
       </div>
 
       <div className="text-xs text-gray-500">
-        Indexed bytes: {agent.totalSiteSourceSize?.toLocaleString() || 0}
+        {t('agentPanels.indexedBytesPrefix')} {agent.totalSiteSourceSize?.toLocaleString() || 0}
         {appId && (
-          <> · {rows.length} indexed URL{rows.length === 1 ? '' : 's'} in this app</>
+          <> · {rows.length} {rows.length === 1 ? t('agentPanels.indexedUrlsSuffixOne') : t('agentPanels.indexedUrlsSuffixOther')}</>
         )}
       </div>
 
@@ -407,25 +412,25 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         <table className="w-full text-xs">
           <thead className="bg-gray-50">
             <tr>
-              <th className="text-left p-2">URL</th>
-              <th className="text-left p-2 w-24">Size</th>
-              <th className="text-left p-2 w-32">Updated</th>
+              <th className="text-left p-2">{t('agentPanels.urlHeader')}</th>
+              <th className="text-left p-2 w-24">{t('agentPanels.sizeHeader')}</th>
+              <th className="text-left p-2 w-32">{t('agentPanels.updatedHeader')}</th>
               <th className="p-2 w-28"></th>
             </tr>
           </thead>
           <tbody>
             {loadingList && (
-              <tr><td colSpan={4} className="p-3 text-gray-500">Loading...</td></tr>
+              <tr><td colSpan={4} className="p-3 text-gray-500">{t('agentPanels.loading')}</td></tr>
             )}
             {!loadingList && rows.length === 0 && (
-              <tr><td colSpan={4} className="p-3 text-gray-500">No URLs indexed for this app yet.</td></tr>
+              <tr><td colSpan={4} className="p-3 text-gray-500">{t('agentPanels.noUrlsIndexed')}</td></tr>
             )}
             {!loadingList && rows.map((row) => (
               <tr key={row.id} className="border-t align-top">
                 <td className="p-2">
                   <div className="font-mono break-all">{row.url}</div>
                   {row.originUrl && row.originUrl !== row.url && (
-                    <div className="text-gray-400 text-[10px] mt-0.5">via {row.originUrl}</div>
+                    <div className="text-gray-400 text-[10px] mt-0.5">{t('agentPanels.viaPrefix')} {row.originUrl}</div>
                   )}
                 </td>
                 <td className="p-2 text-gray-600">{fmtBytesShort(row.mdByteSize)}</td>
@@ -436,31 +441,31 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                     onClick={async () => {
                       try {
                         await httpReindexSiteSourceV2(appId, row.id);
-                        toast.success('Reindex queued');
+                        toast.success(t('agentPanels.reindexQueued'));
                         await loadList();
                       } catch (e: any) {
-                        toast.error(`Reindex failed: ${e?.response?.data?.error || e.message}`);
+                        toast.error(`${t('agentPanels.reindexFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                       }
                     }}
                     className="text-brand-500 hover:underline mr-2"
                   >
-                    Reindex
+                    {t('agentPanels.reindex')}
                   </button>
                   <button
                     disabled={isDisabled || busy}
                     onClick={async () => {
-                      if (!confirm(`Remove "${row.url}" from the index?`)) return;
+                      if (!confirm(t('agentPanels.confirmRemoveFromIndex').replace('{name}', row.url))) return;
                       try {
                         await httpDeleteSiteSourceV2Url(appId, row.id);
-                        toast.success('Removed');
+                        toast.success(t('agentPanels.removed'));
                         await loadList();
                       } catch (e: any) {
-                        toast.error(`Remove failed: ${e?.response?.data?.error || e.message}`);
+                        toast.error(`${t('agentPanels.removeFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                       }
                     }}
                     className="text-red-500 hover:underline"
                   >
-                    Remove
+                    {t('agentPanels.remove')}
                   </button>
                 </td>
               </tr>
@@ -483,6 +488,7 @@ type DocSourceRow = {
 };
 
 export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
+  const { t } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   const fileRef = useRef<HTMLInputElement>(null);
   const [appId, setAppId] = useState<string>(initialAppId);
@@ -509,7 +515,7 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
       // Non-fatal: just leave rows empty + surface the error so user knows
       // why nothing's listed (was a silent gap previously - user got a
       // success toast on upload then saw an empty panel and reported a bug).
-      toast.error(`Could not load docs list: ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('agentPanels.couldNotLoadDocsListPrefix')} ${e?.response?.data?.error || e.message}`);
     } finally {
       setLoadingList(false);
     }
@@ -524,10 +530,10 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
     <div className="space-y-3 max-w-2xl">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="text-sm text-gray-600">
-          Upload PDFs, DOCX, MD, TXT to index under this agent.
+          {t('agentPanels.docsIndexDescription')}
           {!appId && (
             <div className="mt-1 text-xs text-amber-600">
-              No app picked — open an app in admin first or pick one below.
+              {t('agentPanels.noAppPicked')}
             </div>
           )}
         </div>
@@ -544,17 +550,17 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
           setBusy(true);
           try {
             await httpAgentDocsUpload(appId, agent.id, files);
-            toast.success(`Uploaded ${files.length} file(s)`);
+            toast.success(t('agentPanels.uploadedFilesToast').replace('{n}', String(files.length)));
             await loadList();
           } catch (err: any) {
-            toast.error(`Upload failed: ${err?.response?.data?.error || err.message}`);
+            toast.error(`${t('agentPanels.uploadFailedPrefix')} ${err?.response?.data?.error || err.message}`);
           } finally {
             setBusy(false);
             if (fileRef.current) fileRef.current.value = '';
           }
         }}
       />
-      {busy && <div className="text-sm text-gray-500">Uploading + parsing + embedding...</div>}
+      {busy && <div className="text-sm text-gray-500">{t('agentPanels.uploadingParsingEmbedding')}</div>}
 
       {/* Indexed files list - this used to be missing entirely, so users
           got a 'success' toast on upload but saw no confirmation that the
@@ -563,18 +569,18 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
         <table className="w-full text-xs">
           <thead className="bg-gray-50">
             <tr>
-              <th className="text-left p-2">File</th>
-              <th className="text-left p-2 w-24">Size</th>
-              <th className="text-left p-2 w-32">Uploaded</th>
+              <th className="text-left p-2">{t('agentPanels.fileHeader')}</th>
+              <th className="text-left p-2 w-24">{t('agentPanels.sizeHeader')}</th>
+              <th className="text-left p-2 w-32">{t('agentPanels.uploadedHeader')}</th>
               <th className="p-2 w-20"></th>
             </tr>
           </thead>
           <tbody>
             {loadingList && (
-              <tr><td colSpan={4} className="p-3 text-gray-500">Loading...</td></tr>
+              <tr><td colSpan={4} className="p-3 text-gray-500">{t('agentPanels.loading')}</td></tr>
             )}
             {!loadingList && rows.length === 0 && (
-              <tr><td colSpan={4} className="p-3 text-gray-500">No files indexed for this app yet.</td></tr>
+              <tr><td colSpan={4} className="p-3 text-gray-500">{t('agentPanels.noFilesIndexed')}</td></tr>
             )}
             {!loadingList && rows.map((row) => (
               <tr key={row.id} className="border-t align-top">
@@ -585,18 +591,18 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
                   <button
                     disabled={isDisabled || busy}
                     onClick={async () => {
-                      if (!confirm(`Remove "${row.originalName || row.title || row.id}" from the index?`)) return;
+                      if (!confirm(t('agentPanels.confirmRemoveFromIndex').replace('{name}', row.originalName || row.title || row.id))) return;
                       try {
                         await httpDeleteDocSourceV2(appId, row.id);
-                        toast.success('Removed');
+                        toast.success(t('agentPanels.removed'));
                         await loadList();
                       } catch (e: any) {
-                        toast.error(`Remove failed: ${e?.response?.data?.error || e.message}`);
+                        toast.error(`${t('agentPanels.removeFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                       }
                     }}
                     className="text-red-500 hover:underline"
                   >
-                    Remove
+                    {t('agentPanels.remove')}
                   </button>
                 </td>
               </tr>
@@ -609,13 +615,13 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
 };
 
 export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
+  const { t } = useTranslation();
   const [soul, setSoul] = useState(agent.soulMd);
   useEffect(() => setSoul(agent.soulMd), [agent.id]);
   return (
     <div className="space-y-3 max-w-3xl">
       <div className="text-sm text-gray-600">
-        SOUL.MD: the agent's evolving identity. The agent itself can request updates (Phase 2 wires
-        a tool-call); for now you can edit it as the operator. Last update: {agent.soulMdUpdatedAt || 'never'} ({agent.soulMdUpdatedBy || 'n/a'})
+        {t('agentPanels.soulMdDescriptionPrefix')} {agent.soulMdUpdatedAt || t('agentPanels.never')} ({agent.soulMdUpdatedBy || t('agentPanels.notApplicable')})
       </div>
       <textarea className="border rounded px-2 py-2 w-full font-mono text-sm" rows={16} disabled={isDisabled} value={soul} onChange={(e) => setSoul(e.target.value)} />
       <div className="flex gap-2">
@@ -623,15 +629,15 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
           onClick={async () => {
             try {
               await actionUpdateAgentSoul(agent.id, { soulMd: soul });
-              toast.success('SOUL.MD saved');
+              toast.success(t('agentPanels.soulMdSaved'));
             } catch (e: any) {
-              toast.error(`Failed: ${e?.response?.data?.error || e.message}`);
+              toast.error(`${t('agentPanels.failedPrefix')} ${e?.response?.data?.error || e.message}`);
             }
           }}
           disabled={isDisabled}
           className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
         >
-          Save SOUL.MD
+          {t('agentPanels.saveSoulMd')}
         </button>
       </div>
     </div>
@@ -639,6 +645,7 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
 };
 
 export const HeartbeatPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
+  const { t } = useTranslation();
   const [enabled, setEnabled] = useState(agent.heartbeat?.enabled || false);
   const [schedule, setSchedule] = useState(agent.heartbeat?.schedule || '');
   const [hbPrompt, setHbPrompt] = useState(agent.heartbeat?.prompt || '');
@@ -651,31 +658,30 @@ export const HeartbeatPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean 
   return (
     <div className="space-y-3 max-w-2xl">
       <div className="text-sm text-gray-600">
-        Heartbeat lets the agent engage proactively (e.g. once per day, after N min of inactivity, on a cron).
-        Phase 1 stores the config; the cron worker that actually fires events is delivered in Phase 2.
+        {t('agentPanels.heartbeatDescription')}
       </div>
-      <Field label="Enabled">
+      <Field label={t('agentPanels.enabledLabel')}>
         <input type="checkbox" disabled={isDisabled} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
       </Field>
-      <Field label="Schedule (cron, interval, or keyword)">
+      <Field label={t('agentPanels.scheduleLabel')}>
         <input className="border rounded px-2 py-1 w-full" disabled={isDisabled} placeholder="e.g. '0 9 * * MON-FRI' or 'inactive 1h'" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
       </Field>
-      <Field label="Heartbeat prompt">
+      <Field label={t('agentPanels.heartbeatPromptLabel')}>
         <textarea className="border rounded px-2 py-1 w-full" rows={5} disabled={isDisabled} value={hbPrompt} onChange={(e) => setHbPrompt(e.target.value)} />
       </Field>
       <button
         onClick={async () => {
           try {
             await actionUpdateAgent(agent.id, { heartbeat: { enabled, schedule, prompt: hbPrompt } });
-            toast.success('Heartbeat saved');
+            toast.success(t('agentPanels.heartbeatSaved'));
           } catch (e: any) {
-            toast.error(`Failed: ${e?.response?.data?.error || e.message}`);
+            toast.error(`${t('agentPanels.failedPrefix')} ${e?.response?.data?.error || e.message}`);
           }
         }}
         disabled={isDisabled}
         className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
       >
-        Save heartbeat
+        {t('agentPanels.saveHeartbeat')}
       </button>
     </div>
   );
@@ -726,6 +732,7 @@ const RoomActionsList: React.FC<{
   bi: AgentBotInstance;
   onChanged?: () => void;
 }> = ({ agent, bi, onChanged }) => {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState<string | null>(null);
 
   // Prefer joinedRoomsDetails (with titles); fall back to plain JIDs if the API hasn't
@@ -741,7 +748,7 @@ const RoomActionsList: React.FC<{
   }, [bi.joinedRoomsDetails, bi.joinedRooms]);
 
   if (rows.length === 0) {
-    return <span className="text-gray-500 text-xs">none</span>;
+    return <span className="text-gray-500 text-xs">{t('agentPanels.none')}</span>;
   }
 
   return (
@@ -759,41 +766,41 @@ const RoomActionsList: React.FC<{
                   const resp = await httpTestMessageAgentBotInstance(agent.id, bi.id, undefined, r.jid);
                   const data = resp.data;
                   if (data?.ok && (data.sent ?? 0) > 0) {
-                    toast.success(`Test sent to "${r.title}"`);
+                    toast.success(t('agentPanels.testSentToast').replace('{title}', r.title));
                   } else {
-                    toast.warn(`Sent failed: ${data?.results?.[0]?.error || data?.message || 'unknown'}`);
+                    toast.warn(`${t('agentPanels.sentFailedPrefix')} ${data?.results?.[0]?.error || data?.message || 'unknown'}`);
                   }
                 } catch (e: any) {
                   const data = e?.response?.data;
-                  toast.error(`Test failed: ${data?.message || data?.error || e.message}`);
+                  toast.error(`${t('agentPanels.testFailedPrefix')} ${data?.message || data?.error || e.message}`);
                 } finally {
                   setBusy(null);
                 }
               }}
               className="text-[11px] border rounded px-2 py-0.5 hover:bg-gray-100 disabled:opacity-50"
-              title="Send a system test message into this room only"
+              title={t('agentPanels.testTooltip')}
             >
-              {rowBusy ? '...' : 'Test'}
+              {rowBusy ? '...' : t('agentPanels.test')}
             </button>
             <button
               disabled={rowBusy}
               onClick={async () => {
-                if (!confirm(`Remove "${agent.displayName || 'agent'}" from "${r.title}"? The bot stays running and can be re-invited later.`)) return;
+                if (!confirm(t('agentPanels.confirmRemoveFromRoom').replace('{name}', agent.displayName || t('agentPanels.agentFallback')).replace('{title}', r.title))) return;
                 setBusy(r.jid);
                 try {
                   await httpLeaveChatAgentBotInstance(agent.id, bi.id, r.jid);
-                  toast.success(`Left "${r.title}"`);
+                  toast.success(t('agentPanels.leftToast').replace('{title}', r.title));
                   onChanged?.();
                 } catch (e: any) {
-                  toast.error(`Leave failed: ${e?.response?.data?.error || e.message}`);
+                  toast.error(`${t('agentPanels.leaveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                 } finally {
                   setBusy(null);
                 }
               }}
               className="text-[11px] border rounded px-2 py-0.5 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-              title="Remove this BotInstance from this room (does not stop the bot)"
+              title={t('agentPanels.leaveTooltip')}
             >
-              Leave
+              {t('agentPanels.leave')}
             </button>
             {/* Show the JID as a faint hint - useful for diagnostics, not for everyday use */}
             <span className="font-mono text-[9px] text-gray-400 break-all hidden lg:inline">{r.jid}</span>
@@ -805,6 +812,7 @@ const RoomActionsList: React.FC<{
 };
 
 const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: () => void; isDisabled?: boolean }> = ({ agent, bi, onChanged, isDisabled }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [diag, setDiag] = useState<DiagState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -837,14 +845,14 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
           ? 'bg-yellow-500'
           : 'bg-green-500';
   const dotTitle = !diag
-    ? 'Not loaded yet'
+    ? t('agentPanels.diagNotLoaded')
     : !inMem?.spawned
-      ? 'No XmppClient process for this bot in ai-service'
+      ? t('agentPanels.diagNoXmppClient')
       : !inMem?.online
-        ? `Spawned but not online${inMem?.lastError ? ': ' + inMem.lastError : ''}`
+        ? `${t('agentPanels.diagSpawnedNotOnlinePrefix')}${inMem?.lastError ? ': ' + inMem.lastError : ''}`
         : (inMem?.joinedRooms?.length || 0) === 0
-          ? 'Online but not in any MUC room'
-          : 'Online and in MUC';
+          ? t('agentPanels.diagOnlineNotInRoom')
+          : t('agentPanels.diagOnlineInMuc');
 
   return (
     <>
@@ -866,8 +874,8 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
             )}
             title={
               bi.status === 'on'
-                ? 'ai-service has spawned an XmppClient for this BotInstance — bot is connected and will participate in the rooms below.'
-                : 'BotInstance is stopped — XmppClient is torn down. Rooms are still listed (persisted) but the bot is not actually in them and won’t speak. Use the agent header Start to re-spawn.'
+                ? t('agentPanels.botOnTitle')
+                : t('agentPanels.botOffTitle')
             }
           >
             {bi.status}
@@ -887,16 +895,16 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
           {isDisabled ? (
             <span
               className="text-xs text-gray-400 cursor-not-allowed"
-              title="Inspect is disabled for agents you don't own. Chat content in this bot's rooms belongs to its owner."
+              title={t('agentPanels.inspectDisabledTooltip')}
             >
-              Inspect disabled
+              {t('agentPanels.inspectDisabled')}
             </span>
           ) : (
             <button
               onClick={() => setOpen(!open)}
               className="text-xs text-brand-500 hover:underline"
             >
-              {open ? 'Hide' : 'Inspect'}
+              {open ? t('agentPanels.hide') : t('agentPanels.inspect')}
             </button>
           )}
         </td>
@@ -906,30 +914,30 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
           <td colSpan={5} className="p-3">
             <div className="flex items-center gap-2 mb-2">
               <button onClick={refresh} disabled={loading} className="text-xs border rounded px-2 py-1 hover:bg-gray-100">
-                {loading ? 'Refreshing...' : 'Refresh'}
+                {loading ? t('agentPanels.refreshing') : t('agentPanels.refresh')}
               </button>
               {diag?.aiServiceError && (
-                <span className="text-xs text-red-600">ai-service error: {diag.aiServiceError}</span>
+                <span className="text-xs text-red-600">{t('agentPanels.aiServiceErrorPrefix')} {diag.aiServiceError}</span>
               )}
             </div>
             {diag && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <div className="font-semibold mb-1">In-memory (ai-service runtime)</div>
+                  <div className="font-semibold mb-1">{t('agentPanels.inMemoryHeading')}</div>
                   <dl className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                    <DiagItem label="Spawned" value={String(inMem?.spawned ?? false)} />
-                    <DiagItem label="Online" value={String(inMem?.online ?? false)} />
-                    <DiagItem label="Joined rooms (XMPP)" value={String(inMem?.joinedRooms?.length ?? 0)} />
-                    <DiagItem label="Pending rooms" value={String(inMem?.pendingRooms?.length ?? 0)} />
-                    <DiagItem label="Response mode" value={inMem?.responseMode || inMem?.trigger || 'default'} />
-                    <DiagItem label="RAG" value={String(inMem?.isRAG ?? false)} />
-                    <DiagItem label="Cooldown (s)" value={String(inMem?.cooldownSec ?? 0)} />
-                    <DiagItem label="Prompt length" value={String(inMem?.promptLength ?? 0)} />
-                    <DiagItem label="Last error" value={inMem?.lastError || '—'} />
+                    <DiagItem label={t('agentPanels.spawnedLabel')} value={String(inMem?.spawned ?? false)} />
+                    <DiagItem label={t('agentPanels.onlineLabel')} value={String(inMem?.online ?? false)} />
+                    <DiagItem label={t('agentPanels.joinedRoomsXmppLabel')} value={String(inMem?.joinedRooms?.length ?? 0)} />
+                    <DiagItem label={t('agentPanels.pendingRoomsLabel')} value={String(inMem?.pendingRooms?.length ?? 0)} />
+                    <DiagItem label={t('agentPanels.responseModeLabelShort')} value={inMem?.responseMode || inMem?.trigger || t('agentPanels.defaultFallback')} />
+                    <DiagItem label={t('agentPanels.ragLabel')} value={String(inMem?.isRAG ?? false)} />
+                    <DiagItem label={t('agentPanels.cooldownSecLabel')} value={String(inMem?.cooldownSec ?? 0)} />
+                    <DiagItem label={t('agentPanels.promptLengthLabel')} value={String(inMem?.promptLength ?? 0)} />
+                    <DiagItem label={t('agentPanels.lastErrorLabel')} value={inMem?.lastError || '—'} />
                   </dl>
                   {(inMem?.joinedRooms || []).length > 0 && (
                     <div className="mt-2">
-                      <div className="text-gray-500 mb-1">XMPP joined rooms:</div>
+                      <div className="text-gray-500 mb-1">{t('agentPanels.xmppJoinedRoomsLabel')}</div>
                       {inMem.joinedRooms.map((r: string) => (
                         <div key={r} className="font-mono text-[10px] break-all">{r}</div>
                       ))}
@@ -937,12 +945,10 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
                   )}
                 </div>
                 <div>
-                  <div className="font-semibold mb-1">Last conversations</div>
+                  <div className="font-semibold mb-1">{t('agentPanels.lastConversationsHeading')}</div>
                   {(diag.aiService?.conversations || []).length === 0 ? (
                     <div className="text-gray-500">
-                      None recorded yet. If the bot is online + in the room but you've sent
-                      messages and see nothing here, the stanza handler in ai-service is
-                      not seeing the messages — check ai-service logs and ejabberd MUC config.
+                      {t('agentPanels.noneRecordedYet')}
                     </div>
                   ) : (
                     <div className="space-y-2 max-h-72 overflow-auto pr-2">
@@ -978,6 +984,7 @@ export const ChatsIndexPanel: React.FC<{
   scopedAppId?: string;
   isDisabled?: boolean;
 }> = ({ agent, defaultChatRooms, scopedAppId, isDisabled }) => {
+  const { t } = useTranslation();
   const [items, setItems] = useState<AgentBotInstance[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -995,24 +1002,21 @@ export const ChatsIndexPanel: React.FC<{
   return (
     <div className="space-y-3">
       <div className="text-sm text-gray-600">
-        Per-App embodiments of this Agent and the rooms each is in.
-        Click "Inspect" on a row to see live ai-service runtime state (online? in-room?
-        last error?) and the last few message/response pairs — useful for diagnosing
-        "the bot doesn't respond".
+        {t('agentPanels.chatsIndexDescription')}
       </div>
       <div className="border rounded">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="text-left p-2 w-1/4">App</th>
+              <th className="text-left p-2 w-1/4">{t('agentPanels.appHeader')}</th>
               <th
                 className="text-left p-2 w-28"
-                title="Bot lifecycle in this app: 'on' = ai-service has spawned an XmppClient and the bot will participate in the rooms below; 'off' = teardown, the bot won't speak in this app even though rooms are still listed."
+                title={t('agentPanels.botInAppTooltip')}
               >
-                Bot in app
+                {t('agentPanels.botInAppHeader')}
               </th>
-              <th className="text-left p-2">Rooms joined (with per-room actions)</th>
-              <th className="text-left p-2 w-32">Last active</th>
+              <th className="text-left p-2">{t('agentPanels.roomsJoinedHeader')}</th>
+              <th className="text-left p-2 w-32">{t('agentPanels.lastActiveHeader')}</th>
               <th className="p-2 w-20"></th>
             </tr>
           </thead>
@@ -1020,7 +1024,7 @@ export const ChatsIndexPanel: React.FC<{
             {items.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-3 text-gray-500">
-                  Not deployed to any App yet.
+                  {t('agentPanels.notDeployedYet')}
                 </td>
               </tr>
             )}
@@ -1035,7 +1039,7 @@ export const ChatsIndexPanel: React.FC<{
           (only shown when this panel is rendered inside a per-App context). */}
       {scopedAppId && defaultChatRooms && defaultChatRooms.length > 0 && (
         <div className="border rounded p-3 bg-gray-50">
-          <div className="text-sm font-semibold mb-2">Invite to a default room of this app</div>
+          <div className="text-sm font-semibold mb-2">{t('agentPanels.inviteToDefaultRoomHeading')}</div>
           <div className="flex flex-col gap-2">
             {defaultChatRooms.map((r) => (
               <button
@@ -1045,11 +1049,11 @@ export const ChatsIndexPanel: React.FC<{
                   setBusy(true);
                   try {
                     await actionInviteAgentToChat(agent.id, { appId: scopedAppId, chatId: r.chatId });
-                    toast.success(`Invited to ${r.title}`);
+                    toast.success(t('agentPanels.invitedToast').replace('{title}', r.title));
                     reload();
                     await actionListBotInstances({ appId: scopedAppId });
                   } catch (e: any) {
-                    toast.error(`Invite failed: ${e?.response?.data?.error || e.message}`);
+                    toast.error(`${t('agentPanels.inviteFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                   } finally {
                     setBusy(false);
                   }

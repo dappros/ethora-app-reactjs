@@ -2,6 +2,7 @@
 
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { FC, ReactNode } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 
 interface Props {
@@ -26,12 +27,14 @@ export const ConfirmModal: FC<Props> = ({
   title,
   message,
   confirmLabel,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   danger = false,
   busy = false,
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
+  const resolvedCancelLabel = cancelLabel ?? t('confirmModal.cancelLabelDefault');
   return (
     <Dialog
       open
@@ -43,7 +46,7 @@ export const ConfirmModal: FC<Props> = ({
           <button
             className="absolute top-[15px] right-[15px]"
             onClick={onCancel}
-            aria-label="Close"
+            aria-label={t('confirmModal.closeAriaLabel')}
           >
             <IconClose />
           </button>
@@ -60,7 +63,7 @@ export const ConfirmModal: FC<Props> = ({
             className="w-full py-3 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover disabled:opacity-50"
             onClick={onCancel}
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             disabled={busy}
@@ -71,7 +74,7 @@ export const ConfirmModal: FC<Props> = ({
                 : 'w-full py-3 hover:bg-brand-darker p-2 border bg-brand-500 border-brand-darker rounded-xl text-white disabled:opacity-50'
             }
           >
-            {busy ? 'Working...' : confirmLabel}
+            {busy ? t('confirmModal.workingLabel') : confirmLabel}
           </button>
         </div>
       </DialogPanel>

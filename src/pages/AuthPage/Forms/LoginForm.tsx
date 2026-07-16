@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import React from 'react';
 
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import LoginStep from '../Login/Steps/LoginForm';
 
@@ -11,6 +12,7 @@ interface SignInFormProps {
 
 const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const config = useAppStore((s) => s.currentApp);
 
@@ -58,13 +60,13 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
               m: 0,
             }}
           >
-            Sign In
+            {t('authLoginForm.title')}
           </Typography>
         </Box>
         <LoginStep />
       </Box>
       <Typography align="center" component="span" fontSize={'14px'}>
-        Don't have an account?{' '}
+        {t('authLoginForm.noAccount')}{' '}
         <Typography
           style={{
             textDecoration: 'underline',
@@ -76,7 +78,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
           }}
           onClick={() => navigate('/register')}
         >
-          Sign Up
+          {t('authLoginForm.signUp')}
         </Typography>
       </Typography>
     </Box>

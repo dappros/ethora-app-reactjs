@@ -1,12 +1,14 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, IconButton } from '@mui/material';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface FeedbackIframeProps {
   onClick: (value: boolean) => void;
 }
 
 export const FeedbackIframe = ({ onClick }: FeedbackIframeProps) => {
+  const { t } = useTranslation();
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export const FeedbackIframe = ({ onClick }: FeedbackIframeProps) => {
       </IconButton>
       <iframe
         ref={iframeRef}
-        title="Feedback"
+        title={t('feedbackIframe.title')}
         src="https://form.jotform.com/251643190288359"
         width="100%"
         height="100%"

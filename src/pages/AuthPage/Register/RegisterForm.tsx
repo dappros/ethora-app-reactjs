@@ -15,6 +15,7 @@ import {
   httpRegisterWithEmailV2,
   sendHSFormData,
 } from '../../../http';
+import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import { navigateToUserPage } from '../../../utils/navigateToUserPage';
 import CustomButton from '../Button';
@@ -50,6 +51,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const utmParams = localStorage.getItem('urlParams');
   const formRef = useRef<HTMLFormElement>(null);
+  const { t } = useTranslation();
 
   const {
     register,
@@ -131,7 +133,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       setEmailSuggestion(suggested);
       setError('email', {
         type: 'suggestion',
-        message: `Did you mean ${suggested}?`,
+        message: `${t('authRegisterForm.didYouMean')} ${suggested}?`,
       });
       return;
     }
@@ -210,7 +212,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     } catch (error: AxiosError | any) {
       toast.error(
         error?.response?.data?.error ||
-          'An account with this email already exists.'
+          t('authRegisterForm.accountExists')
       );
     }
   };
@@ -236,7 +238,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
             className="mx-4 text-black"
             style={{ whiteSpace: 'nowrap' }}
           >
-            OR
+            {t('authRegisterForm.or')}
           </Typography>
           <span className="flex-grow border-t border-2 border-gray-300 mx-4 border-r-2" />
         </Box>
@@ -265,16 +267,16 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
             }}
           >
             <CustomInput
-              placeholder="First Name"
+              placeholder={t('authRegisterForm.firstNamePlaceholder')}
               id="firstName"
               fullWidth
-              {...register('firstName', { required: 'First Name is required' })}
+              {...register('firstName', { required: t('authRegisterForm.firstNameRequired') })}
               error={Boolean(errors.firstName)}
               helperText={errors.firstName?.message}
               required={true}
             />
             <CustomInput
-              placeholder="Last Name"
+              placeholder={t('authRegisterForm.lastNamePlaceholder')}
               id="lastName"
               fullWidth
               {...register('lastName')}
@@ -284,15 +286,15 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           </Box>
           <CustomInput
             fullWidth
-            placeholder="Email"
+            placeholder={t('authRegisterForm.emailPlaceholder')}
             id="email"
             required={true}
             type="email"
             {...register('email', {
-              required: 'Email is required',
+              required: t('authRegisterForm.emailRequired'),
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address',
+                message: t('authRegisterForm.emailInvalid'),
               },
               onBlur: (e) => {
                 const value = e.target.value?.trim();
@@ -317,14 +319,14 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                 clearErrors('email');
               }}
             >
-              Did you mean {emailSuggestion}?
+              {t('authRegisterForm.didYouMean')} {emailSuggestion}?
             </Typography>
           )}
           <PasswordInput
             type="password"
-            placeholder={'Password'}
+            placeholder={t('authRegisterForm.passwordPlaceholder')}
             sx={{ flex: 1, width: '100%' }}
-            {...register('password', { required: 'Required field' })}
+            {...register('password', { required: t('authRegisterForm.requiredField') })}
             error={!!errors.password}
             helperText={errors.password?.message}
           />
@@ -349,7 +351,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                 : '#0052CD',
             }}
           >
-            Sign Up
+            {t('authRegisterForm.submit')}
           </CustomButton>
         </Box>
         <Box
@@ -390,7 +392,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                   flexWrap: 'wrap',
                 }}
               >
-                By clicking the 'Sign Up' button, you agree to our
+                {t('authRegisterForm.agreementPrefix')}
               </Typography>
               <Typography
                 component="a"
@@ -403,7 +405,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                Terms & Conditions
+                {t('authRegisterForm.termsAndConditions')}
               </Typography>
             </Box>
           </Box>

@@ -3,6 +3,7 @@ import { ReactElement, useState } from 'react';
 import { StepLayout } from '.';
 import { QuestionsType } from '../typeTutorial';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../../../i18n/useTranslation';
 
 import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
@@ -29,7 +30,8 @@ export const StepChooseTutorial = ({
   initialQuestionId?: string;
 }): ReactElement => {
   const navigate = useNavigate();
-  
+  const { t } = useTranslation();
+
   // Находим индекс начального вопроса по ID, если он передан
   const getInitialStep = () => {
     if (initialQuestionId) {
@@ -46,7 +48,7 @@ export const StepChooseTutorial = ({
   if (totalSteps === 0) {
     return (
       <div className="text-center py-8">
-        <p>No questions available</p>
+        <p>{t('stepChooseTutorial.noQuestions')}</p>
       </div>
     );
   }
@@ -128,7 +130,7 @@ export const StepChooseTutorial = ({
                   {currentQuestion.answer.images && currentQuestion.answer.images[index] && (
                     <img
                       src={currentQuestion.answer.images[index]}
-                      alt="Demo animation"
+                      alt={t('stepChooseTutorial.imageAlt')}
                       className="w-full rounded-lg w-[80%]"
                       style={{ margin: '0 auto' }}
                     />
@@ -209,7 +211,7 @@ export const StepChooseTutorial = ({
             onClick={isLastStep ? handleStart : handleNext}
             className="ml-4 bg-brand-500 rounded-full flex items-center transition-colors disabled:text-gray-400 disabled:cursor-not-allowed p-1"
           >
-            <span className="text-white">{isLastStep ? 'GO START' : ''}</span>
+            <span className="text-white">{isLastStep ? t('stepChooseTutorial.goStart') : ''}</span>
             {!isLastStep && <KeyboardArrowRightRoundedIcon  className="text-white" />}
           </button>
         </div>

@@ -23,6 +23,7 @@ import {
   setSourcesSiteCrawl,
   setSourcesSiteCrawlReindex,
 } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import {
   ModelAIbot,
   ModelApp,
@@ -78,6 +79,30 @@ const tabsNew = {
   System: ['Chats', 'Visibility & Privacy', 'API', LIFECYCLE_TAB],
 };
 
+// `tabs` / `tabsNew` above are internal identifiers (compared against the
+// `?tab=` URL search param and used as React keys) - they must stay in
+// English/untranslated. These maps translate only the label actually shown
+// to the user in the tab list.
+const TAB_LABEL_KEYS: Record<string, string> = {
+  'AI Widget': 'appSettings.tab.aiWidget',
+  'Web App': 'appSettings.tab.webApp',
+  'Mobile App': 'appSettings.tab.mobileApp',
+  Appearance: 'appSettings.tab.appearance',
+  'Sign-on options': 'appSettings.tab.signOnOptions',
+  'Home screen': 'appSettings.tab.homeScreen',
+  Menu: 'appSettings.tab.menu',
+  Chats: 'appSettings.tab.chats',
+  'Visibility & Privacy': 'appSettings.tab.visibilityPrivacy',
+  API: 'appSettings.tab.api',
+  [LIFECYCLE_TAB]: 'appSettings.tab.deleteOrArchive',
+};
+
+const SECTION_LABEL_KEYS: Record<string, string> = {
+  Publish: 'appSettings.section.publish',
+  UI: 'appSettings.section.ui',
+  System: 'appSettings.section.system',
+};
+
 export default function AppSettings() {
   const { appId } = useParams();
   const navigate = useNavigate();
@@ -86,6 +111,7 @@ export default function AppSettings() {
 
   const DOMAIN_NAME = import.meta.env.VITE_DOMAIN_NAME;
 
+  const { t, language } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
   const [isInfo, setIsInfo] = useState(false);
@@ -390,7 +416,7 @@ export default function AppSettings() {
         aiBot.user.firstName !== app?.aiBot?.user?.firstName)
     ) {
       if (aiBot.user.lastName.length < 3 || aiBot.user.firstName.length < 3) {
-        toast.warning('The AI bot name must be at least 3 characters long');
+        toast.warning(t('appSettings.toast.botNameTooShort'));
       }
 
       if (app?.creatorId === currentUser?._id) {
@@ -414,7 +440,7 @@ export default function AppSettings() {
 
     if (appId) {
       actionUpdateApp(appId, body).then(() => {
-        toast('Settings applied successfully!');
+        toast(t('appSettings.toast.settingsApplied'));
         setInitialState({
           displayName,
           tagline,
@@ -464,11 +490,14 @@ export default function AppSettings() {
       }));
 
       toast.success(
-        `link ${aiBot.siteUrlsV2.filter((link) => link.id === data.id)[0].url} successfully reindexed`
+        t('appSettings.toast.linkReindexed').replace(
+          '{url}',
+          aiBot.siteUrlsV2.filter((link) => link.id === data.id)[0].url
+        )
       );
     } catch (error) {
       console.error('Error reindex site crawl:', error);
-      toast.error('Failed to reindex site crawl');
+      toast.error(t('appSettings.toast.reindexFailed'));
     } finally {
       setLoading(false);
     }
@@ -491,10 +520,10 @@ export default function AppSettings() {
         );
         return { ...prev, siteUrlsV2: uniqueById };
       });
-      toast.success('Site crawl set successfully');
+      toast.success(t('appSettings.toast.siteCrawlSet'));
     } catch (error) {
       console.error('Error setting site crawl:', error);
-      toast.error('Failed to set site crawl');
+      toast.error(t('appSettings.toast.siteCrawlFailed'));
     } finally {
       setLoadingTextCrawl(false);
     }
@@ -522,13 +551,13 @@ export default function AppSettings() {
           return { ...prev, siteUrlsV2: updatedLinks };
         });
 
-        toast.success('Selected links successfully deleted');
+        toast.success(t('appSettings.toast.linksDeleted'));
       } else {
-        toast.warning('None of the links could be deleted.');
+        toast.warning(t('appSettings.toast.noLinksDeleted'));
       }
     } catch (error) {
       console.error('Error during bulk deletion:', error);
-      toast.error('An error occurred while deleting links');
+      toast.error(t('appSettings.toast.deleteLinksError'));
     } finally {
       setLoading(false);
     }
@@ -556,7 +585,7 @@ export default function AppSettings() {
           key={`section-${sectionTitle}`}
           className="hidden md:block text-md font-bold uppercase text-black py-[10px] md:py-3 md:px-2 border-b-brand-500"
         >
-          {sectionTitle}
+          {t(SECTION_LABEL_KEYS[sectionTitle] ?? sectionTitle)}
         </div>
       );
 
@@ -569,7 +598,7 @@ export default function AppSettings() {
         return (
           <TabApp
             key={`${tab}_${index}`}
-            text={tab}
+            text={t(TAB_LABEL_KEYS[tab] ?? tab)}
             last={tab === LIFECYCLE_TAB}
             disabled={tabDisabled}
           />
@@ -578,7 +607,8 @@ export default function AppSettings() {
 
       return [sectionHeader, ...tabItems];
     });
-  }, [DOMAIN_NAME, domainName, aiEnabled]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [DOMAIN_NAME, domainName, aiEnabled, language]);
 
   useEffect(() => {
     if (apps) {
@@ -598,7 +628,7 @@ export default function AppSettings() {
 
     try {
       await deleteApp(app._id).then(() => {
-        toast.success('You have successfully deleted your application');
+        toast.success(t('appSettings.toast.appDeleted'));
         setIsDelete(false);
         navigate('/app/admin/apps', { replace: true });
       });
@@ -685,11 +715,11 @@ export default function AppSettings() {
 
       <div className="px-4 pb-4 lg:px-0 row-start-2 border-b-0 lg:row-start-1 flex w-full lg:justify-between items-center lg:border-b border-b-gray-200">
         <div className="ml-4 hidden lg:block font-varela text-[24px]">
-          <span>Settings</span>
+          <span>{t('appSettings.heading')}</span>
           <IconButton
             size="small"
             sx={{ marginLeft: 1, verticalAlign: 'middle' }}
-            aria-label="info"
+            aria-label={t('appSettings.infoAriaLabel')}
             onClick={() => setIsInfo(true)}
           >
             <InfoOutlinedIcon fontSize="small" />
@@ -710,7 +740,7 @@ export default function AppSettings() {
             )}
             disabled={!isModified}
           >
-            Save
+            {t('appSettings.saveButton')}
           </button>
         </div>
       </div>

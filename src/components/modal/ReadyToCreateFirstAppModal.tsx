@@ -1,4 +1,5 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
+import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 import './ReadyToCreateFirstAppModal.scss';
 
@@ -7,6 +8,8 @@ interface Props {
 }
 
 export function ReadyToCreateFirstAppModal({ onClose }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       className="ready-to-create-first-app-modal"
@@ -15,15 +18,15 @@ export function ReadyToCreateFirstAppModal({ onClose }: Props) {
     >
       <DialogPanel className="inner">
         <div className="img-div"></div>
-        <div className="title">Ready to Create Your First App?</div>
-        <p>
-          Welcome to our platform! In just a few steps, you can launch your
-          first app. Start building it now and take advantage of web3
-          technologies and integrated tools to grow your business or community.
-        </p>
+        <div className="title">{t('readyToCreateFirstAppModal.title')}</div>
+        <p>{t('readyToCreateFirstAppModal.description')}</p>
         <div className="buttons">
-          <button className="gen-secondary-btn">View Demo</button>
-          <button className="gen-primary-btn">Create App</button>
+          <button className="gen-secondary-btn">
+            {t('readyToCreateFirstAppModal.viewDemo')}
+          </button>
+          <button className="gen-primary-btn">
+            {t('readyToCreateFirstAppModal.createApp')}
+          </button>
         </div>
         <button className="close" onClick={() => onClose()}>
           <IconClose />

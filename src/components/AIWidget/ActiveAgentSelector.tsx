@@ -14,6 +14,7 @@ import { toast } from 'react-toastify';
 import CircularProgress from '@mui/material/CircularProgress';
 import { actionInviteAgentToChat, actionListAgents, actionListBotInstances } from '../../actions';
 import { httpUpdateApp } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAgent, ModelApp } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -23,6 +24,7 @@ interface ActiveAgentSelectorProps {
 }
 
 export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId, app }) => {
+  const { t } = useTranslation();
   const agents = useAppStore((s) => s.agents);
   const botInstances = useAppStore((s) => s.botInstances);
   const doUpdateApp = useAppStore((s) => s.doUpdateApp);
@@ -83,7 +85,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
         const r = await httpUpdateApp(appId, { defaultBotInstanceId: '' });
         setDefaultBotInstanceId(null);
         pushAppToStore(r?.data?.result);
-        toast.success('Cleared default agent');
+        toast.success(t('aiWidgetActiveAgentSelector.clearedToast'));
       } finally {
         setBusy(false);
       }
@@ -91,7 +93,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
     }
     const widgetChatId = app?.aiBot?.chatId;
     if (!widgetChatId) {
-      toast.warn('Bind a chat to AI Widget first (Web App tab)');
+      toast.warn(t('aiWidgetActiveAgentSelector.bindChatWarn'));
       return;
     }
     setBusy(true);
@@ -109,11 +111,18 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
         // back to the bot's xmppUsername if the agent isn't loaded yet.
         const newAgent = agents.find((a) => a.id === agentId);
         const newAgentLabel = newAgent?.displayName || bi.xmppUsername;
-        toast.success(`Default agent set to "${newAgentLabel}"`);
+        toast.success(
+          t('aiWidgetActiveAgentSelector.defaultAgentSetToast').replace(
+            '{name}',
+            newAgentLabel
+          )
+        );
         await actionListBotInstances({ appId });
       }
     } catch (e: any) {
-      toast.error(`Failed: ${e?.response?.data?.error || e.message}`);
+      toast.error(
+        `${t('aiWidgetActiveAgentSelector.failedPrefix')} ${e?.response?.data?.error || e.message}`
+      );
     } finally {
       setBusy(false);
     }
@@ -127,7 +136,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
 
   return (
     <div className="border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm">
-      <span className="text-gray-600">Active agent for AI Widget:</span>
+      <span className="text-gray-600">{t('aiWidgetActiveAgentSelector.label')}</span>
       <select
         className="border rounded px-2 py-1 text-sm bg-white disabled:bg-gray-100 disabled:cursor-wait"
         value={currentAgent?.id || ''}
@@ -137,9 +146,9 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
         {/* "None" lets an operator deliberately unbind the widget (default
             assistant is already attached on App creation; this is the
             opt-out). The legacy "aiBot" path is gone as of Phase B.5. */}
-        <option value="">— None —</option>
+        <option value="">{t('aiWidgetActiveAgentSelector.none')}</option>
         {myAgents.length > 0 && (
-          <optgroup label="My agents">
+          <optgroup label={t('aiWidgetActiveAgentSelector.myAgents')}>
             {myAgents.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.displayName}
@@ -148,7 +157,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
           </optgroup>
         )}
         {publicAgents.length > 0 && (
-          <optgroup label="System / Public agents">
+          <optgroup label={t('aiWidgetActiveAgentSelector.publicAgents')}>
             {publicAgents.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.displayName}
@@ -164,7 +173,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
       {busy && (
         <span className="flex items-center gap-1 text-gray-500 text-xs">
           <CircularProgress size={12} />
-          <span>Binding agent…</span>
+          <span>{t('aiWidgetActiveAgentSelector.binding')}</span>
         </span>
       )}
       <span className="text-gray-400">|</span>
@@ -172,7 +181,7 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
           One Agent can be deployed across many Apps; the dropdown above just picks which
           Agent backs THIS App's AI Widget. */}
       <Link to="/app/admin/agents" className="text-brand-500 hover:underline">
-        Manage agents
+        {t('aiWidgetActiveAgentSelector.manageAgents')}
       </Link>
     </div>
   );

@@ -18,6 +18,7 @@ import {
   httpRegisterWithEmailV2,
   httpV2,
 } from '../../http';
+import { useTranslation } from '../../i18n/useTranslation';
 
 const SITE_KEY = (import.meta.env.VITE_SITE_KEY || '').trim();
 const TURNSTILE_ENABLED = SITE_KEY.length > 0;
@@ -52,6 +53,7 @@ function defaultPrompt(siteTitle: string) {
 }
 
 export default function WpSetup() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const siteTitleParam = (searchParams.get('site_title') || '').trim();
   const siteUrlParam = (searchParams.get('site_url') || '').trim();
@@ -95,11 +97,11 @@ export default function WpSetup() {
     e.preventDefault();
     setErrorMessage('');
     if (TURNSTILE_ENABLED && !cfToken) {
-      setErrorMessage('Please complete the verification challenge below.');
+      setErrorMessage(t('wpSetup.errorTurnstile'));
       return;
     }
     if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters.');
+      setErrorMessage(t('wpSetup.errorPasswordLength'));
       return;
     }
     try {
@@ -115,8 +117,7 @@ export default function WpSetup() {
       setStep('configure');
     } catch (e: any) {
       setErrorMessage(
-        e?.response?.data?.error ||
-          'Sign-up failed. Please check your details and try again.'
+        e?.response?.data?.error || t('wpSetup.errorSignupFailed')
       );
     }
   };
@@ -161,7 +162,7 @@ export default function WpSetup() {
       setStep('done');
     } catch (e: any) {
       setErrorMessage(
-        e?.response?.data?.error || 'Setup failed. Please try again.'
+        e?.response?.data?.error || t('wpSetup.errorSetupFailed')
       );
       setStep('error');
     }
@@ -170,17 +171,15 @@ export default function WpSetup() {
   return (
     <Box sx={{ maxWidth: 520, margin: '40px auto', padding: '0 24px' }}>
       <Typography variant="h5" sx={{ marginBottom: 1, fontWeight: 600 }}>
-        Set up your AI assistant
+        {t('wpSetup.heading')}
       </Typography>
       <Typography variant="body2" sx={{ color: '#666', marginBottom: 3 }}>
-        {step === 'account' &&
-          'Create an Ethora account to host your AI assistant.'}
-        {step === 'configure' &&
-          'Confirm what your assistant should know about your site.'}
+        {step === 'account' && t('wpSetup.stepAccount.subtitle')}
+        {step === 'configure' && t('wpSetup.stepConfigure.subtitle')}
         {step === 'provisioning' &&
-          'Setting things up. This usually takes under a minute.'}
-        {step === 'done' && 'Your assistant is ready.'}
-        {step === 'error' && 'Something went wrong during setup.'}
+          t('wpSetup.stepProvisioning.subtitle')}
+        {step === 'done' && t('wpSetup.stepDone.subtitle')}
+        {step === 'error' && t('wpSetup.stepError.subtitle')}
       </Typography>
 
       {errorMessage && (
@@ -197,21 +196,21 @@ export default function WpSetup() {
         >
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="First name"
+              label={t('wpSetup.firstNameLabel')}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
               fullWidth
             />
             <TextField
-              label="Last name"
+              label={t('wpSetup.lastNameLabel')}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               fullWidth
             />
           </Box>
           <TextField
-            label="Email"
+            label={t('wpSetup.emailLabel')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -219,14 +218,14 @@ export default function WpSetup() {
             fullWidth
           />
           <TextField
-            label="Password"
+            label={t('wpSetup.passwordLabel')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             fullWidth
             inputProps={{ minLength: 6 }}
-            helperText="At least 6 characters."
+            helperText={t('wpSetup.passwordHelper')}
           />
           {TURNSTILE_ENABLED && (
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -238,7 +237,7 @@ export default function WpSetup() {
             </Box>
           )}
           <Button type="submit" variant="contained" size="large">
-            Continue
+            {t('wpSetup.continueButton')}
           </Button>
         </Box>
       )}
@@ -246,22 +245,22 @@ export default function WpSetup() {
       {step === 'configure' && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
-            label="App name"
+            label={t('wpSetup.appNameLabel')}
             value={appName}
             onChange={(e) => setAppName(e.target.value)}
             required
             fullWidth
           />
           <TextField
-            label="Site URL to index"
+            label={t('wpSetup.siteUrlLabel')}
             value={crawlUrl}
             onChange={(e) => setCrawlUrl(e.target.value)}
             placeholder="https://example.com"
             fullWidth
-            helperText="We will index up to 100 pages so your assistant can answer questions about your site."
+            helperText={t('wpSetup.siteUrlHelper')}
           />
           <TextField
-            label="System prompt"
+            label={t('wpSetup.systemPromptLabel')}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             multiline
@@ -269,7 +268,7 @@ export default function WpSetup() {
             fullWidth
           />
           <Button onClick={provision} variant="contained" size="large">
-            Set up my AI
+            {t('wpSetup.setupButton')}
           </Button>
         </Box>
       )}
@@ -286,7 +285,7 @@ export default function WpSetup() {
         >
           <CircularProgress />
           <Typography variant="body2" sx={{ color: '#666' }}>
-            Indexing your site - usually under a minute, up to 100 pages.
+            {t('wpSetup.provisioningText')}
           </Typography>
         </Box>
       )}
@@ -294,7 +293,7 @@ export default function WpSetup() {
       {step === 'done' && result && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Alert severity="success">
-            Your AI assistant is ready.
+            {t('wpSetup.doneAlertTitle')}
             {crawlIncomplete && (
               <Box
                 component="span"
@@ -304,20 +303,18 @@ export default function WpSetup() {
                   fontSize: '0.9em',
                 }}
               >
-                Indexing is still finishing in the background. Your chat works
-                now; answers will improve as more pages get indexed.
+                {t('wpSetup.crawlIncompleteText')}
               </Box>
             )}
           </Alert>
           {returnOrigin ? (
             <Typography variant="body2" sx={{ color: '#666' }}>
-              You can close this window. Your WordPress plugin has been updated
-              automatically.
+              {t('wpSetup.returnOriginText')}
             </Typography>
           ) : (
             <Box>
               <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                Copy this App ID into your WordPress plugin settings:
+                {t('wpSetup.copyAppIdText')}
               </Typography>
               <TextField
                 value={result.appId}
@@ -336,7 +333,7 @@ export default function WpSetup() {
             setErrorMessage('');
           }}
         >
-          Start over
+          {t('wpSetup.startOverButton')}
         </Button>
       )}
     </Box>

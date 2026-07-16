@@ -16,6 +16,7 @@ import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { IconInfo } from '../../components/Icons/IconInfo';
 import { RadioButton } from '../../components/RadioButton';
 import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
+import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 interface Props {
@@ -45,6 +46,7 @@ export function WebApp({
   defaultChatRooms,
   isDisabled,
 }: Props) {
+  const { t } = useTranslation();
   const handleChatChange = (event: SelectChangeEvent<string>) => {
     const selectedJid = event.target.value;
     const selectedChat = defaultChatRooms.find(
@@ -103,26 +105,25 @@ export function WebApp({
 
   return (
     <div className="">
-      <p className="font-sans text-[16px] font-semibold mb-2">Domain name</p>
+      <p className="font-sans text-[16px] font-semibold mb-2">
+        {t('appSettingsWebApp.domainNameHeading')}
+      </p>
       <p className="font-sans text-sm mb-2">
-        Your web app is hosted in our cloud with a complimentary 2nd level
-        domain name available for Free plan users and 1st level domain name for
-        Business plan users.
+        {t('appSettingsWebApp.domainNameDescription')}
       </p>
       <div className="p-2 flex rounded-[8px] bg-brand-150 mb-4">
         <div className="mr-2">
           <IconInfo stroke={primaryColor} />
         </div>
         <span className="font-sans text-[12px]">
-          Self-host option: just clone our engine from github, build and run it
-          on your server.
+          {t('appSettingsWebApp.selfHostInfo')}
         </span>
       </div>
       <div className="flex w-full max-w-[459px] relative mb-4 items-center">
         <input
           value={domainName}
           onChange={(e) => setDomainName(e.target.value)}
-          placeholder="Your App Name"
+          placeholder={t('appSettingsWebApp.appNamePlaceholder')}
           type="text"
           className=" p-2 w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-500"
           name=""
@@ -144,7 +145,7 @@ export function WebApp({
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">
           <input
-            placeholder="Your App Name"
+            placeholder={t('appSettingsWebApp.appNamePlaceholder')}
             type="text"
             className="p-2  w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-300"
             name=""
@@ -159,27 +160,24 @@ export function WebApp({
         </div>
         <div className="flex items-center">
           <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300">
-            Upgrade to Business
+            {t('appSettingsWebApp.upgradeToBusinessButton')}
           </button>
-          <span>to unlock</span>
+          <span>{t('appSettingsWebApp.toUnlockText')}</span>
         </div>
       </div>
 
       <p className="font-sans text-base font-semibold mb-2">
-        Google sign-in and Firebase analytics
+        {t('appSettingsWebApp.googleFirebaseHeading')}
       </p>
       <p className="font-sans text-sm leading-relaxed mb-4">
-        Firebase credentials are required to allow your users to sign on via
-        Google Account. Also this allows you to track your app usage analytics
-        in your Firebase console. These options will be disabled if credentials
-        are not provided.
+        {t('appSettingsWebApp.googleFirebaseDescription')}
       </p>
       <div className="p-2 flex rounded-[8px] bg-brand-150 mb-2">
         <div className="mr-2">
           <IconInfo stroke={primaryColor} />
         </div>
         <span className="font-sans text-[12px]">
-          Copy paste the configuration from your Firebase Console
+          {t('appSettingsWebApp.firebaseConfigInfo')}
         </span>
       </div>
       <Textarea
@@ -199,10 +197,14 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
 }'
       />
 
-      <p className="font-sans text-[24px] font-medium py-4">AI Bot</p>
-      <div className="font-semibold font-sans text-[16px] mb-4">Chat room</div>
+      <p className="font-sans text-[24px] font-medium py-4">
+        {t('appSettingsWebApp.aiBotHeading')}
+      </p>
+      <div className="font-semibold font-sans text-[16px] mb-4">
+        {t('appSettingsWebApp.chatRoomHeading')}
+      </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Select Chat room where the bot should be deployed
+        {t('appSettingsWebApp.selectChatRoomText')}
       </p>
       <FormControl
         sx={{
@@ -229,11 +231,13 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
           },
         }}
       >
-        <InputLabel id="demo-select-small-label">Chat</InputLabel>
+        <InputLabel id="demo-select-small-label">
+          {t('appSettingsWebApp.chatSelectLabel')}
+        </InputLabel>
         <Select
           labelId="demo-select-small-label"
           id="demo-select-small"
-          label="Chat"
+          label={t('appSettingsWebApp.chatSelectLabel')}
           value={memoChatName}
           onChange={(event: SelectChangeEvent<string>) =>
             handleChatChange(event)
@@ -241,7 +245,7 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
           sx={{ height: '42px' }}
         >
           <MenuItem value="None">
-            <em>None</em>
+            <em>{t('appSettingsWebApp.noneLabel')}</em>
           </MenuItem>
           {defaultChatRooms.map((chat) => (
             <MenuItem key={chat.chatId} value={chat.chatId}>
@@ -251,15 +255,15 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
         </Select>
       </FormControl>
       <div className="font-semibold font-sans text-[16px] mb-4">
-        <span className="pr-2">Display Name</span>
-        <Tooltip title="Only the app owner can change the bot's name." arrow>
+        <span className="pr-2">{t('appSettingsWebApp.displayNameHeading')}</span>
+        <Tooltip title={t('appSettingsWebApp.displayNameTooltip')} arrow>
           <WarningAmberOutlinedIcon
             style={{ color: '#f59e0b', fontSize: 18, cursor: 'pointer' }}
           />
         </Tooltip>
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Which Display Name should the bot use?
+        {t('appSettingsWebApp.displayNameDescription')}
       </p>
       <div className="flex flex-col gap-2 mb-8">
         <input
@@ -269,7 +273,7 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
             'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4',
             isDisabled && 'opacity-50 cursor-not-allowed bg-gray-200'
           )}
-          placeholder="First name"
+          placeholder={t('appSettingsWebApp.firstNamePlaceholder')}
           value={aiBot.user?.firstName}
           onChange={(e) =>
             setAiBot({
@@ -285,7 +289,7 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
             'w-1/2 py-2 px-4 rounded-xl bg-gray-100 placeholder-gray-500 outline-none font-sans text-[16px] mb-4',
             isDisabled && 'opacity-50 cursor-not-allowed bg-gray-200'
           )}
-          placeholder="Last name"
+          placeholder={t('appSettingsWebApp.lastNamePlaceholder')}
           value={aiBot.user?.lastName}
           onChange={(e) =>
             setAiBot({
@@ -296,11 +300,10 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
         />
       </div>
       <div className="font-semibold font-sans text-[16px] mb-4">
-        Greeting message when joining the room
+        {t('appSettingsWebApp.greetingMessageHeading')}
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Bot sends this message as a greeting once launched. Delete for no
-        message.
+        {t('appSettingsWebApp.greetingMessageDescription')}
       </p>
       <div className="mb-8">
         <RadioGroup
@@ -311,17 +314,21 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
           <RadioButton
             className="mb-4"
             value="Hello, I am your AI assistant. How can I help you today?"
-            label={'Hello, I am your AI assistant. How can I help you today?'}
+            label={t('appSettingsWebApp.defaultGreetingLabel')}
           />
-          <RadioButton className="mb-2" value="None" label="None" />
+          <RadioButton
+            className="mb-2"
+            value="None"
+            label={t('appSettingsWebApp.noneLabel')}
+          />
         </RadioGroup>
       </div>
 
       <div className="font-semibold font-sans text-[16px] mb-4">
-        Response trigger
+        {t('appSettingsWebApp.responseTriggerHeading')}
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        To which messages should the bot respond
+        {t('appSettingsWebApp.responseTriggerDescription')}
       </p>
       <div className="mb-8">
         <RadioGroup
@@ -332,29 +339,28 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
           <RadioButton
             className="mb-4"
             value="any_message"
-            label="Any message from another user"
+            label={t('appSettingsWebApp.anyMessageLabel')}
           />
           <RadioButton
             className="mb-2"
             value="/bot"
-            label="Any messages addressed to the bot or with '/bot' prefix"
+            label={t('appSettingsWebApp.botPrefixLabel')}
           />
         </RadioGroup>
       </div>
 
       <div className="font-semibold font-sans text-[16px] mb-4">
-        Additional settings
+        {t('appSettingsWebApp.additionalSettingsHeading')}
       </div>
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        Use{' '}
+        {t('appSettingsWebApp.additionalSettingsPrefix')}{' '}
         <NavLink
           to={`/app/admin/apps/${appId}/settings?tab=AI+Widget`}
           className="text-blue-600 underline"
         >
-          AI Widget
+          {t('appSettingsWebApp.aiWidgetLinkText')}
         </NavLink>{' '}
-        tab for additional settings such as prompt, URL crawling and documents
-        upload.
+        {t('appSettingsWebApp.additionalSettingsSuffix')}
       </p>
     </div>
   );

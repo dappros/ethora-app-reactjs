@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import BG from '../../assets/_BG.png';
 import SafariImage from '../../assets/safari.png';
 import YouLogo from '../../assets/YouLogo.svg';
+import { useTranslation } from '../../i18n/useTranslation';
 import AppleIcon from '../../pages/AuthPage/Icons/socials/appleIcon';
 import FacebookIcon from '../../pages/AuthPage/Icons/socials/facebookIcon';
 import GoogleIcon from '../../pages/AuthPage/Icons/socials/googleIcon';
@@ -20,6 +21,7 @@ export const AppearanceRightImage = ({
   tagline,
   logoImage,
 }: AppearanceRightImageProps) => {
+  const { t } = useTranslation();
   return (
     <div className="appearance-right w-full flex justify-center items-start relative pt-20">
       <div className="relative">
@@ -42,7 +44,11 @@ export const AppearanceRightImage = ({
                   className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
                 />
                 <p className="break-words">
-                  {tagline || `${displayName}: join our community`}
+                  {tagline ||
+                    t('appearanceRightImage.joinCommunityTagline').replace(
+                      '{name}',
+                      displayName
+                    )}
                 </p>
               </div>
               <div
@@ -51,7 +57,9 @@ export const AppearanceRightImage = ({
                   '2xl:w-[220px] 2xl:h-[220px], xl:w-[180px] xl:h-[180px]'
                 )}
               >
-                <h3 className="text-[10px] text-center mb-2">Sign Up</h3>
+                <h3 className="text-[10px] text-center mb-2">
+                  {t('appearanceRightImage.signUp')}
+                </h3>
                 <div className="grid grid-cols-3 gap-2 mb-2">
                   <div className="border" style={{ borderColor: color }}></div>
                   <div className="border" style={{ borderColor: color }}></div>
@@ -81,13 +89,11 @@ export const AppearanceRightImage = ({
                   className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"
                   style={{ backgroundColor: color }}
                 >
-                  Sign Up
+                  {t('appearanceRightImage.signUp')}
                 </button>
                 <div className="text-[6px] mb-2">
-                  <span>
-                    By clicking the "Sign Up" button, you agree to our
-                  </span>
-                  <span>Terms & Conditions.</span>
+                  <span>{t('appearanceRightImage.agreementPrefix')}</span>
+                  <span>{t('appearanceRightImage.termsAndConditions')}</span>
                 </div>
                 <button
                   className="border w-full rounded-xl py-[3px] text-[9px] mb-2 flex align-center justify-center"
@@ -96,7 +102,7 @@ export const AppearanceRightImage = ({
                   <div className="mr-2">
                     <GoogleIcon width={10} height={10} />
                   </div>
-                  <span>Continue with Google</span>
+                  <span>{t('appearanceRightImage.continueWithGoogle')}</span>
                 </button>
                 <div className="grid grid-cols-3 gap-2">
                   <button
@@ -119,9 +125,11 @@ export const AppearanceRightImage = ({
                   </button>
                 </div>
                 <div className="text-[8px] text-center text">
-                  <span className="mr-1">Already have an account?</span>
+                  <span className="mr-1">
+                    {t('appearanceRightImage.alreadyHaveAccount')}
+                  </span>
                   <a href="#" style={{ color: color }}>
-                    Sign In
+                    {t('appearanceRightImage.signIn')}
                   </a>
                 </div>
               </div>
