@@ -2,10 +2,6 @@ import { Chat, XmppProvider } from '@ethora/chat-component';
 import Session from 'supertokens-web-js/recipe/session';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
-import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
-
-const TRANSLATE_LANGUAGE_CODES = LANGUAGE_OPTIONS.map((l) => l.id);
-
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 
@@ -187,7 +183,6 @@ export const buildEthoraBaseChatConfig = ({
     translates: {
       enabled: true,
       mode: 'auto',
-      targets: TRANSLATE_LANGUAGE_CODES,
       readerLocale: resolveLocale(),
     },
     colors: {
@@ -403,7 +398,6 @@ export function createChatConfig({
     translates: {
       enabled: true,
       mode: 'auto',
-      targets: TRANSLATE_LANGUAGE_CODES,
       showLanguageSelector:true,
       showLanguageList:false,
     },
