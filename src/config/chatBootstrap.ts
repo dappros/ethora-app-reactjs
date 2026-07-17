@@ -188,6 +188,7 @@ export const buildEthoraBaseChatConfig = ({
       enabled: true,
       mode: 'auto',
       targets: TRANSLATE_LANGUAGE_CODES,
+      readerLocale: resolveLocale(),
     },
     colors: {
       primary: primaryColor || '#0052CD',
@@ -403,6 +404,8 @@ export function createChatConfig({
       enabled: true,
       mode: 'auto',
       targets: TRANSLATE_LANGUAGE_CODES,
+      showLanguageSelector:true,
+      showLanguageList:false,
     },
   };
 }

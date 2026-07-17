@@ -21,7 +21,7 @@
     "@emotion/styled": "^11.13.0",
     "@ethersproject/providers": "^5.8.0",
     "@ethora/ai-chat-widget": "github:dappros/ai-assistant-ui#77f6a48958866124f1e2c270163d6235429bb0c5",
-    "@ethora/chat-component": "26.6.1",
+    "@ethora/chat-component": "26.6.2",
     "@headlessui/react": "^2.1.8",
     "@marsidev/react-turnstile": "^1.3.0",
     "@microsoft/clarity": "^1.0.0",

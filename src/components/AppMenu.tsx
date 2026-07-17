@@ -15,9 +15,10 @@ import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { UnreadBadge } from './UnreadBadge';
 
 const ITEM_CLASS =
-  'flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[64px] h-[64px] rounded-xl aria-[current=page]:bg-brand-150';
+  'flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
 const LABEL_CLASS =
-  'text-center font-sans text-sm group-aria-[current=page]:text-brand-500';
+  'text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500';
+const ITEM_WRAP_CLASS = 'py-[3px] first:pt-0 last:pb-0';
 
 // Billing surfaces a "You're on a Free plan" copy that's specific to our
 // hosted SaaS (chat.ethora.com and chat-qa.ethora.com). Enterprise / self-
@@ -70,81 +71,88 @@ export function AppMenu() {
       <div className="font-varela text-[24px] leading-none md:hidden block">
         {getPageTitle}
       </div>
-      <div className="hidden md:flex flex-col">
-        {/* Order: Apps (admin landing) -> Chats -> Agents -> Billing -> Help.
-            Apps / Agents / Billing are admin-gated; Chats and Help are open
-            to every signed-in user. The inner Apps / Agents / Billing tab
-            row inside the Admin layout is kept for now while we observe
-            how the sidebar variant performs. */}
+      <div className="hidden md:flex flex-col divide-y divide-gray-100">
         {isAdmin && (
-          <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
-            <IconAdmin />
-            <div className={LABEL_CLASS}>{t('nav.apps')}</div>
-          </NavLink>
-        )}
-        <NavLink to="/app/chat" className={ITEM_CLASS}>
-          <div className="relative">
-            <IconChat />
-            <UnreadBadge className="absolute -top-1 -right-2" />
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
+              <IconAdmin />
+              <div className={LABEL_CLASS}>{t('nav.apps')}</div>
+            </NavLink>
           </div>
-          <div className={LABEL_CLASS}>{t('nav.chats')}</div>
-        </NavLink>
-        {isAdmin && (
-          <NavLink
-            to="/app/admin/agents"
-            title={
-              aiEnabled
-                ? undefined
-                : 'AI features are not enabled in this deployment'
-            }
-            className={cn(ITEM_CLASS, {
-              'cursor-not-allowed pointer-events-none opacity-50': !aiEnabled,
-            })}
-          >
-            <IconAgents />
-            <div className={LABEL_CLASS}>{t('nav.agents')}</div>
+        )}
+        <div className={ITEM_WRAP_CLASS}>
+          <NavLink to="/app/chat" className={ITEM_CLASS}>
+            <div className="relative">
+              <IconChat />
+              <UnreadBadge className="absolute -top-1 -right-2" />
+            </div>
+            <div className={LABEL_CLASS}>{t('nav.chats')}</div>
           </NavLink>
+        </div>
+        {isAdmin && (
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink
+              to="/app/admin/agents"
+              title={
+                aiEnabled
+                  ? undefined
+                  : 'AI features are not enabled in this deployment'
+              }
+              className={cn(ITEM_CLASS, {
+                'cursor-not-allowed pointer-events-none opacity-50': !aiEnabled,
+              })}
+            >
+              <IconAgents />
+              <div className={LABEL_CLASS}>{t('nav.agents')}</div>
+            </NavLink>
+          </div>
         )}
         {isAdmin && showBilling && (
-          <NavLink to="/app/admin/billing" className={ITEM_CLASS}>
-            <IconBilling />
-            <div className={LABEL_CLASS}>{t('nav.billing')}</div>
-          </NavLink>
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink to="/app/admin/billing" className={ITEM_CLASS}>
+              <IconBilling />
+              <div className={LABEL_CLASS}>{t('nav.billing')}</div>
+            </NavLink>
+          </div>
         )}
-        <NavLink to="/app/help" className={ITEM_CLASS}>
-          <IconHelp />
-          <div className={LABEL_CLASS}>{t('nav.help')}</div>
-        </NavLink>
-        <div className="my-2 border-b border-b-gray-200"></div>
+        <div className={ITEM_WRAP_CLASS}>
+          <NavLink to="/app/help" className={ITEM_CLASS}>
+            <IconHelp />
+            <div className={LABEL_CLASS}>{t('nav.help')}</div>
+          </NavLink>
+        </div>
       </div>
-      <div>
-        <NavLink
-          to="/app/profile"
-          className="flex hover:bg-[#F5F7F9] group flex-col items-center md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-        >
-          <ProfilePageUserIcon
-            firstName={currentUser.firstName}
-            lastName={currentUser.lastName}
-            profileImage={currentUser.profileImage}
-            width="40px"
-            height="40px"
-            className="border border-brand-500 rounded-full"
-            small={true}
-          />
-          <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-sm ">
-            {t('nav.profile')}
-          </div>
-        </NavLink>
-        <div className="hidden md:block my-2 border-b border-b-gray-200"></div>
-        <NavLink
-          to="/app/account"
-          className="hidden group hover:bg-[#F5F7F9] flex-col items-center justify-center md:flex md:w-[64px] md:h-[64px] rounded-xl aria-[current=page]:bg-brand-150"
-        >
-          <IconAccount />
-          <div className="hidden md:block text-center font-sans text-sm group-aria-[current=page]:text-brand-500">
-            {t('nav.account')}
-          </div>
-        </NavLink>
+      <div className="md:divide-y md:divide-gray-100">
+        <div className={ITEM_WRAP_CLASS}>
+          <NavLink
+            to="/app/profile"
+            className="flex hover:bg-[#F5F7F9] group flex-col items-center justify-center md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
+          >
+            <ProfilePageUserIcon
+              firstName={currentUser.firstName}
+              lastName={currentUser.lastName}
+              profileImage={currentUser.profileImage}
+              width="40px"
+              height="40px"
+              className="border border-brand-500 rounded-full"
+              small={true}
+            />
+            <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-xs max-w-full truncate">
+              {t('nav.profile')}
+            </div>
+          </NavLink>
+        </div>
+        <div className={cn(ITEM_WRAP_CLASS, 'hidden md:block')}>
+          <NavLink
+            to="/app/account"
+            className="hidden group hover:bg-[#F5F7F9] flex-col items-center justify-center md:flex md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
+          >
+            <IconAccount />
+            <div className="hidden md:block text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500">
+              {t('nav.account')}
+            </div>
+          </NavLink>
+        </div>
       </div>
       {isMobileMenuVisible && (
         <MobileMenuModal
