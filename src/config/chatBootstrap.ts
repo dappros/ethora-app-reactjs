@@ -2,6 +2,7 @@ import { Chat, XmppProvider } from '@ethora/chat-component';
 import Session from 'supertokens-web-js/recipe/session';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
+import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 
@@ -101,6 +102,19 @@ function resolveLocale(uiLanguage?: string | null): string {
   return uiLanguage || browserLocale;
 }
 
+type TranslatesConfig = NonNullable<ChatConfig['translates']>;
+
+function buildTranslatesConfig(
+  extra: Record<string, unknown> = {}
+): TranslatesConfig {
+  return {
+    enabled: true,
+    mode: 'auto',
+    targets: LANGUAGE_OPTIONS.map((l) => l.id),
+    ...extra,
+  } as unknown as TranslatesConfig;
+}
+
 const getRoomListStyles = () =>
   ({
     maxHeight: 'calc(100%)',
@@ -180,11 +194,7 @@ export const buildEthoraBaseChatConfig = ({
     },
     pushNotifications: webNotificationsConfig,
     // Static UI localization (device language) + dynamic message translation.
-    translates: {
-      enabled: true,
-      mode: 'auto',
-      readerLocale: resolveLocale(),
-    },
+    translates: buildTranslatesConfig({ readerLocale: resolveLocale() }),
     colors: {
       primary: primaryColor || '#0052CD',
       secondary: '#141414',
@@ -395,11 +405,10 @@ export function createChatConfig({
     },
     pushNotifications: webNotificationsConfig,
     i18n: { locale: resolveLocale(uiLanguage) },
-    translates: {
-      enabled: true,
-      mode: 'auto',
-      showLanguageSelector:true,
-      showLanguageList:false,
-    },
+    translates: buildTranslatesConfig({
+      readerLocale: resolveLocale(uiLanguage),
+      showLanguageSelector: true,
+      showLanguageList: false,
+    }),
   };
 }

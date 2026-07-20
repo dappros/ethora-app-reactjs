@@ -8,7 +8,7 @@ import {
   ModelOwnerSession,
   ModelState,
 } from '../models';
-import type { UiLanguageCode } from '../constants/languageOptionsConstants';
+import type { UiLocale } from '../constants/languageOptionsConstants';
 import {
   getPreferredUiLanguage,
   setPreferredUiLanguage,
@@ -73,7 +73,7 @@ export interface AppSliceInterface extends ModelState {
   // App-wide UI language (see ModelState.uiLanguage). Persists to
   // localStorage via utils/uiLanguage.ts AND updates the store so every
   // subscribed component (nav, Profile, ...) re-renders immediately.
-  doSetUiLanguage: (language: UiLanguageCode) => void;
+  doSetUiLanguage: (language: UiLocale) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (

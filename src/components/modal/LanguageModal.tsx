@@ -2,14 +2,14 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import cn from 'classnames';
 import {
   UI_LANGUAGE_OPTIONS,
-  UiLanguageCode,
+  UiLocale,
 } from '../../constants/languageOptionsConstants';
 import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 
 interface Props {
-  value: UiLanguageCode;
-  onSelect: (code: UiLanguageCode) => void;
+  value: UiLocale;
+  onSelect: (code: UiLocale) => void;
   onClose: () => void;
 }
 

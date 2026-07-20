@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { toBaseLanguage } from '../constants/languageOptionsConstants';
 import { useAppStore } from '../store/useAppStore';
 import { translations } from './translations';
 
@@ -14,7 +15,8 @@ import { translations } from './translations';
 // edited independently, so tying `t()`'s type to "every key that currently
 // exists" would force every edit through a single shared union type.
 export function useTranslation() {
-  const language = useAppStore((s) => s.uiLanguage);
+  const locale = useAppStore((s) => s.uiLanguage);
+  const language = toBaseLanguage(locale);
 
   // Memoized on `language` so `t` keeps a STABLE identity across renders.
   // Callers legitimately need `t` in useMemo/useCallback dep arrays (any memo
@@ -29,5 +31,5 @@ export function useTranslation() {
     [language]
   );
 
-  return { t, language };
+  return { t, language, locale };
 }

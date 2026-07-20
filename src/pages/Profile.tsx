@@ -26,7 +26,7 @@ import { LanguageModal } from '../components/modal/LanguageModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
 import {
   UI_LANGUAGE_OPTIONS,
-  UiLanguageCode,
+  UiLocale,
 } from '../constants/languageOptionsConstants';
 import { logLogout } from '../hooks/withTracking.tsx';
 import { deleteDocuments, getDocuments, httpLogout } from '../http';
@@ -92,7 +92,7 @@ export default function Profile() {
     setShowDelete(false);
   };
 
-  const onChangeUiLanguage = (code: UiLanguageCode) => {
+  const onChangeUiLanguage = (code: UiLocale) => {
     doSetUiLanguage(code);
     setShowLanguageModal(false);
     toast.success(t('language.savedToast'));

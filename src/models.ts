@@ -1,4 +1,4 @@
-import type { UiLanguageCode } from './constants/languageOptionsConstants';
+import type { UiLocale } from './constants/languageOptionsConstants';
 
 export interface ModelCurrentUser {
   _id: string;
@@ -355,7 +355,7 @@ export interface ModelState {
   // so switching it re-renders every subscribed component immediately.
   // Initialized from utils/uiLanguage.ts (persisted choice, else browser
   // detection, else 'en').
-  uiLanguage: UiLanguageCode;
+  uiLanguage: UiLocale;
 }
 
 export type OrderByType =
