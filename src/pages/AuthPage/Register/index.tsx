@@ -1,4 +1,5 @@
 import { Box, useMediaQuery, useTheme } from '@mui/material';
+import EthoraSplitLayout, { isEthoraDomain } from '../EthoraSplitLayout';
 import SignUpForm from '../Forms/RegisterLayout';
 import LogoContent from '../LogoContent';
 import Wrapper from '../Wrapper';
@@ -7,6 +8,16 @@ export default function Register() {
   const theme = useTheme();
   const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024));
   const isSmallDevice = useMediaQuery(theme.breakpoints.down(512));
+
+  // Same rule as the login page: branded split layout on our own domains
+  // (desktop only), standard layout everywhere else.
+  if (isEthoraDomain() && !isMobileDevice) {
+    return (
+      <EthoraSplitLayout>
+        <SignUpForm isMobile={false} isSmallDevice={false} />
+      </EthoraSplitLayout>
+    );
+  }
 
   return (
     <Wrapper>
