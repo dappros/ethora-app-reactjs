@@ -18,6 +18,17 @@ export const authShared = {
     'authLogoContent.logoAlt': 'Company logo',
     'authLogoContent.taglineSuffix': ': join our community',
 
+    'authBrandPanel.subtitle':
+      'The developer platform for real-time messaging and AI assistants.',
+    'authBrandPanel.chatChannel': '#support',
+    'authBrandPanel.chatQuestion': 'How do I add the chat widget to my app?',
+    'authBrandPanel.chatAnswerPart1': 'Install',
+    'authBrandPanel.chatAnswerPart2':
+      'and drop in the <Chat/> component — done.',
+    'authBrandPanel.aiTyping': 'AI is typing…',
+    'authBrandPanel.trustedBy': 'Trusted by 8,000+ developers',
+    'authBrandPanel.uptime': '99.9% uptime',
+
     'authMetamaskButton.installFirst': 'Install Metamask first!',
     'authMetamaskButton.loginSuccess': 'Successfully logged in with Metamask!',
     'authMetamaskButton.loginFailed': 'Failed to sign with Metamask.',
@@ -50,6 +61,18 @@ export const authShared = {
     'authLogoContent.logoAlt': "Logo de l'entreprise",
     'authLogoContent.taglineSuffix': ' : rejoignez notre communauté',
 
+    'authBrandPanel.subtitle':
+      "La plateforme développeur pour la messagerie en temps réel et les assistants IA.",
+    'authBrandPanel.chatChannel': '#support',
+    'authBrandPanel.chatQuestion':
+      'Comment ajouter le widget de chat à mon application ?',
+    'authBrandPanel.chatAnswerPart1': 'Installez',
+    'authBrandPanel.chatAnswerPart2':
+      "et insérez le composant <Chat/> — c'est fait.",
+    'authBrandPanel.aiTyping': "L'IA écrit…",
+    'authBrandPanel.trustedBy': 'Adopté par plus de 8 000 développeurs',
+    'authBrandPanel.uptime': '99,9 % de disponibilité',
+
     'authMetamaskButton.installFirst': "Installez d'abord Metamask !",
     'authMetamaskButton.loginSuccess': 'Connexion réussie avec Metamask !',
     'authMetamaskButton.loginFailed': 'Échec de la signature avec Metamask.',
@@ -79,6 +102,18 @@ export const authShared = {
 
     'authLogoContent.logoAlt': 'Logotipo de la empresa',
     'authLogoContent.taglineSuffix': ': únete a nuestra comunidad',
+
+    'authBrandPanel.subtitle':
+      'La plataforma para desarrolladores de mensajería en tiempo real y asistentes de IA.',
+    'authBrandPanel.chatChannel': '#support',
+    'authBrandPanel.chatQuestion':
+      '¿Cómo agrego el widget de chat a mi aplicación?',
+    'authBrandPanel.chatAnswerPart1': 'Instala',
+    'authBrandPanel.chatAnswerPart2':
+      'y añade el componente <Chat/> — listo.',
+    'authBrandPanel.aiTyping': 'La IA está escribiendo…',
+    'authBrandPanel.trustedBy': 'Con la confianza de más de 8,000 desarrolladores',
+    'authBrandPanel.uptime': '99.9% de disponibilidad',
 
     'authMetamaskButton.installFirst': '¡Instala Metamask primero!',
     'authMetamaskButton.loginSuccess':
