@@ -28,3 +28,6 @@ tsconfig.app.tsbuildinfo
 
 .env
 .server.data
+
+# Deploy-script stamps and npm cache (setup-node-services.sh)
+.ethora_deploy/
