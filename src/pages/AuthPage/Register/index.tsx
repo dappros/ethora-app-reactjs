@@ -27,15 +27,24 @@ export default function Register() {
           width: '100%',
           display: 'flex',
           flex: 1,
-          flexDirection: isMobileDevice ? 'column' : 'row',
-          gap: isMobileDevice ? '20px' : '16px',
-          justifyContent: isMobileDevice ? 'start' : 'center',
-          alignItems: 'center',
-          // fontFamily: 'Verela',
+          flexDirection: 'column',
         }}
       >
-        <LogoContent isMobile={isMobileDevice} />
-        <SignUpForm isMobile={isMobileDevice} isSmallDevice={isSmallDevice} />
+        {/* See the comment in Login/index.tsx: auto margins center the pair
+            without making a too-tall registration step unreachable. */}
+        <Box
+          sx={{
+            margin: 'auto 0',
+            width: '100%',
+            display: 'flex',
+            flexDirection: isMobileDevice ? 'column' : 'row',
+            gap: isMobileDevice ? '20px' : '16px',
+            alignItems: 'center',
+          }}
+        >
+          <LogoContent isMobile={isMobileDevice} />
+          <SignUpForm isMobile={isMobileDevice} isSmallDevice={isSmallDevice} />
+        </Box>
       </Box>
     </Wrapper>
   );

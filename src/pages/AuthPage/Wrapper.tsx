@@ -34,7 +34,10 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
         sx={{
           display: 'flex',
           width: '100%',
-          height: '100%',
+          // minHeight (not height) so a form taller than the viewport grows
+          // the column instead of spilling out of it - the auto-margin
+          // centering in Login/Register then degrades to top-aligned.
+          minHeight: '100%',
           gap: '24px',
           alignItems: 'center',
           justifyContent: 'center',

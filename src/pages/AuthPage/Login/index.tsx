@@ -40,13 +40,27 @@ export default function LoginComponent() {
           width: '100%',
           display: 'flex',
           flex: 1,
-          flexDirection: isMobileDevice ? 'column' : 'row',
-          gap: isMobileDevice ? '20px' : '16px',
-          alignItems: 'center',
+          flexDirection: 'column',
         }}
       >
-        <LogoContent isMobile={isMobileDevice} />
-        <SignInForm isMobile={isMobileDevice} />
+        {/* margin:'auto 0' (not justifyContent:'center') centers the logo +
+            form pair vertically while staying safe on short viewports: when
+            the content is taller than the available space the auto margins
+            resolve to 0, so the top stays reachable instead of being clipped
+            above the scroll origin. Same idiom as EthoraSplitLayout. */}
+        <Box
+          sx={{
+            margin: 'auto 0',
+            width: '100%',
+            display: 'flex',
+            flexDirection: isMobileDevice ? 'column' : 'row',
+            gap: isMobileDevice ? '20px' : '16px',
+            alignItems: 'center',
+          }}
+        >
+          <LogoContent isMobile={isMobileDevice} />
+          <SignInForm isMobile={isMobileDevice} />
+        </Box>
       </Box>
     </Wrapper>
   );

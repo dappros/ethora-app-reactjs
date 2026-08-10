@@ -33,12 +33,20 @@ const EthoraBrandPanel: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        gap: '32px',
-        padding: '48px 56px',
+        // Vertical rhythm scales with the viewport height so the panel keeps
+        // fitting on short screens (laptops at 100% zoom, split windows)
+        // instead of growing past 100vh.
+        gap: 'clamp(16px, 3vh, 32px)',
+        padding: 'clamp(24px, 5vh, 48px) 56px',
         background: 'linear-gradient(135deg, #3D8BE8 0%, #0A4FC0 100%)',
         color: 'white',
         fontFamily: 'Varela Round',
-        overflow: 'auto',
+        // This panel is decorative - it must never scroll. The compacting
+        // rules above (plus the two height media queries below) keep the
+        // content inside 100vh; anything that still doesn't fit is dropped
+        // rather than turned into a scrollbar.
+        overflow: 'hidden',
+        minHeight: 0,
       }}
     >
       <Box>
@@ -65,7 +73,7 @@ const EthoraBrandPanel: React.FC = () => {
             fontSize: 'clamp(32px, 3.2vw, 48px)',
             lineHeight: 1.25,
             color: 'white',
-            marginTop: '48px',
+            marginTop: 'clamp(16px, 4vh, 48px)',
             maxWidth: '560px',
             wordBreak: 'break-word',
           }}
@@ -81,7 +89,7 @@ const EthoraBrandPanel: React.FC = () => {
             fontSize: '18px',
             lineHeight: 1.5,
             color: 'rgba(255, 255, 255, 0.9)',
-            marginTop: '24px',
+            marginTop: 'clamp(12px, 2vh, 24px)',
             maxWidth: '520px',
           }}
         >
@@ -97,6 +105,10 @@ const EthoraBrandPanel: React.FC = () => {
           maxWidth: '600px',
           width: '100%',
           color: '#141414',
+          // ~250px of fixed-height decoration. Below this the tagline and
+          // subtitle alone fill the panel, so drop the mockup instead of
+          // letting it push the content out of the viewport.
+          '@media (max-height: 700px)': { display: 'none' },
         }}
       >
         <Box
@@ -222,6 +234,10 @@ const EthoraBrandPanel: React.FC = () => {
           gap: '16px',
           fontSize: '14px',
           color: 'rgba(255, 255, 255, 0.85)',
+          flexShrink: 0,
+          // Last thing to go on very short viewports (short split windows,
+          // browser zoomed in).
+          '@media (max-height: 480px)': { display: 'none' },
         }}
       >
         <span>{t('authBrandPanel.trustedBy')}</span>

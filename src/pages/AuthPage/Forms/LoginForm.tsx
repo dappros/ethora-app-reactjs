@@ -34,9 +34,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
         minWidth: '300px',
         width: '100%',
         maxWidth: isMobile ? '486px' : '600px',
-        maxHeight: isMobile ? '732px' : '588px',
-        minHeight: isMobile ? 'inherit' : '588px',
-        height: '100%',
+        // On mobile the card must hug its content: stretching it to the full
+        // column height is what pushed the "Don't have an account?" line to
+        // the bottom of the screen (space-between over ~200px of dead space)
+        // and left the fields pinned to the top. Desktop keeps the fixed
+        // 588px card so the split/branded layouts are unchanged.
+        maxHeight: isMobile ? 'none' : '588px',
+        minHeight: isMobile ? 'auto' : '588px',
+        height: isMobile ? 'auto' : '100%',
         justifyContent: 'space-between',
       }}
     >

@@ -3,7 +3,8 @@
   font-weight: 400;
   font-style: normal;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  overflow-y: auto;
   margin: 0;
   background-image: url('./Icons/circles.svg');
   background-position: center;
