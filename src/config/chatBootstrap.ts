@@ -145,8 +145,9 @@ export const buildEthoraBaseChatConfig = ({
   primaryColor,
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
   const userLoginPayload = makeChatUserLogin(currentUser);
+  const baseUrl = import.meta.env.VITE_API.split("/v1")[0];
   const config: XmppProviderConfig = {
-    baseUrl: import.meta.env.VITE_API,
+    baseUrl: baseUrl,
     xmppSettings: {
       devServer: import.meta.env.VITE_APP_XMPP_SERVICE,
       host: import.meta.env.VITE_XMPP_HOST,
