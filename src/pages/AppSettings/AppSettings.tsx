@@ -580,10 +580,13 @@ export default function AppSettings() {
 
   const tabsMemo = useMemo(() => {
     return Object.entries(tabsNew).flatMap(([sectionTitle, items]) => {
+      // Section headers only make sense on the vertical rail (lg+). In the
+      // horizontal strip below lg they'd sit inline between the tabs and read
+      // as tabs themselves, so they're dropped there.
       const sectionHeader = (
         <div
           key={`section-${sectionTitle}`}
-          className="hidden md:block text-md font-bold uppercase text-black py-[10px] md:py-3 md:px-2 border-b-brand-500"
+          className="hidden lg:block text-md font-bold uppercase text-black lg:py-3 lg:px-2"
         >
           {t(SECTION_LABEL_KEYS[sectionTitle] ?? sectionTitle)}
         </div>
@@ -601,6 +604,7 @@ export default function AppSettings() {
             text={t(TAB_LABEL_KEYS[tab] ?? tab)}
             last={tab === LIFECYCLE_TAB}
             disabled={tabDisabled}
+            breakpoint="lg"
           />
         );
       });
@@ -749,9 +753,16 @@ export default function AppSettings() {
         selectedIndex={selectedIndex}
         onChange={handleTabChange}
       >
-        <TabList className="flex flex-row lg:flex-col hide-scroll lg:mb-0  border-b border-gray-200 lg:border-b-0 lg:pr-4 overflow-auto  lg:border-r lg:border-gray-200">
-          {tabsMemo}
-        </TabList>
+        {/* Below lg the tab list is a horizontal scroll strip with a hidden
+            scrollbar, so a fade on the right edge is the only cue that there
+            is more to scroll to. `lg:contents` drops this wrapper out of the
+            grid at lg so the TabList becomes the sidebar column again. */}
+        <div className="relative min-w-0 lg:contents">
+          <TabList className="flex flex-row items-stretch h-full lg:h-auto lg:flex-col hide-scroll lg:mb-0 border-b border-gray-200 lg:border-b-0 lg:pr-4 overflow-auto lg:border-r lg:border-gray-200">
+            {tabsMemo}
+          </TabList>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" />
+        </div>
         <TabPanels className="h-full overflow-hidden">
           <TabPanel
             key="AI bot"
@@ -807,8 +818,9 @@ export default function AppSettings() {
 
           <TabPanel
             key="Appearance"
-            // className="grid grid-rows-1 lg:ml-4 h-full "
-            className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
+            // The preview column sizes itself now (it scales to the space it
+            // gets), so the second row is auto instead of a hard 368px.
+            className="grid grid-rows-[auto,_auto] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full min-w-0 overflow-y-auto"
           >
             <Appearance
               displayName={displayName}

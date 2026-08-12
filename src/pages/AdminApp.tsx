@@ -54,7 +54,7 @@ export default function AdminApp() {
     // overflow-hidden
     <div className="h-full  grid grid-rows-[auto,_1fr]">
       <div className="mb-4 flex md:flex-row flex-col md:justify-between">
-        <div className="flex mb-4 md:mb-0">
+        <div className="pl-4 pt-2 flex mb-4 md:mb-0">
           <button className="ml-[5px] md:mb-0 mr-[13px]" onClick={goBack}>
             <IconArrowLeft />
           </button>
@@ -69,7 +69,7 @@ export default function AdminApp() {
             from the switcher. The onClick eagerly switches chatAppId so
             the destination renders the right context immediately rather
             than after a hydration round-trip on Chat.tsx mount. */}
-        <div className="grid justify-center content-center grid-cols-4 w-auto md:w-full md:max-w-[520px] md:mr-[32px]">
+        <div className="grid justify-center content-center grid-cols-4 w-auto md:w-full md:max-w-[520px] md:mr-[32px] px-4">
           <NavLink
             className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
             to={`/app/admin/apps/${appId}/users`}

@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { useLayoutEffect, useRef, useState } from 'react';
 import BG from '../../assets/_BG.png';
 import SafariImage from '../../assets/safari.png';
 import YouLogo from '../../assets/YouLogo.svg';
@@ -15,6 +16,41 @@ interface AppearanceRightImageProps {
   tagline: string;
   logoImage: string;
 }
+
+// The preview is a pixel-perfect composition of two fixed-size device mockups
+// (a 469x285 browser window plus an iPhone that pokes 40px above it and 40px
+// past its right edge), so it can't reflow. Instead it's rendered at its
+// natural size inside an absolutely-positioned box and scaled down to whatever
+// width is actually available. Absolute positioning keeps those 509px from
+// leaking into the grid column - otherwise the column (and with it every input
+// in the left half) would stay 509px wide and get clipped on a phone.
+const NATURAL_W = 509;
+const NATURAL_H = 368;
+const IPHONE_OVERHANG_TOP = 40;
+
+function useFitScale(naturalWidth: number) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const measure = () => {
+      const available = el.clientWidth;
+      if (available > 0) {
+        setScale(Math.min(1, available / naturalWidth));
+      }
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [naturalWidth]);
+
+  return { ref, scale };
+}
 export const AppearanceRightImage = ({
   displayName,
   color,
@@ -22,121 +58,151 @@ export const AppearanceRightImage = ({
   logoImage,
 }: AppearanceRightImageProps) => {
   const { t } = useTranslation();
+  const { ref: fitRef, scale } = useFitScale(NATURAL_W);
+
   return (
-    <div className="appearance-right w-full flex justify-center items-start relative pt-20">
-      <div className="relative">
+    <div
+      ref={fitRef}
+      className="appearance-right relative w-full min-w-0 mt-4 2xl:mt-20"
+      style={{ height: NATURAL_H * scale }}
+    >
+      <div
+        className="absolute top-0"
+        style={{
+          width: NATURAL_W,
+          height: NATURAL_H,
+          left: '50%',
+          marginLeft: -NATURAL_W / 2,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top center',
+        }}
+      >
         <div
-          className={classNames(
-            'bg-center bg-cover relative',
-            'w-[469px] h-[285px]'
-          )}
-          style={{ backgroundImage: `url(${SafariImage})` }}
+          className="relative w-[469px]"
+          style={{ marginTop: IPHONE_OVERHANG_TOP }}
         >
-          <div className="absolute w-full h-[262px]  bg-white bottom-0">
-            <div
-              className="w-full grid grid-cols-[2fr,_3fr] place-items-center h-full bg-preview bg-cover px-[20px]"
-              style={{ backgroundImage: `url(${BG})` }}
-            >
-              <div className="max-w-[170px]">
-                <img
-                  src={logoImage || YouLogo}
-                  alt="Primary Logo"
-                  className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
-                />
-                <p className="break-words">
-                  {tagline ||
-                    t('appearanceRightImage.joinCommunityTagline').replace(
-                      '{name}',
-                      displayName
-                    )}
-                </p>
-              </div>
+          <div
+            className={classNames(
+              'bg-center bg-cover relative',
+              'w-[469px] h-[285px]'
+            )}
+            style={{ backgroundImage: `url(${SafariImage})` }}
+          >
+            <div className="absolute w-full h-[262px]  bg-white bottom-0">
               <div
-                className={classNames(
-                  'bg-white rounded-xl p-3',
-                  '2xl:w-[220px] 2xl:h-[220px], xl:w-[180px] xl:h-[180px]'
-                )}
+                className="w-full grid grid-cols-[2fr,_3fr] place-items-center h-full bg-preview bg-cover px-[20px]"
+                style={{ backgroundImage: `url(${BG})` }}
               >
-                <h3 className="text-[10px] text-center mb-2">
-                  {t('appearanceRightImage.signUp')}
-                </h3>
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  <div className="border" style={{ borderColor: color }}></div>
-                  <div className="border" style={{ borderColor: color }}></div>
-                  <div className="border" style={{ borderColor: color }}></div>
-                </div>
-                <div className="flex gap-3 mb-1">
-                  <input
-                    readOnly
-                    type="text"
-                    value="Gloria"
-                    className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                <div className="max-w-[170px]">
+                  <img
+                    src={logoImage || YouLogo}
+                    alt="Primary Logo"
+                    className="max-w-[80px] max-h-[63px] min-h-[40px] object-contain"
                   />
-                  <input
-                    readOnly
-                    type="text"
-                    value="Mayer"
-                    className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-                  />
+                  <p className="break-words">
+                    {tagline ||
+                      t('appearanceRightImage.joinCommunityTagline').replace(
+                        '{name}',
+                        displayName
+                      )}
+                  </p>
                 </div>
-                <input
-                  readOnly
-                  type="text"
-                  value="GloriaMayer@gmail.com"
-                  className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
-                />
-                <button
-                  className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"
-                  style={{ backgroundColor: color }}
+                <div
+                  className={classNames(
+                    'bg-white rounded-xl p-3',
+                    '2xl:w-[220px] 2xl:h-[220px], xl:w-[180px] xl:h-[180px]'
+                  )}
                 >
-                  {t('appearanceRightImage.signUp')}
-                </button>
-                <div className="text-[6px] mb-2">
-                  <span>{t('appearanceRightImage.agreementPrefix')}</span>
-                  <span>{t('appearanceRightImage.termsAndConditions')}</span>
-                </div>
-                <button
-                  className="border w-full rounded-xl py-[3px] text-[9px] mb-2 flex align-center justify-center"
-                  style={{ borderColor: color, color: color }}
-                >
-                  <div className="mr-2">
-                    <GoogleIcon width={10} height={10} />
+                  <h3 className="text-[10px] text-center mb-2">
+                    {t('appearanceRightImage.signUp')}
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div
+                      className="border"
+                      style={{ borderColor: color }}
+                    ></div>
+                    <div
+                      className="border"
+                      style={{ borderColor: color }}
+                    ></div>
+                    <div
+                      className="border"
+                      style={{ borderColor: color }}
+                    ></div>
                   </div>
-                  <span>{t('appearanceRightImage.continueWithGoogle')}</span>
-                </button>
-                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex gap-3 mb-1">
+                    <input
+                      readOnly
+                      type="text"
+                      value="Gloria"
+                      className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                    />
+                    <input
+                      readOnly
+                      type="text"
+                      value="Mayer"
+                      className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                    />
+                  </div>
+                  <input
+                    readOnly
+                    type="text"
+                    value="GloriaMayer@gmail.com"
+                    className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                  />
                   <button
-                    className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
+                    className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"
+                    style={{ backgroundColor: color }}
+                  >
+                    {t('appearanceRightImage.signUp')}
+                  </button>
+                  <div className="text-[6px] mb-2">
+                    <span>{t('appearanceRightImage.agreementPrefix')}</span>
+                    <span>{t('appearanceRightImage.termsAndConditions')}</span>
+                  </div>
+                  <button
+                    className="border w-full rounded-xl py-[3px] text-[9px] mb-2 flex align-center justify-center"
                     style={{ borderColor: color, color: color }}
                   >
-                    <FacebookIcon width={12} height={12} />
+                    <div className="mr-2">
+                      <GoogleIcon width={10} height={10} />
+                    </div>
+                    <span>{t('appearanceRightImage.continueWithGoogle')}</span>
                   </button>
-                  <button
-                    className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                    style={{ borderColor: color, color: color }}
-                  >
-                    <AppleIcon width={12} height={12} />
-                  </button>
-                  <button
-                    className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
-                    style={{ borderColor: color, color: color }}
-                  >
-                    <MetamaskIcon width={12} height={12} />
-                  </button>
-                </div>
-                <div className="text-[8px] text-center text">
-                  <span className="mr-1">
-                    {t('appearanceRightImage.alreadyHaveAccount')}
-                  </span>
-                  <a href="#" style={{ color: color }}>
-                    {t('appearanceRightImage.signIn')}
-                  </a>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
+                      style={{ borderColor: color, color: color }}
+                    >
+                      <FacebookIcon width={12} height={12} />
+                    </button>
+                    <button
+                      className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
+                      style={{ borderColor: color, color: color }}
+                    >
+                      <AppleIcon width={12} height={12} />
+                    </button>
+                    <button
+                      className="border rounded-xl py-[4px] text-[9px] mb-1 flex justify-center"
+                      style={{ borderColor: color, color: color }}
+                    >
+                      <MetamaskIcon width={12} height={12} />
+                    </button>
+                  </div>
+                  <div className="text-[8px] text-center text">
+                    <span className="mr-1">
+                      {t('appearanceRightImage.alreadyHaveAccount')}
+                    </span>
+                    <a href="#" style={{ color: color }}>
+                      {t('appearanceRightImage.signIn')}
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <AppearanceIphone color={color} logoImage={logoImage} />
         </div>
-        <AppearanceIphone color={color} logoImage={logoImage} />
       </div>
     </div>
   );
