@@ -267,6 +267,10 @@ type SiteSourceRow = {
   updatedAt?: string;
 };
 
+// Page size for the Web Index table. The backend caps `limit` at 500; 25 keeps the
+// panel scrollable without pagination controls dominating a small index.
+const SITE_SOURCES_PAGE_SIZE = 25;
+
 function fmtBytesShort(n?: number | null) {
   const v = Number(n) || 0;
   if (v < 1024) return `${v} B`;
@@ -312,6 +316,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [busy, setBusy] = useState(false);
   const [rows, setRows] = useState<SiteSourceRow[]>([]);
   const [loadingList, setLoadingList] = useState(false);
+  const [offset, setOffset] = useState(0);
+  // Server-side total, not rows.length — a crawl can leave far more rows than one page.
+  const [total, setTotal] = useState(0);
 
   // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
   // the user's first owned app so the UI is functional out of the box.
@@ -324,28 +331,49 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialAppId]);
 
-  const loadList = async () => {
+  // Takes the offset explicitly: callers that move between pages or drop the last row
+  // of a page need the fetch to use the new offset without waiting for a re-render.
+  const loadList = async (nextOffset = offset) => {
     if (!appId) {
       setRows([]);
+      setTotal(0);
       return;
     }
     setLoadingList(true);
     try {
-      const r = await httpListSiteSourcesV2(appId);
-      // Endpoint returns { result: SiteSourceRow[] } in v2.
+      const r = await httpListSiteSourcesV2(appId, { limit: SITE_SOURCES_PAGE_SIZE, offset: nextOffset });
+      // Endpoint returns { result: SiteSourceRow[], pagination: { total, limit, offset, hasMore } } in v2.
       const items: SiteSourceRow[] = r.data?.result || r.data?.items || [];
       setRows(items);
+      // Older backends have no pagination block; total then degrades to the page length,
+      // which still renders a sane (if truncated) count rather than 0.
+      setTotal(Number(r.data?.pagination?.total ?? items.length));
+      setOffset(nextOffset);
     } catch (e: any) {
       toast.error(`${t('agentPanels.failedToLoadUrlsPrefix')} ${e?.response?.data?.error || e.message}`);
       setRows([]);
+      setTotal(0);
     } finally {
       setLoadingList(false);
     }
   };
+  // Switching app scope invalidates the current page position.
   useEffect(() => {
-    loadList();
+    loadList(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId]);
+
+  // Removing the last row of a non-first page would otherwise strand the user on an
+  // empty page, so step back one page in that case.
+  const reloadAfterRowRemoved = () => {
+    const stayOnPage = rows.length > 1 || offset === 0;
+    return loadList(stayOnPage ? offset : Math.max(0, offset - SITE_SOURCES_PAGE_SIZE));
+  };
+
+  const pageStart = total === 0 ? 0 : offset + 1;
+  const pageEnd = offset + rows.length;
+  const hasPrev = offset > 0;
+  const hasNext = pageEnd < total;
 
   return (
     <div className="space-y-3 max-w-3xl">
@@ -381,8 +409,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
               await httpAgentSiteCrawl(appId, agent.id, url, followLink);
               toast.success(t('agentPanels.crawlQueued'));
               setUrl('');
-              // Re-fetch the list so the new pages appear.
-              await loadList();
+              // Re-fetch from the first page: new rows sort newest-first, so they
+              // land at the top regardless of where the operator was paging.
+              await loadList(0);
             } catch (e: any) {
               toast.error(`${t('agentPanels.crawlFailedPrefix')} ${e?.response?.data?.error || e.message}`);
             } finally {
@@ -398,7 +427,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       <div className="text-xs text-gray-500">
         {t('agentPanels.indexedBytesPrefix')} {agent.totalSiteSourceSize?.toLocaleString() || 0}
         {appId && (
-          <> · {rows.length} {rows.length === 1 ? t('agentPanels.indexedUrlsSuffixOne') : t('agentPanels.indexedUrlsSuffixOther')}</>
+          <> · {total.toLocaleString()} {total === 1 ? t('agentPanels.indexedUrlsSuffixOne') : t('agentPanels.indexedUrlsSuffixOther')}</>
         )}
       </div>
 
@@ -442,7 +471,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                       try {
                         await httpReindexSiteSourceV2(appId, row.id);
                         toast.success(t('agentPanels.reindexQueued'));
-                        await loadList();
+                        await loadList(offset);
                       } catch (e: any) {
                         toast.error(`${t('agentPanels.reindexFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                       }
@@ -458,7 +487,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                       try {
                         await httpDeleteSiteSourceV2Url(appId, row.id);
                         toast.success(t('agentPanels.removed'));
-                        await loadList();
+                        await reloadAfterRowRemoved();
                       } catch (e: any) {
                         toast.error(`${t('agentPanels.removeFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                       }
@@ -473,6 +502,34 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           </tbody>
         </table>
       </div>
+
+      {/* Hidden while everything fits on one page — a single-page index needs no controls. */}
+      {(hasPrev || hasNext) && (
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>
+            {t('agentPanels.paginationRange')
+              .replace('{from}', String(pageStart))
+              .replace('{to}', String(pageEnd))
+              .replace('{total}', total.toLocaleString())}
+          </span>
+          <div className="flex gap-2">
+            <button
+              disabled={!hasPrev || loadingList}
+              onClick={() => loadList(Math.max(0, offset - SITE_SOURCES_PAGE_SIZE))}
+              className="border rounded px-3 py-1 disabled:opacity-40"
+            >
+              {t('agentPanels.previousPage')}
+            </button>
+            <button
+              disabled={!hasNext || loadingList}
+              onClick={() => loadList(offset + SITE_SOURCES_PAGE_SIZE)}
+              className="border rounded px-3 py-1 disabled:opacity-40"
+            >
+              {t('agentPanels.nextPage')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
