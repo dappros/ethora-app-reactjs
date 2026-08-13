@@ -38,6 +38,8 @@ export const appSettings1 = {
     'appSettings.toast.reindexFailed': 'Failed to reindex site crawl',
     'appSettings.toast.siteCrawlSet': 'Site crawl set successfully',
     'appSettings.toast.siteCrawlFailed': 'Failed to set site crawl',
+    'appSettings.confirmRecrawlIndexed':
+      '{url} is already indexed. Crawl it again and replace the stored copy?',
     'appSettings.toast.linksDeleted': 'Selected links successfully deleted',
     'appSettings.toast.noLinksDeleted': 'None of the links could be deleted.',
     'appSettings.toast.deleteLinksError':
@@ -236,6 +238,8 @@ export const appSettings1 = {
       "Exploration du site configurée avec succès",
     'appSettings.toast.siteCrawlFailed':
       "Échec de la configuration de l'exploration du site",
+    'appSettings.confirmRecrawlIndexed':
+      '{url} est déjà indexée. Explorer à nouveau et remplacer la copie enregistrée ?',
     'appSettings.toast.linksDeleted':
       'Liens sélectionnés supprimés avec succès',
     'appSettings.toast.noLinksDeleted':
@@ -457,6 +461,8 @@ export const appSettings1 = {
       'Rastreo del sitio configurado correctamente',
     'appSettings.toast.siteCrawlFailed':
       'No se pudo configurar el rastreo del sitio',
+    'appSettings.confirmRecrawlIndexed':
+      '{url} ya está indexada. ¿Rastrearla de nuevo y reemplazar la copia guardada?',
     'appSettings.toast.linksDeleted':
       'Los enlaces seleccionados se eliminaron correctamente',
     'appSettings.toast.noLinksDeleted':

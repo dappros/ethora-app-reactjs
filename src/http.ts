@@ -712,10 +712,26 @@ export const sendHSFormData = async (
 };
 
 
-export function setSourcesSiteCrawl(appId: string, url: string, followLink: boolean) {
+// A site-crawl POST answers 409 SITE_SOURCE_ALREADY_INDEXED when the URL is
+// already in the app's Web Index instead of adding a second row for the same
+// page. Returns the URL to show in the "crawl it again?" prompt (the stored
+// spelling, which can differ from what was typed), or null for any other error.
+export function alreadyIndexedUrl(error: unknown, fallbackUrl: string): string | null {
+  const res = (error as {
+    response?: { status?: number; data?: { code?: string; details?: { existingUrl?: string } } };
+  })?.response;
+  if (res?.status !== 409 || res?.data?.code !== 'SITE_SOURCE_ALREADY_INDEXED') return null;
+  return res.data?.details?.existingUrl || fallbackUrl;
+}
+
+// `force` re-crawls a URL that is already indexed, overwriting the stored copy.
+// Without it the backend answers 409 SITE_SOURCE_ALREADY_INDEXED rather than
+// adding a second row for the same page.
+export function setSourcesSiteCrawl(appId: string, url: string, followLink: boolean, force = false) {
   return http.post(`/sources/site-crawl/${appId}`, {
     url,
-    followLink
+    followLink,
+    force
   });
 }
 
@@ -866,8 +882,12 @@ export function httpSetBotInstanceStatus(id: string, status: 'on' | 'off') {
 
 // Per-Agent source ingestion. These reuse the same endpoints as the per-App calls but
 // pass an explicit agentId so docs land in the agent's RAG namespace.
-export function httpAgentSiteCrawl(appId: string, agentId: string, url: string, followLink: boolean) {
-  return httpV2.post(`/apps/${appId}/sources/site-crawl`, { url, followLink, agentId });
+// `force` opts out of the already-indexed check: the URL is re-crawled and the
+// stored copy overwritten. Without it a URL already present in the app's Web
+// Index list comes back as 409 SITE_SOURCE_ALREADY_INDEXED instead of being
+// silently added a second time.
+export function httpAgentSiteCrawl(appId: string, agentId: string, url: string, followLink: boolean, force = false) {
+  return httpV2.post(`/apps/${appId}/sources/site-crawl`, { url, followLink, agentId, force });
 }
 
 export function httpAgentDocsUpload(appId: string, agentId: string, files: File[]) {

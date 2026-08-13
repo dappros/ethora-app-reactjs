@@ -20,6 +20,7 @@ import {
 import {
   httpAgentDocsUpload,
   httpAgentSiteCrawl,
+  alreadyIndexedUrl,
   httpDeleteDocSourceV2,
   httpDeleteSiteSourceV2Url,
   httpDiagAgentBotInstance,
@@ -370,6 +371,36 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     return loadList(stayOnPage ? offset : Math.max(0, offset - SITE_SOURCES_PAGE_SIZE));
   };
 
+  const crawlOnce = async (force: boolean) => {
+    await httpAgentSiteCrawl(appId, agent.id, url, followLink, force);
+    toast.success(t('agentPanels.crawlQueued'));
+    setUrl('');
+    // Re-fetch from the first page: new rows sort newest-first, so they
+    // land at the top regardless of where the operator was paging.
+    await loadList(0);
+  };
+
+  const handleCrawl = async () => {
+    setBusy(true);
+    try {
+      try {
+        await crawlOnce(false);
+      } catch (e) {
+        // A URL already in this app's list is a prompt, not a failure: offer the
+        // overwrite instead of making the operator delete the row first. Declining
+        // leaves the URL in the input, so it can be edited rather than retyped.
+        const indexedUrl = alreadyIndexedUrl(e, url);
+        if (indexedUrl === null) throw e;
+        if (!confirm(t('agentPanels.confirmRecrawlIndexed').replace('{url}', indexedUrl))) return;
+        await crawlOnce(true);
+      }
+    } catch (e: any) {
+      toast.error(`${t('agentPanels.crawlFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const pageStart = total === 0 ? 0 : offset + 1;
   const pageEnd = offset + rows.length;
   const hasPrev = offset > 0;
@@ -403,21 +434,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         </label>
         <button
           disabled={isDisabled || busy || !url || !appId}
-          onClick={async () => {
-            setBusy(true);
-            try {
-              await httpAgentSiteCrawl(appId, agent.id, url, followLink);
-              toast.success(t('agentPanels.crawlQueued'));
-              setUrl('');
-              // Re-fetch from the first page: new rows sort newest-first, so they
-              // land at the top regardless of where the operator was paging.
-              await loadList(0);
-            } catch (e: any) {
-              toast.error(`${t('agentPanels.crawlFailedPrefix')} ${e?.response?.data?.error || e.message}`);
-            } finally {
-              setBusy(false);
-            }
-          }}
+          onClick={handleCrawl}
           className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
         >
           {busy ? t('agentPanels.crawling') : t('agentPanels.crawl')}
