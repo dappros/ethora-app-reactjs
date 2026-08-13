@@ -833,11 +833,15 @@ export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstance
   return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/test-message`, { text, roomJid });
 }
 
-// List indexed Web Index sources for an App. Returns rows with { id, originUrl, url, mdByteSize, tags }.
+// List indexed Web Index sources for an App. Returns rows with { id, originUrl, url, mdByteSize, tags }
+// plus a { total, limit, offset, hasMore } pagination block.
 // Used by the agent's Web Index tab to show the URL list (not just total bytes).
-export function httpListSiteSourcesV2(appId?: string) {
-  if (appId) return httpV2.get(`/apps/${appId}/sources/site-crawl`);
-  return httpV2.get('/sources/site-crawl');
+// Pagination is opt-in server-side: without `limit` the backend returns every row,
+// which is what the legacy AI Widget LinksTable still relies on.
+export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number }) {
+  const config = params ? { params } : undefined;
+  if (appId) return httpV2.get(`/apps/${appId}/sources/site-crawl`, config);
+  return httpV2.get('/sources/site-crawl', config);
 }
 
 // NB: despite the name, the backend expects an array of SiteSource document
