@@ -864,6 +864,13 @@ export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number;
 // _ids (24-hex ObjectIds), not URL strings. Joi rejects URL strings with a
 // 422 VALIDATION_ERROR, which is why an earlier 'pass row.url' call from
 // AgentPanels silently failed. Use the row.id from listSiteSources.
+// Single Web Index row including `md`. The list endpoint omits the markdown to
+// keep a page of rows small, so this is the only way to read back what a crawl
+// actually stored for one URL.
+export function httpGetSiteSourceV2(appId: string, sourceId: string) {
+  return httpV2.get(`/apps/${appId}/sources/site-crawl/${sourceId}`);
+}
+
 // Accepts one id or many: the endpoint deletes the whole batch in a single
 // call and answers with a { summary, details } breakdown, so a bulk removal
 // does not need to be fanned out into one request per row.

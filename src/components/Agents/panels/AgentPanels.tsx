@@ -36,6 +36,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
 import { useAppStore } from '../../../store/useAppStore';
+import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
 
 export const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <label className="block">
@@ -330,6 +331,8 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   // Row ids ticked for bulk removal. Held as ids rather than indexes so a
   // selection survives paging: a crawl of any size is removed in one request.
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Row whose stored markdown is open in the viewer, if any.
+  const [viewing, setViewing] = useState<SiteSourceRow | null>(null);
 
   // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
   // the user's first owned app so the UI is functional out of the box.
@@ -547,7 +550,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
               <th className="text-left p-2">{t('agentPanels.urlHeader')}</th>
               <th className="text-left p-2 w-24">{t('agentPanels.sizeHeader')}</th>
               <th className="text-left p-2 w-32">{t('agentPanels.updatedHeader')}</th>
-              <th className="p-2 w-28"></th>
+              <th className="p-2 w-40"></th>
             </tr>
           </thead>
           <tbody>
@@ -577,6 +580,12 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                 <td className="p-2 text-gray-600">{fmtBytesShort(row.mdByteSize)}</td>
                 <td className="p-2 text-gray-500">{row.updatedAt ? new Date(row.updatedAt).toLocaleString() : ''}</td>
                 <td className="p-2 text-right whitespace-nowrap">
+                  <button
+                    onClick={() => setViewing(row)}
+                    className="text-brand-500 hover:underline mr-2"
+                  >
+                    {t('agentPanels.viewMarkdown')}
+                  </button>
                   <button
                     disabled={isDisabled || busy}
                     onClick={async () => {
@@ -649,6 +658,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
             </button>
           </div>
         </div>
+      )}
+
+      {viewing && (
+        <SiteSourceMarkdownModal
+          appId={appId}
+          sourceId={viewing.id}
+          url={viewing.url}
+          onClose={() => setViewing(null)}
+        />
       )}
     </div>
   );

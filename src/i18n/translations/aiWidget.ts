@@ -268,6 +268,12 @@ export const aiWidget = {
     'agentPanels.removedSelected': 'Removed {n} URLs',
     'agentPanels.selectAllOnPage': 'Select all URLs on this page',
     'agentPanels.selectRow': 'Select {url}',
+    'agentPanels.viewMarkdown': 'View',
+    'agentPanels.markdownTitle': 'Indexed content',
+    'agentPanels.markdownEmpty': 'No content is stored for this URL.',
+    'agentPanels.markdownLoadFailedPrefix': 'Could not load content:',
+    'agentPanels.markdownBytes': '{n} bytes of markdown',
+    'agentPanels.closeDialog': 'Close',
     'agentPanels.docsIndexDescription':
       'Upload PDFs, DOCX, MD, TXT to index under this agent.',
     'agentPanels.uploadingParsingEmbedding':
@@ -625,6 +631,12 @@ export const aiWidget = {
     'agentPanels.removedSelected': '{n} URL supprimées',
     'agentPanels.selectAllOnPage': 'Sélectionner toutes les URL de cette page',
     'agentPanels.selectRow': 'Sélectionner {url}',
+    'agentPanels.viewMarkdown': 'Voir',
+    'agentPanels.markdownTitle': 'Contenu indexé',
+    'agentPanels.markdownEmpty': "Aucun contenu n'est stocké pour cette URL.",
+    'agentPanels.markdownLoadFailedPrefix': 'Impossible de charger le contenu :',
+    'agentPanels.markdownBytes': '{n} octets de markdown',
+    'agentPanels.closeDialog': 'Fermer',
     'agentPanels.docsIndexDescription':
       'Téléversez des fichiers PDF, DOCX, MD, TXT à indexer pour cet agent.',
     'agentPanels.uploadingParsingEmbedding':
@@ -986,6 +998,12 @@ export const aiWidget = {
     'agentPanels.removedSelected': '{n} URL eliminadas',
     'agentPanels.selectAllOnPage': 'Seleccionar todas las URL de esta página',
     'agentPanels.selectRow': 'Seleccionar {url}',
+    'agentPanels.viewMarkdown': 'Ver',
+    'agentPanels.markdownTitle': 'Contenido indexado',
+    'agentPanels.markdownEmpty': 'No hay contenido almacenado para esta URL.',
+    'agentPanels.markdownLoadFailedPrefix': 'No se pudo cargar el contenido:',
+    'agentPanels.markdownBytes': '{n} bytes de markdown',
+    'agentPanels.closeDialog': 'Cerrar',
     'agentPanels.docsIndexDescription':
       'Sube archivos PDF, DOCX, MD, TXT para indexarlos en este agente.',
     'agentPanels.uploadingParsingEmbedding':
