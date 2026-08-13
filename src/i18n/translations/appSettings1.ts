@@ -36,7 +36,8 @@ export const appSettings1 = {
       'The AI bot name must be at least 3 characters long',
     'appSettings.toast.linkReindexed': 'Link {url} successfully reindexed',
     'appSettings.toast.reindexFailed': 'Failed to reindex site crawl',
-    'appSettings.toast.siteCrawlSet': 'Site crawl set successfully',
+    'appSettings.toast.siteCrawlSet':
+      'Crawl started. Indexed pages appear in the list once it finishes - reopen this tab in a minute.',
     'appSettings.toast.siteCrawlFailed': 'Failed to set site crawl',
     'appSettings.confirmRecrawlIndexed':
       '{url} is already indexed. Crawl it again and replace the stored copy?',
@@ -235,7 +236,7 @@ export const appSettings1 = {
     'appSettings.toast.reindexFailed':
       'Échec de la réindexation du site',
     'appSettings.toast.siteCrawlSet':
-      "Exploration du site configurée avec succès",
+      "Exploration lancée. Les pages indexées apparaîtront dans la liste une fois terminée - rouvrez cet onglet dans une minute.",
     'appSettings.toast.siteCrawlFailed':
       "Échec de la configuration de l'exploration du site",
     'appSettings.confirmRecrawlIndexed':
@@ -458,7 +459,7 @@ export const appSettings1 = {
     'appSettings.toast.reindexFailed':
       'No se pudo reindexar el rastreo del sitio',
     'appSettings.toast.siteCrawlSet':
-      'Rastreo del sitio configurado correctamente',
+      'Rastreo iniciado. Las páginas indexadas aparecerán en la lista cuando termine: vuelve a abrir esta pestaña en un minuto.',
     'appSettings.toast.siteCrawlFailed':
       'No se pudo configurar el rastreo del sitio',
     'appSettings.confirmRecrawlIndexed':

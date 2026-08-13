@@ -148,13 +148,17 @@ export default function WpSetup() {
       }
 
       if (newAgentId && crawlUrl.trim()) {
+        // Always "still running": the crawler queues the job and answers
+        // immediately, so a successful POST means indexing has *started*, not
+        // that any page is stored yet. A failure lands in the same state from
+        // the user's point of view - app and bot are usable either way, the RAG
+        // content just keeps filling in behind them.
+        setCrawlIncomplete(true);
         try {
           await httpAgentSiteCrawl(newAppId, newAgentId, crawlUrl.trim(), true);
         } catch (_) {
-          // Treat any crawl failure (incl. client-side timeout before backend
-          // finishes) as "still running." App and bot are already usable; the
-          // RAG content just keeps filling in.
-          setCrawlIncomplete(true);
+          // Non-fatal: setup completes, the assistant just starts without
+          // site knowledge.
         }
       }
 
