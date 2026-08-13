@@ -511,10 +511,14 @@ export default function AppSettings() {
 
     const crawlOnce = async (force: boolean) => {
       const response = await setSourcesSiteCrawl(appId, url, followLink, force);
+      // resultV2 is empty now that the crawler queues the job and answers before
+      // fetching anything - the pages arrive later via its callback. Kept as a
+      // merge rather than dropped so the reindex path (which does still answer
+      // with rows) and any future synchronous response keep working.
       setAiBot((prev) => {
         const combined = [
           ...prev.siteUrlsV2,
-          ...(response.data.resultV2 as SiteLinks[]),
+          ...((response.data.resultV2 ?? []) as SiteLinks[]),
         ];
         const uniqueById: SiteLinks[] = Array.from(
           new Map(combined.map((item) => [item.id, item])).values()

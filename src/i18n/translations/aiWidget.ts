@@ -239,7 +239,8 @@ export const aiWidget = {
     'agentPanels.followLinks': 'follow links',
     'agentPanels.crawling': 'Crawling...',
     'agentPanels.crawl': 'Crawl',
-    'agentPanels.crawlQueued': 'Crawl queued',
+    'agentPanels.crawlQueued':
+      'Crawl started. Indexed pages appear here once it finishes - reload the list in a minute.',
     'agentPanels.crawlFailedPrefix': 'Crawl failed:',
     'agentPanels.confirmRecrawlIndexed':
       '{url} is already indexed. Crawl it again and replace the stored copy?',
@@ -599,7 +600,8 @@ export const aiWidget = {
     'agentPanels.followLinks': 'suivre les liens',
     'agentPanels.crawling': 'Exploration en cours...',
     'agentPanels.crawl': 'Explorer',
-    'agentPanels.crawlQueued': "Exploration mise en file d'attente",
+    'agentPanels.crawlQueued':
+      "Exploration lancée. Les pages indexées apparaîtront ici une fois terminée - rechargez la liste dans une minute.",
     'agentPanels.crawlFailedPrefix': "Échec de l'exploration :",
     'agentPanels.confirmRecrawlIndexed':
       '{url} est déjà indexée. Explorer à nouveau et remplacer la copie enregistrée ?',
@@ -967,7 +969,8 @@ export const aiWidget = {
     'agentPanels.followLinks': 'seguir enlaces',
     'agentPanels.crawling': 'Rastreando...',
     'agentPanels.crawl': 'Rastrear',
-    'agentPanels.crawlQueued': 'Rastreo en cola',
+    'agentPanels.crawlQueued':
+      'Rastreo iniciado. Las páginas indexadas aparecerán aquí cuando termine: recarga la lista en un minuto.',
     'agentPanels.crawlFailedPrefix': 'Error al rastrear:',
     'agentPanels.confirmRecrawlIndexed':
       '{url} ya está indexada. ¿Rastrearla de nuevo y reemplazar la copia guardada?',

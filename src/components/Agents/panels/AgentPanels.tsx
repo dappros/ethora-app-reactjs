@@ -435,8 +435,10 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     await httpAgentSiteCrawl(appId, agent.id, url, followLink, force);
     toast.success(t('agentPanels.crawlQueued'));
     setUrl('');
-    // Re-fetch from the first page: new rows sort newest-first, so they
-    // land at the top regardless of where the operator was paging.
+    // The crawler answers as soon as the job is queued, so this reload will not
+    // show the new rows yet - they land once the crawl finishes and calls back.
+    // Still worth doing: it resets paging to where those rows will appear (new
+    // rows sort newest-first) and the toast tells the operator to come back.
     await loadList(0);
   };
 
