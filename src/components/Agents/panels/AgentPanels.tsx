@@ -272,6 +272,13 @@ type SiteSourceRow = {
 // panel scrollable without pagination controls dominating a small index.
 const SITE_SOURCES_PAGE_SIZE = 25;
 
+// The API's error shape, narrowed once. Toasts across this file otherwise reach
+// into `e.response.data.error` through an `any`.
+function apiErrorMessage(e: unknown): string {
+  const err = e as { response?: { data?: { error?: string } }; message?: string };
+  return err?.response?.data?.error || err?.message || '';
+}
+
 function fmtBytesShort(n?: number | null) {
   const v = Number(n) || 0;
   if (v < 1024) return `${v} B`;
@@ -320,6 +327,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [offset, setOffset] = useState(0);
   // Server-side total, not rows.length — a crawl can leave far more rows than one page.
   const [total, setTotal] = useState(0);
+  // Row ids ticked for bulk removal. Held as ids rather than indexes so a
+  // selection survives paging: a crawl of any size is removed in one request.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
   // the user's first owned app so the UI is functional out of the box.
@@ -358,17 +368,64 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       setLoadingList(false);
     }
   };
-  // Switching app scope invalidates the current page position.
+  // Switching app scope invalidates the current page position, and a selection
+  // of ids from the previous app must not survive into the new one.
   useEffect(() => {
+    setSelected(new Set());
     loadList(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId]);
 
-  // Removing the last row of a non-first page would otherwise strand the user on an
-  // empty page, so step back one page in that case.
-  const reloadAfterRowRemoved = () => {
-    const stayOnPage = rows.length > 1 || offset === 0;
-    return loadList(stayOnPage ? offset : Math.max(0, offset - SITE_SOURCES_PAGE_SIZE));
+  // Deleting rows can empty the current page (or every page after it), which would
+  // otherwise strand the user on a blank view. Clamp to the last offset that still
+  // holds rows. Works for a bulk removal spanning pages, not just the last row of one.
+  const reloadAfterRowsRemoved = (removedCount: number) => {
+    const newTotal = Math.max(0, total - removedCount);
+    const lastPageOffset =
+      newTotal === 0 ? 0 : Math.floor((newTotal - 1) / SITE_SOURCES_PAGE_SIZE) * SITE_SOURCES_PAGE_SIZE;
+    return loadList(Math.min(offset, lastPageOffset));
+  };
+
+  const toggleRow = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  // The header checkbox acts on the current page only — "select all" across a
+  // list the operator hasn't seen is too easy to fire by accident.
+  const pageIds = rows.map((r) => r.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const somePageSelected = pageIds.some((id) => selected.has(id));
+
+  const togglePage = () =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      pageIds.forEach((id) => (allPageSelected ? next.delete(id) : next.add(id)));
+      return next;
+    });
+
+  const removeSelected = async () => {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    if (!confirm(t('agentPanels.confirmRemoveSelected').replace('{n}', String(ids.length)))) return;
+    setBusy(true);
+    try {
+      const r = await httpDeleteSiteSourceV2Url(appId, ids);
+      // The endpoint is idempotent and reports per-id results, so a selection
+      // holding a row someone else already deleted still succeeds — report what
+      // actually went away rather than what was asked for.
+      const deleted = Number(r.data?.summary?.deleted ?? ids.length);
+      toast.success(t('agentPanels.removedSelected').replace('{n}', String(deleted)));
+      setSelected(new Set());
+      await reloadAfterRowsRemoved(deleted);
+    } catch (e) {
+      toast.error(`${t('agentPanels.removeFailedPrefix')} ${apiErrorMessage(e)}`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const crawlOnce = async (force: boolean) => {
@@ -441,10 +498,25 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         </button>
       </div>
 
-      <div className="text-xs text-gray-500">
-        {t('agentPanels.indexedBytesPrefix')} {agent.totalSiteSourceSize?.toLocaleString() || 0}
-        {appId && (
-          <> · {total.toLocaleString()} {total === 1 ? t('agentPanels.indexedUrlsSuffixOne') : t('agentPanels.indexedUrlsSuffixOther')}</>
+      <div className="flex items-center justify-between gap-2 text-xs text-gray-500 min-h-[28px]">
+        <span>
+          {t('agentPanels.indexedBytesPrefix')} {agent.totalSiteSourceSize?.toLocaleString() || 0}
+          {appId && (
+            <> · {total.toLocaleString()} {total === 1 ? t('agentPanels.indexedUrlsSuffixOne') : t('agentPanels.indexedUrlsSuffixOther')}</>
+          )}
+        </span>
+        {/* Only present once something is ticked, so the default view stays as it was. */}
+        {selected.size > 0 && (
+          <span className="flex items-center gap-2">
+            <span>{t('agentPanels.selectedCount').replace('{n}', String(selected.size))}</span>
+            <button
+              disabled={isDisabled || busy}
+              onClick={removeSelected}
+              className="border border-red-300 text-red-600 hover:bg-red-50 rounded px-3 py-1 disabled:opacity-40"
+            >
+              {t('agentPanels.removeSelected')}
+            </button>
+          </span>
         )}
       </div>
 
@@ -458,6 +530,20 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         <table className="w-full text-xs">
           <thead className="bg-gray-50">
             <tr>
+              <th className="p-2 w-8">
+                <input
+                  type="checkbox"
+                  aria-label={t('agentPanels.selectAllOnPage')}
+                  disabled={isDisabled || busy || rows.length === 0}
+                  checked={allPageSelected}
+                  // Partial page selection has no checked state of its own; set it
+                  // on the DOM node, which is the only way React exposes it.
+                  ref={(el) => {
+                    if (el) el.indeterminate = somePageSelected && !allPageSelected;
+                  }}
+                  onChange={togglePage}
+                />
+              </th>
               <th className="text-left p-2">{t('agentPanels.urlHeader')}</th>
               <th className="text-left p-2 w-24">{t('agentPanels.sizeHeader')}</th>
               <th className="text-left p-2 w-32">{t('agentPanels.updatedHeader')}</th>
@@ -466,13 +552,22 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           </thead>
           <tbody>
             {loadingList && (
-              <tr><td colSpan={4} className="p-3 text-gray-500">{t('agentPanels.loading')}</td></tr>
+              <tr><td colSpan={5} className="p-3 text-gray-500">{t('agentPanels.loading')}</td></tr>
             )}
             {!loadingList && rows.length === 0 && (
-              <tr><td colSpan={4} className="p-3 text-gray-500">{t('agentPanels.noUrlsIndexed')}</td></tr>
+              <tr><td colSpan={5} className="p-3 text-gray-500">{t('agentPanels.noUrlsIndexed')}</td></tr>
             )}
             {!loadingList && rows.map((row) => (
-              <tr key={row.id} className="border-t align-top">
+              <tr key={row.id} className={`border-t align-top ${selected.has(row.id) ? 'bg-brand-50' : ''}`}>
+                <td className="p-2">
+                  <input
+                    type="checkbox"
+                    aria-label={t('agentPanels.selectRow').replace('{url}', row.url)}
+                    disabled={isDisabled || busy}
+                    checked={selected.has(row.id)}
+                    onChange={() => toggleRow(row.id)}
+                  />
+                </td>
                 <td className="p-2">
                   <div className="font-mono break-all">{row.url}</div>
                   {row.originUrl && row.originUrl !== row.url && (
@@ -504,7 +599,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                       try {
                         await httpDeleteSiteSourceV2Url(appId, row.id);
                         toast.success(t('agentPanels.removed'));
-                        await reloadAfterRowRemoved();
+                        // A row removed on its own must not linger in the selection
+                        // and get re-sent as a NOT_FOUND id on the next bulk delete.
+                        setSelected((prev) => {
+                          if (!prev.has(row.id)) return prev;
+                          const next = new Set(prev);
+                          next.delete(row.id);
+                          return next;
+                        });
+                        await reloadAfterRowsRemoved(1);
                       } catch (e: any) {
                         toast.error(`${t('agentPanels.removeFailedPrefix')} ${e?.response?.data?.error || e.message}`);
                       }

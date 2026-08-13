@@ -864,8 +864,12 @@ export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number;
 // _ids (24-hex ObjectIds), not URL strings. Joi rejects URL strings with a
 // 422 VALIDATION_ERROR, which is why an earlier 'pass row.url' call from
 // AgentPanels silently failed. Use the row.id from listSiteSources.
-export function httpDeleteSiteSourceV2Url(appId: string, siteSourceId: string) {
-  return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { ids: [siteSourceId] } });
+// Accepts one id or many: the endpoint deletes the whole batch in a single
+// call and answers with a { summary, details } breakdown, so a bulk removal
+// does not need to be fanned out into one request per row.
+export function httpDeleteSiteSourceV2Url(appId: string, siteSourceIds: string | string[]) {
+  const ids = Array.isArray(siteSourceIds) ? siteSourceIds : [siteSourceIds];
+  return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { ids } });
 }
 
 export function httpReindexSiteSourceV2(appId: string, urlId: string) {

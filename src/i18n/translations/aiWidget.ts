@@ -261,6 +261,13 @@ export const aiWidget = {
     'agentPanels.confirmRemoveFromIndex': 'Remove "{name}" from the index?',
     'agentPanels.removed': 'Removed',
     'agentPanels.removeFailedPrefix': 'Remove failed:',
+    'agentPanels.selectedCount': '{n} selected',
+    'agentPanels.removeSelected': 'Remove selected',
+    'agentPanels.confirmRemoveSelected':
+      'Remove {n} selected URLs from the index?',
+    'agentPanels.removedSelected': 'Removed {n} URLs',
+    'agentPanels.selectAllOnPage': 'Select all URLs on this page',
+    'agentPanels.selectRow': 'Select {url}',
     'agentPanels.docsIndexDescription':
       'Upload PDFs, DOCX, MD, TXT to index under this agent.',
     'agentPanels.uploadingParsingEmbedding':
@@ -611,6 +618,13 @@ export const aiWidget = {
       'Supprimer « {name} » de l’index ?',
     'agentPanels.removed': 'Supprimé',
     'agentPanels.removeFailedPrefix': 'Échec de la suppression :',
+    'agentPanels.selectedCount': '{n} sélectionnées',
+    'agentPanels.removeSelected': 'Supprimer la sélection',
+    'agentPanels.confirmRemoveSelected':
+      "Supprimer les {n} URL sélectionnées de l'index ?",
+    'agentPanels.removedSelected': '{n} URL supprimées',
+    'agentPanels.selectAllOnPage': 'Sélectionner toutes les URL de cette page',
+    'agentPanels.selectRow': 'Sélectionner {url}',
     'agentPanels.docsIndexDescription':
       'Téléversez des fichiers PDF, DOCX, MD, TXT à indexer pour cet agent.',
     'agentPanels.uploadingParsingEmbedding':
@@ -965,6 +979,13 @@ export const aiWidget = {
     'agentPanels.confirmRemoveFromIndex': '¿Eliminar "{name}" del índice?',
     'agentPanels.removed': 'Eliminado',
     'agentPanels.removeFailedPrefix': 'Error al eliminar:',
+    'agentPanels.selectedCount': '{n} seleccionadas',
+    'agentPanels.removeSelected': 'Eliminar seleccionadas',
+    'agentPanels.confirmRemoveSelected':
+      '¿Eliminar del índice las {n} URL seleccionadas?',
+    'agentPanels.removedSelected': '{n} URL eliminadas',
+    'agentPanels.selectAllOnPage': 'Seleccionar todas las URL de esta página',
+    'agentPanels.selectRow': 'Seleccionar {url}',
     'agentPanels.docsIndexDescription':
       'Sube archivos PDF, DOCX, MD, TXT para indexarlos en este agente.',
     'agentPanels.uploadingParsingEmbedding':
