@@ -22,6 +22,7 @@ import {
   httpUpdateOneUser,
   setSourcesSiteCrawl,
   setSourcesSiteCrawlReindex,
+  alreadyIndexedUrl,
 } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import {
@@ -508,8 +509,8 @@ export default function AppSettings() {
 
     setLoadingTextCrawl(true);
 
-    try {
-      const response = await setSourcesSiteCrawl(appId, url, followLink);
+    const crawlOnce = async (force: boolean) => {
+      const response = await setSourcesSiteCrawl(appId, url, followLink, force);
       setAiBot((prev) => {
         const combined = [
           ...prev.siteUrlsV2,
@@ -521,6 +522,24 @@ export default function AppSettings() {
         return { ...prev, siteUrlsV2: uniqueById };
       });
       toast.success(t('appSettings.toast.siteCrawlSet'));
+    };
+
+    try {
+      try {
+        await crawlOnce(false);
+      } catch (error) {
+        // The URL is already in this app's index. Offer to overwrite it rather
+        // than reporting a failure the operator can do nothing about.
+        const indexedUrl = alreadyIndexedUrl(error, url);
+        if (indexedUrl === null) throw error;
+        if (
+          !confirm(
+            t('appSettings.confirmRecrawlIndexed').replace('{url}', indexedUrl)
+          )
+        )
+          return;
+        await crawlOnce(true);
+      }
     } catch (error) {
       console.error('Error setting site crawl:', error);
       toast.error(t('appSettings.toast.siteCrawlFailed'));

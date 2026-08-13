@@ -241,6 +241,8 @@ export const aiWidget = {
     'agentPanels.crawl': 'Crawl',
     'agentPanels.crawlQueued': 'Crawl queued',
     'agentPanels.crawlFailedPrefix': 'Crawl failed:',
+    'agentPanels.confirmRecrawlIndexed':
+      '{url} is already indexed. Crawl it again and replace the stored copy?',
     'agentPanels.indexedBytesPrefix': 'Indexed bytes:',
     'agentPanels.indexedUrlsSuffixOne': 'indexed URL in this app',
     'agentPanels.indexedUrlsSuffixOther': 'indexed URLs in this app',
@@ -586,6 +588,8 @@ export const aiWidget = {
     'agentPanels.crawl': 'Explorer',
     'agentPanels.crawlQueued': "Exploration mise en file d'attente",
     'agentPanels.crawlFailedPrefix': "Échec de l'exploration :",
+    'agentPanels.confirmRecrawlIndexed':
+      '{url} est déjà indexée. Explorer à nouveau et remplacer la copie enregistrée ?',
     'agentPanels.indexedBytesPrefix': 'Octets indexés :',
     'agentPanels.indexedUrlsSuffixOne': 'URL indexée dans cette application',
     'agentPanels.indexedUrlsSuffixOther':
@@ -939,6 +943,8 @@ export const aiWidget = {
     'agentPanels.crawl': 'Rastrear',
     'agentPanels.crawlQueued': 'Rastreo en cola',
     'agentPanels.crawlFailedPrefix': 'Error al rastrear:',
+    'agentPanels.confirmRecrawlIndexed':
+      '{url} ya está indexada. ¿Rastrearla de nuevo y reemplazar la copia guardada?',
     'agentPanels.indexedBytesPrefix': 'Bytes indexados:',
     'agentPanels.indexedUrlsSuffixOne': 'URL indexada en esta aplicación',
     'agentPanels.indexedUrlsSuffixOther':
