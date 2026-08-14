@@ -30,8 +30,10 @@ import {
   httpListSiteSourcesV2,
   httpPostFile,
   httpReindexSiteSourceV2,
+  httpGetSiteCrawlJob,
   httpTestMessageAgentBotInstance,
 } from '../../../http';
+import { useSiteCrawlEvents, SiteCrawlEvent } from '../../../hooks/useSiteCrawlEvents';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
@@ -273,6 +275,35 @@ type SiteSourceRow = {
 // panel scrollable without pagination controls dominating a small index.
 const SITE_SOURCES_PAGE_SIZE = 25;
 
+// Progress events carry the rows they stored, so the table is updated from the
+// event itself and a running crawl needs no refetch at all. This debounce is
+// only for the cases where the event could not carry them: a delivery too large
+// for one payload (rowsTruncated), or a crawl finishing, where one quiet
+// reconcile is cheaper than trusting the merge to have been complete.
+const LIVE_RELOAD_DEBOUNCE_MS = 1200;
+
+// Fallback poll for jobs we are showing as running. Centrifugo delivery is
+// unacknowledged: if the terminal event is missed (tab was reloading, socket was
+// reconnecting) the progress line would otherwise sit there forever.
+const JOB_RECONCILE_MS = 15000;
+
+// A crawl or reindex this panel is currently watching.
+interface LiveCrawlJob {
+  url: string;
+  kind: 'crawl' | 'reindex';
+  savedPages: number;
+}
+
+// Did a refetch actually bring anything new? Compares what the table renders -
+// a crawl only ever adds rows or rewrites a page's size, so id + size + the
+// update stamp is the whole visible surface.
+function sameSiteSourceRows(a: SiteSourceRow[], b: SiteSourceRow[]) {
+  if (a.length !== b.length) return false;
+  return a.every((row, i) =>
+    row.id === b[i].id && row.mdByteSize === b[i].mdByteSize && row.updatedAt === b[i].updatedAt
+  );
+}
+
 // The API's error shape, narrowed once. Toasts across this file otherwise reach
 // into `e.response.data.error` through an `any`.
 function apiErrorMessage(e: unknown): string {
@@ -333,6 +364,10 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [selected, setSelected] = useState<Set<string>>(new Set());
   // Row whose stored markdown is open in the viewer, if any.
   const [viewing, setViewing] = useState<SiteSourceRow | null>(null);
+  // Crawls/reindexes still running, keyed by jobId. Populated when this panel
+  // starts one, and by events - which also arrive for a job started in another
+  // tab, since the backend publishes to the user's personal channel.
+  const [liveJobs, setLiveJobs] = useState<Record<string, LiveCrawlJob>>({});
 
   // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
   // the user's first owned app so the UI is functional out of the box.
@@ -347,37 +382,223 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
 
   // Takes the offset explicitly: callers that move between pages or drop the last row
   // of a page need the fetch to use the new offset without waiting for a re-render.
-  const loadList = async (nextOffset = offset) => {
+  //
+  // `silent` is for the refetches nobody asked for - the ones a running crawl
+  // triggers as its pages land. Those must not look like the table reloading:
+  // no "Loading..." placeholder, no error toast, and the table is left alone if
+  // the server came back with what is already on screen.
+  const loadList = async (nextOffset = offset, opts: { silent?: boolean } = {}) => {
     if (!appId) {
       setRows([]);
       setTotal(0);
       return;
     }
-    setLoadingList(true);
+    if (!opts.silent) setLoadingList(true);
     try {
       const r = await httpListSiteSourcesV2(appId, { limit: SITE_SOURCES_PAGE_SIZE, offset: nextOffset });
       // Endpoint returns { result: SiteSourceRow[], pagination: { total, limit, offset, hasMore } } in v2.
       const items: SiteSourceRow[] = r.data?.result || r.data?.items || [];
-      setRows(items);
+      // Handing React a fresh array on every poll repaints every row, which is
+      // what a once-a-second background refetch would otherwise look like.
+      setRows((prev) => (sameSiteSourceRows(prev, items) ? prev : items));
       // Older backends have no pagination block; total then degrades to the page length,
       // which still renders a sane (if truncated) count rather than 0.
       setTotal(Number(r.data?.pagination?.total ?? items.length));
       setOffset(nextOffset);
     } catch (e: any) {
+      // A background refetch that fails changes nothing on screen. The operator
+      // did not ask for it, and blanking a list they are reading (or toasting
+      // once a second for a blip) is worse than showing slightly stale rows.
+      if (opts.silent) return;
       toast.error(`${t('agentPanels.failedToLoadUrlsPrefix')} ${e?.response?.data?.error || e.message}`);
       setRows([]);
       setTotal(0);
     } finally {
-      setLoadingList(false);
+      if (!opts.silent) setLoadingList(false);
     }
   };
   // Switching app scope invalidates the current page position, and a selection
-  // of ids from the previous app must not survive into the new one.
+  // of ids from the previous app must not survive into the new one. Live jobs go
+  // too: they belong to the app that was scoped when they started.
   useEffect(() => {
     setSelected(new Set());
+    setLiveJobs({});
     loadList(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId]);
+
+  // Live progress ------------------------------------------------------------
+  //
+  // Pages are stored in batches while a crawl runs, and each event carries the
+  // rows that landed - so the table is updated from the event itself. No poll,
+  // no refetch, and no "Loading..." replacing a list the operator is reading.
+  const reloadTimer = useRef<number | null>(null);
+  // Refreshed on every render so the debounced reload always uses the page the
+  // operator is looking at now, not the one that was current when it was queued.
+  const reloadCurrentPage = useRef(() => {});
+  reloadCurrentPage.current = () => { void loadList(offset, { silent: true }); };
+  // When an event last arrived. While they are flowing there is nothing for the
+  // reconcile poll to catch up on, so it stays out of the way.
+  const lastEventAt = useRef(0);
+
+  const scheduleReload = () => {
+    if (reloadTimer.current !== null) return;
+    reloadTimer.current = window.setTimeout(() => {
+      reloadTimer.current = null;
+      reloadCurrentPage.current();
+    }, LIVE_RELOAD_DEBOUNCE_MS);
+  };
+
+  useEffect(() => () => {
+    if (reloadTimer.current !== null) window.clearTimeout(reloadTimer.current);
+  }, []);
+
+  // Ids the table already holds. Kept alongside `rows` rather than derived from
+  // it inside the merge: two events can land before React has re-rendered, and
+  // a stale closure would count the same row as new twice.
+  const knownRowIds = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    knownRowIds.current = new Set(rows.map((row) => row.id));
+  }, [rows]);
+
+  // Put the rows an event delivered into the table.
+  //
+  // The list is newest-first, so fresh rows belong at the top of page 0. On any
+  // other page they belong to a page the operator is not looking at, and only
+  // the count changes. A row that is already on screen was re-crawled: its size
+  // and timestamp are replaced in place, which is what a reindex looks like.
+  const mergeEventRows = (incoming: SiteSourceRow[]) => {
+    if (!incoming?.length) return;
+    const fresh = incoming.filter((row) => row.id && !knownRowIds.current.has(row.id));
+    const updates = new Map(incoming.filter((row) => knownRowIds.current.has(row.id)).map((row) => [row.id, row]));
+    fresh.forEach((row) => knownRowIds.current.add(row.id));
+
+    if (updates.size > 0) {
+      setRows((prev) => prev.map((row) => (updates.has(row.id) ? { ...row, ...updates.get(row.id)! } : row)));
+    }
+    if (fresh.length > 0) {
+      setTotal((prev) => prev + fresh.length);
+      // Only page 0 shows the newest rows. Trimming to the page size keeps the
+      // table the size it would be after a refetch, so paging stays consistent.
+      if (offset === 0) {
+        setRows((prev) => [...fresh, ...prev].slice(0, SITE_SOURCES_PAGE_SIZE));
+      }
+    }
+  };
+
+  const forgetJob = (jobId: string) =>
+    setLiveJobs((prev) => {
+      if (!prev[jobId]) return prev;
+      const next = { ...prev };
+      delete next[jobId];
+      return next;
+    });
+
+  // Shared by the event path and the reconcile poll, so a job that finishes
+  // while the socket is down is reported exactly the same way.
+  const finishJob = (
+    jobId: string,
+    outcome: { kind: 'crawl' | 'reindex'; url: string; savedPages: number; failed: boolean; error?: string | null; truncated?: boolean; truncatedReason?: string | null; reconcile?: boolean }
+  ) => {
+    forgetJob(jobId);
+    if (outcome.failed) {
+      toast.error(
+        t(outcome.kind === 'reindex' ? 'agentPanels.reindexFailedEvent' : 'agentPanels.crawlFailedEvent')
+          .replace('{url}', outcome.url)
+          .replace('{error}', outcome.error || '')
+      );
+    } else {
+      toast.success(
+        outcome.kind === 'reindex'
+          ? t('agentPanels.reindexDone').replace('{url}', outcome.url)
+          : t('agentPanels.crawlDone')
+              .replace('{n}', String(outcome.savedPages))
+              .replace('{url}', outcome.url)
+      );
+      if (outcome.truncated) {
+        toast.warning(t('agentPanels.crawlTruncated').replace('{reason}', outcome.truncatedReason || ''));
+      }
+    }
+    // Reconcile once at the end. The rows are already on screen, merged from the
+    // events, so this is silent and normally a no-op - it exists to correct the
+    // count and pick up anything an event could not carry (or that arrived while
+    // the socket was down and the poll below found instead).
+    if (outcome.reconcile !== false) scheduleReload();
+  };
+
+  useSiteCrawlEvents({
+    appId,
+    onEvent: (ev: SiteCrawlEvent) => {
+      lastEventAt.current = Date.now();
+      // The rows the event brought go straight into the table - this is what
+      // replaces refetching the list while a crawl runs.
+      mergeEventRows(ev.rows || []);
+      // ...unless there were more than one payload can carry, in which case the
+      // table is now missing rows and only a fetch can fill them in.
+      if (ev.rowsTruncated) scheduleReload();
+
+      if (ev.type === 'site_crawl_progress') {
+        setLiveJobs((prev) => ({
+          ...prev,
+          [ev.jobId]: { url: ev.url, kind: ev.kind, savedPages: ev.savedPages },
+        }));
+        return;
+      }
+      finishJob(ev.jobId, {
+        kind: ev.kind,
+        url: ev.url,
+        savedPages: ev.savedPages,
+        failed: ev.type === 'site_crawl_failed',
+        error: ev.error,
+        truncated: ev.truncated,
+        truncatedReason: ev.truncatedReason,
+      });
+    },
+  });
+
+  // The safety net behind those events. Only runs while something is being
+  // watched, and only reads job rows - the authoritative copy of the state the
+  // events describe.
+  const liveJobIds = Object.keys(liveJobs);
+  useEffect(() => {
+    if (!appId || liveJobIds.length === 0) return;
+    const timer = window.setInterval(async () => {
+      // Events are arriving, so the panel is already up to date - polling on top
+      // of them is pure noise. This only earns its keep when the socket has gone
+      // quiet and a terminal event may have been missed.
+      if (Date.now() - lastEventAt.current < JOB_RECONCILE_MS) return;
+      for (const jobId of Object.keys(liveJobs)) {
+        try {
+          const r = await httpGetSiteCrawlJob(appId, jobId);
+          const job = r.data?.result;
+          if (!job) continue;
+          if (job.status === 'completed' || job.status === 'failed') {
+            finishJob(jobId, {
+              kind: job.kind === 'reindex' ? 'reindex' : 'crawl',
+              url: job.url,
+              savedPages: Number(job.savedPages) || 0,
+              failed: job.status === 'failed',
+              error: job.error,
+              truncated: Boolean(job.truncated),
+              truncatedReason: job.truncatedReason,
+            });
+          } else if (Number(job.savedPages) > (liveJobs[jobId]?.savedPages || 0)) {
+            // Progress events can be missed too, not just the terminal one.
+            setLiveJobs((prev) => (prev[jobId]
+              ? { ...prev, [jobId]: { ...prev[jobId], savedPages: Number(job.savedPages) || 0 } }
+              : prev));
+            scheduleReload();
+          }
+        } catch {
+          // A job row that 404s (purged, or belongs to another app) is not worth
+          // reporting - stop watching it.
+          forgetJob(jobId);
+        }
+      }
+    }, JOB_RECONCILE_MS);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId, liveJobIds.join(',')]);
 
   // Deleting rows can empty the current page (or every page after it), which would
   // otherwise strand the user on a blank view. Clamp to the last offset that still
@@ -432,14 +653,21 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   };
 
   const crawlOnce = async (force: boolean) => {
-    await httpAgentSiteCrawl(appId, agent.id, url, followLink, force);
+    const r = await httpAgentSiteCrawl(appId, agent.id, url, followLink, force);
     toast.success(t('agentPanels.crawlQueued'));
+    // Watch it from the moment it is queued rather than waiting for the first
+    // event, so a crawl that is still sitting in the crawler's queue is visible
+    // as something in flight instead of nothing at all.
+    const jobId = r.data?.jobId;
+    if (jobId) {
+      setLiveJobs((prev) => ({ ...prev, [jobId]: { url: r.data?.url || url, kind: 'crawl', savedPages: 0 } }));
+    }
     setUrl('');
-    // The crawler answers as soon as the job is queued, so this reload will not
-    // show the new rows yet - they land once the crawl finishes and calls back.
-    // Still worth doing: it resets paging to where those rows will appear (new
-    // rows sort newest-first) and the toast tells the operator to come back.
-    await loadList(0);
+    // Nothing has been fetched yet, so this reload shows no new rows. Still worth
+    // doing: it resets paging to where the rows will appear as they land, since
+    // the list sorts newest-first. Silent for the same reason - there is nothing
+    // to announce, and the crawl's own progress line is already on screen.
+    await loadList(0, { silent: true });
   };
 
   const handleCrawl = async () => {
@@ -502,6 +730,27 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           {busy ? t('agentPanels.crawling') : t('agentPanels.crawl')}
         </button>
       </div>
+
+      {/* One line per crawl in flight. Present only while something is running,
+          so the panel looks exactly as it did when nothing is. */}
+      {liveJobIds.length > 0 && (
+        <div className="space-y-1">
+          {liveJobIds.map((jobId) => {
+            const job = liveJobs[jobId];
+            return (
+              <div key={jobId} className="flex items-center gap-2 text-xs text-brand-600 bg-brand-50 border border-brand-100 rounded px-2 py-1">
+                <span className="inline-block h-2 w-2 rounded-full bg-brand-500 animate-pulse" aria-hidden />
+                <span className="font-mono break-all">{job.url}</span>
+                <span className="text-gray-500 whitespace-nowrap">
+                  {job.kind === 'reindex'
+                    ? t('agentPanels.reindexRunning')
+                    : t('agentPanels.crawlRunning').replace('{n}', String(job.savedPages))}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-2 text-xs text-gray-500 min-h-[28px]">
         <span>
@@ -592,8 +841,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                     disabled={isDisabled || busy}
                     onClick={async () => {
                       try {
-                        await httpReindexSiteSourceV2(appId, row.id);
+                        const r = await httpReindexSiteSourceV2(appId, row.id);
                         toast.success(t('agentPanels.reindexQueued'));
+                        // Queued like a crawl - the refreshed copy lands on the
+                        // callback, and the row's size/updated columns only move
+                        // once it does.
+                        const jobId = r.data?.jobId;
+                        if (jobId) {
+                          setLiveJobs((prev) => ({ ...prev, [jobId]: { url: row.url, kind: 'reindex', savedPages: 0 } }));
+                        }
                         await loadList(offset);
                       } catch (e: any) {
                         toast.error(`${t('agentPanels.reindexFailedPrefix')} ${e?.response?.data?.error || e.message}`);

@@ -857,8 +857,22 @@ export function httpDeleteSiteSourceV2Url(appId: string, siteSourceIds: string |
   return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { ids } });
 }
 
+// Queues a re-crawl of one already-indexed row. Answers { status: 'queued', jobId }
+// the same way a fresh crawl does - the stored copy is overwritten later, when the
+// crawler calls back, so the row's size and updatedAt only move then.
 export function httpReindexSiteSourceV2(appId: string, urlId: string) {
   return httpV2.post(`/apps/${appId}/sources/site-crawl-reindex`, { urlId });
+}
+
+// Status of a queued crawl or reindex: { status, kind, url, savedPages, totalBytes,
+// truncated, error, startedAt, finishedAt }.
+//
+// The live view of a crawl comes from Centrifugo events (useSiteCrawlEvents), but
+// those are unacknowledged and unreplayable - a client that reloaded or briefly
+// lost the socket never learns the crawl ended. This is the reconcilable copy of
+// the same state; poll it for any job the UI still believes is running.
+export function httpGetSiteCrawlJob(appId: string, jobId: string) {
+  return httpV2.get(`/apps/${appId}/sources/site-crawl-jobs/${jobId}`);
 }
 
 export function httpGetBotInstance(id: string) {
