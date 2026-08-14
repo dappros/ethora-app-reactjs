@@ -32,11 +32,7 @@ interface Props {
   // can preview what's available, but interactive elements are disabled and a
   // banner explains the state.
   aiFeatureDisabled?: boolean;
-  loadingTextCrawl?: boolean;
   handleRagChange: () => void;
-  handleSiteCrawl: (url: string, followLink: boolean) => void;
-  handleCrawlReindex: (id: string) => void;
-  deleteSiteCrawl: (url: string[]) => void;
 }
 
 // Inject the production widget bundle into the admin page so the operator

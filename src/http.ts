@@ -724,39 +724,6 @@ export function alreadyIndexedUrl(error: unknown, fallbackUrl: string): string |
   return res.data?.details?.existingUrl || fallbackUrl;
 }
 
-// `force` re-crawls a URL that is already indexed, overwriting the stored copy.
-// Without it the backend answers 409 SITE_SOURCE_ALREADY_INDEXED rather than
-// adding a second row for the same page.
-export function setSourcesSiteCrawl(appId: string, url: string, followLink: boolean, force = false) {
-  return http.post(`/sources/site-crawl/${appId}`, {
-    url,
-    followLink,
-    force
-  });
-}
-
-export function setSourcesSiteCrawlReindex(appId: string, urlId: string) {
-  return http.post(`/sources/site-crawl-reindex/${appId}`, {
-    urlId
-  });
-}
-
-export function deleteSourcesSiteCrawl(appId: string, url: string) {
-  return http.delete(`/sources/site-crawl/url/${appId}`, {
-    data: {
-      url
-    }
-  });
-}
-
-export function deleteSourcesSiteCrawlV2(appId: string, urls: string[]) {
-  return http.delete(`/sources/site-crawl-v2/url/${appId}`, {
-    data: {
-      urls
-    }
-  });
-}
-
 export function setSourcesSiteFiles(appId: string, files: File[]) {
   const formData = new FormData();
   files.forEach((file) => {
