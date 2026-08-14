@@ -213,7 +213,7 @@ export const appSettings2 = {
     'appSettingsWebApp.additionalSettingsPrefix': 'Use',
     'appSettingsWebApp.aiWidgetLinkText': 'AI Widget',
     'appSettingsWebApp.additionalSettingsSuffix':
-      'tab for additional settings such as prompt, URL crawling and documents upload.',
+      'tab for additional settings such as prompt and documents upload.',
 
     // --- WebMobileApp.tsx ---
     'appSettingsWebMobileApp.webAppHeading': 'Web app',
@@ -504,7 +504,7 @@ export const appSettings2 = {
     'appSettingsWebApp.additionalSettingsPrefix': 'Utilisez le',
     'appSettingsWebApp.aiWidgetLinkText': 'Widget IA',
     'appSettingsWebApp.additionalSettingsSuffix':
-      'pour les paramètres supplémentaires tels que le prompt, l’exploration d’URL et l’envoi de documents.',
+      'pour les paramètres supplémentaires tels que le prompt et l’envoi de documents.',
 
     // --- WebMobileApp.tsx ---
     'appSettingsWebMobileApp.webAppHeading': 'Application web',
@@ -801,7 +801,7 @@ export const appSettings2 = {
     'appSettingsWebApp.additionalSettingsPrefix': 'Usa la pestaña',
     'appSettingsWebApp.aiWidgetLinkText': 'Widget de IA',
     'appSettingsWebApp.additionalSettingsSuffix':
-      'para configuración adicional como el prompt, el rastreo de URL y la carga de documentos.',
+      'para configuración adicional como el prompt y la carga de documentos.',
 
     // --- WebMobileApp.tsx ---
     'appSettingsWebMobileApp.webAppHeading': 'Aplicación web',

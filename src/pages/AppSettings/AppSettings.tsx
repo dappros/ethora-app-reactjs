@@ -16,21 +16,9 @@ import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import TabApp from '../../components/TabApp';
-import {
-  deleteApp,
-  deleteSourcesSiteCrawlV2,
-  httpUpdateOneUser,
-  setSourcesSiteCrawl,
-  setSourcesSiteCrawlReindex,
-  alreadyIndexedUrl,
-} from '../../http';
+import { deleteApp, httpUpdateOneUser } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-import {
-  ModelAIbot,
-  ModelApp,
-  ModelAppDefaulRooom,
-  SiteLinks,
-} from '../../models';
+import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIWidget } from './AIWidget';
 import { Api } from './Api';
@@ -152,7 +140,6 @@ export default function AppSettings() {
   };
 
   const [loading, setLoading] = useState(false);
-  const [loadingTextCrawl, setLoadingTextCrawl] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
   const [initialState, setInitialState] = useState({});
@@ -474,118 +461,6 @@ export default function AppSettings() {
     }
   };
 
-  const handleCrawlReindex = async (id: string) => {
-    if (!appId || !id || !app) return;
-
-    setLoading(true);
-
-    try {
-      const response = await setSourcesSiteCrawlReindex(appId, id);
-      const data = response.data.result as SiteLinks;
-
-      setAiBot((prev) => ({
-        ...prev,
-        siteUrlsV2: prev.siteUrlsV2.map((link) =>
-          link.id === data.id ? data : link
-        ),
-      }));
-
-      toast.success(
-        t('appSettings.toast.linkReindexed').replace(
-          '{url}',
-          aiBot.siteUrlsV2.filter((link) => link.id === data.id)[0].url
-        )
-      );
-    } catch (error) {
-      console.error('Error reindex site crawl:', error);
-      toast.error(t('appSettings.toast.reindexFailed'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSiteCrawl = async (url: string, followLink: boolean) => {
-    if (!appId || !url) return;
-
-    setLoadingTextCrawl(true);
-
-    const crawlOnce = async (force: boolean) => {
-      const response = await setSourcesSiteCrawl(appId, url, followLink, force);
-      // resultV2 is empty now that the crawler queues the job and answers before
-      // fetching anything - the pages arrive later via its callback. Kept as a
-      // merge rather than dropped so the reindex path (which does still answer
-      // with rows) and any future synchronous response keep working.
-      setAiBot((prev) => {
-        const combined = [
-          ...prev.siteUrlsV2,
-          ...((response.data.resultV2 ?? []) as SiteLinks[]),
-        ];
-        const uniqueById: SiteLinks[] = Array.from(
-          new Map(combined.map((item) => [item.id, item])).values()
-        );
-        return { ...prev, siteUrlsV2: uniqueById };
-      });
-      toast.success(t('appSettings.toast.siteCrawlSet'));
-    };
-
-    try {
-      try {
-        await crawlOnce(false);
-      } catch (error) {
-        // The URL is already in this app's index. Offer to overwrite it rather
-        // than reporting a failure the operator can do nothing about.
-        const indexedUrl = alreadyIndexedUrl(error, url);
-        if (indexedUrl === null) throw error;
-        if (
-          !confirm(
-            t('appSettings.confirmRecrawlIndexed').replace('{url}', indexedUrl)
-          )
-        )
-          return;
-        await crawlOnce(true);
-      }
-    } catch (error) {
-      console.error('Error setting site crawl:', error);
-      toast.error(t('appSettings.toast.siteCrawlFailed'));
-    } finally {
-      setLoadingTextCrawl(false);
-    }
-  };
-
-  const deleteSiteCrawl = async (urls: string[]) => {
-    if (!appId || !urls || urls.length === 0) return;
-
-    setLoading(true);
-
-    try {
-      const deletedIds: string[] = [];
-
-      const response = await deleteSourcesSiteCrawlV2(appId, urls);
-
-      if (response.data.result.acknowledged) {
-        deletedIds.push(...urls);
-      }
-
-      if (deletedIds.length > 0) {
-        setAiBot((prev) => {
-          const updatedLinks = prev.siteUrlsV2.filter(
-            (item) => !deletedIds.includes(item.id)
-          );
-          return { ...prev, siteUrlsV2: updatedLinks };
-        });
-
-        toast.success(t('appSettings.toast.linksDeleted'));
-      } else {
-        toast.warning(t('appSettings.toast.noLinksDeleted'));
-      }
-    } catch (error) {
-      console.error('Error during bulk deletion:', error);
-      toast.error(t('appSettings.toast.deleteLinksError'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const onExternalClick = () => {
     if (app) {
       window.open(
@@ -801,10 +676,6 @@ export default function AppSettings() {
               isDisabled={app?.creatorId !== currentUser?._id}
               aiFeatureDisabled={!aiEnabled}
               handleRagChange={handleRagChange}
-              handleSiteCrawl={handleSiteCrawl}
-              deleteSiteCrawl={deleteSiteCrawl}
-              loadingTextCrawl={loadingTextCrawl}
-              handleCrawlReindex={handleCrawlReindex}
             />
           </TabPanel>
 

@@ -3,7 +3,7 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // Second batch of modal dictionaries (see index.ts for how this merges into
 // the app-wide translations table). Namespaced per source file: NewAppModal,
 // AvatarModalCropper, CreateDocumentModal, NewUserModal,
-// ResetPasswordUserModal, SourcesSiteCrawlModal, ConfirmModal.
+// ResetPasswordUserModal, ConfirmModal.
 export const modalsB = {
   en: {
     'newAppModal.creatingTitle': 'Application creation in progress!',
@@ -39,11 +39,6 @@ export const modalsB = {
     'resetPasswordUserModal.title': 'Reset password',
     'resetPasswordUserModal.cancelButton': 'Cancel',
     'resetPasswordUserModal.continueButton': 'Continue',
-
-    'sourcesSiteCrawlModal.title': 'Delete Site Crawl',
-    'sourcesSiteCrawlModal.deleteLabel': 'Delete:',
-    'sourcesSiteCrawlModal.cancelButton': 'Cancel',
-    'sourcesSiteCrawlModal.deleteButton': 'Delete',
 
     'confirmModal.cancelLabelDefault': 'Cancel',
     'confirmModal.closeAriaLabel': 'Close',
@@ -86,11 +81,6 @@ export const modalsB = {
     'resetPasswordUserModal.cancelButton': 'Annuler',
     'resetPasswordUserModal.continueButton': 'Continuer',
 
-    'sourcesSiteCrawlModal.title': "Supprimer l'exploration du site",
-    'sourcesSiteCrawlModal.deleteLabel': 'Supprimer :',
-    'sourcesSiteCrawlModal.cancelButton': 'Annuler',
-    'sourcesSiteCrawlModal.deleteButton': 'Supprimer',
-
     'confirmModal.cancelLabelDefault': 'Annuler',
     'confirmModal.closeAriaLabel': 'Fermer',
     'confirmModal.workingLabel': 'Traitement en cours...',
@@ -130,11 +120,6 @@ export const modalsB = {
     'resetPasswordUserModal.title': 'Restablecer contraseña',
     'resetPasswordUserModal.cancelButton': 'Cancelar',
     'resetPasswordUserModal.continueButton': 'Continuar',
-
-    'sourcesSiteCrawlModal.title': 'Eliminar rastreo del sitio',
-    'sourcesSiteCrawlModal.deleteLabel': 'Eliminar:',
-    'sourcesSiteCrawlModal.cancelButton': 'Cancelar',
-    'sourcesSiteCrawlModal.deleteButton': 'Eliminar',
 
     'confirmModal.cancelLabelDefault': 'Cancelar',
     'confirmModal.closeAriaLabel': 'Cerrar',

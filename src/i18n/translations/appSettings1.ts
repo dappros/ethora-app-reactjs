@@ -34,17 +34,6 @@ export const appSettings1 = {
     'appSettings.section.system': 'System',
     'appSettings.toast.botNameTooShort':
       'The AI bot name must be at least 3 characters long',
-    'appSettings.toast.linkReindexed': 'Link {url} successfully reindexed',
-    'appSettings.toast.reindexFailed': 'Failed to reindex site crawl',
-    'appSettings.toast.siteCrawlSet':
-      'Crawl started. Indexed pages appear in the list once it finishes - reopen this tab in a minute.',
-    'appSettings.toast.siteCrawlFailed': 'Failed to set site crawl',
-    'appSettings.confirmRecrawlIndexed':
-      '{url} is already indexed. Crawl it again and replace the stored copy?',
-    'appSettings.toast.linksDeleted': 'Selected links successfully deleted',
-    'appSettings.toast.noLinksDeleted': 'None of the links could be deleted.',
-    'appSettings.toast.deleteLinksError':
-      'An error occurred while deleting links',
     'appSettings.toast.settingsApplied': 'Settings applied successfully!',
     'appSettings.toast.appDeleted':
       'You have successfully deleted your application',
@@ -231,22 +220,6 @@ export const appSettings1 = {
     'appSettings.section.system': 'Système',
     'appSettings.toast.botNameTooShort':
       'Le nom du bot IA doit comporter au moins 3 caractères',
-    'appSettings.toast.linkReindexed':
-      'Le lien {url} a été réindexé avec succès',
-    'appSettings.toast.reindexFailed':
-      'Échec de la réindexation du site',
-    'appSettings.toast.siteCrawlSet':
-      "Exploration lancée. Les pages indexées apparaîtront dans la liste une fois terminée - rouvrez cet onglet dans une minute.",
-    'appSettings.toast.siteCrawlFailed':
-      "Échec de la configuration de l'exploration du site",
-    'appSettings.confirmRecrawlIndexed':
-      '{url} est déjà indexée. Explorer à nouveau et remplacer la copie enregistrée ?',
-    'appSettings.toast.linksDeleted':
-      'Liens sélectionnés supprimés avec succès',
-    'appSettings.toast.noLinksDeleted':
-      "Aucun des liens n'a pu être supprimé.",
-    'appSettings.toast.deleteLinksError':
-      'Une erreur est survenue lors de la suppression des liens',
     'appSettings.toast.settingsApplied':
       'Paramètres appliqués avec succès !',
     'appSettings.toast.appDeleted':
@@ -454,22 +427,6 @@ export const appSettings1 = {
     'appSettings.section.system': 'Sistema',
     'appSettings.toast.botNameTooShort':
       'El nombre del bot de IA debe tener al menos 3 caracteres',
-    'appSettings.toast.linkReindexed':
-      'El enlace {url} se reindexó correctamente',
-    'appSettings.toast.reindexFailed':
-      'No se pudo reindexar el rastreo del sitio',
-    'appSettings.toast.siteCrawlSet':
-      'Rastreo iniciado. Las páginas indexadas aparecerán en la lista cuando termine: vuelve a abrir esta pestaña en un minuto.',
-    'appSettings.toast.siteCrawlFailed':
-      'No se pudo configurar el rastreo del sitio',
-    'appSettings.confirmRecrawlIndexed':
-      '{url} ya está indexada. ¿Rastrearla de nuevo y reemplazar la copia guardada?',
-    'appSettings.toast.linksDeleted':
-      'Los enlaces seleccionados se eliminaron correctamente',
-    'appSettings.toast.noLinksDeleted':
-      'No se pudo eliminar ninguno de los enlaces.',
-    'appSettings.toast.deleteLinksError':
-      'Se produjo un error al eliminar los enlaces',
     'appSettings.toast.settingsApplied':
       '¡Configuración aplicada correctamente!',
     'appSettings.toast.appDeleted':

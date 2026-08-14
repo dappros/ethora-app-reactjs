@@ -63,12 +63,6 @@ export const aiWidget = {
     'aiWidgetRag.paragraph3Suffix':
       'without being limited by the prompt context window size.',
 
-    // TabAIWidget.tsx
-    'aiWidgetTabs.code': 'Code',
-    'aiWidgetTabs.prompt': 'Prompt',
-    'aiWidgetTabs.addWebsites': 'Add websites',
-    'aiWidgetTabs.addDocuments': 'Add documents',
-
     // TabAIWidget/TabAIWidgetCode.tsx
     'aiWidgetCode.title': 'Code',
     'aiWidgetCode.description':
@@ -107,31 +101,6 @@ export const aiWidget = {
     'aiWidgetPrompt.description':
       'Use to provide instructions on how the bot should behave. You may also copy&paste limited data on your specific business context the bot should be aware of.',
     'aiWidgetPrompt.placeholder': 'Enter prompt instructions here...',
-
-    // TabAIWidget/TabAIWidgetPromptWebsite.tsx
-    'aiWidgetWebsite.titlePrefix': 'Add Website (',
-    'aiWidgetWebsite.ragFeature': 'RAG feature',
-    'aiWidgetWebsite.description':
-      'Provide your website URL(s) in order for the system to ingest data from there.',
-    'aiWidgetWebsite.indexingProgress':
-      'Indexing in progress, please wait or come back later...',
-    'aiWidgetWebsite.followLinksPrefix':
-      'Links will be followed (same domain only). Use this to index the',
-    'aiWidgetWebsite.followLinksBold': 'whole website',
-    'aiWidgetWebsite.noFollowLinksPrefix':
-      'Links will not be followed. Use this to index',
-    'aiWidgetWebsite.noFollowLinksBold': 'one specific page',
-    'aiWidgetWebsite.noFollowLinksSuffix': 'only',
-
-    // TabAIWidget/TabAIWidgetPromptWebsite/LinksTable.tsx
-    'aiWidgetLinksTable.pageUrl': 'Page Url',
-    'aiWidgetLinksTable.totalLabel': 'total:',
-    'aiWidgetLinksTable.sizeHeader': 'Size (Mb)',
-    'aiWidgetLinksTable.mbUnit': 'Mb',
-    'aiWidgetLinksTable.preview': 'Preview',
-    'aiWidgetLinksTable.reindex': 'Reindex',
-    'aiWidgetLinksTable.deleteChosenLinks': 'Delete chosen links',
-    'aiWidgetLinksTable.markdownPreview': 'Markdown Preview',
 
     // WidgetConversationsPanel.tsx
     'aiWidgetConversations.heading': 'Widget conversations',
@@ -417,12 +386,6 @@ export const aiWidget = {
     'aiWidgetRag.paragraph3Suffix':
       'sans être limité par la taille de la fenêtre de contexte du prompt.',
 
-    // TabAIWidget.tsx
-    'aiWidgetTabs.code': 'Code',
-    'aiWidgetTabs.prompt': 'Prompt',
-    'aiWidgetTabs.addWebsites': 'Ajouter des sites web',
-    'aiWidgetTabs.addDocuments': 'Ajouter des documents',
-
     // TabAIWidget/TabAIWidgetCode.tsx
     'aiWidgetCode.title': 'Code',
     'aiWidgetCode.description':
@@ -463,31 +426,6 @@ export const aiWidget = {
     'aiWidgetPrompt.description':
       'Utilisez ce champ pour indiquer comment le bot doit se comporter. Vous pouvez également copier-coller des données limitées sur le contexte spécifique de votre activité dont le bot doit avoir connaissance.',
     'aiWidgetPrompt.placeholder': 'Saisissez les instructions du prompt ici...',
-
-    // TabAIWidget/TabAIWidgetPromptWebsite.tsx
-    'aiWidgetWebsite.titlePrefix': 'Ajouter un site web (',
-    'aiWidgetWebsite.ragFeature': 'fonctionnalité RAG',
-    'aiWidgetWebsite.description':
-      "Indiquez la ou les URL de votre site web afin que le système en extraie les données.",
-    'aiWidgetWebsite.indexingProgress':
-      'Indexation en cours, veuillez patienter ou revenir plus tard...',
-    'aiWidgetWebsite.followLinksPrefix':
-      'Les liens seront suivis (même domaine uniquement). Utilisez cette option pour indexer',
-    'aiWidgetWebsite.followLinksBold': 'tout le site web',
-    'aiWidgetWebsite.noFollowLinksPrefix':
-      'Les liens ne seront pas suivis. Utilisez cette option pour indexer',
-    'aiWidgetWebsite.noFollowLinksBold': 'une seule page spécifique',
-    'aiWidgetWebsite.noFollowLinksSuffix': 'uniquement',
-
-    // TabAIWidget/TabAIWidgetPromptWebsite/LinksTable.tsx
-    'aiWidgetLinksTable.pageUrl': 'URL de la page',
-    'aiWidgetLinksTable.totalLabel': 'total :',
-    'aiWidgetLinksTable.sizeHeader': 'Taille (Mo)',
-    'aiWidgetLinksTable.mbUnit': 'Mo',
-    'aiWidgetLinksTable.preview': 'Aperçu',
-    'aiWidgetLinksTable.reindex': 'Réindexer',
-    'aiWidgetLinksTable.deleteChosenLinks': 'Supprimer les liens sélectionnés',
-    'aiWidgetLinksTable.markdownPreview': 'Aperçu Markdown',
 
     // WidgetConversationsPanel.tsx
     'aiWidgetConversations.heading': 'Conversations du widget',
@@ -784,12 +722,6 @@ export const aiWidget = {
     'aiWidgetRag.paragraph3Suffix':
       'sin estar limitado por el tamaño de la ventana de contexto del prompt.',
 
-    // TabAIWidget.tsx
-    'aiWidgetTabs.code': 'Código',
-    'aiWidgetTabs.prompt': 'Prompt',
-    'aiWidgetTabs.addWebsites': 'Agregar sitios web',
-    'aiWidgetTabs.addDocuments': 'Agregar documentos',
-
     // TabAIWidget/TabAIWidgetCode.tsx
     'aiWidgetCode.title': 'Código',
     'aiWidgetCode.description':
@@ -831,31 +763,6 @@ export const aiWidget = {
       'Úsalo para indicar cómo debe comportarse el bot. También puedes copiar y pegar datos limitados sobre el contexto específico de tu negocio que el bot debe conocer.',
     'aiWidgetPrompt.placeholder':
       'Escribe aquí las instrucciones del prompt...',
-
-    // TabAIWidget/TabAIWidgetPromptWebsite.tsx
-    'aiWidgetWebsite.titlePrefix': 'Agregar sitio web (',
-    'aiWidgetWebsite.ragFeature': 'función RAG',
-    'aiWidgetWebsite.description':
-      'Proporciona la URL de tu sitio web para que el sistema extraiga los datos.',
-    'aiWidgetWebsite.indexingProgress':
-      'Indexación en curso, espera o vuelve más tarde...',
-    'aiWidgetWebsite.followLinksPrefix':
-      'Los enlaces se seguirán (solo el mismo dominio). Usa esta opción para indexar',
-    'aiWidgetWebsite.followLinksBold': 'todo el sitio web',
-    'aiWidgetWebsite.noFollowLinksPrefix':
-      'Los enlaces no se seguirán. Usa esta opción para indexar',
-    'aiWidgetWebsite.noFollowLinksBold': 'una sola página específica',
-    'aiWidgetWebsite.noFollowLinksSuffix': 'únicamente',
-
-    // TabAIWidget/TabAIWidgetPromptWebsite/LinksTable.tsx
-    'aiWidgetLinksTable.pageUrl': 'URL de la página',
-    'aiWidgetLinksTable.totalLabel': 'total:',
-    'aiWidgetLinksTable.sizeHeader': 'Tamaño (MB)',
-    'aiWidgetLinksTable.mbUnit': 'MB',
-    'aiWidgetLinksTable.preview': 'Vista previa',
-    'aiWidgetLinksTable.reindex': 'Reindexar',
-    'aiWidgetLinksTable.deleteChosenLinks': 'Eliminar enlaces seleccionados',
-    'aiWidgetLinksTable.markdownPreview': 'Vista previa de Markdown',
 
     // WidgetConversationsPanel.tsx
     'aiWidgetConversations.heading': 'Conversaciones del widget',
