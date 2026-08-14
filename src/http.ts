@@ -326,6 +326,17 @@ export function httpWithAuth(startDate: string, endDate: string) {
   );
 }
 
+export function httpUploadFirebaseServiceAccount(appId: string, file: File) {
+  const fd = new FormData();
+  fd.append('firebaseServiceAccount', file);
+  return http.post(`/push/firebase-service-account/${appId}`, fd);
+}
+
+// Idempotent: succeeds even when no service account was uploaded.
+export function httpDeleteFirebaseServiceAccount(appId: string) {
+  return http.delete(`/push/firebase-service-account/${appId}`);
+}
+
 export function httpPostFile(file: File) {
   let fd = new FormData();
   fd.append('files', file);

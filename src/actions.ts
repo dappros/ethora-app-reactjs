@@ -7,6 +7,8 @@ import {
   httpGetConfig,
   httpGetUsers,
   httpPostFile,
+  httpUploadFirebaseServiceAccount,
+  httpDeleteFirebaseServiceAccount,
   httpResetPasswords,
   httpTokens,
   httpUpdateApp,
@@ -237,6 +239,28 @@ export async function actionUpdateApp(appId: string, options: any) {
   const response = await httpUpdateApp(appId, options);
   const state = getState();
   state.doUpdateApp(response.data.result);
+}
+
+function setFirebaseServiceAccountFlag(appId: string, uploaded: boolean) {
+  const state = getState();
+  const app = state.apps.find((el) => el._id === appId);
+
+  if (app) {
+    state.doUpdateApp({ ...app, firebaseServiceAccountUploaded: uploaded });
+  }
+}
+
+export async function actionUploadFirebaseServiceAccount(
+  appId: string,
+  file: File
+) {
+  await httpUploadFirebaseServiceAccount(appId, file);
+  setFirebaseServiceAccountFlag(appId, true);
+}
+
+export async function actionDeleteFirebaseServiceAccount(appId: string) {
+  await httpDeleteFirebaseServiceAccount(appId);
+  setFirebaseServiceAccountFlag(appId, false);
 }
 
 export async function actionUpdateUser(fd: FormData) {

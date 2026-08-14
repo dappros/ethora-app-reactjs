@@ -1,32 +1,66 @@
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { actionPostFile } from '../../actions';
+import { toast } from 'react-toastify';
+import {
+  actionDeleteFirebaseServiceAccount,
+  actionUploadFirebaseServiceAccount,
+} from '../../actions';
+import { IconDelete } from '../../components/Icons/IconDelete';
 import { IconUpload } from '../../components/Icons/IconUpload';
+import { ConfirmModal } from '../../components/modal/ConfirmModal';
 import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
   appId: string;
-  setGoogleServicesJson: (s: string) => void;
+  firebaseServiceAccountUploaded: boolean;
   primaryColor: string;
 }
 
 export function MobileApp({
   appId,
-  setGoogleServicesJson,
+  firebaseServiceAccountUploaded,
   primaryColor,
 }: Props) {
   const { t } = useTranslation();
   const googleJsonRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const onGoogleJsonRefChanges = (file: File | null) => {
-    if (!file) {
+  const onGoogleJsonRefChanges = async (file: File | null) => {
+    if (!file || busy) {
       return;
     }
 
-    actionPostFile(file).then((resp) => {
-      setGoogleServicesJson(resp.data.results[0].location);
-    });
+    setBusy(true);
+
+    try {
+      await actionUploadFirebaseServiceAccount(appId, file);
+      toast.success(t('appSettingsMobileApp.toast.uploadSuccess'));
+    } catch (error) {
+      console.error('Error uploading Firebase service account:', error);
+      toast.error(t('appSettingsMobileApp.toast.uploadFailed'));
+    } finally {
+      setBusy(false);
+      if (googleJsonRef.current) {
+        googleJsonRef.current.value = '';
+      }
+    }
+  };
+
+  const onDeleteServiceAccount = async () => {
+    setBusy(true);
+
+    try {
+      await actionDeleteFirebaseServiceAccount(appId);
+      toast.success(t('appSettingsMobileApp.toast.deleteSuccess'));
+      setConfirmDelete(false);
+    } catch (error) {
+      console.error('Error deleting Firebase service account:', error);
+      toast.error(t('appSettingsMobileApp.toast.deleteFailed'));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -123,15 +157,43 @@ export function MobileApp({
             onGoogleJsonRefChanges(e.target.files && e.target.files[0])
           }
         />
-        <button
-          className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8"
-          onClick={() => googleJsonRef.current?.click()}
-        >
-          <IconUpload stroke={primaryColor}></IconUpload>
-          <span className="ml-2">{t('appSettingsMobileApp.uploadButton')}</span>
-        </button>
+        {firebaseServiceAccountUploaded ? (
+          <button
+            className="w-full hover:bg-red-50 rounded-xl border border-red-500 text-red-500 flex p-2 items-center justify-center mb-8 disabled:opacity-50"
+            disabled={busy}
+            onClick={() => setConfirmDelete(true)}
+          >
+            <IconDelete />
+            <span className="ml-2">
+              {t('appSettingsMobileApp.deleteButton')}
+            </span>
+          </button>
+        ) : (
+          <button
+            className="w-full hover:bg-brand-hover rounded-xl border border-brand-500 text-brand-500 flex p-2 items-center justify-center mb-8 disabled:opacity-50"
+            disabled={busy}
+            onClick={() => googleJsonRef.current?.click()}
+          >
+            <IconUpload stroke={primaryColor}></IconUpload>
+            <span className="ml-2">
+              {t('appSettingsMobileApp.uploadButton')}
+            </span>
+          </button>
+        )}
 
       </div>
+
+      {confirmDelete && (
+        <ConfirmModal
+          title={t('appSettingsMobileApp.deleteModal.title')}
+          message={t('appSettingsMobileApp.deleteModal.message')}
+          confirmLabel={t('appSettingsMobileApp.deleteModal.confirmLabel')}
+          danger
+          busy={busy}
+          onConfirm={onDeleteServiceAccount}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
     </div>
   );
 }

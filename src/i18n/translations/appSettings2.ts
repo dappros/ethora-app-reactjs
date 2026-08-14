@@ -90,6 +90,19 @@ export const appSettings2 = {
     'appSettingsMobileApp.followSuffix':
       'This will enable your users to receive push notifications for chat messages they missed while being offline.',
     'appSettingsMobileApp.uploadButton': 'Upload',
+    'appSettingsMobileApp.deleteButton': 'Delete',
+    'appSettingsMobileApp.deleteModal.title': 'Delete service account?',
+    'appSettingsMobileApp.deleteModal.message':
+      'Your Firebase service account will be removed and your users will stop receiving push notifications for missed chat messages. You can upload a new service-account.json at any time.',
+    'appSettingsMobileApp.deleteModal.confirmLabel': 'Delete',
+    'appSettingsMobileApp.toast.uploadSuccess':
+      'Firebase service account uploaded',
+    'appSettingsMobileApp.toast.uploadFailed':
+      'Failed to upload Firebase service account',
+    'appSettingsMobileApp.toast.deleteSuccess':
+      'Firebase service account deleted',
+    'appSettingsMobileApp.toast.deleteFailed':
+      'Failed to delete Firebase service account',
 
     // --- ProgressCreateApp.tsx ---
     'appSettingsProgressCreateApp.stepAppCreated': 'App Created',
@@ -375,6 +388,20 @@ export const appSettings2 = {
     'appSettingsMobileApp.followSuffix':
       'Cela permettra à vos utilisateurs de recevoir des notifications push pour les messages de discussion qu’ils ont manqués pendant qu’ils étaient hors ligne.',
     'appSettingsMobileApp.uploadButton': 'Téléverser',
+    'appSettingsMobileApp.deleteButton': 'Supprimer',
+    'appSettingsMobileApp.deleteModal.title':
+      'Supprimer le compte de service ?',
+    'appSettingsMobileApp.deleteModal.message':
+      'Votre compte de service Firebase sera supprimé et vos utilisateurs ne recevront plus de notifications push pour les messages manqués. Vous pouvez téléverser un nouveau service-account.json à tout moment.',
+    'appSettingsMobileApp.deleteModal.confirmLabel': 'Supprimer',
+    'appSettingsMobileApp.toast.uploadSuccess':
+      'Compte de service Firebase téléversé',
+    'appSettingsMobileApp.toast.uploadFailed':
+      'Échec du téléversement du compte de service Firebase',
+    'appSettingsMobileApp.toast.deleteSuccess':
+      'Compte de service Firebase supprimé',
+    'appSettingsMobileApp.toast.deleteFailed':
+      'Échec de la suppression du compte de service Firebase',
 
     // --- ProgressCreateApp.tsx ---
     'appSettingsProgressCreateApp.stepAppCreated': 'Application créée',
@@ -668,6 +695,20 @@ export const appSettings2 = {
     'appSettingsMobileApp.followSuffix':
       'Esto permitirá que tus usuarios reciban notificaciones push de los mensajes de chat que se perdieron mientras estaban desconectados.',
     'appSettingsMobileApp.uploadButton': 'Subir',
+    'appSettingsMobileApp.deleteButton': 'Eliminar',
+    'appSettingsMobileApp.deleteModal.title':
+      '¿Eliminar la cuenta de servicio?',
+    'appSettingsMobileApp.deleteModal.message':
+      'Se eliminará tu cuenta de servicio de Firebase y tus usuarios dejarán de recibir notificaciones push de los mensajes perdidos. Puedes subir un nuevo service-account.json en cualquier momento.',
+    'appSettingsMobileApp.deleteModal.confirmLabel': 'Eliminar',
+    'appSettingsMobileApp.toast.uploadSuccess':
+      'Cuenta de servicio de Firebase subida',
+    'appSettingsMobileApp.toast.uploadFailed':
+      'No se pudo subir la cuenta de servicio de Firebase',
+    'appSettingsMobileApp.toast.deleteSuccess':
+      'Cuenta de servicio de Firebase eliminada',
+    'appSettingsMobileApp.toast.deleteFailed':
+      'No se pudo eliminar la cuenta de servicio de Firebase',
 
     // --- ProgressCreateApp.tsx ---
     'appSettingsProgressCreateApp.stepAppCreated': 'Aplicación creada',

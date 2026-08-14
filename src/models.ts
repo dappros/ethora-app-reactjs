@@ -157,6 +157,7 @@ export interface ModelApp {
   };
   googleServicesJson: string;
   googleServiceInfoPlist: string;
+  firebaseServiceAccountUploaded?: boolean;
   appSecret: string;
   allowUsersToCreateRooms: boolean;
   // Per-app default identity stamped on broadcast announcements when the
