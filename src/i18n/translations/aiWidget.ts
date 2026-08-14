@@ -209,7 +209,15 @@ export const aiWidget = {
     'agentPanels.crawling': 'Crawling...',
     'agentPanels.crawl': 'Crawl',
     'agentPanels.crawlQueued':
-      'Crawl started. Indexed pages appear here once it finishes - reload the list in a minute.',
+      'Crawl started. Pages appear in the list below as they are indexed.',
+    'agentPanels.crawlRunning': 'crawling - {n} pages indexed',
+    'agentPanels.reindexRunning': 'reindexing...',
+    'agentPanels.crawlDone': 'Crawl finished: {n} pages indexed from {url}',
+    'agentPanels.reindexDone': 'Reindex finished: {url}',
+    'agentPanels.crawlFailedEvent': 'Crawl failed for {url}: {error}',
+    'agentPanels.reindexFailedEvent': 'Reindex failed for {url}: {error}',
+    'agentPanels.crawlTruncated':
+      'Crawl limit reached ({reason}) - some pages were not indexed.',
     'agentPanels.crawlFailedPrefix': 'Crawl failed:',
     'agentPanels.confirmRecrawlIndexed':
       '{url} is already indexed. Crawl it again and replace the stored copy?',
@@ -539,7 +547,15 @@ export const aiWidget = {
     'agentPanels.crawling': 'Exploration en cours...',
     'agentPanels.crawl': 'Explorer',
     'agentPanels.crawlQueued':
-      "Exploration lancée. Les pages indexées apparaîtront ici une fois terminée - rechargez la liste dans une minute.",
+      "Exploration lancée. Les pages apparaissent dans la liste ci-dessous au fur et à mesure de leur indexation.",
+    'agentPanels.crawlRunning': 'exploration - {n} pages indexées',
+    'agentPanels.reindexRunning': 'réindexation...',
+    'agentPanels.crawlDone': 'Exploration terminée : {n} pages indexées depuis {url}',
+    'agentPanels.reindexDone': 'Réindexation terminée : {url}',
+    'agentPanels.crawlFailedEvent': "Échec de l'exploration de {url} : {error}",
+    'agentPanels.reindexFailedEvent': 'Échec de la réindexation de {url} : {error}',
+    'agentPanels.crawlTruncated':
+      "Limite d'exploration atteinte ({reason}) - certaines pages n'ont pas été indexées.",
     'agentPanels.crawlFailedPrefix': "Échec de l'exploration :",
     'agentPanels.confirmRecrawlIndexed':
       '{url} est déjà indexée. Explorer à nouveau et remplacer la copie enregistrée ?',
@@ -877,7 +893,15 @@ export const aiWidget = {
     'agentPanels.crawling': 'Rastreando...',
     'agentPanels.crawl': 'Rastrear',
     'agentPanels.crawlQueued':
-      'Rastreo iniciado. Las páginas indexadas aparecerán aquí cuando termine: recarga la lista en un minuto.',
+      'Rastreo iniciado. Las páginas aparecen en la lista de abajo a medida que se indexan.',
+    'agentPanels.crawlRunning': 'rastreando: {n} páginas indexadas',
+    'agentPanels.reindexRunning': 'reindexando...',
+    'agentPanels.crawlDone': 'Rastreo finalizado: {n} páginas indexadas de {url}',
+    'agentPanels.reindexDone': 'Reindexación finalizada: {url}',
+    'agentPanels.crawlFailedEvent': 'Error al rastrear {url}: {error}',
+    'agentPanels.reindexFailedEvent': 'Error al reindexar {url}: {error}',
+    'agentPanels.crawlTruncated':
+      'Se alcanzó el límite de rastreo ({reason}): algunas páginas no se indexaron.',
     'agentPanels.crawlFailedPrefix': 'Error al rastrear:',
     'agentPanels.confirmRecrawlIndexed':
       '{url} ya está indexada. ¿Rastrearla de nuevo y reemplazar la copia guardada?',

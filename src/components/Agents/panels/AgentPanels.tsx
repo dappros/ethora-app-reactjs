@@ -30,8 +30,10 @@ import {
   httpListSiteSourcesV2,
   httpPostFile,
   httpReindexSiteSourceV2,
+  httpGetSiteCrawlJob,
   httpTestMessageAgentBotInstance,
 } from '../../../http';
+import { useSiteCrawlEvents, SiteCrawlEvent } from '../../../hooks/useSiteCrawlEvents';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
@@ -273,6 +275,23 @@ type SiteSourceRow = {
 // panel scrollable without pagination controls dominating a small index.
 const SITE_SOURCES_PAGE_SIZE = 25;
 
+// A crawl delivers pages in batches, so progress events arrive in bursts. Refetching
+// the list on every one of them would hammer the endpoint for no visible gain -
+// collapse a burst into one reload.
+const LIVE_RELOAD_DEBOUNCE_MS = 1200;
+
+// Fallback poll for jobs we are showing as running. Centrifugo delivery is
+// unacknowledged: if the terminal event is missed (tab was reloading, socket was
+// reconnecting) the progress line would otherwise sit there forever.
+const JOB_RECONCILE_MS = 15000;
+
+// A crawl or reindex this panel is currently watching.
+interface LiveCrawlJob {
+  url: string;
+  kind: 'crawl' | 'reindex';
+  savedPages: number;
+}
+
 // The API's error shape, narrowed once. Toasts across this file otherwise reach
 // into `e.response.data.error` through an `any`.
 function apiErrorMessage(e: unknown): string {
@@ -333,6 +352,10 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [selected, setSelected] = useState<Set<string>>(new Set());
   // Row whose stored markdown is open in the viewer, if any.
   const [viewing, setViewing] = useState<SiteSourceRow | null>(null);
+  // Crawls/reindexes still running, keyed by jobId. Populated when this panel
+  // starts one, and by events - which also arrive for a job started in another
+  // tab, since the backend publishes to the user's personal channel.
+  const [liveJobs, setLiveJobs] = useState<Record<string, LiveCrawlJob>>({});
 
   // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
   // the user's first owned app so the UI is functional out of the box.
@@ -372,12 +395,136 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     }
   };
   // Switching app scope invalidates the current page position, and a selection
-  // of ids from the previous app must not survive into the new one.
+  // of ids from the previous app must not survive into the new one. Live jobs go
+  // too: they belong to the app that was scoped when they started.
   useEffect(() => {
     setSelected(new Set());
+    setLiveJobs({});
     loadList(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId]);
+
+  // Live progress ------------------------------------------------------------
+  //
+  // Pages are stored in batches while a crawl runs, so the list genuinely
+  // changes under the operator. Refetch on the events rather than polling, and
+  // keep the reload debounced - a burst of chunk events is one visible change.
+  const reloadTimer = useRef<number | null>(null);
+  // Refreshed on every render so the debounced reload always uses the page the
+  // operator is looking at now, not the one that was current when it was queued.
+  const reloadCurrentPage = useRef(() => {});
+  reloadCurrentPage.current = () => { void loadList(offset); };
+
+  const scheduleReload = () => {
+    if (reloadTimer.current !== null) return;
+    reloadTimer.current = window.setTimeout(() => {
+      reloadTimer.current = null;
+      reloadCurrentPage.current();
+    }, LIVE_RELOAD_DEBOUNCE_MS);
+  };
+
+  useEffect(() => () => {
+    if (reloadTimer.current !== null) window.clearTimeout(reloadTimer.current);
+  }, []);
+
+  const forgetJob = (jobId: string) =>
+    setLiveJobs((prev) => {
+      if (!prev[jobId]) return prev;
+      const next = { ...prev };
+      delete next[jobId];
+      return next;
+    });
+
+  // Shared by the event path and the reconcile poll, so a job that finishes
+  // while the socket is down is reported exactly the same way.
+  const finishJob = (
+    jobId: string,
+    outcome: { kind: 'crawl' | 'reindex'; url: string; savedPages: number; failed: boolean; error?: string | null; truncated?: boolean; truncatedReason?: string | null }
+  ) => {
+    forgetJob(jobId);
+    if (outcome.failed) {
+      toast.error(
+        t(outcome.kind === 'reindex' ? 'agentPanels.reindexFailedEvent' : 'agentPanels.crawlFailedEvent')
+          .replace('{url}', outcome.url)
+          .replace('{error}', outcome.error || '')
+      );
+    } else {
+      toast.success(
+        outcome.kind === 'reindex'
+          ? t('agentPanels.reindexDone').replace('{url}', outcome.url)
+          : t('agentPanels.crawlDone')
+              .replace('{n}', String(outcome.savedPages))
+              .replace('{url}', outcome.url)
+      );
+      if (outcome.truncated) {
+        toast.warning(t('agentPanels.crawlTruncated').replace('{reason}', outcome.truncatedReason || ''));
+      }
+    }
+    scheduleReload();
+  };
+
+  useSiteCrawlEvents({
+    appId,
+    onEvent: (ev: SiteCrawlEvent) => {
+      if (ev.type === 'site_crawl_progress') {
+        setLiveJobs((prev) => ({
+          ...prev,
+          [ev.jobId]: { url: ev.url, kind: ev.kind, savedPages: ev.savedPages },
+        }));
+        scheduleReload();
+        return;
+      }
+      finishJob(ev.jobId, {
+        kind: ev.kind,
+        url: ev.url,
+        savedPages: ev.savedPages,
+        failed: ev.type === 'site_crawl_failed',
+        error: ev.error,
+        truncated: ev.truncated,
+        truncatedReason: ev.truncatedReason,
+      });
+    },
+  });
+
+  // The safety net behind those events. Only runs while something is being
+  // watched, and only reads job rows - the authoritative copy of the state the
+  // events describe.
+  const liveJobIds = Object.keys(liveJobs);
+  useEffect(() => {
+    if (!appId || liveJobIds.length === 0) return;
+    const timer = window.setInterval(async () => {
+      for (const jobId of Object.keys(liveJobs)) {
+        try {
+          const r = await httpGetSiteCrawlJob(appId, jobId);
+          const job = r.data?.result;
+          if (!job) continue;
+          if (job.status === 'completed' || job.status === 'failed') {
+            finishJob(jobId, {
+              kind: job.kind === 'reindex' ? 'reindex' : 'crawl',
+              url: job.url,
+              savedPages: Number(job.savedPages) || 0,
+              failed: job.status === 'failed',
+              error: job.error,
+              truncated: Boolean(job.truncated),
+              truncatedReason: job.truncatedReason,
+            });
+          } else if (Number(job.savedPages) > (liveJobs[jobId]?.savedPages || 0)) {
+            // Progress events can be missed too, not just the terminal one.
+            setLiveJobs((prev) => (prev[jobId]
+              ? { ...prev, [jobId]: { ...prev[jobId], savedPages: Number(job.savedPages) || 0 } }
+              : prev));
+            scheduleReload();
+          }
+        } catch {
+          // A job row that 404s (purged, or belongs to another app) is not worth
+          // reporting - stop watching it.
+          forgetJob(jobId);
+        }
+      }
+    }, JOB_RECONCILE_MS);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId, liveJobIds.join(',')]);
 
   // Deleting rows can empty the current page (or every page after it), which would
   // otherwise strand the user on a blank view. Clamp to the last offset that still
@@ -432,13 +579,19 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   };
 
   const crawlOnce = async (force: boolean) => {
-    await httpAgentSiteCrawl(appId, agent.id, url, followLink, force);
+    const r = await httpAgentSiteCrawl(appId, agent.id, url, followLink, force);
     toast.success(t('agentPanels.crawlQueued'));
+    // Watch it from the moment it is queued rather than waiting for the first
+    // event, so a crawl that is still sitting in the crawler's queue is visible
+    // as something in flight instead of nothing at all.
+    const jobId = r.data?.jobId;
+    if (jobId) {
+      setLiveJobs((prev) => ({ ...prev, [jobId]: { url: r.data?.url || url, kind: 'crawl', savedPages: 0 } }));
+    }
     setUrl('');
-    // The crawler answers as soon as the job is queued, so this reload will not
-    // show the new rows yet - they land once the crawl finishes and calls back.
-    // Still worth doing: it resets paging to where those rows will appear (new
-    // rows sort newest-first) and the toast tells the operator to come back.
+    // Nothing has been fetched yet, so this reload shows no new rows. Still worth
+    // doing: it resets paging to where the rows will appear as they land, since
+    // the list sorts newest-first.
     await loadList(0);
   };
 
@@ -502,6 +655,27 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           {busy ? t('agentPanels.crawling') : t('agentPanels.crawl')}
         </button>
       </div>
+
+      {/* One line per crawl in flight. Present only while something is running,
+          so the panel looks exactly as it did when nothing is. */}
+      {liveJobIds.length > 0 && (
+        <div className="space-y-1">
+          {liveJobIds.map((jobId) => {
+            const job = liveJobs[jobId];
+            return (
+              <div key={jobId} className="flex items-center gap-2 text-xs text-brand-600 bg-brand-50 border border-brand-100 rounded px-2 py-1">
+                <span className="inline-block h-2 w-2 rounded-full bg-brand-500 animate-pulse" aria-hidden />
+                <span className="font-mono break-all">{job.url}</span>
+                <span className="text-gray-500 whitespace-nowrap">
+                  {job.kind === 'reindex'
+                    ? t('agentPanels.reindexRunning')
+                    : t('agentPanels.crawlRunning').replace('{n}', String(job.savedPages))}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-2 text-xs text-gray-500 min-h-[28px]">
         <span>
@@ -592,8 +766,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                     disabled={isDisabled || busy}
                     onClick={async () => {
                       try {
-                        await httpReindexSiteSourceV2(appId, row.id);
+                        const r = await httpReindexSiteSourceV2(appId, row.id);
                         toast.success(t('agentPanels.reindexQueued'));
+                        // Queued like a crawl - the refreshed copy lands on the
+                        // callback, and the row's size/updated columns only move
+                        // once it does.
+                        const jobId = r.data?.jobId;
+                        if (jobId) {
+                          setLiveJobs((prev) => ({ ...prev, [jobId]: { url: row.url, kind: 'reindex', savedPages: 0 } }));
+                        }
                         await loadList(offset);
                       } catch (e: any) {
                         toast.error(`${t('agentPanels.reindexFailedPrefix')} ${e?.response?.data?.error || e.message}`);

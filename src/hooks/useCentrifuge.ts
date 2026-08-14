@@ -11,24 +11,20 @@ let lastWsTokenRefresh = 0;
 const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE || 
   (import.meta.env.DEV ? 'ws://localhost:8001/connection/websocket' : undefined);
 
-type CounterType =
-  | 'counter_chats'
-  | 'counter_api_calls'
-  | 'counter_aitokens'
-  | 'counter_files'
-  | 'counter_transactions'
-  | 'counter_sessions'
-  | 'counter_registered';
-
-  interface CentrifugeData {
-    type: CounterType;
-    appId: string;
-  }
+// The personal channel carries more than the stat counters it started with -
+// site-crawl progress rides on it too - so the payload is typed as the envelope
+// every publication shares. Consumers discriminate on `type` and narrow to
+// their own shape (see useCentrifugeAppUpdater, useSiteCrawlEvents).
+export interface CentrifugePayload {
+  type: string;
+  appId: string;
+  [key: string]: unknown;
+}
 
 export function useCentrifugeChannel() {
    const currentUser = useAppStore((s) => s.currentUser);
 
-  const [data, setData] = useState<CentrifugeData>();
+  const [data, setData] = useState<CentrifugePayload>();
   const [connected, setConnected] = useState(false);
 
   const getToken = async () => {
