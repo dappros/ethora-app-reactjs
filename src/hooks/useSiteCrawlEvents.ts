@@ -9,14 +9,30 @@ import { useCentrifugeChannel } from './useCentrifuge';
 // turn that into something visible - without them the only way to see a crawl
 // progress is to keep pressing reload.
 //
-// Treat every event as "something changed, refetch", never as the data itself:
-// a Centrifugo publish is unacknowledged and unreplayable, so a client that was
-// reloading or briefly offline misses it silently. The authoritative state is
-// the Web Index list plus GET /v2/apps/{appId}/sources/site-crawl-jobs/{jobId}.
+// Events carry the rows they stored, so a subscriber can render a crawl as it
+// happens without polling or refetching. They are still not the system of
+// record: a Centrifugo publish is unacknowledged and unreplayable, so a client
+// that was reloading or briefly offline misses one silently. Merge what arrives,
+// and reconcile against the Web Index list plus
+// GET /v2/apps/{appId}/sources/site-crawl-jobs/{jobId} - never assume the stream
+// was complete.
 export type SiteCrawlEventType =
   | 'site_crawl_progress'
   | 'site_crawl_completed'
   | 'site_crawl_failed';
+
+// One Web Index row as the event carries it - the same shape the list endpoint
+// returns, minus the markdown. This is what lets a subscriber update its table
+// from the event instead of re-reading the list every time a batch lands.
+export interface SiteCrawlEventRow {
+  id: string;
+  url: string;
+  originUrl?: string;
+  mdByteSize?: number;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface SiteCrawlEvent {
   type: SiteCrawlEventType;
@@ -26,6 +42,11 @@ export interface SiteCrawlEvent {
   kind: 'crawl' | 'reindex';
   url: string;
   status: string;
+  // Rows stored by the batch this event reports.
+  rows?: SiteCrawlEventRow[];
+  // More rows landed than the payload carries: the receiver's copy of the list
+  // is incomplete and has to be re-read.
+  rowsTruncated?: boolean;
   // Whole-job totals, not this batch: what to render in a progress line.
   savedPages: number;
   totalBytes: number;
