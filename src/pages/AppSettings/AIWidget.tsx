@@ -86,6 +86,15 @@ function injectWidgetScript({
   if (document.getElementById(TEST_SCRIPT_ID)) return;
   const s = document.createElement('script');
   s.id = TEST_SCRIPT_ID;
+  // A TypeScript entry means the widget is being served straight from its
+  // own Vite dev server (VITE_WIDGET_URL pointing at .../src/main.tsx).
+  // That is an ES module, and loading it as a classic script fails on the
+  // first bare import. Supporting it lets this preview run the widget's
+  // current source with no build step, which is the only way to test an
+  // unreleased widget without publishing a bundle first.
+  if (/\.[tj]sx?($|\?)/.test(widgetUrl)) {
+    s.type = 'module';
+  }
   s.src = widgetUrl;
   s.setAttribute('data-app-id', appId);
   if (apiBase) s.setAttribute('data-api-base', apiBase);
