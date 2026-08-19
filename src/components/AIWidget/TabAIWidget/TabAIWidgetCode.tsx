@@ -56,8 +56,11 @@ export const TabAIWidgetCode = ({
     return agents.find((a) => a.id === bi.agentId) || null;
   }, [agents, botInstances, app, currentApp]);
   const widgetUrl =
-    import.meta.env.VITE_WIDGET_URL ||
+    // Versioned first, same reason as in AIWidget.tsx: otherwise it can
+    // never win while both are set, and the snippet we hand operators
+    // points at a URL their visitors' browsers will cache indefinitely.
     import.meta.env.VITE_WIDGET_VERSIONED_URL ||
+    import.meta.env.VITE_WIDGET_URL ||
     '';
   // The widget's POST /v2/widget/sessions runs against the install's API
   // host. We can derive it from the script src (widget.<root> -> api.<root>)
@@ -139,18 +142,54 @@ export const TabAIWidgetCode = ({
     }
     required.push(`></script>`);
 
+    // Read the contract from the loaded bundle rather than restating it
+    // here. This block used to be a hand-written list of four attributes
+    // while the widget read over thirty, so operators simply could not
+    // discover most of what they had configured. `window.EthoraAssistant`
+    // is published by the widget; the static list below is only a fallback
+    // for the case where the operator opens this tab before the preview
+    // has ever loaded the bundle.
+    const specs = window.EthoraAssistant?.attributes?.filter(
+      (a) => !a.required && !a.deprecatedAliasFor
+    );
+
+    const lines = specs?.length
+      ? (() => {
+          const width = Math.max(
+            ...specs.map((a) => `${a.name}="${a.example}"`.length)
+          );
+          const byGroup = new Map<string, typeof specs>();
+          specs.forEach((a) => {
+            const list = byGroup.get(a.group) || [];
+            list.push(a);
+            byGroup.set(a.group, list);
+          });
+          const out: string[] = [];
+          for (const [group, items] of byGroup) {
+            out.push(``, `  ${group}:`);
+            items.forEach((a) => {
+              const pair = `${a.name}="${a.example}"`;
+              out.push(`    ${pair.padEnd(width)}  ${a.doc}`);
+            });
+          }
+          return out;
+        })()
+      : [
+          ``,
+          `    data-bot-name="Custom Bot Name"`,
+          `    data-bot-avatar="https://your-cdn/avatar.png"`,
+          `    data-title="Help"`,
+          `    data-greeting-message="Hi! How can I help?"`,
+          `    (load the preview once to list every supported attribute)`,
+        ];
+
     const optional = [
       ``,
       `<!--`,
       `  Optional. Move any of these inside the <script ...> tag above to`,
       `  override the defaults (which come from the active Agent set in your`,
       `  AI Widget admin):`,
-      ``,
-      `    data-bot-name="Custom Bot Name"          ← shown above bot bubbles`,
-      `    data-bot-avatar="https://your-cdn/avatar.png"`,
-      `    data-title="Help"                        ← chat-window header`,
-      `    data-greeting-title="Hi there!"          ← empty-state heading`,
-      `    data-greeting="Ask me anything"          ← empty-state body line`,
+      ...lines,
       `-->`,
     ];
 
