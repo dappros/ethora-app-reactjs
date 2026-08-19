@@ -1,34 +1,41 @@
 // Where the AI widget bundle lives, for both the admin preview and the embed
 // snippet handed to operators.
 //
-// Resolution order, most specific first:
+// In a PRODUCTION build the bundle that ships with the app always wins.
 //
-//   1. VITE_WIDGET_VERSIONED_URL - an explicit, immutable URL. First, not
-//      last: while VITE_WIDGET_URL took precedence the versioned value could
-//      never win when both were set, and browsers happily served a cached 3 MB
-//      bundle after a deploy, which reads exactly like "the fix did not work".
-//   2. VITE_WIDGET_URL - local development against the widget's own Vite dev
-//      server, e.g. http://localhost:5173/src/main.tsx, so unreleased widget
-//      changes show up without a build.
-//   3. The copy shipped with this app. This is the default and needs no env
-//      at all: `prebuild` copies @ethora/ai-chat-widget's bundle into
-//      public/widget/, so the version is pinned by package-lock.json and
-//      deployed by the same deploy that ships the admin.
+// The env vars are still read, but only as a fallback, and only for an
+// explicitly self-hosted copy. That ordering is the whole point: on QA
+// VITE_WIDGET_URL said https://widget.chat-qa.ethora.com/assistant2604.js, an
+// April build on a static host with a separate deploy nobody re-ran, and
+// because the env won, the product followed a string that no longer described
+// anything real. What ships now is whatever commit package-lock.json pins,
+// copied into public/widget/ by `prebuild`. An env left over on some server
+// cannot override it.
 //
-// (3) is what stops the class of bug that produced assistant2604.js: an env
-// string on one host pointing at a bundle deployed by a different pipeline,
-// with nothing anywhere to notice the two had drifted apart.
+// `npm run dev` is the exception, and only there: pointing VITE_WIDGET_URL at
+// the widget's own Vite dev server (http://localhost:5173/src/main.tsx) is how
+// unreleased widget changes get tested without a build, and that has to keep
+// working. A dev server is not a deploy, so nothing can rot this way.
 
 import { BUNDLED_WIDGET_PATH } from '../generated/bundledWidget';
 
+const fromEnv = (): string =>
+  (import.meta.env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
+  (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
+  '';
+
 export function resolveWidgetUrl(): string {
-  const explicit =
-    (import.meta.env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
-    (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
-    '';
-  if (explicit) return explicit;
-  // Absolute, not root-relative: this string is pasted into the operator's own
-  // site, where a leading "/" would resolve against THEIR origin.
-  if (typeof window === 'undefined') return BUNDLED_WIDGET_PATH;
-  return new URL(BUNDLED_WIDGET_PATH, window.location.origin).href;
+  if (import.meta.env.DEV) {
+    const dev = fromEnv();
+    if (dev) return dev;
+  }
+  if (BUNDLED_WIDGET_PATH) {
+    // Absolute, not root-relative: this string is pasted into the operator's
+    // own site, where a leading "/" would resolve against THEIR origin.
+    return typeof window === 'undefined'
+      ? BUNDLED_WIDGET_PATH
+      : new URL(BUNDLED_WIDGET_PATH, window.location.origin).href;
+  }
+  // Only reachable if the bundle is missing, i.e. prebuild never ran.
+  return fromEnv();
 }
