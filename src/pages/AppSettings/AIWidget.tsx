@@ -43,7 +43,32 @@ interface Props {
 // the script + the chat widget DOM + any persisted visitor identity, so a
 // subsequent Test mints a fresh visitor and a fresh room.
 const TEST_SCRIPT_ID = 'chat-content-assistant';
-const WIDGET_VISITOR_KEY = 'ethora-widget-visitor';
+
+// The widget publishes its own control surface once loaded. We drive it
+// through that instead of reaching into its localStorage: it owns twelve
+// keys and the list changes, and this file used to clear exactly one of
+// them - so "Reset" left the cached rooms map behind, which is what made
+// the next Test fire history requests at rooms that no longer existed.
+type EthoraAssistantApi = {
+  reset(): void;
+  destroy(): void;
+  isMounted(): boolean;
+  attributes: {
+    name: string;
+    group: string;
+    required?: boolean;
+    deprecatedAliasFor?: string;
+    example: string;
+    doc: string;
+  }[];
+  version: string;
+};
+
+declare global {
+  interface Window {
+    EthoraAssistant?: EthoraAssistantApi;
+  }
+}
 
 function injectWidgetScript({
   widgetUrl,
@@ -70,20 +95,17 @@ function injectWidgetScript({
 }
 
 function teardownWidget() {
-  // Remove the injected script.
-  const s = document.getElementById(TEST_SCRIPT_ID);
-  if (s && s.parentNode) s.parentNode.removeChild(s);
-  // Remove the widget's mounted container + any open-state pill it left.
-  const w = document.getElementById('chat-widget');
-  if (w && w.parentNode) w.parentNode.removeChild(w);
-  // Forget the visitor identity so the next Test gets a fresh visitor +
-  // fresh persistent room — relevant when the operator wants to confirm
-  // the "first-time visitor" flow rather than resuming a previous test.
+  // Unmount and erase everything the widget owns, so the next Test is a
+  // genuine first-time visit: fresh visitor, fresh room, no cached history.
   try {
-    window.localStorage.removeItem(WIDGET_VISITOR_KEY);
+    window.EthoraAssistant?.reset();
   } catch {
-    // ignore
+    // an older bundle without the API; the DOM removal below still applies
   }
+  // The <script> is ours, not the widget's, so we always remove it here.
+  document.getElementById(TEST_SCRIPT_ID)?.remove();
+  // Belt and braces for bundles predating window.EthoraAssistant.
+  document.getElementById('chat-widget')?.remove();
 }
 
 export function AIWidget({
@@ -100,9 +122,13 @@ export function AIWidget({
   const [previewActive, setPreviewActive] = useState<boolean>(false);
   const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
 
+  // Versioned first. With the plain URL taking precedence the versioned one
+  // could never take effect while both were set, and the operator's browser
+  // happily served a cached 3 MB bundle after a deploy - which reads exactly
+  // like "the fix did not work".
   const widgetUrl =
-    (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
     (import.meta.env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
+    (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
     '';
   const apiBaseOverride =
     (import.meta.env.VITE_API as string | undefined) || '';
