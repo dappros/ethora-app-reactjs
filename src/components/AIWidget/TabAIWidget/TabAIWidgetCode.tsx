@@ -9,6 +9,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelApp } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
+import { resolveWidgetUrl } from '../../../utils/widgetUrl';
 
 interface TabAIWidgetCodeProps {
   value: string;
@@ -55,13 +56,9 @@ export const TabAIWidgetCode = ({
     if (!bi) return null;
     return agents.find((a) => a.id === bi.agentId) || null;
   }, [agents, botInstances, app, currentApp]);
-  const widgetUrl =
-    // Versioned first, same reason as in AIWidget.tsx: otherwise it can
-    // never win while both are set, and the snippet we hand operators
-    // points at a URL their visitors' browsers will cache indefinitely.
-    import.meta.env.VITE_WIDGET_VERSIONED_URL ||
-    import.meta.env.VITE_WIDGET_URL ||
-    '';
+  // Env override first, then the copy bundled with this app. See
+  // utils/widgetUrl.ts for why the default is a self-hosted asset.
+  const widgetUrl = resolveWidgetUrl();
   // The widget's POST /v2/widget/sessions runs against the install's API
   // host. We can derive it from the script src (widget.<root> -> api.<root>)
   // at runtime in the embed itself, so data-api-base is optional in the
@@ -118,7 +115,9 @@ export const TabAIWidgetCode = ({
     }
 
     if (!widgetUrl) {
-      return '<!-- Configure VITE_WIDGET_URL in deploy to generate a self-hosted widget embed -->';
+      // Unreachable once the bundled asset exists; kept so a broken build
+      // produces a readable comment rather than src="".
+      return '<!-- Widget asset missing: run npm run build (prebuild copies it) -->';
     }
 
     // MUC variant embed: the widget calls POST /v2/widget/sessions on mount

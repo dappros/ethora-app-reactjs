@@ -12,6 +12,7 @@ import { ModelApp } from '../../models';
 import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
 import { WidgetConversationsPanel } from '../../components/AIWidget/WidgetConversationsPanel';
 import { useTranslation } from '../../i18n/useTranslation';
+import { resolveWidgetUrl } from '../../utils/widgetUrl';
 import './AIWidget.scss';
 
 const statusAiBot = {
@@ -131,14 +132,9 @@ export function AIWidget({
   const [previewActive, setPreviewActive] = useState<boolean>(false);
   const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
 
-  // Versioned first. With the plain URL taking precedence the versioned one
-  // could never take effect while both were set, and the operator's browser
-  // happily served a cached 3 MB bundle after a deploy - which reads exactly
-  // like "the fix did not work".
-  const widgetUrl =
-    (import.meta.env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
-    (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
-    '';
+  // Env override first, then the copy bundled with this app. See
+  // utils/widgetUrl.ts for the full resolution order.
+  const widgetUrl = resolveWidgetUrl();
   const apiBaseOverride =
     (import.meta.env.VITE_API as string | undefined) || '';
 
