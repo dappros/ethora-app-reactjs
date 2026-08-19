@@ -93,7 +93,10 @@ function injectWidgetScript({
   // first bare import. Supporting it lets this preview run the widget's
   // current source with no build step, which is the only way to test an
   // unreleased widget without publishing a bundle first.
-  if (/\.[tj]sx?($|\?)/.test(widgetUrl)) {
+  // A built .js bundle must stay a classic script: module scripts are
+  // fetched in CORS mode, so a bundle served from a host without
+  // Access-Control-Allow-Origin would fail to load here.
+  if (/\.tsx?($|\?)/.test(widgetUrl)) {
     s.type = 'module';
   }
   s.src = widgetUrl;
