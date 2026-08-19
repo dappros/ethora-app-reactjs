@@ -31,3 +31,7 @@ tsconfig.app.tsbuildinfo
 
 # Deploy-script stamps and npm cache (setup-node-services.sh)
 .ethora_deploy/
+
+# Written by scripts/copy-widget.mjs (prebuild) from the pinned
+# @ethora/ai-chat-widget. Never edited by hand, never committed.
+public/widget/
