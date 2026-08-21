@@ -395,7 +395,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     }
     if (!opts.silent) setLoadingList(true);
     try {
-      const r = await httpListSiteSourcesV2(appId, { limit: SITE_SOURCES_PAGE_SIZE, offset: nextOffset });
+      const r = await httpListSiteSourcesV2(appId, { limit: SITE_SOURCES_PAGE_SIZE, offset: nextOffset, agentId: agent.id });
       // Endpoint returns { result: SiteSourceRow[], pagination: { total, limit, offset, hasMore } } in v2.
       const items: SiteSourceRow[] = r.data?.result || r.data?.items || [];
       // Handing React a fresh array on every poll repaints every row, which is
@@ -419,13 +419,16 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   };
   // Switching app scope invalidates the current page position, and a selection
   // of ids from the previous app must not survive into the new one. Live jobs go
-  // too: they belong to the app that was scoped when they started.
+  // too: they belong to the app that was scoped when they started. The agent is
+  // in the deps for the same reason the app is: the list is scoped to (app,
+  // agent), so a parent that swaps the agent under a mounted panel would
+  // otherwise leave the previous agent's rows on screen.
   useEffect(() => {
     setSelected(new Set());
     setLiveJobs({});
     loadList(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appId]);
+  }, [appId, agent.id]);
 
   // Live progress ------------------------------------------------------------
   //
@@ -774,12 +777,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         )}
       </div>
 
-      {/* Indexed URLs table - ported from the legacy AI Widget LinksTable. Shows every
-          row stored under the scoped app's siteSource collection. NB: the siteSource
-          model is keyed by appId only today, so for migrated apps this list may include
-          pages indexed by other agents that share the same app. We surface that as an
-          "(other agents)" hint when the row's url didn't originate from this agent's
-          recent crawls. */}
+      {/* Indexed URLs table - ported from the legacy AI Widget LinksTable. Shows the
+          rows this agent owns in the scoped app; siteSource carries an agentId, so
+          another agent's pages are not in this list even when they share the app. */}
       <div className="border rounded">
         <table className="w-full text-xs">
           <thead className="bg-gray-50">
@@ -961,7 +961,7 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
     if (!appId) return;
     setLoadingList(true);
     try {
-      const resp = await httpListDocSourcesV2(appId);
+      const resp = await httpListDocSourcesV2(appId, agent.id);
       const result = resp?.data?.result;
       setRows(Array.isArray(result) ? result : []);
     } catch (e: any) {
@@ -977,7 +977,7 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
   useEffect(() => {
     if (appId) loadList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appId]);
+  }, [appId, agent.id]);
 
   return (
     <div className="space-y-3 max-w-2xl">
