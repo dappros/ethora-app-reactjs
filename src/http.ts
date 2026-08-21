@@ -832,7 +832,10 @@ export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstance
 // Used by the agent's Web Index tab to show the URL list (not just total bytes).
 // Pagination is opt-in server-side: without `limit` the backend returns every row,
 // which is what the legacy AI Widget LinksTable still relies on.
-export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number }) {
+//
+// `agentId` narrows the list to one agent's rows. Omitting it lists the whole
+// app, which is what the legacy LinksTable wants — it has no agent to scope to.
+export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number; agentId?: string }) {
   const config = params ? { params } : undefined;
   if (appId) return httpV2.get(`/apps/${appId}/sources/site-crawl`, config);
   return httpV2.get('/sources/site-crawl', config);
@@ -908,8 +911,10 @@ export function httpAgentDocsUpload(appId: string, agentId: string, files: File[
 // List uploaded doc sources for an App (ordered by createdAt, newest first
 // per the repo). Used by the Agents > Knowledge panel to confirm uploads
 // landed and to surface a delete affordance.
-export function httpListDocSourcesV2(appId: string) {
-  return httpV2.get(`/apps/${appId}/sources/docs`);
+// `agentId` narrows the list to one agent's uploads, the same way
+// httpListSiteSourcesV2 does for crawled pages.
+export function httpListDocSourcesV2(appId: string, agentId?: string) {
+  return httpV2.get(`/apps/${appId}/sources/docs`, agentId ? { params: { agentId } } : undefined);
 }
 
 export function httpDeleteDocSourceV2(appId: string, docId: string) {
