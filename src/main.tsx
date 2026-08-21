@@ -10,6 +10,9 @@ import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
 import './index.css';
 import { router } from './router.tsx';
 import { useAppStore } from './store/useAppStore';
+import { purgeLegacyCredentialCopies } from './authRefresh.ts';
+
+purgeLegacyCredentialCopies();
 
 // Suppress noisy console warnings in development
 // Must be set up BEFORE any imports that might log warnings

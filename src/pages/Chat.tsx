@@ -107,6 +107,7 @@ const MemoizedChat = React.memo(function ChatComponent({
           return {
             accessToken: fresh.chatTokens.accessToken,
             refreshToken: fresh.chatTokens.refreshToken,
+            xmppPassword: fresh.owner.xmppPassword,
           };
         } catch {
           return null;

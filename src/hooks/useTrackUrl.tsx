@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { actionAfterLogin } from '../actions.ts';
 import { httpGetOneUser } from '../http.ts';
+import { isTransientRefreshFailure } from '../authRefresh.ts';
 
 const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup'];
 
@@ -59,6 +60,11 @@ export const useTrackUrl = () => {
           const { data } = await httpGetOneUser();
           await actionAfterLogin(data);
         } catch (e: any) {
+    
+          if (isTransientRefreshFailure(e)) {
+            console.warn('[useTrackUrl] transient refresh failure, session kept', e);
+            return;
+          }
           if (e?.response?.status === 401 || e?.response?.status === 400) {
             localStorage.removeItem('token-538');
             localStorage.removeItem('refreshToken-538');
@@ -74,7 +80,6 @@ export const useTrackUrl = () => {
         if (publicPath) {
           return;
         }
-        // Only navigate if not already on login page to avoid conflicts
         if (location.pathname !== '/login') {
           navigate(`/login${location.search}`, { replace: true });
         }

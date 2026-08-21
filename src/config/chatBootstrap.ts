@@ -1,5 +1,6 @@
 import { Chat, XmppProvider } from '@ethora/chat-component';
 import Session from 'supertokens-web-js/recipe/session';
+import { refreshAuthTokens } from '../authRefresh';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
@@ -163,15 +164,22 @@ export const buildEthoraBaseChatConfig = ({
         try {
           const refreshed = await Session.attemptRefreshingSession();
 
-          if (!refreshed) return null;
+          if (refreshed) {
+            const tokenPayload = await Session.getAccessTokenPayloadSecurely();
+            const nextChatToken = tokenPayload?.chat_user_jwt_token;
 
-          const tokenPayload = await Session.getAccessTokenPayloadSecurely();
-          const nextChatToken = tokenPayload?.chat_user_jwt_token;
+            if (nextChatToken && typeof nextChatToken === 'string') {
+              return { accessToken: nextChatToken };
+            }
+          }
+        } catch {
+        }
 
-          if (!nextChatToken || typeof nextChatToken !== 'string') return null;
-
+        try {
+          const rotated = await refreshAuthTokens();
           return {
-            accessToken: nextChatToken,
+            accessToken: rotated.token,
+            xmppPassword: rotated.xmppPassword,
           };
         } catch {
           return null;
@@ -251,7 +259,11 @@ interface CreateChatConfigOptions {
     appToken: string;
     chatToken: string;
     ownerSession: ModelOwnerSession;
-    refreshFunction: () => Promise<{ accessToken: string; refreshToken?: string } | null>;
+    refreshFunction: () => Promise<{
+      accessToken: string;
+      refreshToken?: string;
+      xmppPassword?: string;
+    } | null>;
   };
   // Reactive mobile-viewport flag (from useIsMobileView). Drives the
   // room-list top padding so it updates on resize, not just at load.

@@ -1,4 +1,4 @@
-import { localStorageConstants } from './constants/localStorageConstants';
+import { refreshWithLogoutOnFatal } from './authRefresh';
 import {
   getExportCsv,
   httpCreateNewApp,
@@ -13,7 +13,6 @@ import {
   httpTokens,
   httpUpdateApp,
   httpUpdateUser,
-  refreshToken,
   // Phase 1 (Agents)
   httpListAgents,
   httpGetAgent,
@@ -133,41 +132,10 @@ export async function actionRefreshUserFromLocalStorage(
 ) {
   const state = getState();
 
-  const refreshed = await refreshToken();
-
-  httpTokens.token = refreshed.token;
-  httpTokens.wsToken = refreshed.wsToken;
-  httpTokens.refreshToken = refreshed.refreshToken;
-
-  const localStorageUser: ModelCurrentUser = {
-    _id: user._id,
-    appId: user.appId,
-    firstName: user.firstName,
-    homeScreen: user.homeScreen,
-    isAgreeWithTerms: false,
-    isAssetsOpen: false,
-    isProfileOpen: false,
-    lastName: user.lastName,
-    refreshToken: refreshed.refreshToken,
-    token: refreshed.token,
-    wsToken: refreshed.wsToken,
-    xmppPassword: user.xmppPassword,
-    walletAddress: user.defaultWallet.walletAddress,
-    profileImage: user.profileImage,
-    description: user.description,
-    defaultWallet: {
-      walletAddress: user.defaultWallet.walletAddress,
-    },
-    xmppUsername: user.xmppUsername,
-  };
-
-  if (user.isSuperAdmin) {
-    localStorageUser.isSuperAdmin = user.isSuperAdmin;
-  }
+  await refreshWithLogoutOnFatal();
 
   state.doSetUser(user);
-  localStorage.setItem(localStorageConstants.ETHORA_USER, JSON.stringify(user));
-  // await actionBootsrap()
+
 }
 
 export async function actionBootsrap() {

@@ -1,25 +1,30 @@
 import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
 import { ModelUserACL, OrderByType } from './models';
+import {
+  isRefreshFatalError,
+  readStoredRefreshToken,
+  refreshAuthTokens,
+  setRefreshTransport,
+  setTokenSink,
+} from './authRefresh';
 
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
   _wsToken: '',
-  _refreshToken: localStorage.getItem('refreshToken-538') || '',
   set refreshToken(token: string) {
     localStorage.setItem('refreshToken-538', token);
-    this._refreshToken = token;
   },
   get refreshToken() {
-    return this._refreshToken;
+    return readStoredRefreshToken();
   },
   set token(newToken: string) {
     localStorage.setItem('token-538', newToken);
     this._token = newToken;
   },
   get token() {
-    return this._token;
+    return localStorage.getItem('token-538') || this._token;
   },
   set wsToken(wsToken: string) {
     this._wsToken = wsToken;
@@ -188,7 +193,6 @@ function attachAuthInterceptors(client: AxiosInstance) {
     }
 
     if ((request as { _retry?: boolean })._retry) {
-      actionLogout();
       return Promise.reject(error);
     }
     (request as { _retry?: boolean })._retry = true;
@@ -197,19 +201,17 @@ function attachAuthInterceptors(client: AxiosInstance) {
       await refreshOnce();
       return client(request);
     } catch (err) {
+      if (isRefreshFatalError(err)) {
+        actionLogout();
+      }
       return Promise.reject(err);
     }
   });
 }
 
-let inFlightRefresh: Promise<unknown> | null = null;
+
 export function refreshOnce(): Promise<unknown> {
-  if (!inFlightRefresh) {
-    inFlightRefresh = refreshToken().finally(() => {
-      inFlightRefresh = null;
-    });
-  }
-  return inFlightRefresh;
+  return refreshAuthTokens();
 }
 
 attachAuthInterceptors(http);
@@ -222,24 +224,19 @@ httpV2App.interceptors.request.use((config) => {
   return config;
 }, null);
 
-export const refreshToken = async () => {
-  try {
-    const response = await http.post('/users/login/refresh', null, {
-      headers: {
-        Authorization: httpTokens.refreshToken,
-      },
-    });
-    const { token, refreshToken, wsToken } = response.data;
-    httpTokens.token = token;
-    httpTokens.refreshToken = refreshToken;
+setRefreshTransport((url, body, config) => http.post(url, body, config));
+setTokenSink(({ token, refreshToken, wsToken }) => {
+  httpTokens.token = token;
+  httpTokens.refreshToken = refreshToken;
+ 
+  if (wsToken) {
     httpTokens.wsToken = wsToken;
-
-    return httpTokens;
-  } catch (error) {
-    actionLogout();
-    console.error('Token refresh failed:', error);
-    throw error;
   }
+});
+
+export const refreshToken = async () => {
+  await refreshAuthTokens();
+  return httpTokens;
 };
 
 export async function singin() {
