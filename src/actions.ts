@@ -1,4 +1,4 @@
-import { refreshWithLogoutOnFatal } from './authRefresh';
+import { markSessionKilled, refreshWithLogoutOnFatal } from './authRefresh';
 import {
   getExportCsv,
   httpCreateNewApp,
@@ -249,9 +249,14 @@ export async function actionUpdateUser(fd: FormData) {
   };
 }
 
+let logoutStarted = false;
+
 export function actionLogout() {
+  if (logoutStarted) return null;
+  logoutStarted = true;
+  markSessionKilled();
   localStorage.clear();
-  window.location.pathname = '/login';
+  window.location.replace('/login');
   return null;
 }
 

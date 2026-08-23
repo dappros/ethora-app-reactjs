@@ -4,7 +4,11 @@ export type RefreshErrorCode =
   | 'REFRESH_IN_PROGRESS'
   | 'REFRESH_TOKEN_ALREADY_ROTATED'
   | 'REFRESH_TOKEN_REUSE_DETECTED'
-  | 'REFRESH_TOKEN_NOT_FOUND';
+  | 'REFRESH_TOKEN_NOT_FOUND'
+  // Synthesized client-side: the refresh endpoint answered 401/403 without
+  // any machine-readable code — the token itself was rejected (expired,
+  // revoked, or from a family the backend already killed).
+  | 'REFRESH_UNAUTHORIZED';
 
 export interface RefreshResult {
   token: string;
@@ -223,6 +227,19 @@ const performRefresh = async (
         throw new RefreshFatalError(code);
       }
 
+      // A 401/403 straight off the refresh endpoint with no recognised race
+      // code means the refresh token itself was rejected (expired, rotated
+      // away, or its family revoked) — older backends answer exactly this:
+      // a plain 401 with no code. Treating it as transient is what produced
+      // the endless /refresh 401 spam: the session was never declared dead,
+      // so every subsequent 401 on any request re-triggered another doomed
+      // refresh. It is fatal — log out and stop asking.
+      const status = (error as { response?: { status?: number } })?.response
+        ?.status;
+      if (status === 401 || status === 403) {
+        throw new RefreshFatalError('REFRESH_UNAUTHORIZED');
+      }
+
       throw error;
     }
   }
@@ -248,7 +265,27 @@ const withLock = <T,>(callback: () => Promise<T>): Promise<T> => {
 
 let inflight: Promise<RefreshResult> | null = null;
 
+// Once a logout has started, no refresh may run and (crucially) no refresh
+// result may be persisted. Without this, an in-flight rotation that resolves
+// AFTER actionLogout() cleared localStorage writes token-538 back, the login
+// page sees a token again, navigates into the app, gets a 401, logs out,
+// reloads - an infinite login-screen flicker loop (each cycle remounts the
+// auth screen and refires its /ping/version fetch).
+let sessionKilled = false;
+
+export function markSessionKilled(): void {
+  sessionKilled = true;
+}
+
+export function isSessionKilled(): boolean {
+  return sessionKilled;
+}
+
 export function refreshAuthTokens(): Promise<RefreshResult> {
+  if (sessionKilled) {
+    // Plain (non-fatal) error: callers must not react with another logout.
+    return Promise.reject(new Error('Session is logged out'));
+  }
   if (inflight) return inflight;
 
   const tokenBeforeLock = readStoredRefreshToken();

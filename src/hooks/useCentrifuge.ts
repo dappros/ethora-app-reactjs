@@ -28,15 +28,17 @@ export function useCentrifugeChannel() {
   const [connected, setConnected] = useState(false);
 
   const getToken = async () => {
-    // Reuse the existing wsToken if we refreshed recently. This caps how often
-    // a reconnect loop can hit /users/login/refresh, regardless of how many
-    // times Centrifuge retries.
+    // Cap how often a reconnect loop can hit /users/login/refresh, no matter
+    // how many times Centrifuge retries. The stamp is taken BEFORE the call
+    // and unconditionally: the old "only throttle when wsToken exists" guard
+    // meant a session whose refresh kept failing (wsToken never filled)
+    // hammered the endpoint on every reconnect attempt.
     const now = Date.now();
-    if (httpTokens.wsToken && now - lastWsTokenRefresh < WS_TOKEN_MIN_INTERVAL_MS) {
+    if (now - lastWsTokenRefresh < WS_TOKEN_MIN_INTERVAL_MS) {
       return httpTokens.wsToken;
     }
+    lastWsTokenRefresh = now;
     await refreshOnce();
-    lastWsTokenRefresh = Date.now();
     return httpTokens.wsToken;
   };
 

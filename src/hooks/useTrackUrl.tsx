@@ -23,7 +23,13 @@ export const useTrackUrl = () => {
       if (publicPath) {
         return;
       }
-      return navigate(`/login${location.search}`);
+      // Guard against re-pushing /login onto itself: each push creates a new
+      // history entry and a fresh location object, re-rendering the whole
+      // route tree for nothing.
+      if (location.pathname !== '/login') {
+        navigate(`/login${location.search}`, { replace: true });
+      }
+      return;
     }
 
     if (location.pathname === '/') {

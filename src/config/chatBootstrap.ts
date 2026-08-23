@@ -1,6 +1,6 @@
 import { Chat, XmppProvider } from '@ethora/chat-component';
 import Session from 'supertokens-web-js/recipe/session';
-import { refreshAuthTokens } from '../authRefresh';
+import { refreshWithLogoutOnFatal } from '../authRefresh';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
@@ -173,10 +173,18 @@ export const buildEthoraBaseChatConfig = ({
             }
           }
         } catch {
+          // SuperTokens isn't configured on every deployment — fall through
+          // to the Ethora refresh below.
         }
 
         try {
-          const rotated = await refreshAuthTokens();
+          // Logout-on-fatal matters here: if this silently returned null on
+          // a dead refresh token, the chat-component would log ITSELF out,
+          // then re-login from the same stale config.userLogin.user and
+          // retry — while the dashboard session stayed "alive" and kept
+          // feeding it dead credentials. A fatal verdict must end the
+          // dashboard session too.
+          const rotated = await refreshWithLogoutOnFatal();
           return {
             accessToken: rotated.token,
             xmppPassword: rotated.xmppPassword,

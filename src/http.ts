@@ -3,6 +3,7 @@ import { actionLogout } from './actions';
 import { ModelUserACL, OrderByType } from './models';
 import {
   isRefreshFatalError,
+  isSessionKilled,
   readStoredRefreshToken,
   refreshAuthTokens,
   setRefreshTransport,
@@ -226,9 +227,16 @@ httpV2App.interceptors.request.use((config) => {
 
 setRefreshTransport((url, body, config) => http.post(url, body, config));
 setTokenSink(({ token, refreshToken, wsToken }) => {
+  // Never resurrect a logged-out session: if a logout already started here,
+  // or another tab cleared the stored refresh token, a late-resolving
+  // rotation must NOT write its tokens back into localStorage - that
+  // reappearing token is what fed the login-screen redirect/reload loop.
+  if (isSessionKilled() || !readStoredRefreshToken()) {
+    return;
+  }
   httpTokens.token = token;
   httpTokens.refreshToken = refreshToken;
- 
+
   if (wsToken) {
     httpTokens.wsToken = wsToken;
   }
