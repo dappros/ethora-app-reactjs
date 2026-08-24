@@ -15,6 +15,7 @@ export interface RefreshResult {
   refreshToken: string;
   wsToken: string;
   xmppPassword?: string;
+  fileToken?: string;
 }
 
 export class RefreshFatalError extends Error {
@@ -144,6 +145,7 @@ type PostFn = (
     refreshToken: string;
     wsToken: string;
     xmppPassword?: string;
+    fileToken?: string;
   };
 }>;
 
@@ -173,6 +175,7 @@ const requestRotation = async (refreshToken: string): Promise<RefreshResult> => 
     refreshToken: response?.data?.refreshToken || '',
     wsToken: response?.data?.wsToken || '',
     xmppPassword: response?.data?.xmppPassword,
+    fileToken: response?.data?.fileToken,
   };
 
   if (!result.token || !result.refreshToken) {

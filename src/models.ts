@@ -13,6 +13,7 @@ export interface ModelCurrentUser {
   token: string;
   refreshToken: string;
   wsToken: string;
+  fileToken: string;
   walletAddress: string;
   xmppPassword: string;
   xmppUsername: string;
@@ -312,6 +313,7 @@ export interface ModelOwnerSession {
     accessToken: string;
     refreshToken: string;
     wsToken: string;
+    fileToken?: string;
   };
   owner: {
     _id: string;
