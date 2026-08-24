@@ -188,6 +188,7 @@ export const buildEthoraBaseChatConfig = ({
           return {
             accessToken: rotated.token,
             xmppPassword: rotated.xmppPassword,
+            fileToken: rotated.fileToken,
           };
         } catch {
           return null;
@@ -271,6 +272,7 @@ interface CreateChatConfigOptions {
       accessToken: string;
       refreshToken?: string;
       xmppPassword?: string;
+      fileToken?: string;
     } | null>;
   };
   // Reactive mobile-viewport flag (from useIsMobileView). Drives the
@@ -303,6 +305,7 @@ function makeChatUserLogin(user: {
   defaultWallet?: { walletAddress: string };
   token?: string;
   refreshToken?: string;
+  fileToken?: string;
 } | null | undefined): ChatUserLoginUser | null {
   if (!user) return null;
   const xmppUsername = user.xmppUsername || '';
@@ -323,6 +326,9 @@ function makeChatUserLogin(user: {
     xmppPassword,
     token: user.token || '',
     refreshToken: user.refreshToken || '',
+    // Signs secure-files.* URLs at render time (appendFileToken). Empty
+    // here means every /v2/files/secure image loads unsigned and 403s.
+    fileToken: user.fileToken || '',
     firstName: user.firstName || '',
     lastName: user.lastName || '',
     profileImage: user.profileImage || '',

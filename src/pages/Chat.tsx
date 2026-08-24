@@ -108,6 +108,7 @@ const MemoizedChat = React.memo(function ChatComponent({
             accessToken: fresh.chatTokens.accessToken,
             refreshToken: fresh.chatTokens.refreshToken,
             xmppPassword: fresh.owner.xmppPassword,
+            fileToken: fresh.chatTokens.fileToken,
           };
         } catch {
           return null;
@@ -136,6 +137,7 @@ const MemoizedChat = React.memo(function ChatComponent({
       currentUser?.token,
       currentUser?.xmppUsername,
       currentUser?.xmppPassword,
+      currentUser?.fileToken,
       currentUser?._id,
       ownerOverride,
       isMobileView,
