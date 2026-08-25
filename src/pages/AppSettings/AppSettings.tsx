@@ -186,6 +186,12 @@ export default function AppSettings() {
     useState(false);
   const [usersCanFree, setUsersCanFree] = useState(false);
 
+  // sign-on. Held under the App's own (negative) field name so the value that
+  // travels to the API is never second-guessed; SignonOptions flips it for the
+  // positively-phrased checkbox and nothing else in the app inverts it.
+  const [userRegistrationDisabled, setUserRegistrationDisabled] =
+    useState(false);
+
   // chats
   const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
 
@@ -220,6 +226,7 @@ export default function AppSettings() {
       enableApple,
       enableFacebook,
       enableMetamask,
+      userRegistrationDisabled,
       domainName,
       firebaseWebConfigString,
       bundleId,
@@ -253,6 +260,7 @@ export default function AppSettings() {
     enableApple,
     enableFacebook,
     enableMetamask,
+    userRegistrationDisabled,
     domainName,
     firebaseWebConfigString,
     bundleId,
@@ -283,6 +291,7 @@ export default function AppSettings() {
         enableApple: app.signonOptions.includes('apple'),
         enableFacebook: app.signonOptions.includes('facebook'),
         enableMetamask: app.signonOptions.includes('metamask'),
+        userRegistrationDisabled: Boolean(app.userRegistrationDisabled),
         domainName: app.domainName,
         firebaseWebConfigString: app.firebaseWebConfigString || '',
         bundleId: app.bundleId,
@@ -360,6 +369,10 @@ export default function AppSettings() {
     }
 
     body.signonOptions = signonOptions;
+
+    // Sent unconditionally (and as a plain boolean) so the owner can re-open
+    // registration as well as close it. Never inverted outside SignonOptions.
+    body.userRegistrationDisabled = userRegistrationDisabled;
 
     // web app
     if (domainName) {
@@ -441,6 +454,7 @@ export default function AppSettings() {
           enableApple,
           enableFacebook,
           enableMetamask,
+          userRegistrationDisabled,
           domainName,
           firebaseWebConfigString,
           bundleId,
@@ -571,6 +585,9 @@ export default function AppSettings() {
     setEnableApple(app.signonOptions.includes('apple'));
     setEnableFacebook(app.signonOptions.includes('facebook'));
     setEnableMetamask(app.signonOptions.includes('metamask'));
+    // The admin apps list is stored unmapped, so a legacy App document can
+    // arrive with no such key; absent means registration allowed.
+    setUserRegistrationDisabled(Boolean(app.userRegistrationDisabled));
     setDomainName(app.domainName);
     setFirebaseWebConfigString(
       app.firebaseWebConfigString ? app.firebaseWebConfigString : ''
@@ -735,6 +752,8 @@ export default function AppSettings() {
             className="grid grid-rows-1 lg:ml-4 h-full "
           >
             <SignonOptions
+              userRegistrationDisabled={userRegistrationDisabled}
+              setUserRegistrationDisabled={setUserRegistrationDisabled}
               enableEmail={enableEmail}
               setEnableEmail={setEnableEmail}
               enableGoogle={enableGoogle}

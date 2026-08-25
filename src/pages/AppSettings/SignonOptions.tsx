@@ -4,6 +4,11 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useTranslation } from '../../i18n/useTranslation';
 
 interface Props {
+  // The App field is negative (`userRegistrationDisabled`); this component is
+  // the ONE place in the codebase allowed to invert it, because the checkbox
+  // is phrased positively. Everything else does a plain truthy check.
+  userRegistrationDisabled: boolean;
+  setUserRegistrationDisabled: (disabled: boolean) => void;
   enableEmail: boolean;
   setEnableEmail: (on: boolean) => void;
   enableGoogle: boolean;
@@ -18,6 +23,8 @@ interface Props {
 }
 
 export function SignonOptions({
+  userRegistrationDisabled,
+  setUserRegistrationDisabled,
   enableEmail,
   setEnableEmail,
   enableGoogle,
@@ -60,6 +67,43 @@ export function SignonOptions({
       <p className="font-sans text-sm mb-8">
         {t('appSettingsSignonOptions.description')}
       </p>
+      <p className="font-sans text-[24px] font-medium mb-2">
+        {t('appSettingsSignonOptions.userRegistrationHeading')}
+      </p>
+      <p className="font-sans text-[12px] text-gray-500 mb-4">
+        {t('appSettingsSignonOptions.userRegistrationDescription')}
+      </p>
+      <Field className="flex items-center cursor-pointer mb-2">
+        <Checkbox
+          className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+          checked={!userRegistrationDisabled}
+          onChange={(allowed: boolean) => setUserRegistrationDisabled(!allowed)}
+        >
+          <IconCheckbox className="hidden group-data-[checked]:block" />
+        </Checkbox>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsSignonOptions.allowUserRegistrationLabel')}
+        </Label>
+      </Field>
+      {userRegistrationDisabled ? (
+        <div className="flex items-start gap-2 mb-8">
+          <WarningAmberIcon
+            sx={{
+              fontSize: 16,
+              color: '#f59e0b',
+              marginTop: '2px',
+              flexShrink: 0,
+            }}
+          />
+          <p className="font-sans text-[14px] text-yellow-600 font-medium">
+            {t('appSettingsSignonOptions.registrationClosedWarning')}
+          </p>
+        </div>
+      ) : (
+        <p className="font-sans text-[12px] text-gray-500 mb-8">
+          {t('appSettingsSignonOptions.registrationOpenHint')}
+        </p>
+      )}
       <p className="font-sans text-[24px] font-medium mb-2">
         {t('appSettingsSignonOptions.standardLoginHeading')}
       </p>

@@ -79,6 +79,9 @@ export async function actionGetConfig(domainName?: string) {
     ),
     appSecret: '',
     allowUsersToCreateRooms: result.allowUsersToCreateRooms,
+    // Apps created before the backend gained this field send nothing; absent
+    // means registration is allowed.
+    userRegistrationDisabled: result.userRegistrationDisabled ?? false,
     aiBot: result.aiBot,
   };
 

@@ -123,6 +123,16 @@ export const appSettings2 = {
     // --- SignonOptions.tsx ---
     'appSettingsSignonOptions.description':
       'Choose which sign on options to enable in your App. This controls how your Users create new accounts and login.',
+    // --- SignonOptions.tsx: self-service registration switch ---
+    'appSettingsSignonOptions.userRegistrationHeading': 'User registration',
+    'appSettingsSignonOptions.userRegistrationDescription':
+      'Controls whether visitors can create their own account in your App. This is enforced by the server, not just hidden in the interface.',
+    'appSettingsSignonOptions.allowUserRegistrationLabel':
+      'Allow new users to register',
+    'appSettingsSignonOptions.registrationClosedWarning':
+      'Registration is closed. Only you can add users - from the dashboard, by batch import, or via the API. Users who already have an account can still sign in, reset their password and stay signed in.',
+    'appSettingsSignonOptions.registrationOpenHint':
+      'Anyone who reaches your App can sign up. Turn this off if you provision every user yourself.',
     'appSettingsSignonOptions.standardLoginHeading': 'Standard login',
     'appSettingsSignonOptions.standardLoginDescription':
       'User is required to create an account with their e-mail and memorize the password. They will need to confirm their e-mail address by clicking a link. E-mails from the platform can be customized with your branding.',
@@ -424,6 +434,16 @@ export const appSettings2 = {
     // --- SignonOptions.tsx ---
     'appSettingsSignonOptions.description':
       'Choisissez les options de connexion à activer dans votre Application. Cela détermine comment vos Utilisateurs créent de nouveaux comptes et se connectent.',
+    // --- SignonOptions.tsx: self-service registration switch ---
+    'appSettingsSignonOptions.userRegistrationHeading': 'Inscription des utilisateurs',
+    'appSettingsSignonOptions.userRegistrationDescription':
+      "Détermine si les visiteurs peuvent créer eux-mêmes un compte dans votre App. La règle est appliquée par le serveur, pas seulement masquée dans l'interface.",
+    'appSettingsSignonOptions.allowUserRegistrationLabel':
+      'Autoriser les nouveaux utilisateurs à s\'inscrire',
+    'appSettingsSignonOptions.registrationClosedWarning':
+      "Les inscriptions sont fermées. Vous seul pouvez ajouter des utilisateurs - depuis le tableau de bord, par import groupé ou via l'API. Les utilisateurs qui ont déjà un compte peuvent toujours se connecter, réinitialiser leur mot de passe et rester connectés.",
+    'appSettingsSignonOptions.registrationOpenHint':
+      'Toute personne qui accède à votre App peut créer un compte. Désactivez cette option si vous créez vous-même chaque utilisateur.',
     'appSettingsSignonOptions.standardLoginHeading': 'Connexion standard',
     'appSettingsSignonOptions.standardLoginDescription':
       'L’Utilisateur doit créer un compte avec son e-mail et mémoriser le mot de passe. Il devra confirmer son adresse e-mail en cliquant sur un lien. Les e-mails envoyés par la plateforme peuvent être personnalisés avec votre image de marque.',
@@ -732,6 +752,16 @@ export const appSettings2 = {
     // --- SignonOptions.tsx ---
     'appSettingsSignonOptions.description':
       'Elige qué opciones de inicio de sesión habilitar en tu Aplicación. Esto controla cómo tus Usuarios crean nuevas cuentas e inician sesión.',
+    // --- SignonOptions.tsx: self-service registration switch ---
+    'appSettingsSignonOptions.userRegistrationHeading': 'Registro de usuarios',
+    'appSettingsSignonOptions.userRegistrationDescription':
+      'Controla si los visitantes pueden crear su propia cuenta en tu App. Lo aplica el servidor, no es solo una opción oculta en la interfaz.',
+    'appSettingsSignonOptions.allowUserRegistrationLabel':
+      'Permitir que se registren nuevos usuarios',
+    'appSettingsSignonOptions.registrationClosedWarning':
+      'El registro está cerrado. Solo tú puedes añadir usuarios: desde el panel, mediante importación por lotes o a través de la API. Quienes ya tienen una cuenta pueden seguir iniciando sesión, restablecer su contraseña y mantener la sesión abierta.',
+    'appSettingsSignonOptions.registrationOpenHint':
+      'Cualquiera que llegue a tu App puede registrarse. Desactívalo si eres tú quien crea cada usuario.',
     'appSettingsSignonOptions.standardLoginHeading':
       'Inicio de sesión estándar',
     'appSettingsSignonOptions.standardLoginDescription':

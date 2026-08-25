@@ -50,6 +50,15 @@ export const authFlows = {
     'authForgetPasswordForm.noAccount': "Don't have an account?",
     'authForgetPasswordForm.signUp': 'Sign Up',
 
+    // Register/RegistrationOpenRoute.tsx + the social/wallet buttons, for
+    // apps whose owner has closed self-service registration.
+    'authRegistrationClosed.notice':
+      'Registration is closed for this app.',
+    'authRegistrationClosed.socialNoAccount':
+      'No account found for this email. Registration is closed for this app - ask the app owner to add you.',
+    'authRegistrationClosed.walletNoAccount':
+      'No account found for this wallet. Registration is closed for this app - ask the app owner to add you.',
+
     // Forms/LoginForm.tsx
     'authLoginForm.title': 'Sign In',
     'authLoginForm.noAccount': "Don't have an account?",
@@ -189,6 +198,15 @@ export const authFlows = {
     'authForgetPasswordForm.backToSignIn': 'Retour à la connexion',
     'authForgetPasswordForm.noAccount': "Vous n'avez pas de compte ?",
     'authForgetPasswordForm.signUp': "S'inscrire",
+
+    // Register/RegistrationOpenRoute.tsx + the social/wallet buttons, for
+    // apps whose owner has closed self-service registration.
+    'authRegistrationClosed.notice':
+      'Les inscriptions sont fermées pour cette application.',
+    'authRegistrationClosed.socialNoAccount':
+      "Aucun compte trouvé pour cette adresse e-mail. Les inscriptions sont fermées pour cette application - demandez au propriétaire de vous ajouter.",
+    'authRegistrationClosed.walletNoAccount':
+      "Aucun compte trouvé pour ce portefeuille. Les inscriptions sont fermées pour cette application - demandez au propriétaire de vous ajouter.",
 
     // Forms/LoginForm.tsx
     'authLoginForm.title': 'Connexion',
@@ -334,6 +352,15 @@ export const authFlows = {
     'authForgetPasswordForm.backToSignIn': 'Volver a iniciar sesión',
     'authForgetPasswordForm.noAccount': '¿No tienes una cuenta?',
     'authForgetPasswordForm.signUp': 'Regístrate',
+
+    // Register/RegistrationOpenRoute.tsx + the social/wallet buttons, for
+    // apps whose owner has closed self-service registration.
+    'authRegistrationClosed.notice':
+      'El registro está cerrado en esta aplicación.',
+    'authRegistrationClosed.socialNoAccount':
+      'No se encontró ninguna cuenta con este correo. El registro está cerrado en esta aplicación: pide al propietario que te añada.',
+    'authRegistrationClosed.walletNoAccount':
+      'No se encontró ninguna cuenta con esta cartera. El registro está cerrado en esta aplicación: pide al propietario que te añada.',
 
     // Forms/LoginForm.tsx
     'authLoginForm.title': 'Iniciar sesión',
