@@ -100,6 +100,13 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
       if (
         errorData?.errors?.[0]?.msg === 'no extWalletRecord for walletAddres'
       ) {
+        // Unknown wallet. Normally this opens the "tell us your name" dialog
+        // and registers; with registration closed there is nothing to open -
+        // POST /users would answer 403 REGISTRATION_DISABLED anyway.
+        if (config?.userRegistrationDisabled) {
+          toast.error(t('authRegistrationClosed.walletNoAccount'));
+          return;
+        }
         setIsModalOpen(true);
       } else {
         toast.error(t('authMetamaskButton.loginFailed'));

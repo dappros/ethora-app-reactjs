@@ -60,6 +60,13 @@ export const FacebookButton = () => {
           }
         }
 
+        // Registration closed: this button is login-only. Never fall into the
+        // register path - say plainly that there is no account and stop.
+        if (shouldRegister && config?.userRegistrationDisabled) {
+          toast.error(t('authRegistrationClosed.socialNoAccount'));
+          return;
+        }
+
         if (shouldRegister) {
           try {
             const userResult = await httpRegisterSocial(

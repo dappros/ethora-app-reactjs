@@ -6,6 +6,7 @@ import { AppStatistics } from './pages/AppStatistics';
 import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
+import RegistrationOpenRoute from './pages/AuthPage/Register/RegistrationOpenRoute';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
@@ -43,10 +44,15 @@ export const router = createBrowserRouter(
               Component: LoginComponent,
             },
             {
+              // Guarded: apps that closed self-service registration bounce
+              // this to /login with a notice.
               path: '/register',
-              Component: Register,
+              Component: RegistrationOpenRoute,
             },
             {
+              // NOT guarded - this is the owner-provisioned user setting their
+              // permanent password from the temp one they were emailed. It has
+              // to keep working precisely when registration is closed.
               path: '/tempPassword/',
               Component: Register,
             },

@@ -70,22 +70,27 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
         </Box>
         <LoginStep />
       </Box>
-      <Typography align="center" component="span" fontSize={'14px'}>
-        {t('authLoginForm.noAccount')}{' '}
-        <Typography
-          style={{
-            textDecoration: 'underline',
-            color: config?.primaryColor ? config.primaryColor : '#0052CD',
-            fontSize: '14px',
-            display: 'inline',
-            cursor: 'pointer',
-            fontWeight: '400px',
-          }}
-          onClick={() => navigate('/register')}
-        >
-          {t('authLoginForm.signUp')}
+      {/* No sign-up entry point when the app has closed self-service
+          registration. UX only - /register is guarded in the router and the
+          endpoints are gated server-side. */}
+      {!config.userRegistrationDisabled && (
+        <Typography align="center" component="span" fontSize={'14px'}>
+          {t('authLoginForm.noAccount')}{' '}
+          <Typography
+            style={{
+              textDecoration: 'underline',
+              color: config?.primaryColor ? config.primaryColor : '#0052CD',
+              fontSize: '14px',
+              display: 'inline',
+              cursor: 'pointer',
+              fontWeight: '400px',
+            }}
+            onClick={() => navigate('/register')}
+          >
+            {t('authLoginForm.signUp')}
+          </Typography>
         </Typography>
-      </Typography>
+      )}
     </Box>
   );
 };

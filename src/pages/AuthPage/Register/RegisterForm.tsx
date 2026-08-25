@@ -127,6 +127,23 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     return null;
   }
 
+  // Belt-and-braces. /register is guarded in the router, but this same form is
+  // also mounted by /tempPassword, which stays open on purpose (that route
+  // belongs to a user the owner provisioned themselves). The sign-up form must
+  // never render on an app that closed registration - everything behind it
+  // answers 403 REGISTRATION_DISABLED. RegisterLayout still renders the
+  // "Already have an account? Sign In" link underneath this.
+  if (config.userRegistrationDisabled) {
+    return (
+      <Typography
+        align="center"
+        sx={{ fontSize: '14px', color: '#8C8C8C', paddingTop: '16px' }}
+      >
+        {t('authRegistrationClosed.notice')}
+      </Typography>
+    );
+  }
+
   const onSubmit = async ({ email, firstName, lastName, password }: Inputs) => {
     const suggested = suggestEmail(email);
     if (suggested && suggested !== email) {

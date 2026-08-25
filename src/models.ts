@@ -161,6 +161,13 @@ export interface ModelApp {
   firebaseServiceAccountUploaded?: boolean;
   appSecret: string;
   allowUsersToCreateRooms: boolean;
+  // Self-service registration switch (ethora-backend 2609+). Negative on
+  // purpose: App documents that predate the field come back without it, and
+  // absent must mean "registration allowed". actions.ts coerces the absent
+  // case to `false`, so everything downstream sees a real boolean and every
+  // consumer is a plain truthy check - do NOT invert it into a positive alias.
+  // The single inversion lives at the admin checkbox in AppSettings.
+  userRegistrationDisabled: boolean;
   // Per-app default identity stamped on broadcast announcements when the
   // /v2/chats/broadcast caller doesn't supply `sender` in the request body.
   // Without this the chat-component renders broadcasts as "Deleted User".
