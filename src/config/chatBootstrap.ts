@@ -338,7 +338,21 @@ function makeChatUserLogin(user: {
       user.defaultWallet?.walletAddress ||
       '',
     defaultWallet: user.defaultWallet || { walletAddress: '' },
-  } as ChatUserLoginUser;
+    // The double cast is load-bearing, not laziness. `fileToken` exists in
+    // the chat-component's own source (lib/src/types/models/user.model.ts)
+    // and is read by appendFileToken at render time, but the published
+    // 26.7.1 `dist/types/models/user.model.d.ts` does not declare it - the
+    // shipped types lag the source. That makes `fileToken` an excess
+    // property here, which tips the single cast over into TS2352
+    // ("neither type sufficiently overlaps") and breaks `npm run build`
+    // for the whole release line, since build is `tsc -b && vite build`.
+    //
+    // Widening through `unknown` is the narrowest way to keep the build
+    // green without inventing values for `_id` / `appId` / `username`,
+    // which the component's User type requires and this call site does not
+    // have. Drop the `unknown` hop once chat-component republishes types
+    // that declare `fileToken`.
+  } as unknown as ChatUserLoginUser;
 }
 
 export function createChatConfig({
