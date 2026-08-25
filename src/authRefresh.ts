@@ -57,7 +57,17 @@ export const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken-538';
 export const TOKEN_STORAGE_KEY = 'token-538';
 
 export const REFRESH_ENDPOINT = '/users/login/refresh';
-const LOCK_NAME = 'ethora-auth-refresh';
+// Deliberately NOT 'ethora-auth-refresh': the chat-component's own SDK
+// module (@ethora/chat-component/networking/authRefresh) uses that exact
+// name for ITS Web Lock, and Web Locks are scoped per ORIGIN, not per JS
+// module/bundle. When this file's refreshAuthTokens() is invoked as the
+// value of config.refreshTokens.refreshFunction, it runs INSIDE the
+// component's already-held lock of that name; re-acquiring the same name
+// here deadlocks the tab forever (confirmed via navigator.locks.query():
+// held + pending both report the SAME clientId - the tab waiting on a
+// lock it itself already holds). A distinct name serializes this file's
+// own callers among themselves without colliding with the SDK's lock.
+const LOCK_NAME = 'ethora-webapp-auth-refresh';
 
 const IN_PROGRESS_MAX_ATTEMPTS = 3;
 const IN_PROGRESS_BASE_DELAY_MS = 300;
