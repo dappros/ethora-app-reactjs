@@ -9,6 +9,7 @@ const THIRD_PARTY = {
     'https://js.stripe.com',
     'https://challenges.cloudflare.com',
     'https://apis.google.com',
+    'https://us-assets.i.posthog.com',
   ],
   connect: [
     'https://www.googletagmanager.com',
@@ -21,6 +22,8 @@ const THIRD_PARTY = {
     'https://api.hsforms.com',
     'https://*.googleapis.com',
     'https://*.firebaseio.com',
+    'https://us.i.posthog.com',
+    'https://us-assets.i.posthog.com',
   ],
   frame: [
     'https://js.stripe.com',
