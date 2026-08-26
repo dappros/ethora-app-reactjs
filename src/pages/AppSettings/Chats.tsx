@@ -14,6 +14,7 @@ import { IconMinus } from '../../components/Icons/IconMinus';
 import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
 import { httpListBotInstances, httpLeaveChatAgentBotInstance } from '../../http';
 import { actionListAgents } from '../../actions';
+import { phCapture } from '../../posthog';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { ModelAgent, ModelBotInstance } from '../../models';
@@ -192,6 +193,14 @@ export function Chats({
       await createAppChat(appId, chatTitle, true)
       const { data } = await getDefaultRooms(appId)
       setDefaultChatRooms(data)
+
+      const createdRoom = (data as ModelAppDefaulRooom[]).find(
+        (room) => room.title === chatTitle
+      )
+      phCapture('chat_room_created', {
+        room_id: createdRoom?.jid || createdRoom?.chatId || '',
+        is_private: false,
+      })
       
       // Refresh app config to update defaultRooms in the store
       const { actionGetConfig } = await import('../../actions')
