@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_API: string;
+  readonly VITE_POSTHOG_KEY: string;
+  readonly VITE_POSTHOG_HOST: string;
   readonly VITE_APP_XMPP_SERVICE: string;
   readonly VITE_XMPP_HOST: string;
   readonly VITE_XMPP_SERVICE: string;

@@ -1,6 +1,7 @@
 import { Component, ReactNode } from 'react';
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
+import { phCapture } from '../../posthog';
 
 interface Props {
   children: ReactNode;
@@ -60,6 +61,10 @@ export class RouterErrorBoundary extends Component<Props, State> {
       )
     ) {
       console.error('Router Error Boundary caught an error:', error, errorInfo);
+      phCapture('app_error', {
+        error_message: error.message,
+        screen: window.location.pathname,
+      });
     }
   }
 

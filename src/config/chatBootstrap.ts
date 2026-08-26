@@ -1,6 +1,7 @@
 import { Chat, XmppProvider } from '@ethora/chat-component';
 import Session from 'supertokens-web-js/recipe/session';
 import { refreshWithLogoutOnFatal } from '../authRefresh';
+import { phCapture } from '../posthog';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
@@ -416,6 +417,22 @@ export function createChatConfig({
       disableCreate: app?.allowUsersToCreateRooms === false,
     },
     defaultRooms: app?.defaultRooms || [],
+    eventHandlers: {
+      onMessageSent: ({ roomJID, messageType, metadata }) => {
+        const mimetype = String(
+          (metadata as { mimetype?: string } | undefined)?.mimetype || ''
+        );
+        phCapture('chat_message_sent', {
+          room_id: roomJID,
+          message_type:
+            messageType === 'media'
+              ? mimetype.startsWith('image')
+                ? 'image'
+                : 'file'
+              : 'text',
+        });
+      },
+    },
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
     inAppNotifications: {

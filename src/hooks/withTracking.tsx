@@ -1,5 +1,6 @@
 import Clarity from '@microsoft/clarity';
 import { ComponentType, useEffect, useState } from 'react';
+import { phCapture } from '../posthog.ts';
 import { useAppStore } from '../store/useAppStore.ts';
 
 declare global {
@@ -32,36 +33,6 @@ export const initializeGA4 = (measurementId: string) => {
   document.head.appendChild(inlineScript);
 };
 
-export const initializeGTM = (gtmId: string) => {
-  if (!gtmId) {
-    console.warn('Missing GTM container ID');
-    return;
-  }
-
-  const gtmScript = document.createElement('script');
-  gtmScript.type = 'text/javascript';
-  gtmScript.textContent = `
-    (function(w,d,s,l,i){
-      w[l]=w[l]||[];
-      w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-      var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),
-          dl=l!='dataLayer'?'&l='+l:'';
-      j.async=true;
-      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-      f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','${gtmId}');
-  `;
-  document.head.appendChild(gtmScript);
-
-  const gtmNoscript = document.createElement('noscript');
-  gtmNoscript.innerHTML = `
-    <iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe>
-  `;
-  document.body.appendChild(gtmNoscript);
-};
-
 export const initializeClarity = (clarityId: string) => {
   try {
     Clarity.init(clarityId);
@@ -79,7 +50,6 @@ export function withTracking<T>(Component: ComponentType<T>) {
     const allowedDomains =
       import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
     const currentDomain = window.location.hostname;
-    const GTM_ID = import.meta.env.VITE_GTM_ID;
     const GA_ID = import.meta.env.VITE_GA_ID;
 
     useEffect(() => {
@@ -90,19 +60,20 @@ export function withTracking<T>(Component: ComponentType<T>) {
 
       if (isInitialized) return;
 
-      // Google GA and GTM
-      initializeGTM(GTM_ID);
       initializeGA4(GA_ID);
       initializeClarity(import.meta.env.VITE_CLARITY_ID);
 
       setIsInitialized(true);
 
       return () => {};
-    }, [GA_ID, GTM_ID, allowedDomains, config, currentDomain, isInitialized]);
+    }, [GA_ID, allowedDomains, config, currentDomain, isInitialized]);
 
     return <Component {...props} logLogin={logLogin} logLogout={logLogout} />;
   };
 }
+
+const toPosthogMethod = (method: string) =>
+  method === 'metamask' ? 'wallet' : method;
 
 export const logLogin = (method: string, userId?: string) => {
   if (typeof window.gtag === 'function') {
@@ -111,6 +82,7 @@ export const logLogin = (method: string, userId?: string) => {
       user_id: userId,
     });
   }
+  phCapture('login_completed', { method: toPosthogMethod(method) });
   return { method, userId };
 };
 
@@ -127,6 +99,7 @@ export const logSignup = (method: string, userId?: string, email?: string) => {
       method: method,
     });
   }
+  phCapture('signup_completed', { method: toPosthogMethod(method) });
   return { method, userId };
 };
 

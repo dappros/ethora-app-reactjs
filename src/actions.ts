@@ -28,6 +28,7 @@ import {
   httpGetOwnerSession,
 } from './http';
 import { ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
+import { phCapture, phIdentify, phReset } from './posthog';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
 import { sleep } from './utils/sleep';
@@ -123,6 +124,16 @@ export async function actionAfterLogin(data: any) {
   if (data.user.isSuperAdmin) {
     user.isSuperAdmin = data.user.isSuperAdmin;
   }
+
+  // Every auth path funnels through here - fresh logins (email / google /
+  // facebook / metamask), signup, and the session restore in useTrackUrl -
+  // so this single identify covers both "login" and "refresh with a valid
+  // token" without extra call sites.
+  phIdentify(data.user._id, {
+    email: user.email,
+    name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+    created_at: data.user.createdAt,
+  });
 
   state.doSetUser(user);
   // await actionBootsrap()
@@ -236,6 +247,9 @@ export async function actionUpdateUser(fd: FormData) {
   const {
     data: { user },
   } = await httpUpdateUser(fd);
+  phCapture('profile_updated', {
+    fields_changed: [...new Set(fd.keys())],
+  });
   const state = getState();
   state.doUpdateUser({
     firstName: user.firstName,
@@ -256,6 +270,7 @@ export function actionLogout() {
   if (logoutStarted) return null;
   logoutStarted = true;
   markSessionKilled();
+  phReset();
   localStorage.clear();
   window.location.replace('/login');
   return null;
@@ -271,9 +286,6 @@ export const actionGetCsvFile = async (appId: string): Promise<any> => {
   }
 };
 
-// ---------------------------------------------------------------------------
-// Phase 1 (Agents): actions for the new AI Bots admin tab.
-// ---------------------------------------------------------------------------
 
 export async function actionListAgents(params?: { visibility?: 'public' | 'mine' | 'all'; appId?: string }) {
   const resp = await httpListAgents(params);
