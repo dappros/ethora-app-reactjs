@@ -14,7 +14,7 @@ import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { actionLogout } from '../actions';
+import { actionLogout, actionSetUiLanguage } from '../actions';
 import { IconClose } from '../components/Icons/IconClose';
 import { IconDoc } from '../components/Icons/IconDoc';
 import { IconEdit } from '../components/Icons/IconEdit';
@@ -25,8 +25,8 @@ import { QrModal } from '../components/modal/QrModal';
 import { LanguageModal } from '../components/modal/LanguageModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
 import {
-  UI_LANGUAGE_OPTIONS,
   UiLocale,
+  resolveAvailableLanguages,
 } from '../constants/languageOptionsConstants';
 import { logLogout } from '../hooks/withTracking.tsx';
 import { deleteDocuments, getDocuments, httpLogout } from '../http';
@@ -47,9 +47,14 @@ export default function Profile() {
   // every component using useTranslation() re-renders together when it
   // changes here.
   const uiLanguage = useAppStore((s) => s.uiLanguage);
-  const doSetUiLanguage = useAppStore((s) => s.doSetUiLanguage);
+  // Languages this install offers, learned from the login / me response
+  // (deploy.yml `languages.available`). Falls back to the full bundled
+  // catalogue if the server sent nothing usable - see
+  // constants/languageOptionsConstants.ts.
+  const availableLanguages = useAppStore((s) => s.availableLanguages);
+  const languageOptions = resolveAvailableLanguages(availableLanguages);
   const currentLanguageName =
-    UI_LANGUAGE_OPTIONS.find((l) => l.id === uiLanguage)?.name ?? uiLanguage;
+    languageOptions.find((l) => l.id === uiLanguage)?.name ?? uiLanguage;
   const {
     firstName,
     lastName,
@@ -92,10 +97,19 @@ export default function Profile() {
     setShowDelete(false);
   };
 
-  const onChangeUiLanguage = (code: UiLocale) => {
-    doSetUiLanguage(code);
+  // The switch itself is local and instant; persisting it to the profile is
+  // the part that can fail. On failure the UI stays on the newly-picked
+  // language (it's still cached locally) and we say the save didn't stick,
+  // rather than yanking the interface back to the old one.
+  const onChangeUiLanguage = async (code: UiLocale) => {
     setShowLanguageModal(false);
-    toast.success(t('language.savedToast'));
+    try {
+      await actionSetUiLanguage(code);
+      toast.success(t('language.savedToast'));
+    } catch (e) {
+      console.error('[Profile] failed to save language to profile', e);
+      toast.error(t('language.saveFailedToast'));
+    }
   };
 
   const onLogout = async () => {
@@ -248,6 +262,7 @@ export default function Profile() {
       {showLanguageModal && (
         <LanguageModal
           value={uiLanguage}
+          options={languageOptions}
           onSelect={onChangeUiLanguage}
           onClose={() => setShowLanguageModal(false)}
         />

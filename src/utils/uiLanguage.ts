@@ -1,6 +1,9 @@
 import {
   UI_LANGUAGE_OPTIONS,
   UiLocale,
+  canonicalizeLocale,
+  isUiLocale,
+  resolveAvailableLanguages,
   toBaseLanguage,
 } from '../constants/languageOptionsConstants';
 
@@ -8,57 +11,86 @@ import {
 // existing localStorage-key convention (token-538, chatAppId-538, lastPath).
 // Stores the FULL region-qualified locale (e.g. 'fr-CA') - see
 // languageOptionsConstants for why the region is carried around.
+//
+// Since the choice became part of the user profile this is no longer the
+// source of truth - the server is (User.language, delivered on login / me).
+// It survives as the pre-login and first-paint value: the login screen is
+// translated too, and reading it synchronously avoids a flash of English
+// before /me resolves.
 const UI_LANGUAGE_LS_KEY = 'uiLanguage-538';
 
-const SUPPORTED_LOCALES: readonly string[] = UI_LANGUAGE_OPTIONS.map(
-  (l) => l.id
-);
+// Last-known install language list, cached so the pre-login screens offer the
+// same set the server will confirm a moment later. Refreshed on every session
+// bootstrap (see actions.ts actionAfterLogin).
+const AVAILABLE_LANGUAGES_LS_KEY = 'availableLanguages-538';
 
 const DEFAULT_LOCALE: UiLocale = 'en-CA';
 
-function isSupported(locale: string | null | undefined): locale is UiLocale {
-  return !!locale && SUPPORTED_LOCALES.includes(locale);
+export function getCachedAvailableLanguages(): readonly UiLocale[] {
+  try {
+    const raw = localStorage.getItem(AVAILABLE_LANGUAGES_LS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return resolveAvailableLanguages(parsed.map(String)).map((l) => l.id);
+      }
+    }
+  } catch {
+    // absent / malformed / storage unavailable - fall through to the catalogue.
+  }
+  return UI_LANGUAGE_OPTIONS.map((l) => l.id);
 }
 
-// Match the browser's language against our supported locales by BASE language,
+export function setCachedAvailableLanguages(codes: readonly string[]): void {
+  try {
+    localStorage.setItem(AVAILABLE_LANGUAGES_LS_KEY, JSON.stringify(codes));
+  } catch {
+    // private mode / quota exceeded - non-fatal, just lose the pre-login hint.
+  }
+}
+
+// Match the browser's language against the offered locales by BASE language,
 // so a visitor on 'fr-FR' or plain 'fr' still lands on our 'fr-CA' option
 // instead of falling back to English. Exact-tag matches win first.
-function detectBrowserUiLanguage(): UiLocale {
+function detectBrowserUiLanguage(offered: readonly UiLocale[]): UiLocale {
   const raw = (typeof navigator !== 'undefined' && navigator.language) || '';
-  if (isSupported(raw)) {
-    return raw;
+  const canonical = canonicalizeLocale(raw);
+  if (offered.includes(canonical as UiLocale)) {
+    return canonical as UiLocale;
   }
   const base = toBaseLanguage(raw);
-  const match = UI_LANGUAGE_OPTIONS.find((l) => toBaseLanguage(l.id) === base);
-  return match ? match.id : DEFAULT_LOCALE;
+  const match = offered.find((id) => toBaseLanguage(id) === base);
+  if (match) return match;
+  return offered.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : offered[0];
 }
 
-// The user's explicit choice (Profile language selector) if they've made one,
-// otherwise browser-detected with an English fallback. Single source of truth
-// for the store's initial `uiLanguage` (see store/appStore.ts).
+// The value to render with before the server has spoken: the user's last
+// explicit choice if they made one, otherwise browser-detected. Both are
+// constrained to the languages this install last told us it offers, so a
+// narrowed install list can't leave someone stuck on a dropped language.
 //
 // Also migrates legacy values: earlier builds persisted a bare base language
 // ('fr'), so upgrade those to the matching region-qualified locale instead of
 // silently resetting the user's choice to English.
 export function getPreferredUiLanguage(): UiLocale {
+  const offered = getCachedAvailableLanguages();
   try {
     const stored = localStorage.getItem(UI_LANGUAGE_LS_KEY);
-    if (isSupported(stored)) {
-      return stored;
+    const canonical = canonicalizeLocale(stored);
+    if (canonical && offered.includes(canonical as UiLocale)) {
+      return canonical as UiLocale;
     }
     if (stored) {
       const base = toBaseLanguage(stored);
-      const migrated = UI_LANGUAGE_OPTIONS.find(
-        (l) => toBaseLanguage(l.id) === base
-      );
+      const migrated = offered.find((id) => toBaseLanguage(id) === base);
       if (migrated) {
-        return migrated.id;
+        return migrated;
       }
     }
   } catch {
     // private mode / storage unavailable - fall through to detection.
   }
-  return detectBrowserUiLanguage();
+  return detectBrowserUiLanguage(offered);
 }
 
 export function setPreferredUiLanguage(locale: UiLocale): void {
@@ -67,4 +99,23 @@ export function setPreferredUiLanguage(locale: UiLocale): void {
   } catch {
     // private mode / quota exceeded - non-fatal, just lose persistence.
   }
+}
+
+// Resolve what the app should display for a freshly-bootstrapped session:
+// the user's stored profile choice when this install still offers it, else the
+// install default, else what we were already showing. Mirrors the backend's
+// resolveUserLanguage() so client and server agree on the effective language.
+export function resolveSessionUiLanguage(
+  userLanguage: string | null | undefined,
+  installDefault: string | null | undefined,
+  offered: readonly UiLocale[],
+  current: UiLocale
+): UiLocale {
+  const chosen = canonicalizeLocale(userLanguage);
+  if (isUiLocale(chosen) && offered.includes(chosen)) return chosen;
+
+  const fallback = canonicalizeLocale(installDefault);
+  if (isUiLocale(fallback) && offered.includes(fallback)) return fallback;
+
+  return offered.includes(current) ? current : offered[0];
 }

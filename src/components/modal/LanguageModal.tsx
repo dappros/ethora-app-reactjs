@@ -1,14 +1,15 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import cn from 'classnames';
-import {
-  UI_LANGUAGE_OPTIONS,
-  UiLocale,
-} from '../../constants/languageOptionsConstants';
+import { UiLanguageOption, UiLocale } from '../../constants/languageOptionsConstants';
 import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 
 interface Props {
   value: UiLocale;
+  // Languages this install offers, already narrowed to what the bundle can
+  // render (store.availableLanguages). Passed in rather than read from the
+  // catalogue so the sheet can never show a language the server would reject.
+  options: readonly UiLanguageOption[];
   onSelect: (code: UiLocale) => void;
   onClose: () => void;
 }
@@ -17,7 +18,7 @@ interface Props {
 // top corners, drag-handle affordance) below the `sm` breakpoint; a centered
 // card above it. Replaces the old cramped <select> - big tappable rows work
 // far better on a phone than a native dropdown crammed into a small popover.
-export function LanguageModal({ value, onSelect, onClose }: Props) {
+export function LanguageModal({ value, options, onSelect, onClose }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -40,7 +41,7 @@ export function LanguageModal({ value, onSelect, onClose }: Props) {
           </button>
         </div>
         <div className="flex flex-col gap-1">
-          {UI_LANGUAGE_OPTIONS.map((lang) => {
+          {options.map((lang) => {
             const selected = value === lang.id;
             return (
               <button
