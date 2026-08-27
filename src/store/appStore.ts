@@ -10,7 +10,9 @@ import {
 } from '../models';
 import type { UiLocale } from '../constants/languageOptionsConstants';
 import {
+  getCachedAvailableLanguages,
   getPreferredUiLanguage,
+  setCachedAvailableLanguages,
   setPreferredUiLanguage,
 } from '../utils/uiLanguage';
 
@@ -54,7 +56,9 @@ export interface AppSliceInterface extends ModelState {
   doSetApp: (apps: ModelApp) => void;
   doSetApps: (apps: Array<ModelApp>) => void;
   doUpdateApp: (app: ModelApp) => void;
-  doUpdateUser: (userFieldsForUpdate: Record<string, string | boolean>) => void;
+  // Partial update of the cached current user - only the keys you pass are
+  // touched. See the implementation for why that matters.
+  doUpdateUser: (userFieldsForUpdate: Partial<ModelCurrentUser>) => void;
   doClearState: () => void;
   doSetAiValues: (app: ModelAiWidgetValues) => void;
   // Phase 1 (Agents): in-memory agent + bot-instance lists for the AI Bots admin tab.
@@ -73,7 +77,15 @@ export interface AppSliceInterface extends ModelState {
   // App-wide UI language (see ModelState.uiLanguage). Persists to
   // localStorage via utils/uiLanguage.ts AND updates the store so every
   // subscribed component (nav, Profile, ...) re-renders immediately.
+  //
+  // This is the local half only. Writing the choice back to the user's
+  // profile is actions.ts actionSetUiLanguage - callers reacting to a user
+  // gesture should use that; this one is for applying a language the server
+  // just told us about, where echoing it straight back would be pointless.
   doSetUiLanguage: (language: UiLocale) => void;
+  // Replace the install language list (from the session-bootstrap `languages`
+  // block) and cache it for the next pre-login render.
+  doSetAvailableLanguages: (languages: readonly UiLocale[]) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -99,10 +111,19 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   ownerSession: null,
   ownedApps: [],
   uiLanguage: getPreferredUiLanguage(),
+  availableLanguages: [...getCachedAvailableLanguages()],
   doSetUiLanguage: (language) => {
     setPreferredUiLanguage(language);
     set((s) => {
       s.uiLanguage = language;
+    });
+  },
+  doSetAvailableLanguages: (languages) => {
+    setCachedAvailableLanguages(languages);
+    // Copied into a mutable array: the store is an immer draft, and the
+    // callers hand us a readonly slice of the catalogue.
+    set((s) => {
+      s.availableLanguages = [...languages];
     });
   },
   doSetUser: (user: ModelCurrentUser | null) => {
@@ -115,15 +136,37 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
       s.currentUser = null;
     });
   },
-  doUpdateUser: (userFieldsForUpdate: any) => {
+  // Merges only the PROFILE fields below, and only those actually present in
+  // the payload.
+  //
+  // Two constraints meet here. It used to assign a fixed list of six fields
+  // unconditionally, so any caller passing a subset silently blanked the rest
+  // (a language-only update would have wiped the user's name and avatar out of
+  // the store). But it can't merge the payload wholesale either: Visibility.tsx
+  // hands it the entire user document from the API, and copying that in would
+  // overwrite session-critical fields like `token` and the XMPP credential with
+  // whatever that particular endpoint happened to serialize.
+  //
+  // An explicit allow-list satisfies both: subset updates are safe, and nothing
+  // outside the profile can reach currentUser through this door.
+  doUpdateUser: (userFieldsForUpdate) => {
+    const MERGEABLE_PROFILE_FIELDS = [
+      'firstName',
+      'lastName',
+      'description',
+      'profileImage',
+      'isAssetsOpen',
+      'isProfileOpen',
+      'language',
+    ] as const;
+
     set((s) => {
-      if (s.currentUser) {
-        s.currentUser.firstName = userFieldsForUpdate.firstName;
-        s.currentUser.lastName = userFieldsForUpdate.lastName;
-        s.currentUser.description = userFieldsForUpdate.description;
-        s.currentUser.profileImage = userFieldsForUpdate.profileImage;
-        s.currentUser.isAssetsOpen = userFieldsForUpdate.isAssetsOpen;
-        s.currentUser.isProfileOpen = userFieldsForUpdate.isProfileOpen;
+      if (!s.currentUser) return;
+      for (const key of MERGEABLE_PROFILE_FIELDS) {
+        const value = userFieldsForUpdate[key];
+        if (value === undefined) continue;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (s.currentUser as any)[key] = value;
       }
     });
   },

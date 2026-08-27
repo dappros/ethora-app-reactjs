@@ -602,6 +602,13 @@ export function httpUpdateUser(fd: FormData) {
   return http.put('/users', fd);
 }
 
+// Same endpoint as httpUpdateUser, sent as JSON instead of multipart: the
+// language picker updates one scalar and has no avatar to carry, and a
+// FormData body would make every unrelated field arrive as a string.
+export function httpUpdateUserLanguage(language: string) {
+  return http.put('/users', { language });
+}
+
 export function getPublicProfile(walletAddress: string, token: string = '') {
   if (token) {
     return http.get(`/users/profile/${walletAddress}/${token}`);

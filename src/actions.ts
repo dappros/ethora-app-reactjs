@@ -13,6 +13,7 @@ import {
   httpTokens,
   httpUpdateApp,
   httpUpdateUser,
+  httpUpdateUserLanguage,
   // Phase 1 (Agents)
   httpListAgents,
   httpGetAgent,
@@ -27,10 +28,15 @@ import {
   httpSetBotInstanceStatus,
   httpGetOwnerSession,
 } from './http';
+import {
+  UiLocale,
+  resolveAvailableLanguages,
+} from './constants/languageOptionsConstants';
 import { ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
 import { sleep } from './utils/sleep';
+import { resolveSessionUiLanguage } from './utils/uiLanguage';
 
 const getState = useAppStore.getState;
 
@@ -90,6 +96,53 @@ export async function actionGetConfig(domainName?: string) {
   state.doSetCurrentApp(app);
 }
 
+// Adopt the install's language catalogue and the user's stored choice from a
+// session-bootstrap payload (login / me). Both the list and the choice are
+// server-owned; this is the one place a response turns into store state, so
+// login and page-reload can't drift apart.
+//
+// Deliberately writes through doSetUiLanguage (local only) rather than
+// actionSetUiLanguage: the value came FROM the server, echoing it back would
+// be a pointless write on every page load.
+interface SessionLanguagePayload {
+  user?: { language?: string | null };
+  languages?: { available?: string[]; default?: string };
+}
+
+function applySessionLanguages(data: SessionLanguagePayload) {
+  const state = getState();
+
+  const offered = resolveAvailableLanguages(data?.languages?.available).map(
+    (l) => l.id
+  );
+  state.doSetAvailableLanguages(offered);
+
+  const next = resolveSessionUiLanguage(
+    data?.user?.language,
+    data?.languages?.default,
+    offered,
+    state.uiLanguage
+  );
+  if (next !== state.uiLanguage) {
+    state.doSetUiLanguage(next);
+  }
+}
+
+// User-initiated language change: apply it locally first so the UI switches
+// instantly, then persist it to the profile. A failed write is surfaced by the
+// caller - the local choice is kept either way, so a flaky network degrades to
+// the old localStorage-only behaviour rather than silently reverting the UI.
+export async function actionSetUiLanguage(language: UiLocale) {
+  const state = getState();
+  state.doSetUiLanguage(language);
+
+  const currentUser = state.currentUser;
+  if (!currentUser) return;
+
+  await httpUpdateUserLanguage(language);
+  state.doUpdateUser({ language });
+}
+
 export async function actionAfterLogin(data: any) {
   const state = getState();
 
@@ -121,6 +174,7 @@ export async function actionAfterLogin(data: any) {
       walletAddress: walletAddress,
     },
     xmppUsername: data.user.xmppUsername,
+    language: data.user.language ?? '',
   };
 
   if (data.user.isSuperAdmin) {
@@ -128,6 +182,7 @@ export async function actionAfterLogin(data: any) {
   }
 
   state.doSetUser(user);
+  applySessionLanguages(data);
   // await actionBootsrap()
 }
 
@@ -247,6 +302,7 @@ export async function actionUpdateUser(fd: FormData) {
     profileImage: user.profileImage,
     isAssetsOpen: user.isAssetsOpen,
     isProfileOpen: user.isProfileOpen,
+    language: user.language ?? '',
   });
   return {
     profileImage: user.profileImage,

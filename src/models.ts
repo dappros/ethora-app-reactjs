@@ -10,6 +10,10 @@ export interface ModelCurrentUser {
   isAgreeWithTerms: boolean;
   isAssetsOpen: boolean;
   isProfileOpen: boolean;
+  // Preferred UI language as a BCP-47 tag, or '' when the user has never
+  // picked one (the app then follows the install default). Server-owned:
+  // written through PUT /users, read back on login and /me.
+  language?: string;
   token: string;
   refreshToken: string;
   wsToken: string;
@@ -363,9 +367,15 @@ export interface ModelState {
   // UI_LANGUAGE_OPTIONS (en/fr/es - see constants/languageOptionsConstants.ts).
   // Kept in the store (not read straight from localStorage on every render)
   // so switching it re-renders every subscribed component immediately.
-  // Initialized from utils/uiLanguage.ts (persisted choice, else browser
-  // detection, else 'en').
+  // Initialized from utils/uiLanguage.ts (last-known choice, else browser
+  // detection) and replaced by the user's server-stored choice as soon as a
+  // session bootstraps.
   uiLanguage: UiLocale;
+  // Languages this install offers, as delivered in the `languages` block of
+  // the login / me response and narrowed to what the bundle can render
+  // (see constants/languageOptionsConstants.ts resolveAvailableLanguages).
+  // Seeded from the localStorage cache so the pre-login screens have a list.
+  availableLanguages: UiLocale[];
 }
 
 export type OrderByType =

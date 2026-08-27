@@ -31,6 +31,8 @@ export const common = {
 
     'language.select': 'App language',
     'language.savedToast': 'Language preference saved',
+    'language.saveFailedToast':
+      "Language changed on this device, but couldn't be saved to your profile",
   },
   fr: {
     'nav.apps': 'Applications',
@@ -57,6 +59,8 @@ export const common = {
 
     'language.select': "Langue de l'application",
     'language.savedToast': 'Préférence de langue enregistrée',
+    'language.saveFailedToast':
+      "Langue modifiée sur cet appareil, mais impossible de l'enregistrer dans votre profil",
   },
   es: {
     'nav.apps': 'Aplicaciones',
@@ -83,5 +87,7 @@ export const common = {
 
     'language.select': 'Idioma de la aplicación',
     'language.savedToast': 'Preferencia de idioma guardada',
+    'language.saveFailedToast':
+      'Idioma cambiado en este dispositivo, pero no se pudo guardar en tu perfil',
   },
 } satisfies Record<UiLanguageCode, Record<string, string>>;
