@@ -93,6 +93,9 @@ const MemoizedChat = React.memo(function ChatComponent({
   // createChatConfig's i18n.locale so switching language in Profile
   // re-renders the chat-component's static captions live.
   const uiLanguage = useAppStore((s) => s.uiLanguage);
+  // Languages this install offers. Gates in-chat message translation: fewer
+  // than two and createChatConfig hands the component translates.enabled:false.
+  const availableLanguages = useAppStore((s) => s.availableLanguages);
 
   const ownerOverride = useMemo(() => {
     if (!ownerSession) return undefined;
@@ -124,6 +127,7 @@ const MemoizedChat = React.memo(function ChatComponent({
         chatToken: currentUser?.token || null,
         isMobileView,
         uiLanguage,
+        availableLanguages,
         // Forwarding currentUser lets createChatConfig set userLogin from the
         // base-app User's xmpp creds when no owner override is active. This
         // is the load-bearing fix for the email-login path because the
@@ -142,6 +146,7 @@ const MemoizedChat = React.memo(function ChatComponent({
       ownerOverride,
       isMobileView,
       uiLanguage,
+      availableLanguages,
     ]
   );
 

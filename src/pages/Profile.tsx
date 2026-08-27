@@ -48,9 +48,10 @@ export default function Profile() {
   // changes here.
   const uiLanguage = useAppStore((s) => s.uiLanguage);
   // Languages this install offers, learned from the login / me response
-  // (deploy.yml `languages.available`). Falls back to the full bundled
-  // catalogue if the server sent nothing usable - see
-  // constants/languageOptionsConstants.ts.
+  // (deploy.yml `chat.translates`). Falls back to the full bundled catalogue
+  // if the server sent nothing usable - see
+  // constants/languageOptionsConstants.ts. One entry means a single-language
+  // install, and the picker below is not rendered at all.
   const availableLanguages = useAppStore((s) => s.availableLanguages);
   const languageOptions = resolveAvailableLanguages(availableLanguages);
   const currentLanguageName =
@@ -224,17 +225,22 @@ export default function Profile() {
                 </TabPanels>
               </TabGroup>
             </div>
-            <div className="border border-[#F0F0F0] rounded-xl p-4">
-              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
-                {t('profile.language')}
-              </p>
-              <button
-                onClick={() => setShowLanguageModal(true)}
-                className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
-              >
-                {currentLanguageName}
-              </button>
-            </div>
+            {/* Hidden entirely on a single-language install (deploy.yml
+                `chat.translates` empty or one code): a picker with nothing to
+                pick reads as a broken control, not as a setting. */}
+            {languageOptions.length > 1 && (
+              <div className="border border-[#F0F0F0] rounded-xl p-4">
+                <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
+                  {t('profile.language')}
+                </p>
+                <button
+                  onClick={() => setShowLanguageModal(true)}
+                  className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
+                >
+                  {currentLanguageName}
+                </button>
+              </div>
+            )}
             <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
               <button
                 className="text-[#F44336] p-4 w-full rounded-xl hover:bg-brand-hover font-varela text-regular inline-flex items-center justify-center"

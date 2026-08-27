@@ -1,7 +1,7 @@
 // The full catalogue of locales this bundle can actually render — every entry
 // here has a dictionary in i18n/translations/. It is NOT the list a given
 // install offers: that is an install-time decision (deploy.yml
-// `languages.available` -> AVAILABLE_LANGUAGES), delivered to the client in the
+// `chat.translates` -> AVAILABLE_LANGUAGES), delivered to the client in the
 // `languages` block of every login / me response and applied by
 // resolveAvailableLanguages() below.
 //
@@ -42,9 +42,15 @@ export function isUiLocale(code: string | null | undefined): code is UiLocale {
 //
 // Codes the bundle has no dictionary for are dropped rather than shown: they
 // would render entirely in English, which reads as a broken translation rather
-// than a language choice. An empty or entirely-unknown list falls back to the
-// whole catalogue — better to offer too much than to leave the user with no
-// language picker at all if the server sends something unexpected.
+// than a language choice.
+//
+// A ONE-entry result is a meaningful answer, not a degenerate one: a
+// single-language install (deploy.yml `chat.translates` empty, so the API
+// reports just its default) is how an operator asks for no language picker and
+// no in-chat translation, and padding it back out would override that. Only a
+// list we can make no sense of at all — empty, or entirely unknown codes —
+// falls back to the whole catalogue, since that means the server told us
+// nothing usable rather than telling us "one language".
 export function resolveAvailableLanguages(
   codes: readonly string[] | null | undefined
 ): readonly UiLanguageOption[] {
@@ -53,12 +59,3 @@ export function resolveAvailableLanguages(
   const matched = UI_LANGUAGE_OPTIONS.filter((l) => wanted.includes(l.id));
   return matched.length > 0 ? matched : UI_LANGUAGE_OPTIONS;
 }
-
-export const LANGUAGE_OPTIONS = [
-  { name: 'English', id: 'en-CA' },
-  { name: 'Español', id: 'es-US' },
-  // { name: 'Portuguese', id: 'pt' },
-  { name: 'Français', id: 'fr-CA' },
-  // { name: 'Haitian Creole', id: 'ht' },
-  // { name: 'Chinese', id: 'zh' },
-];

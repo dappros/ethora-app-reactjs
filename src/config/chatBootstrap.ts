@@ -3,7 +3,8 @@ import Session from 'supertokens-web-js/recipe/session';
 import { refreshWithLogoutOnFatal } from '../authRefresh';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
-import { LANGUAGE_OPTIONS } from '../constants/languageOptionsConstants';
+import { resolveAvailableLanguages } from '../constants/languageOptionsConstants';
+import { getCachedAvailableLanguages } from '../utils/uiLanguage';
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 
@@ -105,13 +106,28 @@ function resolveLocale(uiLanguage?: string | null): string {
 
 type TranslatesConfig = NonNullable<ChatConfig['translates']>;
 
+// In-chat message translation follows the install's language list (deploy.yml
+// `chat.translates` -> the `languages` block on login / me -> store's
+// availableLanguages). Fewer than two offered languages means the operator
+// asked for a single-language install: `enabled: false` is the chat-component's
+// documented host switch (config.model.ts) and turns off the globe picker in
+// the header, the auto-translated bubbles, and the per-message Translate
+// action in one go — no chat-component change needed for either mode.
+//
+// `offered` is the already-narrowed catalogue (resolveAvailableLanguages), so
+// the targets we hand the component can only ever be locales this bundle can
+// actually render.
 function buildTranslatesConfig(
+  offered: readonly { id: string }[],
   extra: Record<string, unknown> = {}
 ): TranslatesConfig {
+  if (offered.length < 2) {
+    return { enabled: false } as unknown as TranslatesConfig;
+  }
   return {
     enabled: true,
     mode: 'auto',
-    targets: LANGUAGE_OPTIONS.map((l) => l.id),
+    targets: offered.map((l) => l.id),
     ...extra,
   } as unknown as TranslatesConfig;
 }
@@ -138,13 +154,24 @@ interface BuildEthoraBaseChatConfigProps {
   chat_token?: string | null;
   currentUser?: ModelCurrentUser | null;
   primaryColor?: string | null;
+  // Languages this install offers (store's availableLanguages, ultimately
+  // deploy.yml `chat.translates`). Drives whether message translation is
+  // enabled at all. Callers must pass their OWN reactive
+  // `useAppStore((s) => s.availableLanguages)` read and include it in their
+  // useMemo deps (see main.tsx) - this is a plain function, not a hook.
+  // Omitted, we fall back to the last list the server told us about.
+  availableLanguages?: readonly string[] | null;
 }
 
 export const buildEthoraBaseChatConfig = ({
   chat_token,
   currentUser,
   primaryColor,
+  availableLanguages,
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
+  const offeredLanguages = resolveAvailableLanguages(
+    availableLanguages ?? getCachedAvailableLanguages()
+  );
   const userLoginPayload = makeChatUserLogin(currentUser);
   const baseUrl = import.meta.env.VITE_API.split("/v1")[0];
   const config: XmppProviderConfig = {
@@ -212,7 +239,9 @@ export const buildEthoraBaseChatConfig = ({
     },
     pushNotifications: webNotificationsConfig,
     // Static UI localization (device language) + dynamic message translation.
-    translates: buildTranslatesConfig({ readerLocale: resolveLocale() }),
+    translates: buildTranslatesConfig(offeredLanguages, {
+      readerLocale: resolveLocale(),
+    }),
     colors: {
       primary: primaryColor || '#0052CD',
       secondary: '#141414',
@@ -287,6 +316,11 @@ interface CreateChatConfigOptions {
   // subscribe to the store on its own. Falls back to browser detection when
   // omitted.
   uiLanguage?: string | null;
+  // Languages this install offers (store's availableLanguages). Gates in-chat
+  // message translation - see buildTranslatesConfig. Same reactivity caveat as
+  // uiLanguage: pass a live `useAppStore((s) => s.availableLanguages)` read and
+  // list it in the useMemo deps (see Chat.tsx).
+  availableLanguages?: readonly string[] | null;
 }
 
 // Build the userLogin.user payload for chat-component. Returns null when
@@ -347,6 +381,7 @@ export function createChatConfig({
   currentUser,
   ownerOverride,
   uiLanguage,
+  availableLanguages,
   // isMobileView: kept in the options contract (Chat.tsx still passes it)
   // but no longer read here - getRoomListStyles() dropped its
   // mobile-conditional padding upstream. Not destructured to a local so
@@ -357,8 +392,12 @@ export function createChatConfig({
   // calls SuperTokens which doesn't know about the owner user. Failing to
   // override the refresh would result in the chat-component silently
   // logging the owner out after ~1h with no recovery path.
+  const offeredLanguages = resolveAvailableLanguages(
+    availableLanguages ?? getCachedAvailableLanguages()
+  );
   const baseConfig = buildEthoraBaseChatConfig({
     chat_token: ownerOverride?.chatToken ?? chatToken,
+    availableLanguages,
   });
 
   if (ownerOverride) {
@@ -432,7 +471,7 @@ export function createChatConfig({
     },
     pushNotifications: webNotificationsConfig,
     i18n: { locale: resolveLocale(uiLanguage) },
-    translates: buildTranslatesConfig({
+    translates: buildTranslatesConfig(offeredLanguages, {
       readerLocale: resolveLocale(uiLanguage),
       showLanguageSelector: true,
       showLanguageList: false,

@@ -131,14 +131,19 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
 function XmppProviderBridge({ children }: { children: React.ReactNode }) {
   const currentUser = useAppStore((s) => s.currentUser);
   const currentApp = useAppStore((s) => s.currentApp);
+  // Languages this install offers (deploy.yml `chat.translates`, learned on
+  // login / me). Read reactively so a session bootstrap that narrows the list
+  // to one language rebuilds the provider config with translation off.
+  const availableLanguages = useAppStore((s) => s.availableLanguages);
   const providerConfig = useMemo(
     () =>
       buildEthoraBaseChatConfig({
         chat_token: currentUser?.token || null,
         currentUser,
         primaryColor: currentApp?.primaryColor,
+        availableLanguages,
       }),
-    [currentUser, currentApp?.primaryColor]
+    [currentUser, currentApp?.primaryColor, availableLanguages]
   );
 
   return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
