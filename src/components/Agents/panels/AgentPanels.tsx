@@ -55,6 +55,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   const [responseMode, setResponseMode] = useState(agent.responseMode);
   const [responseProbability, setResponseProbability] = useState(agent.responseProbability);
   const [cooldownSec, setCooldownSec] = useState(agent.cooldownSec);
+  const [llmModel, setLlmModel] = useState(agent.llmModel || '');
 
   useEffect(() => {
     setDisplayName(agent.displayName);
@@ -63,6 +64,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
     setResponseMode(agent.responseMode);
     setResponseProbability(agent.responseProbability);
     setCooldownSec(agent.cooldownSec);
+    setLlmModel(agent.llmModel || '');
   }, [agent.id]);
 
   async function save() {
@@ -74,6 +76,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         responseMode,
         responseProbability,
         cooldownSec,
+        llmModel: llmModel.trim(),
       });
       toast.success(t('agentPanels.saved'));
     } catch (e: any) {
@@ -204,6 +207,28 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
           value={cooldownSec}
           onChange={(e) => setCooldownSec(parseInt(e.target.value || '0', 10))}
         />
+      </Field>
+      {/* Per-agent model override. Free text with suggestions: the model list moves
+          faster than releases, and the provider validates the ID anyway. Empty means
+          the platform default (AI_CHAT_MODEL on the AI service). */}
+      <Field label={t('agentPanels.llmModelLabel')}>
+        <input
+          list="agent-llm-model-suggestions"
+          className="border rounded px-2 py-1 w-full text-sm font-mono"
+          disabled={isDisabled}
+          value={llmModel}
+          placeholder="gpt-5.6-luna"
+          onChange={(e) => setLlmModel(e.target.value)}
+        />
+        <datalist id="agent-llm-model-suggestions">
+          <option value="gpt-5.6-luna" />
+          <option value="gpt-5.6-terra" />
+          <option value="gpt-5.4-mini" />
+          <option value="gpt-5-mini" />
+          <option value="gpt-4.1-mini" />
+          <option value="gpt-4.1" />
+        </datalist>
+        <span className="block text-xs text-gray-500 mt-1">{t('agentPanels.llmModelHint')}</span>
       </Field>
       <button onClick={save} disabled={isDisabled} className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50">
         {t('agentPanels.savePersona')}

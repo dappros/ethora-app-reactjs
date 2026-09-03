@@ -192,6 +192,8 @@ export const aiWidget = {
     'agentPanels.probabilityLabel': 'Probability ({pct}%)',
     'agentPanels.cooldownLabel':
       'Cooldown (seconds between replies in the same room)',
+    'agentPanels.llmModelLabel': 'LLM model (leave empty for the platform default)',
+    'agentPanels.llmModelHint': 'Any model ID your OpenAI-compatible provider accepts, e.g. gpt-5.6-luna, gpt-5.4-mini, gpt-4.1-mini.',
     'agentPanels.savePersona': 'Save persona',
     'agentPanels.templatesLabel': 'Templates:',
     'agentPanels.contextSaved': 'Context saved',
@@ -261,16 +263,16 @@ export const aiWidget = {
     'agentPanels.uploadedHeader': 'Uploaded',
     'agentPanels.noFilesIndexed': 'No files indexed for this app yet.',
     'agentPanels.soulMdDescriptionPrefix':
-      "SOUL.MD: the agent's evolving identity. The agent itself can request updates (Phase 2 wires a tool-call); for now you can edit it as the operator. Last update:",
+      'SOUL.MD is the agent\'s evolving self-memory. The agent updates it on its own during conversations (via its update_soul tool) whenever it notices something durable: goals, observations about participants, commitments. You can also edit it here as the operator; changes reach running bots immediately. Last update:',
     'agentPanels.never': 'never',
     'agentPanels.notApplicable': 'n/a',
     'agentPanels.soulMdSaved': 'SOUL.MD saved',
     'agentPanels.failedPrefix': 'Failed:',
     'agentPanels.saveSoulMd': 'Save SOUL.MD',
     'agentPanels.heartbeatDescription':
-      'Heartbeat lets the agent engage proactively (e.g. once per day, after N min of inactivity, on a cron). Phase 1 stores the config; the cron worker that actually fires events is delivered in Phase 2.',
+      'Heartbeat lets the agent post on its own into every chat it is a member of, without waiting to be spoken to. Schedule formats: \'every 30m\' or \'2h\' (fixed interval), \'daily 09:00\' (UTC), \'idle 15m\' (nudge a room after 15 minutes of silence, once per silence), or a 5-field cron expression in UTC. The heartbeat prompt tells the agent what to do on each beat; it may stay quiet when it has nothing to add.',
     'agentPanels.enabledLabel': 'Enabled',
-    'agentPanels.scheduleLabel': 'Schedule (cron, interval, or keyword)',
+    'agentPanels.scheduleLabel': 'Schedule (e.g. every 30m, idle 15m, daily 09:00, or cron)',
     'agentPanels.heartbeatPromptLabel': 'Heartbeat prompt',
     'agentPanels.heartbeatSaved': 'Heartbeat saved',
     'agentPanels.saveHeartbeat': 'Save heartbeat',
@@ -528,6 +530,8 @@ export const aiWidget = {
     'agentPanels.probabilityLabel': 'Probabilité ({pct} %)',
     'agentPanels.cooldownLabel':
       'Délai de récupération (secondes entre les réponses dans le même salon)',
+    'agentPanels.llmModelLabel': 'Modèle LLM (laisser vide pour la valeur par défaut de la plateforme)',
+    'agentPanels.llmModelHint': 'Tout identifiant de modèle accepté par votre fournisseur compatible OpenAI, ex. gpt-5.6-luna, gpt-5.4-mini, gpt-4.1-mini.',
     'agentPanels.savePersona': 'Enregistrer la persona',
     'agentPanels.templatesLabel': 'Modèles :',
     'agentPanels.contextSaved': 'Contexte enregistré',
@@ -603,16 +607,16 @@ export const aiWidget = {
     'agentPanels.noFilesIndexed':
       'Aucun fichier indexé pour cette application pour le moment.',
     'agentPanels.soulMdDescriptionPrefix':
-      "SOUL.MD : l'identité évolutive de l'agent. L'agent lui-même pourra demander des mises à jour (la phase 2 connectera un appel d'outil) ; pour l'instant, vous pouvez le modifier en tant qu'opérateur. Dernière mise à jour :",
+      'SOUL.MD est la mémoire évolutive de l\'agent. L\'agent la met à jour lui-même au fil des conversations (via son outil update_soul) dès qu\'il remarque quelque chose de durable : objectifs, observations sur les participants, engagements. Vous pouvez aussi la modifier ici en tant qu\'opérateur ; les changements sont appliqués immédiatement aux bots en cours d\'exécution. Dernière mise à jour :',
     'agentPanels.never': 'jamais',
     'agentPanels.notApplicable': 'n/d',
     'agentPanels.soulMdSaved': 'SOUL.MD enregistré',
     'agentPanels.failedPrefix': 'Échec :',
     'agentPanels.saveSoulMd': 'Enregistrer SOUL.MD',
     'agentPanels.heartbeatDescription':
-      "Le battement de cœur (heartbeat) permet à l'agent d'engager la conversation de façon proactive (par ex. une fois par jour, après N minutes d'inactivité, selon une planification cron). La phase 1 se limite à stocker la configuration ; le worker cron qui déclenche réellement les événements sera livré en phase 2.",
+      'Le heartbeat permet à l\'agent de publier de lui-même dans chaque salon dont il est membre, sans attendre qu\'on lui parle. Formats de planification : « every 30m » ou « 2h » (intervalle fixe), « daily 09:00 » (UTC), « idle 15m » (relance un salon après 15 minutes de silence, une fois par silence) ou une expression cron à 5 champs en UTC. Le prompt du heartbeat indique à l\'agent quoi faire à chaque battement ; il peut rester silencieux s\'il n\'a rien à ajouter.',
     'agentPanels.enabledLabel': 'Activé',
-    'agentPanels.scheduleLabel': 'Planification (cron, intervalle ou mot-clé)',
+    'agentPanels.scheduleLabel': 'Planification (ex. every 30m, idle 15m, daily 09:00 ou cron)',
     'agentPanels.heartbeatPromptLabel': 'Prompt du heartbeat',
     'agentPanels.heartbeatSaved': 'Heartbeat enregistré',
     'agentPanels.saveHeartbeat': 'Enregistrer le heartbeat',
@@ -874,6 +878,8 @@ export const aiWidget = {
     'agentPanels.probabilityLabel': 'Probabilidad ({pct}%)',
     'agentPanels.cooldownLabel':
       'Tiempo de espera (segundos entre respuestas en la misma sala)',
+    'agentPanels.llmModelLabel': 'Modelo LLM (dejar vacío para usar el predeterminado de la plataforma)',
+    'agentPanels.llmModelHint': 'Cualquier ID de modelo que acepte tu proveedor compatible con OpenAI, p. ej. gpt-5.6-luna, gpt-5.4-mini, gpt-4.1-mini.',
     'agentPanels.savePersona': 'Guardar persona',
     'agentPanels.templatesLabel': 'Plantillas:',
     'agentPanels.contextSaved': 'Contexto guardado',
@@ -948,16 +954,16 @@ export const aiWidget = {
     'agentPanels.noFilesIndexed':
       'Aún no hay archivos indexados para esta aplicación.',
     'agentPanels.soulMdDescriptionPrefix':
-      'SOUL.MD: la identidad en evolución del agente. El propio agente podrá solicitar actualizaciones (la fase 2 conectará una llamada a herramienta); por ahora puedes editarlo como operador. Última actualización:',
+      'SOUL.MD es la memoria evolutiva del agente. El propio agente la actualiza durante las conversaciones (mediante su herramienta update_soul) cuando detecta algo duradero: objetivos, observaciones sobre los participantes, compromisos. También puedes editarla aquí como operador; los cambios llegan de inmediato a los bots en ejecución. Última actualización:',
     'agentPanels.never': 'nunca',
     'agentPanels.notApplicable': 'n/d',
     'agentPanels.soulMdSaved': 'SOUL.MD guardado',
     'agentPanels.failedPrefix': 'Error:',
     'agentPanels.saveSoulMd': 'Guardar SOUL.MD',
     'agentPanels.heartbeatDescription':
-      'El "heartbeat" permite que el agente inicie la interacción de forma proactiva (por ejemplo, una vez al día, tras N minutos de inactividad, según una programación cron). La fase 1 solo almacena la configuración; el worker cron que realmente dispara los eventos se entregará en la fase 2.',
+      'El heartbeat permite que el agente publique por su cuenta en cada sala de la que es miembro, sin esperar a que le hablen. Formatos de programación: \'every 30m\' o \'2h\' (intervalo fijo), \'daily 09:00\' (UTC), \'idle 15m\' (reactiva una sala tras 15 minutos de silencio, una vez por silencio) o una expresión cron de 5 campos en UTC. El prompt del heartbeat indica al agente qué hacer en cada latido; puede quedarse en silencio si no tiene nada que aportar.',
     'agentPanels.enabledLabel': 'Habilitado',
-    'agentPanels.scheduleLabel': 'Programación (cron, intervalo o palabra clave)',
+    'agentPanels.scheduleLabel': 'Programación (p. ej. every 30m, idle 15m, daily 09:00 o cron)',
     'agentPanels.heartbeatPromptLabel': 'Prompt del heartbeat',
     'agentPanels.heartbeatSaved': 'Heartbeat guardado',
     'agentPanels.saveHeartbeat': 'Guardar heartbeat',
