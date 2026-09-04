@@ -458,9 +458,13 @@ export function createChatConfig({
     defaultRooms: app?.defaultRooms || [],
     eventHandlers: {
       onMessageSent: ({ roomJID, messageType, metadata }) => {
-        const mimetype = String(
-          (metadata as { mimetype?: string } | undefined)?.mimetype || ''
-        );
+        // The chat component reports the MIME type as metadata.fileType - it
+        // never sets metadata.mimetype - so reading that key classified every
+        // upload as 'file'. fileData is the File itself, kept as a fallback.
+        const meta = metadata as
+          | { fileType?: string; fileData?: { type?: string } }
+          | undefined;
+        const mimetype = String(meta?.fileType || meta?.fileData?.type || '');
         phCapture('chat_message_sent', {
           room_id: roomJID,
           message_type:
