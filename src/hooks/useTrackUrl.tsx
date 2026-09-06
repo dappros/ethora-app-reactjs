@@ -3,6 +3,7 @@ import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { actionAfterLogin } from '../actions.ts';
 import { httpGetOneUser } from '../http.ts';
 import { isTransientRefreshFailure } from '../authRefresh.ts';
+import { defaultLandingPath } from '../utils/appHost.ts';
 
 const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup'];
 
@@ -33,12 +34,12 @@ export const useTrackUrl = () => {
     }
 
     if (location.pathname === '/') {
-      navigate(lastPath || '/app/admin/apps', { replace: true });
+      navigate(lastPath || defaultLandingPath(), { replace: true });
       return;
     }
 
     if (token && token !== 'undefined' && location.pathname === '/login') {
-      navigate(lastPath || '/app/admin/apps', { replace: true });
+      navigate(lastPath || defaultLandingPath(), { replace: true });
       return;
     }
 
@@ -49,7 +50,7 @@ export const useTrackUrl = () => {
 
   useEffect(() => {
     if (token && token !== 'undefined' && location.pathname === '/login') {
-      navigate(lastPath || '/app/admin/apps', { replace: true });
+      navigate(lastPath || defaultLandingPath(), { replace: true });
     }
   }, [location.pathname, navigate]);
 

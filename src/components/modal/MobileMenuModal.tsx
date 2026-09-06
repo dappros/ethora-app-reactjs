@@ -11,6 +11,7 @@ import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
 import { IconHelp } from '../Icons/IconHelp';
 import { useTranslation } from '../../i18n/useTranslation';
+import { isBaseAppHost } from '../../utils/appHost';
 import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
@@ -34,7 +35,8 @@ function isEthoraHostedEnv(): boolean {
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const { t } = useTranslation();
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
-  const showBilling = isEthoraHostedEnv();
+  const isBaseApp = isBaseAppHost();
+  const showBilling = isBaseApp && isEthoraHostedEnv();
 
   useEffect(() => {
     function onResize() {
@@ -100,10 +102,12 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               <span className={labelBase}>{t('nav.billing')}</span>
             </NavLink>
           )}
-          <NavLink to="/app/help" onClick={onClose} className={itemBase}>
-            <IconHelp />
-            <span className={labelBase}>{t('nav.help')}</span>
-          </NavLink>
+          {isBaseApp && (
+            <NavLink to="/app/help" onClick={onClose} className={itemBase}>
+              <IconHelp />
+              <span className={labelBase}>{t('nav.help')}</span>
+            </NavLink>
+          )}
         </div>
         <div className="">
           <NavLink

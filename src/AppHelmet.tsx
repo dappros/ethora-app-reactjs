@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import { ModelApp } from './models';
 import { useAppStore } from './store/useAppStore';
+import { defaultLandingPath } from './utils/appHost';
 
 const PLATFORM_NAME = String(
   import.meta.env.VITE_PLATFORM_NAME || ''
@@ -56,7 +57,7 @@ export default function AppHelmet() {
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token-538');
-  const lastPath = localStorage.getItem('lastPath') || '/app/admin/apps';
+  const lastPath = localStorage.getItem('lastPath') || defaultLandingPath();
 
   useEffect(() => {
     if (!token) {

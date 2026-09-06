@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
+import { isBaseAppHost } from '../utils/appHost';
 import { IconAccount } from './Icons/IconAccount';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconAgents } from './Icons/IconAgents';
@@ -44,7 +45,10 @@ export function AppMenu() {
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
   const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
-  const showBilling = isEthoraHostedEnv();
+  // Apps / Agents / Billing / Help belong to the base app (app.<root>). An app
+  // created inside it is served from its own subdomain and shows chat only.
+  const isBaseApp = isBaseAppHost();
+  const showBilling = isBaseApp && isEthoraHostedEnv();
 
   const getPageTitle = useMemo(() => {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -72,7 +76,7 @@ export function AppMenu() {
         {getPageTitle}
       </div>
       <div className="hidden md:flex flex-col divide-y divide-gray-100">
-        {isAdmin && (
+        {isAdmin && isBaseApp && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
               <IconAdmin />
@@ -89,7 +93,7 @@ export function AppMenu() {
             <div className={LABEL_CLASS}>{t('nav.chats')}</div>
           </NavLink>
         </div>
-        {isAdmin && (
+        {isAdmin && isBaseApp && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink
               to="/app/admin/agents"
@@ -115,12 +119,14 @@ export function AppMenu() {
             </NavLink>
           </div>
         )}
-        <div className={ITEM_WRAP_CLASS}>
-          <NavLink to="/app/help" className={ITEM_CLASS}>
-            <IconHelp />
-            <div className={LABEL_CLASS}>{t('nav.help')}</div>
-          </NavLink>
-        </div>
+        {isBaseApp && (
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink to="/app/help" className={ITEM_CLASS}>
+              <IconHelp />
+              <div className={LABEL_CLASS}>{t('nav.help')}</div>
+            </NavLink>
+          </div>
+        )}
       </div>
       <div className="md:divide-y md:divide-gray-100">
         <div className={ITEM_WRAP_CLASS}>
@@ -156,7 +162,7 @@ export function AppMenu() {
       </div>
       {isMobileMenuVisible && (
         <MobileMenuModal
-          isAdmin={isAdmin}
+          isAdmin={isAdmin && isBaseApp}
           onClose={() => setMobileMenuVisible(false)}
         />
       )}

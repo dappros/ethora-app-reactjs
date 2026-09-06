@@ -1,4 +1,5 @@
 import { NavigateFunction } from 'react-router-dom';
+import { defaultLandingPath } from './appHost';
 
 export function navigateToUserPage(
   navigate: NavigateFunction,
@@ -18,7 +19,7 @@ export function navigateToUserPage(
       break;
     }
     default: {
-      navigate('/app/admin/apps');
+      navigate(defaultLandingPath());
     }
   }
 }

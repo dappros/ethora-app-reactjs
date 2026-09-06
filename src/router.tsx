@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppHelmet from './AppHelmet';
 import AppLayout from './AppLayout';
+import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
 import { AppStatistics } from './pages/AppStatistics';
 import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
@@ -9,7 +10,6 @@ import Register from './pages/AuthPage/Register';
 import RegistrationOpenRoute from './pages/AuthPage/Register/RegistrationOpenRoute';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
-import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
 const Admin = lazy(() => import('./pages/Admin'));
 const Help = lazy(() => import('./pages/Help'));
 const WhatsNew = lazy(() => import('./pages/WhatsNew'));
@@ -25,9 +25,11 @@ const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
 
 import App from './App';
+import { BaseAppOnly } from './components/BaseAppOnly';
 import AdminLayout from './pages/AdminLayout';
 import TurnstileBridge from './pages/TurnstileBridge';
 import WpSetup from './pages/WpSetup';
+import { defaultLandingPath } from './utils/appHost';
 
 export const router = createBrowserRouter(
   [
@@ -74,72 +76,79 @@ export const router = createBrowserRouter(
               children: [
                 {
                   index: true,
-                  element: <Navigate to="/app/admin/apps" />,
+                  element: <Navigate to={defaultLandingPath()} replace />,
                 },
                 {
                   path: 'chat',
                   Component: Chat,
                 },
+                // Admin console + help: base app only. Tenant subdomains are
+                // chat-only, so these bounce to /app/chat there.
                 {
-                  path: 'admin',
-                  Component: () => (
-                    <AdminLayout>
-                      <Admin />
-                    </AdminLayout>
-                  ),
+                  element: <BaseAppOnly />,
                   children: [
                     {
-                      index: true,
-                      element: <Navigate to="/app/admin/apps" />,
-                    },
-                    {
-                      path: 'apps',
-                      Component: AdminApps,
-                    },
-                    {
-                      path: 'billing',
-                      Component: AdminBilling,
-                    },
-                    {
-                      path: 'agents',
-                      Component: AdminAgents,
-                    },
-                    {
-                      path: 'agents/:agentId/settings',
-                      Component: AgentSettings,
-                    },
-                    {
-                      path: 'apps/:appId',
-                      Component: AdminApp,
+                      path: 'admin',
+                      Component: () => (
+                        <AdminLayout>
+                          <Admin />
+                        </AdminLayout>
+                      ),
                       children: [
                         {
                           index: true,
-                          element: <Navigate to="settings" replace />,
+                          element: <Navigate to="/app/admin/apps" />,
                         },
                         {
-                          path: 'settings',
-                          Component: AppSettings,
+                          path: 'apps',
+                          Component: AdminApps,
                         },
                         {
-                          path: 'users',
-                          Component: AppUsers,
+                          path: 'billing',
+                          Component: AdminBilling,
                         },
                         {
-                          path: 'statistics',
-                          Component: AppStatistics,
+                          path: 'agents',
+                          Component: AdminAgents,
+                        },
+                        {
+                          path: 'agents/:agentId/settings',
+                          Component: AgentSettings,
+                        },
+                        {
+                          path: 'apps/:appId',
+                          Component: AdminApp,
+                          children: [
+                            {
+                              index: true,
+                              element: <Navigate to="settings" replace />,
+                            },
+                            {
+                              path: 'settings',
+                              Component: AppSettings,
+                            },
+                            {
+                              path: 'users',
+                              Component: AppUsers,
+                            },
+                            {
+                              path: 'statistics',
+                              Component: AppStatistics,
+                            },
+                          ],
                         },
                       ],
                     },
-                  ],
-                },
 
-                {
-                  path: 'help/whats-new',
-                  Component: WhatsNew,
-                },
-                {
-                  path: 'help',
-                  Component: Help,
+                    {
+                      path: 'help/whats-new',
+                      Component: WhatsNew,
+                    },
+                    {
+                      path: 'help',
+                      Component: Help,
+                    },
+                  ],
                 },
                 {
                   path: 'profile',
