@@ -1,8 +1,7 @@
 // The full catalogue of locales this bundle can actually render — every entry
 // here has a dictionary in i18n/translations/. It is NOT the list a given
-// install offers: that is an install-time decision (deploy.yml
-// `chat.translates` -> AVAILABLE_LANGUAGES), delivered to the client in the
-// `languages` block of every login / me response and applied by
+// install offers: that comes from `translateLanguages` on GET /apps/get-config
+// (deploy.yml `translate.languages`), narrowed to this catalogue by
 // resolveAvailableLanguages() below.
 //
 // Adding a locale here without adding its dictionary makes the picker offer a
@@ -44,13 +43,16 @@ export function isUiLocale(code: string | null | undefined): code is UiLocale {
 // would render entirely in English, which reads as a broken translation rather
 // than a language choice.
 //
-// A ONE-entry result is a meaningful answer, not a degenerate one: a
-// single-language install (deploy.yml `chat.translates` empty, so the API
-// reports just its default) is how an operator asks for no language picker and
-// no in-chat translation, and padding it back out would override that. Only a
-// list we can make no sense of at all — empty, or entirely unknown codes —
-// falls back to the whole catalogue, since that means the server told us
-// nothing usable rather than telling us "one language".
+// A ONE-entry result is a meaningful answer, not a degenerate one: an operator
+// who configures a single language is asking for no interface language picker,
+// and padding it back out would override that. Only a list we can make no sense
+// of at all — empty, or entirely unknown codes — falls back to the whole
+// catalogue, since that means the server told us nothing usable rather than
+// telling us "one language".
+//
+// That fallback is why this must NOT gate in-chat translation: it turns "no
+// translation server" into three offered languages. The translation gate reads
+// the raw list instead — see config/chatBootstrap.ts buildTranslatesConfig.
 export function resolveAvailableLanguages(
   codes: readonly string[] | null | undefined
 ): readonly UiLanguageOption[] {

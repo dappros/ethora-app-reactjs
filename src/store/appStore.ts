@@ -11,8 +11,10 @@ import {
 import type { UiLocale } from '../constants/languageOptionsConstants';
 import {
   getCachedAvailableLanguages,
+  getCachedTranslateLanguages,
   getPreferredUiLanguage,
   setCachedAvailableLanguages,
+  setCachedTranslateLanguages,
   setPreferredUiLanguage,
 } from '../utils/uiLanguage';
 
@@ -83,8 +85,9 @@ export interface AppSliceInterface extends ModelState {
   // gesture should use that; this one is for applying a language the server
   // just told us about, where echoing it straight back would be pointless.
   doSetUiLanguage: (language: UiLocale) => void;
-  // Replace the install language list (from the session-bootstrap `languages`
-  // block) and cache it for the next pre-login render.
+  // Replace the install language list (get-config's translateLanguages,
+  // narrowed to the renderable catalogue) and cache it for the next pre-login
+  // render.
   doSetAvailableLanguages: (languages: readonly UiLocale[]) => void;
   // Chat-message translation language (see ModelState.chatLanguage). Local
   // half only, like doSetUiLanguage: the profile write is actions.ts
@@ -123,9 +126,12 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   // before a session exists, so there is no flash of the wrong value to
   // prevent, and the server stays the single source of truth.
   chatLanguage: null,
-  // Empty until get-config answers. An install with no translation server
-  // keeps it empty, which is also the "hide the chat language picker" signal.
-  translateLanguages: [],
+  // Seeded from the last list get-config gave us, so the translation gate
+  // (chatBootstrap's buildTranslatesConfig) doesn't spend the first paint of
+  // every reload believing this install has no translation server. An install
+  // that really has none keeps it empty, which is both the "hide the chat
+  // language picker" and the "translates.enabled: false" signal.
+  translateLanguages: [...getCachedTranslateLanguages()],
   doSetUiLanguage: (language) => {
     setPreferredUiLanguage(language);
     set((s) => {
@@ -138,6 +144,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
     });
   },
   doSetTranslateLanguages: (languages) => {
+    setCachedTranslateLanguages(languages);
     // Copied into a mutable array: the store is an immer draft and callers
     // hand us a readonly slice of the config response.
     set((s) => {

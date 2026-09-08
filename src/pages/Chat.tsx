@@ -89,13 +89,19 @@ const MemoizedChat = React.memo(function ChatComponent({
   // Reactive: recomputes chatConfig when the viewport crosses the mobile
   // breakpoint so room-list paddings update on resize, not just at load.
   const isMobileView = useIsMobileView();
-  // App-wide UI language (Profile's LanguageModal, store/appStore.ts). Feeds
-  // createChatConfig's i18n.locale so switching language in Profile
-  // re-renders the chat-component's static captions live.
+  // The two independent language choices from Profile (store/appStore.ts).
+  // uiLanguage feeds the chat-component's static captions; chatLanguage feeds
+  // what messages are translated into. Both read reactively so switching
+  // either one in Profile re-renders the chat live. chatLanguage is null until
+  // the user picks one, which createChatConfig reads as "follow the app
+  // language" - the same semantics the Profile row shows.
   const uiLanguage = useAppStore((s) => s.uiLanguage);
-  // Languages this install offers. Gates in-chat message translation: fewer
-  // than two and createChatConfig hands the component translates.enabled:false.
-  const availableLanguages = useAppStore((s) => s.availableLanguages);
+  const chatLanguage = useAppStore((s) => s.chatLanguage);
+  // What the install's translation server can translate into (get-config's
+  // translateLanguages). Gates in-chat message translation: empty and
+  // createChatConfig hands the component translates.enabled:false, matching
+  // what Profile does with its chat-language row.
+  const translateLanguages = useAppStore((s) => s.translateLanguages);
 
   const ownerOverride = useMemo(() => {
     if (!ownerSession) return undefined;
@@ -126,8 +132,9 @@ const MemoizedChat = React.memo(function ChatComponent({
         app: config,
         chatToken: currentUser?.token || null,
         isMobileView,
-        uiLanguage,
-        availableLanguages,
+        appTranslate: uiLanguage,
+        chatTranslate: chatLanguage,
+        translateLanguages,
         // Forwarding currentUser lets createChatConfig set userLogin from the
         // base-app User's xmpp creds when no owner override is active. This
         // is the load-bearing fix for the email-login path because the
@@ -146,7 +153,8 @@ const MemoizedChat = React.memo(function ChatComponent({
       ownerOverride,
       isMobileView,
       uiLanguage,
-      availableLanguages,
+      chatLanguage,
+      translateLanguages,
     ]
   );
 
