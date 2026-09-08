@@ -53,11 +53,11 @@ export default function Profile() {
   // every component using useTranslation() re-renders together when it
   // changes here.
   const uiLanguage = useAppStore((s) => s.uiLanguage);
-  // Languages this install offers, learned from the login / me response
-  // (deploy.yml `chat.translates`). Falls back to the full bundled catalogue
-  // if the server sent nothing usable - see
-  // constants/languageOptionsConstants.ts. One entry means a single-language
-  // install, and the picker below is not rendered at all.
+  // Languages the interface works in, from get-config's translateLanguages
+  // narrowed to the bundled catalogue. Falls back to the full catalogue if the
+  // server sent nothing usable - see constants/languageOptionsConstants.ts.
+  // One entry means a single-language install, and the picker below is not
+  // rendered at all.
   const availableLanguages = useAppStore((s) => s.availableLanguages);
   const languageOptions = resolveAvailableLanguages(availableLanguages);
   const currentLanguageName =
@@ -269,9 +269,8 @@ export default function Profile() {
                 </TabPanels>
               </TabGroup>
             </div>
-            {/* Hidden entirely on a single-language install (deploy.yml
-                `chat.translates` empty or one code): a picker with nothing to
-                pick reads as a broken control, not as a setting. */}
+            {/* Hidden entirely on a single-language install: a picker with
+                nothing to pick reads as a broken control, not as a setting. */}
             {languageOptions.length > 1 && (
               <div className="border border-[#F0F0F0] rounded-xl p-4">
                 <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">

@@ -376,10 +376,12 @@ export interface ModelState {
   // detection) and replaced by the user's server-stored choice as soon as a
   // session bootstraps.
   uiLanguage: UiLocale;
-  // Languages this install offers, as delivered in the `languages` block of
-  // the login / me response and narrowed to what the bundle can render
-  // (see constants/languageOptionsConstants.ts resolveAvailableLanguages).
-  // Seeded from the localStorage cache so the pre-login screens have a list.
+  // Languages the INTERFACE works in: get-config's translateLanguages narrowed
+  // to what the bundle can render (see constants/languageOptionsConstants.ts
+  // resolveAvailableLanguages, which falls back to the whole catalogue when the
+  // raw list is empty or unrecognisable - right for a picker, wrong for the
+  // translation gate). Seeded from the localStorage cache so the pre-login
+  // screens have a list.
   availableLanguages: UiLocale[];
   // The language the user wants incoming chat messages translated into.
   //

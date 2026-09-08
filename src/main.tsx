@@ -133,19 +133,33 @@ Node.prototype.removeChild = function <T extends Node>(child: T): T {
 function XmppProviderBridge({ children }: { children: React.ReactNode }) {
   const currentUser = useAppStore((s) => s.currentUser);
   const currentApp = useAppStore((s) => s.currentApp);
-  // Languages this install offers (deploy.yml `chat.translates`, learned on
-  // login / me). Read reactively so a session bootstrap that narrows the list
-  // to one language rebuilds the provider config with translation off.
-  const availableLanguages = useAppStore((s) => s.availableLanguages);
+  // What the install's translation server can translate into (get-config's
+  // translateLanguages). Read reactively so a bootstrap that reports no
+  // translation server rebuilds the provider config with translation off.
+  const translateLanguages = useAppStore((s) => s.translateLanguages);
+  // Same two language choices the Chats page passes (see pages/Chat.tsx). This
+  // provider sits above the router, so without them the in-app notification
+  // toasts and any chat surface outside /chat would stay on raw browser
+  // detection while the page itself followed the user's picks.
+  const uiLanguage = useAppStore((s) => s.uiLanguage);
+  const chatLanguage = useAppStore((s) => s.chatLanguage);
   const providerConfig = useMemo(
     () =>
       buildEthoraBaseChatConfig({
         chat_token: currentUser?.token || null,
         currentUser,
         primaryColor: currentApp?.primaryColor,
-        availableLanguages,
+        translateLanguages,
+        appTranslate: uiLanguage,
+        chatTranslate: chatLanguage,
       }),
-    [currentUser, currentApp?.primaryColor, availableLanguages]
+    [
+      currentUser,
+      currentApp?.primaryColor,
+      translateLanguages,
+      uiLanguage,
+      chatLanguage,
+    ]
   );
 
   return <XmppProvider config={providerConfig}>{children}</XmppProvider>;
