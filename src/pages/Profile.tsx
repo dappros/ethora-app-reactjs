@@ -11,7 +11,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@mui/material';
 import { DateTime } from 'luxon';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -31,6 +31,7 @@ import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
 import {
   UiLocale,
   resolveAvailableLanguages,
+  resolveTranslateLanguages,
 } from '../constants/languageOptionsConstants';
 import { logLogout } from '../hooks/withTracking.tsx';
 import { deleteDocuments, getDocuments, httpLogout } from '../http';
@@ -65,10 +66,26 @@ export default function Profile() {
   // translates into their app language, so that is what the row shows —
   // labelled as following the interface, not as an independent choice.
   const chatLanguage = useAppStore((s) => s.chatLanguage);
+  // What the install's translation server can actually translate into
+  // (get-config `translateLanguages`). This — not the interface catalogue —
+  // is what the chat picker offers: translating messages INTO a language does
+  // not require the UI to render in it.
+  const translateLanguages = useAppStore((s) => s.translateLanguages);
+  const translateOptions = useMemo(
+    () => resolveTranslateLanguages(translateLanguages, uiLanguage),
+    [translateLanguages, uiLanguage]
+  );
   const effectiveChatLanguage = chatLanguage ?? uiLanguage;
   const currentChatLanguageName =
-    languageOptions.find((l) => l.id === effectiveChatLanguage)?.name ??
+    translateOptions.find((l) => l.id === effectiveChatLanguage)?.name ??
     effectiveChatLanguage;
+  // The stored choice can fall outside the offered set — the operator narrows
+  // the translation server's languages, or the user's app language is one it
+  // has no model for. Say so rather than showing a value that silently will
+  // not translate.
+  const chatLanguageUnsupported =
+    translateOptions.length > 0 &&
+    !translateOptions.some((l) => l.id === effectiveChatLanguage);
   const {
     firstName,
     lastName,
@@ -129,7 +146,7 @@ export default function Profile() {
   // Unlike the UI language there is nothing applied locally first, so a failed
   // write leaves the row on its previous value and the toast is the whole
   // story.
-  const onChangeChatLanguage = async (code: UiLocale) => {
+  const onChangeChatLanguage = async (code: string) => {
     setShowChatLanguageModal(false);
     try {
       await actionSetChatLanguage(code);
@@ -266,20 +283,33 @@ export default function Profile() {
                 >
                   {currentLanguageName}
                 </button>
-                <p className="text-[#8C8C8C] font-sans text-[14px] mt-4 mb-2">
-                  {t('profile.chatLanguage')}
-                </p>
-                <button
-                  onClick={() => setShowChatLanguageModal(true)}
-                  className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
-                >
-                  {currentChatLanguageName}
-                </button>
-                <p className="text-[#8C8C8C] font-sans text-[12px] mt-2">
-                  {chatLanguage === null
-                    ? t('profile.chatLanguageFollowingApp')
-                    : t('profile.chatLanguageHint')}
-                </p>
+                {/* Hidden entirely when the install has no translation
+                    server (get-config reports translateLanguages: []): a
+                    picker whose choice cannot take effect is worse than no
+                    picker. */}
+                {translateOptions.length > 0 && (
+                  <>
+                    <p className="text-[#8C8C8C] font-sans text-[14px] mt-4 mb-2">
+                      {t('profile.chatLanguage')}
+                    </p>
+                    <button
+                      onClick={() => setShowChatLanguageModal(true)}
+                      className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
+                    >
+                      {currentChatLanguageName}
+                    </button>
+                    <p className="text-[#8C8C8C] font-sans text-[12px] mt-2">
+                      {chatLanguage === null
+                        ? t('profile.chatLanguageFollowingApp')
+                        : t('profile.chatLanguageHint')}
+                    </p>
+                    {chatLanguageUnsupported && (
+                      <p className="text-[#F44336] font-sans text-[12px] mt-1">
+                        {t('profile.chatLanguageUnsupported')}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             )}
             <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
@@ -319,7 +349,7 @@ export default function Profile() {
       {showChatLanguageModal && (
         <LanguageModal
           value={effectiveChatLanguage}
-          options={languageOptions}
+          options={translateOptions}
           onSelect={onChangeChatLanguage}
           onClose={() => setShowChatLanguageModal(false)}
           title={t('profile.chatLanguage')}

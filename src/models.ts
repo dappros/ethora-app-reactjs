@@ -388,7 +388,21 @@ export interface ModelState {
   // is the only source of truth. `null` means "not chosen" - callers should
   // read it as "follow uiLanguage", matching the backend's
   // resolveUserChatLanguage().
-  chatLanguage: UiLocale | null;
+  //
+  // A plain string rather than UiLocale: the translation server can support
+  // languages this bundle has no dictionary for, and picking one of those as a
+  // translation target is legitimate (see translateLanguages below).
+  chatLanguage: string | null;
+  // What the install's translation server can translate into, from the
+  // `translateLanguages` field of GET /apps/get-config. Install-wide, not
+  // per-app.
+  //
+  // Distinct from availableLanguages above: that is the set of languages the
+  // INTERFACE works in, this is a separate deployment's capability list, and
+  // the two may legitimately differ in both directions. An empty array means
+  // no translation server is configured - the chat language picker is hidden
+  // entirely in that case.
+  translateLanguages: string[];
 }
 
 export type OrderByType =

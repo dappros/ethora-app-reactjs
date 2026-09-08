@@ -59,3 +59,57 @@ export function resolveAvailableLanguages(
   const matched = UI_LANGUAGE_OPTIONS.filter((l) => wanted.includes(l.id));
   return matched.length > 0 ? matched : UI_LANGUAGE_OPTIONS;
 }
+
+// Options for the CHAT language picker, built from the translation server's
+// capability list (`translateLanguages` on GET /apps/get-config).
+//
+// Deliberately NOT narrowed to UI_LANGUAGE_OPTIONS the way
+// resolveAvailableLanguages does. That narrowing is right for the interface —
+// a locale with no dictionary would render in English, which reads as broken.
+// It is wrong here: translating messages INTO Ukrainian does not require a
+// Ukrainian interface, and the translation server is a separate deployment
+// that may well support languages this bundle has never heard of. Dropping
+// them would make the whole list pointless beyond the three bundled locales.
+//
+// Names come from the catalogue when we have one (so 'fr-CA' reads "Français",
+// matching the app-language picker), else from Intl.DisplayNames in the
+// reader's own language, else the raw tag — always something selectable rather
+// than a blank row.
+//
+// An empty result means the install has no translation server configured;
+// callers should hide the picker rather than show an empty sheet.
+export interface LanguageChoice {
+  id: string;
+  name: string;
+}
+
+function displayNameFor(code: string, uiLocale: string): string {
+  const known = UI_LANGUAGE_OPTIONS.find((l) => l.id === code);
+  if (known) return known.name;
+  try {
+    // `type: 'language'` handles both 'uk' and 'uk-UA'. Region-qualified tags
+    // come back as "Ukrainian (Ukraine)" which is more precise than we need but
+    // never wrong.
+    const dn = new Intl.DisplayNames([uiLocale], { type: 'language' });
+    return dn.of(code) || code;
+  } catch {
+    // Unsupported runtime, or a tag Intl refuses to parse.
+    return code;
+  }
+}
+
+export function resolveTranslateLanguages(
+  codes: readonly string[] | null | undefined,
+  uiLocale: string
+): readonly LanguageChoice[] {
+  if (!codes || codes.length === 0) return [];
+  const seen = new Set<string>();
+  const out: LanguageChoice[] = [];
+  for (const raw of codes) {
+    const id = canonicalizeLocale(raw);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push({ id, name: displayNameFor(id, uiLocale) });
+  }
+  return out;
+}
