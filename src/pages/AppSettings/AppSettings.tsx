@@ -726,6 +726,8 @@ export default function AppSettings() {
               firebaseServiceAccountUploaded={
                 !!app.firebaseServiceAccountUploaded
               }
+              apnsKeyUploaded={!!app.apnsKeyUploaded}
+              bundleId={app.bundleId}
             />
           </TabPanel>
 

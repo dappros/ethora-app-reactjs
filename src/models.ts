@@ -168,6 +168,7 @@ export interface ModelApp {
   googleServicesJson: string;
   googleServiceInfoPlist: string;
   firebaseServiceAccountUploaded?: boolean;
+  apnsKeyUploaded?: boolean;
   appSecret: string;
   allowUsersToCreateRooms: boolean;
   // Self-service registration switch (ethora-backend 2609+). Negative on

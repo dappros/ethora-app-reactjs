@@ -9,6 +9,9 @@ import {
   httpPostFile,
   httpUploadFirebaseServiceAccount,
   httpDeleteFirebaseServiceAccount,
+  httpUploadApnsKey,
+  httpDeleteApnsKey,
+  ApnsKeyUpload,
   httpResetPasswords,
   httpTokens,
   httpUpdateApp,
@@ -349,6 +352,25 @@ export async function actionUploadFirebaseServiceAccount(
 export async function actionDeleteFirebaseServiceAccount(appId: string) {
   await httpDeleteFirebaseServiceAccount(appId);
   setFirebaseServiceAccountFlag(appId, false);
+}
+
+function setApnsKeyFlag(appId: string, uploaded: boolean) {
+  const state = getState();
+  const app = state.apps.find((el) => el._id === appId);
+
+  if (app) {
+    state.doUpdateApp({ ...app, apnsKeyUploaded: uploaded });
+  }
+}
+
+export async function actionUploadApnsKey(appId: string, input: ApnsKeyUpload) {
+  await httpUploadApnsKey(appId, input);
+  setApnsKeyFlag(appId, true);
+}
+
+export async function actionDeleteApnsKey(appId: string) {
+  await httpDeleteApnsKey(appId);
+  setApnsKeyFlag(appId, false);
 }
 
 export async function actionUpdateUser(fd: FormData) {

@@ -342,6 +342,45 @@ export function httpDeleteFirebaseServiceAccount(appId: string) {
   return http.delete(`/push/firebase-service-account/${appId}`);
 }
 
+export type ApnsEnvironment = 'sandbox' | 'production';
+
+export interface ApnsKeyUpload {
+  file: File;
+  keyId: string;
+  teamId: string;
+  environment: ApnsEnvironment;
+  bundleId: string;
+}
+
+export function httpUploadApnsKey(appId: string, input: ApnsKeyUpload) {
+  const fd = new FormData();
+  fd.append('apnsKey', input.file);
+  fd.append('keyId', input.keyId);
+  fd.append('teamId', input.teamId);
+  fd.append('environment', input.environment);
+  fd.append('bundleId', input.bundleId);
+  return http.post(`/push/apns/${appId}`, fd);
+}
+
+export function httpDeleteApnsKey(appId: string) {
+  return http.delete(`/push/apns/${appId}`);
+}
+
+
+export interface PushPlatformState {
+  enabled: boolean;
+  todayCount: number;
+  quota: number;
+}
+
+export function httpGetPushPlatform(appId: string) {
+  return http.get<PushPlatformState>(`/push/platform/${appId}`);
+}
+
+export function httpSetPushPlatform(appId: string, enabled: boolean) {
+  return http.put<PushPlatformState>(`/push/platform/${appId}`, { enabled });
+}
+
 export function httpPostFile(file: File) {
   let fd = new FormData();
   fd.append('files', file);

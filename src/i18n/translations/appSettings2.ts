@@ -103,6 +103,33 @@ export const appSettings2 = {
       'Firebase service account deleted',
     'appSettingsMobileApp.toast.deleteFailed':
       'Failed to delete Firebase service account',
+    'appSettingsMobileApp.platform.label': 'Platform delivery',
+    'appSettingsMobileApp.platform.hint':
+      "Send pushes through Ethora's own credentials. Enable this if you do not publish your own app and your users install the Ethora app from the stores. A daily quota applies.",
+    'appSettingsMobileApp.platform.usage': 'Used {used} of {quota} today',
+    'appSettingsMobileApp.platform.toast.enabled': 'Platform delivery enabled',
+    'appSettingsMobileApp.platform.toast.disabled': 'Platform delivery disabled',
+    'appSettingsMobileApp.platform.toast.failed':
+      'Failed to update platform delivery',
+    'appSettingsMobileApp.apns.heading': 'Apple Push (APNs)',
+    'appSettingsMobileApp.apns.description':
+      'For iOS pushes without Firebase: upload the APNs auth key (.p8) from your Apple Developer account together with its Key ID, your Team ID and the bundle id of the app that receives the pushes.',
+    'appSettingsMobileApp.apns.keyIdLabel': 'Key ID (10 characters)',
+    'appSettingsMobileApp.apns.teamIdLabel': 'Team ID (10 characters)',
+    'appSettingsMobileApp.apns.bundleIdLabel': 'Bundle ID',
+    'appSettingsMobileApp.apns.environmentLabel': 'Environment',
+    'appSettingsMobileApp.apns.chooseFile': 'Choose .p8 file',
+    'appSettingsMobileApp.apns.uploadButton': 'Upload APNs key',
+    'appSettingsMobileApp.apns.deleteButton': 'Delete APNs key',
+    'appSettingsMobileApp.apns.deleteModal.title': 'Delete APNs key?',
+    'appSettingsMobileApp.apns.deleteModal.message':
+      'Your APNs auth key will be removed and iOS users of your own app will stop receiving pushes. You can upload a key again at any time.',
+    'appSettingsMobileApp.apns.deleteModal.confirmLabel': 'Delete',
+    'appSettingsMobileApp.apns.toast.uploadSuccess': 'APNs key uploaded',
+    'appSettingsMobileApp.apns.toast.uploadFailed': 'Failed to upload APNs key',
+    'appSettingsMobileApp.apns.toast.deleteSuccess': 'APNs key deleted',
+    'appSettingsMobileApp.apns.toast.deleteFailed': 'Failed to delete APNs key',
+    'appSettingsMobileApp.firebase.heading': 'Android and Web Push (Firebase)',
 
     // --- ProgressCreateApp.tsx ---
     'appSettingsProgressCreateApp.stepAppCreated': 'App Created',
@@ -412,6 +439,33 @@ export const appSettings2 = {
       'Compte de service Firebase supprimé',
     'appSettingsMobileApp.toast.deleteFailed':
       'Échec de la suppression du compte de service Firebase',
+    'appSettingsMobileApp.platform.label': 'Livraison par la plateforme',
+    'appSettingsMobileApp.platform.hint':
+      "Envoyer les notifications push via les identifiants d'Ethora. Activez cette option si vous ne publiez pas votre propre application et que vos utilisateurs installent l'application Ethora depuis les stores. Un quota quotidien s'applique.",
+    'appSettingsMobileApp.platform.usage': "{used} sur {quota} utilisés aujourd'hui",
+    'appSettingsMobileApp.platform.toast.enabled': 'Livraison par la plateforme activée',
+    'appSettingsMobileApp.platform.toast.disabled': 'Livraison par la plateforme désactivée',
+    'appSettingsMobileApp.platform.toast.failed':
+      'Échec de la mise à jour de la livraison par la plateforme',
+    'appSettingsMobileApp.apns.heading': 'Apple Push (APNs)',
+    'appSettingsMobileApp.apns.description':
+      "Pour les notifications iOS sans Firebase : téléversez la clé d'authentification APNs (.p8) de votre compte Apple Developer avec son Key ID, votre Team ID et le bundle id de l'application qui reçoit les notifications.",
+    'appSettingsMobileApp.apns.keyIdLabel': 'Key ID (10 caractères)',
+    'appSettingsMobileApp.apns.teamIdLabel': 'Team ID (10 caractères)',
+    'appSettingsMobileApp.apns.bundleIdLabel': 'Bundle ID',
+    'appSettingsMobileApp.apns.environmentLabel': 'Environnement',
+    'appSettingsMobileApp.apns.chooseFile': 'Choisir un fichier .p8',
+    'appSettingsMobileApp.apns.uploadButton': 'Téléverser la clé APNs',
+    'appSettingsMobileApp.apns.deleteButton': 'Supprimer la clé APNs',
+    'appSettingsMobileApp.apns.deleteModal.title': 'Supprimer la clé APNs ?',
+    'appSettingsMobileApp.apns.deleteModal.message':
+      "Votre clé APNs sera supprimée et les utilisateurs iOS de votre application ne recevront plus de notifications. Vous pouvez téléverser une clé à tout moment.",
+    'appSettingsMobileApp.apns.deleteModal.confirmLabel': 'Supprimer',
+    'appSettingsMobileApp.apns.toast.uploadSuccess': 'Clé APNs téléversée',
+    'appSettingsMobileApp.apns.toast.uploadFailed': 'Échec du téléversement de la clé APNs',
+    'appSettingsMobileApp.apns.toast.deleteSuccess': 'Clé APNs supprimée',
+    'appSettingsMobileApp.apns.toast.deleteFailed': 'Échec de la suppression de la clé APNs',
+    'appSettingsMobileApp.firebase.heading': 'Notifications Android et Web (Firebase)',
 
     // --- ProgressCreateApp.tsx ---
     'appSettingsProgressCreateApp.stepAppCreated': 'Application créée',
@@ -729,6 +783,33 @@ export const appSettings2 = {
       'Cuenta de servicio de Firebase eliminada',
     'appSettingsMobileApp.toast.deleteFailed':
       'No se pudo eliminar la cuenta de servicio de Firebase',
+    'appSettingsMobileApp.platform.label': 'Entrega por la plataforma',
+    'appSettingsMobileApp.platform.hint':
+      'Enviar notificaciones push con las credenciales de Ethora. Actívalo si no publicas tu propia aplicación y tus usuarios instalan la app de Ethora desde las tiendas. Se aplica una cuota diaria.',
+    'appSettingsMobileApp.platform.usage': 'Usados {used} de {quota} hoy',
+    'appSettingsMobileApp.platform.toast.enabled': 'Entrega por la plataforma activada',
+    'appSettingsMobileApp.platform.toast.disabled': 'Entrega por la plataforma desactivada',
+    'appSettingsMobileApp.platform.toast.failed':
+      'No se pudo actualizar la entrega por la plataforma',
+    'appSettingsMobileApp.apns.heading': 'Apple Push (APNs)',
+    'appSettingsMobileApp.apns.description':
+      'Para notificaciones iOS sin Firebase: sube la clave de autenticación APNs (.p8) de tu cuenta de Apple Developer junto con su Key ID, tu Team ID y el bundle id de la app que recibe las notificaciones.',
+    'appSettingsMobileApp.apns.keyIdLabel': 'Key ID (10 caracteres)',
+    'appSettingsMobileApp.apns.teamIdLabel': 'Team ID (10 caracteres)',
+    'appSettingsMobileApp.apns.bundleIdLabel': 'Bundle ID',
+    'appSettingsMobileApp.apns.environmentLabel': 'Entorno',
+    'appSettingsMobileApp.apns.chooseFile': 'Elegir archivo .p8',
+    'appSettingsMobileApp.apns.uploadButton': 'Subir clave APNs',
+    'appSettingsMobileApp.apns.deleteButton': 'Eliminar clave APNs',
+    'appSettingsMobileApp.apns.deleteModal.title': '¿Eliminar la clave APNs?',
+    'appSettingsMobileApp.apns.deleteModal.message':
+      'Se eliminará tu clave APNs y los usuarios iOS de tu propia app dejarán de recibir notificaciones. Puedes subir una clave de nuevo en cualquier momento.',
+    'appSettingsMobileApp.apns.deleteModal.confirmLabel': 'Eliminar',
+    'appSettingsMobileApp.apns.toast.uploadSuccess': 'Clave APNs subida',
+    'appSettingsMobileApp.apns.toast.uploadFailed': 'No se pudo subir la clave APNs',
+    'appSettingsMobileApp.apns.toast.deleteSuccess': 'Clave APNs eliminada',
+    'appSettingsMobileApp.apns.toast.deleteFailed': 'No se pudo eliminar la clave APNs',
+    'appSettingsMobileApp.firebase.heading': 'Notificaciones Android y Web (Firebase)',
 
     // --- ProgressCreateApp.tsx ---
     'appSettingsProgressCreateApp.stepAppCreated': 'Aplicación creada',
