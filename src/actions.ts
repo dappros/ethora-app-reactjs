@@ -97,8 +97,19 @@ export async function actionGetConfig(domainName?: string) {
   // translation server can translate into. Absent on an API that predates the
   // field, which reads the same as "no translation server" - the chat language
   // picker stays hidden either way.
-  state.doSetTranslateLanguages(
-    Array.isArray(result.translateLanguages) ? result.translateLanguages : []
+  const translateLanguages: string[] = Array.isArray(result.translateLanguages)
+    ? result.translateLanguages
+    : [];
+  state.doSetTranslateLanguages(translateLanguages);
+  // get-config is now the ONLY place a language list arrives - the session
+  // bootstrap stopped carrying a `languages` block. The same list feeds both
+  // pickers with different narrowings: the interface can only offer locales the
+  // bundle ships dictionaries for (resolveAvailableLanguages drops the rest,
+  // since an unbundled one would render in English), while the chat picker
+  // offers the list whole, because translating INTO a language does not require
+  // the UI to render in it.
+  state.doSetAvailableLanguages(
+    resolveAvailableLanguages(translateLanguages).map((l) => l.id)
   );
 
   await sleep(1000);
@@ -116,20 +127,21 @@ export async function actionGetConfig(domainName?: string) {
 // be a pointless write on every page load.
 interface SessionLanguagePayload {
   user?: { appLanguage?: string | null; chatLanguage?: string | null };
-  languages?: { available?: string[]; default?: string };
 }
 
 function applySessionLanguages(data: SessionLanguagePayload) {
   const state = getState();
 
-  const offered = resolveAvailableLanguages(data?.languages?.available).map(
-    (l) => l.id
-  );
-  state.doSetAvailableLanguages(offered);
+  // The offered list is no longer in this payload - the API stopped sending a
+  // `languages` block, and get-config is the single source. Read what
+  // actionGetConfig already put in the store rather than re-deriving it here.
+  const offered = state.availableLanguages;
 
   const next = resolveSessionUiLanguage(
     data?.user?.appLanguage,
-    data?.languages?.default,
+    // No install default arrives any more either; resolveSessionUiLanguage
+    // falls through to the current value, then to the first offered locale.
+    null,
     offered,
     state.uiLanguage
   );
@@ -141,13 +153,12 @@ function applySessionLanguages(data: SessionLanguagePayload) {
   // chosen", which callers read as "follow the app language" - the same rule
   // the backend's resolveUserChatLanguage() applies.
   //
-  // Not narrowed against `offered`: that is the INTERFACE catalogue, and the
-  // chat language is validated against the translation server's list instead
-  // (store.translateLanguages, from get-config). Narrowing here would silently
-  // discard a legitimate choice - a user translating into a language the UI
-  // does not render in - and get-config may not have answered yet on some
-  // bootstrap orders. Only the canonical form is enforced; the Profile picker
-  // is what checks the value against what the translator actually supports.
+  // Not narrowed against `offered`: that is the bundle-renderable subset, and
+  // the chat language is validated against the full translation-server list
+  // instead. Narrowing here would silently discard a legitimate choice - a user
+  // translating into a language the UI does not render in. Only the canonical
+  // form is enforced; the Profile picker checks it against what the translator
+  // actually supports.
   const storedChat = canonicalizeLocale(data?.user?.chatLanguage);
   state.doSetChatLanguage(storedChat || null);
 }
