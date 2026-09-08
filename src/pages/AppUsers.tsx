@@ -37,6 +37,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
+import { downloadCsv } from '../utils/csv';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
@@ -314,19 +315,33 @@ export default function AppUsers() {
     firstName,
     lastName,
     email,
+    password,
   }: {
     firstName: string;
     lastName: string;
     email: string;
+    password: string;
   }) => {
     if (!appId) {
       return;
     }
 
     setLoading(true);
-    httpCraeteUser(appId, { firstName, lastName, email })
+    httpCraeteUser(appId, { firstName, lastName, email, password })
       .then(() => {
-        actionGetUsers(
+        // Hand the credentials over the moment the account exists. The server
+        // stores the password hashed and no endpoint reads it back, so this
+        // download is the only copy the operator will ever get — emit it
+        // before the list refresh so a failure there cannot cost them the
+        // password.
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const slug = email.replace(/[^a-zA-Z0-9._-]+/g, '-');
+        downloadCsv(`new-user-${slug}-${stamp}.csv`, [
+          ['First Name', 'Last Name', 'Email', 'Password'],
+          [firstName, lastName, email, password],
+        ]);
+
+        return actionGetUsers(
           appId,
           itemsPerTable,
           page * itemsPerTable,

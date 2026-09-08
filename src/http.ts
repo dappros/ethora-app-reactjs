@@ -387,12 +387,21 @@ export function httpCraeteUser(
     email,
     firstName,
     lastName,
-  }: { email: string; firstName: string; lastName: string }
+    password,
+  }: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    // Optional. When sent, the server stores it as the user's permanent
+    // sign-in password instead of mailing out a generated temp one.
+    password?: string;
+  }
 ) {
   return http.post(`/users/create-with-app-id/${appId}`, {
     email,
     firstName,
     lastName,
+    ...(password ? { password } : {}),
   });
 }
 

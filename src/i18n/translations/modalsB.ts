@@ -33,6 +33,11 @@ export const modalsB = {
     'newUserModal.firstNamePlaceholder': 'First Name',
     'newUserModal.lastNamePlaceholder': 'Last Name',
     'newUserModal.emailPlaceholder': 'Email',
+    'newUserModal.passwordPlaceholder': 'Password',
+    'newUserModal.passwordHint':
+      'Generated automatically. Edit it if you like — it is saved as the sign-in password and downloaded as a CSV once the user is created.',
+    'newUserModal.passwordRegenerate': 'Generate a new password',
+    'newUserModal.passwordMinLength': 'Password must be at least 6 characters',
     'newUserModal.cancelButton': 'Cancel',
     'newUserModal.continueButton': 'Continue',
 
@@ -74,6 +79,12 @@ export const modalsB = {
     'newUserModal.firstNamePlaceholder': 'Prénom',
     'newUserModal.lastNamePlaceholder': 'Nom',
     'newUserModal.emailPlaceholder': 'E-mail',
+    'newUserModal.passwordPlaceholder': 'Mot de passe',
+    'newUserModal.passwordHint':
+      'Généré automatiquement. Modifiez-le si vous le souhaitez : il est enregistré comme mot de passe de connexion et téléchargé en CSV une fois l’utilisateur créé.',
+    'newUserModal.passwordRegenerate': 'Générer un nouveau mot de passe',
+    'newUserModal.passwordMinLength':
+      'Le mot de passe doit contenir au moins 6 caractères',
     'newUserModal.cancelButton': 'Annuler',
     'newUserModal.continueButton': 'Continuer',
 
@@ -114,6 +125,12 @@ export const modalsB = {
     'newUserModal.firstNamePlaceholder': 'Nombre',
     'newUserModal.lastNamePlaceholder': 'Apellido',
     'newUserModal.emailPlaceholder': 'Correo electrónico',
+    'newUserModal.passwordPlaceholder': 'Contraseña',
+    'newUserModal.passwordHint':
+      'Generada automáticamente. Puedes editarla: se guarda como contraseña de acceso y se descarga en CSV cuando se crea el usuario.',
+    'newUserModal.passwordRegenerate': 'Generar una contraseña nueva',
+    'newUserModal.passwordMinLength':
+      'La contraseña debe tener al menos 6 caracteres',
     'newUserModal.cancelButton': 'Cancelar',
     'newUserModal.continueButton': 'Continuar',
 

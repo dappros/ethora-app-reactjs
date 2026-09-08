@@ -25,6 +25,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 // (`httpV2App`) lacks them and the middleware rejects with
 // `TOKEN_MISSING_CLAIMS`.
 import { httpV2 } from '../../http';
+import { downloadCsv } from '../../utils/csv';
 
 // Server response shape — matches the listWidgetConversationsService
 // envelope. Kept minimal (no shared types module yet); when more views
@@ -309,32 +310,6 @@ export function WidgetConversationsPanel({
       return { ok: false, error: e?.response?.data?.error || e?.message || 'chat delete failed' };
     }
     return { ok: true };
-  }
-
-  // CSV export — used by both "Export selected" and "Export all" flows.
-  // We escape with the standard double-double-quote rule: anything that
-  // contains a comma, quote, or newline gets wrapped in quotes with
-  // internal quotes doubled. Any spreadsheet that opens CSV will read
-  // it back correctly.
-  function csvCell(value: unknown): string {
-    const s = value == null ? '' : String(value);
-    if (s === '') return '';
-    if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-    return s;
-  }
-
-  function downloadCsv(filename: string, rowsCsv: string[][]) {
-    // BOM so Excel opens UTF-8 with the right encoding.
-    const csv = '﻿' + rowsCsv.map((r) => r.map(csvCell).join(',')).join('\r\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
   // Given a list of conversation rows, fetch their messages and emit a
