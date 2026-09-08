@@ -10,10 +10,15 @@ export interface ModelCurrentUser {
   isAgreeWithTerms: boolean;
   isAssetsOpen: boolean;
   isProfileOpen: boolean;
-  // Preferred UI language as a BCP-47 tag, or '' when the user has never
-  // picked one (the app then follows the install default). Server-owned:
-  // written through PUT /users, read back on login and /me.
-  language?: string;
+  // The language the interface is rendered in, as a BCP-47 tag, or '' when the
+  // user has never picked one (the app then follows the install default).
+  // Server-owned: written through PUT /users, read back on login and /me.
+  // Named `language` before the split into app / chat preferences.
+  appLanguage?: string;
+  // The language the user wants incoming chat messages translated into. Same
+  // shape and lifecycle as appLanguage; '' means "follow appLanguage" rather
+  // than the install default.
+  chatLanguage?: string;
   token: string;
   refreshToken: string;
   wsToken: string;
@@ -376,6 +381,14 @@ export interface ModelState {
   // (see constants/languageOptionsConstants.ts resolveAvailableLanguages).
   // Seeded from the localStorage cache so the pre-login screens have a list.
   availableLanguages: UiLocale[];
+  // The language the user wants incoming chat messages translated into.
+  //
+  // Unlike uiLanguage this is NOT seeded from localStorage: nothing renders in
+  // it before a session exists, so there is no flash to avoid, and the server
+  // is the only source of truth. `null` means "not chosen" - callers should
+  // read it as "follow uiLanguage", matching the backend's
+  // resolveUserChatLanguage().
+  chatLanguage: UiLocale | null;
 }
 
 export type OrderByType =

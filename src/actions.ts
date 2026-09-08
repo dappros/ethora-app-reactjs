@@ -13,7 +13,7 @@ import {
   httpTokens,
   httpUpdateApp,
   httpUpdateUser,
-  httpUpdateUserLanguage,
+  httpUpdateUserLanguages,
   // Phase 1 (Agents)
   httpListAgents,
   httpGetAgent,
@@ -30,6 +30,7 @@ import {
 } from './http';
 import {
   UiLocale,
+  canonicalizeLocale,
   resolveAvailableLanguages,
 } from './constants/languageOptionsConstants';
 import { ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
@@ -106,7 +107,7 @@ export async function actionGetConfig(domainName?: string) {
 // actionSetUiLanguage: the value came FROM the server, echoing it back would
 // be a pointless write on every page load.
 interface SessionLanguagePayload {
-  user?: { language?: string | null };
+  user?: { appLanguage?: string | null; chatLanguage?: string | null };
   languages?: { available?: string[]; default?: string };
 }
 
@@ -119,7 +120,7 @@ function applySessionLanguages(data: SessionLanguagePayload) {
   state.doSetAvailableLanguages(offered);
 
   const next = resolveSessionUiLanguage(
-    data?.user?.language,
+    data?.user?.appLanguage,
     data?.languages?.default,
     offered,
     state.uiLanguage
@@ -127,6 +128,15 @@ function applySessionLanguages(data: SessionLanguagePayload) {
   if (next !== state.uiLanguage) {
     state.doSetUiLanguage(next);
   }
+
+  // Chat language is adopted verbatim rather than defaulted: null means "never
+  // chosen", which callers read as "follow the app language" - the same rule
+  // the backend's resolveUserChatLanguage() applies. Constrained to what this
+  // install offers so a narrowed list can't leave a dropped code in the store.
+  const storedChat = canonicalizeLocale(data?.user?.chatLanguage);
+  state.doSetChatLanguage(
+    offered.includes(storedChat as UiLocale) ? (storedChat as UiLocale) : null
+  );
 }
 
 // User-initiated language change: apply it locally first so the UI switches
@@ -140,8 +150,23 @@ export async function actionSetUiLanguage(language: UiLocale) {
   const currentUser = state.currentUser;
   if (!currentUser) return;
 
-  await httpUpdateUserLanguage(language);
-  state.doUpdateUser({ language });
+  await httpUpdateUserLanguages({ appLanguage: language });
+  state.doUpdateUser({ appLanguage: language });
+}
+
+// The chat-message translation language. Unlike the UI language there is
+// nothing to apply locally first - no caption re-renders on this - so the
+// store is updated only once the write lands, and a failed write leaves the
+// previous value in place for the caller to report.
+export async function actionSetChatLanguage(language: UiLocale) {
+  const state = getState();
+
+  const currentUser = state.currentUser;
+  if (!currentUser) return;
+
+  await httpUpdateUserLanguages({ chatLanguage: language });
+  state.doSetChatLanguage(language);
+  state.doUpdateUser({ chatLanguage: language });
 }
 
 export async function actionAfterLogin(data: any) {
@@ -175,7 +200,8 @@ export async function actionAfterLogin(data: any) {
       walletAddress: walletAddress,
     },
     xmppUsername: data.user.xmppUsername,
-    language: data.user.language ?? '',
+    appLanguage: data.user.appLanguage ?? '',
+    chatLanguage: data.user.chatLanguage ?? '',
   };
 
   if (data.user.isSuperAdmin) {
@@ -316,7 +342,8 @@ export async function actionUpdateUser(fd: FormData) {
     profileImage: user.profileImage,
     isAssetsOpen: user.isAssetsOpen,
     isProfileOpen: user.isProfileOpen,
-    language: user.language ?? '',
+    appLanguage: user.appLanguage ?? '',
+    chatLanguage: user.chatLanguage ?? '',
   });
   return {
     profileImage: user.profileImage,

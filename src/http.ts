@@ -612,10 +612,17 @@ export function httpUpdateUser(fd: FormData) {
 }
 
 // Same endpoint as httpUpdateUser, sent as JSON instead of multipart: the
-// language picker updates one scalar and has no avatar to carry, and a
+// language pickers update one scalar and have no avatar to carry, and a
 // FormData body would make every unrelated field arrive as a string.
-export function httpUpdateUserLanguage(language: string) {
-  return http.put('/users', { language });
+//
+// Takes a partial so either preference can be written on its own — the API
+// leaves untouched fields alone, and sending both would make one picker
+// silently rewrite the other's value.
+export function httpUpdateUserLanguages(languages: {
+  appLanguage?: string;
+  chatLanguage?: string;
+}) {
+  return http.put('/users', languages);
 }
 
 export function getPublicProfile(walletAddress: string, token: string = '') {
