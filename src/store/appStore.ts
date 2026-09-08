@@ -86,6 +86,10 @@ export interface AppSliceInterface extends ModelState {
   // Replace the install language list (from the session-bootstrap `languages`
   // block) and cache it for the next pre-login render.
   doSetAvailableLanguages: (languages: readonly UiLocale[]) => void;
+  // Chat-message translation language (see ModelState.chatLanguage). Local
+  // half only, like doSetUiLanguage: the profile write is actions.ts
+  // actionSetChatLanguage. `null` clears it back to "follow uiLanguage".
+  doSetChatLanguage: (language: UiLocale | null) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -112,10 +116,19 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   ownedApps: [],
   uiLanguage: getPreferredUiLanguage(),
   availableLanguages: [...getCachedAvailableLanguages()],
+  // No localStorage seed on purpose: nothing renders in the chat language
+  // before a session exists, so there is no flash of the wrong value to
+  // prevent, and the server stays the single source of truth.
+  chatLanguage: null,
   doSetUiLanguage: (language) => {
     setPreferredUiLanguage(language);
     set((s) => {
       s.uiLanguage = language;
+    });
+  },
+  doSetChatLanguage: (language) => {
+    set((s) => {
+      s.chatLanguage = language;
     });
   },
   doSetAvailableLanguages: (languages) => {
@@ -157,7 +170,8 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
       'profileImage',
       'isAssetsOpen',
       'isProfileOpen',
-      'language',
+      'appLanguage',
+      'chatLanguage',
     ] as const;
 
     set((s) => {

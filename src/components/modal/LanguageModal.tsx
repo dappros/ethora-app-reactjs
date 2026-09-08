@@ -12,13 +12,17 @@ interface Props {
   options: readonly UiLanguageOption[];
   onSelect: (code: UiLocale) => void;
   onClose: () => void;
+  // Heading text. Defaults to the generic "select a language" caption; the
+  // profile passes a specific one so two pickers on the same screen (interface
+  // vs chat translation) don't open identical-looking sheets.
+  title?: string;
 }
 
 // Mobile-optimized: a bottom sheet (anchored to the viewport bottom, rounded
 // top corners, drag-handle affordance) below the `sm` breakpoint; a centered
 // card above it. Replaces the old cramped <select> - big tappable rows work
 // far better on a phone than a native dropdown crammed into a small popover.
-export function LanguageModal({ value, options, onSelect, onClose }: Props) {
+export function LanguageModal({ value, options, onSelect, onClose, title }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -34,7 +38,7 @@ export function LanguageModal({ value, options, onSelect, onClose }: Props) {
         <div className="sm:hidden w-10 h-1.5 bg-gray-200 rounded-full mx-auto mb-4" />
         <div className="flex items-center justify-between mb-4">
           <div className="font-varela text-[18px] sm:text-[24px]">
-            {t('language.select')}
+            {title ?? t('language.select')}
           </div>
           <button onClick={onClose} aria-label="Close">
             <IconClose />

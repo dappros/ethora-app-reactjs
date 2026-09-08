@@ -21,6 +21,11 @@ export const common = {
     'profile.onlineOffline': 'Online / Offline',
     'profile.logout': 'Logout',
     'profile.language': 'App language',
+    'profile.chatLanguage': 'Chat language',
+    'profile.chatLanguageHint':
+      'Incoming chat messages are translated into this language.',
+    'profile.chatLanguageFollowingApp':
+      'Following the app language. Pick one to translate chat messages into a different language.',
     'profile.deleteDocument.title': 'Delete Document',
     'profile.deleteDocument.confirm':
       'Are you sure you want to delete document?',
@@ -49,6 +54,11 @@ export const common = {
     'profile.onlineOffline': 'En ligne / Hors ligne',
     'profile.logout': 'Déconnexion',
     'profile.language': "Langue de l'application",
+    'profile.chatLanguage': 'Langue du clavardage',
+    'profile.chatLanguageHint':
+      'Les messages reçus sont traduits dans cette langue.',
+    'profile.chatLanguageFollowingApp':
+      "Suit la langue de l'application. Choisissez-en une pour traduire les messages dans une autre langue.",
     'profile.deleteDocument.title': 'Supprimer le document',
     'profile.deleteDocument.confirm':
       'Êtes-vous sûr de vouloir supprimer ce document ?',
@@ -77,6 +87,11 @@ export const common = {
     'profile.onlineOffline': 'En línea / Desconectado',
     'profile.logout': 'Cerrar sesión',
     'profile.language': 'Idioma de la aplicación',
+    'profile.chatLanguage': 'Idioma del chat',
+    'profile.chatLanguageHint':
+      'Los mensajes entrantes se traducen a este idioma.',
+    'profile.chatLanguageFollowingApp':
+      'Sigue el idioma de la aplicación. Elige uno para traducir los mensajes a otro idioma.',
     'profile.deleteDocument.title': 'Eliminar documento',
     'profile.deleteDocument.confirm':
       '¿Estás seguro de que quieres eliminar este documento?',

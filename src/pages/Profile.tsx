@@ -14,7 +14,11 @@ import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { actionLogout, actionSetUiLanguage } from '../actions';
+import {
+  actionLogout,
+  actionSetChatLanguage,
+  actionSetUiLanguage,
+} from '../actions';
 import { IconClose } from '../components/Icons/IconClose';
 import { IconDoc } from '../components/Icons/IconDoc';
 import { IconEdit } from '../components/Icons/IconEdit';
@@ -41,6 +45,7 @@ export default function Profile() {
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [deleteDocumentId, setDeleteDocumentId] = useState('');
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showChatLanguageModal, setShowChatLanguageModal] = useState(false);
   const { t } = useTranslation();
   // App-wide UI language (see store/appStore.ts's uiLanguage /
   // doSetUiLanguage). Reading it from the store - not local state - means
@@ -56,6 +61,14 @@ export default function Profile() {
   const languageOptions = resolveAvailableLanguages(availableLanguages);
   const currentLanguageName =
     languageOptions.find((l) => l.id === uiLanguage)?.name ?? uiLanguage;
+  // Null means the user never picked a chat language. The backend then
+  // translates into their app language, so that is what the row shows —
+  // labelled as following the interface, not as an independent choice.
+  const chatLanguage = useAppStore((s) => s.chatLanguage);
+  const effectiveChatLanguage = chatLanguage ?? uiLanguage;
+  const currentChatLanguageName =
+    languageOptions.find((l) => l.id === effectiveChatLanguage)?.name ??
+    effectiveChatLanguage;
   const {
     firstName,
     lastName,
@@ -109,6 +122,20 @@ export default function Profile() {
       toast.success(t('language.savedToast'));
     } catch (e) {
       console.error('[Profile] failed to save language to profile', e);
+      toast.error(t('language.saveFailedToast'));
+    }
+  };
+
+  // Unlike the UI language there is nothing applied locally first, so a failed
+  // write leaves the row on its previous value and the toast is the whole
+  // story.
+  const onChangeChatLanguage = async (code: UiLocale) => {
+    setShowChatLanguageModal(false);
+    try {
+      await actionSetChatLanguage(code);
+      toast.success(t('language.savedToast'));
+    } catch (e) {
+      console.error('[Profile] failed to save chat language to profile', e);
       toast.error(t('language.saveFailedToast'));
     }
   };
@@ -239,6 +266,20 @@ export default function Profile() {
                 >
                   {currentLanguageName}
                 </button>
+                <p className="text-[#8C8C8C] font-sans text-[14px] mt-4 mb-2">
+                  {t('profile.chatLanguage')}
+                </p>
+                <button
+                  onClick={() => setShowChatLanguageModal(true)}
+                  className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
+                >
+                  {currentChatLanguageName}
+                </button>
+                <p className="text-[#8C8C8C] font-sans text-[12px] mt-2">
+                  {chatLanguage === null
+                    ? t('profile.chatLanguageFollowingApp')
+                    : t('profile.chatLanguageHint')}
+                </p>
               </div>
             )}
             <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
@@ -271,6 +312,17 @@ export default function Profile() {
           options={languageOptions}
           onSelect={onChangeUiLanguage}
           onClose={() => setShowLanguageModal(false)}
+          title={t('profile.language')}
+        />
+      )}
+
+      {showChatLanguageModal && (
+        <LanguageModal
+          value={effectiveChatLanguage}
+          options={languageOptions}
+          onSelect={onChangeChatLanguage}
+          onClose={() => setShowChatLanguageModal(false)}
+          title={t('profile.chatLanguage')}
         />
       )}
 
