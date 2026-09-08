@@ -26,6 +26,8 @@ export const common = {
       'Incoming chat messages are translated into this language.',
     'profile.chatLanguageFollowingApp':
       'Following the app language. Pick one to translate chat messages into a different language.',
+    'profile.chatLanguageUnsupported':
+      'The translation server does not support this language. Pick one from the list so chat messages get translated.',
     'profile.deleteDocument.title': 'Delete Document',
     'profile.deleteDocument.confirm':
       'Are you sure you want to delete document?',
@@ -59,6 +61,8 @@ export const common = {
       'Les messages reçus sont traduits dans cette langue.',
     'profile.chatLanguageFollowingApp':
       "Suit la langue de l'application. Choisissez-en une pour traduire les messages dans une autre langue.",
+    'profile.chatLanguageUnsupported':
+      "Le serveur de traduction ne prend pas en charge cette langue. Choisissez-en une dans la liste pour que les messages soient traduits.",
     'profile.deleteDocument.title': 'Supprimer le document',
     'profile.deleteDocument.confirm':
       'Êtes-vous sûr de vouloir supprimer ce document ?',
@@ -92,6 +96,8 @@ export const common = {
       'Los mensajes entrantes se traducen a este idioma.',
     'profile.chatLanguageFollowingApp':
       'Sigue el idioma de la aplicación. Elige uno para traducir los mensajes a otro idioma.',
+    'profile.chatLanguageUnsupported':
+      'El servidor de traducción no admite este idioma. Elige uno de la lista para que los mensajes se traduzcan.',
     'profile.deleteDocument.title': 'Eliminar documento',
     'profile.deleteDocument.confirm':
       '¿Estás seguro de que quieres eliminar este documento?',

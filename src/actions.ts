@@ -93,6 +93,14 @@ export async function actionGetConfig(domainName?: string) {
     aiBot: result.aiBot,
   };
 
+  // Install-wide, not part of ModelApp: what the separately-deployed
+  // translation server can translate into. Absent on an API that predates the
+  // field, which reads the same as "no translation server" - the chat language
+  // picker stays hidden either way.
+  state.doSetTranslateLanguages(
+    Array.isArray(result.translateLanguages) ? result.translateLanguages : []
+  );
+
   await sleep(1000);
   httpTokens.appJwt = result.appToken;
   state.doSetCurrentApp(app);
@@ -131,12 +139,17 @@ function applySessionLanguages(data: SessionLanguagePayload) {
 
   // Chat language is adopted verbatim rather than defaulted: null means "never
   // chosen", which callers read as "follow the app language" - the same rule
-  // the backend's resolveUserChatLanguage() applies. Constrained to what this
-  // install offers so a narrowed list can't leave a dropped code in the store.
+  // the backend's resolveUserChatLanguage() applies.
+  //
+  // Not narrowed against `offered`: that is the INTERFACE catalogue, and the
+  // chat language is validated against the translation server's list instead
+  // (store.translateLanguages, from get-config). Narrowing here would silently
+  // discard a legitimate choice - a user translating into a language the UI
+  // does not render in - and get-config may not have answered yet on some
+  // bootstrap orders. Only the canonical form is enforced; the Profile picker
+  // is what checks the value against what the translator actually supports.
   const storedChat = canonicalizeLocale(data?.user?.chatLanguage);
-  state.doSetChatLanguage(
-    offered.includes(storedChat as UiLocale) ? (storedChat as UiLocale) : null
-  );
+  state.doSetChatLanguage(storedChat || null);
 }
 
 // User-initiated language change: apply it locally first so the UI switches
@@ -158,7 +171,7 @@ export async function actionSetUiLanguage(language: UiLocale) {
 // nothing to apply locally first - no caption re-renders on this - so the
 // store is updated only once the write lands, and a failed write leaves the
 // previous value in place for the caller to report.
-export async function actionSetChatLanguage(language: UiLocale) {
+export async function actionSetChatLanguage(language: string) {
   const state = getState();
 
   const currentUser = state.currentUser;

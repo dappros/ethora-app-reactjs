@@ -1,16 +1,19 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import cn from 'classnames';
-import { UiLanguageOption, UiLocale } from '../../constants/languageOptionsConstants';
 import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
 
-interface Props {
-  value: UiLocale;
-  // Languages this install offers, already narrowed to what the bundle can
-  // render (store.availableLanguages). Passed in rather than read from the
-  // catalogue so the sheet can never show a language the server would reject.
-  options: readonly UiLanguageOption[];
-  onSelect: (code: UiLocale) => void;
+// Generic over the code type so both callers stay type-safe: the app-language
+// picker passes UiLocale (the bundle's catalogue), while the chat-language
+// picker passes plain strings, because the translation server can support
+// languages this bundle has no dictionary for.
+interface Props<T extends string> {
+  value: T | null;
+  // The languages to offer, already resolved by the caller. Passed in rather
+  // than read from the catalogue so the sheet can never show a language the
+  // server would reject.
+  options: readonly { id: T; name: string }[];
+  onSelect: (code: T) => void;
   onClose: () => void;
   // Heading text. Defaults to the generic "select a language" caption; the
   // profile passes a specific one so two pickers on the same screen (interface
@@ -22,7 +25,13 @@ interface Props {
 // top corners, drag-handle affordance) below the `sm` breakpoint; a centered
 // card above it. Replaces the old cramped <select> - big tappable rows work
 // far better on a phone than a native dropdown crammed into a small popover.
-export function LanguageModal({ value, options, onSelect, onClose, title }: Props) {
+export function LanguageModal<T extends string>({
+  value,
+  options,
+  onSelect,
+  onClose,
+  title,
+}: Props<T>) {
   const { t } = useTranslation();
 
   return (

@@ -89,7 +89,10 @@ export interface AppSliceInterface extends ModelState {
   // Chat-message translation language (see ModelState.chatLanguage). Local
   // half only, like doSetUiLanguage: the profile write is actions.ts
   // actionSetChatLanguage. `null` clears it back to "follow uiLanguage".
-  doSetChatLanguage: (language: UiLocale | null) => void;
+  doSetChatLanguage: (language: string | null) => void;
+  // What the install's translation server can translate into, learned from
+  // GET /apps/get-config (see ModelState.translateLanguages).
+  doSetTranslateLanguages: (languages: readonly string[]) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -120,6 +123,9 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   // before a session exists, so there is no flash of the wrong value to
   // prevent, and the server stays the single source of truth.
   chatLanguage: null,
+  // Empty until get-config answers. An install with no translation server
+  // keeps it empty, which is also the "hide the chat language picker" signal.
+  translateLanguages: [],
   doSetUiLanguage: (language) => {
     setPreferredUiLanguage(language);
     set((s) => {
@@ -129,6 +135,13 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   doSetChatLanguage: (language) => {
     set((s) => {
       s.chatLanguage = language;
+    });
+  },
+  doSetTranslateLanguages: (languages) => {
+    // Copied into a mutable array: the store is an immer draft and callers
+    // hand us a readonly slice of the config response.
+    set((s) => {
+      s.translateLanguages = [...languages];
     });
   },
   doSetAvailableLanguages: (languages) => {
