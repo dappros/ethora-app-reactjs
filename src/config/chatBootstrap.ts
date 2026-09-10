@@ -223,6 +223,7 @@ export const buildEthoraBaseChatConfig = ({
   const baseUrl = import.meta.env.VITE_API.split("/v1")[0];
   const config: XmppProviderConfig = {
     baseUrl: baseUrl,
+    appId: currentUser?.appId || '',
     xmppSettings: {
       devServer: import.meta.env.VITE_APP_XMPP_SERVICE,
       host: import.meta.env.VITE_XMPP_HOST,
@@ -370,6 +371,7 @@ interface CreateChatConfigOptions extends ChatLanguageInputs {
 // other auth modes are configured.
 function makeChatUserLogin(user: {
   _id?: string;
+  appId?: string;
   firstName?: string;
   lastName?: string;
   profileImage?: string;
@@ -404,6 +406,7 @@ function makeChatUserLogin(user: {
     // Signs secure-files.* URLs at render time (appendFileToken). Empty
     // here means every /v2/files/secure image loads unsigned and 403s.
     fileToken: user.fileToken || '',
+    appId: user.appId || '',
     firstName: user.firstName || '',
     lastName: user.lastName || '',
     profileImage: user.profileImage || '',
