@@ -36,7 +36,8 @@ export default function AdminApps() {
   const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'archived') || 'active';
   // Per-tab counts shown alongside the tab labels: "Active (22) | Archived (1)".
   // Fetched in parallel with the main list refresh via httpGetAppsWithStatus
-  // (limit=1 returns the same `total` we use for pagination on either view).
+  // (a minimal-limit call returns the same `total` we use for pagination on
+  // either view; the backend rejects limit < 5, so we use 5).
   const [activeCount, setActiveCount] = useState<number | null>(null);
   const [archivedCount, setArchivedCount] = useState<number | null>(null);
 
@@ -83,7 +84,7 @@ export default function AdminApps() {
 
       // Update the tab's own total directly from this response - the list
       // we just rendered IS the source of truth for the active tab. Then
-      // make one cheap (limit=1) call for the other tab's total.
+      // make one cheap (limit=5, the backend minimum) call for the other tab's total.
       if (lifecycleTab === 'archived') {
         setArchivedCount(response.data.total ?? 0);
       } else {
@@ -91,7 +92,7 @@ export default function AdminApps() {
       }
       try {
         const otherResp = await httpGetAppsWithStatus({
-          limit: 1,
+          limit: 5,
           offset: 0,
           order,
           orderBy,
