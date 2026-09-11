@@ -24,6 +24,7 @@ import {
   ChatsIndexPanel,
   ContextPanel,
   DocsIndexPanel,
+  FlowsPanel,
   HeartbeatPanel,
   PersonaPanel,
   SoulMdPanel,
@@ -47,6 +48,7 @@ const TABS = [
   'Docs Index',
   'SOUL.MD',
   'Heartbeat',
+  'Flows',
   'Chats Index',
   'Visibility',
 ] as const;
@@ -58,6 +60,7 @@ const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
   'Docs Index': 'agentSettings.tabDocsIndex',
   'SOUL.MD': 'agentSettings.tabSoulMd',
   Heartbeat: 'agentSettings.tabHeartbeat',
+  Flows: 'agentSettings.tabFlows',
   'Chats Index': 'agentSettings.tabChatsIndex',
   Visibility: 'agentSettings.tabVisibility',
 };
@@ -65,7 +68,7 @@ const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
 const SECTIONS: { labelKey: string; tabs: (typeof TABS[number])[] }[] = [
   { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Context'] },
   { labelKey: 'agentSettings.sectionKnowledge', tabs: ['Web Index', 'Docs Index'] },
-  { labelKey: 'agentSettings.sectionBehaviour', tabs: ['SOUL.MD', 'Heartbeat'] },
+  { labelKey: 'agentSettings.sectionBehaviour', tabs: ['SOUL.MD', 'Heartbeat', 'Flows'] },
   { labelKey: 'agentSettings.sectionActivity', tabs: ['Chats Index'] },
   { labelKey: 'agentSettings.sectionSharing', tabs: ['Visibility'] },
 ];
@@ -199,6 +202,9 @@ export default function AgentSettings() {
           </TabPanel>
           <TabPanel className="p-2">
             <HeartbeatPanel agent={agent} isDisabled={readOnly} />
+          </TabPanel>
+          <TabPanel className="p-2">
+            <FlowsPanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
             <ChatsIndexPanel agent={agent} isDisabled={readOnly} />

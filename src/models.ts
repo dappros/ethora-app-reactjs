@@ -297,6 +297,9 @@ export interface ModelAgent {
   soulMdUpdatedAt: string | null;
   soulMdUpdatedBy: string;
   heartbeat: { enabled: boolean; schedule: string; prompt: string };
+  // Flows: the operator's YAML script and its compiled form (read-only here).
+  flowsYaml: string;
+  flows: unknown[];
   visibility: 'private' | 'unlisted' | 'public';
   totalSiteSourceSize: number;
   createdAt: string;
