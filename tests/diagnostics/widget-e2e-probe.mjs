@@ -149,80 +149,35 @@ await page.goto(HOST_URL, { waitUntil: 'domcontentloaded' });
 console.log(`[step] waiting ${SETTLE_MS}ms for widget to bootstrap`);
 await page.waitForTimeout(SETTLE_MS);
 
-// Try to open the chat by clicking the widget toggle. The widget's
-// public DOM uses #chat-widget; the toggle is typically a single button
-// inside it. We click any clickable element within #chat-widget root —
-// brittle but the widget bundle owns its own DOM contract so this is
-// the most stable approximation.
-const opened = await page.evaluate(() => {
-  const root = document.getElementById('chat-widget');
-  if (!root) return { ok: false, reason: 'no #chat-widget' };
-  // Find a button-shaped element to click.
-  const btn = root.querySelector('button, [role=button]') || root.firstElementChild;
-  if (!btn) return { ok: false, reason: 'no clickable in #chat-widget' };
-  (btn).click();
-  return { ok: true, tag: btn.tagName, text: (btn.textContent || '').slice(0, 40) };
-});
+// The widget renders inside an open shadow root on #chat-widget. Playwright
+// locators pierce open shadow DOM, so drive it with locators rather than
+// document.querySelector (which stops at the shadow boundary).
+const launcher = page.locator('#chat-widget button[aria-label^="Open"], #chat-widget button').first();
+let opened;
+try {
+  await launcher.waitFor({ state: 'visible', timeout: 5000 });
+  const label = await launcher.getAttribute('aria-label');
+  await launcher.click();
+  opened = { ok: true, label };
+} catch (e) {
+  opened = { ok: false, reason: e.message.split('\n')[0] };
+}
 console.log(`[step] widget-open click: ${JSON.stringify(opened)}`);
+await page.waitForTimeout(2500);
 
-await page.waitForTimeout(2000);
-
-// Type a message and submit. The widget owns its DOM, but the chat
-// input ends up nested several layers deep (under MUI Dialog / styled
-// components / etc) so we search the entire document, not just under
-// `#chat-widget`. The placeholder "Type message" is stable across
-// versions; we use it as the primary selector.
-const sent = await page.evaluate((msg) => {
-  const candidates = [
-    ...document.querySelectorAll('input[placeholder*="Type" i]'),
-    ...document.querySelectorAll('textarea[placeholder*="Type" i]'),
-    ...document.querySelectorAll('input[type="text"]'),
-    ...document.querySelectorAll('textarea'),
-  ];
-  const input = candidates.find((el) => {
-    const r = el.getBoundingClientRect();
-    return r.width > 50 && r.height > 10 && !el.disabled && !el.readOnly;
-  });
-  if (!input) {
-    return {
-      ok: false,
-      reason: 'no input found',
-      seen: candidates.map((el) => ({
-        tag: el.tagName,
-        placeholder: el.getAttribute('placeholder'),
-        rect: el.getBoundingClientRect(),
-        disabled: el.disabled,
-      })),
-    };
-  }
-  // React-controlled inputs require the native setter to be called or
-  // React's onChange won't fire. Standard pattern.
-  const proto = Object.getPrototypeOf(input);
-  const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-  if (setter) setter.call(input, msg);
-  else input.value = msg;
-  input.dispatchEvent(new Event('input', { bubbles: true }));
-  input.focus();
-  // Most chat inputs send on Enter.
-  input.dispatchEvent(
-    new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true })
-  );
-  // Form-submit fallback.
-  const form = input.closest('form');
-  if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  // Send-button fallback. Search the input's ancestor chain for a
-  // sibling button — most send icons are positioned next to the input.
-  let p = input.parentElement;
-  while (p) {
-    const btn = p.querySelector('button, [role="button"], svg[role="button"]');
-    if (btn) {
-      btn.click();
-      break;
-    }
-    p = p.parentElement;
-  }
-  return { ok: true, value: input.value, placeholder: input.getAttribute('placeholder') };
-}, TEST_MESSAGE);
+// Type a message and send it. The chat input is a textarea/input somewhere
+// under the shadow root; Enter sends.
+const input = page.locator('#chat-widget textarea, #chat-widget input[type="text"], #chat-widget input:not([type])').first();
+let sent;
+try {
+  await input.waitFor({ state: 'visible', timeout: 8000 });
+  await input.click();
+  await input.fill(TEST_MESSAGE);
+  await input.press('Enter');
+  sent = { ok: true, value: TEST_MESSAGE, placeholder: await input.getAttribute('placeholder') };
+} catch (e) {
+  sent = { ok: false, reason: e.message.split('\n')[0] };
+}
 console.log(`[step] widget-send: ${JSON.stringify(sent)}`);
 
 console.log(`[step] waiting ${REPLY_WAIT_MS}ms for bot reply / archive`);
