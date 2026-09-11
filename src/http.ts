@@ -844,6 +844,14 @@ export function httpUpdateAgent(idOrAddress: string, body: any) {
   return httpV2.put(`/agents/${encodeURIComponent(idOrAddress)}`, body);
 }
 
+export type FlowsValidationError = { path: string; message: string; line?: number };
+
+// Dry-run the flows compiler (no save). 200 either way; `ok` says whether the
+// script compiled and `errors` carries line-numbered problems otherwise.
+export function httpValidateAgentFlows(flowsYaml: string) {
+  return httpV2.post<{ ok: boolean; flowKeys?: string[]; errors?: FlowsValidationError[] }>('/agents/flows/validate', { flowsYaml });
+}
+
 export function httpDeleteAgent(idOrAddress: string) {
   return httpV2.delete(`/agents/${encodeURIComponent(idOrAddress)}`);
 }

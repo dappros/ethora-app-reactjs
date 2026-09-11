@@ -17,6 +17,9 @@
 // to answer the first bot message that offers buttons by posting its first
 // button's value, the way a human tapping the chip would - that checks the
 // round trip (agent offers choices -> user picks -> agent sees the answer).
+// SCRIPT="a|b|c" plays a scripted conversation: after MESSAGE, each item is
+// posted in turn, 1.5 s after the bot's latest message, so a whole flow
+// (menu tap, answers, "skip") can be driven end to end in one run.
 //
 // The @xmpp/client dependency is resolved from the ai-service package so this
 // script has no install step of its own.
@@ -41,6 +44,7 @@ const ROOM = env('ROOM')
 const MESSAGE = env('MESSAGE', 'Hello everyone, what would you like to talk about today?')
 const WATCH_SEC = Number.parseInt(env('WATCH_SEC', '240'), 10)
 const TAP_BUTTON = env('TAP_BUTTON', '') === '1'
+const SCRIPT = env('SCRIPT', '').split('|').map((s) => s.trim()).filter(Boolean)
 
 if (!APP_ID || !EMAIL || !PASSWORD || !ROOM) {
     console.error('APP_ID, TEST_EMAIL, TEST_PASSWORD and ROOM are required')
@@ -75,6 +79,19 @@ const xmpp = client({
 const counts = { human: 0, bot: 0, system: 0, buttons: 0, reactions: 0 }
 const senders = new Map()
 let tapped = false
+let scriptTimer = null
+const playNextScriptLine = () => {
+    if (!SCRIPT.length) return
+    // With TAP_BUTTON the tap is the first move; script lines answer what follows it.
+    if (TAP_BUTTON && !tapped) return
+    clearTimeout(scriptTimer)
+    scriptTimer = setTimeout(() => {
+        const line = SCRIPT.shift()
+        if (!line) return
+        console.log(`[probe] ${stamp()} script -> sending "${line}"`)
+        sendText(line).catch((e) => console.error('[probe] script send failed', e?.message || e))
+    }, 1500)
+}
 
 const dataAttrs = (me) => ({
     fullName,
@@ -126,12 +143,14 @@ xmpp.on('stanza', (stanza) => {
     senders.set(name, (senders.get(name) || 0) + 1)
     const msgId = stanza.getChild('stanza-id')?.attrs?.id || stanza.attrs.id
     console.log(`[${kind}] ${stamp()} ${name} (${msgId}): ${body.replace(/\s+/g, ' ').slice(0, 160)}`)
+    if (isBot && !isSystem) playNextScriptLine()
     const buttons = parseButtons(data?.attrs?.quickReplies)
     if (buttons.length) {
         counts.buttons += 1
         console.log(`[buttons] ${stamp()} ${name}: ${buttons.map((b) => `[${b.name}${b.value !== b.name ? ` -> ${b.value}` : ''}]`).join(' ')}`)
         if (TAP_BUTTON && isBot && !tapped) {
             tapped = true
+            clearTimeout(scriptTimer)
             setTimeout(() => {
                 console.log(`[probe] ${stamp()} tapping "${buttons[0].name}" -> sending "${buttons[0].value}"`)
                 sendText(buttons[0].value).catch((e) => console.error('[probe] tap failed', e?.message || e))

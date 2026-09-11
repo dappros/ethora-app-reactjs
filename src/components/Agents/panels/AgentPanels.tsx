@@ -32,11 +32,14 @@ import {
   httpReindexSiteSourceV2,
   httpGetSiteCrawlJob,
   httpTestMessageAgentBotInstance,
+  httpValidateAgentFlows,
+  FlowsValidationError,
 } from '../../../http';
 import { useSiteCrawlEvents, SiteCrawlEvent } from '../../../hooks/useSiteCrawlEvents';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
+import { agentFlowTemplates } from '../../../constants/agentFlowTemplates';
 import { useAppStore } from '../../../store/useAppStore';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
 
@@ -1118,6 +1121,132 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
           {t('agentPanels.saveSoulMd')}
         </button>
       </div>
+    </div>
+  );
+};
+
+// Flows: the operator's scripted conversations (opening menu, intake,
+// appointment request...). Plain YAML in a textarea, like Context, with
+// starter templates and a dry-run Validate. Errors come back from the API's
+// compiler with line numbers; the same compiler runs on Save, so a script
+// that does not compile is never stored.
+export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
+  const { t } = useTranslation();
+  const [yaml, setYaml] = useState(agent.flowsYaml || '');
+  const [errors, setErrors] = useState<FlowsValidationError[]>([]);
+  const [flowKeys, setFlowKeys] = useState<string[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    setYaml(agent.flowsYaml || '');
+    setErrors([]);
+    setFlowKeys(null);
+  }, [agent.id]);
+
+  const dirty = yaml !== (agent.flowsYaml || '');
+  const lines = useMemo(() => Math.min(40, Math.max(16, yaml.split('\n').length + 2)), [yaml]);
+
+  const validate = async () => {
+    setBusy(true);
+    try {
+      const r = await httpValidateAgentFlows(yaml);
+      setErrors(r.data.errors || []);
+      setFlowKeys(r.data.ok ? r.data.flowKeys || [] : null);
+      if (r.data.ok) toast.success(t('agentPanels.flowsValid'));
+      return r.data.ok;
+    } catch (e: any) {
+      toast.error(`${t('agentPanels.failedPrefix')} ${e?.response?.data?.error || e.message}`);
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      await actionUpdateAgent(agent.id, { flowsYaml: yaml });
+      setErrors([]);
+      toast.success(t('agentPanels.flowsSaved'));
+    } catch (e: any) {
+      const details: FlowsValidationError[] | undefined = e?.response?.data?.details;
+      if (Array.isArray(details) && details.length) {
+        setErrors(details);
+        toast.error(t('agentPanels.flowsInvalid'));
+      } else {
+        toast.error(`${t('agentPanels.saveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 max-w-3xl">
+      <p className="text-sm text-gray-600">{t('agentPanels.flowsIntro')}</p>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm text-gray-500">{t('agentPanels.templatesLabel')}</span>
+        {agentFlowTemplates.map((tpl) => (
+          <button
+            key={tpl.id}
+            disabled={isDisabled}
+            onClick={() => {
+              setYaml(tpl.yaml);
+              setErrors([]);
+              setFlowKeys(null);
+            }}
+            className="text-xs border rounded px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+          >
+            {tpl.label}
+          </button>
+        ))}
+      </div>
+      <textarea
+        className={classNames('border rounded px-2 py-2 w-full font-mono text-sm whitespace-pre', errors.length ? 'border-red-400' : '')}
+        rows={lines}
+        spellCheck={false}
+        disabled={isDisabled}
+        value={yaml}
+        placeholder={t('agentPanels.flowsPlaceholder')}
+        onChange={(e) => {
+          setYaml(e.target.value);
+          setFlowKeys(null);
+        }}
+      />
+      {errors.length > 0 && (
+        <ul className="rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 space-y-1">
+          {errors.map((err, i) => (
+            <li key={i} className="font-mono">
+              {err.line ? `line ${err.line}: ` : ''}
+              {err.path ? `${err.path} ` : ''}
+              {err.message}
+            </li>
+          ))}
+        </ul>
+      )}
+      {flowKeys && errors.length === 0 && (
+        <p className="text-xs text-green-700">
+          {flowKeys.length
+            ? `${t('agentPanels.flowsFound')} ${flowKeys.join(', ')}`
+            : t('agentPanels.flowsNone')}
+        </p>
+      )}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={validate}
+          disabled={isDisabled || busy}
+          className="border rounded px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
+        >
+          {t('agentPanels.validateFlows')}
+        </button>
+        <button
+          onClick={save}
+          disabled={isDisabled || busy || !dirty}
+          className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
+        >
+          {t('agentPanels.saveFlows')}
+        </button>
+      </div>
+      <p className="text-xs text-gray-500">{t('agentPanels.flowsHint')}</p>
     </div>
   );
 };
