@@ -1135,3 +1135,49 @@ export function saveBlobAs(blob: Blob, filename: string) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// ---------------------------------------------------------------------------
+// User API keys + OAuth grants (Account > AI assistants). Keys are long-lived
+// user tokens for MCP clients / agents; the token value is returned once on
+// create. Grants are OAuth connections made by hosted assistants (Claude,
+// ChatGPT); the list endpoint may 404 on deployments without the OAuth
+// server, callers hide the section in that case.
+// ---------------------------------------------------------------------------
+export interface UserApiKey {
+  id: string;
+  name: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface UserApiKeyCreated extends UserApiKey {
+  token: string;
+}
+
+export interface UserOauthGrant {
+  id: string;
+  clientName: string;
+  scope?: string;
+  createdAt: string;
+  expiresAt?: string;
+}
+
+export function httpListUserApiKeys() {
+  return httpV2.get<{ ok: boolean; data: { items: UserApiKey[] } }>('/users/me/api-keys');
+}
+
+export function httpCreateUserApiKey(body: { name?: string; ttlDays?: number }) {
+  return httpV2.post<{ ok: boolean; data: UserApiKeyCreated }>('/users/me/api-keys', body);
+}
+
+export function httpRevokeUserApiKey(id: string) {
+  return httpV2.delete<{ ok: boolean }>(`/users/me/api-keys/${encodeURIComponent(id)}`);
+}
+
+export function httpListUserOauthGrants() {
+  return httpV2.get<{ ok: boolean; data: { items: UserOauthGrant[] } }>('/users/me/oauth-grants');
+}
+
+export function httpRevokeUserOauthGrant(id: string) {
+  return httpV2.delete<{ ok: boolean }>(`/users/me/oauth-grants/${encodeURIComponent(id)}`);
+}
