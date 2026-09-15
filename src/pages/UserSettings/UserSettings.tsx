@@ -8,6 +8,7 @@ import TabApp from '../../components/TabApp';
 import { logLogout } from '../../hooks/withTracking.tsx';
 import { httpLogout } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
+import { AiAssistants } from './AiAssistants';
 import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
@@ -21,6 +22,7 @@ const tabs = [
   'Visiblility',
   'Profile Shares',
   'Document Shares',
+  'AI Assistants',
   'Blocked Users',
 ];
 
@@ -76,6 +78,7 @@ export default function UserSettings() {
               <TabApp text={t('userSettingsPage.tabVisibility')} />
               <TabApp text={t('userSettingsPage.tabProfileShares')} />
               <TabApp text={t('userSettingsPage.tabDocumentShares')} />
+              <TabApp text={t('userSettingsPage.tabAiAssistants')} />
               <TabApp text={t('userSettingsPage.tabBlockedUsers')} disabled />
             </TabList>
             {/* Logout sits where Referrals used to live (bottom of the left
@@ -106,6 +109,9 @@ export default function UserSettings() {
             </TabPanel>
             <TabPanel key="Document Shares" className="">
               <DocumentShares />
+            </TabPanel>
+            <TabPanel key="AI Assistants" className="h-full overflow-auto">
+              <AiAssistants />
             </TabPanel>
             <TabPanel
               key="Blocked Users"

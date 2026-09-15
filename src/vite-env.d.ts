@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_XMPP_SERVICE: string;
   readonly VITE_XMPP_HOST: string;
   readonly VITE_XMPP_SERVICE: string;
+  readonly VITE_MCP_PUBLIC_URL?: string;
 }
 
 interface ImportMeta {
