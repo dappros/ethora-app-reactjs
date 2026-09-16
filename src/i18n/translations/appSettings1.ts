@@ -50,13 +50,40 @@ export const appSettings1 = {
     'appSettingsAppearance.addLogoButton': 'Add logo',
 
     // appSettingsApi.* - Api.tsx
-    'appSettingsApi.heading': 'App Access Key',
+    'appSettingsApi.heading':
+      'App credentials',
     'appSettingsApi.description':
-      'For accessing Ethora API and infrastructure, your App uses a Key and Secret pair. With this key pair, your applications can generate JWT tokens etc for authentication and signing API requests.',
+      'Every app has an App ID and an App Secret. The App ID identifies your app to the Ethora API. The App Secret is the signing key your backend uses to mint the tokens that authenticate API calls. Keep the secret on a server you control: anything holding it can act as your app.',
     'appSettingsApi.rotateNote':
-      "Note: “Rotate” will replace your key pair with a new one. This will invalidate access for your application code until it's updated with new credentials.",
-    'appSettingsApi.keyColumn': 'Key',
-    'appSettingsApi.secretColumn': 'Secret',
+      'Rotating the secret replaces the pair. Anything still using the old secret stops working immediately, so update your deployed code first.',
+    'appSettingsApi.keyColumn':
+      'App ID',
+    'appSettingsApi.secretColumn':
+      'App Secret',
+    'appSettingsApi.credHeading': 'Which credential do I need?',
+    'appSettingsApi.credIntro':
+      'Ethora accepts three kinds of credential. Pick by who is calling, not by what you are building.',
+    'appSettingsApi.credColKind': 'Credential',
+    'appSettingsApi.credColWhen': 'Use it when',
+    'appSettingsApi.credColHow': 'How you get it',
+    'appSettingsApi.credUserKind': 'User token',
+    'appSettingsApi.credUserWhen':
+      'A person is signed in and acting as themselves, in your app or in an assistant.',
+    'appSettingsApi.credUserHow': 'Sign in, or use an API key.',
+    'appSettingsApi.credAppKind': 'App token',
+    'appSettingsApi.credAppWhen':
+      'Your backend is doing something scoped to this one app: broadcasts, indexing sources, bot configuration.',
+    'appSettingsApi.credAppHow':
+      'Signed from the App Secret, or minted through the app-tokens API.',
+    'appSettingsApi.credServerKind': 'Server (B2B) token',
+    'appSettingsApi.credServerWhen':
+      'Your backend is provisioning on behalf of the tenant: creating apps, batch user creation, managing app tokens.',
+    'appSettingsApi.credServerHow': 'Signed from the App Secret.',
+    'appSettingsApi.assistantHeading': 'Connect an AI assistant',
+    'appSettingsApi.assistantIntro':
+      'You do not need any of the above to use Ethora from Claude, ChatGPT, Cursor or Claude Code. Connect the hosted MCP server and sign in there instead:',
+    'appSettingsApi.assistantNote':
+      'For a client that cannot run a sign-in flow, take a personal connector URL from Account > AI Assistants instead. Either way the assistant acts as you, so it never needs the App Secret.',
 
     // appSettingsChats.* - Chats.tsx
     'appSettingsChats.deleteButton': 'Delete',
@@ -239,13 +266,40 @@ export const appSettings1 = {
     'appSettingsAppearance.addLogoButton': 'Ajouter un logo',
 
     // appSettingsApi.* - Api.tsx
-    'appSettingsApi.heading': "Clé d'accès de l'application",
+    'appSettingsApi.heading':
+      "Identifiants de l'application",
     'appSettingsApi.description':
-      "Pour accéder à l'API et à l'infrastructure d'Ethora, votre application utilise une paire clé/secret. Avec cette paire de clés, vos applications peuvent générer des jetons JWT, entre autres, pour l'authentification et la signature des requêtes API.",
+      "Chaque application possède un App ID et un App Secret. L'App ID identifie votre application auprès de l'API Ethora. L'App Secret est la clé de signature que votre backend utilise pour émettre les jetons qui authentifient les appels API. Gardez le secret sur un serveur que vous contrôlez : tout ce qui le détient peut agir au nom de votre application.",
     'appSettingsApi.rotateNote':
-      "Remarque : « Régénérer » remplacera votre paire de clés par une nouvelle. Cela invalidera l'accès pour le code de votre application jusqu'à ce qu'il soit mis à jour avec les nouveaux identifiants.",
-    'appSettingsApi.keyColumn': 'Clé',
-    'appSettingsApi.secretColumn': 'Secret',
+      "Régénérer le secret remplace la paire. Tout ce qui utilise encore l'ancien secret cesse de fonctionner immédiatement, mettez donc d'abord à jour votre code déployé.",
+    'appSettingsApi.keyColumn':
+      'App ID',
+    'appSettingsApi.secretColumn':
+      'App Secret',
+    'appSettingsApi.credHeading': 'De quel identifiant ai-je besoin ?',
+    'appSettingsApi.credIntro':
+      "Ethora accepte trois types d'identifiants. Choisissez selon qui appelle, pas selon ce que vous construisez.",
+    'appSettingsApi.credColKind': 'Identifiant',
+    'appSettingsApi.credColWhen': 'À utiliser quand',
+    'appSettingsApi.credColHow': "Comment l'obtenir",
+    'appSettingsApi.credUserKind': 'Jeton utilisateur',
+    'appSettingsApi.credUserWhen':
+      'Une personne est connectée et agit en son propre nom, dans votre application ou dans un assistant.',
+    'appSettingsApi.credUserHow': 'Connectez-vous, ou utilisez une clé API.',
+    'appSettingsApi.credAppKind': "Jeton d'application",
+    'appSettingsApi.credAppWhen':
+      "Votre backend effectue une action limitée à cette application : diffusions, indexation de sources, configuration du bot.",
+    'appSettingsApi.credAppHow':
+      "Signé à partir de l'App Secret, ou émis via l'API des jetons d'application.",
+    'appSettingsApi.credServerKind': 'Jeton serveur (B2B)',
+    'appSettingsApi.credServerWhen':
+      "Votre backend provisionne au nom du locataire : création d'applications, création d'utilisateurs en lot, gestion des jetons d'application.",
+    'appSettingsApi.credServerHow': "Signé à partir de l'App Secret.",
+    'appSettingsApi.assistantHeading': 'Connecter un assistant IA',
+    'appSettingsApi.assistantIntro':
+      "Vous n'avez besoin d'aucun des éléments ci-dessus pour utiliser Ethora depuis Claude, ChatGPT, Cursor ou Claude Code. Connectez plutôt le serveur MCP hébergé et connectez-vous là :",
+    'appSettingsApi.assistantNote':
+      "Pour un client qui ne peut pas exécuter de flux de connexion, prenez plutôt une URL de connecteur personnelle dans Compte > Assistants IA. Dans les deux cas l'assistant agit en votre nom et n'a jamais besoin de l'App Secret.",
 
     // appSettingsChats.* - Chats.tsx
     'appSettingsChats.deleteButton': 'Supprimer',
@@ -446,13 +500,40 @@ export const appSettings1 = {
     'appSettingsAppearance.addLogoButton': 'Añadir logotipo',
 
     // appSettingsApi.* - Api.tsx
-    'appSettingsApi.heading': 'Clave de acceso de la aplicación',
+    'appSettingsApi.heading':
+      'Credenciales de la aplicación',
     'appSettingsApi.description':
-      'Para acceder a la API y a la infraestructura de Ethora, tu aplicación utiliza un par de clave y secreto. Con este par de claves, tus aplicaciones pueden generar tokens JWT, entre otros usos, para la autenticación y la firma de solicitudes a la API.',
+      'Cada aplicación tiene un App ID y un App Secret. El App ID identifica tu aplicación ante la API de Ethora. El App Secret es la clave de firma que tu backend usa para emitir los tokens que autentican las llamadas a la API. Guarda el secreto en un servidor que controles: cualquier cosa que lo tenga puede actuar como tu aplicación.',
     'appSettingsApi.rotateNote':
-      'Nota: "Rotar" reemplazará tu par de claves por uno nuevo. Esto invalidará el acceso de tu aplicación hasta que se actualice con las nuevas credenciales.',
-    'appSettingsApi.keyColumn': 'Clave',
-    'appSettingsApi.secretColumn': 'Secreto',
+      'Rotar el secreto reemplaza el par. Todo lo que siga usando el secreto anterior deja de funcionar de inmediato, así que actualiza primero tu código desplegado.',
+    'appSettingsApi.keyColumn':
+      'App ID',
+    'appSettingsApi.secretColumn':
+      'App Secret',
+    'appSettingsApi.credHeading': '¿Qué credencial necesito?',
+    'appSettingsApi.credIntro':
+      'Ethora acepta tres tipos de credencial. Elige según quién llama, no según lo que estás construyendo.',
+    'appSettingsApi.credColKind': 'Credencial',
+    'appSettingsApi.credColWhen': 'Úsala cuando',
+    'appSettingsApi.credColHow': 'Cómo obtenerla',
+    'appSettingsApi.credUserKind': 'Token de usuario',
+    'appSettingsApi.credUserWhen':
+      'Una persona ha iniciado sesión y actúa en su propio nombre, en tu aplicación o en un asistente.',
+    'appSettingsApi.credUserHow': 'Inicia sesión o usa una clave API.',
+    'appSettingsApi.credAppKind': 'Token de aplicación',
+    'appSettingsApi.credAppWhen':
+      'Tu backend hace algo limitado a esta aplicación: difusiones, indexación de fuentes, configuración del bot.',
+    'appSettingsApi.credAppHow':
+      'Firmado con el App Secret, o emitido mediante la API de tokens de aplicación.',
+    'appSettingsApi.credServerKind': 'Token de servidor (B2B)',
+    'appSettingsApi.credServerWhen':
+      'Tu backend aprovisiona en nombre del inquilino: creación de aplicaciones, creación de usuarios por lotes, gestión de tokens de aplicación.',
+    'appSettingsApi.credServerHow': 'Firmado con el App Secret.',
+    'appSettingsApi.assistantHeading': 'Conectar un asistente de IA',
+    'appSettingsApi.assistantIntro':
+      'No necesitas nada de lo anterior para usar Ethora desde Claude, ChatGPT, Cursor o Claude Code. Conecta el servidor MCP alojado e inicia sesión allí:',
+    'appSettingsApi.assistantNote':
+      'Para un cliente que no puede ejecutar un flujo de inicio de sesión, usa una URL de conector personal desde Cuenta > Asistentes de IA. En ambos casos el asistente actúa como tú, así que nunca necesita el App Secret.',
 
     // appSettingsChats.* - Chats.tsx
     'appSettingsChats.deleteButton': 'Eliminar',
