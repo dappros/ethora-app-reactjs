@@ -84,6 +84,33 @@ export const appSettings1 = {
       'You do not need any of the above to use Ethora from Claude, ChatGPT, Cursor or Claude Code. Connect the hosted MCP server and sign in there instead:',
     'appSettingsApi.assistantNote':
       'For a client that cannot run a sign-in flow, take a personal connector URL from Account > AI Assistants instead. Either way the assistant acts as you, so it never needs the App Secret.',
+    'appSettingsApi.stHeading': 'Server tokens (B2B)',
+    'appSettingsApi.stIntro':
+      'A server token lets your backend act as this app over the API without handling the App Secret. Send it as the x-custom-token header. Each token can be revoked here on its own.',
+    'appSettingsApi.stCreatedHeading': 'Your new server token',
+    'appSettingsApi.stCreatedWarning':
+      'Shown once. Store it in your server configuration now; anyone holding it can act as this app until you revoke it.',
+    'appSettingsApi.stCurlLabel': 'Try it',
+    'appSettingsApi.stDoneButton': 'Done',
+    'appSettingsApi.stNamePlaceholder': 'Name (e.g. crm-sync)',
+    'appSettingsApi.stTtlLabel': 'Expires in',
+    'appSettingsApi.stTtl30': '30 days',
+    'appSettingsApi.stTtl90': '90 days',
+    'appSettingsApi.stTtl365': '365 days',
+    'appSettingsApi.stCreateButton': 'Create token',
+    'appSettingsApi.stCreating': 'Creating...',
+    'appSettingsApi.stNoTokens': 'No server tokens yet.',
+    'appSettingsApi.stColName': 'Name',
+    'appSettingsApi.stColCreated': 'Created',
+    'appSettingsApi.stColExpires': 'Expires',
+    'appSettingsApi.stRevokeButton': 'Revoke',
+    'appSettingsApi.stRevokeTitle': 'Revoke server token?',
+    'appSettingsApi.stRevokeMessage':
+      'Integrations using this token stop working immediately.',
+    'appSettingsApi.stRevokeConfirm': 'Revoke',
+    'appSettingsApi.stToastCreated': 'Server token created',
+    'appSettingsApi.stToastRevoked': 'Server token revoked',
+    'appSettingsApi.stToastError': 'Something went wrong. Please try again.',
 
     // appSettingsChats.* - Chats.tsx
     'appSettingsChats.deleteButton': 'Delete',
@@ -303,6 +330,33 @@ export const appSettings1 = {
 
     // appSettingsChats.* - Chats.tsx
     'appSettingsChats.deleteButton': 'Supprimer',
+    'appSettingsApi.stHeading': 'Jetons serveur (B2B)',
+    'appSettingsApi.stIntro':
+      "Un jeton serveur permet à votre backend d'agir au nom de cette application via l'API sans manipuler l'App Secret. Envoyez-le dans l'en-tête x-custom-token. Chaque jeton peut être révoqué ici séparément.",
+    'appSettingsApi.stCreatedHeading': 'Votre nouveau jeton serveur',
+    'appSettingsApi.stCreatedWarning':
+      "Affiché une seule fois. Enregistrez-le dès maintenant dans la configuration de votre serveur ; quiconque le détient peut agir au nom de cette application jusqu'à sa révocation.",
+    'appSettingsApi.stCurlLabel': 'Essayer',
+    'appSettingsApi.stDoneButton': 'Terminé',
+    'appSettingsApi.stNamePlaceholder': 'Nom (ex. crm-sync)',
+    'appSettingsApi.stTtlLabel': 'Expire dans',
+    'appSettingsApi.stTtl30': '30 jours',
+    'appSettingsApi.stTtl90': '90 jours',
+    'appSettingsApi.stTtl365': '365 jours',
+    'appSettingsApi.stCreateButton': 'Créer un jeton',
+    'appSettingsApi.stCreating': 'Création...',
+    'appSettingsApi.stNoTokens': 'Aucun jeton serveur pour le moment.',
+    'appSettingsApi.stColName': 'Nom',
+    'appSettingsApi.stColCreated': 'Créé le',
+    'appSettingsApi.stColExpires': 'Expire le',
+    'appSettingsApi.stRevokeButton': 'Révoquer',
+    'appSettingsApi.stRevokeTitle': 'Révoquer le jeton serveur ?',
+    'appSettingsApi.stRevokeMessage':
+      'Les intégrations qui utilisent ce jeton cesseront de fonctionner immédiatement.',
+    'appSettingsApi.stRevokeConfirm': 'Révoquer',
+    'appSettingsApi.stToastCreated': 'Jeton serveur créé',
+    'appSettingsApi.stToastRevoked': 'Jeton serveur révoqué',
+    'appSettingsApi.stToastError': "Une erreur s'est produite. Veuillez réessayer.",
     'appSettingsChats.newChatsHeading': 'Nouvelles discussions',
     'appSettingsChats.allowUsersCreateLabel':
       'Autoriser les utilisateurs à créer de nouvelles discussions',
@@ -534,6 +588,33 @@ export const appSettings1 = {
       'No necesitas nada de lo anterior para usar Ethora desde Claude, ChatGPT, Cursor o Claude Code. Conecta el servidor MCP alojado e inicia sesión allí:',
     'appSettingsApi.assistantNote':
       'Para un cliente que no puede ejecutar un flujo de inicio de sesión, usa una URL de conector personal desde Cuenta > Asistentes de IA. En ambos casos el asistente actúa como tú, así que nunca necesita el App Secret.',
+    'appSettingsApi.stHeading': 'Tokens de servidor (B2B)',
+    'appSettingsApi.stIntro':
+      'Un token de servidor permite que tu backend actúe como esta aplicación a través de la API sin manejar el App Secret. Envíalo en la cabecera x-custom-token. Cada token puede revocarse aquí por separado.',
+    'appSettingsApi.stCreatedHeading': 'Tu nuevo token de servidor',
+    'appSettingsApi.stCreatedWarning':
+      'Se muestra una sola vez. Guárdalo ahora en la configuración de tu servidor; cualquiera que lo tenga puede actuar como esta aplicación hasta que lo revoques.',
+    'appSettingsApi.stCurlLabel': 'Probar',
+    'appSettingsApi.stDoneButton': 'Listo',
+    'appSettingsApi.stNamePlaceholder': 'Nombre (p. ej. crm-sync)',
+    'appSettingsApi.stTtlLabel': 'Caduca en',
+    'appSettingsApi.stTtl30': '30 días',
+    'appSettingsApi.stTtl90': '90 días',
+    'appSettingsApi.stTtl365': '365 días',
+    'appSettingsApi.stCreateButton': 'Crear token',
+    'appSettingsApi.stCreating': 'Creando...',
+    'appSettingsApi.stNoTokens': 'Todavía no hay tokens de servidor.',
+    'appSettingsApi.stColName': 'Nombre',
+    'appSettingsApi.stColCreated': 'Creado',
+    'appSettingsApi.stColExpires': 'Caduca',
+    'appSettingsApi.stRevokeButton': 'Revocar',
+    'appSettingsApi.stRevokeTitle': '¿Revocar el token de servidor?',
+    'appSettingsApi.stRevokeMessage':
+      'Las integraciones que usan este token dejarán de funcionar de inmediato.',
+    'appSettingsApi.stRevokeConfirm': 'Revocar',
+    'appSettingsApi.stToastCreated': 'Token de servidor creado',
+    'appSettingsApi.stToastRevoked': 'Token de servidor revocado',
+    'appSettingsApi.stToastError': 'Algo salió mal. Inténtalo de nuevo.',
 
     // appSettingsChats.* - Chats.tsx
     'appSettingsChats.deleteButton': 'Eliminar',

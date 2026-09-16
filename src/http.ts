@@ -1181,3 +1181,38 @@ export function httpListUserOauthGrants() {
 export function httpRevokeUserOauthGrant(id: string) {
   return httpV2.delete<{ ok: boolean }>(`/users/me/oauth-grants/${encodeURIComponent(id)}`);
 }
+
+// App server (B2B) tokens: revocable x-custom-token credentials minted for an
+// app the caller owns (backend: /v2/apps/:appId/server-tokens).
+export interface AppServerToken {
+  id: string;
+  name: string;
+  createdAt?: string;
+  expiresAt?: string;
+}
+
+export interface AppServerTokenCreated extends AppServerToken {
+  token: string;
+}
+
+export function httpListAppServerTokens(appId: string) {
+  return httpV2.get<{ ok: boolean; data: { items: AppServerToken[] } }>(
+    `/apps/${encodeURIComponent(appId)}/server-tokens`
+  );
+}
+
+export function httpCreateAppServerToken(
+  appId: string,
+  body: { name?: string; ttlDays?: number }
+) {
+  return httpV2.post<{ ok: boolean; data: AppServerTokenCreated }>(
+    `/apps/${encodeURIComponent(appId)}/server-tokens`,
+    body
+  );
+}
+
+export function httpRevokeAppServerToken(appId: string, id: string) {
+  return httpV2.delete<{ ok: boolean }>(
+    `/apps/${encodeURIComponent(appId)}/server-tokens/${encodeURIComponent(id)}`
+  );
+}
