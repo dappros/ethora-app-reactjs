@@ -78,7 +78,7 @@ export const appSettings1 = {
     'appSettingsApi.credServerKind': 'Server (B2B) token',
     'appSettingsApi.credServerWhen':
       'Your backend is provisioning on behalf of the tenant: creating apps, batch user creation, managing app tokens.',
-    'appSettingsApi.credServerHow': 'Signed from the App Secret.',
+    'appSettingsApi.credServerHow': 'Minted in the Server tokens section below (revocable), or signed from the App Secret.',
     'appSettingsApi.assistantHeading': 'Connect an AI assistant',
     'appSettingsApi.assistantIntro':
       'You do not need any of the above to use Ethora from Claude, ChatGPT, Cursor or Claude Code. Connect the hosted MCP server and sign in there instead:',
@@ -582,7 +582,7 @@ export const appSettings1 = {
     'appSettingsApi.credServerKind': 'Token de servidor (B2B)',
     'appSettingsApi.credServerWhen':
       'Tu backend aprovisiona en nombre del inquilino: creación de aplicaciones, creación de usuarios por lotes, gestión de tokens de aplicación.',
-    'appSettingsApi.credServerHow': 'Firmado con el App Secret.',
+    'appSettingsApi.credServerHow': 'Se crea en la seccion Tokens de servidor mas abajo (revocable), o se firma con el App Secret.',
     'appSettingsApi.assistantHeading': 'Conectar un asistente de IA',
     'appSettingsApi.assistantIntro':
       'No necesitas nada de lo anterior para usar Ethora desde Claude, ChatGPT, Cursor o Claude Code. Conecta el servidor MCP alojado e inicia sesión allí:',
