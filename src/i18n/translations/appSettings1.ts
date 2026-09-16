@@ -321,7 +321,7 @@ export const appSettings1 = {
     'appSettingsApi.credServerKind': 'Jeton serveur (B2B)',
     'appSettingsApi.credServerWhen':
       "Votre backend provisionne au nom du locataire : création d'applications, création d'utilisateurs en lot, gestion des jetons d'application.",
-    'appSettingsApi.credServerHow': "Signé à partir de l'App Secret.",
+    'appSettingsApi.credServerHow': "Créé dans la section Jetons serveur ci-dessous (révocable), ou signé à partir de l'App Secret.",
     'appSettingsApi.assistantHeading': 'Connecter un assistant IA',
     'appSettingsApi.assistantIntro':
       "Vous n'avez besoin d'aucun des éléments ci-dessus pour utiliser Ethora depuis Claude, ChatGPT, Cursor ou Claude Code. Connectez plutôt le serveur MCP hébergé et connectez-vous là :",
