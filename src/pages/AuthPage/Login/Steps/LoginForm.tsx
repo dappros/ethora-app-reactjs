@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,14 +39,22 @@ const LoginStep = () => {
     formState: { errors },
   } = useForm<Inputs>();
 
+  // The request (+ actionAfterLogin's follow-up calls) can take a moment,
+  // and with no feedback the button just sits there looking stuck until
+  // the app abruptly swaps in a full-page loader on navigate. This tracks
+  // only the pending request - left `true` on the success path is
+  // deliberate, since navigate() unmounts this form right after anyway.
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   const onSubmit: SubmitHandler<Inputs> = ({ email, password }) => {
+    setIsLoggingIn(true);
     httpLoginWithEmail(email, password)
       .then(async ({ data }) => {
         try {
           if (!data || !data.user) {
             throw new Error('Invalid response from server');
           }
-          
+
           await actionAfterLogin(data);
 
           logLogin('email', data.user._id);
@@ -60,6 +69,7 @@ const LoginStep = () => {
         } catch (error: any) {
           console.error('Error processing login response:', error);
           toast.error(error?.message || t('authLoginStep.processError'));
+          setIsLoggingIn(false);
         }
       })
       .catch((error) => {
@@ -81,6 +91,7 @@ const LoginStep = () => {
 
         toast.error(errorMessage);
         localStorage.removeItem('token-538');
+        setIsLoggingIn(false);
       });
   };
 
@@ -147,6 +158,8 @@ const LoginStep = () => {
           variant="contained"
           color="primary"
           type="submit"
+          loading={isLoggingIn}
+          disabled={isLoggingIn}
           style={{
             backgroundColor: config?.primaryColor
               ? config.primaryColor

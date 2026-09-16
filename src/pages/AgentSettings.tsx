@@ -30,6 +30,7 @@ import {
   SoulMdPanel,
   WebIndexPanel,
 } from '../components/Agents/panels/AgentPanels';
+import { AgentWidgetAppearancePanel } from '../components/Agents/panels/AgentWidgetAppearancePanel';
 import { httpListAgentBotInstances } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../models';
@@ -44,6 +45,7 @@ import { useAppStore } from '../store/useAppStore';
 const TABS = [
   'Persona',
   'Context',
+  'Widget Appearance',
   'Web Index',
   'Docs Index',
   'SOUL.MD',
@@ -56,6 +58,7 @@ const TABS = [
 const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
   Persona: 'agentSettings.tabPersona',
   Context: 'agentSettings.tabContext',
+  'Widget Appearance': 'agentSettings.tabWidgetAppearance',
   'Web Index': 'agentSettings.tabWebIndex',
   'Docs Index': 'agentSettings.tabDocsIndex',
   'SOUL.MD': 'agentSettings.tabSoulMd',
@@ -66,7 +69,7 @@ const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
 };
 
 const SECTIONS: { labelKey: string; tabs: (typeof TABS[number])[] }[] = [
-  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Context'] },
+  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Context', 'Widget Appearance'] },
   { labelKey: 'agentSettings.sectionKnowledge', tabs: ['Web Index', 'Docs Index'] },
   { labelKey: 'agentSettings.sectionBehaviour', tabs: ['SOUL.MD', 'Heartbeat', 'Flows'] },
   { labelKey: 'agentSettings.sectionActivity', tabs: ['Chats Index'] },
@@ -190,6 +193,9 @@ export default function AgentSettings() {
           </TabPanel>
           <TabPanel className="p-2">
             <ContextPanel agent={agent} isDisabled={readOnly} />
+          </TabPanel>
+          <TabPanel className="p-2">
+            <AgentWidgetAppearancePanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
             <WebIndexPanel agent={agent} appId={scopedAppId} isDisabled={readOnly} />

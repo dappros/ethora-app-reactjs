@@ -3,15 +3,25 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
 import { httpUpdateApp, httpV2 } from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
 import { ModelApp } from '../../models';
 import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
+import { AssistantAppearancePanel } from '../../components/AIWidget/AssistantAppearancePanel';
 import { WidgetConversationsPanel } from '../../components/AIWidget/WidgetConversationsPanel';
 import { useTranslation } from '../../i18n/useTranslation';
+import {
+  AiWidgetAppearance,
+  defaultAiWidgetAppearance,
+  getAppearanceAttributes,
+  loadStoredAppearance,
+  saveStoredAppearance,
+} from '../../lib/aiWidgetAppearance';
 import { resolveWidgetUrl } from '../../utils/widgetUrl';
 import './AIWidget.scss';
 
@@ -77,12 +87,17 @@ function injectWidgetScript({
   apiBase,
   displayName,
   avatar,
+  extraAttrs,
 }: {
   widgetUrl: string;
   appId: string;
   apiBase?: string;
   displayName?: string;
   avatar?: string;
+  // Operator-chosen appearance overrides (see AssistantAppearancePanel /
+  // lib/aiWidgetAppearance.ts), applied to the same test-preview script tag
+  // so "Test widget" reflects exactly what Save appearance would ship.
+  extraAttrs?: Array<[string, string]>;
 }) {
   if (document.getElementById(TEST_SCRIPT_ID)) return;
   const s = document.createElement('script');
@@ -104,6 +119,7 @@ function injectWidgetScript({
   if (apiBase) s.setAttribute('data-api-base', apiBase);
   if (displayName) s.setAttribute('data-bot-display-name', displayName);
   if (avatar) s.setAttribute('data-bot-avatar', avatar);
+  extraAttrs?.forEach(([name, value]) => s.setAttribute(name, value));
   document.body.appendChild(s);
 }
 
@@ -134,6 +150,39 @@ export function AIWidget({
   const [value, setValue] = useState('1');
   const [previewActive, setPreviewActive] = useState<boolean>(false);
   const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
+
+  // Appearance customization (colors, fonts, layout, launcher, CTA). Not
+  // yet a backend field (see lib/aiWidgetAppearance.ts header) - persisted
+  // to this browser only, keyed by appId. `savedAppearance` is the
+  // last-persisted snapshot, used only to compute the "unsaved changes"
+  // indicator; `appearance` is what Test widget and the embed snippet below
+  // actually render, live, before Save is even clicked.
+  const [appearance, setAppearance] = useState<AiWidgetAppearance>(() =>
+    loadStoredAppearance(appId)
+  );
+  const [savedAppearance, setSavedAppearance] = useState<AiWidgetAppearance>(appearance);
+
+  useEffect(() => {
+    const loaded = loadStoredAppearance(appId);
+    setAppearance(loaded);
+    setSavedAppearance(loaded);
+  }, [appId]);
+
+  const handleAppearanceChange = useCallback((updates: Partial<AiWidgetAppearance>) => {
+    setAppearance((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  const handleSaveAppearance = useCallback(() => {
+    saveStoredAppearance(appId, appearance);
+    setSavedAppearance(appearance);
+    toast.success(t('aiWidgetAppearance.saved'));
+  }, [appId, appearance, t]);
+
+  const handleResetAppearance = useCallback(() => {
+    setAppearance(defaultAiWidgetAppearance);
+  }, []);
+
+  const appearanceIsDirty = !isEqual(appearance, savedAppearance);
 
   // Env override first, then the copy bundled with this app. See
   // utils/widgetUrl.ts for the full resolution order.
@@ -166,9 +215,10 @@ export function AIWidget({
       widgetUrl,
       appId,
       apiBase: apiBaseOverride || undefined,
+      extraAttrs: getAppearanceAttributes(appearance),
     });
     setPreviewActive(true);
-  }, [widgetUrl, appId, apiBaseOverride]);
+  }, [widgetUrl, appId, apiBaseOverride, appearance]);
 
   const handleStopPreview = useCallback(() => {
     teardownWidget();
@@ -346,6 +396,17 @@ export function AIWidget({
           </div>
         </Box>
 
+        {/* Appearance customization — colors, fonts, layout, launcher, CTA.
+            Feeds both the Test widget button above (live) and the embed
+            code below (once saved). */}
+        <AssistantAppearancePanel
+          appearance={appearance}
+          onChange={handleAppearanceChange}
+          onSave={handleSaveAppearance}
+          onReset={handleResetAppearance}
+          isDirty={appearanceIsDirty}
+        />
+
         {/* Embed Code panel — generates the <script> snippet operators paste
             into their own site. */}
         <div className="w-full overflow-x-auto">
@@ -354,6 +415,7 @@ export function AIWidget({
             appId={appId}
             app={app}
             userId={aiBot.userId}
+            appearance={appearance}
             handleChange={handleChange}
           />
         </div>

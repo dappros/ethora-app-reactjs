@@ -1,6 +1,7 @@
 import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 import { adminCore } from './adminCore';
 import { aiWidget } from './aiWidget';
+import { aiWidgetAppearance } from './aiWidgetAppearance';
 import { appSettings1 } from './appSettings1';
 import { appSettings2 } from './appSettings2';
 import { authFlows } from './authFlows';
@@ -31,6 +32,7 @@ const dictionaries = [
   common,
   adminCore,
   aiWidget,
+  aiWidgetAppearance,
   appSettings1,
   appSettings2,
   authFlows,

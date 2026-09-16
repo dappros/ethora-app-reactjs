@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTranslation } from '../../../i18n/useTranslation';
+import { AiWidgetAppearance, getAppearanceAttributes } from '../../../lib/aiWidgetAppearance';
 import { ModelApp } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
 import { resolveWidgetUrl } from '../../../utils/widgetUrl';
@@ -16,6 +17,11 @@ interface TabAIWidgetCodeProps {
   appId?: string;
   app?: ModelApp;
   userId?: string;
+  // Appearance chosen in AssistantAppearancePanel above. Its non-default
+  // data-* attributes are inlined into the required <script> tag below
+  // instead of only appearing in the commented reference block, so the
+  // snippet an operator copies matches what they actually configured.
+  appearance?: AiWidgetAppearance;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
 }
 
@@ -24,6 +30,7 @@ export const TabAIWidgetCode = ({
   appId,
   app,
   userId,
+  appearance,
   handleChange,
 }: TabAIWidgetCodeProps): ReactElement => {
   const { t } = useTranslation();
@@ -139,6 +146,13 @@ export const TabAIWidgetCode = ({
     if (apiBaseOverride) {
       required.push(`  data-api-base="${apiBaseOverride}"`);
     }
+    // Appearance attrs the operator actually set in the panel above, so the
+    // snippet they copy already reflects their choices - not just the four
+    // required attrs plus a wall of commented examples.
+    const chosenAppearance = appearance ? getAppearanceAttributes(appearance) : [];
+    chosenAppearance.forEach(([attr, val]) => {
+      required.push(`  ${attr}="${val.replace(/"/g, '&quot;')}"`);
+    });
     required.push(`></script>`);
 
     // Read the contract from the loaded bundle rather than restating it
@@ -148,8 +162,9 @@ export const TabAIWidgetCode = ({
     // is published by the widget; the static list below is only a fallback
     // for the case where the operator opens this tab before the preview
     // has ever loaded the bundle.
+    const inlinedNames = new Set(chosenAppearance.map(([attr]) => attr));
     const specs = window.EthoraAssistant?.attributes?.filter(
-      (a) => !a.required && !a.deprecatedAliasFor
+      (a) => !a.required && !a.deprecatedAliasFor && !inlinedNames.has(a.name)
     );
 
     const lines = specs?.length
@@ -193,7 +208,7 @@ export const TabAIWidgetCode = ({
     ];
 
     return [...required, ...optional].join('\n');
-  }, [appId, widgetUrl, apiBaseOverride]);
+  }, [appId, widgetUrl, apiBaseOverride, appearance]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
