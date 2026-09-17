@@ -60,6 +60,18 @@ export const userSettings = {
     'userSettingsAi.toastDisconnected': 'App disconnected',
     'userSettingsAi.toastError': 'Something went wrong. Please try again.',
 
+    // src/pages/UserSettings/EmailVerification.tsx
+    'userSettingsEmail.label': 'Account email:',
+    'userSettingsEmail.verified': 'Verified',
+    'userSettingsEmail.notVerified': 'Not verified',
+    'userSettingsEmail.verifyButton': 'Verify',
+    'userSettingsEmail.sending': 'Sending...',
+    'userSettingsEmail.sentMessage': 'We sent a link to {email}. Open it to finish verifying.',
+    'userSettingsEmail.resendButton': 'Send again',
+    'userSettingsEmail.resendIn': 'Send again in {seconds}s',
+    'userSettingsEmail.optionalNote': 'Verifying is optional. Some AI assistant connectors, such as ChatGPT, require a verified address before they can be connected.',
+    'userSettingsEmail.toastError': 'Could not send the verification link. Please try again.',
+
     // src/pages/UserSettings/BlockedUsers.tsx
     'userSettingsBlockedUsers.title': 'Users you have blocked',
 
@@ -261,6 +273,18 @@ export const userSettings = {
     'userSettingsAi.toastRevoked': 'Clé API révoquée',
     'userSettingsAi.toastDisconnected': 'Application déconnectée',
     'userSettingsAi.toastError': 'Une erreur est survenue. Veuillez réessayer.',
+
+    // src/pages/UserSettings/EmailVerification.tsx
+    'userSettingsEmail.label': 'E-mail du compte :',
+    'userSettingsEmail.verified': 'Vérifié',
+    'userSettingsEmail.notVerified': 'Non vérifié',
+    'userSettingsEmail.verifyButton': 'Vérifier',
+    'userSettingsEmail.sending': 'Envoi...',
+    'userSettingsEmail.sentMessage': 'Nous avons envoyé un lien à {email}. Ouvrez-le pour terminer la vérification.',
+    'userSettingsEmail.resendButton': 'Renvoyer',
+    'userSettingsEmail.resendIn': 'Renvoyer dans {seconds} s',
+    'userSettingsEmail.optionalNote': 'La vérification est facultative. Certains connecteurs d\'assistants IA, comme ChatGPT, exigent une adresse vérifiée avant de pouvoir être connectés.',
+    'userSettingsEmail.toastError': 'Impossible d\'envoyer le lien de vérification. Veuillez réessayer.',
 
     // src/pages/UserSettings/BlockedUsers.tsx
     'userSettingsBlockedUsers.title': 'Utilisateurs que vous avez bloqués',
@@ -468,6 +492,18 @@ export const userSettings = {
     'userSettingsAi.toastRevoked': 'Clave API revocada',
     'userSettingsAi.toastDisconnected': 'Aplicación desconectada',
     'userSettingsAi.toastError': 'Algo salió mal. Inténtalo de nuevo.',
+
+    // src/pages/UserSettings/EmailVerification.tsx
+    'userSettingsEmail.label': 'Correo de la cuenta:',
+    'userSettingsEmail.verified': 'Verificado',
+    'userSettingsEmail.notVerified': 'Sin verificar',
+    'userSettingsEmail.verifyButton': 'Verificar',
+    'userSettingsEmail.sending': 'Enviando...',
+    'userSettingsEmail.sentMessage': 'Enviamos un enlace a {email}. Ábrelo para terminar la verificación.',
+    'userSettingsEmail.resendButton': 'Enviar de nuevo',
+    'userSettingsEmail.resendIn': 'Enviar de nuevo en {seconds} s',
+    'userSettingsEmail.optionalNote': 'La verificación es opcional. Algunos conectores de asistentes de IA, como ChatGPT, requieren una dirección verificada antes de poder conectarse.',
+    'userSettingsEmail.toastError': 'No se pudo enviar el enlace de verificación. Inténtalo de nuevo.',
 
     // src/pages/UserSettings/BlockedUsers.tsx
     'userSettingsBlockedUsers.title': 'Usuarios que has bloqueado',
