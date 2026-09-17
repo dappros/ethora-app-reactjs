@@ -1181,3 +1181,30 @@ export function httpListUserOauthGrants() {
 export function httpRevokeUserOauthGrant(id: string) {
   return httpV2.delete<{ ok: boolean }>(`/users/me/oauth-grants/${encodeURIComponent(id)}`);
 }
+
+// Optional email verification. Verifying is not required to use Ethora - it was
+// deliberately made non-mandatory - but some assistant connectors (ChatGPT)
+// only accept an account whose address is verified. Both calls may 404 on a
+// deployment that predates the feature; callers hide the affordance instead of
+// showing an error.
+export interface UserMeV2 {
+  _id?: string;
+  email?: string;
+  emailVerified?: boolean;
+}
+
+export interface UserEmailVerificationSent {
+  sent: boolean;
+  email?: string;
+  alreadyVerified?: boolean;
+}
+
+export function httpGetUserMeV2() {
+  return httpV2.get<{ ok: boolean; data: UserMeV2 }>('/users/me');
+}
+
+export function httpSendUserEmailVerification() {
+  return httpV2.post<{ ok: boolean; data: UserEmailVerificationSent }>(
+    '/users/me/email/verification'
+  );
+}

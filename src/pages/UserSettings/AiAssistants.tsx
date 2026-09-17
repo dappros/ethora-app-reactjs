@@ -16,6 +16,7 @@ import {
   UserOauthGrant,
 } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
+import { EmailVerification } from './EmailVerification';
 
 // Public MCP endpoint, e.g. https://mcp.chat.example.com/mcp. Blank when the
 // deployment does not run the hosted MCP server; the page then hides the
@@ -176,6 +177,11 @@ export function AiAssistants() {
       <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
         {t('userSettingsAi.intro')}
       </div>
+
+      {/* Quiet, opt-in only: connecting ChatGPT needs a verified address, so
+          the state belongs on this tab. It renders nothing when the backend
+          does not report one. */}
+      <EmailVerification />
 
       {MCP_URL ? (
         <Snippet label={t('userSettingsAi.endpointLabel')} value={MCP_URL} />
