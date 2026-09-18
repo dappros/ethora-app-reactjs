@@ -106,7 +106,33 @@ Verdict line:
 - `BOT_DID_NOT_REPLY` — visitor archived but no bot reply seen.
   Likely ai-service didn't auto-join the visitor's persistent room.
 
+### `agent-room-probe.mjs`
+
+Raw-XMPP (no browser) transcript of a MUC room with AI agents in it: logs in
+as a human test user, posts one message, then prints everything the room
+sees for `WATCH_SEC` - `[human]` / `[bot]` / `[system]` lines with the
+archive id, `[buttons]` for a bot message carrying `quickReplies`, and
+`[reaction]` for XEP-0444 reaction stanzas (with the target id). Ends with a
+`[verdict]` count per sender.
+
+- `TAP_BUTTON=1` answers the first bot message that offers buttons by
+  posting its first button's value, the way a tap would.
+- `SCRIPT="a|b|c"` plays a scripted conversation: each line is posted 1.5 s
+  after the bot's latest message (after the tap, when `TAP_BUTTON` is set),
+  so a whole flow (menu -> answers -> "skip") runs from one command.
+
+Use it for the agent response gate (how many agent-to-agent turns follow a
+human, when they stop), chat actions (buttons / reactions on the wire), and
+flows (`ethora-backend/services/ai/README.md` § Flows). Agents outside the
+warm window are cold after an ai-service restart and a raw XMPP message
+does not wake them - hit `POST /bot-instances/:xmppUsername/wake` on the
+ai-service first.
+
 ### `widget-e2e-probe.mjs`
+
+The widget mounts inside an open shadow root on `#chat-widget`; the probe
+drives it with Playwright locators (which pierce open shadow DOM), so plain
+`document.querySelector` will not find the launcher or the input.
 
 End-to-end probe for the full AI Widget pipeline. Hosts a synthetic
 page on the widget origin (so localStorage works), injects the
