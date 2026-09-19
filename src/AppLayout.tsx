@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
+import { LicenseBanner } from './components/LicenseBanner';
 import { useAppStore } from './store/useAppStore';
 
 export default function AppLayout() {
@@ -27,8 +28,11 @@ export default function AppLayout() {
             </div>
             {/* router content — edge-to-edge on mobile (no grey inset between
                 the top bar and the chat panel); padded card on desktop. */}
-            <div className="min-h-[calc(100vh-72px)] md:p-0">
-              <Outlet />
+            <div className="min-h-[calc(100vh-72px)] md:p-0 flex flex-col">
+              <LicenseBanner />
+              <div className="flex-1 min-h-0">
+                <Outlet />
+              </div>
             </div>
           </div>
         </div>

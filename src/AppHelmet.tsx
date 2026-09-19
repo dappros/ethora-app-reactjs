@@ -29,6 +29,7 @@ const ROUTE_TABS: RouteEntry[] = [
   { pattern: '/app/admin/agents/:agentId/settings', tab: 'Agent Settings' },
   { pattern: '/app/admin/agents', tab: 'Agents' },
   { pattern: '/app/admin/billing', tab: 'Billing' },
+  { pattern: '/app/admin/license', tab: 'License' },
   // Other top-level routes
   { pattern: '/app/chat', tab: 'Chats' },
   { pattern: '/app/help/whats-new', tab: "What's new" },

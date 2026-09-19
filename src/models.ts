@@ -424,3 +424,47 @@ export type OrderByType =
   | 'firstName';
 
 export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'fr' | 'zh';
+
+// License state of the whole install (GET /v2/license). Mirrors the backend
+// LicenseStatus schema; the key string itself is never sent to the browser.
+export type LicenseState = 'licensed' | 'grace' | 'restricted';
+
+export interface LicenseStatus {
+  state: LicenseState;
+  reason:
+    | 'ok'
+    | 'no_key'
+    | 'malformed'
+    | 'invalid_signature'
+    | 'domain_mismatch'
+    | 'not_yet_valid'
+    | 'expired'
+    | 'call_home_overdue';
+  source: 'env' | 'stored' | 'none';
+  checkedAt: string;
+  installedAt: string;
+  graceEndsAt: string | null;
+  instanceId: string;
+  hosts: string[];
+  features: string[];
+  restrictions: { createApps: boolean; createUsers: boolean; adminPanel: boolean };
+  license: {
+    lid: string;
+    customer: string;
+    domain: string;
+    tier: string;
+    issuedAt: string | null;
+    expiresAt: string;
+    features: string[];
+    limits: Record<string, number>;
+    offline: boolean;
+  } | null;
+  keyError: { reason: string; mismatchedHosts: string[] } | null;
+  callHome: {
+    enabled: boolean;
+    serverConfigured: boolean;
+    lastAt: string | null;
+    lastStatus: string | null;
+  };
+  serverTime: string;
+}

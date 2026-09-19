@@ -10,6 +10,7 @@ import { IconAgents } from './Icons/IconAgents';
 import { IconBilling } from './Icons/IconBilling';
 import { IconChat } from './Icons/IconChat';
 import { IconHelp } from './Icons/IconHelp';
+import { IconLicense } from './Icons/IconLicense';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
 import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
@@ -117,6 +118,14 @@ export function AppMenu() {
             <NavLink to="/app/admin/billing" className={ITEM_CLASS}>
               <IconBilling />
               <div className={LABEL_CLASS}>{t('nav.billing')}</div>
+            </NavLink>
+          </div>
+        )}
+        {isAdmin && isBaseApp && (
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink to="/app/admin/license" className={ITEM_CLASS}>
+              <IconLicense />
+              <div className={LABEL_CLASS}>{t('nav.license')}</div>
             </NavLink>
           </div>
         )}
