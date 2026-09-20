@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from '../i18n/useTranslation';
 
-const TEST_SITE_KEY = import.meta.env.VITE_SITE_KEY as string;
+import { env } from '../config/env';
+const TEST_SITE_KEY = env.VITE_SITE_KEY as string;
 
 export default function TurnstileBridge() {
   const containerRef = useRef<HTMLDivElement>(null);

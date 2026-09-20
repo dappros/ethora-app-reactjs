@@ -18,10 +18,11 @@ import {
 import { useTranslation } from '../../i18n/useTranslation';
 import { EmailVerification } from './EmailVerification';
 
+import { env } from '../../config/env';
 // Public MCP endpoint, e.g. https://mcp.chat.example.com/mcp. Blank when the
 // deployment does not run the hosted MCP server; the page then hides the
 // connection snippets but still manages API keys.
-const MCP_URL = (import.meta.env.VITE_MCP_PUBLIC_URL || '').trim().replace(/\/+$/, '');
+const MCP_URL = (env.VITE_MCP_PUBLIC_URL || '').trim().replace(/\/+$/, '');
 // Base without the trailing /mcp so the personal URL can be built as
 // <base>/mcp/k/<key> (same scheme the MCP server accepts as a bearer).
 const MCP_BASE = MCP_URL.replace(/\/mcp$/, '');

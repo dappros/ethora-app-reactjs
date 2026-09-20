@@ -15,6 +15,7 @@ import { isBaseAppHost } from '../../utils/appHost';
 import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
+import { env } from '../../config/env';
 interface Props {
   isAdmin?: boolean;
   onClose: () => void;
@@ -34,7 +35,7 @@ function isEthoraHostedEnv(): boolean {
 
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const { t } = useTranslation();
-  const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+  const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
   const isBaseApp = isBaseAppHost();
   const showBilling = isBaseApp && isEthoraHostedEnv();
 

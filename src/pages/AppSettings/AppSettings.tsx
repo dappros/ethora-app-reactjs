@@ -31,6 +31,7 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
+import { env } from '../../config/env';
 // Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
 // step content - we only want that chunk over the wire when firstAdd is
 // true, not on every Settings visit.
@@ -98,7 +99,7 @@ export default function AppSettings() {
   const location = useLocation();
   const isNew = location.state?.isNew ?? false;
 
-  const DOMAIN_NAME = import.meta.env.VITE_DOMAIN_NAME;
+  const DOMAIN_NAME = env.VITE_DOMAIN_NAME;
 
   const { t, language } = useTranslation();
   const apps = useAppStore((s) => s.apps);
@@ -478,7 +479,7 @@ export default function AppSettings() {
   const onExternalClick = () => {
     if (app) {
       window.open(
-        `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+        `https://${app.domainName}.${env.VITE_ROOT_DOMAIN}`,
         '_blank'
       );
     }
@@ -488,7 +489,7 @@ export default function AppSettings() {
   // false, the AI Widget tab below renders disabled (visible but non-clickable)
   // and the AIWidget panel itself goes into read-only "preview" mode.
   const aiEnabled =
-    import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+    env.VITE_AI_FEATURE_ENABLED === 'true';
 
   const tabsMemo = useMemo(() => {
     return Object.entries(tabsNew).flatMap(([sectionTitle, items]) => {

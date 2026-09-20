@@ -12,6 +12,7 @@ import { ModelApp } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
 import { resolveWidgetUrl } from '../../../utils/widgetUrl';
 
+import { env } from '../../../config/env';
 interface TabAIWidgetCodeProps {
   value: string;
   appId?: string;
@@ -71,7 +72,7 @@ export const TabAIWidgetCode = ({
   // at runtime in the embed itself, so data-api-base is optional in the
   // generated snippet — but expose VITE_API for installs that intentionally
   // host the widget JS off-domain.
-  const apiBaseOverride = (import.meta.env.VITE_API as string | undefined) || '';
+  const apiBaseOverride = (env.VITE_API as string | undefined) || '';
 
   // displayName / avatar state removed — persona comes from the active
   // Agent now (rendered above as a read-only summary). The script-tag
@@ -80,7 +81,7 @@ export const TabAIWidgetCode = ({
   // hand to the snippet below if they need them.
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>('');
-  const envXmppHost = import.meta.env.VITE_XMPP_HOST || '';
+  const envXmppHost = env.VITE_XMPP_HOST || '';
   const xmppHost = useMemo(() => {
     const jid = app?.systemChatAccount?.jid || currentApp?.systemChatAccount?.jid;
     if (!jid || !jid.includes('@')) {

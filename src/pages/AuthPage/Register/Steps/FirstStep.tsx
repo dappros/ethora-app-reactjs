@@ -23,7 +23,8 @@ import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
 import SkeletonLoader from '../../SkeletonLoader';
 
-const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+import { env } from '../../../../config/env';
+const ROOT_DOMAIN = String(env.VITE_ROOT_DOMAIN || '').trim();
 
 function setEthoraUserCookie(value: string) {
   const domainPart =
@@ -159,7 +160,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
         const website = window.location.origin;
         const currentDomain = window.location.hostname;
         const allowedDomains =
-          import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+          env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
 
         const hubspotData = {
           fields: [
@@ -174,9 +175,9 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           return;
         }
 
-        const hubspotEnabled = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
-        const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
-        const formId = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+        const hubspotEnabled = String(env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+        const portalId = String(env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+        const formId = String(env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
         if (!hubspotEnabled || !portalId || !formId) {
           return;
         }

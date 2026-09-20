@@ -15,6 +15,7 @@ import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { UnreadBadge } from './UnreadBadge';
 
+import { env } from '../config/env';
 const ITEM_CLASS =
   'flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
 const LABEL_CLASS =
@@ -44,7 +45,7 @@ export function AppMenu() {
   const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
-  const aiEnabled = import.meta.env.VITE_AI_FEATURE_ENABLED === 'true';
+  const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
   // Apps / Agents / Billing / Help belong to the base app (app.<root>). An app
   // created inside it is served from its own subdomain and shows chat only.
   const isBaseApp = isBaseAppHost();

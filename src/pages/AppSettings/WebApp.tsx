@@ -19,6 +19,7 @@ import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
+import { env } from '../../config/env';
 interface Props {
   appId: string;
   domainName: string;
@@ -99,8 +100,8 @@ export function WebApp({
   }, [aiBot.chatId]);
 
   const hostedAppsRootDomain =
-    import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
-    import.meta.env.VITE_ROOT_DOMAIN ||
+    env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
+    env.VITE_ROOT_DOMAIN ||
     'ethora.com';
 
   return (

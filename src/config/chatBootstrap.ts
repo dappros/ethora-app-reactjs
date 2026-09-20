@@ -5,6 +5,7 @@ import { phCapture } from '../posthog';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 import { getCachedTranslateLanguages } from '../utils/uiLanguage';
+import { env } from './env';
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 
@@ -18,22 +19,22 @@ type ChatUserLoginUser = NonNullable<NonNullable<ChatConfig['userLogin']>['user'
 // deployment (prod / QA / self-host) points at its own web host; falls back to
 // the prod host when VITE_QR_URL is unset so existing builds are unaffected.
 const DEFAULT_QR_URL =
-  import.meta.env.VITE_QR_URL || 'https://app.chat.ethora.com/app/chat/?qrChatId=';
+  env.VITE_QR_URL || 'https://app.chat.ethora.com/app/chat/?qrChatId=';
 
 // Video/audio calls (LiveKit). Gated by VITE_VIDEO_CALLS_ENABLED, which the
 // deploy system renders from features.video_calls in deploy.yml. The
 // chat-component only surfaces call UI when enabled; livekitUrl points at the
 // LiveKit server for the instance (VITE_LIVEKIT_URL).
 const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
-  enabled: import.meta.env.VITE_VIDEO_CALLS_ENABLED === 'true',
-  livekitUrl: import.meta.env.VITE_LIVEKIT_URL || '',
+  enabled: env.VITE_VIDEO_CALLS_ENABLED === 'true',
+  livekitUrl: env.VITE_LIVEKIT_URL || '',
   allowedRoomTypes: ['private'],
   enableAudioCalls: true,
   startWithMicOn: true,
 };
 const webNotificationsConfig: NonNullable<ChatConfig['pushNotifications']> = {
   enabled: true,
-  vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+  vapidPublicKey: env.VITE_VAPID_PUBLIC_KEY,
   permissionBanner: {
     enabled: true,
     showWhenBlocked: true,
@@ -56,7 +57,7 @@ export function buildPushNotificationsConfig(): {
   };
 } {
   const allowedDomains =
-    import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+    env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   const currentDomain = window.location.hostname;
   const pushEnabledByDomain = allowedDomains.includes(currentDomain);
 
@@ -65,13 +66,13 @@ export function buildPushNotificationsConfig(): {
   }
 
   const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+    apiKey: env.VITE_FIREBASE_API_KEY,
+    authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: env.VITE_FIREBASE_APP_ID,
+    measurementId: env.VITE_FIREBASE_MEASUREMENT_ID,
   };
 
   const hasFirebaseConfig = Boolean(
@@ -220,14 +221,14 @@ export const buildEthoraBaseChatConfig = ({
   const offeredTranslations =
     translateLanguages ?? getCachedTranslateLanguages();
   const userLoginPayload = makeChatUserLogin(currentUser);
-  const baseUrl = import.meta.env.VITE_API.split("/v1")[0];
+  const baseUrl = env.VITE_API.split("/v1")[0];
   const config: XmppProviderConfig = {
     baseUrl: baseUrl,
     appId: currentUser?.appId || '',
     xmppSettings: {
-      devServer: import.meta.env.VITE_APP_XMPP_SERVICE,
-      host: import.meta.env.VITE_XMPP_HOST,
-      conference: import.meta.env.VITE_XMPP_SERVICE,
+      devServer: env.VITE_APP_XMPP_SERVICE,
+      host: env.VITE_XMPP_HOST,
+      conference: env.VITE_XMPP_SERVICE,
     },
     jwtLogin: {
       enabled: true,

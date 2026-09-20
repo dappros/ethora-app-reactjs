@@ -9,6 +9,7 @@ import { IconUpload } from '../../components/Icons/IconUpload';
 import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
 import { useTranslation } from '../../i18n/useTranslation';
 
+import { env } from '../../config/env';
 interface Props {
   domainName: string;
   setDomainName: (s: string) => void;
@@ -38,8 +39,8 @@ export function WebMobileApp({
   const googleJsonRef = useRef<HTMLInputElement>(null);
   const plistFileRef = useRef<HTMLInputElement>(null);
   const hostedAppsRootDomain =
-    import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
-    import.meta.env.VITE_ROOT_DOMAIN ||
+    env.VITE_HOSTED_APPS_ROOT_DOMAIN ||
+    env.VITE_ROOT_DOMAIN ||
     'ethora.com';
 
   const onGoogleJsonRefChanges = (file: File | null) => {

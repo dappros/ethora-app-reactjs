@@ -12,6 +12,7 @@ import { useAppStore } from './store/useAppStore';
 import { initFirebase } from './utils/firebase';
 import { useHandleRedirectLogin } from './hooks/useHandleRedirectLogin';
 
+import { env } from './config/env';
 export function Fallback() {
   return <p>Performing initial data load</p>;
 }
@@ -19,7 +20,7 @@ export function Fallback() {
 function getBootstrapDomainName(): string | undefined {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    const hostedRoot = import.meta.env.VITE_HOSTED_APPS_ROOT_DOMAIN?.trim();
+    const hostedRoot = env.VITE_HOSTED_APPS_ROOT_DOMAIN?.trim();
 
     // On a hosted-apps subdomain (e.g. tenant.chat.ethora.com),
     // always derive from the URL -- the build-time VITE_DOMAIN_NAME
@@ -32,11 +33,11 @@ function getBootstrapDomainName(): string | undefined {
     }
 
     if (!hostname || hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-      return import.meta.env.VITE_DOMAIN_NAME?.trim() || undefined;
+      return env.VITE_DOMAIN_NAME?.trim() || undefined;
     }
   }
 
-  const configuredDomain = import.meta.env.VITE_DOMAIN_NAME?.trim();
+  const configuredDomain = env.VITE_DOMAIN_NAME?.trim();
   if (configuredDomain) {
     return configuredDomain;
   }
@@ -62,7 +63,7 @@ function App() {
       enabled: pushConfig.enabled,
       softAsk: pushConfig.softAsk,
       firebaseConfig: pushConfig.firebaseConfig,
-      vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+      vapidPublicKey: env.VITE_VAPID_PUBLIC_KEY,
     }),
     [pushConfig]
   );

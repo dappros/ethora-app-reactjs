@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { env } from '../config/env';
 interface Params {
   utm_ref?: string;
   first_page?: string;
@@ -35,7 +36,7 @@ export const useCaptureParams = () => {
 
     const isAllowedDomain = (() => {
       const allowed =
-        import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+        env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
       const current = window.location.hostname;
       return allowed.includes(current);
     })();

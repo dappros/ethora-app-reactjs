@@ -15,6 +15,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { ModelApp } from '../../models';
 import './Api.scss';
 
+import { env } from '../../config/env';
 interface Props {
   app: ModelApp;
 }
@@ -22,7 +23,7 @@ interface Props {
 // Hosted MCP endpoint, e.g. https://mcp.chat.example.com/mcp. Blank on
 // deployments without the hosted MCP server: the assistant section is hidden
 // then (same rule as UserSettings/AiAssistants.tsx).
-const MCP_URL = (import.meta.env.VITE_MCP_PUBLIC_URL || '')
+const MCP_URL = (env.VITE_MCP_PUBLIC_URL || '')
   .trim()
   .replace(/\/+$/, '');
 const MCP_OAUTH_URL = MCP_URL ? `${MCP_URL.replace(/\/mcp$/, '')}/mcp/oauth` : '';
@@ -30,8 +31,8 @@ const MCP_OAUTH_URL = MCP_URL ? `${MCP_URL.replace(/\/mcp$/, '')}/mcp/oauth` : '
 // Public v2 API base for the curl example (VITE_API_V2, falling back to the
 // v1 base with the version swapped).
 const API_V2 = (
-  (import.meta.env.VITE_API_V2 as string | undefined) ||
-  ((import.meta.env.VITE_API as string | undefined) || '').replace(/\/v1\/?$/, '/v2')
+  (env.VITE_API_V2 as string | undefined) ||
+  ((env.VITE_API as string | undefined) || '').replace(/\/v1\/?$/, '/v2')
 )
   .trim()
   .replace(/\/+$/, '');
