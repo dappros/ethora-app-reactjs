@@ -7,6 +7,7 @@ import { appSettings2 } from './appSettings2';
 import { authFlows } from './authFlows';
 import { authShared } from './authShared';
 import { common } from './common';
+import { license } from './license';
 import { miscComponents } from './miscComponents';
 import { miscPages } from './miscPages';
 import { modalsA } from './modalsA';
@@ -37,6 +38,7 @@ const dictionaries = [
   appSettings2,
   authFlows,
   authShared,
+  license,
   miscComponents,
   miscPages,
   modalsA,
