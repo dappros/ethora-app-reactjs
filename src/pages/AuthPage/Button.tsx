@@ -9,7 +9,8 @@ interface CustomButtonProps extends ButtonProps {
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
-  placeholder,
+  // Accepted for prop-type parity; not an attribute MUI Button understands.
+  placeholder: _placeholder,
   style,
   children,
   loading,

@@ -28,7 +28,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
         }
         return null;
       });
-      // @ts-ignore
+      // @ts-expect-error: the mapped component list is looser than the skeleton state type
       setSkeletons(components);
     }
   }, [loading, children]);

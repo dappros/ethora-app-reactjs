@@ -202,7 +202,7 @@ export default function AppUsers() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     setRowsSelected(() => items.map((_el) => false));
   }, [items]);
 
@@ -524,7 +524,7 @@ export default function AppUsers() {
                   const ids = selectedIds();
                   try {
                     for (const id of ids) {
-                      // eslint-disable-next-line no-await-in-loop
+                       
                       await httpRestoreUser(appId, id);
                     }
                     toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.restoredSuccessSuffix')}`);

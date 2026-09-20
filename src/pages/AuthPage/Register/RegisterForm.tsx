@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Box, Typography } from '@mui/material';
-import { AxiosError } from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../actions';
@@ -227,7 +226,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           toast.error(error.response.data.error);
           localStorage.removeItem('token-538');
         });
-    } catch (error: AxiosError | any) {
+    } catch (error: any) {
       toast.error(
         error?.response?.data?.error ||
           t('authRegisterForm.accountExists')

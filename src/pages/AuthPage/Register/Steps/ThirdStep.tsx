@@ -65,10 +65,6 @@ const ThirdStep = () => {
     }
   }, [newPassword, repeatPassword]);
 
-  if (!config) {
-    return null;
-  }
-
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const email = queryParams.get('email') || '';
@@ -97,6 +93,11 @@ const ThirdStep = () => {
       newPasswordRef.current.focus();
     }
   }, []);
+
+  // After every hook, so the hook order is identical on each render.
+  if (!config) {
+    return null;
+  }
 
   const onSubmit = async ({ newPassword, repeatPassword }: Inputs) => {
     const email = queryParams.get('email') || '';

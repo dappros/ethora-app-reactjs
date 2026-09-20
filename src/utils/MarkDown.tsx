@@ -87,8 +87,8 @@ export const MarkDown = (text: string): (string | JSX.Element)[] => {
     let i = startIndex;
     while (i < lines.length) {
       const currentLine = lines[i];
-      if (/^(\d+\.\s+|\-\s+)/.test(currentLine)) {
-        const itemText = currentLine.replace(/^(\d+\.\s+|\-\s+)/, '');
+      if (/^(\d+\.\s+|-\s+)/.test(currentLine)) {
+        const itemText = currentLine.replace(/^(\d+\.\s+|-\s+)/, '');
         items.push(<li key={`li-${key++}`}>{parseInline(itemText)}</li>);
       } else if (currentLine.trim() === '') {
         break;
@@ -179,7 +179,7 @@ export const MarkDown = (text: string): (string | JSX.Element)[] => {
       continue;
     }
 
-    if (/^(\-|\d+\.)\s+/.test(line)) {
+    if (/^(-|\d+\.)\s+/.test(line)) {
       const { list, newIndex } = parseList(idx);
       elements.push(list);
       idx = newIndex;

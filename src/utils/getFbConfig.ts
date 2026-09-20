@@ -30,6 +30,6 @@ function findFirebaseConfig(input: string[]) {
 
 export function preprocessInputKeysToJson(input: string) {
   // Add double quotes around the keys
-  // @ts-ignore
+  // @ts-expect-error: String.replaceAll with a RegExp needs the es2021 lib, which tsconfig does not include
   return input.replaceAll(/([,{]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
 }

@@ -47,9 +47,9 @@ export default function ProfileEdit() {
     lastName,
     description,
   }) => {
-    let fd = new FormData();
+    const fd = new FormData();
     if (profileImage.startsWith('data:image/')) {
-      let file = base64ToFile(profileImage, 'profileImage.jpg');
+      const file = base64ToFile(profileImage, 'profileImage.jpg');
       fd.append('file', file);
     }
 

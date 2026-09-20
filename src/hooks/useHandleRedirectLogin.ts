@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { getAuth, getRedirectResult, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import { getAuth, getRedirectResult } from 'firebase/auth';
 import { initFirebase } from '../utils/firebase';
 import { actionAfterLogin } from '../actions';
 import { useNavigate } from 'react-router-dom';
@@ -29,9 +29,6 @@ export const useHandleRedirectLogin = () => {
       try {
         const result = await getRedirectResult(auth);
         if (!result || cancelled) return;
-  
-        GoogleAuthProvider.credentialFromResult(result) ||
-          FacebookAuthProvider.credentialFromResult(result);
   
         const idToken = await auth.currentUser?.getIdToken();
   

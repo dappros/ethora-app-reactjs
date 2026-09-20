@@ -17,8 +17,7 @@ type Inputs = {
 };
 
 export function ResetPasswordUserModal({ onClose }: Props) {
-  // @ts-ignore
-  const { register, handleSubmit } = useForm<Inputs>();
+  const { handleSubmit } = useForm<Inputs>();
   const { t } = useTranslation();
 
   const onSubmit: SubmitHandler<Inputs> = () => {};

@@ -136,7 +136,7 @@ export function Chats({
   };
 
   const renderActionsForSelected = () => {
-    let selectedIndexes = [];
+    const selectedIndexes = [];
 
     rowsSelected.forEach((el, index) => {
       if (el === true) {
@@ -176,7 +176,7 @@ export function Chats({
   };
 
   const getSelectedIndexes = () => {
-    let indexes: Array<number> = [];
+    const indexes: Array<number> = [];
 
     rowsSelected.forEach((el, index) => {
       if (el === true) {
@@ -218,10 +218,10 @@ export function Chats({
   }
 
   const onDelete = async () => {
-    let selectedRooms: Array<ModelAppDefaulRooom> = [];
+    const selectedRooms: Array<ModelAppDefaulRooom> = [];
     rowsSelected.forEach((el, index) => {
       if (el === true) {
-        let item = defaultChatRooms[index];
+        const item = defaultChatRooms[index];
         selectedRooms.push(item);
       }
     });

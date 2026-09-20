@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import classNames from 'classnames';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -106,7 +105,7 @@ export default function AdminApps() {
       } catch {
         // non-fatal: tab counts are nice-to-have; the rest of the page works without them.
       }
-    } catch (error: AxiosError | any) {
+    } catch (error: any) {
       console.error(error?.response?.data?.error || error);
     } finally {
       setLoading(false);
