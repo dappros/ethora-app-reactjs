@@ -10,8 +10,9 @@ import { ModelApp } from './models';
 import { useAppStore } from './store/useAppStore';
 import { defaultLandingPath } from './utils/appHost';
 
+import { env } from './config/env';
 const PLATFORM_NAME = String(
-  import.meta.env.VITE_PLATFORM_NAME || ''
+  env.VITE_PLATFORM_NAME || ''
 ).trim();
 
 // Tab label for each app-shell route. Used to build per-route browser titles

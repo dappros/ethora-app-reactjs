@@ -3,11 +3,12 @@ import React, { ReactNode } from 'react';
 import { BuildVersionFooter } from '../../components/BuildVersionFooter';
 import EthoraBrandPanel from './EthoraBrandPanel';
 
+import { env } from '../../config/env';
 // True when the app runs on one of our own (ethora) domains — these get the
 // branded split-screen auth pages; white-label apps keep the standard layout.
 export function isEthoraDomain(): boolean {
   const allowedDomains =
-    import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+    env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   return allowedDomains.includes(window.location.hostname);
 }
 

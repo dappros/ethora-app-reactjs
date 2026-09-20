@@ -19,9 +19,10 @@
 
 import { BUNDLED_WIDGET_PATH } from '../generated/bundledWidget';
 
+import { env } from '../config/env';
 const fromEnv = (): string =>
-  (import.meta.env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
-  (import.meta.env.VITE_WIDGET_URL as string | undefined) ||
+  (env.VITE_WIDGET_VERSIONED_URL as string | undefined) ||
+  (env.VITE_WIDGET_URL as string | undefined) ||
   '';
 
 export function resolveWidgetUrl(): string {

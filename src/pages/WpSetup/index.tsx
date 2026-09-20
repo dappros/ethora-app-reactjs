@@ -20,7 +20,8 @@ import {
 } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 
-const SITE_KEY = (import.meta.env.VITE_SITE_KEY || '').trim();
+import { env } from '../../config/env';
+const SITE_KEY = (env.VITE_SITE_KEY || '').trim();
 const TURNSTILE_ENABLED = SITE_KEY.length > 0;
 
 type Step = 'account' | 'configure' | 'provisioning' | 'done' | 'error';

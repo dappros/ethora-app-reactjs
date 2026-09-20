@@ -15,7 +15,8 @@ import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import GoogleIcon from './Icons/socials/googleIcon';
 
-const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+import { env } from '../../config/env';
+const ROOT_DOMAIN = String(env.VITE_ROOT_DOMAIN || '').trim();
 function setEthoraUserCookie(value: string) {
   const domainPart =
     ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
@@ -99,16 +100,16 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
 
             const website = `${window?.location?.origin || ''}/google`;
             const allowedDomains =
-              import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+              env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {
               return;
             }
 
-            const hubspotEnabled = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
-            const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
-            const formId = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+            const hubspotEnabled = String(env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+            const portalId = String(env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+            const formId = String(env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
             if (hubspotEnabled && portalId && formId) {
               const hubspotData = {
                 fields: [

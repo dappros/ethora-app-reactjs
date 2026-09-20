@@ -4,6 +4,7 @@ import YouLogo from '../../assets/YouLogo.svg';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../i18n/useTranslation';
 
+import { env } from '../../config/env';
 interface LogoContentProps {
   isMobile?: boolean;
 }
@@ -14,7 +15,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   const { t } = useTranslation();
 
   const allowedDomains =
-    import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+    env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   const currentDomain = window.location.hostname;
 
   // if (!allowedDomains.includes(currentDomain)) {

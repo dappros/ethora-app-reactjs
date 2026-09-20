@@ -13,6 +13,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 
+import { env } from '../config/env';
 interface ChatComponentProps {
   // The app whose chat space is being rendered. For the legacy base-app
   // path this is the user's own currentApp; for owner-session mode this is
@@ -312,7 +313,7 @@ export default function ChatPage() {
   }, [apps, chatAppId, config, ownerSession]);
 
   const allowedDomains =
-    import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+    env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   const currentDomain = window.location.hostname;
 
   const handleSwitch = async (nextAppId: string | null) => {

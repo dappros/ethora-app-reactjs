@@ -1,4 +1,5 @@
-const BASE_SUBDOMAIN = (import.meta.env.VITE_DOMAIN_NAME || 'app')
+import { env } from '../config/env';
+const BASE_SUBDOMAIN = (env.VITE_DOMAIN_NAME || 'app')
   .trim()
   .toLowerCase();
 

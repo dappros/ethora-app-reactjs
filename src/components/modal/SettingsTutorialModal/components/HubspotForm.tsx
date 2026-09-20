@@ -20,6 +20,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppStore } from '../../../../store/useAppStore';
 import { useTranslation } from '../../../../i18n/useTranslation';
 
+import { env } from '../../../../config/env';
 interface FormInputs {
   firstname: string;
   lastname: string;
@@ -35,10 +36,10 @@ export const HubspotForm = () => {
   const currentUser = useAppStore((s) => s.currentUser);
 
   const enabled =
-    String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
-  const portalId = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+    String(env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+  const portalId = String(env.VITE_HUBSPOT_PORTAL_ID || '').trim();
   const formId = String(
-    import.meta.env.VITE_HUBSPOT_FORM_ID_TUTORIAL || ''
+    env.VITE_HUBSPOT_FORM_ID_TUTORIAL || ''
   ).trim();
   const isConfigured = enabled && !!portalId && !!formId;
 

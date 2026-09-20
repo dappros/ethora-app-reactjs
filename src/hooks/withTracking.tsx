@@ -3,6 +3,7 @@ import { ComponentType, useEffect, useState } from 'react';
 import { phCapture } from '../posthog.ts';
 import { useAppStore } from '../store/useAppStore.ts';
 
+import { env } from '../config/env';
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,9 +49,9 @@ export function withTracking<T>(Component: ComponentType<T>) {
       (state) => state.currentApp?.firebaseConfigParsed
     );
     const allowedDomains =
-      import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+      env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
     const currentDomain = window.location.hostname;
-    const GA_ID = import.meta.env.VITE_GA_ID;
+    const GA_ID = env.VITE_GA_ID;
 
     useEffect(() => {
       if (!allowedDomains.includes(currentDomain)) {
@@ -61,7 +62,7 @@ export function withTracking<T>(Component: ComponentType<T>) {
       if (isInitialized) return;
 
       initializeGA4(GA_ID);
-      initializeClarity(import.meta.env.VITE_CLARITY_ID);
+      initializeClarity(env.VITE_CLARITY_ID);
 
       setIsInitialized(true);
 

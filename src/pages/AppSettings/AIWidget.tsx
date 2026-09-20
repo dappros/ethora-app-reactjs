@@ -25,6 +25,7 @@ import {
 import { resolveWidgetUrl } from '../../utils/widgetUrl';
 import './AIWidget.scss';
 
+import { env } from '../../config/env';
 const statusAiBot = {
   on: true,
   off: false,
@@ -188,7 +189,7 @@ export function AIWidget({
   // utils/widgetUrl.ts for the full resolution order.
   const widgetUrl = resolveWidgetUrl();
   const apiBaseOverride =
-    (import.meta.env.VITE_API as string | undefined) || '';
+    (env.VITE_API as string | undefined) || '';
 
   const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);

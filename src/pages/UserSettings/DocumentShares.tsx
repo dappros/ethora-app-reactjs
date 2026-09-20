@@ -23,6 +23,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { ModelCurrentUser } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 
+import { env } from '../../config/env';
 interface ModelProfileShare {
   createdAt: string;
   updatedAt: string;
@@ -327,7 +328,7 @@ export function DocumentShares() {
                           <IconQr />
                         </button>
                         <CopyToClipboard
-                          text={`${import.meta.env.VITE_API}/docs/share/${el.token}`}
+                          text={`${env.VITE_API}/docs/share/${el.token}`}
                           onCopy={() =>
                             toast.success(
                               t('userSettingsDocumentShares.toastCopied')
@@ -377,7 +378,7 @@ export function DocumentShares() {
             )}
             {showQr && (
               <QrModal
-                path={`${import.meta.env.VITE_API}/docs/share/${showQr.token}`}
+                path={`${env.VITE_API}/docs/share/${showQr.token}`}
                 onClose={() => setShowQr(undefined)}
               ></QrModal>
             )}

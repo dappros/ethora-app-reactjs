@@ -15,6 +15,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n/useTranslation';
 
+import { env } from '../config/env';
 type BackendVersionInfo = {
   version: string | null;
   build: {
@@ -25,9 +26,9 @@ type BackendVersionInfo = {
   };
 };
 
-const FE_VERSION = (import.meta.env.VITE_BUILD_VERSION || '').trim();
-const FE_BRANCH = (import.meta.env.VITE_BUILD_BRANCH || '').trim();
-const FE_COMMIT = (import.meta.env.VITE_BUILD_COMMIT || '').trim();
+const FE_VERSION = (env.VITE_BUILD_VERSION || '').trim();
+const FE_BRANCH = (env.VITE_BUILD_BRANCH || '').trim();
+const FE_COMMIT = (env.VITE_BUILD_COMMIT || '').trim();
 
 // Module-level cache: one /ping/version request per page load, no matter how
 // many times the auth screen (and this footer with it) is remounted. During
@@ -38,7 +39,7 @@ let backendVersionPromise: Promise<BackendVersionInfo | null> | null = null;
 function fetchBackendVersionOnce(): Promise<BackendVersionInfo | null> {
   if (!backendVersionPromise) {
     // Use the same base URL Vite proxies / VITE_API points to, so this also works in dev mode.
-    const apiBase = (import.meta.env.VITE_API as string | undefined) || '/v1';
+    const apiBase = (env.VITE_API as string | undefined) || '/v1';
     const url = apiBase.replace(/\/+$/, '') + '/ping/version';
     backendVersionPromise = fetch(url, { credentials: 'omit' })
       .then((r) => (r.ok ? r.json() : null))

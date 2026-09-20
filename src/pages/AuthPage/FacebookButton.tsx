@@ -15,9 +15,10 @@ import CustomButton from './Button.tsx';
 import { getUserCredsFromFacebook } from './firebase';
 import FacebookIcon from './Icons/socials/facebookIcon';
 
-const HUBSPOT_ENABLED = String(import.meta.env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
-const HUBSPOT_PORTAL_ID = String(import.meta.env.VITE_HUBSPOT_PORTAL_ID || '').trim();
-const HUBSPOT_FORM_ID_SIGNUP = String(import.meta.env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
+import { env } from '../../config/env';
+const HUBSPOT_ENABLED = String(env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
+const HUBSPOT_PORTAL_ID = String(env.VITE_HUBSPOT_PORTAL_ID || '').trim();
+const HUBSPOT_FORM_ID_SIGNUP = String(env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
 
 export const FacebookButton = () => {
   const config = useAppStore((s) => s.currentApp);
@@ -81,7 +82,7 @@ export const FacebookButton = () => {
 
             const website = `${window?.location?.origin || ''}/facebook`;
             const allowedDomains =
-              import.meta.env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
+              env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
             const currentDomain = window.location.hostname;
 
             if (!allowedDomains.includes(currentDomain)) {

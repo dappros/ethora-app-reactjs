@@ -8,6 +8,7 @@ import { IconExternalLink } from './Icons/IconExternalLink';
 import { IconInfo } from './Icons/IconInfo';
 import { Tooltip } from './Tooltip';
 
+import { env } from '../config/env';
 interface Props {
   app: ModelApp;
   primaryColor: string;
@@ -38,7 +39,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
 
   const onExternalClick = () => {
     window.open(
-      `https://${app.domainName}.${import.meta.env.VITE_ROOT_DOMAIN}`,
+      `https://${app.domainName}.${env.VITE_ROOT_DOMAIN}`,
       '_blank'
     );
   };

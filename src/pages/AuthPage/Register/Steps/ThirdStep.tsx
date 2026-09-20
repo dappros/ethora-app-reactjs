@@ -14,7 +14,8 @@ import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
 
-const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
+import { env } from '../../../../config/env';
+const ROOT_DOMAIN = String(env.VITE_ROOT_DOMAIN || '').trim();
 function setEthoraUserCookie(value: string) {
   const domainPart =
     ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';

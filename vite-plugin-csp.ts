@@ -79,10 +79,19 @@ const ENV_ORIGIN_KEYS = [
 
 const unique = (values: string[]) => [...new Set(values.filter(Boolean))];
 
+// Placeholder written into connect-src when the bundle is built for
+// runtime configuration (VITE_RUNTIME_CONFIG=true). The container entrypoint
+// replaces it with the origins derived from its environment, mirroring
+// originsFrom() above (see docker/entrypoint.sh). A leftover placeholder is
+// an invalid source expression that browsers ignore, so a bundle served
+// without the entrypoint fails closed rather than open.
+export const CSP_RUNTIME_PLACEHOLDER = '__ETHORA_CSP_ENV_ORIGINS__';
+
 export function buildCspPolicy(env: Record<string, string>): string {
-  const envOrigins = unique(
-    ENV_ORIGIN_KEYS.flatMap((key) => originsFrom(env[key]))
-  );
+  const runtime = String(env.VITE_RUNTIME_CONFIG || '').toLowerCase() === 'true';
+  const envOrigins = runtime
+    ? [CSP_RUNTIME_PLACEHOLDER]
+    : unique(ENV_ORIGIN_KEYS.flatMap((key) => originsFrom(env[key])));
 
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],

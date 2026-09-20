@@ -3,12 +3,13 @@ import { Centrifuge } from 'centrifuge';
 import { useAppStore } from '../store/useAppStore';
 import { httpTokens, refreshOnce } from '../http';
 
+import { env } from '../config/env';
 const WS_TOKEN_MIN_INTERVAL_MS = 30_000;
 let lastWsTokenRefresh = 0;
 
 // Use environment variable or default to localhost for development
 // Centrifuge v6 requires ws:// or wss:// scheme with full WebSocket path
-const VITE_APP_CENTRIFUGE_SERVICE = import.meta.env.VITE_APP_CENTRIFUGE_SERVICE || 
+const VITE_APP_CENTRIFUGE_SERVICE = env.VITE_APP_CENTRIFUGE_SERVICE || 
   (import.meta.env.DEV ? 'ws://localhost:8001/connection/websocket' : undefined);
 
 // The personal channel carries more than the stat counters it started with -

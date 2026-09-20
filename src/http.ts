@@ -10,6 +10,7 @@ import {
   setTokenSink,
 } from './authRefresh';
 
+import { env } from './config/env';
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
@@ -46,18 +47,18 @@ const getBaseURL = (envVar: string | undefined, defaultPath: string) => {
 };
 
 export const http = axios.create({
-  baseURL: getBaseURL(import.meta.env.VITE_API, '/v1'),
+  baseURL: getBaseURL(env.VITE_API, '/v1'),
   timeout: 30000, // 30 seconds timeout
 });
 
 export const httpV2 = axios.create({
-  baseURL: getBaseURL(import.meta.env.VITE_API_V2, '/v2'),
+  baseURL: getBaseURL(env.VITE_API_V2, '/v2'),
   timeout: 30000, // 30 seconds timeout
 });
 
 // v2 client that authenticates as "app" (appJwt) and does NOT do user refresh/logout flows.
 export const httpV2App = axios.create({
-  baseURL: getBaseURL(import.meta.env.VITE_API_V2, '/v2'),
+  baseURL: getBaseURL(env.VITE_API_V2, '/v2'),
   timeout: 30000,
 });
 
