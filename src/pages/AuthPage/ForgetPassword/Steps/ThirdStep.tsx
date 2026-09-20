@@ -9,13 +9,11 @@ import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import CustomButton from '../../Button';
 
-interface ThirdStepProps {}
-
 interface Inputs {
   newPassword: string;
   repeatPassword: string;
 }
-const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
+const ThirdStep: React.FC = () => {
   const config = useAppStore((s) => s.currentApp);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
@@ -61,7 +59,7 @@ const ThirdStep: React.FC<ThirdStepProps> = ({}) => {
               errors.push(e.msg);
             }
           }
-          // @ts-ignore
+          // @ts-expect-error: toast.error's second argument is typed as options; this legacy call passes the detail string
           toast.error(t('authForgetPasswordThirdStep.error'), errors.join(', '));
         }
         toast.error(t('authForgetPasswordThirdStep.error'), error.response.data.error);

@@ -20,7 +20,6 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
   const [loading, setLoading] = useState(false);
-  // @ts-ignore
   const [name, setName] = useState('');
 
   const onCreate = () => {
@@ -48,7 +47,7 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      let file = e.target.files[0];
+      const file = e.target.files[0];
 
       if (file) {
         setFile(file);

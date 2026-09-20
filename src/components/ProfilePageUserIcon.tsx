@@ -58,7 +58,7 @@ export function ProfilePageUserIcon({
   };
 
   const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let files = e.target.files;
+    const files = e.target.files;
     if (files) {
       const file = files[0];
 
@@ -74,7 +74,7 @@ export function ProfilePageUserIcon({
     }
   };
 
-  let innerStyle: any = {};
+  const innerStyle: any = {};
 
   if (profileImage) {
     innerStyle.backgroundImage = `url('${profileImage}')`;

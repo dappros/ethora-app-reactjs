@@ -3,8 +3,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { ModelUserACL } from '../../models';
 import { IconClose } from '../Icons/IconClose';
 import './AclModal.scss';
-//@ts-ignore
-import { set, get } from 'lodash';
+import { set } from 'lodash';
 import { CheckboxApp } from '../CheckboxApp';
 import { useTranslation } from '../../i18n/useTranslation';
 
@@ -19,7 +18,7 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
   const { t } = useTranslation();
 
   const onChange = (isSet: boolean, path: string) => {
-    let newAcl = JSON.parse(JSON.stringify(acl));
+    const newAcl = JSON.parse(JSON.stringify(acl));
     set(newAcl, path, isSet);
 
     setEditAcl(newAcl);

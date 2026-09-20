@@ -14,7 +14,7 @@ interface PasswordInputProps extends Omit<TextFieldProps, 'variant'> {
   isDisabledPassword?: boolean;
 }
 
-// @ts-ignore
+// @ts-expect-error: the styled() callback receives a custom `config` prop that TextFieldProps does not declare
 const StyledTextField = styled(TextField)(({ theme, config }) => ({
   '& .MuiInputBase-root': {
     borderRadius: 16,
@@ -75,8 +75,8 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
         placeholder={placeholder}
         type={inputType}
         value={value}
-        // @ts-ignore
-        config={{ primaryColor: config?.primaryColor }} // Pass config to StyledTextField
+        // @ts-expect-error: `config` is consumed by StyledTextField above, not by MUI TextField
+        config={{ primaryColor: config?.primaryColor }}
         {...props}
         InputProps={{
           ...props.InputProps,

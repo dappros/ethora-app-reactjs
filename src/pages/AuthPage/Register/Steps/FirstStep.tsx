@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Box, Typography } from '@mui/material';
-import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 import { actionAfterLogin } from '../../../../actions';
 import CustomInput from '../../../../components/input/Input';
@@ -209,7 +208,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           toast.error(error.response.data.error);
           localStorage.removeItem('token-538');
         });
-    } catch (error: AxiosError | any) {
+    } catch (error: any) {
       toast.error(
         error?.response?.data?.error ||
           t('authRegisterFirstStep.accountExists')

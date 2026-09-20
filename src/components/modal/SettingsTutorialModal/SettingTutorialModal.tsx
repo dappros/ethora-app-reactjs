@@ -120,10 +120,11 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
           />
         );
       case 'Chat':
-      case 'AI':
+      case 'AI': {
         const listStep = step === 'Chat' ? 'ChatList' : 'AIList';
         handleChangeStep(listStep);
         return null;
+      }
       case 'Demo':
         return (
           <DemoComponentForm

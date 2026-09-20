@@ -3,9 +3,9 @@ import { styled } from '@mui/material/styles';
 import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
 
-interface CustomInputProps extends Omit<TextFieldProps, 'variant'> {}
+type CustomInputProps = Omit<TextFieldProps, 'variant'>;
 
-// @ts-ignore
+// @ts-expect-error: the styled() callback receives a custom `config` prop that TextFieldProps does not declare
 const StyledTextField = styled(TextField)(({ theme, config }) => ({
   '& .MuiInputBase-root': {
     borderRadius: 16,
@@ -51,8 +51,8 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
         variant="outlined"
         placeholder={props.placeholder}
         inputProps={{ style: { minWidth: '40px' } }}
-        // @ts-ignore
-        config={{ primaryColor: config?.primaryColor }} // Pass config to StyledTextField
+        // @ts-expect-error: `config` is consumed by StyledTextField above, not by MUI TextField
+        config={{ primaryColor: config?.primaryColor }}
         {...props}
       />
     );

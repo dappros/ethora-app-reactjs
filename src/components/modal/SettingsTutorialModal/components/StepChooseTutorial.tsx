@@ -14,9 +14,9 @@ export const StepChooseTutorial = ({
   animate,
   navigateStart,
   onClose,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   questionStep: _questionStep,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   handleChangeQuestionStep: _handleChangeQuestionStep,
   initialQuestionId,
 }: {

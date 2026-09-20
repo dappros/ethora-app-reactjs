@@ -383,7 +383,7 @@ export function httpSetPushPlatform(appId: string, enabled: boolean) {
 }
 
 export function httpPostFile(file: File) {
-  let fd = new FormData();
+  const fd = new FormData();
   fd.append('files', file);
   return http.post('/files', fd);
 }

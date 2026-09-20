@@ -76,7 +76,11 @@ export const FacebookButton = () => {
               '',
               loginType
             );
-            const { firstName, lastName, email } = userResult?.data?.user;
+            const user = userResult?.data?.user;
+            if (!user) {
+              throw new Error('Social registration returned no user');
+            }
+            const { firstName, lastName, email } = user;
 
             logSignup('facebook', userResult?.data?.user?._id, userResult?.data?.user?.email);
 
