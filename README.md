@@ -80,6 +80,27 @@ npm run typecheck   # TypeScript-only check
 npm run lint        # ESLint
 ```
 
+## Configuration at runtime (`/config.js`)
+
+Every `VITE_*` value the app reads goes through `src/config/env.ts`
+(`env.VITE_API`, `env.VITE_XMPP_HOST`, ...). Never read `import.meta.env`
+directly in application code. `env.ts` prefers `window.__ETHORA_CONFIG__`,
+loaded from `/config.js` before the bundle, over the value inlined at build
+time, so one prebuilt bundle can serve any install:
+
+- Source builds: `public/config.js` ships an empty object and the `.env`
+  values inlined by Vite apply, exactly as before.
+- The container image (`Dockerfile`, `docker/entrypoint.sh`) renders
+  `config.js` and the Content-Security-Policy origins from its `VITE_*`
+  environment at start (`serve`), or exports the rendered bundle into a
+  directory for a host nginx (`export /out`). Built with
+  `VITE_RUNTIME_CONFIG=true`, which makes `vite-plugin-csp.ts` emit a
+  placeholder the entrypoint fills in.
+
+Adding a new `VITE_*` key: add it to `BUILD_TIME` in `src/config/env.ts`
+and to `deploy/templates/frontend.env.template` in the monoserver. See the
+monoserver's `docs/CONTAINER_IMAGES.md`.
+
 ## Browser Smoke Tests
 
 This repo also contains a minimal Playwright smoke layer for browser-visible public routes. To list or run the suite:
