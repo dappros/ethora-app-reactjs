@@ -1,10 +1,11 @@
 import { Box, Typography } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
-import LoginStep from '../Login/Steps/LoginForm';
+import LoginStep, { MfaPending } from '../Login/Steps/LoginForm';
+import MfaStep from '../Login/Steps/MfaStep';
 
 interface SignInFormProps {
   isMobile?: boolean;
@@ -15,6 +16,8 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
   const { t } = useTranslation();
 
   const config = useAppStore((s) => s.currentApp);
+  // Set when the password step came back with an MFA pending token.
+  const [mfaPending, setMfaPending] = useState<MfaPending | null>(null);
 
   if (!config) {
     return null;
@@ -65,10 +68,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
               m: 0,
             }}
           >
-            {t('authLoginForm.title')}
+            {mfaPending ? t('authMfaStep.title') : t('authLoginForm.title')}
           </Typography>
         </Box>
-        <LoginStep />
+        {mfaPending ? (
+          <MfaStep pending={mfaPending} onBack={() => setMfaPending(null)} />
+        ) : (
+          <LoginStep onMfaRequired={setMfaPending} />
+        )}
       </Box>
       {/* No sign-up entry point when the app has closed self-service
           registration. UX only - /register is guarded in the router and the
