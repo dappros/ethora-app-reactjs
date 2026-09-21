@@ -3,31 +3,33 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
-import { actionAfterLogin } from '../../../../actions';
 import CustomInput from '../../../../components/input/Input';
 import PasswordInput from '../../../../components/input/PasswordInput';
-import { logLogin } from '../../../../hooks/withTracking.tsx';
 import { httpLoginWithEmail } from '../../../../http.ts';
 import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
-import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
+import { finishLogin } from '../../../../utils/finishLogin';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
-
-const ROOT_DOMAIN = String(import.meta.env.VITE_ROOT_DOMAIN || '').trim();
-function setEthoraUserCookie(value: string) {
-  const domainPart =
-    ROOT_DOMAIN && ROOT_DOMAIN !== 'localhost' ? `; domain=.${ROOT_DOMAIN}` : '';
-  document.cookie = `ethora_user=${value}; path=/${domainPart}; secure; samesite=lax; max-age=604800`;
-}
 
 type Inputs = {
   email: string;
   password: string;
 };
 
-const LoginStep = () => {
+export interface MfaPending {
+  mfaToken: string;
+  expiresIn: number;
+}
+
+interface LoginStepProps {
+  // Called instead of finishing the login when the account has MFA enabled:
+  // the API answered with a pending token and no session.
+  onMfaRequired?: (pending: MfaPending) => void;
+}
+
+const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
   const navigate = useNavigate();
   const config = useAppStore((s) => s.currentApp);
   const { t } = useTranslation();
@@ -42,20 +44,16 @@ const LoginStep = () => {
     httpLoginWithEmail(email, password)
       .then(async ({ data }) => {
         try {
-          if (!data || !data.user) {
-            throw new Error('Invalid response from server');
+          if (data?.mfaRequired && data?.mfaToken) {
+            if (onMfaRequired) {
+              onMfaRequired({ mfaToken: data.mfaToken, expiresIn: Number(data.expiresIn) || 300 });
+              return;
+            }
+            throw new Error(t('authMfaStep.unsupported'));
           }
-          
-          await actionAfterLogin(data);
-
-          logLogin('email', data.user._id);
-          setEthoraUserCookie('1');
-
-          if (config?.afterLoginPage) {
-            navigateToUserPage(navigate, config.afterLoginPage as string);
-          } else {
-            // Default navigation if no afterLoginPage is set
-            navigate('/');
+          const outcome = await finishLogin(data, navigate, config);
+          if (outcome === 'mfa-enrolment-required') {
+            toast.info(t('authMfaStep.enrolmentRequiredToast'));
           }
         } catch (error: any) {
           console.error('Error processing login response:', error);

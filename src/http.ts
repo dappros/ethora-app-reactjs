@@ -85,6 +85,7 @@ const AUTH_WHITELIST: Array<string | RegExp> = [
   '/apps/get-config', // App config doesn't require user auth
   '/users/login-with-email',
   '/users/login',
+  '/users/login/mfa', // second login step: app-JWT auth like login-with-email
   /^\/users\/checkEmail\//,
   '/users/sign-up-with-email',
   '/v2/users/sign-up-with-email', // V2 signup endpoint
@@ -112,6 +113,7 @@ function shouldInjectAppIdInBody(url: string | undefined, method?: string) {
   if (url === '/users' && m === 'post') return true;
   if (url === '/users/login' && m === 'post') return true;
   if (url === '/users/login-with-email' && m === 'post') return true;
+  if (url === '/users/login/mfa' && m === 'post') return true;
   if (url === '/users/sign-up-with-email' && m === 'post') return true;
   if (url === '/users/sign-up-resend-email' && m === 'post') return true;
   if (url === '/users/forgot' && m === 'post') return true;
@@ -188,7 +190,11 @@ function attachAuthInterceptors(client: AxiosInstance) {
     if (
       url === '/users/login/refresh' ||
       url === '/users/login-with-email' ||
-      url === '/users/login'
+      url === '/users/login' ||
+      url === '/users/login/mfa' ||
+      // A wrong current password / code is a 401 by design, not a stale session.
+      url === '/users/me/password' ||
+      url.startsWith('/users/me/mfa')
     ) {
       return Promise.reject(error);
     }
@@ -1206,5 +1212,72 @@ export function httpGetUserMeV2() {
 export function httpSendUserEmailVerification() {
   return httpV2.post<{ ok: boolean; data: UserEmailVerificationSent }>(
     '/users/me/email/verification'
+  );
+}
+
+// --- Account > Security: own password + multi-factor authentication ---
+// v2 endpoints; responses are flat `{ success, ...fields }`.
+
+export interface MfaStatus {
+  enabled: boolean;
+  enabledAt: string | null;
+  backupCodesRemaining: number;
+  pendingEnrolment: boolean;
+  hasPassword: boolean;
+}
+
+export interface MfaEnrolment {
+  secret: string;
+  otpauthUri: string;
+  issuer: string;
+  account: string;
+  digits: number;
+  period: number;
+  expiresInSeconds: number;
+}
+
+export function httpChangePassword(currentPassword: string, newPassword: string) {
+  return httpV2.post<{ success: boolean; sessionsRevoked: number }>('/users/me/password', {
+    currentPassword,
+    newPassword,
+  });
+}
+
+export function httpGetMfaStatus() {
+  return httpV2.get<MfaStatus & { success: boolean }>('/users/me/mfa');
+}
+
+export function httpStartMfaEnrolment(password: string) {
+  return httpV2.post<MfaEnrolment & { success: boolean }>('/users/me/mfa/totp', { password });
+}
+
+export function httpConfirmMfaEnrolment(code: string) {
+  return httpV2.post<{ success: boolean; enabled: boolean; backupCodes: string[] }>(
+    '/users/me/mfa/totp/confirm',
+    { code }
+  );
+}
+
+export function httpDisableMfa(password: string, code: string) {
+  return httpV2.delete<{ success: boolean; enabled: boolean }>('/users/me/mfa/totp', {
+    data: { password, code },
+  });
+}
+
+export function httpRegenerateMfaBackupCodes(code: string) {
+  return httpV2.post<{ success: boolean; backupCodes: string[] }>('/users/me/mfa/backup-codes', {
+    code,
+  });
+}
+
+// Second login step. Same response shape as login-with-email on success.
+export function httpVerifyMfaLogin(mfaToken: string, code: string) {
+  return httpV2.post('/users/login/mfa', { mfaToken, code });
+}
+
+// Owner/admin recovery for a user of the managed app (lost device).
+export function httpResetUserMfa(appId: string, userId: string) {
+  return httpV2.delete<{ success: boolean; wasEnabled: boolean; sessionsRevoked: number }>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/mfa`
   );
 }

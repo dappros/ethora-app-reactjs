@@ -25,6 +25,7 @@ import {
   httpCraeteUser,
   httpGetUsers,
   httpHardDeleteUsers,
+  httpResetUserMfa,
   httpRestoreUser,
   httpTagsSet,
   httpUpdateAcl,
@@ -37,6 +38,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
 import { NewUserModal } from '../components/modal/NewUserModal';
+import { apiError } from '../utils/apiError';
 import { downloadCsv } from '../utils/csv';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
@@ -62,6 +64,8 @@ export default function AppUsers() {
   const [total, setTotal] = useState(0);
   const [showManageTags, setShowManageTags] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showResetMfa, setShowResetMfa] = useState(false);
+  const [resetMfaBusy, setResetMfaBusy] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showHardDelete, setShowHardDelete] = useState(false);
   const [tags, setTags] = useState('');
@@ -373,6 +377,29 @@ export default function AppUsers() {
     });
   };
 
+  // Owner recovery for a locked-out user (lost authenticator, no backup
+  // codes): clears MFA and ends their sessions; they log in with the password.
+  const onResetMfa = async () => {
+    if (!appId) return;
+    const ids = selectedIds();
+    setResetMfaBusy(true);
+    try {
+      let cleared = 0;
+      for (const id of ids) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await httpResetUserMfa(appId, id);
+        if (res.data?.wasEnabled) cleared += 1;
+      }
+      setShowResetMfa(false);
+      toast(t('appUsers.mfaResetToast').replace('{count}', String(cleared)));
+      refreshAndClearSelection();
+    } catch (e: unknown) {
+      toast.error(`${t('appUsers.mfaResetFailedPrefix')} ${apiError(e).message}`);
+    } finally {
+      setResetMfaBusy(false);
+    }
+  };
+
   const selectedIds = (): string[] => {
     const out: string[] = [];
     rowsSelected.forEach((el, index) => {
@@ -505,6 +532,13 @@ export default function AppUsers() {
               onClick={() => setShowResetPassword(true)}
             >
               {t('appUsers.resetPassword')}
+            </button>
+            <button
+              className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+              onClick={() => setShowResetMfa(true)}
+              title={t('appUsers.resetMfaTitle')}
+            >
+              {t('appUsers.resetMfa')}
             </button>
             {lifecycleTab === 'active' ? (
               <button
@@ -841,6 +875,16 @@ export default function AppUsers() {
             </button>
           </div>
         </SubmitModal>
+      )}
+      {showResetMfa && (
+        <ConfirmModal
+          title={`${t('appUsers.resetMfaConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
+          message={t('appUsers.resetMfaConfirmMessage')}
+          confirmLabel={t('appUsers.resetMfa')}
+          busy={resetMfaBusy}
+          onConfirm={onResetMfa}
+          onCancel={() => setShowResetMfa(false)}
+        />
       )}
       {showArchive && (
         <ConfirmModal

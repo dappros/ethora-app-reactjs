@@ -7,6 +7,11 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // edited independently of other translation dictionaries.
 export const appSettings2 = {
   en: {
+    // src/pages/AppSettings/SignonOptions.tsx (MFA)
+    'appSettingsSignonOptions.mfaHeading': 'Two-step verification',
+    'appSettingsSignonOptions.mfaDescription': 'Any user can turn on two-step verification (authenticator app) under Account > Security. This policy applies to people who manage this app.',
+    'appSettingsSignonOptions.requireMfaForAdminsLabel': 'Require two-step verification for administrators and owners',
+    'appSettingsSignonOptions.requireMfaForAdminsHint': 'Administrators who have not set it up are sent to Account > Security after signing in. End users and API clients are not affected.',
     // --- AIWidget.tsx ---
     'appSettingsAIWidget.disabledBannerStrong':
       'AI features are not enabled in this deployment.',
@@ -341,6 +346,11 @@ export const appSettings2 = {
       'This is where your User can manage their visibility and privacy settings, as well as download their data or delete their account (GDPR and CCPA compliance requirement).',
   },
   fr: {
+    // src/pages/AppSettings/SignonOptions.tsx (MFA)
+    'appSettingsSignonOptions.mfaHeading': 'Vérification en deux étapes',
+    'appSettingsSignonOptions.mfaDescription': 'Tout utilisateur peut activer la vérification en deux étapes (application d\'authentification) dans Compte > Sécurité. Cette règle s\'applique aux personnes qui gèrent cette application.',
+    'appSettingsSignonOptions.requireMfaForAdminsLabel': 'Exiger la vérification en deux étapes pour les administrateurs et propriétaires',
+    'appSettingsSignonOptions.requireMfaForAdminsHint': 'Les administrateurs qui ne l\'ont pas configurée sont redirigés vers Compte > Sécurité après connexion. Les utilisateurs finaux et les clients API ne sont pas concernés.',
     // --- AIWidget.tsx ---
     'appSettingsAIWidget.disabledBannerStrong':
       "Les fonctionnalités d'IA ne sont pas activées sur ce déploiement.",
@@ -685,6 +695,11 @@ export const appSettings2 = {
       'C’est ici que votre Utilisateur peut gérer ses paramètres de visibilité et de confidentialité, ainsi que télécharger ses données ou supprimer son compte (exigence de conformité RGPD et CCPA).',
   },
   es: {
+    // src/pages/AppSettings/SignonOptions.tsx (MFA)
+    'appSettingsSignonOptions.mfaHeading': 'Verificación en dos pasos',
+    'appSettingsSignonOptions.mfaDescription': 'Cualquier usuario puede activar la verificación en dos pasos (aplicación de autenticación) en Cuenta > Seguridad. Esta política se aplica a quienes administran esta aplicación.',
+    'appSettingsSignonOptions.requireMfaForAdminsLabel': 'Exigir verificación en dos pasos a administradores y propietarios',
+    'appSettingsSignonOptions.requireMfaForAdminsHint': 'Los administradores que no la hayan configurado son enviados a Cuenta > Seguridad tras iniciar sesión. Los usuarios finales y los clientes de la API no se ven afectados.',
     // --- AIWidget.tsx ---
     'appSettingsAIWidget.disabledBannerStrong':
       'Las funciones de IA no están habilitadas en este despliegue.',
