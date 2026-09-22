@@ -93,6 +93,7 @@ export async function actionGetConfig(domainName?: string) {
     // Apps created before the backend gained this field send nothing; absent
     // means registration is allowed.
     userRegistrationDisabled: result.userRegistrationDisabled ?? false,
+    requireMfaForAdmins: result.requireMfaForAdmins ?? false,
     aiBot: result.aiBot,
   };
 

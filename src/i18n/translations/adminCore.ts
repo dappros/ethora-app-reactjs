@@ -15,6 +15,13 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // original English form and behaviour is unchanged.
 export const adminCore = {
   en: {
+    // src/pages/AppUsers.tsx (MFA)
+    'appUsers.resetMfa': 'Reset MFA',
+    'appUsers.resetMfaTitle': 'Clear two-step verification so the user can sign in with their password again',
+    'appUsers.resetMfaConfirmTitlePrefix': 'Reset two-step verification for',
+    'appUsers.resetMfaConfirmMessage': 'Their authenticator and backup codes stop working and all their sessions are signed out. They sign in with their password and can set up two-step verification again.',
+    'appUsers.mfaResetToast': 'Two-step verification reset for {count} user(s).',
+    'appUsers.mfaResetFailedPrefix': 'Could not reset two-step verification:',
     // Admin.tsx - shared support footer shown under every admin sub-page.
     'adminShell.needAssistance': 'Need assistance?',
     'adminShell.helpSupportPage': 'Help & Support page',
@@ -278,6 +285,13 @@ export const adminCore = {
     'agentSettings.tabVisibility': 'Visibility',
   },
   fr: {
+    // src/pages/AppUsers.tsx (MFA)
+    'appUsers.resetMfa': 'Réinitialiser la MFA',
+    'appUsers.resetMfaTitle': 'Supprimer la vérification en deux étapes pour que l\'utilisateur puisse se reconnecter avec son mot de passe',
+    'appUsers.resetMfaConfirmTitlePrefix': 'Réinitialiser la vérification en deux étapes pour',
+    'appUsers.resetMfaConfirmMessage': 'Son application d\'authentification et ses codes de secours cesseront de fonctionner et toutes ses sessions seront déconnectées. Il se connectera avec son mot de passe et pourra reconfigurer la vérification.',
+    'appUsers.mfaResetToast': 'Vérification en deux étapes réinitialisée pour {count} utilisateur(s).',
+    'appUsers.mfaResetFailedPrefix': 'Impossible de réinitialiser la vérification en deux étapes :',
     'adminShell.needAssistance': "Besoin d'aide ?",
     'adminShell.helpSupportPage': "Page d'aide et de support",
     'adminShell.or': 'ou',
@@ -538,6 +552,13 @@ export const adminCore = {
     'agentSettings.tabVisibility': 'Visibilité',
   },
   es: {
+    // src/pages/AppUsers.tsx (MFA)
+    'appUsers.resetMfa': 'Restablecer MFA',
+    'appUsers.resetMfaTitle': 'Eliminar la verificación en dos pasos para que el usuario pueda volver a iniciar sesión con su contraseña',
+    'appUsers.resetMfaConfirmTitlePrefix': 'Restablecer la verificación en dos pasos para',
+    'appUsers.resetMfaConfirmMessage': 'Su aplicación de autenticación y sus códigos de respaldo dejarán de funcionar y se cerrarán todas sus sesiones. Iniciará sesión con su contraseña y podrá configurar la verificación de nuevo.',
+    'appUsers.mfaResetToast': 'Verificación en dos pasos restablecida para {count} usuario(s).',
+    'appUsers.mfaResetFailedPrefix': 'No se pudo restablecer la verificación en dos pasos:',
     'adminShell.needAssistance': '¿Necesitas ayuda?',
     'adminShell.helpSupportPage': 'Página de ayuda y soporte',
     'adminShell.or': 'o',

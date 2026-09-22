@@ -12,6 +12,7 @@ import { AiAssistants } from './AiAssistants';
 import { DocumentShares } from './DocumentShares';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
+import { Security } from './Security';
 // Referrals intentionally kept in source; the tab is hidden for now but
 // the page may be re-enabled later.
 // import { Referrals } from './Referrals';
@@ -24,6 +25,7 @@ const tabs = [
   'Document Shares',
   'AI Assistants',
   'Blocked Users',
+  'Security',
 ];
 
 export default function UserSettings() {
@@ -80,6 +82,7 @@ export default function UserSettings() {
               <TabApp text={t('userSettingsPage.tabDocumentShares')} />
               <TabApp text={t('userSettingsPage.tabAiAssistants')} />
               <TabApp text={t('userSettingsPage.tabBlockedUsers')} disabled />
+              <TabApp text={t('userSettingsPage.tabSecurity')} />
             </TabList>
             {/* Logout sits where Referrals used to live (bottom of the left
                 rail on desktop). Some users instinctively look for Logout on
@@ -118,6 +121,9 @@ export default function UserSettings() {
               className="grid grid-rows-1 md:ml-4 h-full "
             >
               {/* <BlockedUsers /> */}
+            </TabPanel>
+            <TabPanel key="Security" className="h-full overflow-auto">
+              <Security />
             </TabPanel>
           </TabPanels>
         </TabGroup>

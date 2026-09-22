@@ -192,6 +192,9 @@ export default function AppSettings() {
   // positively-phrased checkbox and nothing else in the app inverts it.
   const [userRegistrationDisabled, setUserRegistrationDisabled] =
     useState(false);
+  // Security policy: admins/owners of this app are steered to MFA enrolment
+  // at login. Plain positive boolean; absent on older apps means off.
+  const [requireMfaForAdmins, setRequireMfaForAdmins] = useState(false);
 
   // chats
   const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
@@ -228,6 +231,7 @@ export default function AppSettings() {
       enableFacebook,
       enableMetamask,
       userRegistrationDisabled,
+      requireMfaForAdmins,
       domainName,
       firebaseWebConfigString,
       bundleId,
@@ -262,6 +266,7 @@ export default function AppSettings() {
     enableFacebook,
     enableMetamask,
     userRegistrationDisabled,
+    requireMfaForAdmins,
     domainName,
     firebaseWebConfigString,
     bundleId,
@@ -293,6 +298,7 @@ export default function AppSettings() {
         enableFacebook: app.signonOptions.includes('facebook'),
         enableMetamask: app.signonOptions.includes('metamask'),
         userRegistrationDisabled: Boolean(app.userRegistrationDisabled),
+        requireMfaForAdmins: Boolean(app.requireMfaForAdmins),
         domainName: app.domainName,
         firebaseWebConfigString: app.firebaseWebConfigString || '',
         bundleId: app.bundleId,
@@ -374,6 +380,7 @@ export default function AppSettings() {
     // Sent unconditionally (and as a plain boolean) so the owner can re-open
     // registration as well as close it. Never inverted outside SignonOptions.
     body.userRegistrationDisabled = userRegistrationDisabled;
+    body.requireMfaForAdmins = requireMfaForAdmins;
 
     // web app
     if (domainName) {
@@ -456,6 +463,7 @@ export default function AppSettings() {
           enableFacebook,
           enableMetamask,
           userRegistrationDisabled,
+          requireMfaForAdmins,
           domainName,
           firebaseWebConfigString,
           bundleId,
@@ -589,6 +597,7 @@ export default function AppSettings() {
     // The admin apps list is stored unmapped, so a legacy App document can
     // arrive with no such key; absent means registration allowed.
     setUserRegistrationDisabled(Boolean(app.userRegistrationDisabled));
+    setRequireMfaForAdmins(Boolean(app.requireMfaForAdmins));
     setDomainName(app.domainName);
     setFirebaseWebConfigString(
       app.firebaseWebConfigString ? app.firebaseWebConfigString : ''
@@ -757,6 +766,8 @@ export default function AppSettings() {
             <SignonOptions
               userRegistrationDisabled={userRegistrationDisabled}
               setUserRegistrationDisabled={setUserRegistrationDisabled}
+              requireMfaForAdmins={requireMfaForAdmins}
+              setRequireMfaForAdmins={setRequireMfaForAdmins}
               enableEmail={enableEmail}
               setEnableEmail={setEnableEmail}
               enableGoogle={enableGoogle}

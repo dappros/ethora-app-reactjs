@@ -9,6 +9,8 @@ interface Props {
   // is phrased positively. Everything else does a plain truthy check.
   userRegistrationDisabled: boolean;
   setUserRegistrationDisabled: (disabled: boolean) => void;
+  requireMfaForAdmins: boolean;
+  setRequireMfaForAdmins: (on: boolean) => void;
   enableEmail: boolean;
   setEnableEmail: (on: boolean) => void;
   enableGoogle: boolean;
@@ -25,6 +27,8 @@ interface Props {
 export function SignonOptions({
   userRegistrationDisabled,
   setUserRegistrationDisabled,
+  requireMfaForAdmins,
+  setRequireMfaForAdmins,
   enableEmail,
   setEnableEmail,
   enableGoogle,
@@ -104,6 +108,27 @@ export function SignonOptions({
           {t('appSettingsSignonOptions.registrationOpenHint')}
         </p>
       )}
+      <p className="font-sans text-[24px] font-medium mb-2">
+        {t('appSettingsSignonOptions.mfaHeading')}
+      </p>
+      <p className="font-sans text-[12px] text-gray-500 mb-4">
+        {t('appSettingsSignonOptions.mfaDescription')}
+      </p>
+      <Field className="flex items-center cursor-pointer mb-2">
+        <Checkbox
+          className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
+          checked={requireMfaForAdmins}
+          onChange={setRequireMfaForAdmins}
+        >
+          <IconCheckbox className="hidden group-data-[checked]:block" />
+        </Checkbox>
+        <Label className="cursor-pointer font-sans text-sm">
+          {t('appSettingsSignonOptions.requireMfaForAdminsLabel')}
+        </Label>
+      </Field>
+      <p className="font-sans text-[12px] text-gray-500 mb-8">
+        {t('appSettingsSignonOptions.requireMfaForAdminsHint')}
+      </p>
       <p className="font-sans text-[24px] font-medium mb-2">
         {t('appSettingsSignonOptions.standardLoginHeading')}
       </p>
