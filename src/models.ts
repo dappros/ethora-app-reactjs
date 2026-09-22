@@ -272,6 +272,10 @@ export interface ModelAppUser {
   // Public MFA status only (secrets never leave the server). Absent on
   // backends that predate MFA.
   mfa?: { enabled: boolean; enabledAt?: string | null; backupCodesRemaining?: number };
+  mfaEnabled?: boolean;
+  // Derived server-side from the ACL row, the app owner and the platform
+  // super-admin flags. Absent on older backends.
+  role?: 'superadmin' | 'owner' | 'admin' | 'member';
 }
 
 // Phase 1 (Agents): first-class AI Agent and per-App BotInstance projections returned by /v2/agents and /v2/bot-instances.
