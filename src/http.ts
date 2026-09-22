@@ -403,7 +403,10 @@ export function httpGetUsers(
   //   status='archived' -> only archived users (restore screen)
   //   includeArchived=true -> active + archived
   //   default -> active only (current behavior)
-  lifecycle?: { status?: 'archived'; includeArchived?: boolean }
+  lifecycle?: { status?: 'archived'; includeArchived?: boolean },
+  // access='admin' -> only users who can act in the admin panel for this app
+  // (any ACL grant, the app owner, platform super admins).
+  access?: 'admin'
 ) {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -413,7 +416,16 @@ export function httpGetUsers(
   });
   if (lifecycle?.status) params.set('status', lifecycle.status);
   if (lifecycle?.includeArchived) params.set('includeArchived', 'true');
+  if (access) params.set('access', access);
   return http.get(`/users/${appId}?${params.toString()}`);
+}
+
+// "Remove admin access": every ACL grant on the app turned off; the account
+// and its login stay. Refused for the caller and for the app owner.
+export function httpRevokeUserAccess(appId: string, userId: string) {
+  return httpV2.delete<{ success: boolean; hadAccess: boolean; superAdminCleared: boolean }>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/access`
+  );
 }
 
 export function httpDeleteManyUsers(appId: string, usersIdList: Array<string>) {
