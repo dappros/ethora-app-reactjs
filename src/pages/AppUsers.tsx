@@ -27,6 +27,7 @@ import {
   httpHardDeleteUsers,
   httpResetUserMfa,
   httpRestoreUser,
+  httpRevokeUserAccess,
   httpTagsSet,
   httpUpdateAcl,
 } from '../http';
@@ -73,6 +74,11 @@ export default function AppUsers() {
   // Active vs Archived view. ?lifecycle=archived persists across refresh so the
   // operator can land directly on the restore screen.
   const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'archived') || 'active';
+  // All users vs only those with admin-panel access (?access=admin).
+  const accessTab = (searchParams.get('access') as 'all' | 'admin') || 'all';
+  const accessParam = accessTab === 'admin' ? ('admin' as const) : undefined;
+  const [showRevokeAccess, setShowRevokeAccess] = useState(false);
+  const [revokeBusy, setRevokeBusy] = useState(false);
 
   // const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   // const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
@@ -221,7 +227,7 @@ export default function AppUsers() {
     if (!appId) return;
 
     const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
-    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle).then(
+    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle, accessParam).then(
       (response) => {
         const { total, items } = response.data;
         setItems(items);
@@ -229,7 +235,7 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / limit));
       }
     );
-  }, [appId, limit, page, orderBy, order, lifecycleTab]);
+  }, [appId, limit, page, orderBy, order, lifecycleTab, accessParam]);
 
   useEffect(() => {
     fetchUsers();
@@ -247,7 +253,8 @@ export default function AppUsers() {
       page * itemsPerTable,
       orderBy,
       order,
-      lifecycle
+      lifecycle,
+      accessParam
     ).then((response) => {
       const { total, items } = response.data;
       setItems(items);
@@ -400,6 +407,32 @@ export default function AppUsers() {
     }
   };
 
+  // "Remove admin access": all ACL grants off, account and login kept.
+  const onRevokeAccess = async () => {
+    if (!appId) return;
+    const ids = selectedIds();
+    setRevokeBusy(true);
+    let revoked = 0;
+    const skipped: string[] = [];
+    for (const id of ids) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await httpRevokeUserAccess(appId, id);
+        if (res.data?.hadAccess) revoked += 1;
+      } catch (e: unknown) {
+        const { code } = apiError(e);
+        skipped.push(code || 'ERROR');
+      }
+    }
+    setRevokeBusy(false);
+    setShowRevokeAccess(false);
+    toast(t('appUsers.accessRevokedToast').replace('{count}', String(revoked)));
+    if (skipped.includes('CANNOT_REVOKE_SELF')) toast.error(t('appUsers.accessRevokeSelf'));
+    if (skipped.includes('OWNER_CANNOT_BE_REVOKED')) toast.error(t('appUsers.accessRevokeOwner'));
+    if (skipped.includes('SUPERADMIN_DEMOTE_FORBIDDEN')) toast.error(t('appUsers.accessRevokeSuperadmin'));
+    refreshAndClearSelection();
+  };
+
   const selectedIds = (): string[] => {
     const out: string[] = [];
     rowsSelected.forEach((el, index) => {
@@ -540,6 +573,13 @@ export default function AppUsers() {
             >
               {t('appUsers.resetMfa')}
             </button>
+            <button
+              className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+              onClick={() => setShowRevokeAccess(true)}
+              title={t('appUsers.revokeAccessTitle')}
+            >
+              {t('appUsers.revokeAccess')}
+            </button>
             {lifecycleTab === 'active' ? (
               <button
                 className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
@@ -606,6 +646,24 @@ export default function AppUsers() {
                 )}
               >
                 {tab === 'active' ? t('appUsers.tabActive') : t('appUsers.tabArchived')}
+              </button>
+            ))}
+          </div>
+          {/* All users vs admin-panel access only (any ACL grant, owner, super admins). */}
+          <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
+            {(['all', 'admin'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => updateSearchParams({ access: tab, page: 0 })}
+                className={classNames(
+                  'px-3 py-1 rounded-lg font-varela',
+                  accessTab === tab
+                    ? 'bg-white text-brand-500 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                )}
+                title={tab === 'admin' ? t('appUsers.tabAdminAccessTitle') : ''}
+              >
+                {tab === 'all' ? t('appUsers.tabAllUsers') : t('appUsers.tabAdminAccess')}
               </button>
             ))}
           </div>
@@ -684,6 +742,12 @@ export default function AppUsers() {
                     </th>
 
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      {t('appUsers.colRole')}
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
+                      {t('appUsers.colMfa')}
+                    </th>
+                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
                       {t('appUsers.colAuthMethod')}
                     </th>
                     <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
@@ -749,6 +813,29 @@ export default function AppUsers() {
                                 )
                               : '-'}
                           </div>
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          {el.role ? (
+                            <span
+                              className={classNames(
+                                'px-3 py-1 rounded-2xl text-xs',
+                                el.role === 'member' ? 'bg-gray-100 text-gray-600' : 'bg-brand-150 text-brand-500'
+                              )}
+                            >
+                              {t(`appUsers.role_${el.role}`)}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                          {el.mfaEnabled === undefined && el.mfa === undefined ? (
+                            '-'
+                          ) : el.mfaEnabled || el.mfa?.enabled ? (
+                            <span className="px-3 py-1 rounded-2xl text-xs bg-green-100 text-green-700">{t('appUsers.mfaOn')}</span>
+                          ) : (
+                            <span className="px-3 py-1 rounded-2xl text-xs bg-gray-100 text-gray-600">{t('appUsers.mfaOff')}</span>
+                          )}
                         </td>
                         <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
                           <div className="flex items-center justify-center">
@@ -884,6 +971,16 @@ export default function AppUsers() {
           busy={resetMfaBusy}
           onConfirm={onResetMfa}
           onCancel={() => setShowResetMfa(false)}
+        />
+      )}
+      {showRevokeAccess && (
+        <ConfirmModal
+          title={`${t('appUsers.revokeAccessConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
+          message={t('appUsers.revokeAccessConfirmMessage')}
+          confirmLabel={t('appUsers.revokeAccess')}
+          busy={revokeBusy}
+          onConfirm={onRevokeAccess}
+          onCancel={() => setShowRevokeAccess(false)}
         />
       )}
       {showArchive && (
