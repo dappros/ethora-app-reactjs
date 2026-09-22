@@ -11,6 +11,7 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import { getUserCredsFromGoogle, IUser } from '../../utils/firebase';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
+import { MfaPending, mfaPendingFrom } from '../../utils/finishLogin';
 import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import GoogleIcon from './Icons/socials/googleIcon';
@@ -25,9 +26,12 @@ function setEthoraUserCookie(value: string) {
 
 interface GoogleButtonProps {
   utm?: string | null;
+  // Login card hands the MFA second step to the caller (same as the
+  // password form) when the account has two-step verification on.
+  onMfaRequired?: (pending: MfaPending) => void;
 }
 
-export const GoogleButton = ({ utm }: GoogleButtonProps) => {
+export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -146,6 +150,12 @@ export const GoogleButton = ({ utm }: GoogleButtonProps) => {
             credential?.accessToken ?? '',
             loginType
           ).then(async ({ data }) => {
+            const pending = mfaPendingFrom(data);
+            if (pending) {
+              if (onMfaRequired) onMfaRequired(pending);
+              else toast.error(t('authMfaStep.unsupported'));
+              return;
+            }
             logLogin('google', data.user._id);
 
             await actionAfterLogin(data);

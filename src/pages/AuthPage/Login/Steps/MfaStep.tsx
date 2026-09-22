@@ -14,9 +14,8 @@ import { httpVerifyMfaLogin } from '../../../../http.ts';
 import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import { apiError } from '../../../../utils/apiError';
-import { finishLogin } from '../../../../utils/finishLogin';
+import { finishLogin, MfaPending } from '../../../../utils/finishLogin';
 import CustomButton from '../../Button';
-import type { MfaPending } from './LoginForm';
 
 type Inputs = { code: string };
 

@@ -21,6 +21,21 @@ export function setEthoraUserCookie(value: string) {
 // (requireMfaForAdmins) sends admins here right after login.
 export const SECURITY_TAB_PATH = '/app/account?tab=Security';
 
+// What a login endpoint answers instead of a session when the account has
+// MFA on. The client finishes on /users/login/mfa with a code.
+export interface MfaPending {
+  mfaToken: string;
+  expiresIn: number;
+}
+
+export function mfaPendingFrom(data: unknown): MfaPending | null {
+  const d = data as { mfaRequired?: boolean; mfaToken?: string; expiresIn?: number } | null;
+  if (d?.mfaRequired && d.mfaToken) {
+    return { mfaToken: d.mfaToken, expiresIn: Number(d.expiresIn) || 300 };
+  }
+  return null;
+}
+
 // The parts of the login payload this helper looks at; the rest is handed to
 // actionAfterLogin untouched.
 export interface LoginPayload {
