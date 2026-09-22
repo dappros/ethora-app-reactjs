@@ -1224,6 +1224,15 @@ export interface MfaStatus {
   backupCodesRemaining: number;
   pendingEnrolment: boolean;
   hasPassword: boolean;
+  // Whether "send me a reset link" can work on this install (outbound mail).
+  passwordResetEmailAvailable?: boolean;
+  // For password-less accounts: how they may prove identity to set one.
+  setPasswordMethods?: Array<'reauth' | 'mfaCode'>;
+}
+
+export interface SetPasswordProof {
+  mfaCode?: string;
+  reauth?: { provider: 'google' | 'facebook' | 'apple'; idToken?: string; accessToken?: string; authToken?: string };
 }
 
 export interface MfaEnrolment {
@@ -1241,6 +1250,15 @@ export function httpChangePassword(currentPassword: string, newPassword: string)
     currentPassword,
     newPassword,
   });
+}
+
+// Password-less account (social / wallet sign-up): set a first password after
+// proving identity with a fresh provider sign-in or an MFA code.
+export function httpSetInitialPassword(newPassword: string, proof: SetPasswordProof) {
+  return httpV2.post<{ success: boolean; passwordSet: boolean; sessionsRevoked: number }>(
+    '/users/me/password',
+    { newPassword, ...proof }
+  );
 }
 
 export function httpGetMfaStatus() {

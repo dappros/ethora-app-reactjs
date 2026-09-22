@@ -14,16 +14,20 @@ import { Loading } from '../../components/Loading';
 import {
   MfaEnrolment,
   MfaStatus,
+  SetPasswordProof,
   httpChangePassword,
   httpConfirmMfaEnrolment,
   httpDisableMfa,
   httpGetMfaStatus,
+  httpPostForgotPassword,
   httpRegenerateMfaBackupCodes,
+  httpSetInitialPassword,
   httpStartMfaEnrolment,
 } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { apiError } from '../../utils/apiError';
+import { getUserCredsFromGoogle } from '../../utils/firebase';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -52,13 +56,169 @@ function BackupCodes({ codes, onDone }: { codes: string[]; onDone: () => void })
   );
 }
 
-function ChangePassword({ hasPassword }: { hasPassword: boolean }) {
+function ResetLink({ available }: { available: boolean }) {
+  const { t } = useTranslation();
+  const currentUser = useAppStore((s) => s.currentUser);
+  const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const email = currentUser?.email || '';
+  if (!available || !email) return null;
+  const send = async () => {
+    setBusy(true);
+    try {
+      await httpPostForgotPassword(email);
+      setSent(true);
+      toast.success(t('userSettingsPassword.resetLinkSent').replace('{email}', email));
+    } catch (err: unknown) {
+      toast.error(apiError(err, t('userSettingsPassword.toastError')).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="text-[#8C8C8C] font-sans text-[12px]">
+      {t('userSettingsPassword.forgotCurrent')}{' '}
+      <button type="button" disabled={busy || sent} onClick={send} className="text-brand-500 hover:underline disabled:opacity-50 disabled:no-underline">
+        {sent ? t('userSettingsPassword.resetLinkSentShort') : t('userSettingsPassword.sendResetLink')}
+      </button>
+    </div>
+  );
+}
+
+// Password-less accounts (Google / Facebook / Apple / wallet sign-ups): set a
+// first password after a fresh proof of identity. The server verifies the
+// provider credential and compares its email with the account; a stolen
+// session alone is not enough.
+function SetPassword({ status, reload }: { status: MfaStatus; reload: () => Promise<void> }) {
+  const { t } = useTranslation();
+  const currentApp = useAppStore((s) => s.currentApp);
+  const [next, setNext] = useState('');
+  const [repeat, setRepeat] = useState('');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const methods = status.setPasswordMethods || ['reauth'];
+  const googleAvailable = methods.includes('reauth') && Boolean(currentApp?.signonOptions?.includes('google'));
+  const codeAvailable = methods.includes('mfaCode') && status.enabled;
+  const mismatch = repeat.length > 0 && next !== repeat;
+  const tooShort = next.length > 0 && next.length < MIN_PASSWORD_LENGTH;
+  const formOk = next.length >= MIN_PASSWORD_LENGTH && next === repeat && !busy;
+
+  const submit = async (proof: SetPasswordProof) => {
+    setBusy(true);
+    try {
+      const res = await httpSetInitialPassword(next, proof);
+      const revoked = res.data?.sessionsRevoked ?? 0;
+      toast.success(
+        revoked > 0
+          ? t('userSettingsPassword.toastSetRevoked').replace('{count}', String(revoked))
+          : t('userSettingsPassword.toastSet')
+      );
+      setNext('');
+      setRepeat('');
+      setCode('');
+      await reload();
+    } catch (err: unknown) {
+      const { code: c, message } = apiError(err, t('userSettingsPassword.toastError'));
+      toast.error(
+        c === 'REAUTH_EMAIL_MISMATCH'
+          ? t('userSettingsPassword.reauthMismatch')
+          : c === 'REAUTH_FAILED'
+            ? t('userSettingsPassword.reauthFailed')
+            : c === 'MFA_CODE_INVALID'
+              ? t('userSettingsMfa.invalidCode')
+              : message
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const withGoogle = async () => {
+    if (!formOk) return;
+    setBusy(true);
+    try {
+      const creds = await getUserCredsFromGoogle();
+      const idToken = creds?.idToken as string | undefined;
+      const accessToken = (creds?.credential as { accessToken?: string } | undefined)?.accessToken;
+      if (!idToken || !accessToken) {
+        toast.error(t('userSettingsPassword.reauthFailed'));
+        setBusy(false);
+        return;
+      }
+      await submit({ reauth: { provider: 'google', idToken, accessToken } });
+    } catch {
+      toast.error(t('userSettingsPassword.reauthFailed'));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6 max-w-[416px]">
+      <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsPassword.setDescription')}</div>
+      <PasswordInput
+        fullWidth
+        placeholder={t('userSettingsPassword.newPlaceholder')}
+        value={next}
+        onChange={(e) => setNext(e.target.value)}
+        error={tooShort}
+        helperText={tooShort ? t('userSettingsPassword.tooShort') : undefined}
+        inputProps={{ autoComplete: 'new-password' }}
+      />
+      <PasswordInput
+        fullWidth
+        placeholder={t('userSettingsPassword.repeatPlaceholder')}
+        value={repeat}
+        onChange={(e) => setRepeat(e.target.value)}
+        error={mismatch}
+        helperText={mismatch ? t('userSettingsPassword.mismatch') : undefined}
+        inputProps={{ autoComplete: 'new-password' }}
+      />
+      {!googleAvailable && !codeAvailable ? (
+        <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsPassword.setNoMethod')}</div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {googleAvailable && (
+            <div>
+              <button type="button" disabled={!formOk} onClick={withGoogle} className={primaryButton}>
+                {t('userSettingsPassword.setWithGoogle')}
+              </button>
+            </div>
+          )}
+          {codeAvailable && (
+            <div className="flex flex-col gap-3">
+              <div className="text-[#8C8C8C] font-sans text-[12px]">
+                {googleAvailable ? t('userSettingsPassword.orWithCode') : t('userSettingsPassword.withCode')}
+              </div>
+              <input
+                className={inputClass}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder={t('userSettingsMfa.codeOrBackupPlaceholder')}
+                autoComplete="one-time-code"
+                maxLength={12}
+              />
+              <div>
+                <button type="button" disabled={!formOk || !code} onClick={() => submit({ mfaCode: code })} className={secondaryButton}>
+                  {t('userSettingsPassword.setWithCode')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChangePassword({ status, reload }: { status: MfaStatus | null; reload: () => Promise<void> }) {
   const { t } = useTranslation();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [repeat, setRepeat] = useState('');
   const [busy, setBusy] = useState(false);
 
+  const hasPassword = status ? status.hasPassword : true;
   const mismatch = repeat.length > 0 && next !== repeat;
   const tooShort = next.length > 0 && next.length < MIN_PASSWORD_LENGTH;
   const canSubmit = current && next.length >= MIN_PASSWORD_LENGTH && next === repeat && !busy;
@@ -88,9 +248,11 @@ function ChangePassword({ hasPassword }: { hasPassword: boolean }) {
 
   return (
     <div className="mb-10">
-      <p className="font-sans text-regular font-semibold mb-2">{t('userSettingsPassword.heading')}</p>
-      {!hasPassword ? (
-        <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">{t('userSettingsPassword.noPassword')}</div>
+      <p className="font-sans text-regular font-semibold mb-2">
+        {hasPassword ? t('userSettingsPassword.heading') : t('userSettingsPassword.setHeading')}
+      </p>
+      {!hasPassword && status ? (
+        <SetPassword status={status} reload={reload} />
       ) : (
         <form onSubmit={onSubmit} className="flex flex-col gap-6 max-w-[416px]" autoComplete="off">
           <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsPassword.description')}</div>
@@ -119,10 +281,13 @@ function ChangePassword({ hasPassword }: { hasPassword: boolean }) {
             helperText={mismatch ? t('userSettingsPassword.mismatch') : undefined}
             inputProps={{ autoComplete: 'new-password' }}
           />
-          <div>
-            <button type="submit" disabled={!canSubmit} className={primaryButton}>
-              {busy ? t('userSettingsPassword.saving') : t('userSettingsPassword.submit')}
-            </button>
+          <div className="flex flex-col gap-3">
+            <div>
+              <button type="submit" disabled={!canSubmit} className={primaryButton}>
+                {busy ? t('userSettingsPassword.saving') : t('userSettingsPassword.submit')}
+              </button>
+            </div>
+            <ResetLink available={Boolean(status?.passwordResetEmailAvailable)} />
           </div>
         </form>
       )}
@@ -405,7 +570,7 @@ export function Security() {
 
   return (
     <div className="md:ml-4 h-full overflow-auto">
-      <ChangePassword hasPassword={status ? status.hasPassword : true} />
+      <ChangePassword status={status} reload={load} />
       {status && <Mfa status={status} reload={load} />}
       {checked && !status && (
         <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsMfa.unavailable')}</div>

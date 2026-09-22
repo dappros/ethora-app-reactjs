@@ -15,6 +15,7 @@ import { logLogin, logSignup } from '../../hooks/withTracking';
 import { loginSignature, registerSignature } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
+import { MfaPending, mfaPendingFrom } from '../../utils/finishLogin';
 import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
@@ -39,9 +40,10 @@ type FormData = {
 
 interface MetamaskButtonProps {
   utm?: string | null;
+  onMfaRequired?: (pending: MfaPending) => void;
 }
 
-export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
+export const MetamaskButton = ({ utm, onMfaRequired }: MetamaskButtonProps) => {
   const config = useAppStore((s) => s.currentApp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [account, setAccount] = useState<string | null>(null);
@@ -89,6 +91,12 @@ export const MetamaskButton = ({ utm }: MetamaskButtonProps) => {
       const loginSig = await signerInstance.signMessage(loginMessage);
       const loginResponse = await loginSignature(acc, loginSig, loginMessage);
 
+      const pending = mfaPendingFrom(loginResponse.data);
+      if (pending) {
+        if (onMfaRequired) onMfaRequired(pending);
+        else toast.error(t('authMfaStep.unsupported'));
+        return;
+      }
       const user = loginResponse.data?.user;
       if (user) {
         await actionAfterMetamask(loginResponse.data);

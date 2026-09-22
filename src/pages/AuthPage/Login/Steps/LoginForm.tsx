@@ -8,7 +8,7 @@ import PasswordInput from '../../../../components/input/PasswordInput';
 import { httpLoginWithEmail } from '../../../../http.ts';
 import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
-import { finishLogin } from '../../../../utils/finishLogin';
+import { finishLogin, MfaPending, mfaPendingFrom } from '../../../../utils/finishLogin';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
@@ -18,10 +18,7 @@ type Inputs = {
   password: string;
 };
 
-export interface MfaPending {
-  mfaToken: string;
-  expiresIn: number;
-}
+export type { MfaPending };
 
 interface LoginStepProps {
   // Called instead of finishing the login when the account has MFA enabled:
@@ -44,9 +41,10 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
     httpLoginWithEmail(email, password)
       .then(async ({ data }) => {
         try {
-          if (data?.mfaRequired && data?.mfaToken) {
+          const pending = mfaPendingFrom(data);
+          if (pending) {
             if (onMfaRequired) {
-              onMfaRequired({ mfaToken: data.mfaToken, expiresIn: Number(data.expiresIn) || 300 });
+              onMfaRequired(pending);
               return;
             }
             throw new Error(t('authMfaStep.unsupported'));
@@ -169,10 +167,10 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
             {t('authLoginStep.or')}
           </Typography>
         )}
-        {config?.signonOptions.includes('google') && <GoogleButton />}
+        {config?.signonOptions.includes('google') && <GoogleButton onMfaRequired={onMfaRequired} />}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        {config?.signonOptions.includes('metamask') && <MetamaskButton />}
+        {config?.signonOptions.includes('metamask') && <MetamaskButton onMfaRequired={onMfaRequired} />}
         {/* {config?.signonOptions.includes('facebook') && <FacebookButton />} */}
       </Box>
     </Box>
