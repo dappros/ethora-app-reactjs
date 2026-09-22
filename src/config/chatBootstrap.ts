@@ -32,6 +32,14 @@ const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
   enableAudioCalls: true,
   startWithMicOn: true,
 };
+// End-to-end encryption (OMEMO 2). Gated by VITE_E2EE_ENABLED, which the
+// deploy system renders from features.e2ee in deploy.yml. Off means the SDK
+// generates no keys and builds stanzas exactly as before; on, it encrypts in
+// rooms the backend marked `e2ee` and leaves every other room plain. Needs an
+// ejabberd that lets room members read each other's OMEMO PEP nodes.
+const e2eeConfig: NonNullable<ChatConfig['e2ee']> = {
+  enabled: env.VITE_E2EE_ENABLED === 'true',
+};
 const webNotificationsConfig: NonNullable<ChatConfig['pushNotifications']> = {
   enabled: true,
   vapidPublicKey: env.VITE_VAPID_PUBLIC_KEY,
@@ -279,6 +287,7 @@ export const buildEthoraBaseChatConfig = ({
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
     videoCalls: videoCallsConfig,
+    e2ee: e2eeConfig,
     // In-app message notifications (toasts). Enabled here, on the app-wide
     // XmppProvider (mounted above the router in main.tsx), so they fire on
     // any page - not only while the Chats page is open.
