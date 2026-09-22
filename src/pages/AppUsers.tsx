@@ -241,28 +241,10 @@ export default function AppUsers() {
     fetchUsers();
   }, [fetchUsers]);
 
-  useEffect(() => {
-    if (!appId) {
-      return;
-    }
-
-    const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
-    httpGetUsers(
-      appId,
-      itemsPerTable,
-      page * itemsPerTable,
-      orderBy,
-      order,
-      lifecycle,
-      accessParam
-    ).then((response) => {
-      const { total, items } = response.data;
-      setItems(items);
-      setTotal(total);
-      setPageCount(Math.ceil(total / itemsPerTable));
-      setRowsSelected((selected) => selected.map(() => false));
-    });
-  }, [orderBy, order, lifecycleTab]);
+  // The list is fetched by fetchUsers above (re-run on every filter, sort,
+  // page or limit change); the [items] effect below clears the selection.
+  // A second fetch here raced the first and could overwrite a filtered
+  // result with an unfiltered one.
 
   const renderTo = () => {
     return itemsPerTable * (page + 1);
