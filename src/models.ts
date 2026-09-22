@@ -178,6 +178,9 @@ export interface ModelApp {
   // consumer is a plain truthy check - do NOT invert it into a positive alias.
   // The single inversion lives at the admin checkbox in AppSettings.
   userRegistrationDisabled: boolean;
+  // Admins/owners of this app are told at login to enrol in MFA
+  // (login response `mfaEnrolmentRequired`). Absent on older apps = off.
+  requireMfaForAdmins: boolean;
   // Per-app default identity stamped on broadcast announcements when the
   // /v2/chats/broadcast caller doesn't supply `sender` in the request body.
   // Without this the chat-component renders broadcasts as "Deleted User".
@@ -266,6 +269,9 @@ export interface ModelAppUser {
   archivedAt?: string;
   archivedBy?: string;
   archiveReason?: string;
+  // Public MFA status only (secrets never leave the server). Absent on
+  // backends that predate MFA.
+  mfa?: { enabled: boolean; enabledAt?: string | null; backupCodesRemaining?: number };
 }
 
 // Phase 1 (Agents): first-class AI Agent and per-App BotInstance projections returned by /v2/agents and /v2/bot-instances.

@@ -6,6 +6,24 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // overall shape this file follows.
 export const authFlows = {
   en: {
+    // src/pages/AuthPage/Login/Steps/MfaStep.tsx
+    'authMfaStep.title': 'Two-step verification',
+    'authMfaStep.intro': 'Enter the 6-digit code from your authenticator app.',
+    'authMfaStep.backupIntro': 'Enter one of your backup codes. Each code works once.',
+    'authMfaStep.codePlaceholder': '6-digit code',
+    'authMfaStep.backupPlaceholder': 'Backup code (XXXXX-XXXXX)',
+    'authMfaStep.codeRequired': 'Enter the code',
+    'authMfaStep.codeInvalidFormat': 'The code is 6 digits',
+    'authMfaStep.backupInvalidFormat': 'A backup code has 10 characters',
+    'authMfaStep.useBackup': 'Use a backup code instead',
+    'authMfaStep.useAuthenticator': 'Use the authenticator app instead',
+    'authMfaStep.submit': 'Verify',
+    'authMfaStep.back': 'Back to sign in',
+    'authMfaStep.expiresIn': 'This step expires in {seconds} s',
+    'authMfaStep.expired': 'This step has expired. Go back and sign in again.',
+    'authMfaStep.invalidCode': 'That code is not valid. Check the time on your device and try again.',
+    'authMfaStep.unsupported': 'This account requires two-step verification, which this sign-in method does not support.',
+    'authMfaStep.enrolmentRequiredToast': 'This app requires two-step verification for administrators. Set it up under Account > Security.',
     // ForgetPassword/Steps/FirstStep.tsx
     'authForgetPasswordFirstStep.description':
       'Please, enter your email, and we will send you a link to reset your password.',
@@ -153,6 +171,24 @@ export const authFlows = {
     'authLoginPage.title': 'Login',
   },
   fr: {
+    // src/pages/AuthPage/Login/Steps/MfaStep.tsx
+    'authMfaStep.title': 'Vérification en deux étapes',
+    'authMfaStep.intro': 'Saisissez le code à 6 chiffres de votre application d\'authentification.',
+    'authMfaStep.backupIntro': 'Saisissez l\'un de vos codes de secours. Chaque code ne fonctionne qu\'une fois.',
+    'authMfaStep.codePlaceholder': 'Code à 6 chiffres',
+    'authMfaStep.backupPlaceholder': 'Code de secours (XXXXX-XXXXX)',
+    'authMfaStep.codeRequired': 'Saisissez le code',
+    'authMfaStep.codeInvalidFormat': 'Le code comporte 6 chiffres',
+    'authMfaStep.backupInvalidFormat': 'Un code de secours comporte 10 caractères',
+    'authMfaStep.useBackup': 'Utiliser un code de secours',
+    'authMfaStep.useAuthenticator': 'Utiliser l\'application d\'authentification',
+    'authMfaStep.submit': 'Vérifier',
+    'authMfaStep.back': 'Retour à la connexion',
+    'authMfaStep.expiresIn': 'Cette étape expire dans {seconds} s',
+    'authMfaStep.expired': 'Cette étape a expiré. Revenez en arrière et reconnectez-vous.',
+    'authMfaStep.invalidCode': 'Ce code n\'est pas valide. Vérifiez l\'heure de votre appareil et réessayez.',
+    'authMfaStep.unsupported': 'Ce compte exige une vérification en deux étapes, que cette méthode de connexion ne prend pas en charge.',
+    'authMfaStep.enrolmentRequiredToast': 'Cette application exige la vérification en deux étapes pour les administrateurs. Configurez-la dans Compte > Sécurité.',
     // ForgetPassword/Steps/FirstStep.tsx
     'authForgetPasswordFirstStep.description':
       "Veuillez saisir votre adresse e-mail, nous vous enverrons un lien pour réinitialiser votre mot de passe.",
@@ -306,6 +342,24 @@ export const authFlows = {
     'authLoginPage.title': 'Connexion',
   },
   es: {
+    // src/pages/AuthPage/Login/Steps/MfaStep.tsx
+    'authMfaStep.title': 'Verificación en dos pasos',
+    'authMfaStep.intro': 'Introduce el código de 6 dígitos de tu aplicación de autenticación.',
+    'authMfaStep.backupIntro': 'Introduce uno de tus códigos de respaldo. Cada código funciona una sola vez.',
+    'authMfaStep.codePlaceholder': 'Código de 6 dígitos',
+    'authMfaStep.backupPlaceholder': 'Código de respaldo (XXXXX-XXXXX)',
+    'authMfaStep.codeRequired': 'Introduce el código',
+    'authMfaStep.codeInvalidFormat': 'El código tiene 6 dígitos',
+    'authMfaStep.backupInvalidFormat': 'Un código de respaldo tiene 10 caracteres',
+    'authMfaStep.useBackup': 'Usar un código de respaldo',
+    'authMfaStep.useAuthenticator': 'Usar la aplicación de autenticación',
+    'authMfaStep.submit': 'Verificar',
+    'authMfaStep.back': 'Volver al inicio de sesión',
+    'authMfaStep.expiresIn': 'Este paso caduca en {seconds} s',
+    'authMfaStep.expired': 'Este paso ha caducado. Vuelve atrás e inicia sesión de nuevo.',
+    'authMfaStep.invalidCode': 'Ese código no es válido. Comprueba la hora de tu dispositivo e inténtalo de nuevo.',
+    'authMfaStep.unsupported': 'Esta cuenta requiere verificación en dos pasos, que este método de inicio de sesión no admite.',
+    'authMfaStep.enrolmentRequiredToast': 'Esta aplicación requiere verificación en dos pasos para los administradores. Configúrala en Cuenta > Seguridad.',
     // ForgetPassword/Steps/FirstStep.tsx
     'authForgetPasswordFirstStep.description':
       'Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
