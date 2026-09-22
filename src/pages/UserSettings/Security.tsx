@@ -213,6 +213,7 @@ function SetPassword({ status, reload }: { status: MfaStatus; reload: () => Prom
 
 function ChangePassword({ status, reload }: { status: MfaStatus | null; reload: () => Promise<void> }) {
   const { t } = useTranslation();
+  const currentApp = useAppStore((s) => s.currentApp);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [repeat, setRepeat] = useState('');
@@ -221,7 +222,49 @@ function ChangePassword({ status, reload }: { status: MfaStatus | null; reload: 
   const hasPassword = status ? status.hasPassword : true;
   const mismatch = repeat.length > 0 && next !== repeat;
   const tooShort = next.length > 0 && next.length < MIN_PASSWORD_LENGTH;
-  const canSubmit = current && next.length >= MIN_PASSWORD_LENGTH && next === repeat && !busy;
+  const formOk = next.length >= MIN_PASSWORD_LENGTH && next === repeat && !busy;
+  const canSubmit = Boolean(current) && formOk;
+  // A user who signs in with Google may not know the password on the account:
+  // a fresh Google sign-in for the same email is accepted instead of it.
+  const googleInstead =
+    Boolean(status?.setPasswordMethods?.includes('reauth')) &&
+    Boolean(currentApp?.signonOptions?.includes('google'));
+
+  const changeWithGoogle = async () => {
+    if (!formOk) return;
+    setBusy(true);
+    try {
+      const creds = await getUserCredsFromGoogle();
+      const idToken = creds?.idToken as string | undefined;
+      const accessToken = (creds?.credential as { accessToken?: string } | undefined)?.accessToken;
+      if (!idToken || !accessToken) {
+        toast.error(t('userSettingsPassword.reauthFailed'));
+        return;
+      }
+      const res = await httpSetInitialPassword(next, { reauth: { provider: 'google', idToken, accessToken } });
+      const revoked = res.data?.sessionsRevoked ?? 0;
+      toast.success(
+        revoked > 0
+          ? t('userSettingsPassword.toastSuccessRevoked').replace('{count}', String(revoked))
+          : t('userSettingsPassword.toastSuccess')
+      );
+      setCurrent('');
+      setNext('');
+      setRepeat('');
+      await reload();
+    } catch (err: unknown) {
+      const { code, message } = apiError(err, t('userSettingsPassword.reauthFailed'));
+      toast.error(
+        code === 'REAUTH_EMAIL_MISMATCH'
+          ? t('userSettingsPassword.reauthMismatch')
+          : code === 'REAUTH_FAILED'
+            ? t('userSettingsPassword.reauthFailed')
+            : message
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,6 +330,20 @@ function ChangePassword({ status, reload }: { status: MfaStatus | null; reload: 
                 {busy ? t('userSettingsPassword.saving') : t('userSettingsPassword.submit')}
               </button>
             </div>
+            {googleInstead && (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[#8C8C8C] font-sans text-[12px]">
+                <span>{t('userSettingsPassword.forgotCurrent')}</span>
+                <button
+                  type="button"
+                  disabled={!formOk}
+                  onClick={changeWithGoogle}
+                  className="text-brand-500 hover:underline disabled:opacity-50 disabled:no-underline"
+                  title={formOk ? '' : t('userSettingsPassword.fillNewFirst')}
+                >
+                  {t('userSettingsPassword.changeWithGoogle')}
+                </button>
+              </div>
+            )}
             <ResetLink available={Boolean(status?.passwordResetEmailAvailable)} />
           </div>
         </form>
