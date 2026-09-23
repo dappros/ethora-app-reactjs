@@ -198,6 +198,11 @@ export default function AppSettings() {
 
   // chats
   const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
+  // Per-app opt-in for end-to-end encrypted 1:1 chats. Off is the platform
+  // default, so an app that predates the field reads as off. The install-wide
+  // VITE_E2EE_ENABLED gate is checked in the Chats tab, which hides the row
+  // entirely on deployments that do not support e2ee.
+  const [e2eeEnabled, setE2eeEnabled] = useState(false);
 
   // Default identity stamped on broadcast announcements (per-app default; can
   // still be overridden per-broadcast in the Chats tab). Without this the
@@ -243,6 +248,7 @@ export default function AppSettings() {
       defaultAccessProfileOpen,
       usersCanFree,
       allowUsersToCreateRooms,
+      e2eeEnabled,
       broadcastSenderName,
       broadcastSenderPhotoUrl,
       aiBot: cloneDeep(aiBot),
@@ -278,6 +284,7 @@ export default function AppSettings() {
     defaultAccessProfileOpen,
     usersCanFree,
     allowUsersToCreateRooms,
+    e2eeEnabled,
     broadcastSenderName,
     broadcastSenderPhotoUrl,
     aiBot,
@@ -310,6 +317,7 @@ export default function AppSettings() {
         defaultAccessProfileOpen: app.defaultAccessProfileOpen,
         usersCanFree: app.usersCanFree,
         allowUsersToCreateRooms: app.allowUsersToCreateRooms,
+        e2eeEnabled: Boolean(app.e2eeEnabled),
         // Pre-fill the broadcast sender fields if previously saved; otherwise
         // leave blank and rely on the server-side fallback to app.displayName.
         broadcastSenderName: app.broadcastSender?.name || '',
@@ -437,6 +445,7 @@ export default function AppSettings() {
     }
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
+    body.e2eeEnabled = e2eeEnabled;
 
     // Default broadcast sender (per-app). Always send both fields so an
     // operator can blank either of them from the UI; the backend's
@@ -475,6 +484,7 @@ export default function AppSettings() {
           defaultAccessProfileOpen,
           usersCanFree,
           allowUsersToCreateRooms,
+          e2eeEnabled,
           broadcastSenderName,
           broadcastSenderPhotoUrl,
           aiBot,
@@ -611,6 +621,7 @@ export default function AppSettings() {
     setDefaultAccessProfileOpen(app.defaultAccessProfileOpen);
     setUsersCanFree(app.usersCanFree);
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
+    setE2eeEnabled(Boolean(app.e2eeEnabled));
     setDefaultChatRooms(app.defaultRooms);
   }, [app]);
 
@@ -807,6 +818,8 @@ export default function AppSettings() {
             <Chats
               allowUsersToCreateRooms={allowUsersToCreateRooms}
               setAllowUsersToCreateRooms={setAllowUsersToCreateRooms}
+              e2eeEnabled={e2eeEnabled}
+              setE2eeEnabled={setE2eeEnabled}
               defaultChatRooms={defaultChatRooms}
               setDefaultChatRooms={setDefaultChatRooms}
               appId={appId as string}
