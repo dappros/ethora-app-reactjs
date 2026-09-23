@@ -11,17 +11,17 @@ export const Rag = ({ ragRef }: RagProps): ReactElement => {
     <>
       <div
         ref={ragRef}
-        className="font-semibold font-sans text-[16px] pb-4 pt-8 text-blue-600"
+        className="font-semibold font-sans text-[16px] pb-4 pt-8 text-blue-600 dark:text-blue-400"
       >
         {t('aiWidgetRag.title')}
       </div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600">
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600 dark:text-blue-400">
         {t('aiWidgetRag.paragraph1')}
       </p>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600">
+      <p className="font-sans text-sm pb-4 flex items-center gap-1 text-blue-600 dark:text-blue-400">
         {t('aiWidgetRag.paragraph2')}
       </p>
-      <p className="font-sans text-sm pb-4 text-blue-600 items-center gap-1 mb-8 inline-block">
+      <p className="font-sans text-sm pb-4 text-blue-600 dark:text-blue-400 items-center gap-1 mb-8 inline-block">
         {t('aiWidgetRag.paragraph3Prefix')}{' '}
         <strong>{t('aiWidgetRag.paragraph3Bold')}</strong>{' '}
         {t('aiWidgetRag.paragraph3Suffix')}

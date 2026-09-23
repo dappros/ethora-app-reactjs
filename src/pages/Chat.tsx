@@ -368,7 +368,7 @@ export default function ChatPage() {
             if (!targetApp) return null; // owned-apps list still loading
             if ((targetApp.defaultRooms?.length || 0) > 0) return null;
             return (
-              <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-900/60 px-4 py-2 text-sm border max-w-[640px]">
                 {t('chat.noChatsBanner.prefix')}
                 <NavLink
                   to={`/app/admin/apps/${chatAppId}/settings?tab=Chats`}
@@ -384,7 +384,7 @@ export default function ChatPage() {
           if (apps.length === 0) {
             // Variant 1: hosted demo, no owned apps yet.
             return (
-              <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-900/60 px-4 py-2 text-sm border max-w-[640px]">
                 {t('chat.demoNoAppsBanner.prefix')}
                 <NavLink to="/app/admin/apps" className="text-brand-500 underline">
                   {t('chat.demoNoAppsBanner.linkText')}
@@ -395,7 +395,7 @@ export default function ChatPage() {
           }
           // Variant 2: hosted demo, has owned apps - point at the switcher.
           return (
-            <div className="bg-yellow-100 px-4 py-2 text-sm border max-w-[640px]">
+            <div className="bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-900/60 px-4 py-2 text-sm border max-w-[640px]">
               {t('chat.demoHasAppsBanner')}
             </div>
           );
@@ -403,7 +403,7 @@ export default function ChatPage() {
         <div />
       </div>
       <div
-        className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden pt-0 md:pt-4"
+        className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-[#fff] px-0 overflow-hidden pt-0 md:pt-4"
         style={{ color: '#141414' }}
       >
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP

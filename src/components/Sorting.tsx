@@ -59,7 +59,7 @@ export function Sorting<T extends string>({
 
   return (
     <div className={`flex ${className}`}>
-      <span className="text-[#8C8C8C] text-[14px] mr-2">{t('sorting.sortBy')}</span>
+      <span className="text-gray-500 text-[14px] mr-2">{t('sorting.sortBy')}</span>
       <Popover className="relative">
         <PopoverButton className="flex items-center">
           <div className="mr-2 text-brand-500 font-semibold">
@@ -81,7 +81,7 @@ export function Sorting<T extends string>({
             >
               {orderItemList.map((el) => (
                 <Field key={el.key} className="flex">
-                  <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
+                  <Label className="cursor-pointer w-full hover:bg-gray-100 p-2 rounded-xl">
                     <CloseButton className="flex w-full items-center justify-between relative ">
                       <div>
                         <Radio value={el.key} className="">
@@ -111,7 +111,7 @@ export function Sorting<T extends string>({
             >
               {orderByList.map((el) => (
                 <Field key={el.key} className="flex">
-                  <Label className="cursor-pointer w-full hover:bg-[#F5F7F9] p-2 rounded-xl">
+                  <Label className="cursor-pointer w-full hover:bg-gray-100 p-2 rounded-xl">
                     <CloseButton className="flex w-full items-center justify-between relative">
                       <div>
                         <Radio value={el.key} className="">

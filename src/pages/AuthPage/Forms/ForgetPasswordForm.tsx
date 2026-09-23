@@ -57,7 +57,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
         justifyContent: 'space-between',
         padding: '16px',
         borderRadius: '24px',
-        backgroundColor: 'white',
+        backgroundColor: 'rgb(var(--c-surface))',
         boxShadow: isMobile ? 'none' : '0px 4px 35px 0px #00000014',
         p: isMobile ? '0px 16px' : '24px 40px',
         display: 'flex',
@@ -95,7 +95,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
               fontWeight: 400,
               fontSize: '24px',
               height: '32px',
-              color: '#141414',
+              color: 'rgb(var(--c-gray-950))',
               m: 0,
             }}
           >

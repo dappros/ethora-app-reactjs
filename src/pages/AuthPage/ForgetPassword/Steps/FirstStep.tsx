@@ -62,7 +62,7 @@ const FirstStep = ({ setStep }: FirstStepProps) => {
             textAlign: 'left',
             fontSize: '16px',
             fontWeight: 400,
-            color: '#8C8C8C',
+            color: 'rgb(var(--c-gray-500))',
           }}
         >
           {t('authForgetPasswordFirstStep.description')}

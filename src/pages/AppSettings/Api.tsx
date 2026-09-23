@@ -141,7 +141,7 @@ export const Api = ({ app }: Props) => {
         <div className="mx-2 hidden-scroll overflow-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#FCFCFC]">
+              <tr className="bg-gray-50">
                 <th className={cn(th, 'w-1/2 r-delimiter rounded-l-lg')}>
                   {t('appSettingsApi.keyColumn')}
                 </th>
@@ -151,7 +151,7 @@ export const Api = ({ app }: Props) => {
               </tr>
             </thead>
             <tbody>
-              <tr className={cn('hover:!bg-[#F5F7F9]')}>
+              <tr className={cn('hover:!bg-gray-100')}>
                 <td className="r-delimiter px-4 py-[20px] font-sans font-normal text-sm rounded-l-lg">
                   <div className="flex justify-items-center">
                     <span className="mr-2">{app._id}</span>
@@ -180,7 +180,7 @@ export const Api = ({ app }: Props) => {
         <div className="mx-2 hidden-scroll overflow-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#FCFCFC]">
+              <tr className="bg-gray-50">
                 <th className={cn(th, 'rounded-l-lg')}>
                   {t('appSettingsApi.credColKind')}
                 </th>
@@ -194,7 +194,7 @@ export const Api = ({ app }: Props) => {
             </thead>
             <tbody className="font-sans font-normal text-sm">
               {credentialRows.map((row) => (
-                <tr key={row.kind} className="hover:!bg-[#F5F7F9]">
+                <tr key={row.kind} className="hover:!bg-gray-100">
                   <td className="px-4 py-3 align-top whitespace-nowrap">
                     {row.kind}
                   </td>
@@ -229,10 +229,10 @@ export const Api = ({ app }: Props) => {
                   <Secret className="mr-2" value={stCreated.token} />
                   <CopyButton value={stCreated.token} />
                 </div>
-                <div className="text-[#8C8C8C] font-sans text-[12px] mb-1">
+                <div className="text-gray-500 font-sans text-[12px] mb-1">
                   {t('appSettingsApi.stCurlLabel')}
                 </div>
-                <div className="flex items-start gap-2 bg-[#F5F7F9] rounded-xl px-[12px] py-[12px] mb-3">
+                <div className="flex items-start gap-2 bg-gray-100 rounded-xl px-[12px] py-[12px] mb-3">
                   <pre className="flex-1 min-w-0 overflow-x-auto text-[12px] font-mono whitespace-pre">
                     {curlExample(stCreated.token)}
                   </pre>
@@ -255,14 +255,14 @@ export const Api = ({ app }: Props) => {
                 maxLength={64}
                 onChange={(e) => setStName(e.target.value)}
                 placeholder={t('appSettingsApi.stNamePlaceholder')}
-                className="flex-1 bg-[#F5F7F9] rounded-xl px-[12px] py-[12px] placeholder:text-[#8C8C8C] outline-none text-sm"
+                className="flex-1 bg-gray-100 rounded-xl px-[12px] py-[12px] placeholder:text-gray-500 outline-none text-sm"
               />
               <label className="flex items-center gap-2 text-[13px] font-sans">
                 <span className="whitespace-nowrap">{t('appSettingsApi.stTtlLabel')}</span>
                 <select
                   value={stTtl}
                   onChange={(e) => setStTtl(Number(e.target.value))}
-                  className="bg-[#F5F7F9] rounded-xl px-[12px] py-[12px] outline-none"
+                  className="bg-gray-100 rounded-xl px-[12px] py-[12px] outline-none"
                 >
                   {TTL_OPTIONS.map((d) => (
                     <option key={d} value={d}>
@@ -291,7 +291,7 @@ export const Api = ({ app }: Props) => {
               <div className="mx-2 hidden-scroll overflow-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-[#FCFCFC]">
+                    <tr className="bg-gray-50">
                       <th className={cn(th, 'rounded-l-lg')}>{t('appSettingsApi.stColName')}</th>
                       <th className={th}>{t('appSettingsApi.stColCreated')}</th>
                       <th className={th}>{t('appSettingsApi.stColExpires')}</th>
@@ -300,7 +300,7 @@ export const Api = ({ app }: Props) => {
                   </thead>
                   <tbody className="font-sans font-normal text-sm">
                     {tokens.map((tk) => (
-                      <tr key={tk.id} className="hover:!bg-[#F5F7F9]">
+                      <tr key={tk.id} className="hover:!bg-gray-100">
                         <td className="px-4 py-3 break-all">{tk.name || '-'}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{formatDate(tk.createdAt)}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{formatDate(tk.expiresAt)}</td>

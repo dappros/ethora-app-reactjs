@@ -8,11 +8,12 @@ interface Props {
 export function IconEdit({
   width = 24,
   height = 24,
-  stroke = '#8C8C8C',
+  stroke = 'currentColor',
   pathClassName = 'brand-path-stroke'
 }: Props) {
   return (
     <svg
+      className="text-gray-500"
       width={width}
       height={height}
       viewBox="0 0 24 24"

@@ -148,28 +148,28 @@ function VisitorMetadataPopover({
         {formatVisitor(row)}
       </div>
       <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-x-2 gap-y-0.5">
-        <div className="text-gray-300">{t('aiWidgetConversations.jidLabel')}</div>
+        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.jidLabel')}</div>
         <div className="font-mono break-all">
           {row.visitor?.xmppUsername || '—'}
         </div>
-        <div className="text-gray-300">{t('aiWidgetConversations.countryLabel')}</div>
+        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.countryLabel')}</div>
         <div>
           {m?.country
             ? `${flagFor(m.country)} ${m.country}`.trim()
             : '—'}
         </div>
-        <div className="text-gray-300">{t('aiWidgetConversations.browserLabel')}</div>
+        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.browserLabel')}</div>
         <div>{def(browserLabel)}</div>
-        <div className="text-gray-300">{t('aiWidgetConversations.osLabel')}</div>
+        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.osLabel')}</div>
         <div>{def(osLabel)}</div>
-        <div className="text-gray-300">{t('aiWidgetConversations.deviceLabel')}</div>
+        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.deviceLabel')}</div>
         <div>{m?.deviceType ? m.deviceType : t('aiWidgetConversations.desktopDefault')}</div>
         {/* IP is captured (drives the country lookup) but not shown by
             default — visitor IP is sensitive and showing it routinely
             puts operators in a tricky data-protection posture. A future
             "enterprise" flag will gate its visibility for installs that
             have a specific contract permitting it. */}
-        <div className="text-gray-300">{t('aiWidgetConversations.firstSeenLabel')}</div>
+        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.firstSeenLabel')}</div>
         <div>
           {row.visitor?.firstSeenAt
             ? new Date(row.visitor.firstSeenAt).toLocaleString()
@@ -177,7 +177,7 @@ function VisitorMetadataPopover({
         </div>
       </div>
       {!m && (
-        <div className="mt-2 text-[11px] italic text-gray-300">
+        <div className="mt-2 text-[11px] italic text-[#D9D9D9]">
           {t('aiWidgetConversations.metadataUnavailable')}
         </div>
       )}
@@ -553,6 +553,7 @@ export function WidgetConversationsPanel({
             borderColor: 'error.light',
             backgroundColor: 'error.lighter',
             color: 'error.dark',
+            '.dark &': { color: 'error.light' },
           }}
         >
           <span className="text-sm">{t('aiWidgetConversations.loadErrorPrefix')} {error}</span>
@@ -572,8 +573,8 @@ export function WidgetConversationsPanel({
               lose track of selections while scrolling. Delete-selected
               opens a confirm modal; nothing destructive happens here. */}
           {selected.size > 0 && (
-            <div className="flex items-center justify-between bg-red-50 border-b border-red-200 px-4 py-2 text-sm">
-              <span className="text-red-700 font-medium">
+            <div className="flex items-center justify-between bg-red-50 border-b border-red-200 dark:bg-red-950/30 dark:border-red-900/60 px-4 py-2 text-sm">
+              <span className="text-red-700 dark:text-red-300 font-medium">
                 {selected.size} {t('aiWidgetConversations.selectedSuffix')}
               </span>
               <div className="flex items-center gap-2">
@@ -600,7 +601,7 @@ export function WidgetConversationsPanel({
             </div>
           )}
           {deleteError && (
-            <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-xs text-red-700">
+            <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-xs text-red-700 dark:bg-red-950/30 dark:border-red-900/60 dark:text-red-300">
               {deleteError}
             </div>
           )}
@@ -659,7 +660,7 @@ export function WidgetConversationsPanel({
                           information on hover", standard convention. */}
                       <span
                         className="cursor-help"
-                        style={{ borderBottom: '1px dotted rgba(0,0,0,0.3)' }}
+                        style={{ borderBottom: '1px dotted rgb(var(--c-gray-950) / 0.3)' }}
                       >
                         {row.visitor?.metadata?.country && (
                           <span className="mr-1" aria-hidden="true">
@@ -784,6 +785,7 @@ export function WidgetConversationsPanel({
                       borderColor: 'warning.light',
                       backgroundColor: 'warning.lighter',
                       color: 'warning.dark',
+                      '.dark &': { color: 'warning.light' },
                       fontSize: 12,
                     }}
                   >
@@ -799,6 +801,7 @@ export function WidgetConversationsPanel({
                       borderColor: 'error.light',
                       backgroundColor: 'error.lighter',
                       color: 'error.dark',
+                      '.dark &': { color: 'error.light' },
                       fontSize: 12,
                     }}
                   >

@@ -9,7 +9,7 @@ interface Props {
 export function ApplicationStarterInf({ onClose }: Props) {
   const { t } = useTranslation();
   return (
-    <div className="p-4 bg-[#F3F6FC] relative grid grid-rows-[3fr,_2fr] lg:grid-rows-1 lg:grid-cols-[minmax(600px,_3fr),_2fr] mb-4 rounded-xl">
+    <div className="p-4 bg-brand-150 relative grid grid-rows-[3fr,_2fr] lg:grid-rows-1 lg:grid-cols-[minmax(600px,_3fr),_2fr] mb-4 rounded-xl">
       <div className="text-regular flex items-end lg:items-start font-varela">
         <div>
           <p>{t('applicationStarterInf.intro')}</p>

@@ -87,6 +87,12 @@ function App() {
         '--bg-auth-background',
         hexToRgba(primaryColor, '0.05')
       );
+      // Hover wash for the dark theme: 5% of the brand colour is invisible
+      // on a dark surface (see --brand-hover in index.css).
+      document.documentElement.style.setProperty(
+        '--bg-auth-background-dark',
+        hexToRgba(primaryColor, '0.16')
+      );
       const res = hexToRgba(primaryColor);
       if (res) {
         const match = res.match(/\d+(\.\d+)?/g);

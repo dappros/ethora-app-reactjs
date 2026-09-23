@@ -1,7 +1,7 @@
 .app-table {
   padding: 8px;
-  border: 1px solid #f0f0f0;
-  background-color: #ffffff;
+  border: 1px solid rgb(var(--c-gray-200));
+  background-color: rgb(var(--c-surface));
   border-radius: 12px;
   overflow: hidden;
 
@@ -33,7 +33,7 @@
 
   thead {
     // border-block-end: 2px solid;
-    background: whitesmoke;
+    background: rgb(var(--c-gray-100));
   }
 
   th,
@@ -42,10 +42,10 @@
   }
 
   tr.selected {
-    background-color: #e7edf9;
+    background-color: rgb(var(--c-brand-100));
   }
 
   tr:hover {
-    background-color: #f5f7f9;
+    background-color: rgb(var(--c-gray-100));
   }
 }

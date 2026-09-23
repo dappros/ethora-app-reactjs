@@ -47,13 +47,13 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
           <div className="form">
             <input
               type="text"
-              className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
+              className="w-full rounded-xl bg-gray-100 outline-none mb-8 py-[12px] px-[16px]"
               placeholder={t('newUserModal.firstNamePlaceholder')}
               {...register('firstName', { required: true })}
             />
             <input
               type="text"
-              className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
+              className="w-full rounded-xl bg-gray-100 outline-none mb-8 py-[12px] px-[16px]"
               placeholder={t('newUserModal.lastNamePlaceholder')}
               {...register('lastName', { required: true })}
             />
@@ -61,7 +61,7 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
             <div className="email">
               <input
                 type="text"
-                className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
+                className="w-full rounded-xl bg-gray-100 outline-none mb-8 py-[12px] px-[16px]"
                 placeholder={t('newUserModal.emailPlaceholder')}
                 {...register('email', { required: true })}
               />
@@ -74,7 +74,7 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
                 type="text"
                 autoComplete="off"
                 spellCheck={false}
-                className="w-full rounded-xl bg-[#F5F7F9] outline-none py-[12px] px-[16px] font-mono"
+                className="w-full rounded-xl bg-gray-100 outline-none py-[12px] px-[16px] font-mono"
                 placeholder={t('newUserModal.passwordPlaceholder')}
                 {...register('password', {
                   required: true,

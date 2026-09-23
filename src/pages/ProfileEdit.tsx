@@ -84,13 +84,13 @@ export default function ProfileEdit() {
       <div className="rounded-2xl bg-white px-4 h-full grid grid-rows-[72px,_1fr] overflow-hidden">
         <div className="flex justify-between items-center">
           <button
-            className="w-full max-w-[128px] py-2 rounded-xl hover:bg-[#F3F6FC] text-brand-500"
+            className="w-full max-w-[128px] py-2 rounded-xl hover:bg-brand-150 text-brand-500"
             onClick={() => navigate('/app/profile')}
           >
             {t('profileEdit.cancelButton')}
           </button>
           <button
-            className="w-full max-w-[128px] py-2 rounded-xl border text-brand-500 hover:bg-[#F3F6FC] border-brand-500"
+            className="w-full max-w-[128px] py-2 rounded-xl border text-brand-500 hover:bg-brand-150 border-brand-500"
             onClick={onSave}
           >
             {t('profileEdit.saveButton')}
@@ -111,22 +111,22 @@ export default function ProfileEdit() {
               action=""
             >
               <div>
-                <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
+                <div className="text-gray-500 text-[12px] font-sans ml-2">
                   {t('profileEdit.firstNameLabel')}
                 </div>
                 <input
                   type="text"
-                  className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+                  className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
                   placeholder={t('profileEdit.firstNamePlaceholder')}
                   {...register('firstName', { required: true, value: fName })}
                 />
               </div>
               <div>
-                <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
+                <div className="text-gray-500 text-[12px] font-sans ml-2">
                   {t('profileEdit.lastNameLabel')}
                 </div>
                 <input
-                  className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+                  className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
                   placeholder={t('profileEdit.lastNamePlaceholder')}
                   type="text"
                   {...register('lastName', { required: true, value: lName })}
@@ -134,11 +134,11 @@ export default function ProfileEdit() {
               </div>
 
               <div>
-                <div className="text-[#8C8C8C] text-[12px] font-sans ml-2">
+                <div className="text-gray-500 text-[12px] font-sans ml-2">
                   {t('profileEdit.aboutLabel')}
                 </div>
                 <input
-                  className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+                  className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
                   placeholder={t('profileEdit.aboutPlaceholder')}
                   type="text"
                   {...register('description', { value: descr })}

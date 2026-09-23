@@ -178,7 +178,7 @@ export default function WpSetup() {
       <Typography variant="h5" sx={{ marginBottom: 1, fontWeight: 600 }}>
         {t('wpSetup.heading')}
       </Typography>
-      <Typography variant="body2" sx={{ color: '#666', marginBottom: 3 }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 3 }}>
         {step === 'account' && t('wpSetup.stepAccount.subtitle')}
         {step === 'configure' && t('wpSetup.stepConfigure.subtitle')}
         {step === 'provisioning' &&
@@ -289,7 +289,7 @@ export default function WpSetup() {
           }}
         >
           <CircularProgress />
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {t('wpSetup.provisioningText')}
           </Typography>
         </Box>
@@ -313,7 +313,7 @@ export default function WpSetup() {
             )}
           </Alert>
           {returnOrigin ? (
-            <Typography variant="body2" sx={{ color: '#666' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {t('wpSetup.returnOriginText')}
             </Typography>
           ) : (

@@ -4,7 +4,7 @@
   text-wrap: nowrap;
 
   .label {
-    color: #8c8c8c;
+    color: rgb(var(--c-gray-500));
     font-size: 14px;
     margin-right: 8px;
   }
@@ -20,8 +20,8 @@
 
 .gen-app-sorting-panel {
   .app-sorting-panel-inner {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    background-color: white;
+    border: 1px solid rgb(var(--c-fg) / 0.1);
+    background-color: rgb(var(--c-surface));
     min-width: 240px;
     width: 100%;
     padding: 16px;
@@ -45,7 +45,7 @@
   }
 
   .app-sorting-radio-outer:hover {
-    background-color: #f5f7f9;
+    background-color: rgb(var(--c-gray-100));
   }
 
   .app-sorting-button-text {

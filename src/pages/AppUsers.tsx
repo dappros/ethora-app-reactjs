@@ -557,7 +557,13 @@ export default function AppUsers() {
         icon = <FacebookIcon />;
         break;
       case 'apple':
-        icon = <AppleIcon />;
+        // The glyph is literal black (it is also drawn in the customer
+        // login preview), so invert it on the dark theme.
+        icon = (
+          <span className="dark:invert">
+            <AppleIcon />
+          </span>
+        );
         break;
       case 'metamask':
       case 'signature':
@@ -828,7 +834,7 @@ export default function AppUsers() {
       </div>
       <div className="overflow-hidden">
         {!items.length && (
-          <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
+          <div className="bg-brand-150 p-4 text-sm font-sans rounded-xl mb-4">
             {t('appUsers.emptyState')}
           </div>
         )}
@@ -838,7 +844,7 @@ export default function AppUsers() {
               {renderActionsForSelected()}
               <table className="border-collapse w-full min-w-[1200px] table-auto">
                 <thead>
-                  <tr className="bg-[#FCFCFC]">
+                  <tr className="bg-gray-50">
                     <th className="pl-4 py-2 w-[32px] rounded-l-lg">
                       <Field className="flex items-center cursor-pointer">
                         <Checkbox
@@ -866,8 +872,8 @@ export default function AppUsers() {
                       <tr
                         key={el._id}
                         className={cn('', {
-                          '!bg-[#E7EDF9]': rowsSelected[index],
-                          'hover:!bg-[#F5F7F9]': !rowsSelected[index],
+                          '!bg-brand-100': rowsSelected[index],
+                          'hover:!bg-gray-100': !rowsSelected[index],
                         })}
                       >
                         <td className="pl-4 py-2 w-[32px] rounded-l-lg">
@@ -937,7 +943,7 @@ export default function AppUsers() {
                           {el.mfaEnabled === undefined && el.mfa === undefined ? (
                             '-'
                           ) : el.mfaEnabled || el.mfa?.enabled ? (
-                            <span className="px-2 py-0.5 rounded-2xl text-xs bg-green-100 text-green-700">{t('appUsers.mfaOn')}</span>
+                            <span className="px-2 py-0.5 rounded-2xl text-xs bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300">{t('appUsers.mfaOn')}</span>
                           ) : (
                             <span className="px-2 py-0.5 rounded-2xl text-xs bg-gray-100 text-gray-600">{t('appUsers.mfaOff')}</span>
                           )}
@@ -952,7 +958,7 @@ export default function AppUsers() {
                             {lifecycleTab === 'archived' && (
                               <button
                                 onClick={() => onRestoreOne(el._id)}
-                                className="text-xs text-green-700 hover:underline"
+                                className="text-xs text-green-700 dark:text-green-400 hover:underline"
                                 title={t('appUsers.restoreRowTitle')}
                               >
                                 {t('appUsers.restore')}
@@ -974,11 +980,11 @@ export default function AppUsers() {
             </div>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mx-8 my-[12px]">
               <div className="flex justify-between lg:justify-start items-center">
-                <div className="text-[#71717A] text-xs mr-8 whitespace-nowrap">
+                <div className="text-gray-500 text-xs mr-8 whitespace-nowrap">
                   {renderFrom()} {t('appUsers.paginationTo')} {renderTo()} {t('appUsers.paginationOf')} {total}
                 </div>
                 <div className="flex">
-                  <div className="text-[#71717A] mr-8">{t('appUsers.showLabel')}</div>
+                  <div className="text-gray-500 mr-8">{t('appUsers.showLabel')}</div>
                   <Menu>
                     <MenuButton className="flex mr-4">
                       <span className="text-brand-500 mr-4 font-semibold">
@@ -1001,7 +1007,7 @@ export default function AppUsers() {
                       </div>
                     </MenuItems>
                   </Menu>
-                  <div className="text-[#71717A]">{t('appUsers.usersWord')}</div>
+                  <div className="text-gray-500">{t('appUsers.usersWord')}</div>
                 </div>
               </div>
               <div className="flex justify-center lg:justify-end lg:items-center">
@@ -1018,7 +1024,7 @@ export default function AppUsers() {
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
           <div className="font-varela text-[24px] text-center mb-2">{t('appUsers.tagsModalTitle')}</div>
-          <div className="font-sans text-[13px] mb-6 text-center text-[#8C8C8C]">
+          <div className="font-sans text-[13px] mb-6 text-center text-gray-500">
             {t('appUsers.tagsModalSubtext').replace('{count}', String(getSelectedIndexes().length))}
           </div>
           <div className="mb-5">
@@ -1048,7 +1054,7 @@ export default function AppUsers() {
                       key={tg}
                       type="button"
                       onClick={() => setTagsToRemove([...tagsToRemove, tg])}
-                      className="px-2 py-0.5 rounded-2xl text-xs bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600"
+                      className="px-2 py-0.5 rounded-2xl text-xs bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-300"
                       title={t('appUsers.tagsRemoveTitle')}
                     >
                       {tg}

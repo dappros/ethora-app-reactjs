@@ -137,7 +137,9 @@ export const BillingModalChangePlan = (
               <Box
                 className={classNames(
                   'pb-4 px-4 rounded-b-xl rounded-t-3xl pt-4',
-                  selectedPlan === plan.id ? 'bg-yellow-800' : 'bg-brand-250'
+                  // The selected fill is a bright yellow in both themes, so its
+                  // text is pinned dark rather than following the theme.
+                  selectedPlan === plan.id ? 'bg-yellow-800 text-[#1F1F1F]' : 'bg-brand-250'
                 )}
               >
                 <Box className="pl-4">
@@ -150,7 +152,10 @@ export const BillingModalChangePlan = (
                   {plan.features.map((feature, index) => (
                     <li
                       key={index}
-                      className=" text-sm text-gray-900 font-bold py-1"
+                      className={classNames(
+                        'text-sm font-bold py-1',
+                        selectedPlan === plan.id ? 'text-[#1F1F1F]' : 'text-gray-900'
+                      )}
                     >
                       {feature}
                     </li>

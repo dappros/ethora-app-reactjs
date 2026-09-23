@@ -434,7 +434,7 @@ export function Chats({
         <div className="mx-2 overflow-auto">
 
           {!defaultChatRooms.length && (
-            <div className="bg-[#F3F6FC] p-4 text-sm font-sans rounded-xl mb-4">
+            <div className="bg-brand-150 p-4 text-sm font-sans rounded-xl mb-4">
               {t('appSettingsChats.noChatsEmptyState')}
             </div>
           )}
@@ -442,7 +442,7 @@ export function Chats({
           {!!defaultChatRooms.length && (
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-[#FCFCFC]">
+                <tr className="bg-gray-50">
                   <th className="pl-4 py-2 w-[32px] rounded-l-lg">
                     <Field className="flex items-center cursor-pointer">
                       <Checkbox
@@ -474,7 +474,7 @@ export function Chats({
               <tbody>
                 {defaultChatRooms.map((el, index) => {
                   return (
-                    <tr key={el.jid} className="hover:!bg-[#F5F7F9]">
+                    <tr key={el.jid} className="hover:!bg-gray-100">
                       <td className="pl-4 py-2 w-[32px] rounded-l-lg">
                         <Field className="flex items-center cursor-pointer">
                           <Checkbox
@@ -582,7 +582,7 @@ export function Chats({
             </div>
 
             {broadcastMode === 'selected' && (
-              <div className="bg-[#F3F6FC] p-4 rounded-xl">
+              <div className="bg-brand-150 p-4 rounded-xl">
                 {!pinnedRooms.length && (
                   <div className="font-sans text-sm text-gray-700">
                     {t('appSettingsChats.noPinnedRoomsFound')}
@@ -691,7 +691,7 @@ export function Chats({
             </div>
 
             {broadcastJobId && (
-              <div className="mt-2 bg-[#FCFCFC] border border-gray-200 rounded-xl p-4">
+              <div className="mt-2 bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <div className="font-sans text-sm font-semibold mb-1">{t('appSettingsChats.broadcastJobHeading')}</div>
                 <div className="font-sans text-xs text-gray-600">
                   {t('appSettingsChats.jobIdLabel')} <span className="font-mono">{broadcastJobId}</span>
@@ -722,7 +722,7 @@ export function Chats({
                     <div className="max-h-[180px] overflow-auto border border-gray-200 rounded-lg bg-white">
                       <table className="w-full border-collapse">
                         <thead>
-                          <tr className="bg-[#FCFCFC]">
+                          <tr className="bg-gray-50">
                             <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">{t('appSettingsChats.roomColumn')}</th>
                             <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">{t('appSettingsChats.statusColumn')}</th>
                             <th className="px-3 py-2 text-gray-500 font-normal font-inter text-xs text-left">{t('appSettingsChats.errorColumn')}</th>

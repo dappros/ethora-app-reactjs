@@ -34,7 +34,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
     defaultValues: { firstName: user.firstName || '', lastName: user.lastName || '', description: user.description || '' },
   });
   const submit: SubmitHandler<Inputs> = (values) => onSubmit({ ...values, tags });
-  const inputClass = 'w-full rounded-xl bg-[#F5F7F9] outline-none py-[12px] px-[16px] text-sm';
+  const inputClass = 'w-full rounded-xl bg-gray-100 outline-none py-[12px] px-[16px] text-sm';
   const roleLabel = useMemo(() => (user.role ? t(`appUsers.role_${user.role}`) : ''), [t, user.role]);
 
   return (
@@ -45,7 +45,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
           <div className="flex items-start justify-between mb-2">
             <div>
               <div className="font-varela text-[24px]">{t('editUserModal.title')}</div>
-              <div className="text-[#8C8C8C] text-[12px] font-sans">
+              <div className="text-gray-500 text-[12px] font-sans">
                 {user.email}
                 {roleLabel ? ` · ${roleLabel}` : ''}
               </div>
@@ -57,7 +57,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
           <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 mt-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.firstName')}</div>
+                <div className="text-gray-500 text-[12px] font-sans mb-1">{t('editUserModal.firstName')}</div>
                 <input
                   type="text"
                   className={inputClass}
@@ -67,7 +67,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
                 {errors.firstName && <div className="text-red-500 text-[12px] mt-1">{t('editUserModal.nameRule')}</div>}
               </div>
               <div>
-                <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.lastName')}</div>
+                <div className="text-gray-500 text-[12px] font-sans mb-1">{t('editUserModal.lastName')}</div>
                 <input
                   type="text"
                   className={inputClass}
@@ -78,7 +78,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
               </div>
             </div>
             <div>
-              <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.description')}</div>
+              <div className="text-gray-500 text-[12px] font-sans mb-1">{t('editUserModal.description')}</div>
               <textarea
                 className={`${inputClass} min-h-[72px]`}
                 placeholder={t('editUserModal.descriptionPlaceholder')}
@@ -86,7 +86,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
               />
             </div>
             <div>
-              <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.tags')}</div>
+              <div className="text-gray-500 text-[12px] font-sans mb-1">{t('editUserModal.tags')}</div>
               <TagsInput value={tags} onChange={setTags} suggestions={suggestions} placeholder={t('editUserModal.tagsPlaceholder')} />
             </div>
             <div className="flex gap-4 mt-2">

@@ -9,7 +9,7 @@ interface BackButtonProps {
 
 const BackButton: React.FC<BackButtonProps> = ({
   onPress,
-  buttonColor = '#8C8C8C',
+  buttonColor = 'rgb(var(--c-gray-500))',
 }) => {
   const hadleClick = (event: any): void => {
     event.preventDefault();

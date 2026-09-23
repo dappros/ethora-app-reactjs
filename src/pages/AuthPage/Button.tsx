@@ -30,7 +30,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         fontSize: '16px',
         textAlign: 'center',
         flex: 1,
-        backgroundColor: variant === 'contained' ? '#0052CD' : '#FFFFFF',
+        backgroundColor: variant === 'contained' ? '#0052CD' : 'rgb(var(--c-surface))',
         color: variant === 'contained' ? '#FFFFFF' : '#0052CD',
         border: variant === 'outlined' ? '1px solid #0052CD' : 'none',
         textTransform: 'none',
@@ -38,7 +38,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
           outline: '2px solid #0052CD',
         },
         '&:hover': {
-          backgroundColor: variant === 'outlined' ? '#FFFFFF' : '#5d8dd6',
+          backgroundColor: variant === 'outlined' ? 'rgb(var(--c-surface))' : '#5d8dd6',
         },
         minHeight: '48px',
         maxHeight: '48px',

@@ -20,7 +20,7 @@ const StyledTextField = styled(TextField)(({ theme, config }) => ({
     borderRadius: 16,
     fontSize: 16,
     border: 'none',
-    backgroundColor: '#F5F7F9',
+    backgroundColor: 'rgb(var(--c-gray-100))',
   },
   '& .MuiOutlinedInput-notchedOutline': {
     border: 'none',
@@ -41,7 +41,7 @@ const StyledTextField = styled(TextField)(({ theme, config }) => ({
     bottom: -20,
     right: 0,
     fontSize: 12,
-    color: '#8C8C8C',
+    color: 'rgb(var(--c-gray-500))',
     margin: 0,
     whiteSpace: 'nowrap',
   },

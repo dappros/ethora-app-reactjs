@@ -89,7 +89,7 @@ const ThirdStep: React.FC = () => {
             textAlign: 'left',
             fontSize: '24px',
             fontWeight: 400,
-            color: '#141414',
+            color: 'rgb(var(--c-gray-950))',
           }}
         >
           {t('authForgetPasswordThirdStep.title')}

@@ -9,3 +9,9 @@
   background-image: url('./Icons/circles.svg');
   background-position: center;
 }
+
+// The decorative rings are drawn in white at 50% opacity; on a dark page
+// they read as bright outlines, so drop them in dark mode.
+:root.dark .responsiveWrapper {
+  background-image: none;
+}

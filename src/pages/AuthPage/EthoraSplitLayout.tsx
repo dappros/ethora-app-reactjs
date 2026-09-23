@@ -29,6 +29,8 @@ const EthoraSplitLayout: React.FC<{ children: ReactNode }> = ({ children }) => (
         flex: 1,
         position: 'relative',
         backgroundColor: '#EEF0F3',
+        // Light keeps its cool grey; dark follows the page token.
+        '.dark &': { backgroundColor: 'rgb(var(--c-page))' },
         display: 'flex',
         padding: '40px',
         overflow: 'auto',

@@ -43,7 +43,7 @@ export const MarkDown = (text: string): (string | JSX.Element)[] => {
           <code
             key={`code-${key++}`}
             style={{
-              background: '#eee',
+              background: 'rgb(var(--c-gray-200))',
               padding: '1px 4px',
               borderRadius: '4px',
             }}
@@ -129,7 +129,7 @@ export const MarkDown = (text: string): (string | JSX.Element)[] => {
         <pre
           key={`pre-${key++}`}
           style={{
-            background: '#f0f0f0',
+            background: 'rgb(var(--c-gray-200))',
             padding: '10px',
             borderRadius: '8px',
             whiteSpace: 'pre-wrap',
@@ -168,9 +168,9 @@ export const MarkDown = (text: string): (string | JSX.Element)[] => {
         <blockquote
           key={`quote-${key++}`}
           style={{
-            borderLeft: '3px solid #ccc',
+            borderLeft: '3px solid rgb(var(--c-gray-300))',
             paddingLeft: '10px',
-            color: '#666',
+            color: 'rgb(var(--c-gray-600))',
           }}
         >
           {parseInline(line.replace(/^>\s*/, ''))}

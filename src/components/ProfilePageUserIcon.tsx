@@ -91,7 +91,7 @@ export function ProfilePageUserIcon({
     return (
       <div className='flex justify-center items-center' >
         <div className="border border-brand-500 rounded-full flex items-center justify-center" style={innerStyle}>
-          <span className={cn("font-varela font-semibold", {"text-[18px]": small, "text-[50px]": !small})}>{firstName.toUpperCase()[0]}</span>
+          <span className={cn("font-varela font-semibold text-[#121219]", {"text-[18px]": small, "text-[50px]": !small})}>{firstName.toUpperCase()[0]}</span>
         </div>
       </div>
     )

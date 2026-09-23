@@ -101,7 +101,7 @@ const ProgressCreateApp = ({
     <Box
       sx={{
         p: isMobile ? 2 : '16px 42px',
-        bgcolor: '#f9f9f9',
+        bgcolor: 'rgb(var(--c-gray-50))',
         borderRadius: 2,
         position: 'relative',
       }}

@@ -137,7 +137,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
     return (
       <Typography
         align="center"
-        sx={{ fontSize: '14px', color: '#8C8C8C', paddingTop: '16px' }}
+        sx={{ fontSize: '14px', color: 'rgb(var(--c-gray-500))', paddingTop: '16px' }}
       >
         {t('authRegistrationClosed.notice')}
       </Typography>
@@ -329,7 +329,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           {emailSuggestion && (
             <Typography
               variant="body2"
-              sx={{ color: '#8C8C8C', cursor: 'pointer' }}
+              sx={{ color: 'rgb(var(--c-gray-500))', cursor: 'pointer' }}
               onClick={() => {
                 setValue('email', emailSuggestion, { shouldValidate: true });
                 setEmailSuggestion(null);
@@ -395,7 +395,7 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                 justifyContent: 'center',
                 textAlign: 'center',
                 gap: '8px',
-                color: '#8C8C8C',
+                color: 'rgb(var(--c-gray-500))',
                 flexWrap: 'wrap',
                 maxWidth: '486px',
                 fontSize: '14px',

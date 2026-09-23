@@ -32,7 +32,7 @@ import { getUserCredsFromGoogle } from '../../utils/firebase';
 const MIN_PASSWORD_LENGTH = 8;
 
 const inputClass =
-  'w-full rounded-xl bg-[#F5F7F9] px-[12px] py-[10px] text-[14px] font-sans outline-none focus:ring-2 focus:ring-brand-500';
+  'w-full rounded-xl bg-gray-100 px-[12px] py-[10px] text-[14px] font-sans outline-none focus:ring-2 focus:ring-brand-500';
 const primaryButton =
   'py-[10px] px-6 rounded-xl bg-brand-500 text-white hover:bg-brand-darker disabled:opacity-50';
 const secondaryButton =
@@ -45,7 +45,7 @@ function BackupCodes({ codes, onDone }: { codes: string[]; onDone: () => void })
     <div className="mb-8 rounded-2xl border border-brand-500 p-4 max-w-[560px]">
       <div className="font-sans text-regular font-semibold mb-1">{t('userSettingsMfa.backupHeading')}</div>
       <div className="text-red-500 font-sans text-[12px] mb-4">{t('userSettingsMfa.backupWarning')}</div>
-      <div className="flex items-start gap-2 bg-[#F5F7F9] rounded-xl px-[12px] py-[12px] mb-4">
+      <div className="flex items-start gap-2 bg-gray-100 rounded-xl px-[12px] py-[12px] mb-4">
         <pre className="flex-1 min-w-0 overflow-x-auto text-[13px] font-mono whitespace-pre">{text}</pre>
         <CopyButton value={text} />
       </div>
@@ -76,7 +76,7 @@ function ResetLink({ available }: { available: boolean }) {
     }
   };
   return (
-    <div className="text-[#8C8C8C] font-sans text-[12px]">
+    <div className="text-gray-500 font-sans text-[12px]">
       {t('userSettingsPassword.forgotCurrent')}{' '}
       <button type="button" disabled={busy || sent} onClick={send} className="text-brand-500 hover:underline disabled:opacity-50 disabled:no-underline">
         {sent ? t('userSettingsPassword.resetLinkSentShort') : t('userSettingsPassword.sendResetLink')}
@@ -155,7 +155,7 @@ function SetPassword({ status, reload }: { status: MfaStatus; reload: () => Prom
 
   return (
     <div className="flex flex-col gap-6 max-w-[416px]">
-      <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsPassword.setDescription')}</div>
+      <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsPassword.setDescription')}</div>
       <PasswordInput
         fullWidth
         placeholder={t('userSettingsPassword.newPlaceholder')}
@@ -175,7 +175,7 @@ function SetPassword({ status, reload }: { status: MfaStatus; reload: () => Prom
         inputProps={{ autoComplete: 'new-password' }}
       />
       {!googleAvailable && !codeAvailable ? (
-        <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsPassword.setNoMethod')}</div>
+        <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsPassword.setNoMethod')}</div>
       ) : (
         <div className="flex flex-col gap-4">
           {googleAvailable && (
@@ -187,7 +187,7 @@ function SetPassword({ status, reload }: { status: MfaStatus; reload: () => Prom
           )}
           {codeAvailable && (
             <div className="flex flex-col gap-3">
-              <div className="text-[#8C8C8C] font-sans text-[12px]">
+              <div className="text-gray-500 font-sans text-[12px]">
                 {googleAvailable ? t('userSettingsPassword.orWithCode') : t('userSettingsPassword.withCode')}
               </div>
               <input
@@ -298,7 +298,7 @@ function ChangePassword({ status, reload }: { status: MfaStatus | null; reload: 
         <SetPassword status={status} reload={reload} />
       ) : (
         <form onSubmit={onSubmit} className="flex flex-col gap-6 max-w-[416px]" autoComplete="off">
-          <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsPassword.description')}</div>
+          <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsPassword.description')}</div>
           <PasswordInput
             fullWidth
             placeholder={t('userSettingsPassword.currentPlaceholder')}
@@ -331,7 +331,7 @@ function ChangePassword({ status, reload }: { status: MfaStatus | null; reload: 
               </button>
             </div>
             {googleInstead && (
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[#8C8C8C] font-sans text-[12px]">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-500 font-sans text-[12px]">
                 <span>{t('userSettingsPassword.forgotCurrent')}</span>
                 <button
                   type="button"
@@ -474,10 +474,10 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
   return (
     <div className="mb-8">
       <p className="font-sans text-regular font-semibold mb-2">{t('userSettingsMfa.heading')}</p>
-      <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">{t('userSettingsMfa.description')}</div>
+      <div className="text-gray-500 font-sans text-[12px] mb-4">{t('userSettingsMfa.description')}</div>
 
       {requiredByPolicy && (
-        <div className="mb-4 rounded-xl border border-yellow-400 bg-yellow-50 px-4 py-3 text-[13px] font-sans text-yellow-800 max-w-[560px]">
+        <div className="mb-4 rounded-xl border border-yellow-400 bg-yellow-50 dark:border-yellow-900/60 dark:bg-yellow-900/30 px-4 py-3 text-[13px] font-sans text-yellow-800 dark:text-yellow-200 max-w-[560px]">
           {t('userSettingsMfa.requiredByPolicy')}
         </div>
       )}
@@ -485,12 +485,12 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
       {backupCodes && <BackupCodes codes={backupCodes} onDone={() => setBackupCodes(null)} />}
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-sans mb-4">
-        <span className="text-[#8C8C8C]">{t('userSettingsMfa.statusLabel')}</span>
-        <span className={status.enabled ? 'text-green-700' : ''}>
+        <span className="text-gray-500">{t('userSettingsMfa.statusLabel')}</span>
+        <span className={status.enabled ? 'text-green-700 dark:text-green-400' : ''}>
           {status.enabled ? t('userSettingsMfa.statusOn') : t('userSettingsMfa.statusOff')}
         </span>
         {status.enabled && (
-          <span className="text-[#8C8C8C]">
+          <span className="text-gray-500">
             {t('userSettingsMfa.backupRemaining').replace('{count}', String(status.backupCodesRemaining))}
           </span>
         )}
@@ -508,7 +508,7 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
           </button>
           <button
             type="button"
-            className="py-[10px] px-6 rounded-xl border border-red-400 text-red-500 hover:bg-red-50"
+            className="py-[10px] px-6 rounded-xl border border-red-400 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
             onClick={() => setStage('disable')}
           >
             {t('userSettingsMfa.disableButton')}
@@ -518,7 +518,7 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
 
       {stage === 'password' && (
         <div className="flex flex-col gap-6 max-w-[416px]">
-          <div className="text-[#8C8C8C] font-sans text-[12px]">
+          <div className="text-gray-500 font-sans text-[12px]">
             {status.hasPassword ? t('userSettingsMfa.enterPasswordToStart') : t('userSettingsMfa.startNoPassword')}
           </div>
           {passwordInput}
@@ -535,20 +535,20 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
 
       {stage === 'scan' && enrolment && (
         <div className="flex flex-col gap-4 max-w-[560px]">
-          <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsMfa.scanInstructions')}</div>
-          <div className="bg-white p-3 rounded-xl border border-gray-200 w-fit">
+          <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsMfa.scanInstructions')}</div>
+          <div className="bg-[#fff] p-3 rounded-xl border border-gray-200 w-fit">
             <QRCode value={enrolment.otpauthUri} size={176} />
           </div>
           <div>
-            <div className="text-[#8C8C8C] font-sans text-[12px] mb-1">{t('userSettingsMfa.manualEntry')}</div>
-            <div className="flex items-start gap-2 bg-[#F5F7F9] rounded-xl px-[12px] py-[12px]">
+            <div className="text-gray-500 font-sans text-[12px] mb-1">{t('userSettingsMfa.manualEntry')}</div>
+            <div className="flex items-start gap-2 bg-gray-100 rounded-xl px-[12px] py-[12px]">
               <div className="flex-1 min-w-0 overflow-x-auto text-[13px] font-mono whitespace-nowrap tracking-wider">
                 {enrolment.secret.replace(/(.{4})/g, '$1 ').trim()}
               </div>
               <CopyButton value={enrolment.secret} />
             </div>
           </div>
-          <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsMfa.enterFirstCode')}</div>
+          <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsMfa.enterFirstCode')}</div>
           <div className="max-w-[416px]">{codeInput('userSettingsMfa.codePlaceholder')}</div>
           <div className="flex gap-3">
             <button type="button" className={primaryButton} disabled={busy || code.replace(/\D/g, '').length !== 6} onClick={confirm}>
@@ -563,7 +563,7 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
 
       {stage === 'disable' && (
         <div className="flex flex-col gap-6 max-w-[416px]">
-          <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsMfa.disableInstructions')}</div>
+          <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsMfa.disableInstructions')}</div>
           {passwordInput}
           {codeInput('userSettingsMfa.codeOrBackupPlaceholder')}
           <div className="flex gap-3">
@@ -584,7 +584,7 @@ function Mfa({ status, reload }: { status: MfaStatus; reload: () => Promise<void
 
       {stage === 'regenerate' && (
         <div className="flex flex-col gap-6 max-w-[416px]">
-          <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsMfa.regenerateInstructions')}</div>
+          <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsMfa.regenerateInstructions')}</div>
           {codeInput('userSettingsMfa.codeOrBackupPlaceholder')}
           <div className="flex gap-3">
             <button type="button" className={primaryButton} disabled={busy || !code} onClick={regenerate}>
@@ -630,7 +630,7 @@ export function Security() {
       <ChangePassword status={status} reload={load} />
       {status && <Mfa status={status} reload={load} />}
       {checked && !status && (
-        <div className="text-[#8C8C8C] font-sans text-[12px]">{t('userSettingsMfa.unavailable')}</div>
+        <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsMfa.unavailable')}</div>
       )}
     </div>
   );

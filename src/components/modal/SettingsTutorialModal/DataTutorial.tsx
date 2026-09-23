@@ -45,7 +45,7 @@ export const getStepsStartView = (
     description: t('dataTutorial.chat.description'),
     icon: IconChat,
     color: 'text-purple-600',
-    bgColor: 'bg-purple-50 hover:bg-purple-100',
+    bgColor: 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/40',
   },
   {
     step: 'AI',
@@ -53,7 +53,7 @@ export const getStepsStartView = (
     description: t('dataTutorial.ai.description'),
     icon: IconAi,
     color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50 hover:bg-yellow-100',
+    bgColor: 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/40',
   },
   {
     step: 'Demo',
@@ -61,7 +61,7 @@ export const getStepsStartView = (
     description: t('dataTutorial.demo.description'),
     icon: IconDemo,
     color: 'text-green-600',
-    bgColor: 'bg-green-50 hover:bg-green-100',
+    bgColor: 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-900/40',
   },
 ];
 
@@ -182,7 +182,7 @@ export const getQuestionsAi = (
           {t('dataTutorial.ai.three.answerTakeUserTo')}{' '}
           <NavLink
             to={`/app/admin/apps/${query}/settings?tab=AI+bot`}
-            className="text-blue-600 underline inline"
+            className="text-blue-600 dark:text-blue-400 underline inline"
           >
             {t('dataTutorial.ai.three.answerBotLinkLabel')}
           </NavLink>{' '}

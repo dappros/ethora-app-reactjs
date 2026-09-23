@@ -283,7 +283,7 @@ const VisibilityPanel: React.FC<{
       )}
 
       {!isOwned && isSuperWriteAdmin && (
-        <div className="rounded-md border border-purple-300 bg-purple-50 p-2 text-xs text-purple-900">
+        <div className="rounded-md border border-purple-300 bg-purple-50 p-2 text-xs text-purple-900 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-200">
           <strong>{t('agentSettings.superadminModerationTitle')}</strong>{' '}
           {t('agentSettings.superadminModerationBody')}
         </div>

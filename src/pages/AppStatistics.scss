@@ -1,5 +1,5 @@
 .rdrDateRangeWrapper {
-  background-color: #ffffff;
+  background-color: rgb(var(--c-surface));
   width: 250px;
   border-bottom: 1px solid #dce0e5;
 }
@@ -93,18 +93,18 @@
 }
 
 .rdrMonthPicker {
-  background-color: #ffffff;
+  background-color: rgb(var(--c-surface));
 }
 
 .rdrDayToday {
-  background-color: #ffffff;
+  background-color: rgb(var(--c-surface));
   border: 1px solid #ea670c;
   border-radius: 5px;
 }
 
 .rdrInRange {
-  background-color: #e7edf9;
-  color: #000000;
+  background-color: rgb(var(--c-brand-100));
+  color: rgb(var(--c-fg));
 }
 
 .rdrStartEdge {
@@ -115,4 +115,59 @@
 .rdrEndEdge {
   border: none;
   background-color: #347b9f;
+}
+
+/* Dark theme: react-date-range ships a light-only stylesheet (and the
+   Tailwind-gray literals above are kept for light-mode fidelity), so
+   re-point its neutrals at the theme tokens when .dark is on <html>. */
+:root.dark {
+  .rdrCalendarWrapper,
+  .rdrMonthAndYearPickers select,
+  .rdrDateDisplayWrapper {
+    background-color: rgb(var(--c-surface));
+    color: rgb(var(--c-fg));
+  }
+
+  .rdrDateRangeWrapper {
+    border-bottom-color: rgb(var(--c-gray-300));
+  }
+
+  .rdrMonthAndYearWrapper,
+  .rdrDay,
+  .rdrDayNumber span {
+    color: rgb(var(--c-gray-800));
+  }
+
+  .rdrMonthAndYearPickers select {
+    color: rgb(var(--c-gray-800));
+  }
+
+  .rdrWeekDay {
+    color: rgb(var(--c-gray-500));
+  }
+
+  .rdrDay:hover {
+    background-color: rgb(var(--c-gray-100));
+  }
+
+  .rdrDayPassive .rdrDayNumber span,
+  .rdrDayPassive {
+    color: rgb(var(--c-gray-300));
+  }
+
+  .rdrDayDisabled {
+    background-color: rgb(var(--c-gray-100));
+  }
+
+  .rdrDayDisabled .rdrDayNumber span {
+    color: rgb(var(--c-gray-400));
+  }
+
+  .rdrDayStartPreview,
+  .rdrDayEndPreview,
+  .rdrDayInRange,
+  .rdrDayStartEdge,
+  .rdrDayEndEdge {
+    background-color: rgb(var(--c-brand-200)) !important;
+  }
 }

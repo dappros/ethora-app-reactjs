@@ -63,7 +63,7 @@ export function Referrals({ id }: Props) {
           <input
             type="text"
             placeholder={t('userSettingsReferrals.referralPlaceholder')}
-            className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+            className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
             {...register('referrerId', { required: true })}
           />
           </div>

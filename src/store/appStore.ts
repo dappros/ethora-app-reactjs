@@ -17,6 +17,11 @@ import {
   setCachedTranslateLanguages,
   setPreferredUiLanguage,
 } from '../utils/uiLanguage';
+import {
+  getPreferredUiTheme,
+  setPreferredUiTheme,
+  type UiTheme,
+} from '../utils/uiTheme';
 
 // localStorage key for the most-recently-selected Chats app context.
 // Suffixed `-538` to match the existing `token-538` convention used
@@ -85,6 +90,9 @@ export interface AppSliceInterface extends ModelState {
   // gesture should use that; this one is for applying a language the server
   // just told us about, where echoing it straight back would be pointless.
   doSetUiLanguage: (language: UiLocale) => void;
+  // Colour theme (see ModelState.uiTheme). Persists to localStorage; the
+  // ThemeBridge in main.tsx applies it to <html>.
+  doSetUiTheme: (theme: UiTheme) => void;
   // Replace the install language list (get-config's translateLanguages,
   // narrowed to the renderable catalogue) and cache it for the next pre-login
   // render.
@@ -121,6 +129,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   ownerSession: null,
   ownedApps: [],
   uiLanguage: getPreferredUiLanguage(),
+  uiTheme: getPreferredUiTheme(),
   availableLanguages: [...getCachedAvailableLanguages()],
   // No localStorage seed on purpose: nothing renders in the chat language
   // before a session exists, so there is no flash of the wrong value to
@@ -136,6 +145,12 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
     setPreferredUiLanguage(language);
     set((s) => {
       s.uiLanguage = language;
+    });
+  },
+  doSetUiTheme: (theme) => {
+    setPreferredUiTheme(theme);
+    set((s) => {
+      s.uiTheme = theme;
     });
   },
   doSetChatLanguage: (language) => {

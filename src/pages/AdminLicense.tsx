@@ -14,9 +14,9 @@ function fmtDate(iso: string | null | undefined) {
 }
 
 const STATE_CLASS: Record<LicenseStatus['state'], string> = {
-  licensed: 'bg-green-100 text-green-800',
-  grace: 'bg-amber-100 text-amber-900',
-  restricted: 'bg-red-100 text-red-800',
+  licensed: 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300',
+  grace: 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-300',
+  restricted: 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300',
 };
 
 export default function AdminLicense() {
@@ -118,7 +118,7 @@ export default function AdminLicense() {
               </div>
 
               {status.keyError && (
-                <div className="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800 p-4 text-sm">
+                <div className="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-900/60 dark:text-red-300 p-4 text-sm">
                   <div className="font-semibold">{t('adminLicense.keyErrorHeading')}</div>
                   <div>{t(`licenseReason.${status.keyError.reason}`)}</div>
                   {status.keyError.mismatchedHosts.length > 0 && (
@@ -128,10 +128,10 @@ export default function AdminLicense() {
               )}
 
               {status.state === 'restricted' && (
-                <p className="mb-6 text-sm text-red-800">{t('adminLicense.restrictedExplain')}</p>
+                <p className="mb-6 text-sm text-red-800 dark:text-red-300">{t('adminLicense.restrictedExplain')}</p>
               )}
               {status.state === 'grace' && (
-                <p className="mb-6 text-sm text-amber-900">{t('adminLicense.graceExplain')}</p>
+                <p className="mb-6 text-sm text-amber-900 dark:text-amber-300">{t('adminLicense.graceExplain')}</p>
               )}
 
               <dl className="grid grid-cols-1 md:grid-cols-[220px,_1fr] gap-y-2 gap-x-4 text-sm mb-8">
@@ -181,7 +181,7 @@ export default function AdminLicense() {
                 </button>
               )}
               {message && (
-                <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700' : 'text-red-700')}>{message.text}</span>
+                <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
               )}
             </div>
             {status?.source === 'env' && (

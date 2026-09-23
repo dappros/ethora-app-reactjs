@@ -1,8 +1,8 @@
 import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 
 // Account / User Settings area: src/pages/UserSettings/* (tab shell +
-// Manage Data, Visibility, Profile Shares, Document Shares, Blocked Users,
-// Referrals) plus src/pages/ProfileEdit.tsx. Namespaced per source file so
+// Appearance, Security, AI Assistants, Privacy & Data, Documents, and the
+// hidden Blocked Users / Referrals) plus src/pages/ProfileEdit.tsx. Namespaced per source file so
 // concurrent edits to other areas don't collide with this file (see
 // index.ts for how per-area dictionaries are merged).
 export const userSettings = {
@@ -76,15 +76,20 @@ export const userSettings = {
     'userSettingsMfa.unavailable': 'Two-step verification is not available on this server yet.',
     // src/pages/UserSettings/UserSettings.tsx
     'userSettingsPage.heading': 'Account',
-    'userSettingsPage.tabManageData': 'Manage Data',
-    'userSettingsPage.tabVisibility': 'Visibility',
-    'userSettingsPage.tabProfileShares': 'Profile Shares',
-    'userSettingsPage.tabDocumentShares': 'Document Shares',
-    'userSettingsPage.tabBlockedUsers': 'Blocked Users',
     'userSettingsPage.logoutButton': 'Logout',
 
     // src/pages/UserSettings/AiAssistants.tsx
     'userSettingsPage.tabAiAssistants': 'AI Assistants',
+    'userSettingsPage.tabAppearance': 'Appearance',
+    'userSettingsPage.tabPrivacyData': 'Privacy & Data',
+    'userSettingsPage.tabDocuments': 'Documents',
+    // src/pages/UserSettings/Appearance.tsx, components/settings/ThemeSettings.tsx
+    'appearance.themeHeading': 'Theme',
+    'appearance.themeDescription': 'Choose how the app looks on this device. System follows your device or browser setting.',
+    'appearance.themeLight': 'Light',
+    'appearance.themeDark': 'Dark',
+    'appearance.themeSystem': 'System',
+    'appearance.languageHeading': 'Language',
     'userSettingsAi.heading': 'AI assistants',
     'userSettingsAi.intro': 'Connect Claude, ChatGPT, Cursor or your own agents to your Ethora account through the Ethora MCP server. Create an API key below, then paste the connection details into your assistant.',
     'userSettingsAi.endpointLabel': 'MCP endpoint',
@@ -357,15 +362,19 @@ export const userSettings = {
     'userSettingsMfa.unavailable': 'La vérification en deux étapes n\'est pas encore disponible sur ce serveur.',
     // src/pages/UserSettings/UserSettings.tsx
     'userSettingsPage.heading': 'Compte',
-    'userSettingsPage.tabManageData': 'Gérer les données',
-    'userSettingsPage.tabVisibility': 'Visibilité',
-    'userSettingsPage.tabProfileShares': 'Partages de profil',
-    'userSettingsPage.tabDocumentShares': 'Partages de documents',
-    'userSettingsPage.tabBlockedUsers': 'Utilisateurs bloqués',
     'userSettingsPage.logoutButton': 'Déconnexion',
 
     // src/pages/UserSettings/AiAssistants.tsx
     'userSettingsPage.tabAiAssistants': 'Assistants IA',
+    'userSettingsPage.tabAppearance': 'Apparence',
+    'userSettingsPage.tabPrivacyData': 'Confidentialité et données',
+    'userSettingsPage.tabDocuments': 'Documents',
+    'appearance.themeHeading': 'Thème',
+    'appearance.themeDescription': "Choisissez l'apparence de l'application sur cet appareil. Système suit le réglage de votre appareil ou navigateur.",
+    'appearance.themeLight': 'Clair',
+    'appearance.themeDark': 'Sombre',
+    'appearance.themeSystem': 'Système',
+    'appearance.languageHeading': 'Langue',
     'userSettingsAi.heading': 'Assistants IA',
     'userSettingsAi.intro': 'Connectez Claude, ChatGPT, Cursor ou vos propres agents à votre compte Ethora via le serveur MCP Ethora. Créez une clé API ci-dessous, puis collez les informations de connexion dans votre assistant.',
     'userSettingsAi.endpointLabel': 'Point d\'accès MCP',
@@ -643,15 +652,19 @@ export const userSettings = {
     'userSettingsMfa.unavailable': 'La verificación en dos pasos aún no está disponible en este servidor.',
     // src/pages/UserSettings/UserSettings.tsx
     'userSettingsPage.heading': 'Cuenta',
-    'userSettingsPage.tabManageData': 'Gestionar datos',
-    'userSettingsPage.tabVisibility': 'Visibilidad',
-    'userSettingsPage.tabProfileShares': 'Perfiles compartidos',
-    'userSettingsPage.tabDocumentShares': 'Documentos compartidos',
-    'userSettingsPage.tabBlockedUsers': 'Usuarios bloqueados',
     'userSettingsPage.logoutButton': 'Cerrar sesión',
 
     // src/pages/UserSettings/AiAssistants.tsx
     'userSettingsPage.tabAiAssistants': 'Asistentes de IA',
+    'userSettingsPage.tabAppearance': 'Apariencia',
+    'userSettingsPage.tabPrivacyData': 'Privacidad y datos',
+    'userSettingsPage.tabDocuments': 'Documentos',
+    'appearance.themeHeading': 'Tema',
+    'appearance.themeDescription': 'Elige cómo se ve la aplicación en este dispositivo. Sistema sigue la configuración de tu dispositivo o navegador.',
+    'appearance.themeLight': 'Claro',
+    'appearance.themeDark': 'Oscuro',
+    'appearance.themeSystem': 'Sistema',
+    'appearance.languageHeading': 'Idioma',
     'userSettingsAi.heading': 'Asistentes de IA',
     'userSettingsAi.intro': 'Conecta Claude, ChatGPT, Cursor o tus propios agentes a tu cuenta de Ethora a través del servidor MCP de Ethora. Crea una clave API abajo y pega los datos de conexión en tu asistente.',
     'userSettingsAi.endpointLabel': 'Punto de acceso MCP',
