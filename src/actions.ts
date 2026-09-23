@@ -94,6 +94,11 @@ export async function actionGetConfig(domainName?: string) {
     // means registration is allowed.
     userRegistrationDisabled: result.userRegistrationDisabled ?? false,
     requireMfaForAdmins: result.requireMfaForAdmins ?? false,
+    // Per-app end-to-end encryption opt-in. Absent on apps (or APIs) that
+    // predate the field, and off is the platform default, so the coercion is
+    // the safe direction: no app gains an encrypted-chat button it never
+    // asked for.
+    e2eeEnabled: result.e2eeEnabled ?? false,
     aiBot: result.aiBot,
   };
 

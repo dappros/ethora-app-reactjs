@@ -152,10 +152,16 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
         translateLanguages,
         appTranslate: uiLanguage,
         chatTranslate: chatLanguage,
+        // Per-app end-to-end-encryption opt-in. This provider sits above the
+        // router, so chat surfaces outside /chat (notification toasts, the
+        // widget) read ITS config; without this they would fall back to the
+        // install default and disagree with the Chats page.
+        e2eeEnabled: currentApp?.e2eeEnabled,
       }),
     [
       currentUser,
       currentApp?.primaryColor,
+      currentApp?.e2eeEnabled,
       translateLanguages,
       uiLanguage,
       chatLanguage,

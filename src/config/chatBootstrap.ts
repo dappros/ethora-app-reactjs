@@ -32,14 +32,33 @@ const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
   enableAudioCalls: true,
   startWithMicOn: true,
 };
-// End-to-end encryption (OMEMO 2). Gated by VITE_E2EE_ENABLED, which the
-// deploy system renders from features.e2ee in deploy.yml. Off means the SDK
-// generates no keys and builds stanzas exactly as before; on, it encrypts in
-// rooms the backend marked `e2ee` and leaves every other room plain. Needs an
-// ejabberd that lets room members read each other's OMEMO PEP nodes.
-const e2eeConfig: NonNullable<ChatConfig['e2ee']> = {
-  enabled: env.VITE_E2EE_ENABLED === 'true',
-};
+// End-to-end encryption (OMEMO 2). Two gates, both of which must be open:
+//
+//   - the INSTALL gate, VITE_E2EE_ENABLED, rendered by the deploy system from
+//     features.e2ee in deploy.yml. It says whether this deployment supports
+//     e2ee at all - it needs an ejabberd whose PEP access_model lets room
+//     members read each other's OMEMO nodes, which not every install has.
+//   - the APP gate, app.e2eeEnabled from GET /apps/get-config, set by the app
+//     owner in App Settings > Chats. It says whether THIS app wants encrypted
+//     chats offered to its users.
+//
+// Off means the SDK generates no keys and builds stanzas exactly as before;
+// on, it encrypts in rooms the backend marked `e2ee` and leaves every other
+// room plain. The backend enforces the same app gate on POST /v1/chats/private
+// (403 E2EE_DISABLED), so this switch only decides what the UI offers - it is
+// not what makes the rule hold.
+//
+// `appE2eeEnabled` is undefined until the first get-config lands. Treated as
+// off: showing an encrypted-chat affordance that the API would then refuse is
+// worse than showing it a beat late, and the config is rebuilt when the store
+// fills in.
+function buildE2eeConfig(
+  appE2eeEnabled: boolean | undefined | null
+): NonNullable<ChatConfig['e2ee']> {
+  return {
+    enabled: env.VITE_E2EE_ENABLED === 'true' && Boolean(appE2eeEnabled),
+  };
+}
 const webNotificationsConfig: NonNullable<ChatConfig['pushNotifications']> = {
   enabled: true,
   vapidPublicKey: env.VITE_VAPID_PUBLIC_KEY,
@@ -212,6 +231,11 @@ interface BuildEthoraBaseChatConfigProps extends ChatLanguageInputs {
   // not a hook. Omitted, we fall back to the last list the server told us
   // about, which is empty until the first get-config of the install.
   translateLanguages?: readonly string[] | null;
+  // The app's own end-to-end-encryption opt-in (store's currentApp.e2eeEnabled,
+  // from GET /apps/get-config). ANDed with the install's VITE_E2EE_ENABLED -
+  // see buildE2eeConfig. Same reactivity caveat as the language inputs: callers
+  // pass their own store read and list it in the useMemo deps (see main.tsx).
+  e2eeEnabled?: boolean | null;
 }
 
 export const buildEthoraBaseChatConfig = ({
@@ -221,6 +245,7 @@ export const buildEthoraBaseChatConfig = ({
   translateLanguages,
   appTranslate,
   chatTranslate,
+  e2eeEnabled,
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
   const { appLocale, chatLocale } = resolveLanguageConfig({
     appTranslate,
@@ -287,7 +312,7 @@ export const buildEthoraBaseChatConfig = ({
     // /v1/users/client jwt-exchange path on email-login deployments.
     initBeforeLoad: Boolean(userLoginPayload),
     videoCalls: videoCallsConfig,
-    e2ee: e2eeConfig,
+    e2ee: buildE2eeConfig(e2eeEnabled),
     // In-app message notifications (toasts). Enabled here, on the app-wide
     // XmppProvider (mounted above the router in main.tsx), so they fire on
     // any page - not only while the Chats page is open.
@@ -458,6 +483,10 @@ export function createChatConfig({
     translateLanguages,
     appTranslate,
     chatTranslate,
+    // The app whose chats are on screen decides this, which in App-Switcher
+    // (owner-session) mode is the switched-into app, not the admin's own base
+    // app - `app` is already the effective one at this call site (Chat.tsx).
+    e2eeEnabled: app?.e2eeEnabled,
   });
 
   if (ownerOverride) {

@@ -181,6 +181,14 @@ export interface ModelApp {
   // Admins/owners of this app are told at login to enrol in MFA
   // (login response `mfaEnrolmentRequired`). Absent on older apps = off.
   requireMfaForAdmins: boolean;
+  // Per-app opt-in for end-to-end encrypted (OMEMO 2) 1:1 chats, set by the
+  // app owner in App Settings > Chats. This is only the INNER gate: the
+  // install-wide VITE_E2EE_ENABLED (deploy.yml `features.e2ee`) is the outer
+  // one, and the chat-component is handed `e2ee.enabled` only when both are
+  // on - see config/chatBootstrap.ts. Absent on older apps, and on an API that
+  // predates the field; actions.ts coerces that to `false`, which is also the
+  // platform default, so everything downstream is a plain truthy check.
+  e2eeEnabled: boolean;
   // Per-app default identity stamped on broadcast announcements when the
   // /v2/chats/broadcast caller doesn't supply `sender` in the request body.
   // Without this the chat-component renders broadcasts as "Deleted User".
