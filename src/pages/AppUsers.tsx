@@ -581,22 +581,37 @@ export default function AppUsers() {
   const SORTABLE: Partial<Record<string, OrderByType>> = {
     name: 'firstName',
     email: 'email',
+    tags: 'tags',
     created: 'createdAt',
+    role: 'role',
     mfa: 'mfaEnabled',
     auth: 'authMethod',
+  };
+  // For these the useful first view is the "desc" side: tagged users first,
+  // admins first. Alphabetic / date columns start ascending as before.
+  const DESC_FIRST: OrderByType[] = ['tags', 'role', 'mfaEnabled'];
+  const SORT_HINT: Partial<Record<OrderByType, [string, string]>> = {
+    tags: [t('appUsers.sortHintTagsAsc'), t('appUsers.sortHintTagsDesc')],
+    role: [t('appUsers.sortHintRoleAsc'), t('appUsers.sortHintRoleDesc')],
   };
   const th = (key: string, label: string, align: 'left' | 'center' = 'center', extra = '') => {
     const field = SORTABLE[key];
     const active = field && orderBy === field;
     const base = `px-3 py-2 text-gray-500 font-normal font-inter text-xs whitespace-nowrap text-${align} ${extra}`;
     if (!field) return <th className={base}>{label}</th>;
+    const firstDir = DESC_FIRST.includes(field) ? 'desc' : 'asc';
+    const nextDir = active ? (order === 'asc' ? 'desc' : 'asc') : firstDir;
+    const hint = SORT_HINT[field];
+    const title = hint
+      ? nextDir === 'asc' ? hint[0] : hint[1]
+      : t('appUsers.sortByTitle').replace('{column}', label);
     return (
       <th className={`${base} cursor-pointer select-none hover:text-gray-800`}>
         <button
           type="button"
           className="inline-flex items-center gap-1"
-          title={t('appUsers.sortByTitle').replace('{column}', label)}
-          onClick={() => updateSearchParams({ orderBy: field, order: active && order === 'asc' ? 'desc' : 'asc', page: 0 })}
+          title={title}
+          onClick={() => updateSearchParams({ orderBy: field, order: nextDir, page: 0 })}
         >
           {label}
           <span className={classNames('text-[10px]', active ? 'text-brand-500' : 'text-gray-300')}>
@@ -794,6 +809,8 @@ export default function AppUsers() {
               { key: 'email', title: t('appUsers.sortEmail') },
               { key: 'authMethod', title: t('appUsers.sortAuthMethod') },
               { key: 'mfaEnabled', title: t('appUsers.sortMfa') },
+              { key: 'tags', title: t('appUsers.sortTags') },
+              { key: 'role', title: t('appUsers.sortRole') },
             ]}
             setOrderBy={setOrderBy}
           />

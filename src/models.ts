@@ -434,6 +434,8 @@ export type OrderByType =
   | 'email'
   | 'firstName'
   | 'authMethod'
-  | 'mfaEnabled';
+  | 'mfaEnabled'
+  | 'tags'
+  | 'role';
 
 export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'fr' | 'zh';
