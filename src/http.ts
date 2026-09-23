@@ -406,8 +406,10 @@ export function httpGetUsers(
   //   default -> active only (current behavior)
   lifecycle?: { status?: 'archived'; includeArchived?: boolean },
   // access='admin' -> only users who can act in the admin panel for this app
-  // (any ACL grant, the app owner, platform super admins).
-  access?: 'admin'
+  // (any management permission, the app owner, platform super admins).
+  access?: 'admin',
+  // tag -> only users carrying this tag
+  tag?: string
 ) {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -418,7 +420,27 @@ export function httpGetUsers(
   if (lifecycle?.status) params.set('status', lifecycle.status);
   if (lifecycle?.includeArchived) params.set('includeArchived', 'true');
   if (access) params.set('access', access);
+  if (tag) params.set('tag', tag);
   return http.get(`/users/${appId}?${params.toString()}`);
+}
+
+// Tags in use on the app's users, with counts (most used first).
+export function httpGetAppUserTags(appId: string) {
+  return http.get<{ items: Array<{ tag: string; count: number }>; total: number }>(`/users/tags/${appId}`);
+}
+
+export function httpTagsAdd(appId: string, usersIdList: string[], tagsList: string[]) {
+  return http.post(`/users/tags-add/${appId}`, { usersIdList, tagsList });
+}
+
+export function httpTagsDelete(appId: string, usersIdList: string[], tagsList: string[]) {
+  return http.post(`/users/tags-delete/${appId}`, { usersIdList, tagsList });
+}
+
+// Admin-side edit of one user of the app (name, description); validated
+// server-side by the same schema as self-update.
+export function httpUpdateAppUser(appId: string, userId: string, body: { firstName?: string; lastName?: string; description?: string }) {
+  return http.put(`/users/${encodeURIComponent(appId)}/${encodeURIComponent(userId)}`, body);
 }
 
 // "Remove admin access": every ACL grant on the app turned off; the account
