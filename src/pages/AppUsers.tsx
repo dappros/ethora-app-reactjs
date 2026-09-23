@@ -19,17 +19,21 @@ import { IconAdd } from '../components/Icons/IconAdd';
 import { IconCheckbox } from '../components/Icons/IconCheckbox';
 import { IconDelete } from '../components/Icons/IconDelete';
 import { IconSettings } from '../components/Icons/IconSettings';
+import { IconEdit } from '../components/Icons/IconEdit';
 import {
   getExportCsv,
   httpArchiveUsers,
   httpCraeteUser,
+  httpGetAppUserTags,
   httpGetUsers,
   httpHardDeleteUsers,
   httpResetUserMfa,
   httpRestoreUser,
   httpRevokeUserAccess,
-  httpTagsSet,
+  httpTagsAdd,
+  httpTagsDelete,
   httpUpdateAcl,
+  httpUpdateAppUser,
 } from '../http';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
@@ -51,6 +55,9 @@ import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
 import FacebookIcon from './AuthPage/Icons/socials/facebookIcon';
 import MetamaskIcon from './AuthPage/Icons/socials/metamaskIcon';
+import GoogleIcon from './AuthPage/Icons/socials/googleIcon';
+import { EditUserModal } from '../components/modal/EditUserModal';
+import { TagsInput } from '../components/TagsInput';
 
 export default function AppUsers() {
   const { t } = useTranslation();
@@ -69,7 +76,13 @@ export default function AppUsers() {
   const [resetMfaBusy, setResetMfaBusy] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showHardDelete, setShowHardDelete] = useState(false);
-  const [tags, setTags] = useState('');
+  // Manage Tags (bulk): tags to add to / remove from the selected users.
+  const [tagsToAdd, setTagsToAdd] = useState<string[]>([]);
+  const [tagsToRemove, setTagsToRemove] = useState<string[]>([]);
+  // Tags in use on this app (suggestions + counts), refreshed after edits.
+  const [appTags, setAppTags] = useState<Array<{ tag: string; count: number }>>([]);
+  const [editUser, setEditUser] = useState<ModelAppUser | null>(null);
+  const [editBusy, setEditBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   // Active vs Archived view. ?lifecycle=archived persists across refresh so the
   // operator can land directly on the restore screen.
@@ -77,6 +90,8 @@ export default function AppUsers() {
   // All users vs only those with admin-panel access (?access=admin).
   const accessTab = (searchParams.get('access') as 'all' | 'admin') || 'all';
   const accessParam = accessTab === 'admin' ? ('admin' as const) : undefined;
+  // Tag filter (?tag=): set by clicking a tag chip in the table.
+  const tagFilter = searchParams.get('tag') || undefined;
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
 
@@ -227,7 +242,7 @@ export default function AppUsers() {
     if (!appId) return;
 
     const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
-    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle, accessParam).then(
+    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle, accessParam, tagFilter).then(
       (response) => {
         const { total, items } = response.data;
         setItems(items);
@@ -235,7 +250,18 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / limit));
       }
     );
-  }, [appId, limit, page, orderBy, order, lifecycleTab, accessParam]);
+  }, [appId, limit, page, orderBy, order, lifecycleTab, accessParam, tagFilter]);
+
+  const loadAppTags = useCallback(() => {
+    if (!appId) return;
+    httpGetAppUserTags(appId)
+      .then((r) => setAppTags(r.data?.items || []))
+      .catch(() => setAppTags([]));
+  }, [appId]);
+
+  useEffect(() => {
+    loadAppTags();
+  }, [loadAppTags]);
 
   useEffect(() => {
     fetchUsers();
@@ -275,33 +301,62 @@ export default function AppUsers() {
     return indexes.map((el) => items[el]._id);
   };
 
-  const onTagsSumbmit = () => {
-    if (!appId) {
-      return;
+  // Manage Tags applies a diff: tags typed under "Add" are added to every
+  // selected user, tags under "Remove" are taken away; nothing else changes.
+  // (The old replace-all form silently wiped tags a user already had.)
+  const onManageTagsSubmit = async () => {
+    if (!appId) return;
+    const ids = getSelectedUserIds();
+    setLoading(true);
+    try {
+      if (tagsToAdd.length) await httpTagsAdd(appId, ids, tagsToAdd);
+      if (tagsToRemove.length) await httpTagsDelete(appId, ids, tagsToRemove);
+      setShowManageTags(false);
+      setTagsToAdd([]);
+      setTagsToRemove([]);
+      toast(t('appUsers.tagsAppliedToast'));
+      refreshAndClearSelection();
+      loadAppTags();
+    } catch (e: unknown) {
+      toast.error(`${t('appUsers.tagsFailedPrefix')} ${apiError(e).message}`);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const selectedUserIds = getSelectedUserIds();
-
-    httpTagsSet(appId, {
-      usersIdList: selectedUserIds,
-      tagsList: tags.split(',').filter((el) => !!el),
-    }).then(() => {
-      actionGetUsers(
-        appId,
-        itemsPerTable,
-        page * itemsPerTable,
-        orderBy,
-        order
-      ).then((response) => {
-        const { total, items } = response.data;
-        setItems(items);
-        setTotal(total);
-        setPageCount(Math.ceil(total / itemsPerTable));
-        setShowManageTags(false);
-        setTags('');
-        toast(t('appUsers.tagsAppliedToast'));
-      });
+  // Tags carried by the selected users (offered under "Remove").
+  const selectedUsersTags = (): string[] => {
+    const out = new Set<string>();
+    rowsSelected.forEach((sel, i) => {
+      if (sel) (items[i]?.tags || []).forEach((tg) => out.add(tg));
     });
+    return Array.from(out).sort();
+  };
+
+  const onEditUserSubmit = async (values: { firstName: string; lastName: string; description: string; tags: string[] }) => {
+    if (!appId || !editUser) return;
+    setEditBusy(true);
+    try {
+      const body: { firstName?: string; lastName?: string; description?: string } = {};
+      if (values.firstName !== editUser.firstName) body.firstName = values.firstName;
+      if (values.lastName !== editUser.lastName) body.lastName = values.lastName;
+      if ((values.description || '') !== (editUser.description || '')) body.description = values.description || '';
+      if (Object.keys(body).length) await httpUpdateAppUser(appId, editUser._id, body);
+      const before = new Set(editUser.tags || []);
+      const after = new Set(values.tags);
+      const add = values.tags.filter((tg) => !before.has(tg));
+      const remove = (editUser.tags || []).filter((tg) => !after.has(tg));
+      if (add.length) await httpTagsAdd(appId, [editUser._id], add);
+      if (remove.length) await httpTagsDelete(appId, [editUser._id], remove);
+      setEditUser(null);
+      toast(t('appUsers.userUpdatedToast'));
+      refreshAndClearSelection();
+      loadAppTags();
+    } catch (e: unknown) {
+      toast.error(`${t('appUsers.userUpdateFailedPrefix')} ${apiError(e).message}`);
+    } finally {
+      setEditBusy(false);
+    }
   };
 
   const onNewUser = ({
@@ -432,7 +487,9 @@ export default function AppUsers() {
       page * itemsPerTable,
       orderBy,
       order,
-      lifecycle
+      lifecycle,
+      accessParam,
+      tagFilter
     ).then((response) => {
       const { total, items } = response.data;
       setItems(items);
@@ -484,17 +541,70 @@ export default function AppUsers() {
     }
   };
 
-  const renderAuthMethodIcon = (name: string) => {
-    switch (name) {
+  // The provider recorded at the user's last sign-in. Legacy users have none;
+  // show that honestly rather than defaulting to email.
+  const renderAuthMethodIcon = (name?: string) => {
+    const method = (name || '').toLowerCase();
+    const label = method ? t(`appUsers.authMethod_${method}`) : t('appUsers.authMethod_unknown');
+    const title = label.startsWith('appUsers.') ? method : label;
+    let icon: React.ReactNode;
+    switch (method) {
+      case 'google':
+      case 'gmail':
+        icon = <GoogleIcon />;
+        break;
       case 'facebook':
-        return <FacebookIcon />;
+        icon = <FacebookIcon />;
+        break;
       case 'apple':
-        return <AppleIcon />;
+        icon = <AppleIcon />;
+        break;
       case 'metamask':
-        return <MetamaskIcon />;
+      case 'signature':
+        icon = <MetamaskIcon />;
+        break;
+      case 'email':
+        icon = <EmailIcon />;
+        break;
       default:
-        return <EmailIcon />;
+        icon = <span className="text-gray-400 text-xs">?</span>;
     }
+    return (
+      <span title={title} aria-label={title} className="inline-flex items-center justify-center">
+        {icon}
+      </span>
+    );
+  };
+
+  // Column header that sorts on click (arrow shows the active column and
+  // direction). Fields the API cannot sort on render as plain labels.
+  const SORTABLE: Partial<Record<string, OrderByType>> = {
+    name: 'firstName',
+    email: 'email',
+    created: 'createdAt',
+    mfa: 'mfaEnabled',
+    auth: 'authMethod',
+  };
+  const th = (key: string, label: string, align: 'left' | 'center' = 'center', extra = '') => {
+    const field = SORTABLE[key];
+    const active = field && orderBy === field;
+    const base = `px-3 py-2 text-gray-500 font-normal font-inter text-xs whitespace-nowrap text-${align} ${extra}`;
+    if (!field) return <th className={base}>{label}</th>;
+    return (
+      <th className={`${base} cursor-pointer select-none hover:text-gray-800`}>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          title={t('appUsers.sortByTitle').replace('{column}', label)}
+          onClick={() => updateSearchParams({ orderBy: field, order: active && order === 'asc' ? 'desc' : 'asc', page: 0 })}
+        >
+          {label}
+          <span className={classNames('text-[10px]', active ? 'text-brand-500' : 'text-gray-300')}>
+            {active ? (order === 'asc' ? '▲' : '▼') : '↕'}
+          </span>
+        </button>
+      </th>
+    );
   };
 
   const renderActionsForSelected = () => {
@@ -649,6 +759,27 @@ export default function AppUsers() {
               </button>
             ))}
           </div>
+          {tagFilter && (
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-brand-150 text-brand-500 text-sm">
+              {t('appUsers.tagFilterPrefix')} {tagFilter}
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchParams((prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete('tag');
+                    next.set('page', '0');
+                    return next;
+                  });
+                }}
+                aria-label={t('appUsers.tagFilterClear')}
+                title={t('appUsers.tagFilterClear')}
+                className="leading-none hover:text-red-500"
+              >
+                ×
+              </button>
+            </span>
+          )}
         </div>
         <div className="flex lg:flex-row flex-col w-full md:w-auto lg:items-center items-end lg:justify-end justify-start gap-4">
           <Sorting<OrderByType>
@@ -661,6 +792,8 @@ export default function AppUsers() {
               { key: 'firstName', title: t('appUsers.sortFirstName') },
               { key: 'lastName', title: t('appUsers.sortLastName') },
               { key: 'email', title: t('appUsers.sortEmail') },
+              { key: 'authMethod', title: t('appUsers.sortAuthMethod') },
+              { key: 'mfaEnabled', title: t('appUsers.sortMfa') },
             ]}
             setOrderBy={setOrderBy}
           />
@@ -700,44 +833,14 @@ export default function AppUsers() {
                         </Checkbox>
                       </Field>
                     </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
-                      {t('appUsers.colFirstName')}
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                      {t('appUsers.colLastName')}
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                      {t('appUsers.colEmail')}
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
-                      {t('appUsers.colTags')}
-                    </th>
-                    {/* <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      Creation Date
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      Seen Date
-                    </th> */}
-
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      {t('appUsers.colCreationSeenDate')}
-                    </th>
-
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      {t('appUsers.colRole')}
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      {t('appUsers.colMfa')}
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      {t('appUsers.colAuthMethod')}
-                    </th>
-                    <th className="px-4 r-delimiter text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      {t('appUsers.colAttribution')}
-                    </th>
-                    <th className="px-4 text-gray-500 font-normal font-inter text-xs rounded-r-lg text-center whitespace-nowrap">
-                      {t('appUsers.colActions')}
-                    </th>
+                    {th('name', t('appUsers.colName'), 'left')}
+                    {th('email', t('appUsers.colEmail'), 'left')}
+                    {th('tags', t('appUsers.colTags'), 'left')}
+                    {th('created', t('appUsers.colCreationSeenDate'))}
+                    {th('role', t('appUsers.colRole'))}
+                    {th('mfa', t('appUsers.colMfa'))}
+                    {th('auth', t('appUsers.colAuthMethod'))}
+                    {th('actions', t('appUsers.colActions'), 'center', 'rounded-r-lg')}
                   </tr>
                 </thead>
                 <tbody>
@@ -761,46 +864,44 @@ export default function AppUsers() {
                             </Checkbox>
                           </Field>
                         </td>
-                        <td className="px-4 py-[20px] text-left font-sans font-normal text-sm whitespace-nowrap">
-                          {el.firstName}
+                        <td className="px-3 py-2 text-left font-sans font-normal text-[13px] whitespace-nowrap">
+                          <div>{`${el.firstName || ''} ${el.lastName || ''}`.trim() || '-'}</div>
                         </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          {el.lastName}
-                        </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                        <td className="px-3 py-2 font-sans font-normal text-[13px] text-left whitespace-nowrap">
                           {el.email}
                         </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          <div className="flex items-center gap-1 justify-center">
-                            {el.tags.slice(0, 3).map((e, index) => (
-                              <div
-                                key={`${e}_${index}`}
-                                className="px-4 py-1 bg-brand-150 text-brand-500 rounded-2xl"
+                        <td className="px-3 py-2 font-sans font-normal text-[13px] text-left">
+                          <div className="flex flex-wrap items-center gap-1">
+                            {(el.tags || []).slice(0, 4).map((tg, i) => (
+                              <button
+                                type="button"
+                                key={`${tg}_${i}`}
+                                onClick={() => updateSearchParams({ tag: tg, page: 0 })}
+                                title={t('appUsers.tagFilterTitle').replace('{tag}', tg)}
+                                className={classNames(
+                                  'px-2 py-0.5 rounded-2xl text-xs hover:bg-brand-500 hover:text-white',
+                                  tagFilter === tg ? 'bg-brand-500 text-white' : 'bg-brand-150 text-brand-500'
+                                )}
                               >
-                                {e}
-                              </div>
+                                {tg}
+                              </button>
                             ))}
-                          </div>
-                        </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
-                          <div>
-                            {DateTime.fromISO(el.createdAt).toFormat(
-                              'dd LLL yyyy t'
+                            {(el.tags || []).length > 4 && (
+                              <span className="text-xs text-gray-400" title={(el.tags || []).slice(4).join(', ')}>
+                                +{(el.tags || []).length - 4}
+                              </span>
                             )}
                           </div>
-                          <div>
-                            {el.lastSeen
-                              ? DateTime.fromISO(el.lastSeen).toFormat(
-                                  'dd LLL yyyy t'
-                                )
-                              : '-'}
-                          </div>
                         </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                        <td className="px-3 py-2 font-sans font-normal text-[12px] text-center whitespace-nowrap text-gray-700">
+                          <div>{DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy t')}</div>
+                          <div className="text-gray-400">{el.lastSeen ? DateTime.fromISO(el.lastSeen).toFormat('dd LLL yyyy t') : '-'}</div>
+                        </td>
+                        <td className="px-3 py-2 font-sans font-normal text-[13px] text-center whitespace-nowrap">
                           {el.role ? (
                             <span
                               className={classNames(
-                                'px-3 py-1 rounded-2xl text-xs',
+                                'px-2 py-0.5 rounded-2xl text-xs',
                                 el.role === 'member' ? 'bg-gray-100 text-gray-600' : 'bg-brand-150 text-brand-500'
                               )}
                             >
@@ -810,24 +911,21 @@ export default function AppUsers() {
                             '-'
                           )}
                         </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                        <td className="px-3 py-2 font-sans font-normal text-[13px] text-center whitespace-nowrap">
                           {el.mfaEnabled === undefined && el.mfa === undefined ? (
                             '-'
                           ) : el.mfaEnabled || el.mfa?.enabled ? (
-                            <span className="px-3 py-1 rounded-2xl text-xs bg-green-100 text-green-700">{t('appUsers.mfaOn')}</span>
+                            <span className="px-2 py-0.5 rounded-2xl text-xs bg-green-100 text-green-700">{t('appUsers.mfaOn')}</span>
                           ) : (
-                            <span className="px-3 py-1 rounded-2xl text-xs bg-gray-100 text-gray-600">{t('appUsers.mfaOff')}</span>
+                            <span className="px-2 py-0.5 rounded-2xl text-xs bg-gray-100 text-gray-600">{t('appUsers.mfaOff')}</span>
                           )}
                         </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center whitespace-nowrap">
+                        <td className="px-3 py-2 font-sans font-normal text-[13px] text-center whitespace-nowrap">
                           <div className="flex items-center justify-center">
                             {renderAuthMethodIcon(el.authMethod)}
                           </div>
                         </td>
-                        <td className="px-4 font-sans font-normal text-sm text-center">
-                          -
-                        </td>
-                        <td className="px-4 rounded-r-lg font-sans font-normal text-sm text-center whitespace-nowrap">
+                        <td className="px-3 py-2 rounded-r-lg font-sans font-normal text-[13px] text-center whitespace-nowrap">
                           <div className="flex items-center justify-center gap-3">
                             {lifecycleTab === 'archived' && (
                               <button
@@ -838,7 +936,10 @@ export default function AppUsers() {
                                 {t('appUsers.restore')}
                               </button>
                             )}
-                            <button onClick={() => setEditAcl(el.acl)} title={t('appUsers.permissionsTitle')}>
+                            <button type="button" onClick={() => setEditUser(el)} title={t('appUsers.editTitle')} aria-label={t('appUsers.editTitle')}>
+                              <IconEdit width={16} />
+                            </button>
+                            <button type="button" onClick={() => setEditAcl(el.acl)} title={t('appUsers.permissionsTitle')} aria-label={t('appUsers.permissionsTitle')}>
                               <IconSettings width={16} height={16} />
                             </button>
                           </div>
@@ -894,16 +995,45 @@ export default function AppUsers() {
       </div>
       {showManageTags && (
         <SubmitModal onClose={() => setShowManageTags(false)}>
-          <div className="font-varela text-[24px] text-center mb-8">{t('appUsers.tagsModalTitle')}</div>
-          <div className="font-sans text-[14px] mb-8 text-center">{t('appUsers.addTagsSubtext')}</div>
-          <div>
-            <input
-              type="text"
-              placeholder={t('appUsers.tagsPlaceholder')}
-              className="w-full rounded-xl bg-[#F5F7F9] outline-none mb-8 py-[12px] px-[16px]"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
+          <div className="font-varela text-[24px] text-center mb-2">{t('appUsers.tagsModalTitle')}</div>
+          <div className="font-sans text-[13px] mb-6 text-center text-[#8C8C8C]">
+            {t('appUsers.tagsModalSubtext').replace('{count}', String(getSelectedIndexes().length))}
+          </div>
+          <div className="mb-5">
+            <div className="font-sans text-[13px] font-semibold mb-1">{t('appUsers.tagsAddLabel')}</div>
+            <TagsInput
+              value={tagsToAdd}
+              onChange={setTagsToAdd}
+              suggestions={appTags.map((x) => x.tag)}
+              placeholder={t('appUsers.tagsAddPlaceholder')}
+              autoFocus
             />
+          </div>
+          <div className="mb-8">
+            <div className="font-sans text-[13px] font-semibold mb-1">{t('appUsers.tagsRemoveLabel')}</div>
+            <TagsInput
+              value={tagsToRemove}
+              onChange={setTagsToRemove}
+              suggestions={selectedUsersTags()}
+              placeholder={t('appUsers.tagsRemovePlaceholder')}
+            />
+            {selectedUsersTags().length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {selectedUsersTags()
+                  .filter((tg) => !tagsToRemove.includes(tg))
+                  .map((tg) => (
+                    <button
+                      key={tg}
+                      type="button"
+                      onClick={() => setTagsToRemove([...tagsToRemove, tg])}
+                      className="px-2 py-0.5 rounded-2xl text-xs bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600"
+                      title={t('appUsers.tagsRemoveTitle')}
+                    >
+                      {tg}
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
           <div className="flex gap-8">
             <button
@@ -913,13 +1043,23 @@ export default function AppUsers() {
               {t('appUsers.cancel')}
             </button>
             <button
-              onClick={onTagsSumbmit}
-              className="rounded-xl hover:bg-brand-darker  bg-brand-500 border max-w-[416px] w-full text-center text-white p-2"
+              onClick={onManageTagsSubmit}
+              disabled={!tagsToAdd.length && !tagsToRemove.length}
+              className="rounded-xl hover:bg-brand-darker bg-brand-500 border max-w-[416px] w-full text-center text-white p-2 disabled:opacity-50"
             >
               {t('appUsers.submit')}
             </button>
           </div>
         </SubmitModal>
+      )}
+      {editUser && (
+        <EditUserModal
+          user={editUser}
+          suggestions={appTags.map((x) => x.tag)}
+          loading={editBusy}
+          onClose={() => setEditUser(null)}
+          onSubmit={onEditUserSubmit}
+        />
       )}
       {showResetPassword && (
         <SubmitModal onClose={() => setShowResetPassword(false)}>

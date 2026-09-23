@@ -276,6 +276,7 @@ export interface ModelAppUser {
   // Derived server-side from the ACL row, the app owner and the platform
   // super-admin flags. Absent on older backends.
   role?: 'superadmin' | 'owner' | 'admin' | 'member';
+  description?: string;
 }
 
 // Phase 1 (Agents): first-class AI Agent and per-App BotInstance projections returned by /v2/agents and /v2/bot-instances.
@@ -431,6 +432,8 @@ export type OrderByType =
   | 'totalTransactions'
   | 'lastName'
   | 'email'
-  | 'firstName';
+  | 'firstName'
+  | 'authMethod'
+  | 'mfaEnabled';
 
 export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'fr' | 'zh';
