@@ -196,7 +196,7 @@ function ClientSteps({
     </div>
   );
   const planNote = (key: string) => (
-    <div className="font-sans text-[12px] mb-4 rounded-xl px-[12px] py-[10px] bg-amber-50 text-amber-800 border border-amber-200">
+    <div className="font-sans text-[12px] mb-4 rounded-xl px-[12px] py-[10px] bg-amber-50 text-amber-800 border border-amber-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-900">
       {t(key)}
     </div>
   );
@@ -295,7 +295,7 @@ function UsageStatus({
   if (!lastUsedAt) {
     return (
       <span
-        className="inline-flex items-center gap-2 whitespace-nowrap text-[#8C8C8C]"
+        className="inline-flex items-center gap-2 whitespace-nowrap text-gray-500"
         title={t('userSettingsAi.statusWaitingHint')}
       >
         <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
@@ -308,7 +308,7 @@ function UsageStatus({
     <span className="inline-flex items-center gap-2 whitespace-nowrap">
       <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
       {t('userSettingsAi.statusConnected')}
-      <span className="text-[#8C8C8C]">
+      <span className="text-gray-500">
         {client ? `${t('userSettingsAi.statusVia').replace('{client}', client)} · ` : ''}
         {relativeAge(lastUsedAt, t)}
       </span>
@@ -488,7 +488,7 @@ export function AiAssistants() {
               <div className="font-sans text-regular font-semibold mb-1">
                 {t('userSettingsAi.newKeyLead')}
               </div>
-              <div className="text-[#8C8C8C] font-sans text-[12px] mb-3">
+              <div className="text-gray-500 font-sans text-[12px] mb-3">
                 {t('userSettingsAi.pickClientHint')}
               </div>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -500,7 +500,7 @@ export function AiAssistants() {
                     className={
                       c === client
                         ? 'py-[8px] px-4 rounded-xl bg-brand-500 text-white text-[13px]'
-                        : 'py-[8px] px-4 rounded-xl bg-[#F5F7F9] text-[13px] hover:bg-brand-hover'
+                        : 'py-[8px] px-4 rounded-xl bg-gray-100 text-[13px] hover:bg-brand-hover'
                     }
                   >
                     {t(`userSettingsAi.client.${c}`)}

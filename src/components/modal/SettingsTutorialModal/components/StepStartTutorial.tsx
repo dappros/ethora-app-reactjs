@@ -78,12 +78,15 @@ export const StepStartTutorial = ({
       {/* The fourth path: let an assistant drive the account instead of
           learning these pages. Deliberately below the three cards, as a
           quieter alternative rather than a fourth tile. */}
-      <div className="mt-8 rounded-2xl bg-[#F5F7F9] p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4">
-        <div className="flex-1">
-          <div className="font-semibold text-black">
+      {/* Width matches the row of three cards above (3 x 200px + gaps), so
+          the modal stays as narrow as it was; theme tokens only, so it reads
+          the same on the dark surface. */}
+      <div className="mt-8 mx-auto max-w-[680px] rounded-2xl bg-gray-100 p-4 flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm text-gray-900">
             {t('stepStartTutorial.mcp.lead')}
           </div>
-          <div className="text-sm text-gray-600 mt-1">
+          <div className="text-xs text-gray-600 mt-1">
             {t('stepStartTutorial.mcp.text')}
           </div>
         </div>
