@@ -57,7 +57,7 @@ export const ListQuestion = ({
                 </div>
               </div>
 
-              <div className="bg-white/90 hover:bg-blue-100/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-md transition-all duration-200 pt-16 md:pt-20 pb-6 px-4 flex flex-col flex-1">
+              <div className="bg-white/90 hover:bg-blue-100/60 dark:hover:bg-blue-900/30 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-md transition-all duration-200 pt-16 md:pt-20 pb-6 px-4 flex flex-col flex-1">
                 <div className="min-h-[3.5rem] md:min-h-[4rem] flex flex-col items-center justify-center text-center">
                   <h3 className="font-bold text-base md:text-lg text-gray-900 leading-tight">
                     {data.question.title}

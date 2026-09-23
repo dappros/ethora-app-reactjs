@@ -85,7 +85,7 @@
 //               fontWeight: 400,
 //               fontSize: '24px',
 //               height: '32px',
-//               color: '#141414',
+//               color: 'rgb(var(--c-gray-950))',
 //               m: 0,
 //             }}
 //           >

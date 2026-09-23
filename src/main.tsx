@@ -3,7 +3,6 @@ import { PostHogProvider } from 'posthog-js/react';
 import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Fallback } from './App.tsx';
 import posthog from './posthog.ts';
@@ -12,6 +11,7 @@ import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
 import './index.css';
 import { router } from './router.tsx';
 import { useAppStore } from './store/useAppStore';
+import { ThemeBridge } from './theme/ThemeBridge';
 import { purgeLegacyCredentialCopies } from './authRefresh.ts';
 
 purgeLegacyCredentialCopies();
@@ -174,16 +174,17 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
 createRoot(document.getElementById('root')!).render(
   <PostHogProvider client={posthog}>
     <XmppProviderBridge>
-      <RouterErrorBoundary>
-        <RouterProvider
-          router={router}
-          fallbackElement={<Fallback />}
-          future={{
-            v7_startTransition: true,
-          }}
-        />
-      </RouterErrorBoundary>
-      <ToastContainer />
+      <ThemeBridge>
+        <RouterErrorBoundary>
+          <RouterProvider
+            router={router}
+            fallbackElement={<Fallback />}
+            future={{
+              v7_startTransition: true,
+            }}
+          />
+        </RouterErrorBoundary>
+      </ThemeBridge>
     </XmppProviderBridge>
   </PostHogProvider>
 );

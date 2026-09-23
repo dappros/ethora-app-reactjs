@@ -101,7 +101,7 @@ export function ProfileShares() {
                 <p className="font-sans text-[14px] text-center mb-8">
                   {t('userSettingsProfileShares.modalDescription')}
                 </p>
-                <div className="p-2 bg-[#F3F6FC] rounded-lg grid grid-cols-[16px,_1fr] gap-2 items-center mb-8">
+                <div className="p-2 bg-brand-150 rounded-lg grid grid-cols-[16px,_1fr] gap-2 items-center mb-8">
                   <IconInfo />
                   <span className="text-[12px]">
                     {t('userSettingsProfileShares.modalInfo')}
@@ -111,12 +111,12 @@ export function ProfileShares() {
                 <h3 className="font-semibold text-[16px] text-left mb-4">
                   {t('userSettingsProfileShares.expirationLabel')}
                 </h3>
-                <div className="text-[12px] text-[#8C8C8C] mb-4">
+                <div className="text-[12px] text-gray-500 mb-4">
                   {t('userSettingsProfileShares.expirationHint')}
                 </div>
-                <Field className="bg-[#F5F7F9] w-full py-[12px] px-[16px] rounded-xl mb-8">
+                <Field className="bg-gray-100 w-full py-[12px] px-[16px] rounded-xl mb-8">
                   <Select
-                    className="w-full bg-[#F5F7F9]"
+                    className="w-full bg-gray-100"
                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                       setExpirationTime(Number(e.target.value))
                     }
@@ -141,14 +141,14 @@ export function ProfileShares() {
                 <div className="font-semibold text-[16px] text-left mb-4">
                   {t('userSettingsProfileShares.memoLabel')}
                 </div>
-                <div className="text-[12px] text-[#8C8C8C] mb-4">
+                <div className="text-[12px] text-gray-500 mb-4">
                   {t('userSettingsProfileShares.memoHint')}
                 </div>
                 <input
                   type="text"
                   onChange={(e) => setMemo(e.target.value)}
                   placeholder={t('userSettingsProfileShares.memoPlaceholder')}
-                  className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+                  className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
                 />
                 <div className="flex gap-8">
                   <button
@@ -210,7 +210,7 @@ export function ProfileShares() {
         <div className="w-full overflow-auto hide-scroll">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#FCFCFC]">
+              <tr className="bg-gray-50">
                 <th className="rounded-l-lg r-delimiter px-4 py-2 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
                   {t('userSettingsProfileShares.tableMemo')}
                 </th>
@@ -228,7 +228,7 @@ export function ProfileShares() {
             <tbody>
               {items.map((el) => {
                 return (
-                  <tr key={el._id} className="hover:!bg-[#F5F7F9]">
+                  <tr key={el._id} className="hover:!bg-gray-100">
                     <td className="px-4 r-delimiter py-[12px] font-sans font-normal text-sm rounded-l-xl whitespace-nowrap">
                       {el.memo ? el.memo : '-'}
                     </td>
@@ -309,14 +309,14 @@ export function ProfileShares() {
   };
 
   return (
-    <div className="md:ml-4">
+    <div>
       <div className="font-sans font-semibold text-[16px] mb-2">
         {t('userSettingsProfileShares.heading')}
       </div>
-      <div className="text-[#8C8C8C] text-[12px] mb-4">
+      <div className="text-gray-500 text-[12px] mb-4">
         {t('userSettingsProfileShares.description')}
       </div>
-      <div className="border border-[#F0F0F0] rounded-xl p-4">
+      <div className="border border-gray-200 rounded-xl p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="font-sans font-semibold text-[16px]">
             {t('userSettingsProfileShares.listOfShares')}
@@ -335,7 +335,7 @@ export function ProfileShares() {
         </div>
 
         {!items.length && (
-          <div className="bg-[#F3F6FC] py-[16px] font-sans text-[14px] px-[16px] rounded-xl">
+          <div className="bg-brand-150 py-[16px] font-sans text-[14px] px-[16px] rounded-xl">
             {t('userSettingsProfileShares.emptyState')}
           </div>
         )}

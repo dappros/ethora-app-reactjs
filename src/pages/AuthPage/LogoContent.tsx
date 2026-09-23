@@ -91,7 +91,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
             fontFamily: 'Varela Round',
             fontWeight: 400,
             fontSize: 48,
-            color: '#141414',
+            color: 'rgb(var(--c-gray-950))',
             lineHeight: '56px',
             height: '112px',
             wordBreak: 'break-word',

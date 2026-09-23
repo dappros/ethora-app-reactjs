@@ -22,7 +22,7 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
   return (
     <Container className="w-full h-screen flex flex-col md:flex-row items-center justify-center md:justify-around md:gap-10">
       <Box className="flex flex-col items-center text-center">
-        <span className="text-brand-850 font-bold text-base">{status}</span>
+        <span className="text-brand-850 dark:text-brand-300 font-bold text-base">{status}</span>
         <span className="py-8 text-4xl md:text-5xl font-medium">{title}</span>
         <Typography className="pb-8">{description}</Typography>
         <CustomButton

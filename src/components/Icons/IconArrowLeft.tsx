@@ -7,10 +7,11 @@ interface Props {
 export function IconArrowLeft({
   width = 16,
   height = 10,
-  stroke = '#8C8C8C',
+  stroke = 'currentColor',
 }: Props) {
   return (
     <svg
+      className="text-gray-500"
       width={width}
       height={height}
       viewBox="0 0 16 10"

@@ -6,6 +6,7 @@ interface Props {
 export function IconMenuBurger({ width = 24, height = 24 }: Props) {
   return (
     <svg
+      className="text-gray-900"
       width={width}
       height={height}
       viewBox="0 0 24 24"
@@ -14,7 +15,7 @@ export function IconMenuBurger({ width = 24, height = 24 }: Props) {
     >
       <path
         d="M3 6.00098H21M3 12.001H15M3 18.001H21"
-        stroke="#1F1F1F"
+        stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -1,4 +1,5 @@
 import type { UiLocale } from './constants/languageOptionsConstants';
+import type { UiTheme } from './utils/uiTheme';
 
 export interface ModelCurrentUser {
   _id: string;
@@ -399,6 +400,9 @@ export interface ModelState {
   // detection) and replaced by the user's server-stored choice as soon as a
   // session bootstraps.
   uiLanguage: UiLocale;
+  // Colour theme choice ('light' | 'dark' | 'system'). Per device, never sent
+  // to the server - see utils/uiTheme.ts.
+  uiTheme: UiTheme;
   // Languages the INTERFACE works in: get-config's translateLanguages narrowed
   // to what the bundle can render (see constants/languageOptionsConstants.ts
   // resolveAvailableLanguages, which falls back to the whole catalogue when the

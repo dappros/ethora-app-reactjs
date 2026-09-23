@@ -136,7 +136,7 @@ export const TabAIWidgetDocument = ({
     if (extension === 'pdf') {
       return <PictureAsPdfIcon sx={{ fontSize: 48, color: '#ef4444' }} />;
     }
-    return <DescriptionIcon sx={{ fontSize: 48, color: '#6b7280' }} />;
+    return <DescriptionIcon sx={{ fontSize: 48, color: 'rgb(var(--c-gray-600))' }} />;
   };
 
   const getFileName = (url: string): string => {
@@ -149,7 +149,7 @@ export const TabAIWidgetDocument = ({
         <span>{t('aiWidgetDocuments.title')}</span>
         <button
           onClick={() => ragRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          className="text-blue-600 text-[14px] inline-flex items-center gap-[2px]"
+          className="text-blue-600 dark:text-blue-400 text-[14px] inline-flex items-center gap-[2px]"
         >
           <span>{t('aiWidgetDocuments.ragFeature')}</span> <InfoOutlinedIcon fontSize="small" />
         </button>
@@ -171,9 +171,11 @@ export const TabAIWidgetDocument = ({
               width: 130,
               height: 130,
               border: '2px dashed',
-              borderColor: file.file ? '#fbbf24' : '#d1d5db',
+              borderColor: file.file ? '#fbbf24' : 'rgb(var(--c-gray-300))',
               borderRadius: 2,
-              backgroundColor: file.file ? '#fef3c7' : '#f9fafb',
+              backgroundColor: file.file ? '#fef3c7' : 'rgb(var(--c-gray-50))',
+              // Pending-upload tile: the amber wash is too bright on dark.
+              '.dark &': file.file ? { backgroundColor: 'rgba(146, 64, 14, 0.3)' } : {},
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -183,7 +185,7 @@ export const TabAIWidgetDocument = ({
               transition: 'all 0.2s',
               '&:hover': {
                 borderColor: '#3b82f6',
-                backgroundColor: '#eff6ff',
+                backgroundColor: 'rgb(var(--c-brand-150))',
               },
             }}
           >
@@ -230,7 +232,7 @@ export const TabAIWidgetDocument = ({
                 paddingBottom: 1,
                 fontSize: '0.7rem',
                 fontWeight: 500,
-                color: '#374151',
+                color: 'rgb(var(--c-gray-700))',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -252,9 +254,9 @@ export const TabAIWidgetDocument = ({
             width: allFiles.length === 0 ? '100%' : 130,
             height: allFiles.length === 0 ? 160 : 130,
             border: '2px dashed',
-            borderColor: isDragging ? '#3b82f6' : '#d1d5db',
+            borderColor: isDragging ? '#3b82f6' : 'rgb(var(--c-gray-300))',
             borderRadius: 2,
-            backgroundColor: isDragging ? '#eff6ff' : '#ffffff',
+            backgroundColor: isDragging ? 'rgb(var(--c-brand-150))' : 'rgb(var(--c-surface))',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -263,14 +265,14 @@ export const TabAIWidgetDocument = ({
             transition: 'all 0.2s',
             '&:hover': {
               borderColor: '#3b82f6',
-              backgroundColor: '#eff6ff',
+              backgroundColor: 'rgb(var(--c-brand-150))',
             },
           }}
         >
           <FileUploadOutlinedIcon
             sx={{
               fontSize: 48,
-              color: isDragging ? '#3b82f6' : '#9ca3af',
+              color: isDragging ? '#3b82f6' : 'rgb(var(--c-gray-500))',
               marginBottom: 1,
             }}
           />
@@ -278,7 +280,7 @@ export const TabAIWidgetDocument = ({
             variant="caption"
             sx={{
               fontSize: '0.7rem',
-              color: '#6b7280',
+              color: 'rgb(var(--c-gray-600))',
               textAlign: 'center',
               paddingX: 1,
             }}

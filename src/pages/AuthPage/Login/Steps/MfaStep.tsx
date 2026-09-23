@@ -79,7 +79,7 @@ export default function MfaStep({ pending, onBack }: Props) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: '320px' }}>
-      <Typography sx={{ fontSize: '14px', color: '#141414' }}>
+      <Typography sx={{ fontSize: '14px', color: 'rgb(var(--c-gray-950))' }}>
         {useBackup ? t('authMfaStep.backupIntro') : t('authMfaStep.intro')}
       </Typography>
       <Box
@@ -124,7 +124,7 @@ export default function MfaStep({ pending, onBack }: Props) {
         >
           {t('authMfaStep.submit')}
         </CustomButton>
-        <Typography sx={{ fontSize: '12px', color: '#8C8C8C', textAlign: 'center' }}>
+        <Typography sx={{ fontSize: '12px', color: 'rgb(var(--c-gray-500))', textAlign: 'center' }}>
           {expired
             ? t('authMfaStep.expired')
             : t('authMfaStep.expiresIn').replace('{seconds}', String(secondsLeft))}

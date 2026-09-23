@@ -18,7 +18,7 @@ import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
 const ITEM_CLASS =
-  'flex group hover:bg-[#F5F7F9] flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
+  'flex group hover:bg-gray-100 flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
 const LABEL_CLASS =
   'text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500';
 const ITEM_WRAP_CLASS = 'py-[3px] first:pt-0 last:pb-0';
@@ -142,7 +142,7 @@ export function AppMenu() {
         <div className={ITEM_WRAP_CLASS}>
           <NavLink
             to="/app/profile"
-            className="flex hover:bg-[#F5F7F9] group flex-col items-center justify-center md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
+            className="flex hover:bg-gray-100 group flex-col items-center justify-center md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
           >
             <ProfilePageUserIcon
               firstName={currentUser.firstName}
@@ -161,7 +161,7 @@ export function AppMenu() {
         <div className={cn(ITEM_WRAP_CLASS, 'hidden md:block')}>
           <NavLink
             to="/app/account"
-            className="hidden group hover:bg-[#F5F7F9] flex-col items-center justify-center md:flex md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
+            className="hidden group hover:bg-gray-100 flex-col items-center justify-center md:flex md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
           >
             <IconAccount />
             <div className="hidden md:block text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500">

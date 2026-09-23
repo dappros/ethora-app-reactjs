@@ -171,7 +171,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
               {({ focus }) => (
                 <button
                   onClick={handleRestore}
-                  className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm text-green-700`}
+                  className={`${focus ? 'bg-gray-100' : ''} w-full text-left px-3 py-2 rounded-lg text-sm text-green-700 dark:text-green-400`}
                 >
                   {t('appActionsMenu.restore')}
                 </button>
@@ -224,7 +224,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                 <span className="font-semibold">"{app.displayName}"</span>{' '}
                 {t('appActionsMenu.confirmHardDelete.intro')}
               </div>
-              <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+              <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-900/60 rounded-lg px-4 py-3">
                 {t('appActionsMenu.confirmHardDelete.purgeListTitle')}
                 <ul className="mt-1 list-disc list-inside space-y-0.5">
                   <li>
@@ -251,7 +251,7 @@ export function AppActionsMenu({ app, onChanged }: Props) {
                   <li>{t('appActionsMenu.confirmHardDelete.botInstances')}</li>
                 </ul>
               </div>
-              <div className="mt-3 text-red-700 font-semibold">
+              <div className="mt-3 text-red-700 dark:text-red-400 font-semibold">
                 {t('appActionsMenu.confirmHardDelete.cannotBeUndone')}
               </div>
             </>

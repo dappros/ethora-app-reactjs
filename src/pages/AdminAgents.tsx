@@ -49,8 +49,8 @@ function fmtBytes(n?: number | null) {
 }
 
 const VISIBILITY_BADGE: Record<string, string> = {
-  public: 'bg-green-100 text-green-700',
-  unlisted: 'bg-yellow-100 text-yellow-700',
+  public: 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+  unlisted: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
   private: 'bg-gray-100 text-gray-600',
 };
 
@@ -285,8 +285,8 @@ export default function AdminAgents() {
         {isSuperReadAdmin && (
           <label className="inline-flex items-center gap-1 cursor-pointer">
             <input type="checkbox" checked={showOtherPrivate} onChange={(e) => setShowOtherPrivate(e.target.checked)} />
-            <span className="text-purple-700">{t('adminAgents.privateOtherTenants')}</span>
-            <span className="text-[10px] text-purple-700/70">{t('adminAgents.superadminBadge')}</span>
+            <span className="text-purple-700 dark:text-purple-300">{t('adminAgents.privateOtherTenants')}</span>
+            <span className="text-[10px] text-purple-700/70 dark:text-purple-300/70">{t('adminAgents.superadminBadge')}</span>
           </label>
         )}
       </div>
@@ -492,7 +492,7 @@ const CreateAgentModal: React.FC<{
             list and be able to clone it. Make the trade-off explicit at
             create time so this is a deliberate choice. */}
         {visibility === 'public' && (
-          <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug">
+          <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug dark:border-yellow-800/60 dark:bg-yellow-900/30 dark:text-yellow-200">
             <strong>{t('adminAgents.publicVisibilityWarningTitle')}</strong>{' '}
             {t('adminAgents.publicVisibilityWarningBody')}
           </div>

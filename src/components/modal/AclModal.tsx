@@ -42,14 +42,14 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
           {t('aclModal.appLevelTitle')}
         </div>
 
-        <div className="font-sans text-xs text-[#8C8C8C] mb-4">
+        <div className="font-sans text-xs text-gray-500 mb-4">
           {t('aclModal.appLevelDescription')}
         </div>
 
         <div className="mb-8">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#FCFCFC]">
+              <tr className="bg-gray-50">
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
                   {t('aclModal.colName')}
                 </th>
@@ -359,14 +359,14 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl }: Props) {
           {t('aclModal.serverLevelTitle')}
         </div>
 
-        <div className="font-sans text-xs text-[#8C8C8C] mb-4">
+        <div className="font-sans text-xs text-gray-500 mb-4">
           {t('aclModal.serverLevelDescription')}
         </div>
 
         <div className="mb-8">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#FCFCFC]">
+              <tr className="bg-gray-50">
                 <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
                   {t('aclModal.colName')}
                 </th>

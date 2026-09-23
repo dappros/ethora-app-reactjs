@@ -93,7 +93,7 @@ export function WebMobileApp({
           id="domain-input"
         />
         {/* <button onClick={onExternalClick} className='cursor-pointer'> */}
-        <button className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl">
+        <button className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 dark:bg-brand-250 rounded-xl">
           .{hostedAppsRootDomain}
         </button>
         {/* </button> */}
@@ -115,7 +115,7 @@ export function WebMobileApp({
             id="domain-input"
           />
           <label
-            className="text-gray-500 tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 rounded-xl"
+            className="text-gray-500 tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 dark:bg-brand-250 rounded-xl"
             htmlFor="domain-input"
           >
             .com

@@ -92,13 +92,13 @@ export function EmailVerification() {
   return (
     <div className="mb-6">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-sans">
-        <span className="text-[#8C8C8C]">{t('userSettingsEmail.label')}</span>
+        <span className="text-gray-500">{t('userSettingsEmail.label')}</span>
         {address && <span className="break-all">{address}</span>}
         {verified ? (
-          <span className="text-[#8C8C8C]">{t('userSettingsEmail.verified')}</span>
+          <span className="text-gray-500">{t('userSettingsEmail.verified')}</span>
         ) : (
           <>
-            <span className="text-[#8C8C8C]">
+            <span className="text-gray-500">
               {t('userSettingsEmail.notVerified')}
             </span>
             {!sent && (
@@ -118,7 +118,7 @@ export function EmailVerification() {
       </div>
 
       {!verified && sent && (
-        <div className="mt-2 text-[#8C8C8C] font-sans text-[12px]">
+        <div className="mt-2 text-gray-500 font-sans text-[12px]">
           {t('userSettingsEmail.sentMessage').replace('{email}', address)}{' '}
           <button
             type="button"
@@ -137,7 +137,7 @@ export function EmailVerification() {
       )}
 
       {!verified && !sent && (
-        <div className="mt-1 text-[#8C8C8C] font-sans text-[12px]">
+        <div className="mt-1 text-gray-500 font-sans text-[12px]">
           {t('userSettingsEmail.optionalNote')}
         </div>
       )}

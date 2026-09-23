@@ -43,8 +43,8 @@ export function LicenseBanner() {
       className={cn(
         'mb-2 md:mb-4 rounded-xl px-4 py-2 text-sm flex flex-col md:flex-row md:items-center gap-1 md:gap-3',
         restricted
-          ? 'bg-red-50 text-red-800 border border-red-200'
-          : 'bg-amber-50 text-amber-900 border border-amber-200'
+          ? 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/30 dark:text-red-200 dark:border-red-900/60'
+          : 'bg-amber-50 text-amber-900 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800/60'
       )}
     >
       <span className="font-semibold">{headline}</span>

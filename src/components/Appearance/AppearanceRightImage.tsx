@@ -88,7 +88,7 @@ export const AppearanceRightImage = ({
             )}
             style={{ backgroundImage: `url(${SafariImage})` }}
           >
-            <div className="absolute w-full h-[262px]  bg-white bottom-0">
+            <div className="absolute w-full h-[262px] bg-[#fff] text-[#121219] [color-scheme:light] bottom-0">
               <div
                 className="w-full grid grid-cols-[2fr,_3fr] place-items-center h-full bg-preview bg-cover px-[20px]"
                 style={{ backgroundImage: `url(${BG})` }}
@@ -109,7 +109,7 @@ export const AppearanceRightImage = ({
                 </div>
                 <div
                   className={classNames(
-                    'bg-white rounded-xl p-3',
+                    'bg-[#fff] rounded-xl p-3',
                     '2xl:w-[220px] 2xl:h-[220px], xl:w-[180px] xl:h-[180px]'
                   )}
                 >
@@ -135,20 +135,20 @@ export const AppearanceRightImage = ({
                       readOnly
                       type="text"
                       value="Gloria"
-                      className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                      className="w-1/2 text-[8px] rounded-xl bg-[#F5F7F9] py-[2px] px-1"
                     />
                     <input
                       readOnly
                       type="text"
                       value="Mayer"
-                      className="w-1/2 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                      className="w-1/2 text-[8px] rounded-xl bg-[#F5F7F9] py-[2px] px-1"
                     />
                   </div>
                   <input
                     readOnly
                     type="text"
                     value="GloriaMayer@gmail.com"
-                    className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+                    className="w-full mb-1 text-[8px] rounded-xl bg-[#F5F7F9] py-[2px] px-1"
                   />
                   <button
                     className="w-full text-white text-[8px] py-[3px] rounded-xl mb-2"

@@ -73,7 +73,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
           textAlign: 'left',
           fontSize: '24px',
           fontWeight: 400,
-          color: '#141414',
+          color: 'rgb(var(--c-gray-950))',
         }}
       >
         {t('authForgetPasswordSecondStep.title')}
@@ -83,7 +83,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
           textAlign: 'left',
           fontSize: '16px',
           fontWeight: 400,
-          color: '#8C8C8C',
+          color: 'rgb(var(--c-gray-500))',
         }}
       >
         {t('authForgetPasswordSecondStep.sentEmailPrefix')}{' '}
@@ -96,7 +96,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             textAlign: 'left',
             fontSize: '16px',
             fontWeight: 400,
-            color: '#141414',
+            color: 'rgb(var(--c-gray-950))',
             marginBottom: '8px',
           }}
         >
@@ -108,7 +108,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             textAlign: 'left',
             fontSize: '16px',
             fontWeight: 400,
-            color: '#141414',
+            color: 'rgb(var(--c-gray-950))',
           }}
         >
           {t('authForgetPasswordSecondStep.instructionCheckSpam')}
@@ -120,7 +120,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ setStep }) => {
             textAlign: 'center',
             fontSize: '14px',
             fontWeight: 400,
-            color: '#8C8C8C',
+            color: 'rgb(var(--c-gray-500))',
             width: '100%',
           }}
         >

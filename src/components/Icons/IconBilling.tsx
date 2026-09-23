@@ -6,6 +6,7 @@ interface Props {
 export function IconBilling({ width = 24, height = 24 }: Props) {
   return (
     <svg
+      className="text-gray-500"
       width={width}
       height={height}
       viewBox="0 0 24 24"
@@ -19,28 +20,28 @@ export function IconBilling({ width = 24, height = 24 }: Props) {
         width="19"
         height="13"
         rx="2"
-        stroke="#8C8C8C"
+        stroke="currentColor"
         className="brand-path-stroke-if-active"
         strokeWidth="1.5"
       />
       {/* magnetic strip */}
       <path
         d="M2.5 9.5H21.5"
-        stroke="#8C8C8C"
+        stroke="currentColor"
         className="brand-path-stroke-if-active"
         strokeWidth="1.5"
       />
       {/* number block */}
       <path
         d="M6 14H10"
-        stroke="#8C8C8C"
+        stroke="currentColor"
         className="brand-path-stroke-if-active"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
       <path
         d="M14 14H18"
-        stroke="#8C8C8C"
+        stroke="currentColor"
         className="brand-path-stroke-if-active"
         strokeWidth="1.5"
         strokeLinecap="round"

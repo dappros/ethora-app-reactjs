@@ -39,7 +39,7 @@ export function TagsInput({ value, onChange, suggestions = [], placeholder, auto
 
   return (
     <div className="relative">
-      <div className="flex flex-wrap items-center gap-2 rounded-xl bg-[#F5F7F9] px-3 py-2 min-h-[44px]">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 min-h-[44px]">
         {value.map((tag) => (
           <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-brand-150 text-brand-500 rounded-2xl text-xs">
             {tag}
@@ -73,7 +73,7 @@ export function TagsInput({ value, onChange, suggestions = [], placeholder, auto
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => add(m)}
-              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-[#F5F7F9]"
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100"
             >
               {m}
             </button>

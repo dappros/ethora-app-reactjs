@@ -8,7 +8,7 @@ interface Props {
 export function IconAdd({
   width = 14,
   height = 14,
-  color = '#8C8C8C',
+  color = 'currentColor',
   className,
 }: Props) {
   return (
@@ -17,7 +17,7 @@ export function IconAdd({
       height={height}
       viewBox="0 0 14 14"
       fill="none"
-      className={className}
+      className={className ? `text-gray-500 ${className}` : 'text-gray-500'}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path

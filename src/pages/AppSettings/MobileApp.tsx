@@ -277,7 +277,7 @@ export function MobileApp({
                 onChange={onPlatformToggle}
                 className="group relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full bg-gray-300 transition data-[checked]:bg-brand-500 disabled:opacity-50"
               >
-                <span className="pointer-events-none inline-block size-5 translate-x-0.5 translate-y-0.5 rounded-full bg-white shadow transition group-data-[checked]:translate-x-5" />
+                <span className="pointer-events-none inline-block size-5 translate-x-0.5 translate-y-0.5 rounded-full bg-[#fff] shadow transition group-data-[checked]:translate-x-5" />
               </Switch>
             </Field>
             {platform.enabled && (
@@ -297,7 +297,7 @@ export function MobileApp({
         </p>
         {apnsKeyUploaded ? (
           <button
-            className="w-full hover:bg-red-50 rounded-xl border border-red-500 text-red-500 flex p-2 items-center justify-center mb-8 disabled:opacity-50"
+            className="w-full hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl border border-red-500 text-red-500 flex p-2 items-center justify-center mb-8 disabled:opacity-50"
             disabled={apnsBusy}
             onClick={() => setConfirmDeleteApns(true)}
           >
@@ -374,7 +374,7 @@ export function MobileApp({
                 disabled={apnsBusy}
                 onClick={() => apnsFileRef.current?.click()}
               >
-                <IconUpload stroke="#374151" />
+                <IconUpload stroke="rgb(var(--c-gray-700))" />
                 <span className="ml-2 truncate">
                   {apnsFile ? apnsFile.name : t('appSettingsMobileApp.apns.chooseFile')}
                 </span>
@@ -408,7 +408,7 @@ export function MobileApp({
         />
         {firebaseServiceAccountUploaded ? (
           <button
-            className="w-full hover:bg-red-50 rounded-xl border border-red-500 text-red-500 flex p-2 items-center justify-center mb-8 disabled:opacity-50"
+            className="w-full hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl border border-red-500 text-red-500 flex p-2 items-center justify-center mb-8 disabled:opacity-50"
             disabled={busy}
             onClick={() => setConfirmDelete(true)}
           >

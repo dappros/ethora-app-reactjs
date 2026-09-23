@@ -285,7 +285,7 @@ export const TabAIWidgetCode = ({
                     }}
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-semibold">
+                  <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-700 dark:text-brand-300 flex items-center justify-center font-semibold">
                     {activeAgent.displayName.slice(0, 2).toUpperCase()}
                   </div>
                 )}
@@ -334,7 +334,7 @@ export const TabAIWidgetCode = ({
             {t('aiWidgetCode.insertBodyText')}
           </p>
           <div
-            className="relative rounded-md bg-gray-700 overflow-y-auto"
+            className="relative rounded-md bg-[#454545] overflow-y-auto"
             style={{ maxHeight: 360 }}
           >
             <div className="absolute top-1 right-1 z-10">
@@ -343,12 +343,12 @@ export const TabAIWidgetCode = ({
                   {copied ? (
                     <CheckIcon
                       fontSize="small"
-                      className="text-white hover:text-gray-300"
+                      className="text-white hover:text-[#D9D9D9]"
                     />
                   ) : (
                     <ContentCopyIcon
                       fontSize="small"
-                      className="text-white hover:text-gray-300"
+                      className="text-white hover:text-[#D9D9D9]"
                     />
                   )}
                 </IconButton>
@@ -400,7 +400,7 @@ export const TabAIWidgetCode = ({
             </a>{' '}
             {t('aiWidgetCode.wordpressInsertSuffix')}
           </p>
-          <div className="relative rounded-md bg-gray-700">
+          <div className="relative rounded-md bg-[#454545]">
             <div className="absolute top-1 right-1 z-10">
               <Tooltip title={copied ? t('aiWidgetCode.copied') : t('aiWidgetCode.copy')}>
                 <IconButton
@@ -412,12 +412,12 @@ export const TabAIWidgetCode = ({
                   {copied ? (
                     <CheckIcon
                       fontSize="small"
-                      className="text-white hover:text-gray-300"
+                      className="text-white hover:text-[#D9D9D9]"
                     />
                   ) : (
                     <ContentCopyIcon
                       fontSize="small"
-                      className="text-white hover:text-gray-300"
+                      className="text-white hover:text-[#D9D9D9]"
                     />
                   )}
                 </IconButton>

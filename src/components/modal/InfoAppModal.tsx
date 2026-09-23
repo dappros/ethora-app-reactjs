@@ -57,7 +57,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
               });
               onClose();
             }}
-            className="text-blue-600 hover:underline cursor-pointer"
+            className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
           >
             {t('infoAppModal.appearanceLink')}
           </button>
@@ -79,7 +79,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
               });
               onClose();
             }}
-            className="text-blue-600 hover:underline cursor-pointer"
+            className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
           >
             {t('infoAppModal.chatsLink')}
           </button>
@@ -104,7 +104,7 @@ const InfoAppModal: FC<InfoAppModalProps> = ({
               navigator.clipboard.writeText(`${domainName}.ethora.com`);
               toast.success(t('infoAppModal.copiedToClipboard'));
             }}
-            className="ml-2 text-blue-600 hover:underline cursor-pointer"
+            className="ml-2 text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
           >
             {'📋 '}
             {t('infoAppModal.copy')}

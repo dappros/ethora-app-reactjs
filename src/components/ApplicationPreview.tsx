@@ -155,7 +155,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalRegistered)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {app.stats.recentlyRegistered}
               </span>
             </div>
@@ -175,7 +175,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalSessions)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {numberFormatter.format(app.stats.recentlySessions)}
               </span>
             </div>
@@ -195,7 +195,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalChats)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {numberFormatter.format(app.stats.recentlyChats)}
               </span>
             </div>
@@ -212,7 +212,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalApiCalls)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {numberFormatter.format(app.stats.recentlyApiCalls)}
               </span>
             </div>
@@ -230,7 +230,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalTokens)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {numberFormatter.format(app.stats.recentlyTokens)}
               </span>
             </div>
@@ -248,7 +248,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalFiles)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {numberFormatter.format(app.stats.recentlyFiles)}
               </span>
             </div>
@@ -268,7 +268,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
                 {numberFormatter.format(app.stats.totalTransactions)}
               </span>{' '}
               <span className="text-gray-500"> / </span>{' '}
-              <span className="text-green-600 font-sans text-sm">
+              <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {numberFormatter.format(app.stats.recentlyTransactions)}
               </span>
             </div>

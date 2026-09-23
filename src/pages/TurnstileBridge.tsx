@@ -60,7 +60,7 @@ export default function TurnstileBridge() {
             window.location.href = url.toString();
           }
         },
-        theme: 'light',
+        theme: 'auto',
       });
     } catch (error) {
       console.error('Error rendering Turnstile:', error);
@@ -74,7 +74,7 @@ export default function TurnstileBridge() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: 'rgb(var(--c-page))',
         fontFamily: 'Arial, sans-serif',
       }}
     >
@@ -84,7 +84,7 @@ export default function TurnstileBridge() {
           padding: '20px',
         }}
       >
-        <h2 style={{ marginBottom: '20px', color: '#333' }}>
+        <h2 style={{ marginBottom: '20px', color: 'rgb(var(--c-gray-800))' }}>
           {t('turnstileBridge.heading')}
         </h2>
         <div
@@ -96,7 +96,7 @@ export default function TurnstileBridge() {
             justifyContent: 'center',
           }}
         />
-        <p style={{ marginTop: '20px', color: '#666', fontSize: '14px' }}>
+        <p style={{ marginTop: '20px', color: 'rgb(var(--c-gray-600))', fontSize: '14px' }}>
           {t('turnstileBridge.subtext')}
         </p>
       </div>

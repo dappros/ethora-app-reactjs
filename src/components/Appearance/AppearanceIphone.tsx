@@ -32,7 +32,7 @@ export const AppearanceIphone = ({
         alt="iPhone Preview"
         className="w-full h-auto object-contain"
       />
-      <div className="absolute inset-4 top-[26px] px-2 rounded-xl bg-white">
+      <div className="absolute inset-4 top-[26px] px-2 rounded-xl bg-[#fff] text-[#121219] [color-scheme:light]">
         <div
           className="h-[45px] bg-cover bg-center flex justify-center items-center p-2"
           style={{ backgroundImage: '' }}
@@ -63,7 +63,7 @@ export const AppearanceIphone = ({
             key={placeholder}
             type="text"
             placeholder={placeholder}
-            className="w-full mb-1 text-[8px] rounded-xl bg-gray-100 py-[2px] px-1"
+            className="w-full mb-1 text-[8px] rounded-xl bg-[#F5F7F9] py-[2px] px-1"
           />
         ))}
         <button

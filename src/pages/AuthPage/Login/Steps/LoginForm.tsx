@@ -175,7 +175,7 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
       >
         {config?.signonOptions.length > 1 && (
           <Typography
-            sx={{ width: '100%', textAlign: 'center', color: '#8C8C8C' }}
+            sx={{ width: '100%', textAlign: 'center', color: 'rgb(var(--c-gray-500))' }}
           >
             {t('authLoginStep.or')}
           </Typography>

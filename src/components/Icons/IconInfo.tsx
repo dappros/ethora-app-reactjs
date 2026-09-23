@@ -8,11 +8,12 @@ interface Props {
 export function IconInfo({
   width = 15,
   height = 15,
-  stroke = '#8C8C8C',
+  stroke = 'currentColor',
   className = ""
 }: Props) {
   return (
     <svg
+      className="text-gray-500"
       width={width}
       height={height}
       viewBox="0 0 15 16"

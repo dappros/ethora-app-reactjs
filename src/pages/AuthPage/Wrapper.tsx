@@ -19,14 +19,14 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
     <Box
       sx={{
         display: 'flex',
-        color: '#141414',
+        color: 'rgb(var(--c-gray-950))',
         padding: isMobileDevice ? '24px 0px' : '5.5% 10%',
         backgroundImage: isMobileDevice ? 'none !important' : '',
         backgroundColor: !isMobileDevice
           ? config?.primaryColor
             ? hexToRGBA(config.primaryColor)
             : hexToRGBA('#0052CD')
-          : 'white',
+          : 'rgb(var(--c-surface))',
       }}
       className="responsiveWrapper"
     >

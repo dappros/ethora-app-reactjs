@@ -6,6 +6,7 @@ interface Props {
 export function IconArrowDown({ width = 24, height = 24 }: Props) {
   return (
     <svg
+      className="text-gray-500"
       width={width}
       height={height}
       viewBox="0 0 24 24"
@@ -14,7 +15,7 @@ export function IconArrowDown({ width = 24, height = 24 }: Props) {
     >
       <path
         d="M5.5 8.7002L12 15.2002L18.5 8.7002"
-        stroke="#8C8C8C"
+        stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
       />

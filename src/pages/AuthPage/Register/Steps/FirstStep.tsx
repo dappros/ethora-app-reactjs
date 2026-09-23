@@ -311,7 +311,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           {emailSuggestion && (
             <Typography
               variant="body2"
-              sx={{ color: '#8C8C8C', cursor: 'pointer' }}
+              sx={{ color: 'rgb(var(--c-gray-500))', cursor: 'pointer' }}
               onClick={() => {
                 setValue('email', emailSuggestion, { shouldValidate: true });
                 setEmailSuggestion(null);
@@ -375,7 +375,7 @@ const FirstStep: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
                 justifyContent: 'center',
                 textAlign: 'center',
                 gap: '8px',
-                color: '#8C8C8C',
+                color: 'rgb(var(--c-gray-500))',
                 flexWrap: 'wrap',
                 maxWidth: '486px',
                 fontSize: '14px',

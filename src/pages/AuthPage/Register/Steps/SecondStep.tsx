@@ -59,7 +59,7 @@ const SecondStep = () => {
             textAlign: 'left',
             fontSize: '24px',
             fontWeight: 400,
-            color: '#141414',
+            color: 'rgb(var(--c-gray-950))',
           }}
         >
           {t('authRegisterSecondStep.title')}
@@ -69,7 +69,7 @@ const SecondStep = () => {
             textAlign: 'left',
             fontSize: '16px',
             fontWeight: 400,
-            color: '#8C8C8C',
+            color: 'rgb(var(--c-gray-500))',
           }}
         >
           {t('authRegisterSecondStep.sentEmailPrefix')}{' '}
@@ -82,7 +82,7 @@ const SecondStep = () => {
               textAlign: 'left',
               fontSize: '16px',
               fontWeight: 400,
-              color: '#141414',
+              color: 'rgb(var(--c-gray-950))',
               marginBottom: '8px',
             }}
           >
@@ -94,7 +94,7 @@ const SecondStep = () => {
               textAlign: 'left',
               fontSize: '16px',
               fontWeight: 400,
-              color: '#141414',
+              color: 'rgb(var(--c-gray-950))',
             }}
           >
             {t('authRegisterSecondStep.instructionCheckSpam')}
@@ -106,7 +106,7 @@ const SecondStep = () => {
               textAlign: 'center',
               fontSize: '14px',
               fontWeight: 400,
-              color: '#8C8C8C',
+              color: 'rgb(var(--c-gray-500))',
               width: '100%',
             }}
           >

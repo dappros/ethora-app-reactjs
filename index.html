@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/ethora-favicon.png" />
     <link rel="apple-touch-icon" href="/ethora-favicon.png" />
+    <!-- Apply the dark theme before first paint (see src/utils/uiTheme.ts,
+         which owns the same key and rules once the app has loaded). -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('uiTheme-538');
+          if (t !== 'light' && t !== 'dark') t = 'system';
+          if (
+            t === 'dark' ||
+            (t === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          ) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <!-- Primary Meta Tags -->

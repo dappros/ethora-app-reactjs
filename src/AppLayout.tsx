@@ -18,7 +18,7 @@ export default function AppLayout() {
 
   return (
     <Suspense fallback={null}>
-      <div className="bg-gray-100 w-full flex justify-center">
+      <div className="bg-page w-full flex justify-center">
         <div className="h-screen max-w-[1920px] w-full md:p-4">
           {/* app content */}
           <div className="h-full grid grid-rows-[72px,_1fr] md:grid-rows-1 md:grid-cols-[96px,_1fr] md:gap-4">

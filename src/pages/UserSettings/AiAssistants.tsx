@@ -66,9 +66,9 @@ function Snippet({ label, value, hint, multiline }: SnippetProps) {
     <div className="mb-4">
       <div className="font-sans text-regular font-semibold mb-1">{label}</div>
       {hint && (
-        <div className="text-[#8C8C8C] font-sans text-[12px] mb-2">{hint}</div>
+        <div className="text-gray-500 font-sans text-[12px] mb-2">{hint}</div>
       )}
-      <div className="flex items-start gap-2 bg-[#F5F7F9] rounded-xl px-[12px] py-[12px]">
+      <div className="flex items-start gap-2 bg-gray-100 rounded-xl px-[12px] py-[12px]">
         {multiline ? (
           <pre className="flex-1 min-w-0 overflow-x-auto text-[12px] font-mono whitespace-pre">
             {value}
@@ -175,7 +175,7 @@ export function AiAssistants() {
       <p className="font-sans text-regular font-semibold mb-2">
         {t('userSettingsAi.heading')}
       </p>
-      <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
+      <div className="text-gray-500 font-sans text-[12px] mb-4">
         {t('userSettingsAi.intro')}
       </div>
 
@@ -187,7 +187,7 @@ export function AiAssistants() {
       {MCP_URL ? (
         <Snippet label={t('userSettingsAi.endpointLabel')} value={MCP_URL} />
       ) : (
-        <div className="mb-6 text-[12px] font-sans bg-[#F5F7F9] rounded-xl px-[12px] py-[12px]">
+        <div className="mb-6 text-[12px] font-sans bg-gray-100 rounded-xl px-[12px] py-[12px]">
           {t('userSettingsAi.mcpDisabled')}
         </div>
       )}
@@ -232,7 +232,7 @@ export function AiAssistants() {
       <p className="font-sans text-regular font-semibold mb-1">
         {t('userSettingsAi.keysHeading')}
       </p>
-      <div className="text-[#8C8C8C] font-sans text-[12px] mb-3">
+      <div className="text-gray-500 font-sans text-[12px] mb-3">
         {t('userSettingsAi.keysDescription')}
       </div>
       <div className="flex flex-col sm:flex-row gap-2 mb-4 max-w-[640px]">
@@ -242,14 +242,14 @@ export function AiAssistants() {
           maxLength={64}
           onChange={(e) => setName(e.target.value)}
           placeholder={t('userSettingsAi.namePlaceholder')}
-          className="flex-1 bg-[#F5F7F9] rounded-xl px-[12px] py-[12px] placeholder:text-[#8C8C8C] outline-none"
+          className="flex-1 bg-gray-100 rounded-xl px-[12px] py-[12px] placeholder:text-gray-500 outline-none"
         />
         <label className="flex items-center gap-2 text-[13px] font-sans">
           <span className="whitespace-nowrap">{t('userSettingsAi.ttlLabel')}</span>
           <select
             value={ttlDays}
             onChange={(e) => setTtlDays(Number(e.target.value))}
-            className="bg-[#F5F7F9] rounded-xl px-[12px] py-[12px] outline-none"
+            className="bg-gray-100 rounded-xl px-[12px] py-[12px] outline-none"
           >
             {TTL_OPTIONS.map((d) => (
               <option key={d} value={d}>
@@ -269,14 +269,14 @@ export function AiAssistants() {
       </div>
 
       {keys.length === 0 ? (
-        <div className="text-[#8C8C8C] font-sans text-[12px] mb-8">
+        <div className="text-gray-500 font-sans text-[12px] mb-8">
           {t('userSettingsAi.noKeys')}
         </div>
       ) : (
         <div className="overflow-x-auto mb-8">
           <table className="w-full text-[13px] font-sans">
             <thead>
-              <tr className="text-left text-[#8C8C8C]">
+              <tr className="text-left text-gray-500">
                 <th className="py-2 pr-4 font-normal">{t('userSettingsAi.colName')}</th>
                 <th className="py-2 pr-4 font-normal">{t('userSettingsAi.colCreated')}</th>
                 <th className="py-2 pr-4 font-normal">{t('userSettingsAi.colExpires')}</th>
@@ -310,18 +310,18 @@ export function AiAssistants() {
           <p className="font-sans text-regular font-semibold mb-1">
             {t('userSettingsAi.grantsHeading')}
           </p>
-          <div className="text-[#8C8C8C] font-sans text-[12px] mb-3">
+          <div className="text-gray-500 font-sans text-[12px] mb-3">
             {t('userSettingsAi.grantsDescription')}
           </div>
           {grants.length === 0 ? (
-            <div className="text-[#8C8C8C] font-sans text-[12px]">
+            <div className="text-gray-500 font-sans text-[12px]">
               {t('userSettingsAi.noGrants')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-[13px] font-sans">
                 <thead>
-                  <tr className="text-left text-[#8C8C8C]">
+                  <tr className="text-left text-gray-500">
                     <th className="py-2 pr-4 font-normal">{t('userSettingsAi.colApp')}</th>
                     <th className="py-2 pr-4 font-normal">{t('userSettingsAi.colScope')}</th>
                     <th className="py-2 pr-4 font-normal">{t('userSettingsAi.colCreated')}</th>

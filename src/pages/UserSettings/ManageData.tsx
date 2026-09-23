@@ -61,11 +61,11 @@ export function ManageData() {
   };
 
   return (
-    <div className="md:ml-4">
+    <div>
       <p className="font-sans text-regular font-semibold mb-2">
         {t('userSettingsManageData.downloadHeading')}
       </p>
-      <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
+      <div className="text-gray-500 font-sans text-[12px] mb-4">
         {t('userSettingsManageData.downloadDescription')}
       </div>
       <button
@@ -77,14 +77,14 @@ export function ManageData() {
       <div className="font-sans text-regular font-semibold mb-2">
         {t('userSettingsManageData.deleteHeading')}
       </div>
-      <div className="text-[#8C8C8C] font-sans text-[12px] mb-4">
+      <div className="text-gray-500 font-sans text-[12px] mb-4">
         {t('userSettingsManageData.deleteDescription')}
       </div>
       {/* Hidden: the DLT immutability disclaimer below is no longer
           relevant since the current platform no longer surfaces on-chain
           state to end users. Kept in source for posterity in case the
           blockchain side is re-enabled later.
-      <div className="bg-[#F3F6FC] p-2 rounded-lg grid grid-cols-[16px,_1fr] gap-2 font-sans text-[12px] mb-4">
+      <div className="bg-brand-150 p-2 rounded-lg grid grid-cols-[16px,_1fr] gap-2 font-sans text-[12px] mb-4">
         <IconInfo />
         <p>
           Due to the immutable nature of distributed ledger technology, network

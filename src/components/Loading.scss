@@ -28,7 +28,7 @@
   }
 
   .loader::after {
-    border-color: black;
+    border-color: rgb(var(--c-fg));
     animation:
       prixClipFix 2s linear infinite,
       rotate 0.5s linear infinite reverse;

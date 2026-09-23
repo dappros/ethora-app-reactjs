@@ -64,7 +64,7 @@ export function CreateDocumentModal({ onClose, componentGetDocs }: Props) {
           value={name}
           placeholder={t('createDocumentModal.titlePlaceholder')}
           onChange={(e) => setName(e.target.value)}
-          className="w-full bg-[#F5F7F9] rounded-xl px-[12px] py-[16px] placeholder:text-[#8C8C8C] outline-none mb-8"
+          className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
         />
         <div className="flex flex-col items-center">
           <button className="hover:bg-gray-200 p-4 rounded-xl" onClick={onFileUpload}>

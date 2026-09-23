@@ -142,7 +142,7 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
           <button
             onClick={handleRestore}
             disabled={busy}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl border border-green-700 text-green-700 hover:bg-green-50 disabled:opacity-50"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl border border-green-700 text-green-700 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-950/40 disabled:opacity-50"
           >
             {t('appSettingsDelete.restoreWord')} {app.displayName}
           </button>
@@ -158,12 +158,12 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
       </section>
 
       {/* Hard delete (irreversible) */}
-      <section className="border border-red-200 rounded-xl p-4 bg-red-50/30">
-        <div className="font-varela text-[16px] mb-2 text-red-700">{t('appSettingsDelete.hardDeleteHeading')}</div>
+      <section className="border border-red-200 dark:border-red-900/60 rounded-xl p-4 bg-red-50/30 dark:bg-red-950/20">
+        <div className="font-varela text-[16px] mb-2 text-red-700 dark:text-red-400">{t('appSettingsDelete.hardDeleteHeading')}</div>
         <p className="font-sans text-sm text-gray-700 mb-3">
           {t('appSettingsDelete.hardDeleteDescription')}
         </p>
-        <div className="bg-white border border-red-200 rounded-lg px-4 py-3 mb-4 font-sans text-sm">
+        <div className="bg-white border border-red-200 dark:border-red-900/60 rounded-lg px-4 py-3 mb-4 font-sans text-sm">
           {t('appSettingsDelete.purgeListIntro')}
           <ul className="mt-2 list-disc list-inside space-y-1">
             <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> {t('appSettingsDelete.usersSuffix')}</li>
@@ -213,7 +213,7 @@ export const DeleteSetting = ({ app, onChanged }: Props) => {
                 <span className="font-semibold">"{app.displayName}"</span>{' '}
                 {t('appSettingsDelete.hardDeleteModalIntroSuffix')}
               </div>
-              <div className="mt-3 text-left max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+              <div className="mt-3 text-left max-w-md mx-auto bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/60 rounded-lg px-4 py-3">
                 {t('appSettingsDelete.purgeListIntro')}
                 <ul className="mt-1 list-disc list-inside space-y-0.5">
                   <li><span className="font-bold">{numberFormatter.format(stats.totalRegistered || 0)}</span> {t('appSettingsDelete.usersSuffix')}</li>

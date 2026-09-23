@@ -9,11 +9,80 @@
   --bg-brand-primary-preview: rgba(0, 82, 205, 1);
   --bg-brand-preview-auth: rgba(0, 82, 205, 0.05);
   --bg-auth-background: rgba(0, 82, 205, 0.05);
-  --border-primary: #f0f0f0;
+  --bg-auth-background-dark: rgba(0, 82, 205, 0.16);
+  --border-primary: rgb(var(--c-gray-200));
+
+  /* Theme tokens. Space-separated RGB channels so Tailwind can apply its
+     `/<alpha>` modifiers (see tailwind.config.js). Everything neutral in the
+     UI - surfaces, the grey ramp, the fixed light-blue tints - reads from
+     here, and the `.dark` block below swaps the values. The app's brand
+     colour (--bg-brand-primary, set per app in App.tsx) is not a token: it
+     stays the same in both themes. */
+  color-scheme: light;
+  --c-page: 245 247 249;
+  --c-surface: 255 255 255;
+  --c-fg: 18 18 25;
+
+  --c-gray-50: 252 252 252;
+  --c-gray-100: 245 247 249;
+  --c-gray-200: 240 240 240;
+  --c-gray-300: 217 217 217;
+  --c-gray-400: 191 191 191;
+  --c-gray-500: 140 140 140;
+  --c-gray-600: 89 89 89;
+  --c-gray-700: 69 69 69;
+  --c-gray-800: 38 38 38;
+  --c-gray-900: 31 31 31;
+  --c-gray-950: 20 20 20;
+
+  --c-brand-50: 243 244 252;
+  --c-brand-100: 231 234 249;
+  --c-brand-150: 243 246 252;
+  --c-brand-200: 194 209 240;
+  --c-brand-250: 198 223 250;
+
+  /* Hover wash and brand-coloured TEXT. Both follow the app's brand colour;
+     in dark mode the wash is stronger and the text lighter, otherwise a dark
+     brand colour disappears against a dark surface. */
+  --brand-hover: var(--bg-auth-background);
+  --brand-text: var(--bg-brand-primary);
+}
+
+/* Dark theme. Applied as a class on <html> by utils/uiTheme.ts (and by the
+   pre-paint snippet in index.html). The grey ramp is inverted rather than
+   re-picked per use, so `text-gray-500` stays "muted text" and
+   `bg-gray-100` stays "recessed fill" in both themes. */
+:root.dark {
+  color-scheme: dark;
+  --c-page: 15 17 21;
+  --c-surface: 26 28 33;
+  --c-fg: 236 238 241;
+
+  --c-gray-50: 31 34 40;
+  --c-gray-100: 21 23 28;
+  --c-gray-200: 44 47 55;
+  --c-gray-300: 61 65 74;
+  --c-gray-400: 110 116 126;
+  --c-gray-500: 148 155 165;
+  --c-gray-600: 182 187 195;
+  --c-gray-700: 207 211 217;
+  --c-gray-800: 226 229 233;
+  --c-gray-900: 236 238 241;
+  --c-gray-950: 245 246 248;
+
+  --c-brand-50: 30 35 50;
+  --c-brand-100: 36 44 66;
+  --c-brand-150: 29 34 48;
+  --c-brand-200: 50 64 99;
+  --c-brand-250: 50 68 104;
+
+  --brand-hover: var(--bg-auth-background-dark);
+  --brand-text: color-mix(in srgb, var(--bg-brand-primary) 60%, white);
 }
 
 body {
-  background-color: #F5F7F9;
+  background-color: rgb(var(--c-page));
+  color: rgb(var(--c-fg));
 }
 
 .hide-scroll::-webkit-scrollbar {
@@ -23,7 +92,7 @@ body {
 
 .thin-scroll {
   scrollbar-width: thin; /* Make the scrollbar thinner */
-  scrollbar-color: #D9D9D9 transparent; /* Color of the thumb and track */
+  scrollbar-color: rgb(var(--c-gray-300)) transparent; /* Color of the thumb and track */
 }
 
 
@@ -36,7 +105,7 @@ table th.r-delimiter::after {
   content: '';
   position: absolute;
   height: 60%;
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid rgb(var(--c-gray-200));
   right: 0;
 }
 
@@ -44,13 +113,13 @@ table td.r-delimiter::after {
   content: '';
   position: absolute;
   height: 32px;
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid rgb(var(--c-gray-200));
   right: 0;
   top: 15px;
 }
 
 tr:nth-child(even) {
-  background-color: #fcfcfc;
+  background-color: rgb(var(--c-gray-50));
 }
 
 .brand-path-stroke {
@@ -62,11 +131,28 @@ tr:nth-child(even) {
 }
 
 .active .brand-path-fill-if-active {
-  fill: var(--bg-brand-primary) !important;
+  fill: var(--brand-text) !important;
 }
 
 .active .brand-path-stroke-if-active {
-  stroke: var(--bg-brand-primary) !important;
+  stroke: var(--brand-text) !important;
+}
+
+/* Recharts draws its grid, axes and default tooltip with fixed light-theme
+   colours. Only override them in dark, so light mode keeps its exact look. */
+:root.dark .recharts-cartesian-grid line {
+  stroke: rgb(var(--c-gray-200));
+}
+:root.dark .recharts-cartesian-axis-line,
+:root.dark .recharts-cartesian-axis-tick-line {
+  stroke: rgb(var(--c-gray-300));
+}
+:root.dark .recharts-cartesian-axis-tick-value {
+  fill: rgb(var(--c-gray-500));
+}
+:root.dark .recharts-default-tooltip {
+  background-color: rgb(var(--c-surface)) !important;
+  border-color: rgb(var(--c-gray-300)) !important;
 }
 
 .fade-enter {

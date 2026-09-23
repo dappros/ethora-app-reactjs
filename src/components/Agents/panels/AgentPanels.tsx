@@ -733,7 +733,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         <div className="text-sm text-gray-600">
           {t('agentPanels.webIndexDescription')}
           {!appId && (
-            <div className="mt-1 text-xs text-amber-600">
+            <div className="mt-1 text-xs text-amber-600 dark:text-amber-400">
               {t('agentPanels.noAppPicked')}
             </div>
           )}
@@ -797,7 +797,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
             <button
               disabled={isDisabled || busy}
               onClick={removeSelected}
-              className="border border-red-300 text-red-600 hover:bg-red-50 rounded px-3 py-1 disabled:opacity-40"
+              className="border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800/60 dark:hover:bg-red-950/30 rounded px-3 py-1 disabled:opacity-40"
             >
               {t('agentPanels.removeSelected')}
             </button>
@@ -1013,7 +1013,7 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
         <div className="text-sm text-gray-600">
           {t('agentPanels.docsIndexDescription')}
           {!appId && (
-            <div className="mt-1 text-xs text-amber-600">
+            <div className="mt-1 text-xs text-amber-600 dark:text-amber-400">
               {t('agentPanels.noAppPicked')}
             </div>
           )}
@@ -1213,7 +1213,7 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
         }}
       />
       {errors.length > 0 && (
-        <ul className="rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 space-y-1">
+        <ul className="rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 space-y-1 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
           {errors.map((err, i) => (
             <li key={i} className="font-mono">
               {err.line ? `line ${err.line}: ` : ''}
@@ -1224,7 +1224,7 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
         </ul>
       )}
       {flowKeys && errors.length === 0 && (
-        <p className="text-xs text-green-700">
+        <p className="text-xs text-green-700 dark:text-green-400">
           {flowKeys.length
             ? `${t('agentPanels.flowsFound')} ${flowKeys.join(', ')}`
             : t('agentPanels.flowsNone')}
@@ -1404,7 +1404,7 @@ const RoomActionsList: React.FC<{
                   setBusy(null);
                 }
               }}
-              className="text-[11px] border rounded px-2 py-0.5 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              className="text-[11px] border rounded px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 disabled:opacity-50"
               title={t('agentPanels.leaveTooltip')}
             >
               {t('agentPanels.leave')}
@@ -1477,7 +1477,7 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
           <span
             className={classNames(
               'inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold',
-              bi.status === 'on' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+              bi.status === 'on' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' : 'bg-gray-200 text-gray-600'
             )}
             title={
               bi.status === 'on'

@@ -11,14 +11,10 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@mui/material';
 import { DateTime } from 'luxon';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import {
-  actionLogout,
-  actionSetChatLanguage,
-  actionSetUiLanguage,
-} from '../actions';
+import { actionLogout } from '../actions';
 import { IconClose } from '../components/Icons/IconClose';
 import { IconDoc } from '../components/Icons/IconDoc';
 import { IconEdit } from '../components/Icons/IconEdit';
@@ -26,13 +22,10 @@ import { IconLogout } from '../components/Icons/IconLogout';
 import { IconQr } from '../components/Icons/IconQr';
 import { CreateDocumentModal } from '../components/modal/CreateDocumentModal';
 import { QrModal } from '../components/modal/QrModal';
-import { LanguageModal } from '../components/modal/LanguageModal';
 import { ProfilePageUserIcon } from '../components/ProfilePageUserIcon';
-import {
-  UiLocale,
-  resolveAvailableLanguages,
-  resolveTranslateLanguages,
-} from '../constants/languageOptionsConstants';
+import { LanguageSettings } from '../components/settings/LanguageSettings';
+import { useHasLanguageSettings } from '../components/settings/useHasLanguageSettings';
+import { ThemeSettings } from '../components/settings/ThemeSettings';
 import { logLogout } from '../hooks/withTracking.tsx';
 import { deleteDocuments, getDocuments, httpLogout } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
@@ -45,47 +38,8 @@ export default function Profile() {
   const [documents, setDocuments] = useState<Array<any>>([]);
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [deleteDocumentId, setDeleteDocumentId] = useState('');
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-  const [showChatLanguageModal, setShowChatLanguageModal] = useState(false);
   const { t } = useTranslation();
-  // App-wide UI language (see store/appStore.ts's uiLanguage /
-  // doSetUiLanguage). Reading it from the store - not local state - means
-  // every component using useTranslation() re-renders together when it
-  // changes here.
-  const uiLanguage = useAppStore((s) => s.uiLanguage);
-  // Languages the interface works in, from get-config's translateLanguages
-  // narrowed to the bundled catalogue. Falls back to the full catalogue if the
-  // server sent nothing usable - see constants/languageOptionsConstants.ts.
-  // One entry means a single-language install, and the picker below is not
-  // rendered at all.
-  const availableLanguages = useAppStore((s) => s.availableLanguages);
-  const languageOptions = resolveAvailableLanguages(availableLanguages);
-  const currentLanguageName =
-    languageOptions.find((l) => l.id === uiLanguage)?.name ?? uiLanguage;
-  // Null means the user never picked a chat language. The backend then
-  // translates into their app language, so that is what the row shows —
-  // labelled as following the interface, not as an independent choice.
-  const chatLanguage = useAppStore((s) => s.chatLanguage);
-  // What the install's translation server can actually translate into
-  // (get-config `translateLanguages`). This — not the interface catalogue —
-  // is what the chat picker offers: translating messages INTO a language does
-  // not require the UI to render in it.
-  const translateLanguages = useAppStore((s) => s.translateLanguages);
-  const translateOptions = useMemo(
-    () => resolveTranslateLanguages(translateLanguages, uiLanguage),
-    [translateLanguages, uiLanguage]
-  );
-  const effectiveChatLanguage = chatLanguage ?? uiLanguage;
-  const currentChatLanguageName =
-    translateOptions.find((l) => l.id === effectiveChatLanguage)?.name ??
-    effectiveChatLanguage;
-  // The stored choice can fall outside the offered set — the operator narrows
-  // the translation server's languages, or the user's app language is one it
-  // has no model for. Say so rather than showing a value that silently will
-  // not translate.
-  const chatLanguageUnsupported =
-    translateOptions.length > 0 &&
-    !translateOptions.some((l) => l.id === effectiveChatLanguage);
+  const hasLanguageSettings = useHasLanguageSettings();
   const {
     firstName,
     lastName,
@@ -126,35 +80,6 @@ export default function Profile() {
         toast.error(t('profile.deleteDocument.error'));
       });
     setShowDelete(false);
-  };
-
-  // The switch itself is local and instant; persisting it to the profile is
-  // the part that can fail. On failure the UI stays on the newly-picked
-  // language (it's still cached locally) and we say the save didn't stick,
-  // rather than yanking the interface back to the old one.
-  const onChangeUiLanguage = async (code: UiLocale) => {
-    setShowLanguageModal(false);
-    try {
-      await actionSetUiLanguage(code);
-      toast.success(t('language.savedToast'));
-    } catch (e) {
-      console.error('[Profile] failed to save language to profile', e);
-      toast.error(t('language.saveFailedToast'));
-    }
-  };
-
-  // Unlike the UI language there is nothing applied locally first, so a failed
-  // write leaves the row on its previous value and the toast is the whole
-  // story.
-  const onChangeChatLanguage = async (code: string) => {
-    setShowChatLanguageModal(false);
-    try {
-      await actionSetChatLanguage(code);
-      toast.success(t('language.savedToast'));
-    } catch (e) {
-      console.error('[Profile] failed to save chat language to profile', e);
-      toast.error(t('language.saveFailedToast'));
-    }
   };
 
   const onLogout = async () => {
@@ -203,29 +128,29 @@ export default function Profile() {
             </div>
             <div>
               <p className="text-center font-varela text-[24px]">{`${firstName} ${lastName}`}</p>
-              <p className="text-center font-sans text-[16px] text-[#8C8C8C]">
+              <p className="text-center font-sans text-[16px] text-gray-500">
                 {t('profile.onlineOffline')}
               </p>
             </div>
-            <div className="border border-[#F0F0F0] rounded-xl p-4">
-              <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
+            <div className="border border-gray-200 rounded-xl p-4">
+              <p className="text-gray-500 font-sans text-[14px] mb-2">
                 {t('profile.about')}
               </p>
               <p className="text-black text-regular">{description}</p>
             </div>
-            <div className="border border-[#F0F0F0] rounded-xl p-4">
+            <div className="border border-gray-200 rounded-xl p-4">
               <TabGroup className="px-2">
                 <TabList className="h-[44px] flex mb-4">
                   <Tab
                     key="documents"
                     // w-1/2 if there's a collection
-                    className="border-b border-b-[#F0F0F0] w-full data-[selected]:text-brand-500 data-[selected]:border-b-brand-500"
+                    className="border-b border-b-gray-200 w-full data-[selected]:text-brand-500 data-[selected]:border-b-brand-500"
                   >
                     {t('profile.documents')}
                   </Tab>
                   {/* <Tab
                     key="collections"
-                    className="border-b border-b-[#F0F0F0] w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500 pointer-events-none text-gray-300"
+                    className="border-b border-b-gray-200 w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500 pointer-events-none text-gray-300"
                   >
                     Collections
                   </Tab> */}
@@ -240,7 +165,7 @@ export default function Profile() {
                     </button>
                     {documents.map((el) => (
                       <div
-                        className="bg-[#F3F6FC] rounded-lg p-2 mb-4 flex items-center justify-between"
+                        className="bg-brand-150 rounded-lg p-2 mb-4 flex items-center justify-between"
                         key={el._id}
                       >
                         <div className="flex items-center">
@@ -249,7 +174,7 @@ export default function Profile() {
                           </div>
                           <div className="ml-2">
                             <div className="text-[14px]">{el.documentName}</div>
-                            <div className="text-[#8C8C8C] text-[12px]">
+                            <div className="text-gray-500 text-[12px]">
                               {DateTime.fromISO(el.createdAt).toFormat(
                                 'dd LLL yyyy t'
                               )}
@@ -269,51 +194,22 @@ export default function Profile() {
                 </TabPanels>
               </TabGroup>
             </div>
-            {/* Hidden entirely on a single-language install: a picker with
-                nothing to pick reads as a broken control, not as a setting. */}
-            {languageOptions.length > 1 && (
-              <div className="border border-[#F0F0F0] rounded-xl p-4">
-                <p className="text-[#8C8C8C] font-sans text-[14px] mb-2">
-                  {t('profile.language')}
-                </p>
-                <button
-                  onClick={() => setShowLanguageModal(true)}
-                  className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
-                >
-                  {currentLanguageName}
-                </button>
-                {/* Hidden entirely when the install has no translation
-                    server (get-config reports translateLanguages: []): a
-                    picker whose choice cannot take effect is worse than no
-                    picker. */}
-                {translateOptions.length > 0 && (
-                  <>
-                    <p className="text-[#8C8C8C] font-sans text-[14px] mt-4 mb-2">
-                      {t('profile.chatLanguage')}
-                    </p>
-                    <button
-                      onClick={() => setShowChatLanguageModal(true)}
-                      className="w-full text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
-                    >
-                      {currentChatLanguageName}
-                    </button>
-                    <p className="text-[#8C8C8C] font-sans text-[12px] mt-2">
-                      {chatLanguage === null
-                        ? t('profile.chatLanguageFollowingApp')
-                        : t('profile.chatLanguageHint')}
-                    </p>
-                    {chatLanguageUnsupported && (
-                      <p className="text-[#F44336] font-sans text-[12px] mt-1">
-                        {t('profile.chatLanguageUnsupported')}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-            <div className="border border-[#F0F0F0] rounded-xl p-4 text-center mb-8">
+            {/* Same controls as Account > Appearance, kept here too so
+                they are one tap away from the profile. */}
+            <div className="border border-gray-200 rounded-xl p-4">
+              <p className="text-gray-500 font-sans text-[14px] mb-2">
+                {t('appearance.themeHeading')}
+              </p>
+              <ThemeSettings />
+              {hasLanguageSettings && (
+                <div className="mt-4">
+                  <LanguageSettings />
+                </div>
+              )}
+            </div>
+            <div className="border border-gray-200 rounded-xl p-4 text-center mb-8">
               <button
-                className="text-[#F44336] p-4 w-full rounded-xl hover:bg-brand-hover font-varela text-regular inline-flex items-center justify-center"
+                className="text-red-500 p-4 w-full rounded-xl hover:bg-brand-hover font-varela text-regular inline-flex items-center justify-center"
                 onClick={() => onLogout()}
               >
                 <IconLogout />
@@ -335,26 +231,6 @@ export default function Profile() {
           onClose={() => setShowNewDocModal(false)}
         />
       )}
-      {showLanguageModal && (
-        <LanguageModal
-          value={uiLanguage}
-          options={languageOptions}
-          onSelect={onChangeUiLanguage}
-          onClose={() => setShowLanguageModal(false)}
-          title={t('profile.language')}
-        />
-      )}
-
-      {showChatLanguageModal && (
-        <LanguageModal
-          value={effectiveChatLanguage}
-          options={translateOptions}
-          onSelect={onChangeChatLanguage}
-          onClose={() => setShowChatLanguageModal(false)}
-          title={t('profile.chatLanguage')}
-        />
-      )}
-
       {showDelete && (
         <Dialog
           className="fixed inset-x-0 inset-y-0 z-50 flex justify-center items-center bg-black/50 transition duration-300 ease-out data-[closed]:opacity-0"
@@ -383,7 +259,7 @@ export default function Profile() {
                 {t('profile.deleteDocument.cancel')}
               </button>
               <button
-                className="bg-[#F44336] w-full py-[12px] rounded-xl bg-brand-500 text-white"
+                className="bg-red-500 w-full py-[12px] rounded-xl bg-brand-500 text-white"
                 onClick={handleDeleteDocument}
               >
                 {t('profile.deleteDocument.delete')}

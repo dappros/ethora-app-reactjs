@@ -59,7 +59,7 @@ export function SignonOptions({
             flexShrink: 0
           }} 
         />
-        <p className="font-sans text-[14px] text-yellow-600 font-medium">
+        <p className="font-sans text-[14px] text-yellow-600 dark:text-yellow-400 font-medium">
           {text}
         </p>
       </div>
@@ -99,7 +99,7 @@ export function SignonOptions({
               flexShrink: 0,
             }}
           />
-          <p className="font-sans text-[14px] text-yellow-600 font-medium">
+          <p className="font-sans text-[14px] text-yellow-600 dark:text-yellow-400 font-medium">
             {t('appSettingsSignonOptions.registrationClosedWarning')}
           </p>
         </div>
