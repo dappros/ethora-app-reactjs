@@ -57,6 +57,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
           <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 mt-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
+                <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.firstName')}</div>
                 <input
                   type="text"
                   className={inputClass}
@@ -66,6 +67,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
                 {errors.firstName && <div className="text-red-500 text-[12px] mt-1">{t('editUserModal.nameRule')}</div>}
               </div>
               <div>
+                <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.lastName')}</div>
                 <input
                   type="text"
                   className={inputClass}
@@ -75,11 +77,14 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
                 {errors.lastName && <div className="text-red-500 text-[12px] mt-1">{t('editUserModal.nameRule')}</div>}
               </div>
             </div>
-            <textarea
-              className={`${inputClass} min-h-[72px]`}
-              placeholder={t('editUserModal.description')}
-              {...register('description', { maxLength: 300 })}
-            />
+            <div>
+              <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.description')}</div>
+              <textarea
+                className={`${inputClass} min-h-[72px]`}
+                placeholder={t('editUserModal.descriptionPlaceholder')}
+                {...register('description', { maxLength: 300 })}
+              />
+            </div>
             <div>
               <div className="text-[#8C8C8C] text-[12px] font-sans mb-1">{t('editUserModal.tags')}</div>
               <TagsInput value={tags} onChange={setTags} suggestions={suggestions} placeholder={t('editUserModal.tagsPlaceholder')} />

@@ -18,8 +18,8 @@ import {
 import { IconAdd } from '../components/Icons/IconAdd';
 import { IconCheckbox } from '../components/Icons/IconCheckbox';
 import { IconDelete } from '../components/Icons/IconDelete';
-import { IconSettings } from '../components/Icons/IconSettings';
 import { IconEdit } from '../components/Icons/IconEdit';
+import { IconKey } from '../components/Icons/IconKey';
 import {
   getExportCsv,
   httpArchiveUsers,
@@ -872,20 +872,25 @@ export default function AppUsers() {
                         </td>
                         <td className="px-3 py-2 font-sans font-normal text-[13px] text-left">
                           <div className="flex flex-wrap items-center gap-1">
-                            {(el.tags || []).slice(0, 4).map((tg, i) => (
-                              <button
-                                type="button"
-                                key={`${tg}_${i}`}
-                                onClick={() => updateSearchParams({ tag: tg, page: 0 })}
-                                title={t('appUsers.tagFilterTitle').replace('{tag}', tg)}
-                                className={classNames(
-                                  'px-2 py-0.5 rounded-2xl text-xs hover:bg-brand-500 hover:text-white',
-                                  tagFilter === tg ? 'bg-brand-500 text-white' : 'bg-brand-150 text-brand-500'
-                                )}
-                              >
-                                {tg}
-                              </button>
-                            ))}
+                            {(el.tags || []).slice(0, 4).map((raw, i) => {
+                              // Legacy tags may carry whitespace / case from the old form.
+                              const tg = raw.trim();
+                              const active = (tagFilter || '').toLowerCase() === tg.toLowerCase();
+                              return (
+                                <button
+                                  type="button"
+                                  key={`${tg}_${i}`}
+                                  onClick={() => updateSearchParams({ tag: tg, page: 0 })}
+                                  title={t('appUsers.tagFilterTitle').replace('{tag}', tg)}
+                                  className={classNames(
+                                    'px-2 py-0.5 rounded-2xl text-xs hover:bg-brand-500 hover:text-white',
+                                    active ? 'bg-brand-500 text-white' : 'bg-brand-150 text-brand-500'
+                                  )}
+                                >
+                                  {tg}
+                                </button>
+                              );
+                            })}
                             {(el.tags || []).length > 4 && (
                               <span className="text-xs text-gray-400" title={(el.tags || []).slice(4).join(', ')}>
                                 +{(el.tags || []).length - 4}
@@ -940,7 +945,7 @@ export default function AppUsers() {
                               <IconEdit width={16} />
                             </button>
                             <button type="button" onClick={() => setEditAcl(el.acl)} title={t('appUsers.permissionsTitle')} aria-label={t('appUsers.permissionsTitle')}>
-                              <IconSettings width={16} height={16} />
+                              <IconKey width={16} height={16} />
                             </button>
                           </div>
                         </td>
