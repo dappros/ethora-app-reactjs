@@ -25,8 +25,8 @@ const tabs = [
   'Appearance',
   'Security',
   'AI Assistants',
-  'Privacy & Data',
   'Documents',
+  'Privacy & Data',
 ];
 
 // Tab names from before the Account page was regrouped, so old bookmarks and
@@ -93,8 +93,8 @@ export default function UserSettings() {
               <TabApp text={t('userSettingsPage.tabAppearance')} />
               <TabApp text={t('userSettingsPage.tabSecurity')} />
               <TabApp text={t('userSettingsPage.tabAiAssistants')} />
-              <TabApp text={t('userSettingsPage.tabPrivacyData')} />
               <TabApp text={t('userSettingsPage.tabDocuments')} />
+              <TabApp text={t('userSettingsPage.tabPrivacyData')} />
             </TabList>
             {/* Logout sits where Referrals used to live (bottom of the left
                 rail on desktop). Some users instinctively look for Logout on
@@ -122,11 +122,11 @@ export default function UserSettings() {
             <TabPanel key="AI Assistants" className="h-full overflow-auto">
               <AiAssistants />
             </TabPanel>
-            <TabPanel key="Privacy & Data" className="h-full overflow-auto">
-              <PrivacyData />
-            </TabPanel>
             <TabPanel key="Documents" className="h-full overflow-auto">
               <Documents />
+            </TabPanel>
+            <TabPanel key="Privacy & Data" className="h-full overflow-auto">
+              <PrivacyData />
             </TabPanel>
           </TabPanels>
         </TabGroup>

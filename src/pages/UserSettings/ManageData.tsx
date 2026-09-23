@@ -74,6 +74,7 @@ export function ManageData() {
       >
         {t('userSettingsManageData.downloadButton')}
       </button>
+      <hr className="border-gray-200 mb-8" />
       <div className="font-sans text-regular font-semibold mb-2">
         {t('userSettingsManageData.deleteHeading')}
       </div>
