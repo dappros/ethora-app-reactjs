@@ -18,8 +18,17 @@ export default function Admin() {
         {t('adminShell.needAssistance')}{' '}
         <NavLink to="/app/help" className="text-brand-500 underline">
           {t('adminShell.helpSupportPage')}
-        </NavLink>{' '}
-        {t('adminShell.or')}{' '}
+        </NavLink>
+        {' | '}
+        {/* The MCP route is the "skip the admin panel" path: an assistant
+            connected once can do most of what these pages do. */}
+        <NavLink
+          to="/app/account?tab=AI%20Assistants"
+          className="text-brand-500 underline"
+        >
+          {t('adminShell.connectMcp')}
+        </NavLink>
+        {' | '}
         <button
           type="button"
           onClick={() => setShowBookACall(true)}

@@ -46,8 +46,9 @@ export const miscPages = {
     'help.sdk.cta': 'Open SDK on GitHub',
     'help.mcp.title': 'MCP',
     'help.mcp.description':
-      'Use our MCP server with your AI IDE - it has knowledge of all Ethora features, tools, and APIs. Just tell your AI IDE what you want to build and it will use the Ethora MCP to set up your project.',
-    'help.mcp.cta': 'Open MCP on GitHub',
+      'Drive your Ethora account from Claude, ChatGPT, Cursor or Claude Code. Connect the hosted Ethora MCP server in a minute and tell your AI what to build; it knows every Ethora feature, tool and API. Prefer a local install? The CLI runs on your own machine.',
+    'help.mcp.cta': 'Connect your AI (remote MCP)',
+    'help.mcp.cliCta': 'CLI on GitHub',
     'help.forum.title': 'Forum',
     'help.forum.description':
       'Have technical or product questions? Create a topic in our community forum - the team and other developers reply there.',
@@ -169,8 +170,9 @@ export const miscPages = {
     'help.sdk.cta': 'Ouvrir le SDK sur GitHub',
     'help.mcp.title': 'MCP',
     'help.mcp.description':
-      "Utilisez notre serveur MCP avec votre IDE IA : il connaît toutes les fonctionnalités, tous les outils et toutes les API d'Ethora. Indiquez simplement à votre IDE IA ce que vous voulez construire, il utilisera le MCP Ethora pour configurer votre projet.",
-    'help.mcp.cta': 'Ouvrir le MCP sur GitHub',
+      "Pilotez votre compte Ethora depuis Claude, ChatGPT, Cursor ou Claude Code. Connectez le serveur MCP hébergé d'Ethora en une minute et dites à votre IA quoi construire : elle connaît toutes les fonctionnalités, outils et API d'Ethora. Vous préférez une installation locale ? La CLI tourne sur votre machine.",
+    'help.mcp.cta': 'Connecter votre IA (MCP distant)',
+    'help.mcp.cliCta': 'CLI sur GitHub',
     'help.forum.title': 'Forum',
     'help.forum.description':
       "Des questions techniques ou produit ? Créez un sujet sur notre forum communautaire : l'équipe et d'autres développeurs y répondent.",
@@ -297,8 +299,9 @@ export const miscPages = {
     'help.sdk.cta': 'Abrir el SDK en GitHub',
     'help.mcp.title': 'MCP',
     'help.mcp.description':
-      'Usa nuestro servidor MCP con tu IDE de IA: conoce todas las funciones, herramientas y API de Ethora. Solo dile a tu IDE de IA qué quieres construir y usará el MCP de Ethora para configurar tu proyecto.',
-    'help.mcp.cta': 'Abrir el MCP en GitHub',
+      'Gestiona tu cuenta de Ethora desde Claude, ChatGPT, Cursor o Claude Code. Conecta el servidor MCP alojado de Ethora en un minuto y dile a tu IA qué construir: conoce todas las funciones, herramientas y API de Ethora. ¿Prefieres una instalación local? La CLI funciona en tu propia máquina.',
+    'help.mcp.cta': 'Conectar tu IA (MCP remoto)',
+    'help.mcp.cliCta': 'CLI en GitHub',
     'help.forum.title': 'Foro',
     'help.forum.description':
       '¿Tienes preguntas técnicas o sobre el producto? Crea un tema en nuestro foro comunitario: el equipo y otros desarrolladores responden allí.',
