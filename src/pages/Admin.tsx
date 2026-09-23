@@ -15,7 +15,6 @@ export default function Admin() {
     <div className="grid grid-rows-[1fr,_auto] gap-4 h-full">
       <Outlet />
       <p className="text-xs text-gray-500 text-center pb-2">
-        {t('adminShell.needAssistance')}{' '}
         <NavLink to="/app/help" className="text-brand-500 underline">
           {t('adminShell.helpSupportPage')}
         </NavLink>
@@ -36,7 +35,6 @@ export default function Admin() {
         >
           {t('adminShell.bookACall')}
         </button>
-        .
       </p>
       {showBookACall && (
         <BookACallModal onClose={() => setShowBookACall(false)} />
