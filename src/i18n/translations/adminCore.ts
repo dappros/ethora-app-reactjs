@@ -24,8 +24,8 @@ export const adminCore = {
     'appUsers.mfaResetFailedPrefix': 'Could not reset two-step verification:',
     // Admin.tsx - shared support footer shown under every admin sub-page.
     'adminShell.needAssistance': 'Need assistance?',
-    'adminShell.helpSupportPage': 'Check Help & Support options',
-    'adminShell.connectMcp': 'connect to your AI via MCP',
+    'adminShell.helpSupportPage': 'Help & Support',
+    'adminShell.connectMcp': 'Connect MCP',
     'adminShell.or': 'or',
     'adminShell.bookACall': 'Book a Call',
 
@@ -354,8 +354,8 @@ export const adminCore = {
     'appUsers.mfaResetToast': 'Vérification en deux étapes réinitialisée pour {count} utilisateur(s).',
     'appUsers.mfaResetFailedPrefix': 'Impossible de réinitialiser la vérification en deux étapes :',
     'adminShell.needAssistance': "Besoin d'aide ?",
-    'adminShell.helpSupportPage': "Voir les options d'aide et de support",
-    'adminShell.connectMcp': 'connecter votre IA via MCP',
+    'adminShell.helpSupportPage': 'Aide et support',
+    'adminShell.connectMcp': 'Connecter MCP',
     'adminShell.or': 'ou',
     'adminShell.bookACall': 'Réserver un appel',
 
@@ -682,8 +682,8 @@ export const adminCore = {
     'appUsers.mfaResetToast': 'Verificación en dos pasos restablecida para {count} usuario(s).',
     'appUsers.mfaResetFailedPrefix': 'No se pudo restablecer la verificación en dos pasos:',
     'adminShell.needAssistance': '¿Necesitas ayuda?',
-    'adminShell.helpSupportPage': 'Ver las opciones de ayuda y soporte',
-    'adminShell.connectMcp': 'conecta tu IA mediante MCP',
+    'adminShell.helpSupportPage': 'Ayuda y soporte',
+    'adminShell.connectMcp': 'Conectar MCP',
     'adminShell.or': 'o',
     'adminShell.bookACall': 'Reservar una llamada',
 
