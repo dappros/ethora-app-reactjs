@@ -1,15 +1,24 @@
 import classNames from 'classnames';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getStepsStartView } from '../DataTutorial';
 import { Step } from '../typeTutorial';
 import { useTranslation } from '../../../../i18n/useTranslation';
 
+// Account settings, AI Assistants tab: where the personal MCP URL and the
+// per-client connection steps live.
+const MCP_TAB_PATH = '/app/account?tab=AI%20Assistants';
+
 export const StepStartTutorial = ({
   onSelect,
+  onClose,
 }: {
   onSelect: (step: Step) => void;
+  // Closes the modal before navigating away to the MCP tab.
+  onClose?: () => void;
 }): ReactElement => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const stepsStartView = getStepsStartView(t);
 
   return (
@@ -64,6 +73,30 @@ export const StepStartTutorial = ({
           </div>
         )
       )}
+      </div>
+
+      {/* The fourth path: let an assistant drive the account instead of
+          learning these pages. Deliberately below the three cards, as a
+          quieter alternative rather than a fourth tile. */}
+      <div className="mt-8 rounded-2xl bg-[#F5F7F9] p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex-1">
+          <div className="font-semibold text-black">
+            {t('stepStartTutorial.mcp.lead')}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">
+            {t('stepStartTutorial.mcp.text')}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            onClose?.();
+            navigate(MCP_TAB_PATH);
+          }}
+          className="whitespace-nowrap py-[10px] px-5 rounded-xl bg-brand-500 text-white hover:bg-brand-darker"
+        >
+          {t('stepStartTutorial.mcp.cta')}
+        </button>
       </div>
     </div>
   );

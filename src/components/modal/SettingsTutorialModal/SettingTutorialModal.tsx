@@ -62,7 +62,7 @@ export const SettingTutorialModal: FC<SettingTutorialModalProps> = ({
   const currentComponent = () => {
     switch (step) {
       case 'Start':
-        return <StepStartTutorial onSelect={(selectedStep) => {
+        return <StepStartTutorial onClose={onClose} onSelect={(selectedStep) => {
           if (selectedStep === 'Chat') {
             handleChangeStep('ChatList');
           } else if (selectedStep === 'AI') {

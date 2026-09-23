@@ -1189,6 +1189,10 @@ export interface UserApiKey {
   name: string;
   createdAt: string;
   expiresAt: string;
+  // Null until the key authenticates its first request; then the time and
+  // the caller (e.g. "mcp/26.9.3 cursor-vscode/1.2"). Absent on older APIs.
+  lastUsedAt?: string | null;
+  lastUsedBy?: string | null;
 }
 
 export interface UserApiKeyCreated extends UserApiKey {
@@ -1201,6 +1205,8 @@ export interface UserOauthGrant {
   scope?: string;
   createdAt: string;
   expiresAt?: string;
+  lastUsedAt?: string | null;
+  lastUsedBy?: string | null;
 }
 
 export function httpListUserApiKeys() {
