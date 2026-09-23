@@ -21,6 +21,9 @@ export const settingsTutorial = {
       'Deploy AI agent for your visitors or your team.',
     'dataTutorial.demo.title': 'Demo',
     'dataTutorial.demo.description': 'Book a demo with Ethora team.',
+    'stepStartTutorial.mcp.lead': 'Or skip the admin panel entirely.',
+    'stepStartTutorial.mcp.text': 'Use your AI to drive your Ethora account - no need to learn the ropes of our admin panel if you connect the Ethora MCP server. Claude, ChatGPT, Cursor and Claude Code can create apps, rooms, users and AI agents for you.',
+    'stepStartTutorial.mcp.cta': 'Connect your AI',
 
     'dataTutorial.chat.one.title': 'New web app',
     'dataTutorial.chat.one.time': '(no code, 5 min)',
@@ -110,6 +113,9 @@ export const settingsTutorial = {
       'Déployez un agent IA pour vos visiteurs ou votre équipe.',
     'dataTutorial.demo.title': 'Démo',
     'dataTutorial.demo.description': "Réservez une démo avec l'équipe Ethora.",
+    'stepStartTutorial.mcp.lead': 'Ou passez-vous complètement du panneau d\'administration.',
+    'stepStartTutorial.mcp.text': 'Laissez votre IA piloter votre compte Ethora : inutile d\'apprendre notre panneau d\'administration si vous connectez le serveur MCP d\'Ethora. Claude, ChatGPT, Cursor et Claude Code peuvent créer des applications, des salons, des utilisateurs et des agents IA pour vous.',
+    'stepStartTutorial.mcp.cta': 'Connecter votre IA',
 
     'dataTutorial.chat.one.title': 'Nouvelle application web',
     'dataTutorial.chat.one.time': '(no code, 5 min)',
@@ -202,6 +208,9 @@ export const settingsTutorial = {
       'Despliega un agente de IA para tus visitantes o tu equipo.',
     'dataTutorial.demo.title': 'Demo',
     'dataTutorial.demo.description': 'Reserva una demo con el equipo de Ethora.',
+    'stepStartTutorial.mcp.lead': 'O sáltate el panel de administración por completo.',
+    'stepStartTutorial.mcp.text': 'Deja que tu IA gestione tu cuenta de Ethora: no hace falta aprender nuestro panel de administración si conectas el servidor MCP de Ethora. Claude, ChatGPT, Cursor y Claude Code pueden crear aplicaciones, salas, usuarios y agentes de IA por ti.',
+    'stepStartTutorial.mcp.cta': 'Conectar tu IA',
 
     'dataTutorial.chat.one.title': 'Nueva aplicación web',
     'dataTutorial.chat.one.time': '(sin código, 5 min)',

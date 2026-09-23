@@ -34,6 +34,9 @@ interface ResourceCardProps {
   onClick?: () => void;
   ctaLabel: string;
   external?: boolean;
+  // Optional second, quieter action (always an external link).
+  secondaryHref?: string;
+  secondaryLabel?: string;
 }
 
 function ResourceCard({
@@ -43,6 +46,8 @@ function ResourceCard({
   onClick,
   ctaLabel,
   external = true,
+  secondaryHref,
+  secondaryLabel,
 }: ResourceCardProps) {
   const ctaClass =
     'inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover font-sans text-sm';
@@ -69,6 +74,17 @@ function ResourceCard({
           <button type="button" onClick={onClick} className={ctaClass}>
             {ctaLabel}
           </button>
+        )}
+        {secondaryHref && secondaryLabel && (
+          <a
+            href={secondaryHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 ml-4 font-sans text-sm text-gray-500 underline hover:text-brand-500"
+          >
+            {secondaryLabel}
+            <IconExternalLink width={12} height={12} />
+          </a>
         )}
       </div>
     </div>
@@ -113,11 +129,15 @@ export default function Help() {
             href="https://github.com/dappros/ethora/"
             ctaLabel={t('help.sdk.cta')}
           />
+          {/* Remote MCP is the default: one URL, no install. The CLI (stdio)
+              is the second option for people who want it on their machine. */}
           <ResourceCard
             title={t('help.mcp.title')}
             description={t('help.mcp.description')}
-            href="https://github.com/dappros/ethora-mcp-server"
+            onClick={() => navigate('/app/account?tab=AI%20Assistants')}
             ctaLabel={t('help.mcp.cta')}
+            secondaryHref="https://github.com/dappros/ethora-mcp-server#using-with-stdio-clients"
+            secondaryLabel={t('help.mcp.cliCta')}
           />
           <ResourceCard
             title={t('help.forum.title')}
