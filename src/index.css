@@ -100,6 +100,12 @@
   --ethora-color-danger: #f1574b !important;
   --ethora-color-success: #2fbe79 !important;
   --ethora-color-online: #2fbe79 !important;
+  /* The selected/active room row's highlight background. The component
+     derives this by tinting `colors.primary` 88% toward WHITE, unconditionally
+     - there is no config field for it, and no dark alternative, so a selected
+     row was a near-white pill with near-white text on top of it (unreadable).
+     A muted, blue-tinted dark surface instead of a pastel one. */
+  --ethora-color-primary-soft: #324063 !important;
 }
 
 body {
