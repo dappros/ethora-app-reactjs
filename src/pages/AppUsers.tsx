@@ -47,6 +47,7 @@ import { apiError } from '../utils/apiError';
 import { downloadCsv } from '../utils/csv';
 import { SubmitModal } from '../components/modal/SubmitModal';
 import { Sorting } from '../components/Sorting';
+import CopyButtonText from '../components/UI/Buttons/CopyButtonText';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useTranslation } from '../i18n/useTranslation';
@@ -72,6 +73,9 @@ export default function AppUsers() {
   const [total, setTotal] = useState(0);
   const [showManageTags, setShowManageTags] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetResults, setResetResults] = useState<
+    Array<{ userId: string; email: string; tempPassword: string }> | null
+  >(null);
   const [showResetMfa, setShowResetMfa] = useState(false);
   const [resetMfaBusy, setResetMfaBusy] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -415,9 +419,17 @@ export default function AppUsers() {
 
     const selectedUserIds = getSelectedUserIds();
 
-    actionResetPasswords(appId, selectedUserIds).then(() => {
+    actionResetPasswords(appId, selectedUserIds).then((res) => {
       setShowResetPassword(false);
-      toast(t('appUsers.passwordResetToast'));
+      // Installs without outbound email get the temporary passwords back
+      // instead of an email going out; show them once so the admin can pass
+      // them on. The user still has to choose a new password at login.
+      const tempPasswords = res.data?.emailSent === false ? res.data?.tempPasswords : undefined;
+      if (Array.isArray(tempPasswords) && tempPasswords.length) {
+        setResetResults(tempPasswords);
+      } else {
+        toast(t('appUsers.passwordResetToast'));
+      }
     });
   };
 
@@ -1088,6 +1100,33 @@ export default function AppUsers() {
           onClose={() => setEditUser(null)}
           onSubmit={onEditUserSubmit}
         />
+      )}
+      {resetResults && (
+        <SubmitModal onClose={() => setResetResults(null)}>
+          <div className="font-varela text-[24px] text-center mb-4">
+            {t('appUsers.tempPasswordsTitle')}
+          </div>
+          <p className="font-sans text-[14px] mb-6 text-center">
+            {t('appUsers.tempPasswordsHint')}
+          </p>
+          <div className="flex flex-col gap-3 mb-8 max-h-[320px] overflow-y-auto">
+            {resetResults.map((r) => (
+              <div key={r.userId} className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3">
+                <div className="min-w-0">
+                  <div className="font-sans text-[14px] truncate">{r.email}</div>
+                  <code className="font-mono text-[14px] select-all">{r.tempPassword}</code>
+                </div>
+                <CopyButtonText textToCopy={r.tempPassword} />
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => setResetResults(null)}
+            className="w-full bg-brand-500 hover:bg-brand-darker rounded-xl py-[12px] text-white"
+          >
+            {t('appUsers.tempPasswordsDone')}
+          </button>
+        </SubmitModal>
       )}
       {showResetPassword && (
         <SubmitModal onClose={() => setShowResetPassword(false)}>
