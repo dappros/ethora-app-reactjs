@@ -5,6 +5,7 @@ import { phCapture } from '../posthog';
 import type { ComponentProps, CSSProperties } from 'react';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 import { getCachedTranslateLanguages } from '../utils/uiLanguage';
+import type { ResolvedUiTheme } from '../utils/uiTheme';
 import { env } from './env';
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
@@ -194,7 +195,52 @@ function buildTranslatesConfig(
   return { mode: 'auto', ...extra, enabled: true };
 }
 
-const getRoomListStyles = () =>
+// The chat-component's own colour system (IConfig.colors + the panel/text
+// tokens it derives internally) only ever renders a light palette - there is
+// no dark-mode switch inside the component. `getChatColors` gives it the
+// subset of surfaces it DOES expose as config (bubble/input/icon-chip
+// backgrounds) so those at least follow the app's theme; the panel
+// background/text/border tokens it hardcodes internally are patched
+// separately via a CSS override (see index.css's `.ethora-chat-root` dark
+// block) since the component gives no config hook for them at all.
+type ChatColors = NonNullable<ChatConfig['colors']>;
+
+function getChatColors(
+  theme: ResolvedUiTheme,
+  primaryColor?: string | null
+): ChatColors {
+  const primary = primaryColor || '#0052CD';
+  if (theme === 'dark') {
+    return {
+      primary,
+      // Matches the app's own dark-theme neutral ramp (index.css's
+      // --c-gray-200 / --c-brand-100 / --c-gray-50) so the chat reads as
+      // part of the same surface, not a bolted-on light panel.
+      secondary: '#2C2F37',
+      iconsBg: '#2C2F37',
+      ownMessageBackground: '#242C42',
+      otherMessageBackground: '#22252C',
+      inputBackground: '#1F2228',
+      colorInput: '#1F2228',
+    };
+  }
+  return {
+    primary,
+    secondary: '#141414',
+  };
+}
+
+// The message-list's own scroll surface (behind the bubbles) is a separate
+// config field from `colors` entirely - `backgroundChat.color` - and
+// defaults to a hardcoded light tint (#F3F6FC) when omitted, same as the
+// other panel tokens above.
+function getBackgroundChat(
+  theme: ResolvedUiTheme
+): NonNullable<ChatConfig['backgroundChat']> {
+  return { color: theme === 'dark' ? '#1a1c21' : '#F3F6FC' };
+}
+
+const getRoomListStyles = (theme: ResolvedUiTheme = 'light') =>
   ({
     maxHeight: 'calc(100%)',
     height: 'calc(100%)',
@@ -202,15 +248,16 @@ const getRoomListStyles = () =>
     border: 'none',
     padding: '16px',
     paddingTop: '0px',
-    color: '#141414',
+    color: theme === 'dark' ? '#ECEEF1' : '#141414',
   }) satisfies CSSProperties;
 
-const chatRoomStyles = {
-  maxHeight: 'calc(100%)',
-  height: 'calc(100%)',
-  borderRadius: '0px 16px 16px 0px',
-  color: '#141414',
-} satisfies CSSProperties;
+const getChatRoomStyles = (theme: ResolvedUiTheme = 'light') =>
+  ({
+    maxHeight: 'calc(100%)',
+    height: 'calc(100%)',
+    borderRadius: '0px 16px 16px 0px',
+    color: theme === 'dark' ? '#ECEEF1' : '#141414',
+  }) satisfies CSSProperties;
 
 // The app-wide provider (main.tsx) takes the same two language inputs as the
 // Chats page: it is mounted above the router, so in-app notification toasts
@@ -236,6 +283,12 @@ interface BuildEthoraBaseChatConfigProps extends ChatLanguageInputs {
   // see buildE2eeConfig. Same reactivity caveat as the language inputs: callers
   // pass their own store read and list it in the useMemo deps (see main.tsx).
   e2eeEnabled?: boolean | null;
+  // The app's resolved light/dark theme (useResolvedUiTheme()). Drives the
+  // subset of chat-component surfaces that follow host config - see
+  // getChatColors. Callers pass their own reactive read and list it in their
+  // useMemo deps (see main.tsx), same as the language inputs above. Defaults
+  // to 'light' so any caller that doesn't pass it keeps prior behaviour.
+  resolvedTheme?: ResolvedUiTheme;
 }
 
 export const buildEthoraBaseChatConfig = ({
@@ -246,6 +299,7 @@ export const buildEthoraBaseChatConfig = ({
   appTranslate,
   chatTranslate,
   e2eeEnabled,
+  resolvedTheme = 'light',
 }: BuildEthoraBaseChatConfigProps): XmppProviderConfig => {
   const { appLocale, chatLocale } = resolveLanguageConfig({
     appTranslate,
@@ -327,10 +381,8 @@ export const buildEthoraBaseChatConfig = ({
     translates: buildTranslatesConfig(offeredTranslations, {
       readerLocale: chatLocale,
     }),
-    colors: {
-      primary: primaryColor || '#0052CD',
-      secondary: '#141414',
-    },
+    colors: getChatColors(resolvedTheme, primaryColor),
+    backgroundChat: getBackgroundChat(resolvedTheme),
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {
@@ -398,6 +450,10 @@ interface CreateChatConfigOptions extends ChatLanguageInputs {
   // a live `useAppStore((s) => s.translateLanguages)` read and list it in the
   // useMemo deps (see Chat.tsx).
   translateLanguages?: readonly string[] | null;
+  // See BuildEthoraBaseChatConfigProps.resolvedTheme - same contract, passed
+  // through to buildEthoraBaseChatConfig and used again below for the
+  // room-list/chat-room text colour and bubble/input surfaces.
+  resolvedTheme?: ResolvedUiTheme;
 }
 
 // Build the userLogin.user payload for chat-component. Returns null when
@@ -462,6 +518,7 @@ export function createChatConfig({
   appTranslate,
   chatTranslate,
   translateLanguages,
+  resolvedTheme = 'light',
   // isMobileView: kept in the options contract (Chat.tsx still passes it)
   // but no longer read here - getRoomListStyles() dropped its
   // mobile-conditional padding upstream. Not destructured to a local so
@@ -487,6 +544,7 @@ export function createChatConfig({
     // (owner-session) mode is the switched-into app, not the admin's own base
     // app - `app` is already the effective one at this call site (Chat.tsx).
     e2eeEnabled: app?.e2eeEnabled,
+    resolvedTheme,
   });
 
   if (ownerOverride) {
@@ -532,13 +590,10 @@ export function createChatConfig({
   return {
     ...baseConfig,
     customAppToken: ownerOverride?.appToken ?? app?.appToken,
-    colors: {
-      primary: app?.primaryColor || '#0052CD',
-      secondary: '#141414',
-    },
+    colors: getChatColors(resolvedTheme, app?.primaryColor),
     qrUrl: DEFAULT_QR_URL,
-    roomListStyles: getRoomListStyles(),
-    chatRoomStyles,
+    roomListStyles: getRoomListStyles(resolvedTheme),
+    chatRoomStyles: getChatRoomStyles(resolvedTheme),
     chatHeaderSettings: {
       disableMenu: true,
       disableCreate: app?.allowUsersToCreateRooms === false,

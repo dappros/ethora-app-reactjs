@@ -12,6 +12,7 @@ import './index.css';
 import { router } from './router.tsx';
 import { useAppStore } from './store/useAppStore';
 import { ThemeBridge } from './theme/ThemeBridge';
+import { useResolvedUiTheme } from './theme/useResolvedUiTheme';
 import { purgeLegacyCredentialCopies } from './authRefresh.ts';
 
 purgeLegacyCredentialCopies();
@@ -143,6 +144,11 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
   // detection while the page itself followed the user's picks.
   const uiLanguage = useAppStore((s) => s.uiLanguage);
   const chatLanguage = useAppStore((s) => s.chatLanguage);
+  // Drives the subset of chat-component surfaces that follow host config -
+  // see chatBootstrap.ts's getChatColors. Read reactively so flipping the
+  // app's theme (Profile > Appearance, or the OS in 'system' mode) recolours
+  // the chat live instead of only on next login.
+  const resolvedTheme = useResolvedUiTheme();
   const providerConfig = useMemo(
     () =>
       buildEthoraBaseChatConfig({
@@ -157,6 +163,7 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
         // widget) read ITS config; without this they would fall back to the
         // install default and disagree with the Chats page.
         e2eeEnabled: currentApp?.e2eeEnabled,
+        resolvedTheme,
       }),
     [
       currentUser,
@@ -165,6 +172,7 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
       translateLanguages,
       uiLanguage,
       chatLanguage,
+      resolvedTheme,
     ]
   );
 

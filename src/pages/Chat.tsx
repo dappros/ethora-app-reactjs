@@ -11,6 +11,7 @@ import { createChatConfig } from '../config/chatBootstrap';
 import { useIsMobileView } from '../hooks/useIsMobileView';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
+import { useResolvedUiTheme } from '../theme/useResolvedUiTheme';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 
 import { env } from '../config/env';
@@ -103,6 +104,10 @@ const MemoizedChat = React.memo(function ChatComponent({
   // createChatConfig hands the component translates.enabled:false, matching
   // what Profile does with its chat-language row.
   const translateLanguages = useAppStore((s) => s.translateLanguages);
+  // Drives the subset of chat-component surfaces that follow host config -
+  // see chatBootstrap.ts's getChatColors. Read reactively so switching the
+  // app's theme recolours the chat live.
+  const resolvedTheme = useResolvedUiTheme();
 
   const ownerOverride = useMemo(() => {
     if (!ownerSession) return undefined;
@@ -143,6 +148,7 @@ const MemoizedChat = React.memo(function ChatComponent({
         // /v1/users/client that loginWithEmail doesn't produce.
         currentUser,
         ownerOverride,
+        resolvedTheme,
       }),
     [
       config,
@@ -156,6 +162,7 @@ const MemoizedChat = React.memo(function ChatComponent({
       uiLanguage,
       chatLanguage,
       translateLanguages,
+      resolvedTheme,
     ]
   );
 
@@ -402,10 +409,7 @@ export default function ChatPage() {
         })()}
         <div />
       </div>
-      <div
-        className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-[#fff] px-0 overflow-hidden pt-0 md:pt-4"
-        style={{ color: '#141414' }}
-      >
+      <div className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden pt-0 md:pt-4">
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP
             socket and fresh chat-component state. React's reconciliation
             of MemoizedChat alone wouldn't recreate the underlying XMPP
