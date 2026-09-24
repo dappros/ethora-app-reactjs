@@ -26,6 +26,8 @@ ENV VITE_RUNTIME_CONFIG=true \
 RUN npm run build
 
 FROM nginx:1.27-alpine AS runtime
+# Pick up base-image security fixes (the scan blocks fixable CRITICALs in openssl etc.).
+RUN apk upgrade --no-cache
 ARG VITE_BUILD_VERSION=""
 ARG VITE_BUILD_COMMIT=""
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
