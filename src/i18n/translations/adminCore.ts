@@ -279,6 +279,10 @@ export const adminCore = {
     'appUsers.tagsAppliedToast': 'Tags applied successfully!',
     'appUsers.userCreatedToast': 'User created successfully!',
     'appUsers.passwordResetToast': 'Password reset successfully!',
+    'appUsers.tempPasswordsTitle': 'Temporary passwords',
+    'appUsers.tempPasswordsHint':
+      'This installation does not send email, so pass these on yourself. Each one works once: the user signs in with it and is asked to choose a new password. They are not shown again.',
+    'appUsers.tempPasswordsDone': 'Done',
     'appUsers.userCapWord': 'User',
     'appUsers.usersCapWord': 'Users',
     'appUsers.archivedSuccessSuffix': 'archived successfully',
@@ -606,6 +610,10 @@ export const adminCore = {
     'appUsers.tagsAppliedToast': 'Étiquettes appliquées avec succès !',
     'appUsers.userCreatedToast': 'Utilisateur créé avec succès !',
     'appUsers.passwordResetToast': 'Mot de passe réinitialisé avec succès !',
+    'appUsers.tempPasswordsTitle': 'Mots de passe temporaires',
+    'appUsers.tempPasswordsHint':
+      "Cette installation n'envoie pas d'e-mails : transmettez-les vous-même. Chacun ne sert qu'une fois : l'utilisateur se connecte avec, puis doit choisir un nouveau mot de passe. Ils ne seront plus affichés.",
+    'appUsers.tempPasswordsDone': 'Terminé',
     'appUsers.userCapWord': 'Utilisateur',
     'appUsers.usersCapWord': 'Utilisateurs',
     'appUsers.archivedSuccessSuffix': 'archivé(s) avec succès',
@@ -934,6 +942,10 @@ export const adminCore = {
     'appUsers.tagsAppliedToast': '¡Etiquetas aplicadas correctamente!',
     'appUsers.userCreatedToast': '¡Usuario creado correctamente!',
     'appUsers.passwordResetToast': '¡Contraseña restablecida correctamente!',
+    'appUsers.tempPasswordsTitle': 'Contraseñas temporales',
+    'appUsers.tempPasswordsHint':
+      'Esta instalación no envía correos, así que entrégalas tú mismo. Cada una sirve una sola vez: el usuario inicia sesión con ella y debe elegir una contraseña nueva. No se volverán a mostrar.',
+    'appUsers.tempPasswordsDone': 'Listo',
     'appUsers.userCapWord': 'Usuario',
     'appUsers.usersCapWord': 'Usuarios',
     'appUsers.archivedSuccessSuffix': 'archivado(s) correctamente',
