@@ -42,6 +42,8 @@ import classNames from 'classnames';
 import { useSearchParams } from 'react-router-dom';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
+import { PlatformAccessModal } from '../components/modal/PlatformAccessModal';
+import { IconSettings } from '../components/Icons/IconSettings';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { apiError } from '../utils/apiError';
 import { downloadCsv } from '../utils/csv';
@@ -51,6 +53,7 @@ import CopyButtonText from '../components/UI/Buttons/CopyButtonText';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useTranslation } from '../i18n/useTranslation';
+import { useAppStore } from '../store/useAppStore';
 import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
@@ -98,6 +101,16 @@ export default function AppUsers() {
   const tagFilter = searchParams.get('tag') || undefined;
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
+  // "Platform access" (superadmin flag, AI agents, network statistics) is
+  // per user across the installation: shown to superadmins, on the base
+  // app only (the backend refuses elsewhere).
+  const currentUser = useAppStore((s) => s.currentUser);
+  const apps = useAppStore((s) => s.apps);
+  const currentApp = apps.find((a) => a._id === appId);
+  const canManagePlatformAccess = currentUser?.isSuperAdmin?.write === true && currentApp?.isBaseApp === true;
+  const [platformUser, setPlatformUser] = useState<ModelAppUser | null>(null);
+  // The user whose ACL is open, for the dialog title.
+  const [editAclUser, setEditAclUser] = useState<ModelAppUser | null>(null);
 
   // const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   // const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
@@ -973,9 +986,22 @@ export default function AppUsers() {
                             <button type="button" onClick={() => setEditUser(el)} title={t('appUsers.editTitle')} aria-label={t('appUsers.editTitle')}>
                               <IconEdit width={16} />
                             </button>
-                            <button type="button" onClick={() => setEditAcl(el.acl)} title={t('appUsers.permissionsTitle')} aria-label={t('appUsers.permissionsTitle')}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditAclUser(el);
+                                setEditAcl(el.acl);
+                              }}
+                              title={t('appUsers.permissionsTitle')}
+                              aria-label={t('appUsers.permissionsTitle')}
+                            >
                               <IconKey width={16} height={16} />
                             </button>
+                            {canManagePlatformAccess && (
+                              <button type="button" onClick={() => setPlatformUser(el)} title={t('appUsers.platformAccessTitle')} aria-label={t('appUsers.platformAccessTitle')}>
+                                <IconSettings width={16} height={16} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1156,6 +1182,15 @@ export default function AppUsers() {
           onCancel={() => setShowResetMfa(false)}
         />
       )}
+      {platformUser && appId && (
+        <PlatformAccessModal
+          appId={appId}
+          user={platformUser}
+          isSelf={platformUser._id === currentUser?._id}
+          onClose={() => setPlatformUser(null)}
+          onChanged={refreshAndClearSelection}
+        />
+      )}
       {showRevokeAccess && (
         <ConfirmModal
           title={`${t('appUsers.revokeAccessConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
@@ -1191,6 +1226,8 @@ export default function AppUsers() {
           acl={editAcl}
           setEditAcl={setEditAcl}
           onClose={() => setEditAcl(null)}
+          userLabel={editAclUser ? `${editAclUser.firstName || ''} ${editAclUser.lastName || ''}`.trim() || editAclUser.email : undefined}
+          appLabel={currentApp?.displayName}
         />
       )}
       {showNewUserModal && (
