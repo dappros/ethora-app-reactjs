@@ -20,6 +20,8 @@ const STATE_CLASS: Record<LicenseStatus['state'], string> = {
 };
 
 const PACKAGE_KEYS = ['ai', 'b2b', 'compliance', 'analytics'] as const;
+const LICENSE_TEXT_URL = 'https://github.com/dappros/ethora-install/blob/main/docs/legal/ETHORA_CORE_LICENSE.md';
+const FEATURE_SCHEDULE_URL = 'https://github.com/dappros/ethora-install/blob/main/docs/legal/FEATURE_SCHEDULE.md';
 
 type ApiErr = AxiosError<{ code?: string; error?: string; details?: { reason?: string } }>;
 
@@ -295,6 +297,12 @@ export default function AdminLicense() {
               <p className="mt-4 text-xs text-gray-500">{t('adminLicense.envKeyNote')}</p>
             )}
           </div>
+
+          <p className="mt-6 text-xs text-gray-500">
+            <a href={LICENSE_TEXT_URL} target="_blank" rel="noreferrer" className="underline">{t('adminLicense.licenseTextLink')}</a>
+            {' | '}
+            <a href={FEATURE_SCHEDULE_URL} target="_blank" rel="noreferrer" className="underline">{t('adminLicense.featureScheduleLink')}</a>
+          </p>
         </div>
       </div>
     </div>

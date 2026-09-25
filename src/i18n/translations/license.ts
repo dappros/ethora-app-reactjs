@@ -8,6 +8,8 @@ export const license = {
 
     'licenseState.licensed': 'Licensed',
     'licenseState.grace': 'Grace period',
+    'adminLicense.licenseTextLink': 'Ethora Core Software License',
+    'adminLicense.featureScheduleLink': 'Feature schedule (editions and limits)',
     'licenseState.unlicensed': 'No license key',
     'licenseTier.core': 'Ethora Core (unregistered)',
     'licenseTier.core-registered': 'Ethora Core',
@@ -106,6 +108,8 @@ export const license = {
 
     'licenseState.licensed': 'Sous licence',
     'licenseState.grace': 'Période de grâce',
+    'adminLicense.licenseTextLink': 'Licence logicielle Ethora Core',
+    'adminLicense.featureScheduleLink': 'Grille des éditions et limites',
     'licenseState.unlicensed': 'Aucune clé de licence',
     'licenseTier.core': 'Ethora Core (non enregistré)',
     'licenseTier.core-registered': 'Ethora Core',
@@ -204,6 +208,8 @@ export const license = {
 
     'licenseState.licensed': 'Con licencia',
     'licenseState.grace': 'Período de gracia',
+    'adminLicense.licenseTextLink': 'Licencia de software Ethora Core',
+    'adminLicense.featureScheduleLink': 'Tabla de ediciones y límites',
     'licenseState.unlicensed': 'Sin clave de licencia',
     'licenseTier.core': 'Ethora Core (sin registrar)',
     'licenseTier.core-registered': 'Ethora Core',

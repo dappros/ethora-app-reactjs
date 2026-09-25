@@ -34,9 +34,13 @@ COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 RUN rm -f /usr/share/nginx/html/50x.html
 COPY docker/entrypoint.sh /usr/local/bin/ethora-frontend
+# Licence text (full text staged by the release workflow; placeholder locally).
+COPY licenses/ /licenses/
 RUN chmod +x /usr/local/bin/ethora-frontend
 LABEL org.opencontainers.image.title="ethora-frontend" \
       org.opencontainers.image.vendor="Dappros Ltd" \
+      org.opencontainers.image.licenses="LicenseRef-Ethora-Core-1.0" \
+      com.ethora.license.url="https://github.com/dappros/ethora-install/blob/main/docs/legal/ETHORA_CORE_LICENSE.md" \
       org.opencontainers.image.revision=${VITE_BUILD_COMMIT} \
       org.opencontainers.image.version=${VITE_BUILD_VERSION}
 EXPOSE 8080
