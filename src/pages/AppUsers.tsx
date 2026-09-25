@@ -26,9 +26,11 @@ import {
   httpCraeteUser,
   httpGetAppUserTags,
   httpGetUsers,
+  httpGrantSuperAdmin,
   httpHardDeleteUsers,
   httpResetUserMfa,
   httpRestoreUser,
+  httpRevokeSuperAdmin,
   httpRevokeUserAccess,
   httpTagsAdd,
   httpTagsDelete,
@@ -51,6 +53,7 @@ import CopyButtonText from '../components/UI/Buttons/CopyButtonText';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useTranslation } from '../i18n/useTranslation';
+import { useAppStore } from '../store/useAppStore';
 import './AppUsers.scss';
 import AppleIcon from './AuthPage/Icons/socials/appleIcon';
 import EmailIcon from './AuthPage/Icons/socials/emailIcon';
@@ -98,6 +101,12 @@ export default function AppUsers() {
   const tagFilter = searchParams.get('tag') || undefined;
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
+  // Superadmin grant / revoke: shown to superadmins only, and only the base
+  // app's users can hold the flag (the backend refuses elsewhere).
+  const currentUser = useAppStore((s) => s.currentUser);
+  const canManageSuperAdmins = currentUser?.isSuperAdmin?.write === true;
+  const [superAdminAction, setSuperAdminAction] = useState<'grant' | 'revoke' | null>(null);
+  const [superAdminBusy, setSuperAdminBusy] = useState(false);
 
   // const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   // const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
@@ -482,6 +491,32 @@ export default function AppUsers() {
     refreshAndClearSelection();
   };
 
+  const onSuperAdminAction = async () => {
+    if (!appId || !superAdminAction) return;
+    const grant = superAdminAction === 'grant';
+    const ids = selectedIds();
+    setSuperAdminBusy(true);
+    let changed = 0;
+    const skipped: string[] = [];
+    for (const id of ids) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const res = grant ? await httpGrantSuperAdmin(appId, id) : await httpRevokeSuperAdmin(appId, id);
+        if (res.data?.wasSuperAdmin !== grant) changed += 1;
+      } catch (e: unknown) {
+        const { code } = apiError(e);
+        skipped.push(code || 'ERROR');
+      }
+    }
+    setSuperAdminBusy(false);
+    setSuperAdminAction(null);
+    toast(t(grant ? 'appUsers.superAdminGrantedToast' : 'appUsers.superAdminRevokedToast').replace('{count}', String(changed)));
+    if (skipped.includes('CANNOT_REVOKE_SELF')) toast.error(t('appUsers.superAdminRevokeSelf'));
+    if (skipped.includes('NOT_BASE_APP')) toast.error(t('appUsers.superAdminNotBaseApp'));
+    if (skipped.includes('SUPERADMIN_REQUIRED')) toast.error(t('appUsers.superAdminRequired'));
+    refreshAndClearSelection();
+  };
+
   const selectedIds = (): string[] => {
     const out: string[] = [];
     rowsSelected.forEach((el, index) => {
@@ -699,6 +734,24 @@ export default function AppUsers() {
             >
               {t('appUsers.revokeAccess')}
             </button>
+            {canManageSuperAdmins && (
+              <button
+                className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+                onClick={() => setSuperAdminAction('grant')}
+                title={t('appUsers.superAdminGrantTitle')}
+              >
+                {t('appUsers.superAdminGrant')}
+              </button>
+            )}
+            {canManageSuperAdmins && (
+              <button
+                className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+                onClick={() => setSuperAdminAction('revoke')}
+                title={t('appUsers.superAdminRevokeTitle')}
+              >
+                {t('appUsers.superAdminRevoke')}
+              </button>
+            )}
             {lifecycleTab === 'active' ? (
               <button
                 className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
@@ -1154,6 +1207,17 @@ export default function AppUsers() {
           busy={resetMfaBusy}
           onConfirm={onResetMfa}
           onCancel={() => setShowResetMfa(false)}
+        />
+      )}
+      {superAdminAction && (
+        <ConfirmModal
+          title={`${t(superAdminAction === 'grant' ? 'appUsers.superAdminGrantConfirmTitlePrefix' : 'appUsers.superAdminRevokeConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
+          message={t(superAdminAction === 'grant' ? 'appUsers.superAdminGrantConfirmMessage' : 'appUsers.superAdminRevokeConfirmMessage')}
+          confirmLabel={t(superAdminAction === 'grant' ? 'appUsers.superAdminGrant' : 'appUsers.superAdminRevoke')}
+          danger={superAdminAction === 'grant'}
+          busy={superAdminBusy}
+          onConfirm={onSuperAdminAction}
+          onCancel={() => setSuperAdminAction(null)}
         />
       )}
       {showRevokeAccess && (

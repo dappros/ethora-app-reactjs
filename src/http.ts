@@ -1334,6 +1334,19 @@ export function httpVerifyMfaLogin(mfaToken: string, code: string) {
 }
 
 // Owner/admin recovery for a user of the managed app (lost device).
+// Platform superadmin flag, base app only; caller must be a superadmin.
+export function httpGrantSuperAdmin(appId: string, userId: string) {
+  return httpV2.post<{ success: boolean; wasSuperAdmin: boolean }>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/superadmin`
+  );
+}
+
+export function httpRevokeSuperAdmin(appId: string, userId: string) {
+  return httpV2.delete<{ success: boolean; wasSuperAdmin: boolean }>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/superadmin`
+  );
+}
+
 export function httpResetUserMfa(appId: string, userId: string) {
   return httpV2.delete<{ success: boolean; wasEnabled: boolean; sessionsRevoked: number }>(
     `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/mfa`
