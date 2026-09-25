@@ -1370,16 +1370,23 @@ export function httpVerifyMfaLogin(mfaToken: string, code: string) {
 }
 
 // Owner/admin recovery for a user of the managed app (lost device).
-// Platform superadmin flag, base app only; caller must be a superadmin.
-export function httpGrantSuperAdmin(appId: string, userId: string) {
-  return httpV2.post<{ success: boolean; wasSuperAdmin: boolean }>(
-    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/superadmin`
-  );
+// Platform-wide access of a base-app user (superadmin flag, AI agents,
+// network statistics). Superadmin callers only; base app only.
+export interface PlatformAccess {
+  userId: string;
+  superadmin: boolean;
+  agents: boolean;
+  netStats: boolean;
 }
 
-export function httpRevokeSuperAdmin(appId: string, userId: string) {
-  return httpV2.delete<{ success: boolean; wasSuperAdmin: boolean }>(
-    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/superadmin`
+export function httpGetPlatformAccess(appId: string, userId: string) {
+  return httpV2.get<PlatformAccess>(`/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/platform-access`);
+}
+
+export function httpSetPlatformAccess(appId: string, userId: string, changes: Partial<Omit<PlatformAccess, 'userId'>>) {
+  return httpV2.patch<PlatformAccess & { changed: Partial<PlatformAccess> }>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/platform-access`,
+    changes
   );
 }
 
