@@ -213,13 +213,10 @@ function getChatColors(
   if (theme === 'dark') {
     return {
       primary,
-      // Matches the app's own dark-theme neutral ramp (index.css's
-      // --c-gray-200 / --c-brand-100 / --c-gray-50) so the chat reads as
-      // part of the same surface, not a bolted-on light panel.
       secondary: '#2C2F37',
       iconsBg: '#2C2F37',
       ownMessageBackground: '#242C42',
-      otherMessageBackground: '#22252C',
+      otherMessageBackground: '#2C2F37',
       inputBackground: '#1F2228',
       colorInput: '#1F2228',
     };
@@ -383,6 +380,7 @@ export const buildEthoraBaseChatConfig = ({
     }),
     colors: getChatColors(resolvedTheme, primaryColor),
     backgroundChat: getBackgroundChat(resolvedTheme),
+    colorScheme: resolvedTheme,
   };
   if (userLoginPayload) {
     (config as ChatConfig).userLogin = {

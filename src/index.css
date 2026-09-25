@@ -80,34 +80,6 @@
   --brand-text: color-mix(in srgb, var(--bg-brand-primary) 60%, white);
 }
 
-/* @ethora/chat-component has no dark-mode of its own: its panel background,
-   text and border tokens (--ethora-color-bg/-bg-subtle/-bg-hover/-text/etc.)
-   are hardcoded to a fixed light palette inside the component and are not
-   exposed through IConfig.colors at all (chatBootstrap.ts's getChatColors
-   covers the tokens that ARE configurable - bubbles, input, icon chips).
-   The component sets its tokens via plain (non-!important) inline style, so
-   an !important override here wins over it without touching the component.
-   Values mirror this file's own dark ramp above so the chat reads as part
-   of the same surface instead of a bolted-on light panel. */
-:root.dark .ethora-chat-root {
-  --ethora-color-bg: #1a1c21 !important;
-  --ethora-color-bg-subtle: #1f2228 !important;
-  --ethora-color-bg-hover: #2c2f37 !important;
-  --ethora-color-text: #eceef1 !important;
-  --ethora-color-text-secondary: #949ba5 !important;
-  --ethora-color-text-muted: #8b919b !important;
-  --ethora-color-border: #3d414a !important;
-  --ethora-color-danger: #f1574b !important;
-  --ethora-color-success: #2fbe79 !important;
-  --ethora-color-online: #2fbe79 !important;
-  /* The selected/active room row's highlight background. The component
-     derives this by tinting `colors.primary` 88% toward WHITE, unconditionally
-     - there is no config field for it, and no dark alternative, so a selected
-     row was a near-white pill with near-white text on top of it (unreadable).
-     A muted, blue-tinted dark surface instead of a pastel one. */
-  --ethora-color-primary-soft: #324063 !important;
-}
-
 body {
   background-color: rgb(var(--c-page));
   color: rgb(var(--c-fg));
