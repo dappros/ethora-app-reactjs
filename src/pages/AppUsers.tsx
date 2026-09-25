@@ -26,11 +26,9 @@ import {
   httpCraeteUser,
   httpGetAppUserTags,
   httpGetUsers,
-  httpGrantSuperAdmin,
   httpHardDeleteUsers,
   httpResetUserMfa,
   httpRestoreUser,
-  httpRevokeSuperAdmin,
   httpRevokeUserAccess,
   httpTagsAdd,
   httpTagsDelete,
@@ -44,6 +42,8 @@ import classNames from 'classnames';
 import { useSearchParams } from 'react-router-dom';
 import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
+import { PlatformAccessModal } from '../components/modal/PlatformAccessModal';
+import { IconSettings } from '../components/Icons/IconSettings';
 import { NewUserModal } from '../components/modal/NewUserModal';
 import { apiError } from '../utils/apiError';
 import { downloadCsv } from '../utils/csv';
@@ -101,12 +101,16 @@ export default function AppUsers() {
   const tagFilter = searchParams.get('tag') || undefined;
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
-  // Superadmin grant / revoke: shown to superadmins only, and only the base
-  // app's users can hold the flag (the backend refuses elsewhere).
+  // "Platform access" (superadmin flag, AI agents, network statistics) is
+  // per user across the installation: shown to superadmins, on the base
+  // app only (the backend refuses elsewhere).
   const currentUser = useAppStore((s) => s.currentUser);
-  const canManageSuperAdmins = currentUser?.isSuperAdmin?.write === true;
-  const [superAdminAction, setSuperAdminAction] = useState<'grant' | 'revoke' | null>(null);
-  const [superAdminBusy, setSuperAdminBusy] = useState(false);
+  const apps = useAppStore((s) => s.apps);
+  const currentApp = apps.find((a) => a._id === appId);
+  const canManagePlatformAccess = currentUser?.isSuperAdmin?.write === true && currentApp?.isBaseApp === true;
+  const [platformUser, setPlatformUser] = useState<ModelAppUser | null>(null);
+  // The user whose ACL is open, for the dialog title.
+  const [editAclUser, setEditAclUser] = useState<ModelAppUser | null>(null);
 
   // const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   // const [orderBy, setOrderBy] = useState<OrderByType>('createdAt');
@@ -491,32 +495,6 @@ export default function AppUsers() {
     refreshAndClearSelection();
   };
 
-  const onSuperAdminAction = async () => {
-    if (!appId || !superAdminAction) return;
-    const grant = superAdminAction === 'grant';
-    const ids = selectedIds();
-    setSuperAdminBusy(true);
-    let changed = 0;
-    const skipped: string[] = [];
-    for (const id of ids) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        const res = grant ? await httpGrantSuperAdmin(appId, id) : await httpRevokeSuperAdmin(appId, id);
-        if (res.data?.wasSuperAdmin !== grant) changed += 1;
-      } catch (e: unknown) {
-        const { code } = apiError(e);
-        skipped.push(code || 'ERROR');
-      }
-    }
-    setSuperAdminBusy(false);
-    setSuperAdminAction(null);
-    toast(t(grant ? 'appUsers.superAdminGrantedToast' : 'appUsers.superAdminRevokedToast').replace('{count}', String(changed)));
-    if (skipped.includes('CANNOT_REVOKE_SELF')) toast.error(t('appUsers.superAdminRevokeSelf'));
-    if (skipped.includes('NOT_BASE_APP')) toast.error(t('appUsers.superAdminNotBaseApp'));
-    if (skipped.includes('SUPERADMIN_REQUIRED')) toast.error(t('appUsers.superAdminRequired'));
-    refreshAndClearSelection();
-  };
-
   const selectedIds = (): string[] => {
     const out: string[] = [];
     rowsSelected.forEach((el, index) => {
@@ -734,24 +712,6 @@ export default function AppUsers() {
             >
               {t('appUsers.revokeAccess')}
             </button>
-            {canManageSuperAdmins && (
-              <button
-                className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
-                onClick={() => setSuperAdminAction('grant')}
-                title={t('appUsers.superAdminGrantTitle')}
-              >
-                {t('appUsers.superAdminGrant')}
-              </button>
-            )}
-            {canManageSuperAdmins && (
-              <button
-                className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
-                onClick={() => setSuperAdminAction('revoke')}
-                title={t('appUsers.superAdminRevokeTitle')}
-              >
-                {t('appUsers.superAdminRevoke')}
-              </button>
-            )}
             {lifecycleTab === 'active' ? (
               <button
                 className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
@@ -1026,9 +986,22 @@ export default function AppUsers() {
                             <button type="button" onClick={() => setEditUser(el)} title={t('appUsers.editTitle')} aria-label={t('appUsers.editTitle')}>
                               <IconEdit width={16} />
                             </button>
-                            <button type="button" onClick={() => setEditAcl(el.acl)} title={t('appUsers.permissionsTitle')} aria-label={t('appUsers.permissionsTitle')}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditAclUser(el);
+                                setEditAcl(el.acl);
+                              }}
+                              title={t('appUsers.permissionsTitle')}
+                              aria-label={t('appUsers.permissionsTitle')}
+                            >
                               <IconKey width={16} height={16} />
                             </button>
+                            {canManagePlatformAccess && (
+                              <button type="button" onClick={() => setPlatformUser(el)} title={t('appUsers.platformAccessTitle')} aria-label={t('appUsers.platformAccessTitle')}>
+                                <IconSettings width={16} height={16} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1209,15 +1182,13 @@ export default function AppUsers() {
           onCancel={() => setShowResetMfa(false)}
         />
       )}
-      {superAdminAction && (
-        <ConfirmModal
-          title={`${t(superAdminAction === 'grant' ? 'appUsers.superAdminGrantConfirmTitlePrefix' : 'appUsers.superAdminRevokeConfirmTitlePrefix')} ${getSelectedIndexes().length} ${getSelectedIndexes().length > 1 ? t('appUsers.userWordPlural') : t('appUsers.userWordSingular')}?`}
-          message={t(superAdminAction === 'grant' ? 'appUsers.superAdminGrantConfirmMessage' : 'appUsers.superAdminRevokeConfirmMessage')}
-          confirmLabel={t(superAdminAction === 'grant' ? 'appUsers.superAdminGrant' : 'appUsers.superAdminRevoke')}
-          danger={superAdminAction === 'grant'}
-          busy={superAdminBusy}
-          onConfirm={onSuperAdminAction}
-          onCancel={() => setSuperAdminAction(null)}
+      {platformUser && appId && (
+        <PlatformAccessModal
+          appId={appId}
+          user={platformUser}
+          isSelf={platformUser._id === currentUser?._id}
+          onClose={() => setPlatformUser(null)}
+          onChanged={refreshAndClearSelection}
         />
       )}
       {showRevokeAccess && (
@@ -1255,6 +1226,8 @@ export default function AppUsers() {
           acl={editAcl}
           setEditAcl={setEditAcl}
           onClose={() => setEditAcl(null)}
+          userLabel={editAclUser ? `${editAclUser.firstName || ''} ${editAclUser.lastName || ''}`.trim() || editAclUser.email : undefined}
+          appLabel={currentApp?.displayName}
         />
       )}
       {showNewUserModal && (
