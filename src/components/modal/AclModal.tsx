@@ -38,11 +38,14 @@ const AREAS: Array<{ area: Area; flags: Flag[] }> = [
 // Each capability owns a set of flags: on = all of them true, off = all
 // false. The "see" capability is what puts the app in the user's list and
 // follows any other grant (the backend forces it too).
-type CapabilityId = 'see' | 'settings' | 'manageUsers' | 'removeUsers' | 'permissions' | 'push' | 'stats';
+type CapabilityId = 'see' | 'settings' | 'viewUsers' | 'manageUsers' | 'removeUsers' | 'permissions' | 'push' | 'stats';
 const CAPABILITIES: Array<{ id: CapabilityId; flags: Array<[Area, Flag]> }> = [
   { id: 'see', flags: [['appSettings', 'read']] },
   { id: 'settings', flags: [['appSettings', 'update'], ['appSettings', 'admin']] },
-  { id: 'manageUsers', flags: [['appUsers', 'create'], ['appUsers', 'read'], ['appUsers', 'update']] },
+  // appUsers.read gates the users list, tags, CSV export and message search;
+  // create/update are the editing half.
+  { id: 'viewUsers', flags: [['appUsers', 'read']] },
+  { id: 'manageUsers', flags: [['appUsers', 'create'], ['appUsers', 'update']] },
   { id: 'removeUsers', flags: [['appUsers', 'delete']] },
   { id: 'permissions', flags: [['appUsers', 'admin']] },
   { id: 'push', flags: [['appPush', 'create'], ['appPush', 'read'], ['appPush', 'update'], ['appPush', 'admin']] },
@@ -52,9 +55,9 @@ const CAPABILITIES: Array<{ id: CapabilityId; flags: Array<[Area, Flag]> }> = [
 type PresetId = 'member' | 'analyst' | 'userManager' | 'admin' | 'custom';
 const PRESETS: Array<{ id: Exclude<PresetId, 'custom'>; on: CapabilityId[]; tokens?: boolean }> = [
   { id: 'member', on: [] },
-  { id: 'analyst', on: ['see', 'stats'] },
-  { id: 'userManager', on: ['see', 'manageUsers', 'removeUsers', 'permissions'] },
-  { id: 'admin', on: ['see', 'settings', 'manageUsers', 'removeUsers', 'permissions', 'push', 'stats'], tokens: true },
+  { id: 'analyst', on: ['see', 'viewUsers', 'stats'] },
+  { id: 'userManager', on: ['see', 'viewUsers', 'manageUsers', 'removeUsers', 'permissions'] },
+  { id: 'admin', on: ['see', 'settings', 'viewUsers', 'manageUsers', 'removeUsers', 'permissions', 'push', 'stats'], tokens: true },
 ];
 
 function flagOf(acl: ModelUserACL, area: Area, flag: Flag): boolean {
@@ -92,6 +95,9 @@ export function AclModal({ onClose, acl, setEditAcl, updateAcl, userLabel, appLa
 
   const setCapability = (next: ModelUserACL, id: CapabilityId, on: boolean) => {
     CAPABILITIES.find((c) => c.id === id)!.flags.forEach(([a, f]) => set(next, `application.${a}.${f}`, on));
+    // Editing or removing users without being able to list them makes no
+    // sense, so those pull "view users" along.
+    if (on && (id === 'manageUsers' || id === 'removeUsers' || id === 'permissions')) set(next, 'application.appUsers.read', true);
   };
 
   const applyPreset = (p: (typeof PRESETS)[number]) =>
