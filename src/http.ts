@@ -1370,6 +1370,26 @@ export function httpVerifyMfaLogin(mfaToken: string, code: string) {
 }
 
 // Owner/admin recovery for a user of the managed app (lost device).
+// Platform-wide access of a base-app user (superadmin flag, AI agents,
+// network statistics). Superadmin callers only; base app only.
+export interface PlatformAccess {
+  userId: string;
+  superadmin: boolean;
+  agents: boolean;
+  netStats: boolean;
+}
+
+export function httpGetPlatformAccess(appId: string, userId: string) {
+  return httpV2.get<PlatformAccess>(`/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/platform-access`);
+}
+
+export function httpSetPlatformAccess(appId: string, userId: string, changes: Partial<Omit<PlatformAccess, 'userId'>>) {
+  return httpV2.patch<PlatformAccess & { changed: Partial<PlatformAccess> }>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/platform-access`,
+    changes
+  );
+}
+
 export function httpResetUserMfa(appId: string, userId: string) {
   return httpV2.delete<{ success: boolean; wasEnabled: boolean; sessionsRevoked: number }>(
     `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/mfa`
