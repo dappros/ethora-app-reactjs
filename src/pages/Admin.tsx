@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { EditionFooter } from '../components/EditionFooter';
 import { BookACallModal } from '../components/modal/BookACallModal';
 import { useTranslation } from '../i18n/useTranslation';
 
@@ -14,7 +15,9 @@ export default function Admin() {
   return (
     <div className="grid grid-rows-[1fr,_auto] gap-4 h-full">
       <Outlet />
-      <p className="text-xs text-gray-500 text-center pb-2">
+      <div className="text-xs text-gray-500 pb-2 flex flex-col items-center gap-1 md:grid md:grid-cols-[1fr,auto,1fr] md:items-center">
+        <span className="hidden md:block" />
+        <p className="text-center">
         <NavLink to="/app/help" className="text-brand-500 underline">
           {t('adminShell.helpSupportPage')}
         </NavLink>
@@ -35,7 +38,9 @@ export default function Admin() {
         >
           {t('adminShell.bookACall')}
         </button>
-      </p>
+        </p>
+        <EditionFooter className="md:justify-self-end md:text-right md:pr-2" />
+      </div>
       {showBookACall && (
         <BookACallModal onClose={() => setShowBookACall(false)} />
       )}

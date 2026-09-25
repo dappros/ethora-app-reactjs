@@ -16,8 +16,12 @@ function fmtDate(iso: string | null | undefined) {
 const STATE_CLASS: Record<LicenseStatus['state'], string> = {
   licensed: 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300',
   grace: 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-300',
-  restricted: 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300',
+  unlicensed: 'bg-gray-100 text-gray-800 dark:bg-gray-800/60 dark:text-gray-200',
 };
+
+const PACKAGE_KEYS = ['ai', 'b2b', 'compliance', 'analytics'] as const;
+
+type ApiErr = AxiosError<{ code?: string; error?: string; details?: { reason?: string } }>;
 
 export default function AdminLicense() {
   const { t } = useTranslation();
@@ -26,8 +30,13 @@ export default function AdminLicense() {
   const canEdit = Boolean(currentUser?.isSuperAdmin?.write);
 
   const [key, setKey] = useState('');
+  const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+
+  const isCore = status?.tier === 'core' || status?.tier === 'core-registered';
+  const unregistered = status?.tier === 'core';
 
   const submit = async () => {
     const trimmed = key.replace(/\s+/g, '');
@@ -40,7 +49,7 @@ export default function AdminLicense() {
       setKey('');
       setMessage({ kind: 'ok', text: t('adminLicense.applied') });
     } catch (e) {
-      const err = e as AxiosError<{ code?: string; details?: { reason?: string } }>;
+      const err = e as ApiErr;
       const code = err.response?.data?.code;
       const reason = err.response?.data?.details?.reason;
       const text =
@@ -50,6 +59,28 @@ export default function AdminLicense() {
             ? t('adminLicense.adminOnly')
             : t('adminLicense.applyFailed');
       setMessage({ kind: 'error', text });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const register = async () => {
+    const addr = (email || currentUser?.email || '').trim();
+    if (!addr) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const r = await httpV2.post<{ license: LicenseStatus }>('/license/register', { email: addr, customer: company.trim() });
+      setLicenseStatus(r.data.license);
+      setMessage({ kind: 'ok', text: t('adminLicense.registered') });
+    } catch (e) {
+      const err = e as ApiErr;
+      const detail = err.response?.data?.error;
+      const code = err.response?.data?.code;
+      setMessage({
+        kind: 'error',
+        text: code === 'LICENSE_ADMIN_ONLY' ? t('adminLicense.adminOnly') : `${t('adminLicense.registerFailed')}${detail ? `: ${detail}` : ''}`,
+      });
     } finally {
       setBusy(false);
     }
@@ -69,29 +100,65 @@ export default function AdminLicense() {
     }
   };
 
+  const usageText = (kind: 'apps' | 'users') => {
+    if (!status) return '-';
+    const limit = status.limits?.[kind] ?? null;
+    const used = status.usage?.[kind]?.used ?? null;
+    const usedText = used === null ? '?' : String(used);
+    if (limit === null) return `${usedText} (${t('adminLicense.unlimited')})`;
+    return t('adminLicense.usageOf').replace('{used}', usedText).replace('{limit}', String(limit));
+  };
+
+  const packagesText = () => {
+    if (!status) return '-';
+    if (status.features.includes('*')) return t('adminLicense.allPackages');
+    const names = status.features.map((f) =>
+      f === 'core' ? t('adminLicense.packagesCore') : (PACKAGE_KEYS as readonly string[]).includes(f) ? t(`adminLicense.package.${f}`) : f
+    );
+    return names.join(', ') || '-';
+  };
+
+  const expiresText = () => {
+    if (!status) return '-';
+    if (status.tier === 'core') return t('adminLicense.notApplicable');
+    if (status.tier === 'core-registered') return t('adminLicense.neverExpires');
+    return fmtDate(status.license?.expiresAt);
+  };
+
+  const supportText = () => {
+    if (!status) return '-';
+    if (status.tier === 'core') return t('adminLicense.supportCommunity');
+    if (status.tier === 'core-registered') return t('adminLicense.supportEmail');
+    return t('adminLicense.supportEnterprise');
+  };
+
   const rows: Array<[string, string]> = status
     ? [
+        [t('adminLicense.rowEdition'), t(`licenseTier.${status.tier}`)],
         [t('adminLicense.rowState'), t(`licenseState.${status.state}`)],
         [t('adminLicense.rowReason'), t(`licenseReason.${status.reason}`)],
-        [t('adminLicense.rowSource'), t(`licenseSource.${status.source}`)],
-        [t('adminLicense.rowCustomer'), status.license?.customer || '-'],
+        [t('adminLicense.rowApps'), usageText('apps')],
+        [t('adminLicense.rowUsers'), usageText('users')],
+        [t('adminLicense.rowPackages'), packagesText()],
+        [t('adminLicense.rowExpires'), expiresText()],
+        ...(status.graceEndsAt && status.state === 'grace' ? [[t('adminLicense.rowGraceEnds'), fmtDate(status.graceEndsAt)] as [string, string]] : []),
         [t('adminLicense.rowLicenseId'), status.license?.lid || '-'],
+        [t('adminLicense.rowCustomer'), status.license?.customer || '-'],
         [t('adminLicense.rowDomain'), status.license?.domain || '-'],
-        [t('adminLicense.rowExpires'), fmtDate(status.license?.expiresAt)],
-        [t('adminLicense.rowGraceEnds'), fmtDate(status.graceEndsAt)],
+        [t('adminLicense.rowSupport'), supportText()],
+        [t('adminLicense.rowSource'), t(`licenseSource.${status.source}`)],
         [t('adminLicense.rowInstalled'), fmtDate(status.installedAt)],
-        [t('adminLicense.rowFeatures'), status.features.includes('*') ? t('adminLicense.allFeatures') : status.features.join(', ') || '-'],
         [t('adminLicense.rowHosts'), status.hosts.join(', ') || '-'],
-        [
-          t('adminLicense.rowCallHome'),
-          !status.callHome.enabled
-            ? t('adminLicense.callHomeDisabled')
-            : !status.callHome.serverConfigured
-              ? t('adminLicense.callHomeNoServer')
-              : status.callHome.lastAt
-                ? `${fmtDate(status.callHome.lastAt)} (${status.callHome.lastStatus})`
-                : t('adminLicense.callHomeNever'),
-        ],
+        ...(status.callHome.serverConfigured
+          ? [[
+              t('adminLicense.rowCallHome'),
+              !status.callHome.enabled
+                ? t('adminLicense.callHomeDisabled')
+                : status.callHome.lastAt
+                  ? `${fmtDate(status.callHome.lastAt)} (${status.callHome.lastStatus})`
+                  : t('adminLicense.callHomeNever'),
+            ] as [string, string]]
+          : []),
         [t('adminLicense.rowInstance'), status.instanceId],
       ]
     : [];
@@ -110,7 +177,7 @@ export default function AdminLicense() {
             <>
               <div className="flex items-center gap-3 mb-6">
                 <span className={cn('inline-block rounded-full px-3 py-1 text-sm font-semibold', STATE_CLASS[status.state])}>
-                  {t(`licenseState.${status.state}`)}
+                  {t(`licenseTier.${status.tier}`)}
                 </span>
                 <button type="button" onClick={() => refresh()} className="text-sm text-brand-500 underline">
                   {t('adminLicense.refresh')}
@@ -127,8 +194,8 @@ export default function AdminLicense() {
                 </div>
               )}
 
-              {status.state === 'restricted' && (
-                <p className="mb-6 text-sm text-red-800 dark:text-red-300">{t('adminLicense.restrictedExplain')}</p>
+              {isCore && status.state !== 'grace' && (
+                <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">{t('adminLicense.coreExplain')}</p>
               )}
               {status.state === 'grace' && (
                 <p className="mb-6 text-sm text-amber-900 dark:text-amber-300">{t('adminLicense.graceExplain')}</p>
@@ -145,6 +212,46 @@ export default function AdminLicense() {
             </>
           ) : (
             <p className="text-sm text-gray-500 mb-8">{t('adminLicense.loading')}</p>
+          )}
+
+          {unregistered && (
+            <div className="rounded-2xl bg-brand-50 dark:bg-brand-950/20 p-6 md:p-8 mb-6">
+              <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.registerHeading')}</h3>
+              <p className="font-sans text-sm text-gray-600 dark:text-gray-300 mb-4">
+                {canEdit ? t('adminLicense.registerBody') : t('adminLicense.adminOnly')}
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <input
+                  type="email"
+                  value={email || currentUser?.email || ''}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={!canEdit || busy}
+                  placeholder={t('adminLicense.registerEmail')}
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60"
+                />
+                <input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  disabled={!canEdit || busy}
+                  placeholder={t('adminLicense.registerCompany')}
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={register}
+                  disabled={!canEdit || busy || !(email || currentUser?.email)}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm disabled:opacity-50"
+                >
+                  {t('adminLicense.registerButton')}
+                </button>
+                {message && (
+                  <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
+                )}
+              </div>
+            </div>
           )}
 
           <div className="rounded-2xl bg-gray-50 p-6 md:p-8">
@@ -180,7 +287,7 @@ export default function AdminLicense() {
                   {t('adminLicense.remove')}
                 </button>
               )}
-              {message && (
+              {message && !unregistered && (
                 <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
               )}
             </div>

@@ -454,7 +454,9 @@ export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'fr' | 'zh';
 
 // License state of the whole install (GET /v2/license). Mirrors the backend
 // LicenseStatus schema; the key string itself is never sent to the browser.
-export type LicenseState = 'licensed' | 'grace' | 'restricted';
+export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
+// Edition the install runs as. core = Ethora Core, unregistered (no key).
+export type LicenseTier = 'core' | 'core-registered' | 'trial' | 'enterprise';
 
 export interface LicenseStatus {
   state: LicenseState;
@@ -474,6 +476,11 @@ export interface LicenseStatus {
   instanceId: string;
   hosts: string[];
   features: string[];
+  tier: LicenseTier;
+  // Per-server caps of the edition; null = unlimited.
+  limits: { apps: number | null; users: number | null };
+  // Current counts next to the caps (GET /v2/license only).
+  usage?: { apps: { used: number | null; limit: number | null }; users: { used: number | null; limit: number | null } };
   restrictions: { createApps: boolean; createUsers: boolean; adminPanel: boolean };
   license: {
     lid: string;
