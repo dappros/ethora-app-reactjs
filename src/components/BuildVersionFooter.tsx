@@ -15,7 +15,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n/useTranslation';
 
-import { fetchBackendVersionOnce } from '../utils/backendVersion';
+import { env } from '../config/env';
+import { fetchBackendVersionOnce, type BackendVersionInfo } from '../utils/backendVersion';
+
+const FE_VERSION = (env.VITE_BUILD_VERSION || '').trim();
+const FE_BRANCH = (env.VITE_BUILD_BRANCH || '').trim();
+const FE_COMMIT = (env.VITE_BUILD_COMMIT || '').trim();
 
 function shortCommit(c?: string | null) {
   if (!c) return '';
