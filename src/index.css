@@ -80,6 +80,19 @@
   --brand-text: color-mix(in srgb, var(--bg-brand-primary) 60%, white);
 }
 
+/* Chrome paints autofilled inputs with its own blue fill, which in dark mode
+   covers only the <input> and leaves the password eye-button area in the
+   field's real colour - a two-tone field. Repaint the autofill in the field's
+   own surface (the inset shadow is the only way to beat the UA background). */
+:root.dark .MuiInputBase-input:-webkit-autofill,
+:root.dark .MuiInputBase-input:-webkit-autofill:hover,
+:root.dark .MuiInputBase-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgb(var(--c-gray-100)) inset;
+  -webkit-text-fill-color: rgb(var(--c-fg));
+  caret-color: rgb(var(--c-fg));
+  border-radius: inherit;
+}
+
 body {
   background-color: rgb(var(--c-page));
   color: rgb(var(--c-fg));

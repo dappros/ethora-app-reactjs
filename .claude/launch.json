@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "dev-force",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--force"],
+      "port": 5173
     }
   ]
 }

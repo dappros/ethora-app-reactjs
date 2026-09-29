@@ -409,7 +409,7 @@ export default function ChatPage() {
         })()}
         <div />
       </div>
-      <div className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden pt-0 md:pt-4">
+      <div className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden">
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP
             socket and fresh chat-component state. React's reconciliation
             of MemoizedChat alone wouldn't recreate the underlying XMPP

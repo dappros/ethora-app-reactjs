@@ -39,6 +39,10 @@ const EthoraBrandPanel: React.FC = () => {
         gap: 'clamp(16px, 3vh, 32px)',
         padding: 'clamp(24px, 5vh, 48px) 56px',
         background: 'linear-gradient(135deg, #3D8BE8 0%, #0A4FC0 100%)',
+        // Deeper in dark so the panel doesn't glare next to the dark form side.
+        '.dark &': {
+          background: 'linear-gradient(135deg, #1C4F9C 0%, #0A2A6B 100%)',
+        },
         color: 'white',
         fontFamily: 'Varela Round',
         // This panel is decorative - it must never scroll. The compacting
@@ -105,6 +109,11 @@ const EthoraBrandPanel: React.FC = () => {
           maxWidth: '600px',
           width: '100%',
           color: '#141414',
+          '.dark &': {
+            backgroundColor: '#1A1C21',
+            color: '#ECEEF1',
+            boxShadow: '0px 12px 32px rgba(0, 0, 0, 0.45)',
+          },
           // ~250px of fixed-height decoration. Below this the tagline and
           // subtitle alone fill the panel, so drop the mockup instead of
           // letting it push the content out of the viewport.
@@ -118,6 +127,7 @@ const EthoraBrandPanel: React.FC = () => {
             gap: '8px',
             padding: '14px 20px',
             borderBottom: '1px solid #ECEFF3',
+            '.dark &': { borderBottomColor: '#2C2F37' },
           }}
         >
           <Box sx={{ display: 'flex', gap: '6px' }}>
@@ -138,6 +148,7 @@ const EthoraBrandPanel: React.FC = () => {
               fontFamily: 'Varela Round',
               fontSize: '14px',
               color: '#141414',
+              '.dark &': { color: '#ECEEF1' },
               marginLeft: '8px',
             }}
           >
@@ -166,6 +177,7 @@ const EthoraBrandPanel: React.FC = () => {
             <Box
               sx={{
                 backgroundColor: '#F1F3F5',
+                '.dark &': { backgroundColor: '#2C2F37' },
                 borderRadius: '16px',
                 padding: '10px 16px',
                 fontSize: '15px',

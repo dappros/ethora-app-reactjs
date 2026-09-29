@@ -195,56 +195,31 @@ function buildTranslatesConfig(
   return { mode: 'auto', ...extra, enabled: true };
 }
 
-// The chat-component's own colour system (IConfig.colors + the panel/text
-// tokens it derives internally) only ever renders a light palette - there is
-// no dark-mode switch inside the component. `getChatColors` gives it the
-// subset of surfaces it DOES expose as config (bubble/input/icon-chip
-// backgrounds) so those at least follow the app's theme; the panel
-// background/text/border tokens it hardcodes internally are patched
-// separately via a CSS override (see index.css's `.ethora-chat-root` dark
-// block) since the component gives no config hook for them at all.
-type ChatColors = NonNullable<ChatConfig['colors']>;
+// Dark surfaces come from the component's own `colorScheme` palette. Bubble,
+// input and backgroundChat colours are deliberately not set: the component
+// applies host values for those as-is in both schemes, and hand-picked dark
+// hexes clashed with its derived tokens. `secondary` is ignored in dark.
+const getChatColors = (primaryColor?: string | null) => ({
+  primary: primaryColor || '#0052CD',
+  secondary: '#141414',
+});
 
-function getChatColors(
-  theme: ResolvedUiTheme,
-  primaryColor?: string | null
-): ChatColors {
-  const primary = primaryColor || '#0052CD';
-  if (theme === 'dark') {
-    return {
-      primary,
-      secondary: '#2C2F37',
-      iconsBg: '#2C2F37',
-      ownMessageBackground: '#242C42',
-      otherMessageBackground: '#2C2F37',
-      inputBackground: '#1F2228',
-      colorInput: '#1F2228',
-    };
-  }
-  return {
-    primary,
-    secondary: '#141414',
-  };
-}
-
-// The message-list's own scroll surface (behind the bubbles) is a separate
-// config field from `colors` entirely - `backgroundChat.color` - and
-// defaults to a hardcoded light tint (#F3F6FC) when omitted, same as the
-// other panel tokens above.
-function getBackgroundChat(
-  theme: ResolvedUiTheme
-): NonNullable<ChatConfig['backgroundChat']> {
-  return { color: theme === 'dark' ? '#1a1c21' : '#F3F6FC' };
-}
-
-const getRoomListStyles = (theme: ResolvedUiTheme = 'light') =>
+// The Chats page card has no top padding of its own, so the chat pane can
+// fill the card edge to edge (its rounded corner then matches the card's).
+// The room list carries the desktop top inset itself: 10px centres the
+// Chats/Files tabs on the chat header (fixed 64px in the component) and
+// starts the search row exactly on the header's bottom border.
+const getRoomListStyles = (
+  theme: ResolvedUiTheme = 'light',
+  isMobileView = false
+) =>
   ({
     maxHeight: 'calc(100%)',
     height: 'calc(100%)',
     borderRadius: '16px 0px 0px 16px',
     border: 'none',
     padding: '16px',
-    paddingTop: '0px',
+    paddingTop: isMobileView ? '0px' : '10px',
     color: theme === 'dark' ? '#ECEEF1' : '#141414',
   }) satisfies CSSProperties;
 
@@ -378,8 +353,7 @@ export const buildEthoraBaseChatConfig = ({
     translates: buildTranslatesConfig(offeredTranslations, {
       readerLocale: chatLocale,
     }),
-    colors: getChatColors(resolvedTheme, primaryColor),
-    backgroundChat: getBackgroundChat(resolvedTheme),
+    colors: getChatColors(primaryColor),
     colorScheme: resolvedTheme,
   };
   if (userLoginPayload) {
@@ -517,10 +491,7 @@ export function createChatConfig({
   chatTranslate,
   translateLanguages,
   resolvedTheme = 'light',
-  // isMobileView: kept in the options contract (Chat.tsx still passes it)
-  // but no longer read here - getRoomListStyles() dropped its
-  // mobile-conditional padding upstream. Not destructured to a local so
-  // it doesn't trip noUnusedLocals.
+  isMobileView = false,
 }: CreateChatConfigOptions): ChatConfig {
   // When we're in owner-session mode we have to override BOTH the chat
   // token (XMPP identity) AND the refreshFunction; the default refresh
@@ -587,10 +558,16 @@ export function createChatConfig({
 
   return {
     ...baseConfig,
+    // The chat-component keys its persisted cache on appId (cacheScope.ts)
+    // and wipes it whenever the scope changes. The app-wide provider
+    // (main.tsx) sends the real appId, so leaving it blank here made the two
+    // configs stamp different scopes and purge each other's cached rooms on
+    // every load - "Loading chats..." instead of an instant cached list.
+    appId: ownerOverride?.ownerSession.appId || currentUser?.appId || '',
     customAppToken: ownerOverride?.appToken ?? app?.appToken,
-    colors: getChatColors(resolvedTheme, app?.primaryColor),
+    colors: getChatColors(app?.primaryColor),
     qrUrl: DEFAULT_QR_URL,
-    roomListStyles: getRoomListStyles(resolvedTheme),
+    roomListStyles: getRoomListStyles(resolvedTheme, isMobileView),
     chatRoomStyles: getChatRoomStyles(resolvedTheme),
     chatHeaderSettings: {
       disableMenu: true,
