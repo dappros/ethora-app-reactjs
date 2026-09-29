@@ -20,8 +20,8 @@ const STATE_CLASS: Record<LicenseStatus['state'], string> = {
 };
 
 const PACKAGE_KEYS = ['ai', 'b2b', 'compliance', 'analytics'] as const;
-const LICENSE_TEXT_URL = 'https://github.com/dappros/ethora-install/blob/main/docs/legal/ETHORA_CORE_LICENSE.md';
-const FEATURE_SCHEDULE_URL = 'https://github.com/dappros/ethora-install/blob/main/docs/legal/FEATURE_SCHEDULE.md';
+const LICENSE_TEXT_URL = 'https://ethora.com/legal/ethora-core-license/';
+const FEATURE_SCHEDULE_URL = 'https://ethora.com/legal/feature-schedule/';
 
 type ApiErr = AxiosError<{ code?: string; error?: string; details?: { reason?: string } }>;
 
