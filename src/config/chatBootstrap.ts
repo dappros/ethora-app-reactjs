@@ -612,7 +612,7 @@ export function createChatConfig({
     i18n: { locale: appLocale },
     translates: buildTranslatesConfig(offeredTranslations, {
       readerLocale: chatLocale,
-      showLanguageSelector: true,
+      showLanguageSelector: false,
       showLanguageList: false,
     }),
   };
