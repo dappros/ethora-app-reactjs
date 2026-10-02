@@ -4,6 +4,7 @@ import { actionAfterLogin } from '../../actions';
 import { logLogin, logSignup } from '../../hooks/withTracking.tsx';
 import {
   httpCheckEmailExist,
+  httpDiscardSession,
   httpLoginSocial,
   httpRegisterSocial,
   sendHSFormData,
@@ -76,6 +77,7 @@ export const FacebookButton = () => {
               '',
               loginType
             );
+            void httpDiscardSession(userResult?.data?.token);
             const user = userResult?.data?.user;
             if (!user) {
               throw new Error('Social registration returned no user');

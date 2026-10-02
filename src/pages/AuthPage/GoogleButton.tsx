@@ -4,6 +4,7 @@ import { actionAfterLogin } from '../../actions';
 import { logLogin, logSignup } from '../../hooks/withTracking.tsx';
 import {
   httpCheckEmailExist,
+  httpDiscardSession,
   httpLoginSocial,
   httpRegisterSocial,
   sendHSFormData,
@@ -93,6 +94,7 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
               utm || ''
             );
 
+            void httpDiscardSession(userResult?.data?.token);
             if (!userResult?.data?.user) {
               toast.error(t('authGoogleButton.registrationFailed'));
               return;
