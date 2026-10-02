@@ -277,6 +277,24 @@ export function httpLogout() {
   return http.post('/users/logout');
 }
 
+// Ends the session a social registration minted. POST /users returns its own
+// token pair, but the web app logs in right after for the full login payload,
+// so that first pair would sit unused and show up as an "other session" on
+// the next password change. Sent with that pair's token on a bare request:
+// the interceptors would put the current session's token in its place.
+// Best effort; a failure only leaves the old behaviour.
+export function httpDiscardSession(token?: string) {
+  if (!token) return Promise.resolve();
+  return axios
+    .post('/users/logout', null, {
+      baseURL: http.defaults.baseURL,
+      headers: { Authorization: token },
+      timeout: 10000,
+    })
+    .then(() => undefined)
+    .catch(() => undefined);
+}
+
 export function httpGetOneUser() {
   return http.get('/users/me');
 }
