@@ -39,7 +39,14 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
 
   const onSubmit: SubmitHandler<Inputs> = ({ email, password }) => {
     httpLoginWithEmail(email, password)
-      .then(async ({ data }) => {
+      .then(async ({ data, status }) => {
+        // 204: the password was a temporary one (owner reset). The user
+        // chooses a permanent password on the page the reset e-mail would
+        // have linked to; without e-mail this is the only way in.
+        if (status === 204) {
+          navigate(`/tempPassword/?email=${encodeURIComponent(email)}&tempPassword=${encodeURIComponent(password)}`);
+          return;
+        }
         try {
           const pending = mfaPendingFrom(data);
           if (pending) {
