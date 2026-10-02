@@ -1,11 +1,11 @@
 import { Box, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
-import BackButton from '../BackButton';
 import RegisterForm from '../Register/RegisterForm';
+import ThirdStep from '../Register/Steps/ThirdStep';
 
 interface SignUpFormProps {
   isMobile?: boolean;
@@ -18,13 +18,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const { t } = useTranslation();
 
-  const [activeStep, setActiveStep] = useState(0);
-
-  useEffect(() => {
-    if (location.pathname.includes('tempPassword')) {
-      setActiveStep(2);
-    }
-  }, []);
+  // /tempPassword/?email=&tempPassword= is the "choose a permanent password"
+  // page (reached from the reset e-mail link, or from the login form after a
+  // temporary password was accepted). It shows the set-password step, with
+  // its own title, in place of the sign-up form. The old multi-step sign-up
+  // used to switch to that step by index; the single-page form that replaced
+  // it never did, so this route showed a plain Sign Up form.
+  const isTempPassword = location.pathname.includes('tempPassword');
 
   return (
     <Box
@@ -60,26 +60,25 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
             width: '100%',
           }}
         >
-          {activeStep > 0 && (
-            <BackButton onPress={() => setActiveStep((prev) => prev - 1)} />
+          {!isTempPassword && (
+            <Typography
+              variant="h4"
+              align="center"
+              gutterBottom
+              sx={{
+                fontFamily: 'Varela Round',
+                fontWeight: 400,
+                fontSize: '24px',
+                height: '32px',
+                color: '#141414',
+                m: 0,
+              }}
+            >
+              {t('authRegisterLayout.title')}
+            </Typography>
           )}
-          <Typography
-            variant="h4"
-            align="center"
-            gutterBottom
-            sx={{
-              fontFamily: 'Varela Round',
-              fontWeight: 400,
-              fontSize: '24px',
-              height: '32px',
-              color: '#141414',
-              m: 0,
-            }}
-          >
-            {t('authRegisterLayout.title')}
-          </Typography>
         </Box>
-        <RegisterForm />
+        {isTempPassword ? <ThirdStep /> : <RegisterForm />}
       </Box>
       <Typography
         align="center"
