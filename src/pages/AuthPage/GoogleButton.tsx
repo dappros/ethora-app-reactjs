@@ -109,14 +109,13 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
               env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
             const currentDomain = window.location.hostname;
 
-            if (!allowedDomains.includes(currentDomain)) {
-              return;
-            }
-
+            // The domain check gates only the HubSpot signup form: tenant-hosted
+            // and custom-domain installs are not in the list, and returning
+            // here skipped the login below, leaving the new user signed out.
             const hubspotEnabled = String(env.VITE_HUBSPOT_ENABLED || '').toLowerCase() === 'true';
             const portalId = String(env.VITE_HUBSPOT_PORTAL_ID || '').trim();
             const formId = String(env.VITE_HUBSPOT_FORM_ID_SIGNUP || '').trim();
-            if (hubspotEnabled && portalId && formId) {
+            if (allowedDomains.includes(currentDomain) && hubspotEnabled && portalId && formId) {
               const hubspotData = {
                 fields: [
                   { name: 'firstname', value: firstName },
@@ -125,7 +124,7 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
                   { name: 'website', value: website },
                 ],
               };
-              await sendHSFormData(portalId, formId, hubspotData);
+              await sendHSFormData(portalId, formId, hubspotData).catch(console.error);
             }
 
             setEthoraUserCookie('accregred');

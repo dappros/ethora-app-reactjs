@@ -91,11 +91,10 @@ export const FacebookButton = () => {
               env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
             const currentDomain = window.location.hostname;
 
-            if (!allowedDomains.includes(currentDomain)) {
-              return;
-            }
-
-            if (HUBSPOT_ENABLED && HUBSPOT_PORTAL_ID && HUBSPOT_FORM_ID_SIGNUP) {
+            // The domain check gates only the HubSpot signup form: tenant-hosted
+            // and custom-domain installs are not in the list, and returning
+            // here skipped the login below, leaving the new user signed out.
+            if (allowedDomains.includes(currentDomain) && HUBSPOT_ENABLED && HUBSPOT_PORTAL_ID && HUBSPOT_FORM_ID_SIGNUP) {
               const hubspotData = {
                 fields: [
                   { name: 'firstname', value: firstName },
@@ -105,7 +104,7 @@ export const FacebookButton = () => {
                 ],
               };
 
-              await sendHSFormData(HUBSPOT_PORTAL_ID, HUBSPOT_FORM_ID_SIGNUP, hubspotData);
+              await sendHSFormData(HUBSPOT_PORTAL_ID, HUBSPOT_FORM_ID_SIGNUP, hubspotData).catch(console.error);
             }
           } catch (error) {
             console.error(error);
