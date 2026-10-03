@@ -131,6 +131,23 @@ widget overwrote the server-issued visitor JID with an `anon-<uuid>`
 credential, causing `mod_ethora`'s per-app prefix guard to reject MUC
 presence and leaving the Widget Conversations panel permanently empty.
 
+### `widget-resume-probe.mjs`
+
+Lazy-session and resume check for the widget, two page loads in one
+browser context (localStorage survives, as for a real visitor). Load 1
+asserts that no `POST /v2/widget/sessions` happens while the page sits
+idle, clicks the launcher, sends a message and waits for the agent's
+reply. Load 2 reloads the page, clicks again and expects the session
+response to carry `room.resumed: true` with the same visitor and room,
+and the earlier message to come back from history.
+
+Prints the timings that matter for the lazy design: session response
+relative to the click, chat input ready after the click, agent reply
+after send. Verdict line is `PASS` / `FAIL` with the individual flags
+(`lazy`, `botReplied`, `resumedFlag`, `sameVisitor`, `sameRoom`,
+`historyRestored`). Env: `QA_API`, `WIDGET_URL`, `APP_ID`,
+`TEST_MESSAGE`, `REPLY_WAIT_MS`, `SETTLE_MS`.
+
 ## Reusable helpers (`tests/diagnostics/lib/`)
 
 These are designed for other probes to import as-needed. Browser-side
