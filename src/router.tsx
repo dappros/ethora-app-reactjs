@@ -3,7 +3,6 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppHelmet from './AppHelmet';
 import AppLayout from './AppLayout';
 import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
-import { AppStatistics } from './pages/AppStatistics';
 import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
@@ -24,6 +23,11 @@ const AppUsers = lazy(() => import('./pages/AppUsers'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
+// Statistics is the only page that uses the charting stack (recharts,
+// react-date-range); keep it out of the main chunk like the other admin pages.
+const AppStatistics = lazy(() =>
+  import('./pages/AppStatistics').then((m) => ({ default: m.AppStatistics }))
+);
 
 import App from './App';
 import { BaseAppOnly } from './components/BaseAppOnly';

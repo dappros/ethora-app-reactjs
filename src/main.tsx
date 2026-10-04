@@ -1,11 +1,11 @@
 import { XmppProvider } from '@ethora/chat-component';
-import { PostHogProvider } from 'posthog-js/react';
 import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import { Fallback } from './App.tsx';
-import posthog from './posthog.ts';
+// Side-effect import: schedules the deferred analytics load (see posthog.ts).
+import './posthog.ts';
 import { RouterErrorBoundary } from './components/Error/RouterErrorBoundary';
 import { buildEthoraBaseChatConfig } from './config/chatBootstrap';
 import './index.css';
@@ -180,19 +180,17 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <PostHogProvider client={posthog}>
-    <XmppProviderBridge>
-      <ThemeBridge>
-        <RouterErrorBoundary>
-          <RouterProvider
-            router={router}
-            fallbackElement={<Fallback />}
-            future={{
-              v7_startTransition: true,
-            }}
-          />
-        </RouterErrorBoundary>
-      </ThemeBridge>
-    </XmppProviderBridge>
-  </PostHogProvider>
+  <XmppProviderBridge>
+    <ThemeBridge>
+      <RouterErrorBoundary>
+        <RouterProvider
+          router={router}
+          fallbackElement={<Fallback />}
+          future={{
+            v7_startTransition: true,
+          }}
+        />
+      </RouterErrorBoundary>
+    </ThemeBridge>
+  </XmppProviderBridge>
 );
