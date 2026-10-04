@@ -154,6 +154,11 @@ while (Date.now() < replyDeadline) {
   await page.waitForTimeout(500);
 }
 console.log(`[step] load1: bot reply ${botReplyAt ? `seen at +${botReplyAt}ms (${botReplyAt - sentAt}ms after send)` : 'NOT seen within ' + REPLY_WAIT_MS + 'ms'}`);
+if (!botReplyAt) {
+  // Show what did arrive so a detector mismatch is visible, not silent.
+  const bodies = wsRx.filter((p) => /<message[^>]*type=['"]groupchat/.test(p) && /<body>/.test(p));
+  for (const p of bodies.slice(0, 4)) console.log(`[rx-frame] from=${(p.match(/\sfrom=['"]([^'"]+)['"]/) || [])[1]} body=${(p.match(/<body>([^<]{0,40})/) || [])[1]}`);
+}
 console.log(`[step] load1: websockets opened=${wsOpens}; outgoing groupchat bodies=${wsTxBodies.length} ${JSON.stringify(wsTxBodies)}`);
 for (const l of sendLog) console.log(`[chat-log] ${l}`);
 const load1 = { idleCalls: idleCallsLoad1, session: sessions[0]?.body || null, botReplyAt };
