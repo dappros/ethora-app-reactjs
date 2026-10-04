@@ -141,10 +141,12 @@ const sentAt = ms();
 while (Date.now() < replyDeadline) {
   // A groupchat message from someone other than the visitor, not our own echo
   // and not a join notice.
-  const visitor = sessions[0]?.body?.visitor?.xmppUsername || '';
+  // A groupchat body from an agent occupant (nickname ends in -bot) that is
+  // not a join notice. Keyed on the sender, not the text: agents often quote
+  // the question back, which a text-exclusion check mistook for an echo.
   const hit = wsRx.find((p) =>
-    /<message[^>]*type=['"]groupchat/.test(p) && !p.includes(TEST_MESSAGE) &&
-    !/has joined the chat/.test(p) && !(visitor && p.includes(`/${visitor}`)) && /<body>/.test(p));
+    /<message[^>]*type=['"]groupchat/.test(p) && /<body>/.test(p) &&
+    /from=['"][^'"]+\/[^'"]*-bot['"]/.test(p) && !/has joined the chat/.test(p));
   if (hit) {
     botReplyAt = ms();
     break;
