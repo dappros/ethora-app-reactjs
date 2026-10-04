@@ -17,6 +17,7 @@
 //   node tests/diagnostics/widget-resume-probe.mjs
 
 import { chromium } from 'playwright';
+import { enableChatVerboseLogging } from './lib/fiber-walker.mjs';
 
 const QA_API = process.env.QA_API || 'https://api.chat-qa.ethora.com';
 const WIDGET_URL = process.env.WIDGET_URL || 'https://widget.chat-qa.ethora.com/assistant.js';
@@ -24,6 +25,9 @@ const APP_ID = process.env.APP_ID || '68b2cd91d58ec5578cfca55b';
 const TEST_MESSAGE = process.env.TEST_MESSAGE || 'resume-probe-' + Date.now();
 const SETTLE_MS = Number(process.env.SETTLE_MS || 6000);
 const REPLY_WAIT_MS = Number(process.env.REPLY_WAIT_MS || 30000);
+// Pause between the chat input appearing and typing; 0 reproduces a visitor who
+// types the moment the panel is ready.
+const TYPE_DELAY_MS = Number(process.env.TYPE_DELAY_MS || 0);
 
 const HOST_HTML = `<!doctype html><html><head><meta charset="utf-8"><title>widget-resume</title></head>
 <body><h1>widget-resume probe host</h1>
@@ -34,6 +38,23 @@ const HOST_URL = new URL('/__widget-resume-probe.html', WIDGET_URL).toString();
 const browser = await chromium.launch({ headless: true, channel: 'chromium' });
 const ctx = await browser.newContext({ ignoreHTTPSErrors: true });
 const page = await ctx.newPage();
+// TRACE_SENDS=1: log a stack trace for every outgoing groupchat <message> with a
+// <body>, from inside the page, so a duplicate send shows its two call paths.
+if (process.env.TRACE_SENDS) {
+  await page.addInitScript(() => {
+    Error.stackTraceLimit = 60;
+    const orig = WebSocket.prototype.send;
+    WebSocket.prototype.send = function (d) {
+      try {
+        if (typeof d === 'string' && d.includes('type="groupchat"') && d.includes('<body>')) {
+          const st = new Error().stack.split('\n').slice(1, 60).map((l) => l.trim()).join(' | ');
+          console.log('[WS-SEND-TRACE] ' + (d.match(/\sid="([^"]+)"/) || [])[1] + ' :: ' + st);
+        }
+      } catch (_) {}
+      return orig.call(this, d);
+    };
+  });
+}
 await page.route(HOST_URL, (route) => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: HOST_HTML }));
 
 // Per-load bookkeeping, reset by startLoad().
@@ -56,10 +77,24 @@ page.on('response', async (r) => {
   }
   console.log(`[sessions] ${r.status()} at +${s.at}ms room=${s.body?.room?.name} resumed=${s.body?.room?.resumed} visitor=${s.body?.visitor?.xmppUsername}`);
 });
+let wsOpens = 0;
+let wsTxBodies = [];
 page.on('websocket', (ws) => {
+  wsOpens += 1;
   ws.on('framereceived', (d) => wsRx.push(d.payload?.toString?.('utf-8') || String(d.payload)));
+  ws.on('framesent', (d) => {
+    const p = d.payload?.toString?.('utf-8') || String(d.payload);
+    if (/<message[^>]*type=['"]groupchat/.test(p) && /<body>/.test(p)) wsTxBodies.push({ at: ms(), id: (p.match(/\sid=['"]([^'"]+)['"]/) || [])[1], len: p.length, head: p.slice(0, 160) });
+  });
 });
 page.on('pageerror', (e) => console.log(`[pageerror] ${e.message}`));
+page.on('console', (m) => { const t = m.text(); if (t.startsWith('[WS-SEND-TRACE]')) console.log(t); });
+// Send-path diagnostics from chat-component (visible once verbose logging is on).
+const sendLog = [];
+page.on('console', (m) => {
+  const t = m.text();
+  if (/\[DIAG\]|send_wait_ms|SendRetry|send_click_to_echo|room_presence|ensureRoomPresence|active_room_retry|not_online|drainHeap|processQueue|\[Send\]|\[XMPP\]/.test(t)) sendLog.push(`+${ms()}ms ${t.slice(0, 220)}`);
+});
 
 async function startLoad(label) {
   sessions = [];
@@ -88,6 +123,13 @@ async function openPanel(label) {
 await startLoad('load1');
 const idleCallsLoad1 = sessions.length;
 const input1 = await openPanel('load1');
+try {
+  console.log(`[step] load1: verbose chat logging: ${await enableChatVerboseLogging(page)}`);
+} catch (e) {
+  console.log(`[step] verbose logging not enabled: ${e.message}`);
+}
+if (TYPE_DELAY_MS) await page.waitForTimeout(TYPE_DELAY_MS);
+wsTxBodies = [];
 await input1.click();
 await input1.fill(TEST_MESSAGE);
 await input1.press('Enter');
@@ -110,6 +152,8 @@ while (Date.now() < replyDeadline) {
   await page.waitForTimeout(500);
 }
 console.log(`[step] load1: bot reply ${botReplyAt ? `seen at +${botReplyAt}ms (${botReplyAt - sentAt}ms after send)` : 'NOT seen within ' + REPLY_WAIT_MS + 'ms'}`);
+console.log(`[step] load1: websockets opened=${wsOpens}; outgoing groupchat bodies=${wsTxBodies.length} ${JSON.stringify(wsTxBodies)}`);
+for (const l of sendLog) console.log(`[chat-log] ${l}`);
 const load1 = { idleCalls: idleCallsLoad1, session: sessions[0]?.body || null, botReplyAt };
 
 // ---- load 2: returning visitor -------------------------------------------

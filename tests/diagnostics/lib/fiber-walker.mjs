@@ -14,7 +14,16 @@
 // null. Pure: no side effects.
 export const findChatStoreSrc = `function findChatStore() {
   const root = document.querySelector('[id=root]') || document.body;
-  const all = Array.from(root.querySelectorAll('*'));
+  // Include elements inside open shadow roots: the embeddable widget renders
+  // the whole chat tree under #chat-widget's shadow root.
+  const collect = (node, acc) => {
+    for (const el of Array.from(node.querySelectorAll('*'))) {
+      acc.push(el);
+      if (el.shadowRoot) collect(el.shadowRoot, acc);
+    }
+    return acc;
+  };
+  const all = collect(root, []);
   const start = all.find(el => Object.keys(el).some(k => k.startsWith('__reactFiber')));
   if (!start) return null;
   const fiberKey = Object.keys(start).find(k => k.startsWith('__reactFiber'));
