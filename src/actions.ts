@@ -40,7 +40,6 @@ import { ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './mo
 import { phCapture, phIdentify, phReset } from './posthog';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
-import { sleep } from './utils/sleep';
 import { resolveSessionUiLanguage } from './utils/uiLanguage';
 
 const getState = useAppStore.getState;
@@ -121,7 +120,6 @@ export async function actionGetConfig(domainName?: string) {
     resolveAvailableLanguages(translateLanguages).map((l) => l.id)
   );
 
-  await sleep(1000);
   httpTokens.appJwt = result.appToken;
   state.doSetCurrentApp(app);
 }
