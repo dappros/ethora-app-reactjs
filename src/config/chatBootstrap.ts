@@ -284,6 +284,7 @@ export const buildEthoraBaseChatConfig = ({
   const config: XmppProviderConfig = {
     baseUrl: baseUrl,
     appId: currentUser?.appId || '',
+    enableMessageSearch: true,
     xmppSettings: {
       devServer: env.VITE_APP_XMPP_SERVICE,
       host: env.VITE_XMPP_HOST,
