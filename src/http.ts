@@ -927,6 +927,35 @@ export function httpUpdateAgentSoul(idOrAddress: string, body: { soulMd?: string
   return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/soul`, body);
 }
 
+export type AgentKnowledgeHealth = {
+  pages: number;
+  docs: number;
+  chunks: number | null;
+  missing: { pages: number; docs: number; examples: string[] };
+  lastIndexedAt: string | null;
+  indexAvailable: boolean;
+  // A rebuild is running: pages fill in as it goes.
+  rebuilding?: boolean;
+};
+
+export function httpGetAgentKnowledge(idOrAddress: string) {
+  return httpV2.get<AgentKnowledgeHealth & { ok: boolean }>(`/agents/${encodeURIComponent(idOrAddress)}/knowledge`);
+}
+
+export function httpRebuildAgentKnowledge(idOrAddress: string, onlyMissing = true) {
+  return httpV2.post<{ ok: boolean; pages: number; docs: number }>(`/agents/${encodeURIComponent(idOrAddress)}/knowledge/rebuild`, { onlyMissing });
+}
+
+export type AgentTryTurn = { role: 'user' | 'assistant'; content: string };
+
+// One turn of the Agent Settings "Try it" chat. Nothing is stored.
+export function httpTryAgent(idOrAddress: string, text: string, history: AgentTryTurn[]) {
+  return httpV2.post<{ ok: boolean; reply: string; sources: string[]; ragDocsUsed: number; model: string | null }>(
+    `/agents/${encodeURIComponent(idOrAddress)}/try`,
+    { text, history },
+  );
+}
+
 export function httpInviteAgentToChat(idOrAddress: string, body: { appId?: string; chatId?: string; chatJid?: string }) {
   return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/invite-to-chat`, body);
 }

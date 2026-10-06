@@ -32,6 +32,7 @@ import {
   WebIndexPanel,
 } from '../components/Agents/panels/AgentPanels';
 import { AgentWidgetAppearancePanel } from '../components/Agents/panels/AgentWidgetAppearancePanel';
+import { TryItPanel } from '../components/Agents/panels/TryItPanel';
 import { httpListAgentBotInstances } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../models';
@@ -45,35 +46,49 @@ import { useAppStore } from '../store/useAppStore';
 // SidebarSections, via TAB_LABEL_KEYS) is translated.
 const TABS = [
   'Persona',
-  'Context',
+  'Instructions',
   'Widget Appearance',
   'Web Index',
   'Docs Index',
-  'SOUL.MD',
+  'Memory',
   'Heartbeat',
   'Flows',
+  'Try it',
   'Chats Index',
   'Visibility',
 ] as const;
 
+// Earlier tab names, kept so bookmarked ?tab= links still land on the tab.
+const TAB_ALIASES: Record<string, (typeof TABS)[number]> = {
+  Context: 'Instructions',
+  'SOUL.MD': 'Memory',
+};
+
+function resolveTab(tab: string | null): number {
+  const name = tab && (TAB_ALIASES[tab] || tab);
+  const i = TABS.indexOf(name as (typeof TABS)[number]);
+  return i >= 0 ? i : -1;
+}
+
 const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
   Persona: 'agentSettings.tabPersona',
-  Context: 'agentSettings.tabContext',
+  Instructions: 'agentSettings.tabInstructions',
   'Widget Appearance': 'agentSettings.tabWidgetAppearance',
   'Web Index': 'agentSettings.tabWebIndex',
   'Docs Index': 'agentSettings.tabDocsIndex',
-  'SOUL.MD': 'agentSettings.tabSoulMd',
+  Memory: 'agentSettings.tabMemory',
   Heartbeat: 'agentSettings.tabHeartbeat',
   Flows: 'agentSettings.tabFlows',
+  'Try it': 'agentSettings.tabTryIt',
   'Chats Index': 'agentSettings.tabChatsIndex',
   Visibility: 'agentSettings.tabVisibility',
 };
 
 const SECTIONS: { labelKey: string; tabs: (typeof TABS[number])[] }[] = [
-  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Context', 'Widget Appearance'] },
+  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Instructions', 'Widget Appearance'] },
   { labelKey: 'agentSettings.sectionKnowledge', tabs: ['Web Index', 'Docs Index'] },
-  { labelKey: 'agentSettings.sectionBehaviour', tabs: ['SOUL.MD', 'Heartbeat', 'Flows'] },
-  { labelKey: 'agentSettings.sectionActivity', tabs: ['Chats Index'] },
+  { labelKey: 'agentSettings.sectionBehaviour', tabs: ['Memory', 'Heartbeat', 'Flows'] },
+  { labelKey: 'agentSettings.sectionActivity', tabs: ['Try it', 'Chats Index'] },
   { labelKey: 'agentSettings.sectionSharing', tabs: ['Visibility'] },
 ];
 
@@ -84,7 +99,7 @@ export default function AgentSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tabFromUrl = searchParams.get('tab');
-  const initialTabIndex = TABS.includes(tabFromUrl as any) ? TABS.indexOf(tabFromUrl as any) : 0;
+  const initialTabIndex = Math.max(0, resolveTab(tabFromUrl));
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
   const [agent, setAgent] = useState<ModelAgent | null>(null);
   const [instances, setInstances] = useState<(ModelBotInstance & { appName?: string })[]>([]);
@@ -144,8 +159,9 @@ export default function AgentSettings() {
   // modal needed any more.)
 
   useEffect(() => {
-    if (TABS.includes(tabFromUrl as any) && TABS.indexOf(tabFromUrl as any) !== selectedIndex) {
-      setSelectedIndex(TABS.indexOf(tabFromUrl as any));
+    const i = resolveTab(tabFromUrl);
+    if (i >= 0 && i !== selectedIndex) {
+      setSelectedIndex(i);
     }
   }, [tabFromUrl]);
 
@@ -183,7 +199,9 @@ export default function AgentSettings() {
   if (!agent) return <div className="p-4 text-gray-500">{t('agentSettings.agentNotFound')}</div>;
 
   return (
-    <div className="h-full rounded-2xl bg-white p-4 grid grid-rows-[auto,1fr] gap-y-4 overflow-hidden">
+    // The read-only notice is a third row; without its own `auto` track it took
+    // the stretching one and filled a third of the page.
+    <div className={classNames('h-full rounded-2xl bg-white p-4 grid gap-y-4 overflow-hidden', readOnly ? 'grid-rows-[auto,auto,1fr]' : 'grid-rows-[auto,1fr]')}>
       <Header
         agent={agent}
         defaultBotInstance={defaultBotInstance}
@@ -236,6 +254,9 @@ export default function AgentSettings() {
           </TabPanel>
           <TabPanel className="p-2">
             <FlowsPanel agent={agent} isDisabled={readOnly} />
+          </TabPanel>
+          <TabPanel className="p-2">
+            <TryItPanel agent={agent} />
           </TabPanel>
           <TabPanel className="p-2">
             <ChatsIndexPanel agent={agent} isDisabled={readOnly} />

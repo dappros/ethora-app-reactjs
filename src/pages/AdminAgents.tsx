@@ -352,9 +352,10 @@ export default function AdminAgents() {
       {showCreate && (
         <CreateAgentModal
           onCancel={() => setShowCreate(false)}
-          onCreated={(agent) => {
+          onCreated={(agent, openTab) => {
             setShowCreate(false);
-            navigate(`/app/admin/agents/${agent.id}/settings`);
+            actionListAgents({}).catch(() => {});
+            navigate(`/app/admin/agents/${agent.id}/settings${openTab ? `?tab=${encodeURIComponent(openTab)}` : ''}`);
           }}
         />
       )}
@@ -569,68 +570,168 @@ const CloneAgentModal: React.FC<{ agent: ModelAgent; onClose: () => void }> = ({
 
 const CreateAgentModal: React.FC<{
   onCancel: () => void;
-  onCreated: (agent: ModelAgent) => void;
+  onCreated: (agent: ModelAgent, openTab?: string) => void;
 }> = ({ onCancel, onCreated }) => {
   const { t } = useTranslation();
-  const apps = useAppStore((s) => s.apps);
-  const currentApp = useAppStore((s) => s.currentApp);
+  const ownedApps = useAppStore((s) => s.ownedApps);
+  const agents = useAppStore((s) => s.agents);
+  const currentUserId = useAppStore((s) => s.currentUser?._id);
+  // Public agents from others are the templates: customer-support ones first,
+  // since that is what most new agents are for.
+  const templates = useMemo(
+    () =>
+      agents
+        .filter((a) => a.visibility === 'public' && a.ownerId !== currentUserId)
+        .sort((a, b) => Number((b.categories || []).includes('customer-support')) - Number((a.categories || []).includes('customer-support'))),
+    [agents, currentUserId]
+  );
+  const [templateId, setTemplateId] = useState('');
+  const template = templates.find((a) => a.id === templateId) || null;
   const [displayName, setDisplayName] = useState('New AI Agent');
   const [bio, setBio] = useState('');
   const [prompt, setPrompt] = useState('You are a helpful assistant.');
   const [visibility, setVisibility] = useState<'private' | 'unlisted' | 'public'>('private');
-  const defaultOwnerAppId = currentApp?._id || apps[0]?._id || '';
+  const [ownerAppId, setOwnerAppId] = useState('');
+  const [includeKnowledge, setIncludeKnowledge] = useState(true);
   const [busy, setBusy] = useState(false);
 
+  useEffect(() => {
+    if (!ownedApps.length) actionLoadOwnedApps().catch(() => {});
+  }, [ownedApps.length]);
+  useEffect(() => {
+    if (!ownerAppId && ownedApps.length) setOwnerAppId(ownedApps[0]._id);
+  }, [ownedApps, ownerAppId]);
+
+  const pickTemplate = (id: string) => {
+    setTemplateId(id);
+    const tpl = templates.find((a) => a.id === id);
+    setDisplayName(tpl ? tpl.displayName : 'New AI Agent');
+  };
+
+  const create = async () => {
+    setBusy(true);
+    try {
+      if (template) {
+        const withKnowledge = includeKnowledge && (template.totalSiteSourceSize || 0) > 0;
+        const { agent } = await actionCloneAgent(template.id, {
+          displayName: displayName.trim() || template.displayName,
+          ...(ownerAppId ? { ownerAppId } : {}),
+          ...(withKnowledge ? { includeKnowledge: true } : {}),
+        });
+        // A support agent is only as good as its knowledge of your business:
+        // land on the Web Index so adding your own site is the next step.
+        if (agent) onCreated(agent, (template.categories || []).includes('customer-support') ? 'Web Index' : undefined);
+      } else {
+        const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: ownerAppId || undefined });
+        if (created) onCreated(created);
+      }
+    } catch (e) {
+      const err = e as { response?: { data?: { error?: string } }; message?: string };
+      toast.error(`${t('adminAgents.createFailedPrefix')} ${err.response?.data?.error || err.message || ''}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-5 w-[480px] max-w-[90%] space-y-3">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" role="dialog" aria-label={t('adminAgents.createModalTitle')}>
+      <div className="bg-white rounded-xl p-5 w-[560px] max-w-[92%] max-h-[90vh] overflow-y-auto space-y-3">
         <h3 className="text-lg font-semibold">{t('adminAgents.createModalTitle')}</h3>
+
+        <fieldset className="space-y-1">
+          <legend className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.startFromLabel')}</legend>
+          <div className="max-h-56 overflow-y-auto border rounded-lg divide-y">
+            <label className="flex items-start gap-2 p-2 cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="start-from" className="mt-1" checked={!template} onChange={() => pickTemplate('')} />
+              <span>
+                <span className="block text-sm font-semibold">{t('adminAgents.startBlank')}</span>
+                <span className="block text-xs text-gray-500">{t('adminAgents.startBlankDesc')}</span>
+              </span>
+            </label>
+            {templates.map((a) => (
+              <label key={a.id} className="flex items-start gap-2 p-2 cursor-pointer hover:bg-gray-50">
+                <input type="radio" name="start-from" className="mt-1" checked={templateId === a.id} onChange={() => pickTemplate(a.id)} />
+                {a.avatarUrl ? (
+                  <img src={a.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px]">{(a.displayName || 'AI').slice(0, 2).toUpperCase()}</span>
+                )}
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold truncate">{a.displayName}</span>
+                  <span className="flex flex-wrap gap-1">
+                    {(a.categories || []).filter(isAgentCategory).map((c) => (
+                      <span key={c} className="text-[10px] px-1.5 rounded-full bg-gray-100 text-gray-700">{t(AGENT_CATEGORY_LABEL_KEYS[c])}</span>
+                    ))}
+                  </span>
+                  {a.bio && <span className="block text-xs text-gray-500 line-clamp-2">{a.bio}</span>}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <label className="block">
           <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.displayNameLabel')}</span>
           <input className="border rounded px-2 py-1 w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
         </label>
-        <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.bioLabel')}</span>
-          <textarea className="border rounded px-2 py-1 w-full" rows={2} value={bio} onChange={(e) => setBio(e.target.value)} />
-        </label>
-        <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.initialPromptLabel')}</span>
-          <textarea className="border rounded px-2 py-1 w-full font-mono text-sm" rows={5} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
-        </label>
-        <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.visibilityLabel')}</span>
-          <select className="border rounded px-2 py-1" value={visibility} onChange={(e) => setVisibility(e.target.value as any)}>
-            <option value="private">{t('adminAgents.visibilityPrivate')}</option>
-            <option value="unlisted">{t('adminAgents.visibilityUnlistedInviteByAddress')}</option>
-            <option value="public">{t('adminAgents.visibilityPublic')}</option>
-          </select>
-        </label>
-        {/* Public is platform-wide visible. Operators who skim through "+ New
-            Agent" defaults sometimes pick Public for an internal-only persona
-            without realising other tenants will see it in their AI Agents
-            list and be able to clone it. Make the trade-off explicit at
-            create time so this is a deliberate choice. */}
-        {visibility === 'public' && (
-          <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug dark:border-yellow-800/60 dark:bg-yellow-900/30 dark:text-yellow-200">
-            <strong>{t('adminAgents.publicVisibilityWarningTitle')}</strong>{' '}
-            {t('adminAgents.publicVisibilityWarningBody')}
+
+        {ownedApps.length > 0 && (
+          <label className="block">
+            <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.homeAppLabel')}</span>
+            <select className="border rounded px-2 py-1 w-full" value={ownerAppId} onChange={(e) => setOwnerAppId(e.target.value)}>
+              {ownedApps.map((a) => (
+                <option key={a._id} value={a._id}>{a.displayName}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {template ? (
+          <div className="space-y-2">
+            <p className="text-xs text-gray-600">{t('adminAgents.templateHint')}</p>
+            {(template.totalSiteSourceSize || 0) > 0 && (
+              <label className="flex items-start gap-2 text-sm">
+                <input type="checkbox" className="mt-1" checked={includeKnowledge} onChange={(e) => setIncludeKnowledge(e.target.checked)} />
+                <span>{t('adminAgents.cloneIncludeKnowledge').replace('{size}', fmtBytes(template.totalSiteSourceSize))}</span>
+              </label>
+            )}
           </div>
+        ) : (
+          <>
+            <label className="block">
+              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.bioLabel')}</span>
+              <textarea className="border rounded px-2 py-1 w-full" rows={2} value={bio} onChange={(e) => setBio(e.target.value)} />
+            </label>
+            <label className="block">
+              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.initialPromptLabel')}</span>
+              <textarea className="border rounded px-2 py-1 w-full font-mono text-sm" rows={5} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+            </label>
+            <label className="block">
+              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.visibilityLabel')}</span>
+              <select className="border rounded px-2 py-1" value={visibility} onChange={(e) => setVisibility(e.target.value as 'private' | 'unlisted' | 'public')}>
+                <option value="private">{t('adminAgents.visibilityPrivate')}</option>
+                <option value="unlisted">{t('adminAgents.visibilityUnlistedInviteByAddress')}</option>
+                <option value="public">{t('adminAgents.visibilityPublic')}</option>
+              </select>
+            </label>
+            {/* Public is platform-wide visible. Operators who skim through "+ New
+                Agent" defaults sometimes pick Public for an internal-only persona
+                without realising other tenants will see it in their AI Agents
+                list and be able to clone it. Make the trade-off explicit at
+                create time so this is a deliberate choice. */}
+            {visibility === 'public' && (
+              <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug dark:border-yellow-800/60 dark:bg-yellow-900/30 dark:text-yellow-200">
+                <strong>{t('adminAgents.publicVisibilityWarningTitle')}</strong>{' '}
+                {t('adminAgents.publicVisibilityWarningBody')}
+              </div>
+            )}
+          </>
         )}
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">{t('adminAgents.cancel')}</button>
           <button
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                const created = await actionCreateAgent({ displayName, bio, prompt, visibility, ownerAppId: defaultOwnerAppId || undefined });
-                if (created) onCreated(created);
-              } catch (e: any) {
-                toast.error(`${t('adminAgents.createFailedPrefix')} ${e?.response?.data?.error || e.message}`);
-              } finally {
-                setBusy(false);
-              }
-            }}
+            disabled={busy || !displayName.trim()}
+            onClick={create}
             className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
           >
             {busy ? t('adminAgents.creating') : t('adminAgents.create')}

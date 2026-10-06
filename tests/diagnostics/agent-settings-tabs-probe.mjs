@@ -93,7 +93,7 @@ const tab = async (name) => {
   await page.waitForTimeout(400);
 };
 const away = async (from) => {
-  await tab(from === 'Persona' ? 'Context' : 'Persona');
+  await tab(from === 'Persona' ? 'Instructions' : 'Persona');
   await tab(from);
 };
 const savedBy = (method) =>
@@ -112,19 +112,19 @@ await away('Persona');
 check('persona kept after tab switch',
   (await page.getByLabel('Display name').inputValue()) === want.displayName && (await page.getByLabel('Bio').inputValue()) === want.bio);
 
-// Context
-await tab('Context');
+// Instructions
+await tab('Instructions');
 await page.locator('textarea').first().fill(want.prompt);
-check('context save', (await click('Save context')) === 200);
-await away('Context');
-check('context kept after tab switch', (await page.locator('textarea').first().inputValue()) === want.prompt);
+check('instructions save', (await click('Save instructions')) === 200);
+await away('Instructions');
+check('instructions kept after tab switch', (await page.locator('textarea').first().inputValue()) === want.prompt);
 
-// SOUL.MD
-await tab('SOUL.MD');
+// Memory
+await tab('Memory');
 await page.locator('textarea').first().fill(want.soulMd);
-check('soul save', (await click('Save SOUL.MD', 'POST')) === 200);
-await away('SOUL.MD');
-check('soul kept after tab switch', (await page.locator('textarea').first().inputValue()) === want.soulMd);
+check('memory save', (await click('Save memory', 'POST')) === 200);
+await away('Memory');
+check('memory kept after tab switch', (await page.locator('textarea').first().inputValue()) === want.soulMd);
 
 // Heartbeat
 await tab('Heartbeat');
@@ -204,8 +204,8 @@ check('chats index renders', (await page.locator('main, body').first().innerText
 await page.goto(`${settingsUrl}?tab=Persona`, { waitUntil: 'domcontentloaded' });
 await page.getByLabel('Display name').waitFor({ timeout: 15000 });
 check('persona after reload', (await page.getByLabel('Display name').inputValue()) === want.displayName);
-await tab('Context');
-check('context after reload', (await page.locator('textarea').first().inputValue()) === want.prompt);
+await tab('Instructions');
+check('instructions after reload', (await page.locator('textarea').first().inputValue()) === want.prompt);
 await page.screenshot({ path: `${OUT_DIR}/agent-settings-tabs.png`, fullPage: true });
 await browser.close();
 browser = null;

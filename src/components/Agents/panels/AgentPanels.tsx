@@ -43,6 +43,7 @@ import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
 import { agentFlowTemplates } from '../../../constants/agentFlowTemplates';
 import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../../../lib/agentCategories';
 import { useAppStore } from '../../../store/useAppStore';
+import { KnowledgeHealth } from './KnowledgeHealth';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
 
 export const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
@@ -293,7 +294,7 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         onClick={async () => {
           try {
             await actionUpdateAgent(agent.id, { prompt });
-            toast.success(t('agentPanels.contextSaved'));
+            toast.success(t('agentPanels.instructionsSaved'));
           } catch (e: any) {
             toast.error(`${t('agentPanels.saveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
           }
@@ -301,7 +302,7 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         disabled={isDisabled}
         className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
       >
-        {t('agentPanels.saveContext')}
+        {t('agentPanels.saveInstructions')}
       </button>
     </div>
   );
@@ -794,6 +795,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         </div>
         <AppScopePicker agent={agent} appId={appId} onChange={setAppId} />
       </div>
+      {!isDisabled && <KnowledgeHealth agentId={agent.id} refreshKey={total} />}
 
       <div className="flex gap-2">
         <input
@@ -1083,6 +1085,7 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
         </div>
         <AppScopePicker agent={agent} appId={appId} onChange={setAppId} />
       </div>
+      {!isDisabled && <KnowledgeHealth agentId={agent.id} refreshKey={rows.length} />}
       <input
         ref={fileRef}
         type="file"
@@ -1165,7 +1168,7 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
   return (
     <div className="space-y-3 max-w-3xl">
       <div className="text-sm text-gray-600">
-        {t('agentPanels.soulMdDescriptionPrefix')} {agent.soulMdUpdatedAt || t('agentPanels.never')} ({agent.soulMdUpdatedBy || t('agentPanels.notApplicable')})
+        {t('agentPanels.memoryDescriptionPrefix')} {agent.soulMdUpdatedAt || t('agentPanels.never')} ({agent.soulMdUpdatedBy || t('agentPanels.notApplicable')})
       </div>
       <textarea className="border rounded px-2 py-2 w-full font-mono text-sm" rows={16} disabled={isDisabled} value={soul} onChange={(e) => setSoul(e.target.value)} />
       <div className="flex gap-2">
@@ -1173,7 +1176,7 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
           onClick={async () => {
             try {
               await actionUpdateAgentSoul(agent.id, { soulMd: soul });
-              toast.success(t('agentPanels.soulMdSaved'));
+              toast.success(t('agentPanels.memorySaved'));
             } catch (e: any) {
               toast.error(`${t('agentPanels.failedPrefix')} ${e?.response?.data?.error || e.message}`);
             }
@@ -1181,7 +1184,7 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
           disabled={isDisabled}
           className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
         >
-          {t('agentPanels.saveSoulMd')}
+          {t('agentPanels.saveMemory')}
         </button>
       </div>
     </div>
