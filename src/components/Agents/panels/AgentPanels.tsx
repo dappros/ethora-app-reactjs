@@ -40,6 +40,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
 import { agentFlowTemplates } from '../../../constants/agentFlowTemplates';
+import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../../../lib/agentCategories';
 import { useAppStore } from '../../../store/useAppStore';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
 
@@ -59,6 +60,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   const [responseProbability, setResponseProbability] = useState(agent.responseProbability);
   const [cooldownSec, setCooldownSec] = useState(agent.cooldownSec);
   const [llmModel, setLlmModel] = useState(agent.llmModel || '');
+  const [categories, setCategories] = useState<AgentCategory[]>((agent.categories || []).filter(isAgentCategory));
 
   useEffect(() => {
     setDisplayName(agent.displayName);
@@ -68,6 +70,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
     setResponseProbability(agent.responseProbability);
     setCooldownSec(agent.cooldownSec);
     setLlmModel(agent.llmModel || '');
+    setCategories((agent.categories || []).filter(isAgentCategory));
   }, [agent.id]);
 
   async function save() {
@@ -80,6 +83,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         responseProbability,
         cooldownSec,
         llmModel: llmModel.trim(),
+        categories,
       });
       toast.success(t('agentPanels.saved'));
     } catch (e: any) {
@@ -233,6 +237,24 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         </datalist>
         <span className="block text-xs text-gray-500 mt-1">{t('agentPanels.llmModelHint')}</span>
       </Field>
+      <fieldset>
+        <legend className="block text-xs font-semibold text-gray-600 mb-1">{t('agentPanels.categoriesLabel')}</legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {AGENT_CATEGORIES.map((c) => (
+            <label key={c} className="inline-flex items-center gap-1 text-sm">
+              <input
+                type="checkbox"
+                disabled={isDisabled}
+                checked={categories.includes(c)}
+                onChange={(e) =>
+                  setCategories((prev) => (e.target.checked ? [...prev, c] : prev.filter((x) => x !== c)))
+                }
+              />
+              {t(AGENT_CATEGORY_LABEL_KEYS[c])}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <button onClick={save} disabled={isDisabled} className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50">
         {t('agentPanels.savePersona')}
       </button>

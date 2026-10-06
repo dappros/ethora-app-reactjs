@@ -313,6 +313,8 @@ export interface ModelAgent {
   greetingMessage: string;
   isRAG: boolean;
   ragTags: string[];
+  // Directory categories, a fixed list (lib/agentCategories.ts).
+  categories?: string[];
   soulMd: string;
   soulMdUpdatedAt: string | null;
   soulMdUpdatedBy: string;

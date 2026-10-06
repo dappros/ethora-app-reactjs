@@ -36,7 +36,7 @@ import {
   canonicalizeLocale,
   resolveAvailableLanguages,
 } from './constants/languageOptionsConstants';
-import { ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
+import { ModelAgent, ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
 import { phCapture, phIdentify, phReset } from './posthog';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
@@ -456,13 +456,18 @@ export async function actionDeleteAgent(idOrAddress: string) {
   getState().doRemoveAgent(idOrAddress);
 }
 
-export async function actionCloneAgent(idOrAddress: string, body?: any) {
+export type AgentCloneKnowledge = { copied: boolean; sites?: number; docs?: number; chunks?: number | null; reason?: string };
+
+export async function actionCloneAgent(
+  idOrAddress: string,
+  body?: { displayName?: string; ownerAppId?: string; includeKnowledge?: boolean },
+): Promise<{ agent: ModelAgent | undefined; knowledge?: AgentCloneKnowledge }> {
   const resp = await httpCloneAgent(idOrAddress, body);
   const agent = resp.data?.agent;
   if (agent) {
     getState().doUpsertAgent(agent);
   }
-  return agent;
+  return { agent, knowledge: resp.data?.knowledge };
 }
 
 export async function actionSetAgentVisibility(idOrAddress: string, visibility: 'private' | 'unlisted' | 'public') {
