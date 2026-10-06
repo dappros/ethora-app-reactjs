@@ -352,10 +352,11 @@ const AppScopePicker: React.FC<{
   onChange: (appId: string) => void;
 }> = ({ agent, appId, onChange }) => {
   const { t } = useTranslation();
-  const apps = useAppStore((s) => s.apps);
+  const apps = useAppStore((s) => s.ownedApps);
   // Only the user's own apps are eligible scopes (anything else and the auth check
-  // on /v2/apps/:appId/sources/* would 403).
-  if (apps.length <= 1) return null;
+  // on /v2/apps/:appId/sources/* would 403). A lone app that is already the
+  // scope needs no picker; with no scope yet the picker is the way to set one.
+  if (apps.length === 0 || (apps.length === 1 && apps[0]._id === appId)) return null;
   return (
     <label className="flex items-center gap-2 text-xs text-gray-600">
       <span>{t('agentPanels.scopeAppLabel')}</span>
@@ -377,7 +378,7 @@ const AppScopePicker: React.FC<{
 
 export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
   const { t } = useTranslation();
-  const apps = useAppStore((s) => s.apps);
+  const apps = useAppStore((s) => s.ownedApps);
   const [appId, setAppId] = useState<string>(initialAppId);
   const [url, setUrl] = useState('');
   const [followLink, setFollowLink] = useState(true);
@@ -970,7 +971,7 @@ type DocSourceRow = {
 
 export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
   const { t } = useTranslation();
-  const apps = useAppStore((s) => s.apps);
+  const apps = useAppStore((s) => s.ownedApps);
   const fileRef = useRef<HTMLInputElement>(null);
   const [appId, setAppId] = useState<string>(initialAppId);
   const [busy, setBusy] = useState(false);
