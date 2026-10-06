@@ -262,6 +262,16 @@ const VisibilityPanel: React.FC<{
 }> = ({ agent, isOwned, isSuperWriteAdmin, onChanged }) => {
   const { t } = useTranslation();
   const canEdit = isOwned || isSuperWriteAdmin;
+  // Making an agent public is the one visibility change that exposes it (and
+  // its knowledge base, through clones) to everyone on the server: confirm it.
+  const [confirmPublic, setConfirmPublic] = useState(false);
+  const choose = (v: 'private' | 'unlisted' | 'public') => {
+    if (v === 'public' && agent.visibility !== 'public') {
+      setConfirmPublic(true);
+      return;
+    }
+    doSet(agent.id, v, onChanged, t);
+  };
   return (
     <div className="space-y-4 max-w-xl">
       <div>
@@ -276,7 +286,7 @@ const VisibilityPanel: React.FC<{
           value="private"
           current={agent.visibility}
           canEdit={canEdit}
-          onChange={(v) => doSet(agent.id, v, onChanged, t)}
+          onChange={choose}
           label={t('agentSettings.visibilityPrivateLabel')}
           description={t('agentSettings.visibilityPrivateDesc')}
         />
@@ -284,7 +294,7 @@ const VisibilityPanel: React.FC<{
           value="unlisted"
           current={agent.visibility}
           canEdit={canEdit}
-          onChange={(v) => doSet(agent.id, v, onChanged, t)}
+          onChange={choose}
           label={t('agentSettings.visibilityUnlistedLabel')}
           description={t('agentSettings.visibilityUnlistedDesc')}
         />
@@ -292,9 +302,10 @@ const VisibilityPanel: React.FC<{
           value="public"
           current={agent.visibility}
           canEdit={canEdit}
-          onChange={(v) => doSet(agent.id, v, onChanged, t)}
+          onChange={choose}
           label={t('agentSettings.visibilityPublicLabel')}
           description={t('agentSettings.visibilityPublicDesc')}
+          sensitive
         />
       </div>
 
@@ -304,6 +315,31 @@ const VisibilityPanel: React.FC<{
           {agent.visibility === 'public' && (
             <> {t('agentSettings.visibilityNotEditableCloneHint')}</>
           )}
+        </div>
+      )}
+
+      {confirmPublic && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" role="dialog" aria-label={t('agentSettings.makePublicTitle')}>
+          <div className="bg-white rounded-xl p-5 w-[480px] max-w-[90%] space-y-3">
+            <h3 className="text-lg font-semibold">{t('agentSettings.makePublicTitle')}</h3>
+            <p className="text-sm text-gray-700">
+              {t('agentSettings.makePublicBody').replace('{name}', agent.displayName || '')}
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => setConfirmPublic(false)} className="border rounded px-4 py-2 text-sm hover:bg-gray-100">
+                {t('agentSettings.makePublicCancel')}
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmPublic(false);
+                  doSet(agent.id, 'public', onChanged, t);
+                }}
+                className="bg-amber-600 hover:bg-amber-500 text-white rounded px-4 py-2 text-sm"
+              >
+                {t('agentSettings.makePublicConfirm')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -345,12 +381,17 @@ const VisibilityOption: React.FC<{
   onChange: (v: 'private' | 'unlisted' | 'public') => void;
   label: string;
   description: string;
-}> = ({ value, current, canEdit, onChange, label, description }) => {
+  // Exposes the agent beyond its owner: drawn in amber so it reads as a
+  // deliberate step.
+  sensitive?: boolean;
+}> = ({ value, current, canEdit, onChange, label, description, sensitive }) => {
   const isChecked = current === value;
   return (
     <label className={classNames(
       'flex items-start gap-3 border rounded-lg p-3 cursor-pointer',
-      isChecked ? 'border-brand-500 bg-brand-50' : 'border-gray-200 bg-white',
+      sensitive
+        ? isChecked ? 'border-amber-500 bg-amber-50' : 'border-amber-200 bg-amber-50/60'
+        : isChecked ? 'border-brand-500 bg-brand-50' : 'border-gray-200 bg-white',
       !canEdit && 'cursor-not-allowed opacity-70'
     )}>
       <input

@@ -30,6 +30,7 @@ import {
   httpListSiteSourcesV2,
   httpPostFile,
   httpReindexSiteSourceV2,
+  httpCancelSiteCrawlJob,
   httpGetSiteCrawlJob,
   httpTestMessageAgentBotInstance,
   httpValidateAgentFlows,
@@ -40,6 +41,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom, ModelBotInstance } from '../../../models';
 import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
 import { agentFlowTemplates } from '../../../constants/agentFlowTemplates';
+import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../../../lib/agentCategories';
 import { useAppStore } from '../../../store/useAppStore';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
 
@@ -59,6 +61,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   const [responseProbability, setResponseProbability] = useState(agent.responseProbability);
   const [cooldownSec, setCooldownSec] = useState(agent.cooldownSec);
   const [llmModel, setLlmModel] = useState(agent.llmModel || '');
+  const [categories, setCategories] = useState<AgentCategory[]>((agent.categories || []).filter(isAgentCategory));
 
   useEffect(() => {
     setDisplayName(agent.displayName);
@@ -68,6 +71,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
     setResponseProbability(agent.responseProbability);
     setCooldownSec(agent.cooldownSec);
     setLlmModel(agent.llmModel || '');
+    setCategories((agent.categories || []).filter(isAgentCategory));
   }, [agent.id]);
 
   async function save() {
@@ -80,6 +84,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         responseProbability,
         cooldownSec,
         llmModel: llmModel.trim(),
+        categories,
       });
       toast.success(t('agentPanels.saved'));
     } catch (e: any) {
@@ -233,6 +238,24 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         </datalist>
         <span className="block text-xs text-gray-500 mt-1">{t('agentPanels.llmModelHint')}</span>
       </Field>
+      <fieldset>
+        <legend className="block text-xs font-semibold text-gray-600 mb-1">{t('agentPanels.categoriesLabel')}</legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {AGENT_CATEGORIES.map((c) => (
+            <label key={c} className="inline-flex items-center gap-1 text-sm">
+              <input
+                type="checkbox"
+                disabled={isDisabled}
+                checked={categories.includes(c)}
+                onChange={(e) =>
+                  setCategories((prev) => (e.target.checked ? [...prev, c] : prev.filter((x) => x !== c)))
+                }
+              />
+              {t(AGENT_CATEGORY_LABEL_KEYS[c])}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <button onClick={save} disabled={isDisabled} className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50">
         {t('agentPanels.savePersona')}
       </button>
@@ -397,6 +420,22 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   // starts one, and by events - which also arrive for a job started in another
   // tab, since the backend publishes to the user's personal channel.
   const [liveJobs, setLiveJobs] = useState<Record<string, LiveCrawlJob>>({});
+  // Jobs the operator asked to stop; the line stays until the crawler confirms.
+  const [stoppingJobs, setStoppingJobs] = useState<Set<string>>(new Set());
+  const stopJob = async (jobId: string) => {
+    setStoppingJobs((prev) => new Set(prev).add(jobId));
+    try {
+      await httpCancelSiteCrawlJob(appId, jobId);
+    } catch (e) {
+      setStoppingJobs((prev) => {
+        const next = new Set(prev);
+        next.delete(jobId);
+        return next;
+      });
+      const err = e as { response?: { data?: { error?: string } }; message?: string };
+      toast.error(`${t('agentPanels.failedPrefix')} ${err.response?.data?.error || err.message || ''}`);
+    }
+  };
 
   // If the parent's scope wasn't usable (e.g. agent has no originAppId), fall back to
   // the user's first owned app so the UI is functional out of the box.
@@ -530,10 +569,22 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   // while the socket is down is reported exactly the same way.
   const finishJob = (
     jobId: string,
-    outcome: { kind: 'crawl' | 'reindex'; url: string; savedPages: number; failed: boolean; error?: string | null; truncated?: boolean; truncatedReason?: string | null; reconcile?: boolean }
+    outcome: { kind: 'crawl' | 'reindex'; url: string; savedPages: number; failed: boolean; cancelled?: boolean; error?: string | null; truncated?: boolean; truncatedReason?: string | null; reconcile?: boolean }
   ) => {
     forgetJob(jobId);
-    if (outcome.failed) {
+    setStoppingJobs((prev) => {
+      if (!prev.has(jobId)) return prev;
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
+    if (outcome.cancelled) {
+      toast.info(
+        t('agentPanels.crawlStopped')
+          .replace('{n}', String(outcome.savedPages))
+          .replace('{url}', outcome.url)
+      );
+    } else if (outcome.failed) {
       toast.error(
         t(outcome.kind === 'reindex' ? 'agentPanels.reindexFailedEvent' : 'agentPanels.crawlFailedEvent')
           .replace('{url}', outcome.url)
@@ -581,6 +632,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         url: ev.url,
         savedPages: ev.savedPages,
         failed: ev.type === 'site_crawl_failed',
+        cancelled: ev.type === 'site_crawl_cancelled',
         error: ev.error,
         truncated: ev.truncated,
         truncatedReason: ev.truncatedReason,
@@ -604,12 +656,13 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           const r = await httpGetSiteCrawlJob(appId, jobId);
           const job = r.data?.result;
           if (!job) continue;
-          if (job.status === 'completed' || job.status === 'failed') {
+          if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
             finishJob(jobId, {
               kind: job.kind === 'reindex' ? 'reindex' : 'crawl',
               url: job.url,
               savedPages: Number(job.savedPages) || 0,
               failed: job.status === 'failed',
+              cancelled: job.status === 'cancelled',
               error: job.error,
               truncated: Boolean(job.truncated),
               truncatedReason: job.truncatedReason,
@@ -778,6 +831,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                     ? t('agentPanels.reindexRunning')
                     : t('agentPanels.crawlRunning').replace('{n}', String(job.savedPages))}
                 </span>
+                {!isDisabled && (
+                  <button
+                    onClick={() => stopJob(jobId)}
+                    disabled={stoppingJobs.has(jobId)}
+                    className="ml-auto text-red-600 hover:underline disabled:opacity-50 disabled:no-underline whitespace-nowrap"
+                  >
+                    {stoppingJobs.has(jobId) ? t('agentPanels.stoppingCrawl') : t('agentPanels.stopCrawl')}
+                  </button>
+                )}
               </div>
             );
           })}

@@ -21,6 +21,7 @@ import { toast } from 'react-toastify';
 import { IconAdd } from '../components/Icons/IconAdd';
 import {
   actionCloneAgent,
+  actionLoadOwnedApps,
   actionCreateAgent,
   actionDeleteAgent,
   actionListAgents,
@@ -28,6 +29,7 @@ import {
 import { httpExportAgent, httpImportAgent, saveBlobAs } from '../http';
 import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { useTranslation } from '../i18n/useTranslation';
+import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../lib/agentCategories';
 import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
@@ -70,18 +72,18 @@ export default function AdminAgents() {
   const [showCreate, setShowCreate] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [filter, setFilter] = useState('');
+  const [category, setCategory] = useState<AgentCategory | ''>('');
+  const [cloneTarget, setCloneTarget] = useState<ModelAgent | null>(null);
 
   // Per-section "show all" toggles so each cohort paginates independently.
   const [showAllMine, setShowAllMine] = useState(false);
   const [showAllPublic, setShowAllPublic] = useState(false);
   const [showAllOtherPrivate, setShowAllOtherPrivate] = useState(false);
 
-  // Section visibility checkboxes. "Mine" and "Public" default on. The
+  // "Mine" and "Public" always show, in that order. The
   // superadmin "Private (other tenants)" cohort is gated on isSuperReadAdmin
   // and defaults off so superadmins don't accidentally see other tenants'
   // private agents on every page load.
-  const [showMine, setShowMine] = useState(true);
-  const [showPublic, setShowPublic] = useState(true);
   const [showOtherPrivate, setShowOtherPrivate] = useState(false);
 
   // Fetch the "own + public" cohort (backend default). The store holds the
@@ -118,6 +120,7 @@ export default function AdminAgents() {
   }, [apps]);
 
   function matchesFilter(a: ModelAgent): boolean {
+    if (category && !(a.categories || []).includes(category)) return false;
     const q = filter.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -135,17 +138,17 @@ export default function AdminAgents() {
   const mine = useMemo(
     () => agents.filter((a) => a.ownerId === currentUserId).filter(matchesFilter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [agents, currentUserId, filter, appNameById]
+    [agents, currentUserId, filter, category, appNameById]
   );
   const publicOthers = useMemo(
     () => agents.filter((a) => a.visibility === 'public' && a.ownerId !== currentUserId).filter(matchesFilter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [agents, currentUserId, filter, appNameById]
+    [agents, currentUserId, filter, category, appNameById]
   );
   const privateOthers = useMemo(
     () => otherPrivate.filter(matchesFilter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [otherPrivate, filter, appNameById]
+    [otherPrivate, filter, category, appNameById]
   );
 
   function onDelete(a: ModelAgent) {
@@ -160,14 +163,8 @@ export default function AdminAgents() {
     };
   }
 
-  async function onClone(a: ModelAgent) {
-    try {
-      await actionCloneAgent(a.id, {});
-      toast.success(`${t('adminAgents.clonedToastPrefix')} "${a.displayName}" ${t('adminAgents.clonedToastSuffix')}`);
-      await actionListAgents({}); // refresh the store so the clone appears in My
-    } catch (e: any) {
-      toast.error(`${t('adminAgents.cloneFailedPrefix')} ${e?.response?.data?.error || e.message}`);
-    }
+  function onClone(a: ModelAgent) {
+    setCloneTarget(a);
   }
 
   async function onExport(a: ModelAgent, format: 'json' | 'zip') {
@@ -271,29 +268,38 @@ export default function AdminAgents() {
           {t('adminAgents.description')}
         </p>
 
-      {/* Section visibility checkboxes. Each toggles a band of the list. */}
-      <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
-        <span className="text-gray-500">{t('adminAgents.showLabel')}</span>
-        <label className="inline-flex items-center gap-1 cursor-pointer">
-          <input type="checkbox" checked={showMine} onChange={(e) => setShowMine(e.target.checked)} />
-          <span>{t('adminAgents.myAgents')}</span>
-        </label>
-        <label className="inline-flex items-center gap-1 cursor-pointer">
-          <input type="checkbox" checked={showPublic} onChange={(e) => setShowPublic(e.target.checked)} />
-          <span>{t('adminAgents.publicAgents')}</span>
-        </label>
-        {isSuperReadAdmin && (
+      {/* Superadmins can also audit other tenants' private agents. Everyone
+          else sees their own agents first, then the public ones. */}
+      {isSuperReadAdmin && (
+        <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
           <label className="inline-flex items-center gap-1 cursor-pointer">
             <input type="checkbox" checked={showOtherPrivate} onChange={(e) => setShowOtherPrivate(e.target.checked)} />
             <span className="text-purple-700 dark:text-purple-300">{t('adminAgents.privateOtherTenants')}</span>
             <span className="text-[10px] text-purple-700/70 dark:text-purple-300/70">{t('adminAgents.superadminBadge')}</span>
           </label>
-        )}
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 mb-4 flex-wrap text-sm" role="group" aria-label={t('adminAgents.categoryLabel')}>
+        <span className="text-gray-500">{t('adminAgents.categoryLabel')}</span>
+        {(['', ...AGENT_CATEGORIES] as const).map((c) => (
+          <button
+            key={c || 'all'}
+            onClick={() => setCategory(c)}
+            aria-pressed={category === c}
+            className={classNames(
+              'text-xs rounded-full px-3 py-1 border',
+              category === c ? 'border-brand-500 bg-brand-50 text-brand-500' : 'border-gray-200 hover:bg-gray-100'
+            )}
+          >
+            {c ? t(AGENT_CATEGORY_LABEL_KEYS[c]) : t('adminAgents.categoryAll')}
+          </button>
+        ))}
       </div>
 
       {loading && agents.length === 0 && <div className="text-gray-500">{t('adminAgents.loading')}</div>}
 
-      {showMine && renderSection(
+      {renderSection(
         t('adminAgents.myAgents'),
         t('adminAgents.myAgentsDesc'),
         mine,
@@ -302,9 +308,9 @@ export default function AdminAgents() {
         'owned'
       )}
 
-      {showMine && showPublic && <hr className="my-6 border-gray-200" />}
+      <hr className="my-6 border-gray-200" />
 
-      {showPublic && renderSection(
+      {renderSection(
         t('adminAgents.publicAgentsTitle'),
         t('adminAgents.publicAgentsDesc'),
         publicOthers,
@@ -313,7 +319,7 @@ export default function AdminAgents() {
         'public'
       )}
 
-      {showOtherPrivate && (showMine || showPublic) && <hr className="my-6 border-gray-200" />}
+      {isSuperReadAdmin && showOtherPrivate && <hr className="my-6 border-gray-200" />}
 
       {isSuperReadAdmin && showOtherPrivate && renderSection(
         t('adminAgents.privateOtherTenants'),
@@ -322,6 +328,10 @@ export default function AdminAgents() {
         showAllOtherPrivate,
         setShowAllOtherPrivate,
         'private-other'
+      )}
+
+      {cloneTarget && (
+        <CloneAgentModal agent={cloneTarget} onClose={() => setCloneTarget(null)} />
       )}
 
       {showImport && (
@@ -385,6 +395,16 @@ const AgentCard: React.FC<{
         </span>
       </div>
 
+      {(agent.categories || []).some(isAgentCategory) && (
+        <div className="flex flex-wrap gap-1">
+          {(agent.categories || []).filter(isAgentCategory).map((c) => (
+            <span key={c} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+              {t(AGENT_CATEGORY_LABEL_KEYS[c])}
+            </span>
+          ))}
+        </div>
+      )}
+
       <dl className="text-xs text-gray-600 grid grid-cols-2 gap-x-2 gap-y-0.5">
         <div>
           <dt className="inline text-gray-400">{t('adminAgents.updatedLabel')}</dt>
@@ -443,6 +463,105 @@ const AgentCard: React.FC<{
             </button>
           </>
         )}
+      </div>
+    </div>
+  );
+};
+
+// Clone a public agent into "My agents". When the source has indexed knowledge
+// (a persona's works, a support agent's site) the clone can take it along: the
+// pages, documents and embeddings are copied into one of the user's apps,
+// without re-indexing.
+const CloneAgentModal: React.FC<{ agent: ModelAgent; onClose: () => void }> = ({ agent, onClose }) => {
+  const { t } = useTranslation();
+  const ownedApps = useAppStore((s) => s.ownedApps);
+  const hasKnowledge = (agent.totalSiteSourceSize || 0) > 0;
+  const [displayName, setDisplayName] = useState(agent.displayName || '');
+  const [includeKnowledge, setIncludeKnowledge] = useState(hasKnowledge);
+  const [ownerAppId, setOwnerAppId] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!ownedApps.length) actionLoadOwnedApps().catch(() => {});
+  }, [ownedApps.length]);
+  useEffect(() => {
+    if (!ownerAppId && ownedApps.length) setOwnerAppId(ownedApps[0]._id);
+  }, [ownedApps, ownerAppId]);
+
+  const needsApp = hasKnowledge && includeKnowledge;
+  const canSubmit = !busy && displayName.trim().length > 0 && (!needsApp || !!ownerAppId);
+
+  async function submit() {
+    setBusy(true);
+    try {
+      const { knowledge } = await actionCloneAgent(agent.id, {
+        displayName: displayName.trim(),
+        ...(needsApp ? { includeKnowledge: true, ownerAppId } : {}),
+      });
+      toast.success(`${t('adminAgents.clonedToastPrefix')} "${agent.displayName}" ${t('adminAgents.clonedToastSuffix')}`);
+      if (knowledge?.copied) {
+        toast.info(
+          t('adminAgents.cloneKnowledgeCopied')
+            .replace('{sites}', String(knowledge.sites ?? 0))
+            .replace('{docs}', String(knowledge.docs ?? 0))
+        );
+      } else if (knowledge) {
+        toast.warn(t('adminAgents.cloneKnowledgeNotCopied').replace('{reason}', knowledge.reason || ''));
+      }
+      await actionListAgents({}); // refresh the store so the clone appears in My agents
+      onClose();
+    } catch (e: any) {
+      toast.error(`${t('adminAgents.cloneFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" role="dialog" aria-label={t('adminAgents.cloneModalTitle')}>
+      <div className="bg-white rounded-xl p-5 w-[480px] max-w-[90%] space-y-3">
+        <h3 className="text-lg font-semibold">{t('adminAgents.cloneModalTitle')}</h3>
+        <label className="block">
+          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.cloneNameLabel')}</span>
+          <input className="border rounded px-2 py-1 w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        </label>
+        {hasKnowledge && (
+          <div className="space-y-2">
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" className="mt-1" checked={includeKnowledge} onChange={(e) => setIncludeKnowledge(e.target.checked)} />
+              <span>
+                {t('adminAgents.cloneIncludeKnowledge').replace('{size}', fmtBytes(agent.totalSiteSourceSize))}
+                <span className="block text-xs text-gray-500">{t('adminAgents.cloneIncludeKnowledgeHint')}</span>
+              </span>
+            </label>
+            {includeKnowledge && (
+              ownedApps.length ? (
+                <label className="block">
+                  <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.cloneHomeAppLabel')}</span>
+                  <select className="border rounded px-2 py-1 w-full" value={ownerAppId} onChange={(e) => setOwnerAppId(e.target.value)}>
+                    {ownedApps.map((a) => (
+                      <option key={a._id} value={a._id}>{a.displayName}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <div className="text-xs text-amber-700">{t('adminAgents.cloneNoAppHint')}</div>
+              )
+            )}
+          </div>
+        )}
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={onClose} className="border rounded px-4 py-2 text-sm hover:bg-gray-100">
+            {t('adminAgents.cloneCancel')}
+          </button>
+          <button
+            onClick={submit}
+            disabled={!canSubmit}
+            className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 text-sm disabled:opacity-50"
+          >
+            {t('adminAgents.cloneSubmit')}
+          </button>
+        </div>
       </div>
     </div>
   );
