@@ -199,7 +199,9 @@ export default function AgentSettings() {
   if (!agent) return <div className="p-4 text-gray-500">{t('agentSettings.agentNotFound')}</div>;
 
   return (
-    <div className="h-full rounded-2xl bg-white p-4 grid grid-rows-[auto,1fr] gap-y-4 overflow-hidden">
+    // The read-only notice is a third row; without its own `auto` track it took
+    // the stretching one and filled a third of the page.
+    <div className={classNames('h-full rounded-2xl bg-white p-4 grid gap-y-4 overflow-hidden', readOnly ? 'grid-rows-[auto,auto,1fr]' : 'grid-rows-[auto,1fr]')}>
       <Header
         agent={agent}
         defaultBotInstance={defaultBotInstance}
