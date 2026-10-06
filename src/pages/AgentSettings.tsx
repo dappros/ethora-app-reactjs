@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 import {
   actionGetAgent,
   actionListAgents,
+  actionLoadOwnedApps,
   actionSetAgentVisibility,
   actionSetBotInstanceStatus,
 } from '../actions';
@@ -88,7 +89,10 @@ export default function AgentSettings() {
   const [agent, setAgent] = useState<ModelAgent | null>(null);
   const [instances, setInstances] = useState<(ModelBotInstance & { appName?: string })[]>([]);
   const [loading, setLoading] = useState(false);
-  const apps = useAppStore((s) => s.apps);
+  // Every App the user owns, not the `apps` slot: that one holds whichever
+  // page the Apps list showed last and is empty when this page is opened
+  // directly, which left Web Index / Docs Index with no App to ingest into.
+  const apps = useAppStore((s) => s.ownedApps);
 
   // Re-fetchable so the header Start/Stop and the Test message modal can refresh
   // the displayed status without forcing a full page reload.
@@ -110,9 +114,30 @@ export default function AgentSettings() {
       .catch((e) => toast.error(`${t('agentSettings.loadAgentFailedPrefix')} ${e?.response?.data?.error || e.message}`))
       .finally(() => setLoading(false));
     reloadInstances();
-    // Load the user's apps so the Web/Docs Index panels can resolve their scoped App.
     actionListAgents({ visibility: 'mine' }).catch(() => {});
+    // Load the user's apps so the Web/Docs Index panels can resolve their scoped App.
+    actionLoadOwnedApps().catch(() => {});
   }, [agentId, reloadInstances]);
+
+  // The panels save through actions that upsert the agent into the store, not
+  // into this page's copy. Follow the store, or a panel remounted by a tab
+  // switch reads the pre-save value (e.g. the Context prompt reverting to the
+  // default). The update response leaves the enrichment fields null, so keep
+  // the ones the initial GET filled in.
+  const storeAgent = useAppStore((s) => (agent ? s.agents.find((a) => a.id === agent.id) : undefined));
+  useEffect(() => {
+    if (!storeAgent) return;
+    setAgent((prev) =>
+      prev && prev.id === storeAgent.id
+        ? {
+            ...prev,
+            ...storeAgent,
+            originAppName: storeAgent.originAppName ?? prev.originAppName,
+            botInstancesCount: storeAgent.botInstancesCount ?? prev.botInstancesCount,
+          }
+        : prev,
+    );
+  }, [storeAgent]);
 
   // (The agent-header "Test message" button moved to per-room buttons inside
   // ChatsIndexPanel so the test always targets one specific room. No top-level

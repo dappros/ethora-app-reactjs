@@ -148,6 +148,21 @@ after send. Verdict line is `PASS` / `FAIL` with the individual flags
 `historyRestored`). Env: `QA_API`, `WIDGET_URL`, `APP_ID`,
 `TEST_MESSAGE`, `REPLY_WAIT_MS`, `SETTLE_MS`.
 
+### `agent-settings-tabs-probe.mjs`
+
+End-to-end pass over every Agent Settings tab on a live stack. Creates a
+throwaway agent scoped to an App the account owns, then edits and saves
+Persona, Context, SOUL.MD, Heartbeat, Flows (template + Validate) and
+Visibility, switching away and back after each save to check the value is
+still shown. Crawls `CRAWL_URL` (default `https://example.com`) in Web
+Index, uploads a small text file in Docs Index, opens Chats Index, then
+reloads and re-reads the agent from the API to confirm the server kept
+every value. Deletes the agent at the end (`KEEP_AGENT=1` keeps it).
+One `[ok]` / `[fail]` line per check; verdict `TABS_OK` / `TABS_FAIL`.
+Env: `QA_BASE`, `QA_API`, `APP_ID`, `TEST_EMAIL`, `TEST_PASSWORD`,
+`SCOPE_APP_ID`, `CRAWL_URL`, `KEEP_AGENT`. The mocked CI counterpart is
+`tests/e2e/agent-settings.spec.ts`.
+
 ## Reusable helpers (`tests/diagnostics/lib/`)
 
 These are designed for other probes to import as-needed. Browser-side
