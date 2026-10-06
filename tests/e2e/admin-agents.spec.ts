@@ -194,3 +194,19 @@ test('a running crawl can be stopped from the Web Index', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Stopping...' })).toBeDisabled();
   expect(writes.some((w) => w.method === 'POST' && w.path === `/v2/apps/e2eapp000000000000000001/sources/site-crawl-jobs/${JOB_ID}/cancel`)).toBe(true);
 });
+
+test('a new agent can start from a public template and lands on its Web Index', async ({ page }) => {
+  const { clones } = await fakeBackend(page);
+  await page.goto('/app/admin/agents');
+  await page.getByRole('button', { name: /New Agent/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'Create new Agent' });
+  // Customer-support templates are listed first.
+  const options = dialog.locator('fieldset label');
+  await expect(options.nth(0)).toContainText('Blank agent');
+  await expect(options.nth(1)).toContainText('Support Agent');
+  await options.nth(1).locator('input[type="radio"]').check();
+  await expect(dialog.getByLabel('Display name', { exact: true })).toHaveValue('Support Agent');
+  await dialog.getByRole('button', { name: 'Create', exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/admin\/agents\/a-clone\/settings\?tab=Web(%20|\+)Index/);
+  expect(clones).toEqual([{ id: 'a-support', body: { displayName: 'Support Agent', ownerAppId: OWNED_APP._id } }]);
+});

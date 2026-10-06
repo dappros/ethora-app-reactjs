@@ -79,6 +79,30 @@ async function fakeBackend(page: Page) {
         agent.visibility = (body as { visibility: string }).visibility;
         return json(route, { ok: true, agent: bare(agent) });
       }
+      if (pathname === `/v2/agents/${AGENT_ID}/try` && method === 'POST') {
+        const { text, history } = body as { text: string; history: unknown[] };
+        return json(route, {
+          ok: true,
+          reply: `Answer ${history.length / 2 + 1} to: ${text}`,
+          sources: ['https://example.com/pricing'],
+          ragDocsUsed: 2,
+          model: 'test',
+        });
+      }
+      if (pathname === `/v2/agents/${AGENT_ID}/knowledge` && method === 'GET') {
+        return json(route, {
+          ok: true,
+          pages: 3,
+          docs: 1,
+          chunks: 40,
+          missing: { pages: 2, docs: 0, examples: ['https://example.com/a', 'https://example.com/b'] },
+          lastIndexedAt: '2026-10-05T10:00:00.000Z',
+          indexAvailable: true,
+        });
+      }
+      if (pathname === `/v2/agents/${AGENT_ID}/knowledge/rebuild` && method === 'POST') {
+        return json(route, { ok: true, pages: 2, docs: 0 }, 202);
+      }
       // Everything else the shell asks for on load (license, stats, sources
       // lists, ...) gets an empty success so nothing reaches a real server.
       return json(route, { ok: true, items: [], total: 0 });
@@ -132,7 +156,7 @@ async function openTab(page: Page, tab: string) {
 }
 
 async function switchAwayAndBack(page: Page, tab: string) {
-  const other = tab === 'Persona' ? 'Context' : 'Persona';
+  const other = tab === 'Persona' ? 'Instructions' : 'Persona';
   await page.getByRole('tab', { name: other, exact: true }).click();
   await page.getByRole('tab', { name: tab, exact: true }).click();
 }
@@ -150,28 +174,28 @@ test.describe('Agent Settings keeps saved values across tab switches', () => {
     await expect(page.getByLabel('Bio')).toHaveValue('A new bio');
   });
 
-  test('Context', async ({ page }) => {
+  test('Instructions', async ({ page }) => {
     const { writes } = await fakeBackend(page);
-    await openTab(page, 'Context');
+    await openTab(page, 'Instructions');
     const prompt = page.locator('textarea').first();
     await expect(prompt).toHaveValue('You are a helpful assistant.');
     await prompt.fill('You answer questions about the e2e suite.');
-    await page.getByRole('button', { name: 'Save context' }).click();
-    await expect(page.getByText('Context saved')).toBeVisible();
+    await page.getByRole('button', { name: 'Save instructions' }).click();
+    await expect(page.getByText('Instructions saved')).toBeVisible();
     expect(writes).toContainEqual(
       expect.objectContaining({ method: 'PUT', body: { prompt: 'You answer questions about the e2e suite.' } }),
     );
-    await switchAwayAndBack(page, 'Context');
+    await switchAwayAndBack(page, 'Instructions');
     await expect(page.locator('textarea').first()).toHaveValue('You answer questions about the e2e suite.');
   });
 
-  test('SOUL.MD', async ({ page }) => {
+  test('Memory', async ({ page }) => {
     await fakeBackend(page);
-    await openTab(page, 'SOUL.MD');
+    await openTab(page, 'Memory');
     await page.locator('textarea').first().fill('# Soul\nCalm and brief.');
-    await page.getByRole('button', { name: 'Save SOUL.MD' }).click();
-    await expect(page.getByText('SOUL.MD saved')).toBeVisible();
-    await switchAwayAndBack(page, 'SOUL.MD');
+    await page.getByRole('button', { name: 'Save memory' }).click();
+    await expect(page.getByText('Memory saved')).toBeVisible();
+    await switchAwayAndBack(page, 'Memory');
     await expect(page.locator('textarea').first()).toHaveValue('# Soul\nCalm and brief.');
   });
 
@@ -228,4 +252,51 @@ test.describe('Agent Settings opened by URL', () => {
       }
     });
   }
+});
+
+test.describe('Agent Settings: renamed tabs, Try it, knowledge health', () => {
+  test('old ?tab= names still open the renamed tabs', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Context');
+    await expect(page.getByRole('tab', { name: 'Instructions', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await openTab(page, 'SOUL.MD');
+    await expect(page.getByRole('tab', { name: 'Memory', exact: true })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('Try it: a test conversation keeps its history and shows the sources used', async ({ page }) => {
+    const { writes } = await fakeBackend(page);
+    await openTab(page, 'Try it');
+    const box = page.getByLabel('Type a message');
+    await box.fill('Do you ship to Canada?');
+    await box.press('Enter');
+    await expect(page.getByText('Answer 1 to: Do you ship to Canada?')).toBeVisible();
+    await expect(page.getByText('Answered with 2 knowledge excerpts')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'https://example.com/pricing' })).toBeVisible();
+
+    await box.fill('and the price?');
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await expect(page.getByText('Answer 2 to: and the price?')).toBeVisible();
+    const tries = writes.filter((w) => w.path.endsWith('/try'));
+    expect(tries[1].body).toEqual({
+      text: 'and the price?',
+      history: [
+        { role: 'user', content: 'Do you ship to Canada?' },
+        { role: 'assistant', content: 'Answer 1 to: Do you ship to Canada?' },
+      ],
+    });
+
+    await page.getByRole('button', { name: 'New conversation' }).click();
+    await expect(page.getByText('Answer 1 to: Do you ship to Canada?')).toHaveCount(0);
+  });
+
+  test('Web Index shows pages that are stored but not searchable, and rebuilds them', async ({ page }) => {
+    const { writes } = await fakeBackend(page);
+    await openTab(page, 'Web Index');
+    const health = page.getByTestId('knowledge-health');
+    await expect(health).toContainText('Searchable knowledge: 3 pages, 1 documents, 40 chunks');
+    await expect(health).toContainText('2 pages and 0 documents are stored but not searchable');
+    await health.getByRole('button', { name: 'Rebuild index' }).click();
+    await expect(page.getByText('Rebuilding the index for 2 items.')).toBeVisible();
+    expect(writes.some((w) => w.path.endsWith('/knowledge/rebuild') && JSON.stringify(w.body) === '{"onlyMissing":true}')).toBe(true);
+  });
 });

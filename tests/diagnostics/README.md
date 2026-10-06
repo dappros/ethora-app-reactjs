@@ -152,7 +152,7 @@ after send. Verdict line is `PASS` / `FAIL` with the individual flags
 
 End-to-end pass over every Agent Settings tab on a live stack. Creates a
 throwaway agent scoped to an App the account owns, then edits and saves
-Persona, Context, SOUL.MD, Heartbeat, Flows (template + Validate) and
+Persona, Instructions, Memory, Heartbeat, Flows (template + Validate) and
 Visibility, switching away and back after each save to check the value is
 still shown. Crawls `CRAWL_URL` (default `https://example.com`) in Web
 Index, uploads a small text file in Docs Index, opens Chats Index, then
