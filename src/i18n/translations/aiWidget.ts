@@ -286,6 +286,7 @@ export const aiWidget = {
     'agentPanels.knowledgeMissing': "{pages} pages and {docs} documents are stored but not searchable, so the agent can't answer from them.",
     'agentPanels.rebuildIndex': 'Rebuild index',
     'agentPanels.rebuildQueued': 'Rebuilding the index for {n} items. This can take a minute.',
+    'agentPanels.rebuildRunning': 'Rebuilding the index... large sites and books can take a few minutes.',
     'agentPanels.heartbeatDescription':
       'Heartbeat lets the agent post on its own into every chat it is a member of, without waiting to be spoken to. Schedule formats: \'every 30m\' or \'2h\' (fixed interval), \'daily 09:00\' (UTC), \'idle 15m\' (nudge a room after 15 minutes of silence, once per silence), or a 5-field cron expression in UTC. The heartbeat prompt tells the agent what to do on each beat; it may stay quiet when it has nothing to add.',
     'agentPanels.enabledLabel': 'Enabled',
@@ -657,6 +658,7 @@ export const aiWidget = {
     'agentPanels.knowledgeMissing': "{pages} pages et {docs} documents sont enregistrés mais non consultables : l'agent ne peut pas s'en servir pour répondre.",
     'agentPanels.rebuildIndex': "Reconstruire l'index",
     'agentPanels.rebuildQueued': "Reconstruction de l'index pour {n} éléments. Cela peut prendre une minute.",
+    'agentPanels.rebuildRunning': "Reconstruction de l'index... les grands sites et les livres peuvent prendre quelques minutes.",
     'agentPanels.heartbeatDescription':
       'Le heartbeat permet à l\'agent de publier de lui-même dans chaque salon dont il est membre, sans attendre qu\'on lui parle. Formats de planification : « every 30m » ou « 2h » (intervalle fixe), « daily 09:00 » (UTC), « idle 15m » (relance un salon après 15 minutes de silence, une fois par silence) ou une expression cron à 5 champs en UTC. Le prompt du heartbeat indique à l\'agent quoi faire à chaque battement ; il peut rester silencieux s\'il n\'a rien à ajouter.',
     'agentPanels.enabledLabel': 'Activé',
@@ -1031,6 +1033,7 @@ export const aiWidget = {
     'agentPanels.knowledgeMissing': '{pages} páginas y {docs} documentos están guardados pero no se pueden consultar, así que el agente no puede responder con ellos.',
     'agentPanels.rebuildIndex': 'Reconstruir índice',
     'agentPanels.rebuildQueued': 'Reconstruyendo el índice de {n} elementos. Puede tardar un minuto.',
+    'agentPanels.rebuildRunning': 'Reconstruyendo el índice... los sitios grandes y los libros pueden tardar unos minutos.',
     'agentPanels.heartbeatDescription':
       'El heartbeat permite que el agente publique por su cuenta en cada sala de la que es miembro, sin esperar a que le hablen. Formatos de programación: \'every 30m\' o \'2h\' (intervalo fijo), \'daily 09:00\' (UTC), \'idle 15m\' (reactiva una sala tras 15 minutos de silencio, una vez por silencio) o una expresión cron de 5 campos en UTC. El prompt del heartbeat indica al agente qué hacer en cada latido; puede quedarse en silencio si no tiene nada que aportar.',
     'agentPanels.enabledLabel': 'Habilitado',

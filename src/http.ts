@@ -934,6 +934,8 @@ export type AgentKnowledgeHealth = {
   missing: { pages: number; docs: number; examples: string[] };
   lastIndexedAt: string | null;
   indexAvailable: boolean;
+  // A rebuild is running: pages fill in as it goes.
+  rebuilding?: boolean;
 };
 
 export function httpGetAgentKnowledge(idOrAddress: string) {

@@ -29,6 +29,15 @@ export const KnowledgeHealth: React.FC<{ agentId: string; refreshKey?: number | 
     load();
   }, [load, refreshKey]);
 
+  // While a rebuild runs, look again every few seconds so the counts climb
+  // and the panel settles by itself when it finishes.
+  const rebuilding = Boolean(health?.rebuilding);
+  useEffect(() => {
+    if (!rebuilding) return;
+    const timer = window.setInterval(load, 10000);
+    return () => window.clearInterval(timer);
+  }, [rebuilding, load]);
+
   if (!health || health.pages + health.docs === 0) return null;
 
   const missing = health.missing.pages + health.missing.docs;
@@ -37,9 +46,7 @@ export const KnowledgeHealth: React.FC<{ agentId: string; refreshKey?: number | 
     try {
       const r = await httpRebuildAgentKnowledge(agentId, true);
       toast.info(t('agentPanels.rebuildQueued').replace('{n}', String((r.data.pages || 0) + (r.data.docs || 0))));
-      // Embedding runs in the background; look again once it has had a moment.
-      window.setTimeout(load, 8000);
-      window.setTimeout(load, 30000);
+      await load();
     } catch (e) {
       const err = e as { response?: { data?: { error?: string } }; message?: string };
       toast.error(`${t('agentPanels.failedPrefix')} ${err.response?.data?.error || err.message || ''}`);
@@ -60,7 +67,13 @@ export const KnowledgeHealth: React.FC<{ agentId: string; refreshKey?: number | 
         )}
       </div>
       {!health.indexAvailable && <div className="text-gray-500">{t('agentPanels.knowledgeIndexUnavailable')}</div>}
-      {health.indexAvailable && missing > 0 && (
+      {health.rebuilding && (
+        <div className="flex items-center gap-2 text-brand-600">
+          <span className="inline-block h-2 w-2 rounded-full bg-brand-500 animate-pulse" aria-hidden />
+          {t('agentPanels.rebuildRunning')}
+        </div>
+      )}
+      {health.indexAvailable && !health.rebuilding && missing > 0 && (
         <div className="rounded border border-amber-200 bg-amber-50 p-2 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200 space-y-1">
           <div>
             {t('agentPanels.knowledgeMissing')
