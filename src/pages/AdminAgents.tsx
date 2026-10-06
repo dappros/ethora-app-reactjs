@@ -80,12 +80,10 @@ export default function AdminAgents() {
   const [showAllPublic, setShowAllPublic] = useState(false);
   const [showAllOtherPrivate, setShowAllOtherPrivate] = useState(false);
 
-  // Section visibility checkboxes. "Mine" and "Public" default on. The
+  // "Mine" and "Public" always show, in that order. The
   // superadmin "Private (other tenants)" cohort is gated on isSuperReadAdmin
   // and defaults off so superadmins don't accidentally see other tenants'
   // private agents on every page load.
-  const [showMine, setShowMine] = useState(true);
-  const [showPublic, setShowPublic] = useState(true);
   const [showOtherPrivate, setShowOtherPrivate] = useState(false);
 
   // Fetch the "own + public" cohort (backend default). The store holds the
@@ -270,25 +268,17 @@ export default function AdminAgents() {
           {t('adminAgents.description')}
         </p>
 
-      {/* Section visibility checkboxes. Each toggles a band of the list. */}
-      <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
-        <span className="text-gray-500">{t('adminAgents.showLabel')}</span>
-        <label className="inline-flex items-center gap-1 cursor-pointer">
-          <input type="checkbox" checked={showMine} onChange={(e) => setShowMine(e.target.checked)} />
-          <span>{t('adminAgents.myAgents')}</span>
-        </label>
-        <label className="inline-flex items-center gap-1 cursor-pointer">
-          <input type="checkbox" checked={showPublic} onChange={(e) => setShowPublic(e.target.checked)} />
-          <span>{t('adminAgents.publicAgents')}</span>
-        </label>
-        {isSuperReadAdmin && (
+      {/* Superadmins can also audit other tenants' private agents. Everyone
+          else sees their own agents first, then the public ones. */}
+      {isSuperReadAdmin && (
+        <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
           <label className="inline-flex items-center gap-1 cursor-pointer">
             <input type="checkbox" checked={showOtherPrivate} onChange={(e) => setShowOtherPrivate(e.target.checked)} />
             <span className="text-purple-700 dark:text-purple-300">{t('adminAgents.privateOtherTenants')}</span>
             <span className="text-[10px] text-purple-700/70 dark:text-purple-300/70">{t('adminAgents.superadminBadge')}</span>
           </label>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 mb-4 flex-wrap text-sm" role="group" aria-label={t('adminAgents.categoryLabel')}>
         <span className="text-gray-500">{t('adminAgents.categoryLabel')}</span>
@@ -309,7 +299,7 @@ export default function AdminAgents() {
 
       {loading && agents.length === 0 && <div className="text-gray-500">{t('adminAgents.loading')}</div>}
 
-      {showMine && renderSection(
+      {renderSection(
         t('adminAgents.myAgents'),
         t('adminAgents.myAgentsDesc'),
         mine,
@@ -318,9 +308,9 @@ export default function AdminAgents() {
         'owned'
       )}
 
-      {showMine && showPublic && <hr className="my-6 border-gray-200" />}
+      <hr className="my-6 border-gray-200" />
 
-      {showPublic && renderSection(
+      {renderSection(
         t('adminAgents.publicAgentsTitle'),
         t('adminAgents.publicAgentsDesc'),
         publicOthers,
@@ -329,7 +319,7 @@ export default function AdminAgents() {
         'public'
       )}
 
-      {showOtherPrivate && (showMine || showPublic) && <hr className="my-6 border-gray-200" />}
+      {isSuperReadAdmin && showOtherPrivate && <hr className="my-6 border-gray-200" />}
 
       {isSuperReadAdmin && showOtherPrivate && renderSection(
         t('adminAgents.privateOtherTenants'),

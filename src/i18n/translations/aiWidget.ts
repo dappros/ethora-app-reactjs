@@ -214,6 +214,9 @@ export const aiWidget = {
     'agentPanels.crawlQueued':
       'Crawl started. Pages appear in the list below as they are indexed.',
     'agentPanels.crawlRunning': 'crawling - {n} pages indexed',
+    'agentPanels.stopCrawl': 'Stop',
+    'agentPanels.stoppingCrawl': 'Stopping...',
+    'agentPanels.crawlStopped': 'Crawl stopped: {n} pages indexed from {url}',
     'agentPanels.reindexRunning': 'reindexing...',
     'agentPanels.crawlDone': 'Crawl finished: {n} pages indexed from {url}',
     'agentPanels.reindexDone': 'Reindex finished: {url}',
@@ -565,6 +568,9 @@ export const aiWidget = {
     'agentPanels.crawlQueued':
       "Exploration lancée. Les pages apparaissent dans la liste ci-dessous au fur et à mesure de leur indexation.",
     'agentPanels.crawlRunning': 'exploration - {n} pages indexées',
+    'agentPanels.stopCrawl': 'Arrêter',
+    'agentPanels.stoppingCrawl': 'Arrêt...',
+    'agentPanels.crawlStopped': 'Exploration arrêtée : {n} pages indexées depuis {url}',
     'agentPanels.reindexRunning': 'réindexation...',
     'agentPanels.crawlDone': 'Exploration terminée : {n} pages indexées depuis {url}',
     'agentPanels.reindexDone': 'Réindexation terminée : {url}',
@@ -924,6 +930,9 @@ export const aiWidget = {
     'agentPanels.crawlQueued':
       'Rastreo iniciado. Las páginas aparecen en la lista de abajo a medida que se indexan.',
     'agentPanels.crawlRunning': 'rastreando: {n} páginas indexadas',
+    'agentPanels.stopCrawl': 'Detener',
+    'agentPanels.stoppingCrawl': 'Deteniendo...',
+    'agentPanels.crawlStopped': 'Rastreo detenido: {n} páginas indexadas de {url}',
     'agentPanels.reindexRunning': 'reindexando...',
     'agentPanels.crawlDone': 'Rastreo finalizado: {n} páginas indexadas de {url}',
     'agentPanels.reindexDone': 'Reindexación finalizada: {url}',

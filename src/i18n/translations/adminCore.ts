@@ -73,11 +73,9 @@ export const adminCore = {
     'adminAgents.privateOtherTenants': 'Private (other tenants)',
     'adminAgents.superadminBadge': 'superadmin',
     'adminAgents.loading': 'Loading...',
-    'adminAgents.myAgentsDesc':
-      'Created by you. You can edit, deploy across your Apps, change visibility, or delete.',
-    'adminAgents.publicAgentsTitle': 'Public agents (from other tenants)',
-    'adminAgents.publicAgentsDesc':
-      'Marked public by their owners on this server. Read-only, clone to your agents to customise.',
+    'adminAgents.myAgentsDesc': 'Private to your account. Manage and deploy across your Apps.',
+    'adminAgents.publicAgentsTitle': 'Public agents',
+    'adminAgents.publicAgentsDesc': 'Sample platform-wide agents. Clone into your agents to modify.',
     'adminAgents.privateOtherDesc':
       'Superadmin-only view of private agents owned by other tenants. Read-only.',
     'adminAgents.emptyOwned':
@@ -351,6 +349,10 @@ export const adminCore = {
       "Not listed publicly, but discoverable by other tenants who know the agent's address. Useful for sharing with specific partners without making it broadcast-visible.",
     'agentSettings.visibilityPublicDesc':
       'Listed for every tenant on this Ethora server. They can view the persona and clone it. Pick this only when the agent is intended to be universally useful (e.g. a generic Support Agent or a published persona for the community).',
+    'agentSettings.makePublicTitle': 'Make this agent public?',
+    'agentSettings.makePublicBody': 'Are you sure you want to make {name} available to other users of this server? It will remain yours and you can make it private again. Other users will be able to clone your agent into their accounts, including its knowledge base (indexed pages and documents) while it is public.',
+    'agentSettings.makePublicConfirm': 'Make public',
+    'agentSettings.makePublicCancel': 'Cancel',
     'agentSettings.visibilityNotEditableMain':
       "You're viewing an agent owned by another tenant. Only the owner can change its visibility.",
     'agentSettings.visibilityNotEditableCloneHint':
@@ -439,11 +441,9 @@ export const adminCore = {
     'adminAgents.privateOtherTenants': 'Privés (autres organisations)',
     'adminAgents.superadminBadge': 'super-administrateur',
     'adminAgents.loading': 'Chargement...',
-    'adminAgents.myAgentsDesc':
-      'Créés par vous. Vous pouvez les modifier, les déployer sur vos applications, changer leur visibilité ou les supprimer.',
-    'adminAgents.publicAgentsTitle': "Agents publics (d'autres organisations)",
-    'adminAgents.publicAgentsDesc':
-      'Rendus publics par leurs propriétaires sur ce serveur. Lecture seule : clonez-les dans vos agents pour les personnaliser.',
+    'adminAgents.myAgentsDesc': 'Privés à votre compte. Gérez-les et déployez-les dans vos applications.',
+    'adminAgents.publicAgentsTitle': 'Agents publics',
+    'adminAgents.publicAgentsDesc': "Exemples d'agents disponibles sur toute la plateforme. Clonez-les dans vos agents pour les modifier.",
     'adminAgents.privateOtherDesc':
       "Vue réservée aux super-administrateurs des agents privés appartenant à d'autres organisations. Lecture seule.",
     'adminAgents.emptyOwned':
@@ -717,6 +717,10 @@ export const adminCore = {
       "Non répertorié publiquement, mais accessible aux autres organisations qui connaissent l'adresse de l'agent. Utile pour le partager avec des partenaires spécifiques sans le rendre visible publiquement.",
     'agentSettings.visibilityPublicDesc':
       "Répertorié pour toutes les organisations de ce serveur Ethora. Elles peuvent consulter la personnalité de l'agent et le cloner. Ne choisissez cette option que si l'agent est destiné à être utile de façon universelle (par exemple, un agent de support générique ou une personnalité publiée pour la communauté).",
+    'agentSettings.makePublicTitle': 'Rendre cet agent public ?',
+    'agentSettings.makePublicBody': "Voulez-vous vraiment rendre {name} accessible aux autres utilisateurs de ce serveur ? Il restera le vôtre et vous pourrez le rendre privé à nouveau. Tant qu'il est public, les autres utilisateurs pourront cloner votre agent dans leur compte, y compris sa base de connaissances (pages et documents indexés).",
+    'agentSettings.makePublicConfirm': 'Rendre public',
+    'agentSettings.makePublicCancel': 'Annuler',
     'agentSettings.visibilityNotEditableMain':
       'Vous consultez un agent appartenant à une autre organisation. Seul le propriétaire peut modifier sa visibilité.',
     'agentSettings.visibilityNotEditableCloneHint':
@@ -807,11 +811,9 @@ export const adminCore = {
     'adminAgents.privateOtherTenants': 'Privados (otras organizaciones)',
     'adminAgents.superadminBadge': 'superadministrador',
     'adminAgents.loading': 'Cargando...',
-    'adminAgents.myAgentsDesc':
-      'Creados por ti. Puedes editarlos, implementarlos en tus aplicaciones, cambiar su visibilidad o eliminarlos.',
-    'adminAgents.publicAgentsTitle': 'Agentes públicos (de otras organizaciones)',
-    'adminAgents.publicAgentsDesc':
-      'Marcados como públicos por sus propietarios en este servidor. Son de solo lectura: clónalos en tus agentes para personalizarlos.',
+    'adminAgents.myAgentsDesc': 'Privados para tu cuenta. Gestiónalos y despliégalos en tus aplicaciones.',
+    'adminAgents.publicAgentsTitle': 'Agentes públicos',
+    'adminAgents.publicAgentsDesc': 'Agentes de ejemplo disponibles en toda la plataforma. Clónalos en tus agentes para modificarlos.',
     'adminAgents.privateOtherDesc':
       'Vista exclusiva para superadministradores de los agentes privados de otras organizaciones. Solo lectura.',
     'adminAgents.emptyOwned':
@@ -1083,6 +1085,10 @@ export const adminCore = {
       'No aparece en listados públicos, pero otras organizaciones que conozcan la dirección del agente pueden encontrarlo. Útil para compartirlo con socios específicos sin hacerlo visible públicamente.',
     'agentSettings.visibilityPublicDesc':
       'Listado para todas las organizaciones de este servidor Ethora. Pueden ver la personalidad del agente y clonarlo. Elige esta opción solo si el agente está pensado para ser útil de forma universal (por ejemplo, un agente de soporte genérico o una personalidad publicada para la comunidad).',
+    'agentSettings.makePublicTitle': '¿Hacer público este agente?',
+    'agentSettings.makePublicBody': '¿Seguro que quieres que {name} esté disponible para otros usuarios de este servidor? Seguirá siendo tuyo y podrás volver a hacerlo privado. Mientras sea público, otros usuarios podrán clonar tu agente en sus cuentas, incluida su base de conocimiento (páginas y documentos indexados).',
+    'agentSettings.makePublicConfirm': 'Hacer público',
+    'agentSettings.makePublicCancel': 'Cancelar',
     'agentSettings.visibilityNotEditableMain':
       'Estás viendo un agente que pertenece a otra organización. Solo el propietario puede cambiar su visibilidad.',
     'agentSettings.visibilityNotEditableCloneHint':

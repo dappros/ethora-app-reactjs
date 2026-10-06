@@ -19,7 +19,8 @@ import { useCentrifugeChannel } from './useCentrifuge';
 export type SiteCrawlEventType =
   | 'site_crawl_progress'
   | 'site_crawl_completed'
-  | 'site_crawl_failed';
+  | 'site_crawl_failed'
+  | 'site_crawl_cancelled';
 
 // One Web Index row as the event carries it - the same shape the list endpoint
 // returns, minus the markdown. This is what lets a subscriber update its table

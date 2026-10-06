@@ -1012,6 +1012,12 @@ export function httpGetSiteCrawlJob(appId: string, jobId: string) {
   return httpV2.get(`/apps/${appId}/sources/site-crawl-jobs/${jobId}`);
 }
 
+// Stop a running crawl. Pages already indexed stay; the terminal
+// `site_crawl_cancelled` event (or the job row) reports the end.
+export function httpCancelSiteCrawlJob(appId: string, jobId: string) {
+  return httpV2.post(`/apps/${appId}/sources/site-crawl-jobs/${jobId}/cancel`);
+}
+
 export function httpGetBotInstance(id: string) {
   return httpV2.get(`/bot-instances/${id}`);
 }
