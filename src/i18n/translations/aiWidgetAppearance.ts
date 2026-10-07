@@ -117,7 +117,7 @@ const en = {
     'aiWidgetAppearance.launcherSizeLabel': 'Size',
     'aiWidgetAppearance.launcherGlowLabel': 'Pulsing glow',
     'aiWidgetAppearance.cardLauncherIcon': 'Icon',
-    'aiWidgetAppearance.launcherIconHint': 'Replaces the chat icon on the button and the avatar in the header. Square images work best.',
+    'aiWidgetAppearance.launcherIconHint': "Replaces the icon on the chat button (the agent's avatar or the chat icon). The header keeps the agent's avatar. Square images work best.",
     'aiWidgetAppearance.iconUpload': 'Upload image',
     'aiWidgetAppearance.iconUploading': 'Uploading…',
     'aiWidgetAppearance.iconRemove': 'Remove',

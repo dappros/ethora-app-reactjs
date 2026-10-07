@@ -18,6 +18,9 @@ export type PreviewMode = 'launcher' | 'welcome' | 'chat';
 interface Props {
   appearance: AiWidgetAppearance;
   botName?: string;
+  // The agent's avatar: the widget shows it in the header and beside bot
+  // messages, and on the launcher when no launcher icon is set.
+  botAvatar?: string;
   mode: PreviewMode;
   onModeChange: (m: PreviewMode) => void;
 }
@@ -81,7 +84,7 @@ const ChatGlyph = ({ size }: { size: number }) => (
   </svg>
 );
 
-export function WidgetPreview({ appearance: a, botName, mode, onModeChange }: Props) {
+export function WidgetPreview({ appearance: a, botName, botAvatar, mode, onModeChange }: Props) {
   const { t } = useTranslation();
   const [stageRef, stageWidth] = useWidth<HTMLDivElement>();
   useGoogleFont(a.googleFont);
@@ -110,8 +113,10 @@ export function WidgetPreview({ appearance: a, botName, mode, onModeChange }: Pr
   const availH = STAGE_HEIGHT - BROWSER_BAR - PAD * 2;
   const scale = stageWidth ? Math.min(1, availW / popupW, availH / popupH) : 1;
 
-  const avatar = a.launcherIcon ? (
-    <img src={a.launcherIcon} alt="" className="size-full object-cover" />
+  // As in the widget (Assistant.tsx): header and message avatars are the
+  // agent's avatar or its initial; the launcher icon never appears there.
+  const avatar = botAvatar ? (
+    <img src={botAvatar} alt="" className="size-full object-cover" />
   ) : (
     title.slice(0, 1).toUpperCase()
   );
@@ -248,8 +253,12 @@ export function WidgetPreview({ appearance: a, botName, mode, onModeChange }: Pr
           } as CSSProperties
         }
       >
+        {/* Launcher: the launcher icon (padded, not cropped), else the
+            agent's avatar, else the chat glyph - the widget's own order. */}
         {a.launcherIcon ? (
-          <img src={a.launcherIcon} alt="" className="size-full object-cover" />
+          <img src={a.launcherIcon} alt="" style={{ width: '58%', height: '58%', objectFit: 'contain' }} />
+        ) : botAvatar ? (
+          <img src={botAvatar} alt="" className="size-full object-cover" />
         ) : (
           <ChatGlyph size={Math.round(size * 0.57)} />
         )}

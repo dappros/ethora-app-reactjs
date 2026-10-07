@@ -48,6 +48,7 @@ interface Props {
   brandColor?: string | null;
   // The active agent's name: what the widget's header shows when no title is set.
   botName?: string;
+  botAvatar?: string;
 }
 
 type TabId = 'content' | 'style' | 'layout' | 'launcher';
@@ -90,6 +91,7 @@ export function AssistantAppearancePanel({
   footer,
   brandColor,
   botName,
+  botAvatar,
 }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<TabId>('content');
@@ -137,7 +139,7 @@ export function AssistantAppearancePanel({
 
   const preview = (
     <div className={cn(twoColumns && 'sticky top-4')}>
-      <WidgetPreview appearance={a} botName={botName} mode={previewMode} onModeChange={setPreviewMode} />
+      <WidgetPreview appearance={a} botName={botName} botAvatar={botAvatar} mode={previewMode} onModeChange={setPreviewMode} />
     </div>
   );
 
