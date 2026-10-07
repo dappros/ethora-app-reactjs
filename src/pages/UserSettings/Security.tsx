@@ -1,6 +1,6 @@
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 //
-// Account > Security: change the own password, and enrol in / disable
+// Account > Security: change the own email and password, and enrol in / disable
 // multi-factor authentication (TOTP). Secrets and backup codes are shown
 // exactly once, in the same bordered "copy this now" box the API-keys tab
 // uses. The MFA block stays hidden when the backend does not answer the
@@ -15,6 +15,7 @@ import {
   MfaEnrolment,
   MfaStatus,
   SetPasswordProof,
+  httpChangeEmail,
   httpChangePassword,
   httpConfirmMfaEnrolment,
   httpDisableMfa,
@@ -207,6 +208,185 @@ function SetPassword({ status, reload }: { status: MfaStatus; reload: () => Prom
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Change the account's email. Same proof of identity as a password change:
+// the current password, or (accounts without one) a fresh Google sign-in or
+// an MFA code. The new address is not confirmed by a link for now.
+function ChangeEmail({ status }: { status: MfaStatus | null }) {
+  const { t } = useTranslation();
+  const currentApp = useAppStore((s) => s.currentApp);
+  const currentEmail = useAppStore((s) => s.currentUser?.email || '');
+  const doUpdateUser = useAppStore((s) => s.doUpdateUser);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const hasPassword = status ? status.hasPassword : true;
+  const trimmed = email.trim();
+  const invalid = trimmed.length > 0 && !EMAIL_RE.test(trimmed);
+  const same = trimmed.length > 0 && trimmed.toLowerCase() === currentEmail.toLowerCase();
+  const emailOk = trimmed.length > 0 && !invalid && !same && !busy;
+  const googleAvailable =
+    Boolean(status?.setPasswordMethods?.includes('reauth')) && Boolean(currentApp?.signonOptions?.includes('google'));
+  const codeAvailable = !hasPassword && Boolean(status?.enabled);
+
+  const submit = async (proof: SetPasswordProof & { currentPassword?: string }) => {
+    setBusy(true);
+    try {
+      const res = await httpChangeEmail(trimmed, proof);
+      const saved = res.data?.email || trimmed;
+      doUpdateUser({ email: saved });
+      toast.success(t('userSettingsEmailChange.toastSuccess').replace('{email}', saved));
+      setEmail('');
+      setPassword('');
+      setCode('');
+    } catch (err: unknown) {
+      const { code: c, message } = apiError(err, t('userSettingsEmailChange.toastError'));
+      toast.error(
+        c === 'WRONG_CREDENTIALS'
+          ? t('userSettingsPassword.wrongCurrent')
+          : c === 'EMAIL_IN_USE'
+            ? t('userSettingsEmailChange.inUse')
+            : c === 'REAUTH_EMAIL_MISMATCH'
+              ? t('userSettingsPassword.reauthMismatch')
+              : c === 'REAUTH_FAILED'
+                ? t('userSettingsPassword.reauthFailed')
+                : c === 'MFA_CODE_INVALID'
+                  ? t('userSettingsMfa.invalidCode')
+                  : message
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const withGoogle = async () => {
+    if (!emailOk) return;
+    setBusy(true);
+    try {
+      const creds = await getUserCredsFromGoogle();
+      const idToken = creds?.idToken as string | undefined;
+      const accessToken = (creds?.credential as { accessToken?: string } | undefined)?.accessToken;
+      if (!idToken || !accessToken) {
+        toast.error(t('userSettingsPassword.reauthFailed'));
+        setBusy(false);
+        return;
+      }
+      await submit({ reauth: { provider: 'google', idToken, accessToken } });
+    } catch {
+      toast.error(t('userSettingsPassword.reauthFailed'));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mb-10" data-testid="change-email">
+      <p className="font-sans text-regular font-semibold mb-2">{t('userSettingsEmailChange.heading')}</p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (emailOk && password) void submit({ currentPassword: password });
+        }}
+        className="flex flex-col gap-6 max-w-[416px]"
+        autoComplete="off"
+      >
+        <div className="text-gray-500 font-sans text-[12px]">
+          {currentEmail
+            ? t('userSettingsEmailChange.current').replace('{email}', currentEmail)
+            : t('userSettingsEmailChange.noCurrent')}{' '}
+          {t('userSettingsEmailChange.description')}
+        </div>
+        <div>
+          <input
+            className={inputClass}
+            type="email"
+            aria-label={t('userSettingsEmailChange.newPlaceholder')}
+            placeholder={t('userSettingsEmailChange.newPlaceholder')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+          {(invalid || same) && (
+            <div className="text-red-600 font-sans text-[12px] mt-1">
+              {invalid ? t('userSettingsEmailChange.invalid') : t('userSettingsEmailChange.same')}
+            </div>
+          )}
+        </div>
+        {hasPassword ? (
+          <>
+            <PasswordInput
+              fullWidth
+              placeholder={t('userSettingsPassword.currentPlaceholder')}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              inputProps={{ autoComplete: 'current-password', 'aria-label': t('userSettingsPassword.currentPlaceholder') }}
+            />
+            <div className="flex flex-col gap-3">
+              <div>
+                <button type="submit" disabled={!emailOk || !password} className={primaryButton}>
+                  {busy ? t('userSettingsPassword.saving') : t('userSettingsEmailChange.submit')}
+                </button>
+              </div>
+              {googleAvailable && (
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-500 font-sans text-[12px]">
+                  <span>{t('userSettingsPassword.forgotCurrent')}</span>
+                  <button
+                    type="button"
+                    disabled={!emailOk}
+                    onClick={withGoogle}
+                    className="text-brand-500 hover:underline disabled:opacity-50 disabled:no-underline"
+                  >
+                    {t('userSettingsEmailChange.withGoogle')}
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        ) : !googleAvailable && !codeAvailable ? (
+          <div className="text-gray-500 font-sans text-[12px]">{t('userSettingsEmailChange.noMethod')}</div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {googleAvailable && (
+              <div>
+                <button type="button" disabled={!emailOk} onClick={withGoogle} className={primaryButton}>
+                  {t('userSettingsEmailChange.withGoogle')}
+                </button>
+              </div>
+            )}
+            {codeAvailable && (
+              <div className="flex flex-col gap-3">
+                <div className="text-gray-500 font-sans text-[12px]">
+                  {googleAvailable ? t('userSettingsPassword.orWithCode') : t('userSettingsPassword.withCode')}
+                </div>
+                <input
+                  className={inputClass}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder={t('userSettingsMfa.codeOrBackupPlaceholder')}
+                  autoComplete="one-time-code"
+                  maxLength={12}
+                />
+                <div>
+                  <button
+                    type="button"
+                    disabled={!emailOk || !code}
+                    onClick={() => submit({ mfaCode: code })}
+                    className={secondaryButton}
+                  >
+                    {t('userSettingsEmailChange.withCode')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </form>
     </div>
   );
 }
@@ -627,6 +807,7 @@ export function Security() {
 
   return (
     <div className="md:ml-4 h-full overflow-auto">
+      {checked && <ChangeEmail status={status} />}
       <ChangePassword status={status} reload={load} />
       {status && <Mfa status={status} reload={load} />}
       {checked && !status && (
