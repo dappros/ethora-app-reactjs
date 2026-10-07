@@ -8,13 +8,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  IconButton,
   Tooltip,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import CloseIcon from '@mui/icons-material/Close';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
@@ -26,64 +23,16 @@ import { useTranslation } from '../../i18n/useTranslation';
 // `TOKEN_MISSING_CLAIMS`.
 import { httpV2 } from '../../http';
 import { downloadCsv } from '../../utils/csv';
-
-// Server response shape — matches the listWidgetConversationsService
-// envelope. Kept minimal (no shared types module yet); when more views
-// consume it we can promote into src/models.ts.
-interface VisitorMetadata {
-  userAgent: string;
-  ip: string;
-  country: string; // ISO-3166-1 alpha-2
-  browser: string;
-  browserVersion: string;
-  os: string;
-  osVersion: string;
-  deviceType: string;
-  capturedAt: string | null;
-}
-
-interface WidgetConversationRow {
-  _id: string;
-  name: string;
-  title: string;
-  type: string;
-  createdAt: string;
-  updatedAt: string;
-  visitor: {
-    _id: string;
-    uuid: string;
-    xmppUsername: string;
-    firstSeenAt: string;
-    // null when the visitor row predates the metadata-capture rollout.
-    metadata?: VisitorMetadata | null;
-  } | null;
-}
-
-interface WidgetConversationsResponse {
-  results: WidgetConversationRow[];
-  pagination?: { limit: number; offset: number; total: number };
-  total?: number;
-  limit?: number;
-  offset?: number;
-}
-
-// Single message row from GET /v2/apps/:appId/chats/:chatId/messages.
-interface ChatMessageRow {
-  id: string;
-  originId: string | null;
-  ts: number; // ms since epoch
-  from: string; // bare JID of sender
-  nick: string;
-  body: string;
-}
-
-interface ChatMessagesResponse {
-  results: ChatMessageRow[];
-  total: number;
-  nextBefore: number | null;
-  chat: { _id: string; name: string; type: string };
-  mamUnavailable: boolean;
-}
+import { WidgetConversationDialog } from './WidgetConversationDialog';
+import {
+  ChatMessagesResponse,
+  WidgetConversationRow,
+  WidgetConversationsResponse,
+  deleteWidgetConversation,
+  flagFor,
+  formatDate,
+  formatVisitor,
+} from './widgetConversations';
 
 interface WidgetConversationsPanelProps {
   appId: string;
@@ -94,38 +43,6 @@ interface WidgetConversationsPanelProps {
 }
 
 const PAGE_SIZE = 20;
-
-function formatDate(value?: string): string {
-  if (!value) return '—';
-  try {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleString();
-  } catch {
-    return value;
-  }
-}
-
-// Visitor display: prefer the uuid suffix (a short readable handle that
-// stays stable per browser), falling back to the JID. Never show the full
-// xmppUsername in the list — it's noisy and includes the appId prefix
-// repeated everywhere.
-function formatVisitor(row: WidgetConversationRow): string {
-  if (!row.visitor) return 'unknown visitor';
-  const uuid = row.visitor.uuid;
-  if (uuid && uuid.length >= 8) return `Visitor #${uuid.slice(0, 8)}`;
-  return row.visitor.xmppUsername || 'unknown visitor';
-}
-
-// Tiny ISO-3166 → flag emoji helper. Skips IP-localhost / private
-// ranges (where country is empty) without trying to be clever — emoji
-// flags are a nice visual cue but never the only signal.
-function flagFor(country: string): string {
-  if (!country || country.length !== 2) return '';
-  const A = 0x1f1e6 - 'A'.charCodeAt(0);
-  const cc = country.toUpperCase();
-  return String.fromCodePoint(cc.charCodeAt(0) + A, cc.charCodeAt(1) + A);
-}
 
 // Rich tooltip body for the visitor row. Renders a small key/value
 // table; missing fields are shown as `—` so the operator can tell
@@ -207,10 +124,6 @@ export function WidgetConversationsPanel({
   // for now since the modal is a quick-look UX, not a deep-archive
   // browser. Older history is reachable by re-opening with a `before`
   // cursor in a future iteration.
-  const [messages, setMessages] = useState<ChatMessageRow[]>([]);
-  const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
-  const [messagesError, setMessagesError] = useState<string | null>(null);
-  const [mamUnavailable, setMamUnavailable] = useState<boolean>(false);
 
   // Bulk-selection + delete state. `selected` holds chat _ids the
   // operator has ticked on the *current page*; we deliberately reset
@@ -293,25 +206,6 @@ export function WidgetConversationsPanel({
   // the MAM rows but they'd still show up on a clear-history call. We
   // swallow individual failures so a partial multi-delete still
   // reports useful aggregate state.
-  async function deleteOne(row: WidgetConversationRow): Promise<{ ok: boolean; error?: string }> {
-    try {
-      await httpV2.delete(`/apps/${appId}/chats/${row._id}/messages`);
-    } catch (e: any) {
-      // mamUnavailable on the install isn't fatal — keep going so the
-      // chat row still gets removed.
-      const code = e?.response?.data?.code;
-      if (code !== 'MAM_NOT_CONFIGURED') {
-        return { ok: false, error: e?.response?.data?.error || e?.message || 'history clear failed' };
-      }
-    }
-    try {
-      await httpV2.delete(`/apps/${appId}/chats`, { data: { name: row.name } });
-    } catch (e: any) {
-      return { ok: false, error: e?.response?.data?.error || e?.message || 'chat delete failed' };
-    }
-    return { ok: true };
-  }
-
   // Given a list of conversation rows, fetch their messages and emit a
   // single CSV. Rows: convoIndex, timestamp, conversationId, visitor,
   // sender (visitor|bot|system), nick, body.
@@ -410,7 +304,7 @@ export function WidgetConversationsPanel({
     let okCount = 0;
     const errors: string[] = [];
     for (const row of targets) {
-      const r = await deleteOne(row);
+      const r = await deleteWidgetConversation(appId, row);
       if (r.ok) okCount++;
       else errors.push(`${formatVisitor(row)}: ${r.error}`);
     }
@@ -435,74 +329,7 @@ export function WidgetConversationsPanel({
 
   const empty = !loading && !error && rows.length === 0;
 
-  const handleCopy = useCallback((value: string) => {
-    try {
-      void navigator.clipboard?.writeText(value);
-    } catch {
-      // ignore — user can select the text manually as a fallback
-    }
-  }, []);
 
-  // Fetch a fresh page of messages whenever a conversation is opened.
-  // AbortController so re-opening a different row mid-flight doesn't
-  // race the previous fetch into the new modal.
-  useEffect(() => {
-    if (!selectedRow) {
-      setMessages([]);
-      setMessagesError(null);
-      setMamUnavailable(false);
-      return;
-    }
-    const ac = new AbortController();
-    setMessagesLoading(true);
-    setMessagesError(null);
-    setMamUnavailable(false);
-    httpV2
-      .get<ChatMessagesResponse>(
-        `/apps/${appId}/chats/${selectedRow._id}/messages`,
-        { params: { limit: 100 }, signal: ac.signal }
-      )
-      .then((resp) => {
-        const data = resp?.data;
-        setMessages(data?.results || []);
-        setMamUnavailable(Boolean(data?.mamUnavailable));
-      })
-      .catch((e: any) => {
-        if (e?.name === 'CanceledError' || e?.code === 'ERR_CANCELED') return;
-        setMessagesError(
-          e?.response?.data?.error ||
-            e?.message ||
-            t('aiWidgetConversations.loadMessagesFailedFallback')
-        );
-      })
-      .finally(() => setMessagesLoading(false));
-    return () => ac.abort();
-  }, [appId, selectedRow, t]);
-
-  // Heuristic: visitors have JID prefix `${appId}_widget-`, the bot is the
-  // App's `${appId}_${aiBot.userId}-bot`. We don't know the exact bot
-  // userId here, so anything not visitor-shaped is rendered as the bot
-  // side. For widget rooms there are exactly two participants so this
-  // is unambiguous; for non-widget rooms (when this modal gets reused
-  // beyond Widget Conversations) we'd want a richer attribution model.
-  function isVisitorMessage(row: ChatMessageRow): boolean {
-    if (!selectedRow?.visitor) return false;
-    const visJid = selectedRow.visitor.xmppUsername;
-    return (
-      row.from === visJid ||
-      row.from.startsWith(`${visJid}@`) ||
-      row.nick === visJid
-    );
-  }
-
-  function formatTs(ms: number): string {
-    if (!ms) return '';
-    try {
-      return new Date(ms).toLocaleString();
-    } catch {
-      return String(ms);
-    }
-  }
 
   return (
     <div className="w-full px-4 py-6">
@@ -720,141 +547,7 @@ export function WidgetConversationsPanel({
         </div>
       )}
 
-      <Dialog
-        open={Boolean(selectedRow)}
-        onClose={() => setSelectedRow(null)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle sx={{ pr: 6 }}>
-          {t('aiWidgetConversations.dialogTitle')}
-          <IconButton
-            aria-label="close"
-            onClick={() => setSelectedRow(null)}
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {selectedRow && (
-            <div className="font-sans text-sm space-y-3">
-              <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.visitorLabel')}</div>
-                <div className="font-medium">{formatVisitor(selectedRow)}</div>
-                {selectedRow.visitor && (
-                  <div className="text-xs text-gray-500 mt-1 break-all">
-                    {selectedRow.visitor.xmppUsername}
-                  </div>
-                )}
-              </div>
-              <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.startedLabel')}</div>
-                <div>{formatDate(selectedRow.createdAt)}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.lastActivityLabel')}</div>
-                <div>{formatDate(selectedRow.updatedAt)}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.roomJidLabel')}</div>
-                <div className="flex items-center gap-2">
-                  <code className="break-all bg-gray-50 px-2 py-1 rounded text-xs">
-                    {selectedRow.name}
-                  </code>
-                  <IconButton
-                    size="small"
-                    aria-label="copy room jid"
-                    onClick={() => handleCopy(selectedRow.name)}
-                  >
-                    <ContentCopyIcon fontSize="small" />
-                  </IconButton>
-                </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase text-gray-500 mb-1 flex items-center justify-between">
-                  <span>{t('aiWidgetConversations.messagesLabel')}</span>
-                  {messagesLoading && <CircularProgress size={12} />}
-                </div>
-                {mamUnavailable && (
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: '1px dashed',
-                      borderColor: 'warning.light',
-                      backgroundColor: 'warning.lighter',
-                      color: 'warning.dark',
-                      '.dark &': { color: 'warning.light' },
-                      fontSize: 12,
-                    }}
-                  >
-                    {t('aiWidgetConversations.mamUnavailable')}
-                  </Box>
-                )}
-                {messagesError && !mamUnavailable && (
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'error.light',
-                      backgroundColor: 'error.lighter',
-                      color: 'error.dark',
-                      '.dark &': { color: 'error.light' },
-                      fontSize: 12,
-                    }}
-                  >
-                    {t('aiWidgetConversations.loadMessagesErrorPrefix')} {messagesError}
-                  </Box>
-                )}
-                {!messagesLoading &&
-                  !messagesError &&
-                  !mamUnavailable &&
-                  messages.length === 0 && (
-                    <div className="text-xs text-gray-500 italic px-1">
-                      {t('aiWidgetConversations.noMessagesYet')}
-                    </div>
-                  )}
-                {messages.length > 0 && (
-                  <div className="rounded-md border border-gray-200 bg-gray-50 max-h-[420px] overflow-y-auto p-2 space-y-2">
-                    {messages.map((m) => {
-                      const visitor = isVisitorMessage(m);
-                      return (
-                        <div
-                          key={m.id}
-                          className={
-                            'flex ' +
-                            (visitor ? 'justify-start' : 'justify-end')
-                          }
-                        >
-                          <div
-                            className={
-                              'max-w-[78%] rounded-lg px-3 py-2 text-sm ' +
-                              (visitor
-                                ? 'bg-white border border-gray-200 text-gray-900'
-                                : 'bg-brand-100 text-gray-900')
-                            }
-                          >
-                            <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-0.5">
-                              {visitor ? t('aiWidgetConversations.visitorTag') : t('aiWidgetConversations.botTag')} · {formatTs(m.ts)}
-                            </div>
-                            <div className="whitespace-pre-wrap break-words">
-                              {m.body || (
-                                <em className="text-gray-400">{t('aiWidgetConversations.emptyBody')}</em>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <WidgetConversationDialog appId={appId} row={selectedRow} onClose={() => setSelectedRow(null)} />
 
       {/* Bulk-delete confirmation. Two-phase to avoid accidental nuke
           when an operator hits Enter on a focused checkbox. The body

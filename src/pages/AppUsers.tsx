@@ -27,6 +27,7 @@ import {
   httpGetAppUserTags,
   httpGetUsers,
   httpHardDeleteUsers,
+  httpV2,
   httpResetUserMfa,
   httpRestoreUser,
   httpRevokeUserAccess,
@@ -52,6 +53,7 @@ import { Sorting } from '../components/Sorting';
 import CopyButtonText from '../components/UI/Buttons/CopyButtonText';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
+import { VisitorsTable } from '../components/Users/VisitorsTable';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import './AppUsers.scss';
@@ -94,8 +96,12 @@ export default function AppUsers() {
   // Active vs Archived view. ?lifecycle=archived persists across refresh so the
   // operator can land directly on the restore screen.
   const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'archived') || 'active';
-  // All users vs only those with admin-panel access (?access=admin).
-  const accessTab = (searchParams.get('access') as 'all' | 'admin') || 'all';
+  // Users, only those with admin-panel access (?access=admin), or anonymous
+  // website visitors (?access=visitors), which the users list never includes.
+  const accessTab = (searchParams.get('access') as 'all' | 'admin' | 'visitors') || 'all';
+  const visitorsTab = accessTab === 'visitors';
+  // Visitor count for the switcher; null until known. 0 disables it.
+  const [visitorsTotal, setVisitorsTotal] = useState<number | null>(null);
   const accessParam = accessTab === 'admin' ? ('admin' as const) : undefined;
   // Tag filter (?tag=): set by clicking a tag chip in the table.
   const tagFilter = searchParams.get('tag') || undefined;
@@ -255,8 +261,25 @@ export default function AppUsers() {
     [updateSearchParams]
   );
 
-  const fetchUsers = useCallback(() => {
+  useEffect(() => {
     if (!appId) return;
+    let cancelled = false;
+    httpV2
+      .get(`/apps/${appId}/widget/conversations`, { params: { limit: 1, offset: 0 } })
+      .then((resp) => {
+        const d = resp?.data;
+        if (!cancelled) setVisitorsTotal(Number(d?.total ?? d?.pagination?.total ?? 0));
+      })
+      .catch(() => {
+        if (!cancelled) setVisitorsTotal(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appId]);
+
+  const fetchUsers = useCallback(() => {
+    if (!appId || visitorsTab) return;
 
     const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
     httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle, accessParam, tagFilter).then(
@@ -267,7 +290,7 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / limit));
       }
     );
-  }, [appId, limit, page, orderBy, order, lifecycleTab, accessParam, tagFilter]);
+  }, [appId, limit, page, orderBy, order, lifecycleTab, accessParam, tagFilter, visitorsTab]);
 
   const loadAppTags = useCallback(() => {
     if (!appId) return;
@@ -771,7 +794,7 @@ export default function AppUsers() {
         <div className="ml-4 hidden md:flex items-center gap-4">
           <div className="font-varela text-[24px]">{t('appUsers.title')}</div>
           {/* Active / Archived filter, mirrors the Apps page. */}
-          <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
+          {!visitorsTab && <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
             {(['active', 'archived'] as const).map((tab) => (
               <button
                 key={tab}
@@ -786,24 +809,41 @@ export default function AppUsers() {
                 {tab === 'active' ? t('appUsers.tabActive') : t('appUsers.tabArchived')}
               </button>
             ))}
-          </div>
-          {/* All users vs admin-panel access only (any ACL grant, owner, super admins). */}
-          <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
-            {(['all', 'admin'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => updateSearchParams({ access: tab, page: 0 })}
-                className={classNames(
-                  'px-3 py-1 rounded-lg font-varela',
-                  accessTab === tab
-                    ? 'bg-white text-brand-500 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                )}
-                title={tab === 'admin' ? t('appUsers.tabAdminAccessTitle') : ''}
-              >
-                {tab === 'all' ? t('appUsers.tabAllUsers') : t('appUsers.tabAdminAccess')}
-              </button>
-            ))}
+          </div>}
+          {/* Users / admin-panel access only (any ACL grant, owner, super
+              admins) / anonymous website visitors (disabled when none). */}
+          <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm" data-testid="users-access-switch">
+            {(['all', 'admin', 'visitors'] as const).map((tab) => {
+              const noVisitors = tab === 'visitors' && visitorsTotal === 0 && !visitorsTab;
+              return (
+                <button
+                  key={tab}
+                  disabled={noVisitors}
+                  onClick={() => updateSearchParams({ access: tab, page: 0 })}
+                  className={classNames(
+                    'px-3 py-1 rounded-lg font-varela disabled:opacity-40 disabled:cursor-not-allowed',
+                    accessTab === tab
+                      ? 'bg-white text-brand-500 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  )}
+                  title={
+                    tab === 'admin'
+                      ? t('appUsers.tabAdminAccessTitle')
+                      : tab === 'visitors'
+                        ? noVisitors
+                          ? t('appUsers.tabVisitorsNone')
+                          : t('appUsers.tabVisitorsTitle')
+                        : ''
+                  }
+                >
+                  {tab === 'all'
+                    ? t('appUsers.tabAllUsers')
+                    : tab === 'admin'
+                      ? t('appUsers.tabAdminAccess')
+                      : `${t('appUsers.tabVisitors')}${visitorsTotal ? ` (${visitorsTotal})` : ''}`}
+                </button>
+              );
+            })}
           </div>
           {tagFilter && (
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-brand-150 text-brand-500 text-sm">
@@ -827,7 +867,7 @@ export default function AppUsers() {
             </span>
           )}
         </div>
-        <div className="flex lg:flex-row flex-col w-full md:w-auto lg:items-center items-end lg:justify-end justify-start gap-4">
+        {!visitorsTab && <div className="flex lg:flex-row flex-col w-full md:w-auto lg:items-center items-end lg:justify-end justify-start gap-4">
           <Sorting<OrderByType>
             className=""
             order={order}
@@ -855,9 +895,14 @@ export default function AppUsers() {
               <span className="hidden sm:block">{t('appUsers.addUser')}</span>
             </button>
           </div>
-        </div>
+        </div>}
       </div>
-      <div className="overflow-hidden">
+      {visitorsTab && appId && (
+        <div className="overflow-hidden pt-4">
+          <VisitorsTable appId={appId} onTotalChange={setVisitorsTotal} />
+        </div>
+      )}
+      <div className={visitorsTab ? 'hidden' : 'overflow-hidden'}>
         {!items.length && (
           <div className="bg-brand-150 p-4 text-sm font-sans rounded-xl mb-4">
             {t('appUsers.emptyState')}
