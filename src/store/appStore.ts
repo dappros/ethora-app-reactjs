@@ -201,6 +201,8 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
     const MERGEABLE_PROFILE_FIELDS = [
       'firstName',
       'lastName',
+      // Account > Security > Change email.
+      'email',
       'description',
       'profileImage',
       'isAssetsOpen',

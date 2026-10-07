@@ -1391,6 +1391,15 @@ export function httpChangePassword(currentPassword: string, newPassword: string)
   });
 }
 
+// Change the own email (Account > Security). Proof of identity is the current
+// password, or for accounts without one a fresh provider sign-in / MFA code.
+export function httpChangeEmail(email: string, proof: SetPasswordProof & { currentPassword?: string }) {
+  return httpV2.post<{ success: boolean; email: string; sessionsRevoked: number }>('/users/me/email', {
+    email,
+    ...proof,
+  });
+}
+
 // Password-less account (social / wallet sign-up): set a first password after
 // proving identity with a fresh provider sign-in or an MFA code.
 export function httpSetInitialPassword(newPassword: string, proof: SetPasswordProof) {
