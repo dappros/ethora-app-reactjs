@@ -234,6 +234,11 @@ export const TabAIWidgetCode = ({
               wrapLines={true}
               lineProps={{
                 style: {
+                  // With line numbers + wrapLongLines the highlighter makes each
+                  // line a flex row, so every token is a flex item and a plain
+                  // select-and-copy put a newline between tokens. A block line
+                  // copies as written (the numbers are user-select: none).
+                  display: 'block',
                   whiteSpace: 'pre-wrap',
                   overflowWrap: 'break-word',
                   wordBreak: 'break-word',
