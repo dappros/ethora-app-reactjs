@@ -497,6 +497,8 @@ export function AIWidget({
               onSave={handleSaveAppearance}
               onReset={handleResetAppearance}
               isDirty={appearanceIsDirty}
+              brandColor={app?.primaryColor}
+              botName={activeAgent?.displayName}
               footer={
                 <p className="font-sans text-xs text-gray-500 mt-4" data-testid="appearance-agent-note">
                   {t('appSettingsAIWidget.moreInAgentPrefix')}{' '}
