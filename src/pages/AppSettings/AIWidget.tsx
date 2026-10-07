@@ -1,5 +1,4 @@
-import { Box, Button } from '@mui/material';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import { Box, Button, Tab, Tabs } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -16,7 +15,10 @@ import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
 import { ModelApp } from '../../models';
-import { ActiveAgentSelector } from '../../components/AIWidget/ActiveAgentSelector';
+import { ActiveAgentCard } from '../../components/AIWidget/ActiveAgentCard';
+import { useActiveWidgetAgent } from '../../hooks/useActiveWidgetAgent';
+import { useAppStore } from '../../store/useAppStore';
+import { Link } from 'react-router-dom';
 import { AssistantAppearancePanel } from '../../components/AIWidget/AssistantAppearancePanel';
 import { WidgetConversationsPanel } from '../../components/AIWidget/WidgetConversationsPanel';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -158,6 +160,10 @@ export function AIWidget({
   const [value, setValue] = useState('1');
   const [previewActive, setPreviewActive] = useState<boolean>(false);
   const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
+  const [widgetTab, setWidgetTab] = useState<'code' | 'appearance'>('code');
+  const activeAgent = useActiveWidgetAgent(app);
+  const currentUserId = useAppStore((s) => (s.currentUser as { _id?: string } | null)?._id);
+  const ownsActiveAgent = !!activeAgent && !!currentUserId && String(activeAgent.ownerId) === String(currentUserId);
 
   // Appearance customization (colors, fonts, layout, launcher, CTA), stored
   // on the App and read by every live embed at load (see
@@ -371,50 +377,14 @@ export function AIWidget({
         }
         aria-disabled={aiFeatureDisabled || undefined}
       >
-        {/* Pick which Agent backs this app's widget. The full Agent editor
-            (persona, prompt, RAG sources, model) lives under /app/admin/agents. */}
-        <ActiveAgentSelector appId={appId as string} app={app} />
-
-        {/* Slim agent / widget status strip. Replaces the legacy
-            HeaderAIWidget (Status / Local context / Model) — Local context
-            and Model moved to per-Agent settings; Status is reduced to a
-            single-line indicator + toggle here. */}
-        <Box className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 mt-4 border border-gray-200 rounded-xl bg-white">
-          <div className="flex items-center gap-2 text-sm font-sans">
-            <PowerSettingsNewIcon
-              fontSize="small"
-              color={statusBot ? 'success' : 'error'}
-            />
-            <span className="font-semibold">{t('appSettingsAIWidget.aiBotLabel')}</span>
-            <span>
-              {statusBot
-                ? t('appSettingsAIWidget.statusEnabled')
-                : t('appSettingsAIWidget.statusDisabled')}
-            </span>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleStatusChange}
-              disabled={aiFeatureDisabled}
-              sx={{ ml: 1 }}
-            >
-              {statusBot
-                ? t('appSettingsAIWidget.disableButton')
-                : t('appSettingsAIWidget.enableButton')}
-            </Button>
+        {/* Top bar: what this page is, and Test widget above (and outside)
+            the agent and widget cards it exercises. */}
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div className="min-w-0">
+            <h2 className="font-sans font-semibold text-lg">{t('appSettingsAIWidget.pageTitle')}</h2>
+            <p className="font-sans text-sm text-gray-600">{t('appSettingsAIWidget.pageSubtitle')}</p>
           </div>
-
-          <div className="flex items-center gap-2 text-sm font-sans text-gray-700">
-            <span className="font-semibold">{t('appSettingsAIWidget.ragLabel')}</span>
-            <span>{ragSize ? `${ragSize} MB` : t('appSettingsAIWidget.ragEmpty')}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm font-sans text-gray-700">
-            <span className="font-semibold">{t('appSettingsAIWidget.conversationsLabel')}</span>
-            <span>{conversationsTotal === null ? '—' : conversationsTotal}</span>
-          </div>
-
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2">
             {previewActive ? (
               <>
                 <Button
@@ -441,7 +411,6 @@ export function AIWidget({
               </>
             ) : (
               <Button
-                size="small"
                 variant="contained"
                 startIcon={<PlayArrowIcon />}
                 onClick={handleStartPreview}
@@ -458,11 +427,20 @@ export function AIWidget({
               </Button>
             )}
           </div>
-        </Box>
+        </div>
 
-        {/* Appearance customization — colors, fonts, layout, launcher, CTA.
-            Feeds both the Test widget button above (live) and the embed
-            code below (once saved). */}
+        {/* The agent behind the widget: which one, who it is, whether it
+            answers, what it knows. Its full editor is under Agents. */}
+        <ActiveAgentCard
+          appId={appId as string}
+          app={app}
+          enabled={statusBot}
+          onToggle={handleStatusChange}
+          disabled={aiFeatureDisabled}
+          conversationsTotal={conversationsTotal}
+          legacyKnowledgeMb={ragSize}
+        />
+
         {legacyAppearance && (
           <Box
             role="status"
@@ -478,30 +456,67 @@ export function AIWidget({
             </Button>
           </Box>
         )}
-        {/* Shown once the saved values are in, so nothing typed before the
-            load finishes gets overwritten by it. */}
-        {appearanceLoaded && (
-          <AssistantAppearancePanel
-            appearance={appearance}
-            onChange={handleAppearanceChange}
-            onSave={handleSaveAppearance}
-            onReset={handleResetAppearance}
-            isDirty={appearanceIsDirty}
-          />
-        )}
 
-        {/* Embed Code panel — generates the <script> snippet operators paste
-            into their own site. */}
-        <div className="w-full overflow-x-auto">
-          <TabAIWidgetCode
-            value={value}
-            appId={appId}
-            app={app}
-            userId={aiBot.userId}
-            appearance={savedAppearance}
-            handleChange={handleChange}
-          />
-        </div>
+        {/* The website widget: the embed code first, its look on a second
+            tab for those who want to change it. */}
+        <section className="border border-gray-200 rounded-xl bg-white mt-4" data-testid="website-widget-card">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
+            <h3 className="font-sans font-semibold text-base">{t('appSettingsAIWidget.widgetCardTitle')}</h3>
+          </div>
+          <Tabs
+            value={widgetTab}
+            onChange={(_, v) => setWidgetTab(v)}
+            sx={{ px: 2, borderBottom: 1, borderColor: 'divider', minHeight: 40 }}
+          >
+            <Tab value="code" label={t('appSettingsAIWidget.codeTab')} sx={{ minHeight: 40, textTransform: 'none' }} />
+            <Tab
+              value="appearance"
+              label={appearanceIsDirty ? `${t('appSettingsAIWidget.appearanceTab')} *` : t('appSettingsAIWidget.appearanceTab')}
+              sx={{ minHeight: 40, textTransform: 'none' }}
+            />
+          </Tabs>
+          {widgetTab === 'code' && (
+            <div className="w-full overflow-x-auto">
+              <TabAIWidgetCode
+                value={value}
+                appId={appId}
+                app={app}
+                userId={aiBot.userId}
+                appearance={savedAppearance}
+                handleChange={handleChange}
+              />
+            </div>
+          )}
+          {/* Shown once the saved values are in, so nothing typed before the
+              load finishes gets overwritten by it. */}
+          {widgetTab === 'appearance' && appearanceLoaded && (
+            <AssistantAppearancePanel
+              embedded
+              appearance={appearance}
+              onChange={handleAppearanceChange}
+              onSave={handleSaveAppearance}
+              onReset={handleResetAppearance}
+              isDirty={appearanceIsDirty}
+              footer={
+                <p className="font-sans text-xs text-gray-500 mt-4" data-testid="appearance-agent-note">
+                  {t('appSettingsAIWidget.moreInAgentPrefix')}{' '}
+                  {activeAgent ? (
+                    <>
+                      <Link to={`/app/admin/agents/${activeAgent.id}/settings`} className="text-brand-500 hover:underline">
+                        {(ownsActiveAgent ? t('appSettingsAIWidget.editAgentLink') : t('appSettingsAIWidget.viewAgentLink')).replace('{name}', activeAgent.displayName)}
+                      </Link>
+                      {!ownsActiveAgent && <> {t('appSettingsAIWidget.cloneToChange')}</>}
+                    </>
+                  ) : (
+                    <Link to="/app/admin/agents" className="text-brand-500 hover:underline">
+                      {t('aiWidgetActiveAgentSelector.manageAgents')}
+                    </Link>
+                  )}
+                </p>
+              }
+            />
+          )}
+        </section>
 
         {/* Widget Conversations: lists rooms with chats.type='widget' for
             this app. Operators can review historical visitor sessions

@@ -8,7 +8,7 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 const en = {
     'aiWidgetAppearance.title': 'Widget appearance',
     'aiWidgetAppearance.description':
-      'Customize how the assistant widget looks and behaves on your site. Test widget shows your changes right away; once saved they reach every site using the embed code below within a minute, no need to paste it again.',
+      'Customize how the assistant widget looks and behaves on your site. Test widget shows your changes right away; once saved they reach every site already using the embed code within a minute, no need to paste it again.',
     'aiWidgetAppearance.saveButton': 'Save appearance',
     'aiWidgetAppearance.resetButton': 'Reset to defaults',
     'aiWidgetAppearance.saved': 'Widget appearance saved',

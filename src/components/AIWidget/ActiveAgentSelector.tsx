@@ -21,9 +21,13 @@ import { useAppStore } from '../../store/useAppStore';
 interface ActiveAgentSelectorProps {
   appId: string;
   app?: ModelApp;
+  // Inside the AI agent card: just the picker, no box or Manage agents link.
+  bare?: boolean;
+  disabled?: boolean;
+  label?: string;
 }
 
-export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId, app }) => {
+export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId, app, bare = false, disabled = false, label }) => {
   const { t } = useTranslation();
   const agents = useAppStore((s) => s.agents);
   const botInstances = useAppStore((s) => s.botInstances);
@@ -135,12 +139,13 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
   const publicAgents = agents.filter((a) => a.visibility === 'public');
 
   return (
-    <div className="border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm">
-      <span className="text-gray-600">{t('aiWidgetActiveAgentSelector.label')}</span>
+    <div className={bare ? 'flex flex-wrap items-center gap-2 text-sm' : 'border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm'}>
+      <label htmlFor={`active-agent-${appId}`} className="text-gray-600">{label || t('aiWidgetActiveAgentSelector.label')}</label>
       <select
-        className="border rounded px-2 py-1 text-sm bg-white disabled:bg-gray-100 disabled:cursor-wait"
+        id={`active-agent-${appId}`}
+        className="border rounded px-2 py-1 text-sm bg-white disabled:bg-gray-100 disabled:cursor-wait max-w-full"
         value={currentAgent?.id || ''}
-        disabled={busy}
+        disabled={busy || disabled}
         onChange={(e) => pick(e.target.value)}
       >
         {/* "None" lets an operator deliberately unbind the widget (default
@@ -176,13 +181,15 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
           <span>{t('aiWidgetActiveAgentSelector.binding')}</span>
         </span>
       )}
-      <span className="text-gray-400">|</span>
+      {!bare && <span className="text-gray-400">|</span>}
       {/* Phase 1 follow-up: Agents now live at the tenant-scope /app/admin/agents page.
           One Agent can be deployed across many Apps; the dropdown above just picks which
           Agent backs THIS App's AI Widget. */}
-      <Link to="/app/admin/agents" className="text-brand-500 hover:underline">
-        {t('aiWidgetActiveAgentSelector.manageAgents')}
-      </Link>
+      {!bare && (
+        <Link to="/app/admin/agents" className="text-brand-500 hover:underline">
+          {t('aiWidgetActiveAgentSelector.manageAgents')}
+        </Link>
+      )}
     </div>
   );
 };
