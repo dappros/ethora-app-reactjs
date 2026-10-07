@@ -191,6 +191,7 @@ export function AIWidget({
         if (cancelled) return;
         setAppearance(defaultAiWidgetAppearance);
         setSavedAppearance(defaultAiWidgetAppearance);
+        setAppearanceLoaded(true);
         toast.error(t('aiWidgetAppearance.loadFailed'));
       });
     return () => {
@@ -477,13 +478,17 @@ export function AIWidget({
             </Button>
           </Box>
         )}
-        <AssistantAppearancePanel
-          appearance={appearance}
-          onChange={handleAppearanceChange}
-          onSave={handleSaveAppearance}
-          onReset={handleResetAppearance}
-          isDirty={appearanceIsDirty}
-        />
+        {/* Shown once the saved values are in, so nothing typed before the
+            load finishes gets overwritten by it. */}
+        {appearanceLoaded && (
+          <AssistantAppearancePanel
+            appearance={appearance}
+            onChange={handleAppearanceChange}
+            onSave={handleSaveAppearance}
+            onReset={handleResetAppearance}
+            isDirty={appearanceIsDirty}
+          />
+        )}
 
         {/* Embed Code panel — generates the <script> snippet operators paste
             into their own site. */}
