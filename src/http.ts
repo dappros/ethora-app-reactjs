@@ -1023,6 +1023,16 @@ export function httpDeleteSiteSourceV2Url(appId: string, siteSourceIds: string |
   return httpV2.delete(`/apps/${appId}/sources/site-crawl-v2/url`, { data: { ids } });
 }
 
+// The App's website widget appearance: the embed's data-* attributes the
+// operator set in the AI Widget tab (non-defaults only).
+export function httpGetWidgetAppearance(appId: string) {
+  return httpV2.get<{ ok: boolean; appearance: Record<string, string> }>(`/apps/${appId}/widget/appearance`);
+}
+
+export function httpSaveWidgetAppearance(appId: string, appearance: Record<string, string>) {
+  return httpV2.put<{ ok: boolean; appearance: Record<string, string> }>(`/apps/${appId}/widget/appearance`, { appearance });
+}
+
 // Queues a re-crawl of one already-indexed row. Answers { status: 'queued', jobId }
 // the same way a fresh crawl does - the stored copy is overwritten later, when the
 // crawler calls back, so the row's size and updatedAt only move then.

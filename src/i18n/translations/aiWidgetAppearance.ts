@@ -8,11 +8,17 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 const en = {
     'aiWidgetAppearance.title': 'Widget appearance',
     'aiWidgetAppearance.description':
-      'Customize how the assistant widget looks and behaves on your site. Changes apply to Test widget above and to the embed code below once you save.',
+      'Customize how the assistant widget looks and behaves on your site. Test widget shows your changes right away; once saved they reach every site using the embed code below within a minute, no need to paste it again.',
     'aiWidgetAppearance.saveButton': 'Save appearance',
     'aiWidgetAppearance.resetButton': 'Reset to defaults',
     'aiWidgetAppearance.saved': 'Widget appearance saved',
     'aiWidgetAppearance.unsavedHint': 'Unsaved changes',
+    'aiWidgetAppearance.saveFailed': 'Could not save the widget appearance',
+    'aiWidgetAppearance.loadFailed': 'Could not load the saved widget appearance',
+    'aiWidgetAppearance.legacyFound':
+      'This browser holds widget appearance settings from an earlier version of this page, which kept them in this browser only. Save them to apply them to your site, or discard them.',
+    'aiWidgetAppearance.legacySave': 'Save and apply',
+    'aiWidgetAppearance.legacyDiscard': 'Discard',
 
     'aiWidgetAppearance.sectionCopy': 'Copy',
     'aiWidgetAppearance.sectionTheme': 'Colors & fonts',

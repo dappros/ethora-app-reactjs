@@ -44,7 +44,7 @@ function bare(agent: Agent): Agent {
   return { ...agent, originAppName: null, botInstancesCount: null };
 }
 
-async function fakeBackend(page: Page) {
+async function fakeBackend(page: Page, opts: { botInstances?: unknown[] } = {}) {
   const agent = freshAgent();
   const writes: Array<{ method: string; path: string; body: unknown }> = [];
 
@@ -65,7 +65,7 @@ async function fakeBackend(page: Page) {
       if (pathname === '/v1/apps') return json(route, { apps: [OWNED_APP], total: 1 });
       if (pathname === '/v2/agents' && method === 'GET') return json(route, { ok: true, total: 1, items: [agent] });
       if (pathname === '/v2/agents/flows/validate') return json(route, { ok: true, flowKeys: ['main'] });
-      if (pathname === `/v2/agents/${AGENT_ID}/bot-instances`) return json(route, { ok: true, items: [] });
+      if (pathname === `/v2/agents/${AGENT_ID}/bot-instances`) return json(route, { ok: true, items: opts.botInstances || [] });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'GET') return json(route, { ok: true, agent });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'PUT') {
         Object.assign(agent, body);
@@ -261,6 +261,36 @@ test.describe('Agent Settings: renamed tabs, Try it, knowledge health', () => {
     await expect(page.getByRole('tab', { name: 'Instructions', exact: true })).toHaveAttribute('aria-selected', 'true');
     await openTab(page, 'SOUL.MD');
     await expect(page.getByRole('tab', { name: 'Memory', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await openTab(page, 'Widget Appearance');
+    await expect(page.getByRole('tab', { name: 'Website widget', exact: true })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('Website widget lists only the viewer\'s Apps whose widget the agent answers in', async ({ page }) => {
+    const bot = (id: string, appId: string, appName: string, isAppWidgetBot: boolean) => ({
+      id, agentId: AGENT_ID, appId, appName, isAppWidgetBot, userId: `u-${id}`, xmppUsername: `${appId}_${id}`,
+      status: 'on', joinedRooms: [], lastActiveAt: null, createdAt: '', updatedAt: '',
+    });
+    await fakeBackend(page, {
+      botInstances: [
+        bot('b1', OWNED_APP._id, OWNED_APP.displayName, true),
+        bot('b2', OWNED_APP._id, OWNED_APP.displayName, false),
+        bot('b3', 'e2eapp00000000000000other', 'Someone else\'s App', true),
+      ],
+    });
+    await openTab(page, 'Website widget');
+    const list = page.getByTestId('website-widget-apps');
+    await expect(list.getByRole('listitem')).toHaveCount(1);
+    await expect(list).toContainText(OWNED_APP.displayName);
+    await expect(list.getByRole('link', { name: 'Open AI Widget settings' })).toHaveAttribute(
+      'href',
+      `/app/admin/apps/${OWNED_APP._id}/settings?tab=AI+Widget`,
+    );
+  });
+
+  test('Website widget explains how to use the agent when no App widget uses it', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Website widget');
+    await expect(page.getByText('No App of yours uses E2E Agent for its website widget yet.')).toBeVisible();
   });
 
   test('Try it: a test conversation keeps its history and shows the sources used', async ({ page }) => {

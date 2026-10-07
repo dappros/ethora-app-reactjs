@@ -31,8 +31,8 @@ import {
   SoulMdPanel,
   WebIndexPanel,
 } from '../components/Agents/panels/AgentPanels';
-import { AgentWidgetAppearancePanel } from '../components/Agents/panels/AgentWidgetAppearancePanel';
 import { TryItPanel } from '../components/Agents/panels/TryItPanel';
+import { AgentBotInstanceRow, WebsiteWidgetPanel } from '../components/Agents/panels/WebsiteWidgetPanel';
 import { httpListAgentBotInstances } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../models';
@@ -47,13 +47,13 @@ import { useAppStore } from '../store/useAppStore';
 const TABS = [
   'Persona',
   'Instructions',
-  'Widget Appearance',
   'Web Index',
   'Docs Index',
   'Memory',
   'Heartbeat',
   'Flows',
   'Try it',
+  'Website widget',
   'Chats Index',
   'Visibility',
 ] as const;
@@ -62,6 +62,8 @@ const TABS = [
 const TAB_ALIASES: Record<string, (typeof TABS)[number]> = {
   Context: 'Instructions',
   'SOUL.MD': 'Memory',
+  // Appearance moved to the App's AI Widget tab; this one points there.
+  'Widget Appearance': 'Website widget',
 };
 
 function resolveTab(tab: string | null): number {
@@ -73,22 +75,22 @@ function resolveTab(tab: string | null): number {
 const TAB_LABEL_KEYS: Record<(typeof TABS)[number], string> = {
   Persona: 'agentSettings.tabPersona',
   Instructions: 'agentSettings.tabInstructions',
-  'Widget Appearance': 'agentSettings.tabWidgetAppearance',
   'Web Index': 'agentSettings.tabWebIndex',
   'Docs Index': 'agentSettings.tabDocsIndex',
   Memory: 'agentSettings.tabMemory',
   Heartbeat: 'agentSettings.tabHeartbeat',
   Flows: 'agentSettings.tabFlows',
   'Try it': 'agentSettings.tabTryIt',
+  'Website widget': 'agentSettings.tabWebsiteWidget',
   'Chats Index': 'agentSettings.tabChatsIndex',
   Visibility: 'agentSettings.tabVisibility',
 };
 
 const SECTIONS: { labelKey: string; tabs: (typeof TABS[number])[] }[] = [
-  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Instructions', 'Widget Appearance'] },
+  { labelKey: 'agentSettings.sectionIdentity', tabs: ['Persona', 'Instructions'] },
   { labelKey: 'agentSettings.sectionKnowledge', tabs: ['Web Index', 'Docs Index'] },
   { labelKey: 'agentSettings.sectionBehaviour', tabs: ['Memory', 'Heartbeat', 'Flows'] },
-  { labelKey: 'agentSettings.sectionActivity', tabs: ['Try it', 'Chats Index'] },
+  { labelKey: 'agentSettings.sectionActivity', tabs: ['Try it', 'Website widget', 'Chats Index'] },
   { labelKey: 'agentSettings.sectionSharing', tabs: ['Visibility'] },
 ];
 
@@ -102,7 +104,7 @@ export default function AgentSettings() {
   const initialTabIndex = Math.max(0, resolveTab(tabFromUrl));
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
   const [agent, setAgent] = useState<ModelAgent | null>(null);
-  const [instances, setInstances] = useState<(ModelBotInstance & { appName?: string })[]>([]);
+  const [instances, setInstances] = useState<AgentBotInstanceRow[]>([]);
   const [loading, setLoading] = useState(false);
   // Every App the user owns, not the `apps` slot: that one holds whichever
   // page the Apps list showed last and is empty when this page is opened
@@ -238,9 +240,6 @@ export default function AgentSettings() {
             <ContextPanel agent={agent} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
-            <AgentWidgetAppearancePanel agent={agent} isDisabled={readOnly} />
-          </TabPanel>
-          <TabPanel className="p-2">
             <WebIndexPanel agent={agent} appId={scopedAppId} isDisabled={readOnly} />
           </TabPanel>
           <TabPanel className="p-2">
@@ -257,6 +256,9 @@ export default function AgentSettings() {
           </TabPanel>
           <TabPanel className="p-2">
             <TryItPanel agent={agent} />
+          </TabPanel>
+          <TabPanel className="p-2">
+            <WebsiteWidgetPanel agent={agent} instances={instances} />
           </TabPanel>
           <TabPanel className="p-2">
             <ChatsIndexPanel agent={agent} isDisabled={readOnly} />

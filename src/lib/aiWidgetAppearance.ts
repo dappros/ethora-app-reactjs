@@ -10,11 +10,12 @@
 // persona from the active Agent - see TabAIWidgetCode.tsx) and are not
 // operator-editable "appearance" per this app's existing design.
 //
-// Not yet persisted server-side (the App schema in ethora-monoserver has no
-// field for it), so this only round-trips through the operator's own
-// browser via localStorage, keyed per App. Good enough to configure the
-// widget and generate an accurate embed snippet; multi-device sync would
-// need a backend field added separately.
+// Stored on the App (GET/PUT /v2/apps/:appId/widget/appearance) as the very
+// data-* attributes the snippet would carry, non-defaults only. The widget
+// reads them at load from GET /v2/widget/config, beneath anything written on
+// the embed itself, so a change applies to live sites without re-pasting the
+// snippet. The localStorage copy below is only read once, to offer moving
+// settings saved by an older admin build to the server.
 
 export interface AiWidgetAppearance {
   // Copy
@@ -203,50 +204,59 @@ export function getAppearanceAttributes(settings: AiWidgetAppearance): Array<[st
   ]);
 }
 
-function loadStored(key: string): AiWidgetAppearance {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return { ...defaultAiWidgetAppearance };
-    const parsed = JSON.parse(raw);
-    return { ...defaultAiWidgetAppearance, ...parsed };
-  } catch {
-    return { ...defaultAiWidgetAppearance };
-  }
+/** Every non-default attribute as a record, the shape the API stores. */
+export function getAppearanceAttributeRecord(settings: AiWidgetAppearance): Record<string, string> {
+  return Object.fromEntries(getAppearanceAttributes(settings));
 }
 
-function saveStored(key: string, settings: AiWidgetAppearance): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(settings));
-  } catch {
-    // localStorage unavailable (private mode, quota) - the in-memory state
-    // this session still works, it just won't survive a reload.
+/**
+ * The panel's settings from stored attributes (the inverse of
+ * getAppearanceAttributes). Unknown attributes are ignored; a field the record
+ * does not mention keeps its default.
+ */
+export function appearanceFromAttributes(attrs: Record<string, string> | null | undefined): AiWidgetAppearance {
+  const out: AiWidgetAppearance = { ...defaultAiWidgetAppearance };
+  if (!attrs) return out;
+  const target = out as unknown as Record<string, string | number | boolean>;
+  for (const entry of ATTR_MAP) {
+    const raw = attrs[entry.attr];
+    if (raw === undefined || raw === null) continue;
+    const fallback = defaultAiWidgetAppearance[entry.key];
+    if (typeof fallback === 'boolean') {
+      const t = String(raw).trim().toLowerCase();
+      target[entry.key] = t === '' || t === 'true' || t === '1' || t === 'yes';
+    } else if (typeof fallback === 'number') {
+      const n = parseInt(String(raw), 10);
+      target[entry.key] = Number.isFinite(n) ? n : fallback;
+    } else {
+      target[entry.key] = String(raw);
+    }
   }
+  return out;
 }
 
 const appStorageKey = (appId: string) => `ethora_ai_widget_appearance_${appId}`;
-// Separate key space: an Agent can be embodied by BotInstances in several
-// Apps (see ChatsIndexPanel), so its own widget appearance is a distinct
-// setting from any one App's, not the same value under a different name.
-// The two panels are independent today - the App-level one does not fall
-// back to this one at embed-snippet time.
-const agentStorageKey = (agentId: string) => `ethora_ai_widget_appearance_agent_${agentId}`;
 
-/** Reads a previously-saved appearance for this App from this browser, or the defaults. */
-export function loadStoredAppearance(appId: string): AiWidgetAppearance {
-  return loadStored(appStorageKey(appId));
+/**
+ * Settings an older admin build saved in this browser only, if any were
+ * changed from the defaults - offered once for moving to the server.
+ */
+export function loadLegacyBrowserAppearance(appId: string): AiWidgetAppearance | null {
+  try {
+    const raw = localStorage.getItem(appStorageKey(appId));
+    if (!raw) return null;
+    const parsed = { ...defaultAiWidgetAppearance, ...JSON.parse(raw) };
+    return getAppearanceAttributes(parsed).length ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
-/** Persists the appearance for this App to this browser only (see file header). */
-export function saveStoredAppearance(appId: string, settings: AiWidgetAppearance): void {
-  saveStored(appStorageKey(appId), settings);
-}
-
-/** Reads a previously-saved appearance for this Agent from this browser, or the defaults. */
-export function loadStoredAgentAppearance(agentId: string): AiWidgetAppearance {
-  return loadStored(agentStorageKey(agentId));
-}
-
-/** Persists the appearance for this Agent to this browser only (see file header). */
-export function saveStoredAgentAppearance(agentId: string, settings: AiWidgetAppearance): void {
-  saveStored(agentStorageKey(agentId), settings);
+/** Forgets this browser's copy once it has been moved to the server (or declined). */
+export function clearLegacyBrowserAppearance(appId: string): void {
+  try {
+    localStorage.removeItem(appStorageKey(appId));
+  } catch {
+    // Storage unavailable: nothing to clear.
+  }
 }
