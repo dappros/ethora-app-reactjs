@@ -177,3 +177,24 @@ test('layout: Test widget on top, one agent card, code first, appearance on its 
   await expect(card.getByTestId('appearance-agent-note')).toBeVisible();
   await expect(page.getByText('Conversations history')).toBeVisible();
 });
+
+test('selecting the snippet text copies it as written, not one token per line', async ({ page }) => {
+  await fakeBackend(page, {});
+  await openTab(page);
+  const pre = page.locator('pre').filter({ hasText: 'data-app-id' });
+  await expect(pre).toBeVisible();
+  const selected = await pre.evaluate((el) => {
+    const code = el.querySelector('code') as HTMLElement;
+    const range = document.createRange();
+    range.selectNodeContents(code);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+    return sel.toString();
+  });
+  const lines = selected.trim().split('\n');
+  expect(lines[0]).toBe('<script');
+  expect(lines).toContain(`  data-app-id="${APP_ID}"`);
+  expect(lines[lines.length - 1]).toBe('></script>');
+  expect(lines.length).toBeLessThanOrEqual(7);
+});
