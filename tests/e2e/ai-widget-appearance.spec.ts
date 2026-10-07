@@ -97,10 +97,12 @@ const me = {
 };
 
 const openTab = (page: Page) => page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI+Widget`);
+const openAppearance = (page: Page) => page.getByRole('tab', { name: /Customize appearance/ }).click();
 
 test('loads the saved appearance from the App and saves changes back to it', async ({ page }) => {
   const { puts } = await fakeBackend(page, { 'data-title': 'Help desk' });
   await openTab(page);
+  await openAppearance(page);
   const title = page.getByLabel('Popup title');
   await expect(title).toHaveValue('Help desk');
 
@@ -114,7 +116,6 @@ test('loads the saved appearance from the App and saves changes back to it', asy
 test('the snippet stays minimal unless the appearance is pinned', async ({ page }) => {
   await fakeBackend(page, { 'data-title': 'Help desk' });
   await openTab(page);
-  await expect(page.getByLabel('Popup title')).toHaveValue('Help desk');
   const code = page.locator('pre').filter({ hasText: 'data-app-id' });
   await expect(code).toContainText(`data-app-id="${APP_ID}"`);
   await expect(code).not.toContainText('data-title="Help desk"');
@@ -134,6 +135,7 @@ test('offers to save appearance an older build kept in this browser', async ({ p
   await banner.getByRole('button', { name: 'Save and apply' }).click();
   await expect(banner).toHaveCount(0);
   expect(puts).toEqual([{ 'data-title': 'From this browser' }]);
+  await openAppearance(page);
   await expect(page.getByLabel('Popup title')).toHaveValue('From this browser');
   expect(await page.evaluate((key) => localStorage.getItem(key), LEGACY_KEY)).toBeNull();
 });
@@ -144,6 +146,34 @@ test('does not offer the browser copy when the App already has an appearance', a
     localStorage.setItem(key, JSON.stringify({ title: 'From this browser' }));
   }, LEGACY_KEY);
   await openTab(page);
+  await openAppearance(page);
   await expect(page.getByLabel('Popup title')).toHaveValue('Help desk');
   await expect(page.getByText('earlier version of this page')).toHaveCount(0);
+});
+
+test('layout: Test widget on top, one agent card, code first, appearance on its own tab', async ({ page }) => {
+  await fakeBackend(page, {});
+  await openTab(page);
+  const agentCard = page.getByTestId('ai-agent-card');
+  await expect(agentCard).toBeVisible();
+  await expect(agentCard.getByLabel('Agent:')).toBeVisible();
+  await expect(agentCard.getByRole('checkbox')).toBeChecked();
+  await expect(agentCard).toContainText('Answering website visitors');
+  // Test widget sits above the agent card, outside it.
+  const testButton = page.getByRole('button', { name: 'Test widget' });
+  await expect(testButton).toBeVisible();
+  expect(await agentCard.getByRole('button', { name: 'Test widget' }).count()).toBe(0);
+  const [tb, ac] = await Promise.all([testButton.boundingBox(), agentCard.boundingBox()]);
+  expect(tb!.y).toBeLessThan(ac!.y);
+  // Code is the default tab and the snippet is short.
+  const card = page.getByTestId('website-widget-card');
+  await expect(card.getByRole('tab', { name: 'Code' })).toHaveAttribute('aria-selected', 'true');
+  const code = card.locator('pre').filter({ hasText: 'data-app-id' });
+  await expect(code).not.toContainText('Optional.');
+  await expect(card.getByTestId('widget-attributes-reference')).not.toHaveAttribute('open', '');
+  await expect(page.getByLabel('Popup title')).toHaveCount(0);
+  await card.getByRole('tab', { name: 'Customize appearance' }).click();
+  await expect(page.getByLabel('Popup title')).toBeVisible();
+  await expect(card.getByTestId('appearance-agent-note')).toBeVisible();
+  await expect(page.getByText('Conversations history')).toBeVisible();
 });

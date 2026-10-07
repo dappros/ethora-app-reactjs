@@ -1,9 +1,7 @@
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Box, Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, Tooltip } from '@mui/material';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTranslation } from '../../../i18n/useTranslation';
@@ -36,34 +34,6 @@ export const TabAIWidgetCode = ({
 }: TabAIWidgetCodeProps): ReactElement => {
   const { t } = useTranslation();
   const currentApp = useAppStore((s) => s.currentApp);
-  const agents = useAppStore((s) => s.agents);
-  const botInstances = useAppStore((s) => s.botInstances);
-
-  // Resolve the Agent the active widget bot draws persona from. Same
-  // resolution chain as ActiveAgentSelector — defaultBotInstanceId ->
-  // BotInstance.agentId -> Agent. Persona surfaces here read-only:
-  // operators edit it under Manage agents, not in this panel.
-  //
-  // Prefer `currentApp` over the parent's `app` prop because the parent
-  // page captures `app` at mount time and doesn't re-pass a fresh copy
-  // when the operator switches Active Agent above. ActiveAgentSelector
-  // pushes the API's updated app row into the store via doUpdateApp,
-  // so reading `currentApp` (when it's the same _id) gives us the
-  // fresh defaultBotInstanceId without a parent re-render.
-  const activeAgent = useMemo(() => {
-    const isSameApp =
-      (currentApp as any)?._id &&
-      (app as any)?._id &&
-      String((currentApp as any)._id) === String((app as any)._id);
-    const biId = isSameApp
-      ? (currentApp as any).defaultBotInstanceId
-      : (app as any)?.defaultBotInstanceId
-        || (currentApp as any)?.defaultBotInstanceId;
-    if (!biId) return null;
-    const bi = botInstances.find((b) => b.id === biId);
-    if (!bi) return null;
-    return agents.find((a) => a.id === bi.agentId) || null;
-  }, [agents, botInstances, app, currentApp]);
   // Env override first, then the copy bundled with this app. See
   // utils/widgetUrl.ts for why the default is a self-hosted asset.
   const widgetUrl = resolveWidgetUrl();
@@ -156,59 +126,7 @@ export const TabAIWidgetCode = ({
     });
     required.push(`></script>`);
 
-    // Read the contract from the loaded bundle rather than restating it
-    // here. This block used to be a hand-written list of four attributes
-    // while the widget read over thirty, so operators simply could not
-    // discover most of what they had configured. `window.EthoraAssistant`
-    // is published by the widget; the static list below is only a fallback
-    // for the case where the operator opens this tab before the preview
-    // has ever loaded the bundle.
-    const inlinedNames = new Set(chosenAppearance.map(([attr]) => attr));
-    const specs = window.EthoraAssistant?.attributes?.filter(
-      (a) => !a.required && !a.deprecatedAliasFor && !inlinedNames.has(a.name)
-    );
-
-    const lines = specs?.length
-      ? (() => {
-          const width = Math.max(
-            ...specs.map((a) => `${a.name}="${a.example}"`.length)
-          );
-          const byGroup = new Map<string, typeof specs>();
-          specs.forEach((a) => {
-            const list = byGroup.get(a.group) || [];
-            list.push(a);
-            byGroup.set(a.group, list);
-          });
-          const out: string[] = [];
-          for (const [group, items] of byGroup) {
-            out.push(``, `  ${group}:`);
-            items.forEach((a) => {
-              const pair = `${a.name}="${a.example}"`;
-              out.push(`    ${pair.padEnd(width)}  ${a.doc}`);
-            });
-          }
-          return out;
-        })()
-      : [
-          ``,
-          `    data-bot-name="Custom Bot Name"`,
-          `    data-bot-avatar="https://your-cdn/avatar.png"`,
-          `    data-title="Help"`,
-          `    data-greeting-message="Hi! How can I help?"`,
-          `    (load the preview once to list every supported attribute)`,
-        ];
-
-    const optional = [
-      ``,
-      `<!--`,
-      `  Optional. Move any of these inside the <script ...> tag above to`,
-      `  override the defaults (which come from the active Agent set in your`,
-      `  AI Widget admin):`,
-      ...lines,
-      `-->`,
-    ];
-
-    return [...required, ...optional].join('\n');
+    return required.join('\n');
   }, [appId, widgetUrl, apiBaseOverride, appearance, pinAppearance]);
 
   const currentCopyTarget = useMemo(() => {
@@ -237,12 +155,7 @@ export const TabAIWidgetCode = ({
   // }, [avatarFile]);
 
   return (
-    <div className="py-6 p-0 md:p-6">
-      <div className="font-semibold font-sans text-[16px] my-4">{t('aiWidgetCode.title')}</div>
-      <p className="font-sans text-sm pb-4 flex items-center gap-1">
-        {t('aiWidgetCode.description')}
-      </p>
-
+    <div className="p-4">
       <Box>
         <ButtonGroup variant="outlined" size="small" aria-label="code tabs">
           <Button
@@ -264,72 +177,6 @@ export const TabAIWidgetCode = ({
 
       {value === '1' && (
         <Box sx={{ pt: 3 }}>
-          {/* Persona summary — read-only. The widget pulls displayName +
-              avatar straight from the active Agent at runtime via the
-              bot's outbound stanza <data fullName=... photo=.../>, so
-              there's nothing to set here. Operators wanting to change
-              the persona edit it under Manage agents. */}
-          <div className="mb-6">
-            <div className="text-sm font-semibold mb-2 text-gray-700">
-              {t('aiWidgetCode.personaLabel')}
-            </div>
-            {activeAgent ? (
-              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50">
-                {activeAgent.avatarUrl ? (
-                  <img
-                    src={activeAgent.avatarUrl}
-                    alt={activeAgent.displayName}
-                    className="w-12 h-12 rounded-full object-cover bg-gray-200"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
-                    }}
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-700 dark:text-brand-300 flex items-center justify-center font-semibold">
-                    {activeAgent.displayName.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">
-                    {activeAgent.displayName}
-                  </div>
-                  {activeAgent.bio && (
-                    <div className="text-xs text-gray-500 truncate">
-                      {activeAgent.bio}
-                    </div>
-                  )}
-                </div>
-                <Link
-                  to={`/app/admin/agents/${activeAgent.id}/settings`}
-                  className="text-brand-500 hover:underline text-sm"
-                >
-                  {t('aiWidgetCode.editInManageAgents')}
-                </Link>
-              </div>
-            ) : (
-              <div className="p-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
-                {t('aiWidgetCode.noAgentPrefix')}{' '}
-                <span className="font-medium">{t('aiWidgetCode.noAgentSelectorLabel')}</span>{' '}
-                {t('aiWidgetCode.noAgentSuffix')}
-              </div>
-            )}
-          </div>
-
-          {/* Inline help replaced by the commented-out block inside the
-              snippet itself (see scriptCode useMemo above). One info
-              line stays here so first-time integrators know overrides
-              exist without reading the snippet end-to-end. */}
-          <div className="mb-4 flex items-start gap-2 text-sm text-gray-600">
-            <InfoOutlinedIcon fontSize="small" className="mt-0.5 shrink-0" />
-            <span>
-              {t('aiWidgetCode.infoLinePrefix')}
-              <code className="mx-1 px-1 rounded bg-gray-100">data-*</code>
-              {t('aiWidgetCode.infoLineMiddle')}
-              <code className="mx-1 px-1 rounded bg-gray-100">&lt;script&gt;</code>
-              {t('aiWidgetCode.infoLineSuffix')}
-            </span>
-          </div>
-
           <p className="font-sans text-sm pb-2 flex items-center gap-1">
             {t('aiWidgetCode.insertBodyText')}
           </p>
@@ -350,7 +197,7 @@ export const TabAIWidgetCode = ({
           </p>
           <div
             className="relative rounded-md bg-[#454545] overflow-y-auto"
-            style={{ maxHeight: 360 }}
+            style={{ maxHeight: 260 }}
           >
             <div className="absolute top-1 right-1 z-10">
               <Tooltip title={copied ? t('aiWidgetCode.copied') : t('aiWidgetCode.copy')}>
@@ -403,6 +250,7 @@ export const TabAIWidgetCode = ({
               {scriptCode}
             </SyntaxHighlighter>
           </div>
+          <WidgetAttributesReference />
         </Box>
       )}
 
@@ -477,3 +325,38 @@ export const TabAIWidgetCode = ({
     </div>
   );
 };
+
+const WIDGET_README_URL = 'https://github.com/dappros/ethora-ai-chat-widget#readme';
+
+// Every attribute the embed reads, out of the way unless asked for. The list
+// comes from the loaded bundle (window.EthoraAssistant, published once the
+// widget has run on this page, e.g. after Test widget); otherwise the README.
+function WidgetAttributesReference(): ReactElement {
+  const { t } = useTranslation();
+  const specs = window.EthoraAssistant?.attributes?.filter((a) => !a.required && !a.deprecatedAliasFor) || [];
+  return (
+    <details className="mt-3 text-sm font-sans" data-testid="widget-attributes-reference">
+      <summary className="cursor-pointer text-gray-600 select-none">{t('aiWidgetCode.allAttributesSummary')}</summary>
+      <p className="text-xs text-gray-500 mt-2">
+        {t('aiWidgetCode.allAttributesIntro')}{' '}
+        <a href={WIDGET_README_URL} target="_blank" rel="noreferrer" className="text-brand-500 hover:underline">
+          {t('aiWidgetCode.allAttributesReadme')}
+        </a>
+      </p>
+      {specs.length > 0 && (
+        <div className="mt-2 max-h-64 overflow-y-auto border border-gray-200 rounded">
+          <table className="w-full text-xs">
+            <tbody>
+              {specs.map((a) => (
+                <tr key={a.name} className="border-t first:border-t-0 align-top">
+                  <td className="p-2 font-mono whitespace-nowrap">{a.name}</td>
+                  <td className="p-2 text-gray-600">{a.doc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </details>
+  );
+}

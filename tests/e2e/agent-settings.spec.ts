@@ -249,6 +249,9 @@ test.describe('Agent Settings opened by URL', () => {
         await expect(page.getByPlaceholder('https://example.com')).toBeEnabled();
       } else {
         await expect(page.locator('input[type="file"]')).toBeEnabled();
+        // Styled picker with a drop area instead of the browser's file input.
+        await expect(page.getByTestId('docs-drop-zone').getByRole('button', { name: 'Choose files' })).toBeEnabled();
+        await expect(page.getByText('or drag files here')).toBeVisible();
       }
     });
   }

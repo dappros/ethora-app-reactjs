@@ -1033,6 +1033,55 @@ type DocSourceRow = {
   updatedAt?: string;
 };
 
+// File picker for Docs Index: a drop area with the section's button style
+// instead of the browser's own file input.
+const DocsDropZone: React.FC<{
+  disabled: boolean;
+  busy: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+  onFiles: (files: File[]) => void;
+}> = ({ disabled, busy, inputRef, onFiles }) => {
+  const { t } = useTranslation();
+  const [over, setOver] = useState(false);
+  return (
+    <div
+      data-testid="docs-drop-zone"
+      onDragOver={(e) => {
+        if (disabled) return;
+        e.preventDefault();
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        if (!disabled) onFiles(Array.from(e.dataTransfer.files || []));
+      }}
+      className={`flex flex-col sm:flex-row items-center justify-center gap-3 rounded-lg border-2 border-dashed px-4 py-5 text-sm transition-colors ${
+        over ? 'border-brand-500 bg-brand-50' : 'border-gray-300 bg-gray-50'
+      } ${disabled ? 'opacity-60' : ''}`}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        hidden
+        disabled={disabled}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onFiles(Array.from(e.target.files || []))}
+      />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => inputRef.current?.click()}
+        className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
+      >
+        {busy ? t('agentPanels.uploading') : t('agentPanels.chooseFiles')}
+      </button>
+      <span className="text-gray-500">{t('agentPanels.dropFilesHint')}</span>
+    </div>
+  );
+};
+
 export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisabled?: boolean }> = ({ agent, appId: initialAppId, isDisabled }) => {
   const { t } = useTranslation();
   const apps = useAppStore((s) => s.ownedApps);
@@ -1086,13 +1135,11 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
         <AppScopePicker agent={agent} appId={appId} onChange={setAppId} />
       </div>
       {!isDisabled && <KnowledgeHealth agentId={agent.id} refreshKey={rows.length} />}
-      <input
-        ref={fileRef}
-        type="file"
-        multiple
+      <DocsDropZone
         disabled={isDisabled || busy || !appId}
-        onChange={async (e: ChangeEvent<HTMLInputElement>) => {
-          const files = Array.from(e.target.files || []);
+        busy={busy}
+        inputRef={fileRef}
+        onFiles={async (files) => {
           if (!files.length) return;
           setBusy(true);
           try {

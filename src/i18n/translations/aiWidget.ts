@@ -83,11 +83,14 @@ export const aiWidget = {
       'Insert this code anywhere inside your <body> tag:',
     'aiWidgetCode.pinAppearanceLabel': 'Pin the appearance in the snippet',
     'aiWidgetCode.pinAppearanceOffHint':
-      'The widget loads the saved appearance when it opens, so changes you save above reach your site without pasting the code again.',
+      'The widget loads the saved appearance when it opens, so changes you save under Customize appearance reach your site without pasting the code again.',
     'aiWidgetCode.pinAppearanceOnHint':
       'The saved appearance is written into the code and wins over changes you save later. Use this for a site that must not follow them.',
     'aiWidgetCode.copied': 'Copied',
     'aiWidgetCode.copy': 'Copy',
+    'aiWidgetCode.allAttributesSummary': "All supported attributes",
+    'aiWidgetCode.allAttributesIntro': "Add any of these to the <script> tag to set it for that one site; a value on the tag overrides the saved appearance there.",
+    'aiWidgetCode.allAttributesReadme': "Full reference on GitHub",
     'aiWidgetCode.wordpressInsertPrefix':
       'Insert this bot ID in your Wordpress',
     'aiWidgetCode.wordpressInsertSuffix': ':',
@@ -108,7 +111,7 @@ export const aiWidget = {
     'aiWidgetPrompt.placeholder': 'Enter prompt instructions here...',
 
     // WidgetConversationsPanel.tsx
-    'aiWidgetConversations.heading': 'Widget conversations',
+    'aiWidgetConversations.heading': 'Conversations history',
     'aiWidgetConversations.loading': 'Loading…',
     'aiWidgetConversations.totalSuffix': 'total',
     'aiWidgetConversations.exportAll': 'Export all',
@@ -265,6 +268,8 @@ export const aiWidget = {
     'agentPanels.closeDialog': 'Close',
     'agentPanels.docsIndexDescription':
       'Upload PDFs, DOCX, MD, TXT to index under this agent.',
+    'agentPanels.chooseFiles': 'Choose files',
+    'agentPanels.dropFilesHint': 'or drag files here',
     'agentPanels.uploadingParsingEmbedding':
       'Uploading + parsing + embedding...',
     'agentPanels.uploadedFilesToast': 'Uploaded {n} file(s)',
@@ -450,11 +455,14 @@ export const aiWidget = {
       "Insérez ce code n'importe où dans votre balise <body> :",
     'aiWidgetCode.pinAppearanceLabel': "Figer l'apparence dans le code",
     'aiWidgetCode.pinAppearanceOffHint':
-      "Le widget charge l'apparence enregistrée à l'ouverture : les changements enregistrés ci-dessus arrivent sur votre site sans recoller le code.",
+      "Le widget charge l'apparence enregistrée à l'ouverture : les changements enregistrés dans Personnaliser l'apparence arrivent sur votre site sans recoller le code.",
     'aiWidgetCode.pinAppearanceOnHint':
       "L'apparence enregistrée est écrite dans le code et prime sur les changements enregistrés ensuite. Pour un site qui ne doit pas les suivre.",
     'aiWidgetCode.copied': 'Copié',
     'aiWidgetCode.copy': 'Copier',
+    'aiWidgetCode.allAttributesSummary': "Tous les attributs pris en charge",
+    'aiWidgetCode.allAttributesIntro': "Ajoutez-en un à la balise <script> pour le régler sur ce seul site ; une valeur sur la balise y prime sur l'apparence enregistrée.",
+    'aiWidgetCode.allAttributesReadme': "Référence complète sur GitHub",
     'aiWidgetCode.wordpressInsertPrefix':
       'Insérez cet identifiant de bot dans les paramètres de votre Wordpress',
     'aiWidgetCode.wordpressInsertSuffix': ' :',
@@ -476,7 +484,7 @@ export const aiWidget = {
     'aiWidgetPrompt.placeholder': 'Saisissez les instructions du prompt ici...',
 
     // WidgetConversationsPanel.tsx
-    'aiWidgetConversations.heading': 'Conversations du widget',
+    'aiWidgetConversations.heading': 'Historique des conversations',
     'aiWidgetConversations.loading': 'Chargement…',
     'aiWidgetConversations.totalSuffix': 'au total',
     'aiWidgetConversations.exportAll': 'Tout exporter',
@@ -641,6 +649,8 @@ export const aiWidget = {
     'agentPanels.closeDialog': 'Fermer',
     'agentPanels.docsIndexDescription':
       'Téléversez des fichiers PDF, DOCX, MD, TXT à indexer pour cet agent.',
+    'agentPanels.chooseFiles': 'Choisir des fichiers',
+    'agentPanels.dropFilesHint': 'ou glissez des fichiers ici',
     'agentPanels.uploadingParsingEmbedding':
       "Téléversement + analyse + génération des embeddings...",
     'agentPanels.uploadedFilesToast': '{n} fichier(s) téléversé(s)',
@@ -829,11 +839,14 @@ export const aiWidget = {
       'Inserta este código en cualquier parte dentro de tu etiqueta <body>:',
     'aiWidgetCode.pinAppearanceLabel': 'Fijar la apariencia en el código',
     'aiWidgetCode.pinAppearanceOffHint':
-      'El widget carga la apariencia guardada al abrirse, así que los cambios que guardes arriba llegan a tu sitio sin volver a pegar el código.',
+      'El widget carga la apariencia guardada al abrirse, así que los cambios que guardes en Personalizar apariencia llegan a tu sitio sin volver a pegar el código.',
     'aiWidgetCode.pinAppearanceOnHint':
       'La apariencia guardada se escribe en el código y tiene prioridad sobre los cambios que guardes después. Úsalo para un sitio que no deba seguirlos.',
     'aiWidgetCode.copied': 'Copiado',
     'aiWidgetCode.copy': 'Copiar',
+    'aiWidgetCode.allAttributesSummary': "Todos los atributos admitidos",
+    'aiWidgetCode.allAttributesIntro': "Añade cualquiera a la etiqueta <script> para fijarlo solo en ese sitio; un valor en la etiqueta prevalece allí sobre la apariencia guardada.",
+    'aiWidgetCode.allAttributesReadme': "Referencia completa en GitHub",
     'aiWidgetCode.wordpressInsertPrefix':
       'Inserta este ID de bot en la configuración de tu Wordpress',
     'aiWidgetCode.wordpressInsertSuffix': ':',
@@ -856,7 +869,7 @@ export const aiWidget = {
       'Escribe aquí las instrucciones del prompt...',
 
     // WidgetConversationsPanel.tsx
-    'aiWidgetConversations.heading': 'Conversaciones del widget',
+    'aiWidgetConversations.heading': 'Historial de conversaciones',
     'aiWidgetConversations.loading': 'Cargando…',
     'aiWidgetConversations.totalSuffix': 'en total',
     'aiWidgetConversations.exportAll': 'Exportar todo',
@@ -1021,6 +1034,8 @@ export const aiWidget = {
     'agentPanels.closeDialog': 'Cerrar',
     'agentPanels.docsIndexDescription':
       'Sube archivos PDF, DOCX, MD, TXT para indexarlos en este agente.',
+    'agentPanels.chooseFiles': 'Elegir archivos',
+    'agentPanels.dropFilesHint': 'o arrastra archivos aquí',
     'agentPanels.uploadingParsingEmbedding':
       'Subiendo + analizando + generando embeddings...',
     'agentPanels.uploadedFilesToast': '{n} archivo(s) subido(s)',

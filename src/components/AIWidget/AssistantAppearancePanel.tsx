@@ -23,6 +23,9 @@ interface Props {
   onSave: () => void;
   onReset: () => void;
   isDirty: boolean;
+  // Inside the Website widget card's tab: no border or title of its own.
+  embedded?: boolean;
+  footer?: React.ReactNode;
 }
 
 // Same input look as AppSettings/Appearance.tsx (bg-gray-100 rounded-xl),
@@ -253,6 +256,8 @@ export function AssistantAppearancePanel({
   onSave,
   onReset,
   isDirty,
+  embedded = false,
+  footer,
 }: Props) {
   const { t } = useTranslation();
   const [gradStart, gradEnd] = appearance.launcherGradient
@@ -266,12 +271,14 @@ export function AssistantAppearancePanel({
   };
 
   return (
-    <div className="w-full border border-gray-200 rounded-xl bg-white p-4 mt-4">
+    <div className={embedded ? 'w-full p-4' : 'w-full border border-gray-200 rounded-xl bg-white p-4 mt-4'}>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
         <div>
-          <div className="font-sans font-semibold text-base">
-            {t('aiWidgetAppearance.title')}
-          </div>
+          {!embedded && (
+            <div className="font-sans font-semibold text-base">
+              {t('aiWidgetAppearance.title')}
+            </div>
+          )}
           <p className="font-sans text-xs text-gray-500 mt-1 max-w-xl">
             {t('aiWidgetAppearance.description')}
           </p>
@@ -571,6 +578,7 @@ export function AssistantAppearancePanel({
           onChange={(v) => onChange({ ctaSparkle: v })}
         />
       </Section>
+      {footer}
     </div>
   );
 }
