@@ -81,6 +81,11 @@ export const aiWidget = {
     'aiWidgetCode.infoLineSuffix': 'tag to override any of them per embed.',
     'aiWidgetCode.insertBodyText':
       'Insert this code anywhere inside your <body> tag:',
+    'aiWidgetCode.pinAppearanceLabel': 'Pin the appearance in the snippet',
+    'aiWidgetCode.pinAppearanceOffHint':
+      'The widget loads the saved appearance when it opens, so changes you save above reach your site without pasting the code again.',
+    'aiWidgetCode.pinAppearanceOnHint':
+      'The saved appearance is written into the code and wins over changes you save later. Use this for a site that must not follow them.',
     'aiWidgetCode.copied': 'Copied',
     'aiWidgetCode.copy': 'Copy',
     'aiWidgetCode.wordpressInsertPrefix':
@@ -443,6 +448,11 @@ export const aiWidget = {
       'pour les remplacer individuellement par intégration.',
     'aiWidgetCode.insertBodyText':
       "Insérez ce code n'importe où dans votre balise <body> :",
+    'aiWidgetCode.pinAppearanceLabel': "Figer l'apparence dans le code",
+    'aiWidgetCode.pinAppearanceOffHint':
+      "Le widget charge l'apparence enregistrée à l'ouverture : les changements enregistrés ci-dessus arrivent sur votre site sans recoller le code.",
+    'aiWidgetCode.pinAppearanceOnHint':
+      "L'apparence enregistrée est écrite dans le code et prime sur les changements enregistrés ensuite. Pour un site qui ne doit pas les suivre.",
     'aiWidgetCode.copied': 'Copié',
     'aiWidgetCode.copy': 'Copier',
     'aiWidgetCode.wordpressInsertPrefix':
@@ -817,6 +827,11 @@ export const aiWidget = {
       'para anular cualquiera de ellos por instalación.',
     'aiWidgetCode.insertBodyText':
       'Inserta este código en cualquier parte dentro de tu etiqueta <body>:',
+    'aiWidgetCode.pinAppearanceLabel': 'Fijar la apariencia en el código',
+    'aiWidgetCode.pinAppearanceOffHint':
+      'El widget carga la apariencia guardada al abrirse, así que los cambios que guardes arriba llegan a tu sitio sin volver a pegar el código.',
+    'aiWidgetCode.pinAppearanceOnHint':
+      'La apariencia guardada se escribe en el código y tiene prioridad sobre los cambios que guardes después. Úsalo para un sitio que no deba seguirlos.',
     'aiWidgetCode.copied': 'Copiado',
     'aiWidgetCode.copy': 'Copiar',
     'aiWidgetCode.wordpressInsertPrefix':

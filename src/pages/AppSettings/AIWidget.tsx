@@ -6,7 +6,12 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { httpUpdateApp, httpV2 } from '../../http';
+import {
+  httpGetWidgetAppearance,
+  httpSaveWidgetAppearance,
+  httpUpdateApp,
+  httpV2,
+} from '../../http';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
@@ -18,9 +23,11 @@ import { useTranslation } from '../../i18n/useTranslation';
 import {
   AiWidgetAppearance,
   defaultAiWidgetAppearance,
+  appearanceFromAttributes,
+  clearLegacyBrowserAppearance,
+  getAppearanceAttributeRecord,
   getAppearanceAttributes,
-  loadStoredAppearance,
-  saveStoredAppearance,
+  loadLegacyBrowserAppearance,
 } from '../../lib/aiWidgetAppearance';
 import { resolveWidgetUrl } from '../../utils/widgetUrl';
 import './AIWidget.scss';
@@ -152,38 +159,93 @@ export function AIWidget({
   const [previewActive, setPreviewActive] = useState<boolean>(false);
   const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
 
-  // Appearance customization (colors, fonts, layout, launcher, CTA). Not
-  // yet a backend field (see lib/aiWidgetAppearance.ts header) - persisted
-  // to this browser only, keyed by appId. `savedAppearance` is the
-  // last-persisted snapshot, used only to compute the "unsaved changes"
-  // indicator; `appearance` is what Test widget and the embed snippet below
-  // actually render, live, before Save is even clicked.
-  const [appearance, setAppearance] = useState<AiWidgetAppearance>(() =>
-    loadStoredAppearance(appId)
-  );
-  const [savedAppearance, setSavedAppearance] = useState<AiWidgetAppearance>(appearance);
+  // Appearance customization (colors, fonts, layout, launcher, CTA), stored
+  // on the App and read by every live embed at load (see
+  // lib/aiWidgetAppearance.ts header). `savedAppearance` is what the server
+  // holds, used for the "unsaved changes" indicator; `appearance` is what
+  // Test widget renders, live, before Save is even clicked.
+  const [appearance, setAppearance] = useState<AiWidgetAppearance>(defaultAiWidgetAppearance);
+  const [savedAppearance, setSavedAppearance] = useState<AiWidgetAppearance>(defaultAiWidgetAppearance);
+  const [appearanceLoaded, setAppearanceLoaded] = useState(false);
+  const [savingAppearance, setSavingAppearance] = useState(false);
+  // Settings an older build of this page kept in this browser only, offered
+  // once for saving to the server when the server holds none.
+  const [legacyAppearance, setLegacyAppearance] = useState<AiWidgetAppearance | null>(null);
 
   useEffect(() => {
-    const loaded = loadStoredAppearance(appId);
-    setAppearance(loaded);
-    setSavedAppearance(loaded);
-  }, [appId]);
+    if (!appId) return;
+    let cancelled = false;
+    setAppearanceLoaded(false);
+    setLegacyAppearance(null);
+    httpGetWidgetAppearance(appId)
+      .then((resp) => {
+        if (cancelled) return;
+        const attrs = resp?.data?.appearance || {};
+        const loaded = appearanceFromAttributes(attrs);
+        setAppearance(loaded);
+        setSavedAppearance(loaded);
+        setAppearanceLoaded(true);
+        if (!Object.keys(attrs).length) setLegacyAppearance(loadLegacyBrowserAppearance(appId));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAppearance(defaultAiWidgetAppearance);
+        setSavedAppearance(defaultAiWidgetAppearance);
+        toast.error(t('aiWidgetAppearance.loadFailed'));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appId, t]);
 
   const handleAppearanceChange = useCallback((updates: Partial<AiWidgetAppearance>) => {
     setAppearance((prev) => ({ ...prev, ...updates }));
   }, []);
 
+  const saveAppearance = useCallback(
+    async (next: AiWidgetAppearance) => {
+      setSavingAppearance(true);
+      try {
+        const resp = await httpSaveWidgetAppearance(appId, getAppearanceAttributeRecord(next));
+        const stored = appearanceFromAttributes(resp?.data?.appearance || {});
+        setAppearance(stored);
+        setSavedAppearance(stored);
+        toast.success(t('aiWidgetAppearance.saved'));
+        return true;
+      } catch (error) {
+        const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+        toast.error(message || t('aiWidgetAppearance.saveFailed'));
+        return false;
+      } finally {
+        setSavingAppearance(false);
+      }
+    },
+    [appId, t]
+  );
+
   const handleSaveAppearance = useCallback(() => {
-    saveStoredAppearance(appId, appearance);
-    setSavedAppearance(appearance);
-    toast.success(t('aiWidgetAppearance.saved'));
-  }, [appId, appearance, t]);
+    if (!appearanceLoaded || savingAppearance) return;
+    void saveAppearance(appearance);
+  }, [appearance, appearanceLoaded, saveAppearance, savingAppearance]);
+
+  const handleKeepLegacyAppearance = useCallback(async () => {
+    if (!legacyAppearance) return;
+    if (await saveAppearance(legacyAppearance)) {
+      clearLegacyBrowserAppearance(appId);
+      setLegacyAppearance(null);
+    }
+  }, [appId, legacyAppearance, saveAppearance]);
+
+  const handleDiscardLegacyAppearance = useCallback(() => {
+    clearLegacyBrowserAppearance(appId);
+    setLegacyAppearance(null);
+  }, [appId]);
 
   const handleResetAppearance = useCallback(() => {
     setAppearance(defaultAiWidgetAppearance);
   }, []);
 
-  const appearanceIsDirty = !isEqual(appearance, savedAppearance);
+  const appearanceIsDirty = appearanceLoaded && !isEqual(appearance, savedAppearance);
 
   // Env override first, then the copy bundled with this app. See
   // utils/widgetUrl.ts for the full resolution order.
@@ -400,6 +462,21 @@ export function AIWidget({
         {/* Appearance customization — colors, fonts, layout, launcher, CTA.
             Feeds both the Test widget button above (live) and the embed
             code below (once saved). */}
+        {legacyAppearance && (
+          <Box
+            role="status"
+            className="flex flex-wrap items-center gap-3 px-4 py-3 mt-4 rounded-xl font-sans text-sm"
+            sx={{ border: '1px solid', borderColor: 'info.light', backgroundColor: 'info.lighter' }}
+          >
+            <span className="flex-1 min-w-[16rem]">{t('aiWidgetAppearance.legacyFound')}</span>
+            <Button size="small" variant="contained" onClick={handleKeepLegacyAppearance} disabled={savingAppearance}>
+              {t('aiWidgetAppearance.legacySave')}
+            </Button>
+            <Button size="small" onClick={handleDiscardLegacyAppearance} disabled={savingAppearance}>
+              {t('aiWidgetAppearance.legacyDiscard')}
+            </Button>
+          </Box>
+        )}
         <AssistantAppearancePanel
           appearance={appearance}
           onChange={handleAppearanceChange}
@@ -416,7 +493,7 @@ export function AIWidget({
             appId={appId}
             app={app}
             userId={aiBot.userId}
-            appearance={appearance}
+            appearance={savedAppearance}
             handleChange={handleChange}
           />
         </div>

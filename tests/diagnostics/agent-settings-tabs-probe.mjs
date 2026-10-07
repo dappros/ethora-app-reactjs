@@ -165,9 +165,9 @@ await tab('Visibility');
   check('visibility kept after tab switch', await page.locator('input[type="radio"][value="unlisted"]').isChecked());
 }
 
-// Widget Appearance (browser-local only): loads and saves without errors
-await tab('Widget Appearance');
-check('widget appearance renders', (await page.getByRole('button', { name: /save/i }).count()) > 0);
+// Website widget: points at the Apps whose widget this agent answers in
+await tab('Website widget');
+check('website widget renders', (await page.getByText(/App settings > AI Widget/).count()) > 0);
 
 // Web Index: crawl a small public page into this agent
 await tab('Web Index');

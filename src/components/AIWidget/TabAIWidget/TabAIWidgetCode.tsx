@@ -1,7 +1,7 @@
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { Box, Button, ButtonGroup, IconButton, Tooltip } from '@mui/material';
+import { Box, Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, Tooltip } from '@mui/material';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -18,10 +18,10 @@ interface TabAIWidgetCodeProps {
   appId?: string;
   app?: ModelApp;
   userId?: string;
-  // Appearance chosen in AssistantAppearancePanel above. Its non-default
-  // data-* attributes are inlined into the required <script> tag below
-  // instead of only appearing in the commented reference block, so the
-  // snippet an operator copies matches what they actually configured.
+  // Appearance saved in AssistantAppearancePanel above. Live embeds load it
+  // from the server, so the snippet stays minimal unless the operator pins
+  // it: then its non-default data-* attributes are written into the tag and
+  // win over later saved changes on that site.
   appearance?: AiWidgetAppearance;
   handleChange: (_: React.SyntheticEvent, newValue: string) => void;
 }
@@ -79,6 +79,7 @@ export const TabAIWidgetCode = ({
   // override path (data-bot-display-name / data-bot-avatar) is still
   // documented for white-label scenarios; operators add those attrs by
   // hand to the snippet below if they need them.
+  const [pinAppearance, setPinAppearance] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>('');
   const envXmppHost = env.VITE_XMPP_HOST || '';
@@ -147,10 +148,9 @@ export const TabAIWidgetCode = ({
     if (apiBaseOverride) {
       required.push(`  data-api-base="${apiBaseOverride}"`);
     }
-    // Appearance attrs the operator actually set in the panel above, so the
-    // snippet they copy already reflects their choices - not just the four
-    // required attrs plus a wall of commented examples.
-    const chosenAppearance = appearance ? getAppearanceAttributes(appearance) : [];
+    // Saved appearance is fetched by the widget at load; writing it into the
+    // tag is opt-in, for sites that must not follow later changes.
+    const chosenAppearance = pinAppearance && appearance ? getAppearanceAttributes(appearance) : [];
     chosenAppearance.forEach(([attr, val]) => {
       required.push(`  ${attr}="${val.replace(/"/g, '&quot;')}"`);
     });
@@ -209,7 +209,7 @@ export const TabAIWidgetCode = ({
     ];
 
     return [...required, ...optional].join('\n');
-  }, [appId, widgetUrl, apiBaseOverride, appearance]);
+  }, [appId, widgetUrl, apiBaseOverride, appearance, pinAppearance]);
 
   const currentCopyTarget = useMemo(() => {
     if (value === '1') {
@@ -330,8 +330,23 @@ export const TabAIWidgetCode = ({
             </span>
           </div>
 
-          <p className="font-sans text-sm pb-4 flex items-center gap-1">
+          <p className="font-sans text-sm pb-2 flex items-center gap-1">
             {t('aiWidgetCode.insertBodyText')}
+          </p>
+          <FormControlLabel
+            className="pb-2"
+            control={
+              <Checkbox
+                size="small"
+                checked={pinAppearance}
+                onChange={(e) => setPinAppearance(e.target.checked)}
+                slotProps={{ input: { 'aria-describedby': 'pin-appearance-hint' } }}
+              />
+            }
+            label={<span className="font-sans text-sm">{t('aiWidgetCode.pinAppearanceLabel')}</span>}
+          />
+          <p id="pin-appearance-hint" className="font-sans text-xs text-gray-500 pb-4 -mt-1">
+            {pinAppearance ? t('aiWidgetCode.pinAppearanceOnHint') : t('aiWidgetCode.pinAppearanceOffHint')}
           </p>
           <div
             className="relative rounded-md bg-[#454545] overflow-y-auto"
