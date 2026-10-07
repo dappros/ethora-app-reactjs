@@ -10,6 +10,39 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { LanguageModal } from '../modal/LanguageModal';
 
+function SettingRow({
+  label,
+  hint,
+  value,
+  onClick,
+}: {
+  label: string;
+  hint?: string;
+  value: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3 text-left hover:bg-brand-hover transition-colors"
+    >
+      <span className="min-w-0">
+        <span className="block font-sans text-sm">{label}</span>
+        {hint && (
+          <span className="block font-sans text-xs text-gray-500 mt-0.5">{hint}</span>
+        )}
+      </span>
+      <span className="flex items-center gap-1 shrink-0 font-sans text-sm text-brand-500">
+        {value}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </span>
+    </button>
+  );
+}
+
 // The interface-language and chat-language pickers. Shared by the Profile
 // page and the Account > Appearance tab, which show the same two settings.
 export function LanguageSettings() {
@@ -88,40 +121,32 @@ export function LanguageSettings() {
 
   return (
     <>
-      <p className="text-gray-500 font-sans text-[14px] mb-2">
-        {t('profile.language')}
-      </p>
-      <button
-        onClick={() => setShowLanguageModal(true)}
-        className="w-full max-w-[416px] text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
-      >
-        {currentLanguageName}
-      </button>
-      {/* Hidden entirely when the install has no translation server
-          (get-config reports translateLanguages: []): a picker whose choice
-          cannot take effect is worse than no picker. */}
-      {translateOptions.length > 0 && (
-        <>
-          <p className="text-gray-500 font-sans text-[14px] mt-4 mb-2">
-            {t('profile.chatLanguage')}
-          </p>
-          <button
+      <div className="flex flex-col gap-2 max-w-2xl">
+        <SettingRow
+          label={t('profile.language')}
+          value={currentLanguageName}
+          onClick={() => setShowLanguageModal(true)}
+        />
+        {/* Hidden entirely when the install has no translation server
+            (get-config reports translateLanguages: []): a picker whose choice
+            cannot take effect is worse than no picker. */}
+        {translateOptions.length > 0 && (
+          <SettingRow
+            label={t('profile.chatLanguage')}
+            hint={
+              chatLanguage === null
+                ? t('profile.chatLanguageFollowingApp')
+                : t('profile.chatLanguageHint')
+            }
+            value={currentChatLanguageName}
             onClick={() => setShowChatLanguageModal(true)}
-            className="w-full max-w-[416px] text-left rounded-xl border border-gray-300 px-3 py-2 bg-white hover:bg-brand-hover"
-          >
-            {currentChatLanguageName}
-          </button>
-          <p className="text-gray-500 font-sans text-[12px] mt-2">
-            {chatLanguage === null
-              ? t('profile.chatLanguageFollowingApp')
-              : t('profile.chatLanguageHint')}
-          </p>
-          {chatLanguageUnsupported && (
-            <p className="text-red-500 font-sans text-[12px] mt-1">
-              {t('profile.chatLanguageUnsupported')}
-            </p>
-          )}
-        </>
+          />
+        )}
+      </div>
+      {translateOptions.length > 0 && chatLanguageUnsupported && (
+        <p className="text-red-500 font-sans text-[12px] mt-2">
+          {t('profile.chatLanguageUnsupported')}
+        </p>
       )}
 
       {showLanguageModal && (

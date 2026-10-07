@@ -1,17 +1,9 @@
 import { logoutService } from '@ethora/chat-component';
-import {
-  Dialog,
-  DialogPanel,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-} from '@headlessui/react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Button } from '@mui/material';
+import { Dialog, DialogPanel } from '@headlessui/react';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { DateTime } from 'luxon';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionLogout } from '../actions';
@@ -31,6 +23,26 @@ import { deleteDocuments, getDocuments, httpLogout } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelCurrentUser } from '../models';
 import { useAppStore } from '../store/useAppStore';
+
+function ProfileSection({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="border border-gray-200 rounded-2xl p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-sans font-semibold text-[15px]">{title}</h3>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export default function Profile() {
   const [showQr, setShowQr] = useState<boolean>(false);
@@ -118,7 +130,7 @@ export default function Profile() {
           </div>
         </div>
         <div className="flex justify-center">
-          <div className="max-w-[800px] w-full flex px-[16px] flex-col gap-8">
+          <div className="max-w-[800px] w-full flex px-[16px] flex-col gap-5">
             <div className="">
               <ProfilePageUserIcon
                 firstName={firstName}
@@ -132,90 +144,92 @@ export default function Profile() {
                 {t('profile.onlineOffline')}
               </p>
             </div>
-            <div className="border border-gray-200 rounded-xl p-4">
-              <p className="text-gray-500 font-sans text-[14px] mb-2">
-                {t('profile.about')}
-              </p>
-              <p className="text-black text-regular">{description}</p>
-            </div>
-            <div className="border border-gray-200 rounded-xl p-4">
-              <TabGroup className="px-2">
-                <TabList className="h-[44px] flex mb-4">
-                  <Tab
-                    key="documents"
-                    // w-1/2 if there's a collection
-                    className="border-b border-b-gray-200 w-full data-[selected]:text-brand-500 data-[selected]:border-b-brand-500"
-                  >
-                    {t('profile.documents')}
-                  </Tab>
-                  {/* <Tab
-                    key="collections"
-                    className="border-b border-b-gray-200 w-1/2 data-[selected]:text-brand-500 data-[selected]:border-b-brand-500 pointer-events-none text-gray-300"
-                  >
-                    Collections
-                  </Tab> */}
-                </TabList>
-                <TabPanels className="">
-                  <TabPanel key="">
-                    <button
-                      onClick={() => setShowNewDocModal(true)}
-                      className="w-full hover:bg-brand-darker bg-brand-500 text-white py-4 font-varela text-[16px] rounded-xl mb-4"
+            <ProfileSection title={t('profile.about')}>
+              {description ? (
+                <p className="font-sans text-[15px] leading-relaxed whitespace-pre-line">
+                  {description}
+                </p>
+              ) : (
+                <p className="font-sans text-sm text-gray-500">{t('profile.aboutEmpty')}</p>
+              )}
+            </ProfileSection>
+
+            <ProfileSection
+              title={
+                documents.length
+                  ? `${t('profile.documents')} · ${documents.length}`
+                  : t('profile.documents')
+              }
+              action={
+                <button
+                  onClick={() => setShowNewDocModal(true)}
+                  className="inline-flex items-center gap-1 rounded-xl bg-brand-500 hover:bg-brand-darker text-white font-sans text-sm font-medium pl-2.5 pr-3.5 py-2 transition-colors"
+                >
+                  <AddIcon sx={{ fontSize: 18 }} />
+                  {t('profile.addDocument')}
+                </button>
+              }
+            >
+              {documents.length ? (
+                <ul className="flex flex-col gap-2">
+                  {documents.map((el) => (
+                    <li
+                      key={el._id}
+                      className="flex items-center gap-3 rounded-xl border border-gray-200 px-3 py-2.5 hover:bg-gray-50 transition-colors"
                     >
-                      {t('profile.addDocument')}
-                    </button>
-                    {documents.map((el) => (
-                      <div
-                        className="bg-brand-150 rounded-lg p-2 mb-4 flex items-center justify-between"
-                        key={el._id}
-                      >
-                        <div className="flex items-center">
-                          <div className="w-[40px] h-[40px] bg-white rounded-lg flex items-center justify-center">
-                            <IconDoc />
-                          </div>
-                          <div className="ml-2">
-                            <div className="text-[14px]">{el.documentName}</div>
-                            <div className="text-gray-500 text-[12px]">
-                              {DateTime.fromISO(el.createdAt).toFormat(
-                                'dd LLL yyyy t'
-                              )}
-                            </div>
-                          </div>
+                      <span className="size-10 shrink-0 rounded-lg bg-brand-150 flex items-center justify-center">
+                        <IconDoc />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-sans text-sm font-medium truncate">
+                          {el.documentName}
                         </div>
-                        <Button
-                          color="error"
-                          onClick={() => showDeleteModal(el._id)}
-                        >
-                          <DeleteIcon />
-                        </Button>
+                        <div className="font-sans text-xs text-gray-500">
+                          {DateTime.fromISO(el.createdAt).toFormat('dd LLL yyyy, t')}
+                        </div>
                       </div>
-                    ))}
-                  </TabPanel>
-                  {/* <TabPanel key="collections">collections</TabPanel> */}
-                </TabPanels>
-              </TabGroup>
-            </div>
+                      <button
+                        onClick={() => showDeleteModal(el._id)}
+                        aria-label={t('profile.deleteDocumentAria').replace('{name}', el.documentName)}
+                        title={t('profile.deleteDocument.delete')}
+                        className="size-9 shrink-0 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                      >
+                        <DeleteOutlineIcon sx={{ fontSize: 20 }} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="rounded-xl border border-dashed border-gray-300 px-4 py-6 text-center font-sans text-sm text-gray-500">
+                  {t('profile.documentsEmpty')}
+                </div>
+              )}
+            </ProfileSection>
+
             {/* Same controls as Account > Appearance, kept here too so
                 they are one tap away from the profile. */}
-            <div className="border border-gray-200 rounded-xl p-4">
-              <p className="text-gray-500 font-sans text-[14px] mb-2">
+            <ProfileSection title={t('profile.preferences')}>
+              <p className="font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                 {t('appearance.themeHeading')}
               </p>
               <ThemeSettings />
               {hasLanguageSettings && (
-                <div className="mt-4">
+                <>
+                  <p className="font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide mt-6 mb-2">
+                    {t('appearance.languageHeading')}
+                  </p>
                   <LanguageSettings />
-                </div>
+                </>
               )}
-            </div>
-            <div className="border border-gray-200 rounded-xl p-4 text-center mb-8">
-              <button
-                className="text-red-500 p-4 w-full rounded-xl hover:bg-brand-hover font-varela text-regular inline-flex items-center justify-center"
-                onClick={() => onLogout()}
-              >
-                <IconLogout />
-                <span className="ml-2">{t('profile.logout')}</span>
-              </button>
-            </div>
+            </ProfileSection>
+
+            <button
+              className="mb-8 w-full rounded-2xl border border-gray-200 px-5 py-4 inline-flex items-center justify-center gap-2 text-red-500 font-sans font-medium hover:bg-red-500/10 hover:border-red-500/40 transition-colors"
+              onClick={() => onLogout()}
+            >
+              <IconLogout />
+              <span>{t('profile.logout')}</span>
+            </button>
           </div>
         </div>
       </div>

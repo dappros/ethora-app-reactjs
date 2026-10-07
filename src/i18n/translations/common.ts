@@ -22,6 +22,10 @@ export const common = {
     'profile.logout': 'Logout',
     'profile.language': 'App language',
     'profile.chatLanguage': 'Chat language',
+    'profile.aboutEmpty': 'No description yet.',
+    'profile.documentsEmpty': 'No documents yet. Add one to keep it with your profile.',
+    'profile.deleteDocumentAria': 'Delete {name}',
+    'profile.preferences': 'Preferences',
     'profile.chatLanguageHint':
       'Incoming chat messages are translated into this language.',
     'profile.chatLanguageFollowingApp':
@@ -57,6 +61,10 @@ export const common = {
     'profile.logout': 'Déconnexion',
     'profile.language': "Langue de l'application",
     'profile.chatLanguage': 'Langue du clavardage',
+    'profile.aboutEmpty': 'Aucune description pour le moment.',
+    'profile.documentsEmpty': 'Aucun document pour le moment. Ajoutez-en un pour le garder avec votre profil.',
+    'profile.deleteDocumentAria': 'Supprimer {name}',
+    'profile.preferences': 'Préférences',
     'profile.chatLanguageHint':
       'Les messages reçus sont traduits dans cette langue.',
     'profile.chatLanguageFollowingApp':
@@ -92,6 +100,10 @@ export const common = {
     'profile.logout': 'Cerrar sesión',
     'profile.language': 'Idioma de la aplicación',
     'profile.chatLanguage': 'Idioma del chat',
+    'profile.aboutEmpty': 'Todavía no hay descripción.',
+    'profile.documentsEmpty': 'Aún no hay documentos. Añade uno para guardarlo en tu perfil.',
+    'profile.deleteDocumentAria': 'Eliminar {name}',
+    'profile.preferences': 'Preferencias',
     'profile.chatLanguageHint':
       'Los mensajes entrantes se traducen a este idioma.',
     'profile.chatLanguageFollowingApp':
