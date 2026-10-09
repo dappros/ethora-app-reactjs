@@ -13,6 +13,7 @@ import { miscPages } from './miscPages';
 import { modalsA } from './modalsA';
 import { modalsB } from './modalsB';
 import { modalsC } from './modalsC';
+import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
@@ -44,6 +45,7 @@ const dictionaries = [
   modalsA,
   modalsB,
   modalsC,
+  serverSettings,
   settingsTutorial,
   sharedComponents,
   userSettings,

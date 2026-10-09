@@ -456,6 +456,26 @@ export type Iso639_1Codes = 'en' | 'es' | 'pt' | 'ht' | 'fr' | 'zh';
 
 // License state of the whole install (GET /v2/license). Mirrors the backend
 // LicenseStatus schema; the key string itself is never sent to the browser.
+// Server settings page (GET /v2/server-settings, super admins).
+export interface ServerSetting {
+  key: string;
+  group: string;
+  kind: 'live' | 'restart';
+  scope: 'api' | 'jobs' | 'ai';
+  type: 'boolean' | 'integer' | 'string' | 'secret' | 'cron';
+  value: string; // effective value; secrets masked
+  source: 'panel' | 'env' | 'default';
+  envValue: string | null;
+  default: string;
+  updatedAt: string | null;
+  updatedBy: string | null;
+  restartPending: boolean;
+}
+export interface ServerSettingsResponse {
+  settings: ServerSetting[];
+  processes: Record<string, string | null>;
+}
+
 export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
 // Edition the install runs as. core = Ethora Core, unregistered (no key).
 export type LicenseTier = 'core' | 'core-registered' | 'trial' | 'enterprise';
