@@ -35,6 +35,8 @@ export default function AdminLicense() {
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   const isCore = status?.tier === 'core' || status?.tier === 'core-registered';
@@ -99,6 +101,19 @@ export default function AdminLicense() {
       setMessage({ kind: 'error', text: t('adminLicense.applyFailed') });
     } finally {
       setBusy(false);
+    }
+  };
+
+  const registry = canEdit && status?.registry?.token ? status.registry : null;
+  const loginCommand = registry ? `docker login -u ${registry.username || 'dappros'} docker.io` : '';
+  const copyToken = async () => {
+    if (!registry) return;
+    try {
+      await navigator.clipboard.writeText(registry.token);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
     }
   };
 
@@ -253,6 +268,29 @@ export default function AdminLicense() {
                   <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
                 )}
               </div>
+            </div>
+          )}
+
+          {registry && (
+            <div className="rounded-2xl bg-gray-50 p-6 md:p-8 mb-6">
+              <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.registryHeading')}</h3>
+              <p className="font-sans text-sm text-gray-600 dark:text-gray-300 mb-4">{t('adminLicense.registryBody')}</p>
+              <pre className="rounded-xl border border-gray-300 bg-white p-3 font-mono text-xs overflow-x-auto mb-3">{loginCommand}</pre>
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                <code className="rounded-xl border border-gray-300 bg-white p-3 font-mono text-xs break-all flex-1 min-w-0">
+                  {showToken ? registry.token : '\u2022'.repeat(24)}
+                </code>
+                <button type="button" onClick={() => setShowToken((v) => !v)} className="text-sm text-brand-500 underline">
+                  {showToken ? t('adminLicense.registryHide') : t('adminLicense.registryShow')}
+                </button>
+                <button type="button" onClick={copyToken} className="text-sm text-brand-500 underline">
+                  {copied ? t('adminLicense.registryCopied') : t('adminLicense.registryCopy')}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                {t('adminLicense.registryNote')}
+                {registry.updatedAt ? ` ${t('adminLicense.registryUpdated').replace('{date}', fmtDate(registry.updatedAt))}` : ''}
+              </p>
             </div>
           )}
 
