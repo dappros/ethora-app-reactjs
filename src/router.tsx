@@ -17,6 +17,7 @@ const AdminApps = lazy(() => import('./pages/AdminApps'));
 const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
+const AdminServerSettings = lazy(() => import('./pages/AdminServerSettings'));
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
@@ -115,6 +116,10 @@ export const router = createBrowserRouter(
                         {
                           path: 'license',
                           Component: AdminLicense,
+                        },
+                        {
+                          path: 'server',
+                          Component: AdminServerSettings,
                         },
                         {
                           path: 'agents',
