@@ -1300,6 +1300,14 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
 
   const current = checkedYaml === yaml;
   const hasErrors = current && errors.length > 0;
+  const lineCount = useMemo(() => yaml.split('\n').length, [yaml]);
+  // Lines the errors point at, for the gutter and the in-editor highlight.
+  const errorLines = useMemo(
+    () => new Set(errors.map((e) => e.line).filter((l): l is number => typeof l === 'number')),
+    [errors]
+  );
+  // The gutter and the highlight layer follow the textarea's scroll.
+  const [scroll, setScroll] = useState({ top: 0, left: 0 });
 
   // Select the offending line in the editor.
   const jumpToLine = (line?: number) => {
@@ -1354,22 +1362,69 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
           </button>
         ))}
       </div>
-      <textarea
-        ref={textareaRef}
-        data-testid="flows-editor"
-        className={classNames('border rounded px-2 py-2 w-full font-mono text-sm whitespace-pre', hasErrors ? 'border-red-400' : '')}
-        rows={lines}
-        spellCheck={false}
-        disabled={isDisabled}
-        value={yaml}
-        placeholder={t('agentPanels.flowsPlaceholder')}
-        onChange={(e) => setYaml(e.target.value)}
-      />
+      {/* Line numbers + error highlight. Text never wraps (wrap="off"), so line N
+          of the textarea is always row N of the gutter and of the highlight layer. */}
+      <div
+        className={classNames(
+          'flex border rounded overflow-hidden font-mono text-sm leading-5',
+          hasErrors ? 'border-red-400' : ''
+        )}
+      >
+        <div
+          aria-hidden
+          className="select-none overflow-hidden border-r bg-gray-50 py-2 text-right text-gray-400 dark:border-gray-700 dark:bg-gray-900/40"
+        >
+          <div style={{ transform: `translateY(-${scroll.top}px)` }}>
+            {Array.from({ length: lineCount }, (_, i) => {
+              const isError = errorLines.has(i + 1);
+              return (
+                <div
+                  key={i}
+                  data-testid={`flows-line-${i + 1}`}
+                  data-error={isError ? 'true' : undefined}
+                  className={classNames(
+                    'min-w-[2.75rem] px-2',
+                    isError && 'bg-red-100 font-semibold text-red-700 dark:bg-red-950/60 dark:text-red-300',
+                    isError && !current && 'opacity-60'
+                  )}
+                >
+                  {i + 1}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="relative flex-1 min-w-0">
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden py-2">
+            <div style={{ transform: `translate(-${scroll.left}px, -${scroll.top}px)` }}>
+              {Array.from({ length: lineCount }, (_, i) => (
+                <div
+                  key={i}
+                  className={classNames('h-5', errorLines.has(i + 1) && 'bg-red-100/60 dark:bg-red-950/40', !current && 'opacity-60')}
+                />
+              ))}
+            </div>
+          </div>
+          <textarea
+            ref={textareaRef}
+            data-testid="flows-editor"
+            className="relative block w-full resize-y bg-transparent px-2 py-2 font-mono text-sm leading-5 whitespace-pre outline-none"
+            wrap="off"
+            rows={lines}
+            spellCheck={false}
+            disabled={isDisabled}
+            value={yaml}
+            placeholder={t('agentPanels.flowsPlaceholder')}
+            onChange={(e) => setYaml(e.target.value)}
+            onScroll={(e) => setScroll({ top: e.currentTarget.scrollTop, left: e.currentTarget.scrollLeft })}
+          />
+        </div>
+      </div>
       {errors.length > 0 && (
         <ul
           data-testid="flows-errors"
           className={classNames(
-            'rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 space-y-1 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300',
+            'rounded border border-red-200 bg-red-100/40 p-2 text-xs text-red-800 space-y-1 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300',
             !current && 'opacity-60'
           )}
         >
