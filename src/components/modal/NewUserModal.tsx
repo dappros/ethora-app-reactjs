@@ -55,7 +55,7 @@ export function NewUserModal({ onClose, onSubmit, loading }: Props) {
               type="text"
               className="w-full rounded-xl bg-gray-100 outline-none mb-8 py-[12px] px-[16px]"
               placeholder={t('newUserModal.lastNamePlaceholder')}
-              {...register('lastName', { required: true })}
+              {...register('lastName')}
             />
 
             <div className="email">

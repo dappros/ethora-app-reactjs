@@ -432,7 +432,7 @@ export default function AppSettings() {
       (aiBot.user.lastName !== app?.aiBot?.user?.lastName ||
         aiBot.user.firstName !== app?.aiBot?.user?.firstName)
     ) {
-      if (aiBot.user.lastName.length < 3 || aiBot.user.firstName.length < 3) {
+      if (!aiBot.user.firstName?.trim()) {
         toast.warning(t('appSettings.toast.botNameTooShort'));
       }
 
