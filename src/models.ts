@@ -496,6 +496,9 @@ export interface LicenseStatus {
     offline: boolean;
   } | null;
   keyError: { reason: string; mismatchedHosts: string[] } | null;
+  // Pull credential for the private Enterprise module images (Docker Hub),
+  // issued per customer by the license server; super admins only.
+  registry?: { username: string; token: string; updatedAt: string | null } | null;
   callHome: {
     enabled: boolean;
     serverConfigured: boolean;
