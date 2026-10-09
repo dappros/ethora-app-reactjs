@@ -64,7 +64,14 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[] } = {}) 
       if (pathname === '/v1/users/me') return json(route, me);
       if (pathname === '/v1/apps') return json(route, { apps: [OWNED_APP], total: 1 });
       if (pathname === '/v2/agents' && method === 'GET') return json(route, { ok: true, total: 1, items: [agent] });
-      if (pathname === '/v2/agents/flows/validate') return json(route, { ok: true, flowKeys: ['main'] });
+      if (pathname === '/v2/agents/flows/validate') {
+        // Scripts containing "oops" fail on their third line, like the API's compiler would.
+        const text = String((body as { flowsYaml?: string })?.flowsYaml || '');
+        if (text.includes('oops')) {
+          return json(route, { ok: false, errors: [{ path: 'flows.start.steps[0]', message: 'unknown step kind "oops"', line: 3 }] });
+        }
+        return json(route, { ok: true, flowKeys: ['main'] });
+      }
       if (pathname === `/v2/agents/${AGENT_ID}/bot-instances`) return json(route, { ok: true, items: opts.botInstances || [] });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'GET') return json(route, { ok: true, agent });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'PUT') {
@@ -226,6 +233,34 @@ test.describe('Agent Settings keeps saved values across tab switches', () => {
     await switchAwayAndBack(page, 'Flows');
     await expect(page.locator('textarea').first()).toHaveValue(yaml);
     await expect(save).toBeDisabled();
+  });
+
+  test('Flows are checked while typing', async ({ page }) => {
+    const { writes } = await fakeBackend(page);
+    await openTab(page, 'Flows');
+    const editor = page.getByTestId('flows-editor');
+    const save = page.getByRole('button', { name: 'Save flows' });
+
+    await editor.fill('version: 1\nflows:\n  oops: true\n');
+    await expect(page.getByTestId('flows-errors')).toContainText('unknown step kind "oops"');
+    await expect(save).toBeDisabled();
+    await expect(page.getByText('Fix the errors above to save')).toBeVisible();
+
+    // The line link selects the offending line in the editor.
+    await page.getByRole('button', { name: 'line 3:' }).click();
+    const selected = await editor.evaluate((el: HTMLTextAreaElement) => el.value.slice(el.selectionStart, el.selectionEnd));
+    expect(selected).toBe('  oops: true');
+
+    // Going back to the stored script clears the old errors.
+    await editor.fill('');
+    await expect(page.getByTestId('flows-errors')).toHaveCount(0);
+
+    await editor.fill('version: 1\nflows:\n  main:\n    steps: []\n');
+    await expect(page.getByTestId('flows-status')).toHaveText('Flows found: main');
+    await expect(page.getByTestId('flows-errors')).toHaveCount(0);
+    await save.click();
+    await expect(page.getByText('Flows saved')).toBeVisible();
+    expect(writes.filter((w) => w.method === 'PUT')).toHaveLength(1);
   });
 
   test('Visibility', async ({ page }) => {
