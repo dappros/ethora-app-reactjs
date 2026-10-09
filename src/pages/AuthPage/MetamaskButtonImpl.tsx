@@ -188,11 +188,7 @@ export const MetamaskButton = ({ utm, onMfaRequired }: MetamaskButtonProps) => {
               label={t('authMetamaskButton.lastNameLabel')}
               fullWidth
               margin="normal"
-              {...register('lastName', { required: true })}
-              error={!!errors.lastName}
-              helperText={
-                errors.lastName && t('authMetamaskButton.lastNameRequired')
-              }
+              {...register('lastName')}
             />
           </DialogContent>
           <DialogActions>

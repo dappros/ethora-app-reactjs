@@ -33,7 +33,7 @@ export const appSettings1 = {
     'appSettings.section.ui': 'UI',
     'appSettings.section.system': 'System',
     'appSettings.toast.botNameTooShort':
-      'The AI bot name must be at least 3 characters long',
+      'The AI bot needs a first name',
     'appSettings.toast.settingsApplied': 'Settings applied successfully!',
     'appSettings.toast.appDeleted':
       'You have successfully deleted your application',
@@ -278,7 +278,7 @@ export const appSettings1 = {
     'appSettings.section.ui': 'Interface',
     'appSettings.section.system': 'Système',
     'appSettings.toast.botNameTooShort':
-      'Le nom du bot IA doit comporter au moins 3 caractères',
+      'Le bot IA doit avoir un prénom',
     'appSettings.toast.settingsApplied':
       'Paramètres appliqués avec succès !',
     'appSettings.toast.appDeleted':
@@ -544,7 +544,7 @@ export const appSettings1 = {
     'appSettings.section.ui': 'Interfaz',
     'appSettings.section.system': 'Sistema',
     'appSettings.toast.botNameTooShort':
-      'El nombre del bot de IA debe tener al menos 3 caracteres',
+      'El bot de IA necesita un nombre',
     'appSettings.toast.settingsApplied':
       '¡Configuración aplicada correctamente!',
     'appSettings.toast.appDeleted':

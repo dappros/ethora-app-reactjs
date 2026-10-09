@@ -62,7 +62,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
                   type="text"
                   className={inputClass}
                   placeholder={t('editUserModal.firstName')}
-                  {...register('firstName', { required: true, minLength: 3, maxLength: 30 })}
+                  {...register('firstName', { required: true, maxLength: 60, validate: (v) => Boolean(String(v || '').trim()) })}
                 />
                 {errors.firstName && <div className="text-red-500 text-[12px] mt-1">{t('editUserModal.nameRule')}</div>}
               </div>
@@ -72,7 +72,7 @@ export function EditUserModal({ user, suggestions, loading, onClose, onSubmit }:
                   type="text"
                   className={inputClass}
                   placeholder={t('editUserModal.lastName')}
-                  {...register('lastName', { required: true, minLength: 3, maxLength: 30 })}
+                  {...register('lastName', { maxLength: 60 })}
                 />
                 {errors.lastName && <div className="text-red-500 text-[12px] mt-1">{t('editUserModal.nameRule')}</div>}
               </div>

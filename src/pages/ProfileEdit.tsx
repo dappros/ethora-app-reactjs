@@ -129,7 +129,7 @@ export default function ProfileEdit() {
                   className="w-full bg-gray-100 rounded-xl px-[12px] py-[16px] placeholder:text-gray-500 outline-none mb-8"
                   placeholder={t('profileEdit.lastNamePlaceholder')}
                   type="text"
-                  {...register('lastName', { required: true, value: lName })}
+                  {...register('lastName', { value: lName })}
                 />
               </div>
 
