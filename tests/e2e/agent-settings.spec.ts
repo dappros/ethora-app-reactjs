@@ -245,6 +245,10 @@ test.describe('Agent Settings keeps saved values across tab switches', () => {
     await expect(page.getByTestId('flows-errors')).toContainText('unknown step kind "oops"');
     await expect(save).toBeDisabled();
     await expect(page.getByText('Fix the errors above to save')).toBeVisible();
+    // The gutter numbers every line and marks the one the error points at.
+    await expect(page.getByTestId('flows-line-3')).toHaveAttribute('data-error', 'true');
+    await expect(page.getByTestId('flows-line-1')).not.toHaveAttribute('data-error', 'true');
+    await expect(page.getByTestId('flows-line-4')).toHaveText('4');
 
     // The line link selects the offending line in the editor.
     await page.getByRole('button', { name: 'line 3:' }).click();
@@ -258,9 +262,25 @@ test.describe('Agent Settings keeps saved values across tab switches', () => {
     await editor.fill('version: 1\nflows:\n  main:\n    steps: []\n');
     await expect(page.getByTestId('flows-status')).toHaveText('Flows found: main');
     await expect(page.getByTestId('flows-errors')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="flows-line-"][data-error]')).toHaveCount(0);
     await save.click();
     await expect(page.getByText('Flows saved')).toBeVisible();
     expect(writes.filter((w) => w.method === 'PUT')).toHaveLength(1);
+  });
+
+  test('Flows gutter follows the editor when it scrolls', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Flows');
+    const editor = page.getByTestId('flows-editor');
+    await editor.fill(Array.from({ length: 80 }, (_, i) => `# line ${i + 1}`).join('\n'));
+    await editor.evaluate((el: HTMLTextAreaElement) => {
+      el.scrollTop = 30 * 20;
+      el.dispatchEvent(new Event('scroll'));
+    });
+    // Line 31 sits at the top of the editor, and its number at the top of the gutter.
+    const box = await editor.boundingBox();
+    const num = await page.getByTestId('flows-line-31').boundingBox();
+    expect(box && num && Math.abs(num.y - (box.y + 8))).toBeLessThan(3);
   });
 
   test('Visibility', async ({ page }) => {
