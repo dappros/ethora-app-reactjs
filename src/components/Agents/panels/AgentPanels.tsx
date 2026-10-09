@@ -1240,38 +1240,78 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
 
 // Flows: the operator's scripted conversations (opening menu, intake,
 // appointment request...). Plain YAML in a textarea, like Context, with
-// starter templates and a dry-run Validate. Errors come back from the API's
-// compiler with line numbers; the same compiler runs on Save, so a script
-// that does not compile is never stored.
+// starter templates. The script is checked against the API's compiler while
+// the operator types, so errors (with line numbers) show up before Save; the
+// same compiler runs on Save, so a script that does not compile is never stored.
+const FLOWS_CHECK_DELAY_MS = 700;
+
 export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
   const { t } = useTranslation();
   const [yaml, setYaml] = useState(agent.flowsYaml || '');
   const [errors, setErrors] = useState<FlowsValidationError[]>([]);
   const [flowKeys, setFlowKeys] = useState<string[] | null>(null);
+  // The text the current errors / flowKeys describe; null until a check returns.
+  const [checkedYaml, setCheckedYaml] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const checkSeq = useRef(0);
   useEffect(() => {
     setYaml(agent.flowsYaml || '');
     setErrors([]);
     setFlowKeys(null);
+    setCheckedYaml(null);
   }, [agent.id]);
 
   const dirty = yaml !== (agent.flowsYaml || '');
   const lines = useMemo(() => Math.min(40, Math.max(16, yaml.split('\n').length + 2)), [yaml]);
 
-  const validate = async () => {
-    setBusy(true);
-    try {
-      const r = await httpValidateAgentFlows(yaml);
-      setErrors(r.data.errors || []);
-      setFlowKeys(r.data.ok ? r.data.flowKeys || [] : null);
-      if (r.data.ok) toast.success(t('agentPanels.flowsValid'));
-      return r.data.ok;
-    } catch (e: any) {
-      toast.error(`${t('agentPanels.failedPrefix')} ${e?.response?.data?.error || e.message}`);
-      return false;
-    } finally {
-      setBusy(false);
+  // Live check of unsaved edits. Responses for older text are dropped, and a
+  // failed request just leaves the last result; Save still compiles server-side.
+  useEffect(() => {
+    if (!dirty || isDisabled) {
+      // Back to the stored script, which compiled when it was saved.
+      checkSeq.current++;
+      setChecking(false);
+      if (!dirty) {
+        setErrors([]);
+        setFlowKeys(null);
+        setCheckedYaml(null);
+      }
+      return;
     }
+    const seq = ++checkSeq.current;
+    setChecking(true);
+    const timer = setTimeout(async () => {
+      try {
+        const r = await httpValidateAgentFlows(yaml);
+        if (seq !== checkSeq.current) return;
+        setErrors(r.data.errors || []);
+        setFlowKeys(r.data.ok ? r.data.flowKeys || [] : null);
+        setCheckedYaml(yaml);
+      } catch {
+        // Network or auth hiccup: keep the previous result, Save reports for real.
+      } finally {
+        if (seq === checkSeq.current) setChecking(false);
+      }
+    }, FLOWS_CHECK_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [yaml, dirty, isDisabled]);
+
+  const current = checkedYaml === yaml;
+  const hasErrors = current && errors.length > 0;
+
+  // Select the offending line in the editor.
+  const jumpToLine = (line?: number) => {
+    const el = textareaRef.current;
+    if (!el || !line) return;
+    const all = yaml.split('\n');
+    const start = all.slice(0, line - 1).reduce((n, l) => n + l.length + 1, 0);
+    const end = start + (all[line - 1] || '').length;
+    el.focus();
+    el.setSelectionRange(start, end);
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 20;
+    el.scrollTop = Math.max(0, (line - 3) * lineHeight);
   };
 
   const save = async () => {
@@ -1279,11 +1319,14 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
     try {
       await actionUpdateAgent(agent.id, { flowsYaml: yaml });
       setErrors([]);
+      setCheckedYaml(yaml);
       toast.success(t('agentPanels.flowsSaved'));
     } catch (e: any) {
       const details: FlowsValidationError[] | undefined = e?.response?.data?.details;
       if (Array.isArray(details) && details.length) {
         setErrors(details);
+        setFlowKeys(null);
+        setCheckedYaml(yaml);
         toast.error(t('agentPanels.flowsInvalid'));
       } else {
         toast.error(`${t('agentPanels.saveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
@@ -1304,8 +1347,6 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
             disabled={isDisabled}
             onClick={() => {
               setYaml(tpl.yaml);
-              setErrors([]);
-              setFlowKeys(null);
             }}
             className="text-xs border rounded px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
           >
@@ -1314,50 +1355,56 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
         ))}
       </div>
       <textarea
-        className={classNames('border rounded px-2 py-2 w-full font-mono text-sm whitespace-pre', errors.length ? 'border-red-400' : '')}
+        ref={textareaRef}
+        data-testid="flows-editor"
+        className={classNames('border rounded px-2 py-2 w-full font-mono text-sm whitespace-pre', hasErrors ? 'border-red-400' : '')}
         rows={lines}
         spellCheck={false}
         disabled={isDisabled}
         value={yaml}
         placeholder={t('agentPanels.flowsPlaceholder')}
-        onChange={(e) => {
-          setYaml(e.target.value);
-          setFlowKeys(null);
-        }}
+        onChange={(e) => setYaml(e.target.value)}
       />
       {errors.length > 0 && (
-        <ul className="rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 space-y-1 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+        <ul
+          data-testid="flows-errors"
+          className={classNames(
+            'rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 space-y-1 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300',
+            !current && 'opacity-60'
+          )}
+        >
           {errors.map((err, i) => (
             <li key={i} className="font-mono">
-              {err.line ? `line ${err.line}: ` : ''}
+              {err.line ? (
+                <button type="button" className="underline hover:no-underline mr-1" onClick={() => jumpToLine(err.line)}>
+                  {t('agentPanels.flowsLine').replace('{line}', String(err.line))}
+                </button>
+              ) : null}
               {err.path ? `${err.path} ` : ''}
               {err.message}
             </li>
           ))}
         </ul>
       )}
-      {flowKeys && errors.length === 0 && (
-        <p className="text-xs text-green-700 dark:text-green-400">
-          {flowKeys.length
-            ? `${t('agentPanels.flowsFound')} ${flowKeys.join(', ')}`
-            : t('agentPanels.flowsNone')}
-        </p>
-      )}
+      <p className="text-xs min-h-[1rem]" data-testid="flows-status">
+        {checking ? (
+          <span className="text-gray-500">{t('agentPanels.flowsChecking')}</span>
+        ) : current && !hasErrors && flowKeys ? (
+          <span className="text-green-700 dark:text-green-400">
+            {flowKeys.length ? `${t('agentPanels.flowsFound')} ${flowKeys.join(', ')}` : t('agentPanels.flowsNone')}
+          </span>
+        ) : null}
+      </p>
       <div className="flex items-center gap-2">
         <button
-          onClick={validate}
-          disabled={isDisabled || busy}
-          className="border rounded px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
-        >
-          {t('agentPanels.validateFlows')}
-        </button>
-        <button
           onClick={save}
-          disabled={isDisabled || busy || !dirty}
+          disabled={isDisabled || busy || !dirty || hasErrors}
+          title={hasErrors ? t('agentPanels.flowsFixFirst') : undefined}
           className="bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 disabled:opacity-50"
         >
           {t('agentPanels.saveFlows')}
         </button>
+        {hasErrors && <span className="text-xs text-red-700 dark:text-red-300">{t('agentPanels.flowsFixFirst')}</span>}
       </div>
       <p className="text-xs text-gray-500">{t('agentPanels.flowsHint')}</p>
     </div>
