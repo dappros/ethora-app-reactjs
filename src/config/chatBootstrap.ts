@@ -32,6 +32,24 @@ const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
   allowedRoomTypes: ['private'],
   enableAudioCalls: true,
   startWithMicOn: true,
+  // End-to-end encrypt call media. The media key is exchanged over the chat's
+  // OMEMO channel, so this shares the chat's install gate (VITE_E2EE_ENABLED)
+  // and only makes sense when calls are on. The per-app and per-room gates are
+  // enforced inside the chat-component: it encrypts a call only in an e2ee room
+  // while OMEMO is running, and otherwise runs the call transport-encrypted.
+  // LiveKit's insertable-stream E2EE needs a Web Worker; the app supplies it so
+  // the library stays bundler-agnostic. Vite bundles livekit-client's shipped
+  // e2ee worker from the app origin, which the build-time CSP already allows
+  // (worker-src 'self' blob:).
+  e2ee: {
+    enabled:
+      env.VITE_E2EE_ENABLED === 'true' &&
+      env.VITE_VIDEO_CALLS_ENABLED === 'true',
+    workerFactory: () =>
+      new Worker(new URL('livekit-client/e2ee-worker', import.meta.url), {
+        type: 'module',
+      }),
+  },
 };
 // End-to-end encryption (OMEMO 2). Two gates, both of which must be open:
 //
