@@ -1088,6 +1088,35 @@ export function httpUpdateSiteWatch(appId: string, watchId: string, schedule: Si
 
 // Answers { status: 'queued', jobId } like a crawl; 409 SITE_REFRESH_IN_PROGRESS
 // while a refresh of the site is already running.
+// The App's Web Index refresh key, for a website's publish hook (WordPress
+// plugin, CMS webhook). POST creates or replaces it and is the only response
+// that carries the key itself.
+export interface RefreshKeyInfo {
+  exists: boolean;
+  keyPrefix?: string;
+  createdAt?: string | null;
+  lastUsedAt?: string | null;
+  key?: string;
+}
+
+export function httpGetRefreshKey(appId: string) {
+  return httpV2.get<{ result: RefreshKeyInfo }>(`/apps/${appId}/sources/refresh-key`);
+}
+
+export function httpCreateRefreshKey(appId: string) {
+  return httpV2.post<{ result: RefreshKeyInfo }>(`/apps/${appId}/sources/refresh-key`);
+}
+
+export function httpRevokeRefreshKey(appId: string) {
+  return httpV2.delete<{ result: { revoked: boolean } }>(`/apps/${appId}/sources/refresh-key`);
+}
+
+// Where a website sends its publish hook: this install's API.
+export function refreshHookUrl() {
+  const base = new URL(String(httpV2.defaults.baseURL || '/v2'), window.location.origin).toString().replace(/\/+$/, '');
+  return `${base}/sources/refresh-hook`;
+}
+
 export function httpRefreshSiteWatch(appId: string, watchId: string) {
   return httpV2.post<{ status: string; jobId: string; url: string }>(`/apps/${appId}/sources/site-watches/${watchId}/refresh`);
 }
