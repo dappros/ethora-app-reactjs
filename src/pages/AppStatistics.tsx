@@ -9,6 +9,7 @@ import 'react-date-range/dist/theme/default.css';
 
 // Components
 import { LineChartLocal } from '../components/Statistics/LineChartLocal';
+import { AiUsageBreakdown } from '../components/Statistics/AiUsageBreakdown';
 
 // Http
 import { httpGetGraphStatistic, httpWithAuth } from '../http';
@@ -275,7 +276,7 @@ export const AppStatistics = (): ReactElement => {
   }, [appId, dates]);
 
   return (
-    <div className="h-full w-full overflow-hidden">
+    <div className="h-full w-full overflow-x-hidden overflow-y-auto">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold hidden md:block">{t('appStatistics.heading')}</h2>
 
@@ -440,6 +441,9 @@ export const AppStatistics = (): ReactElement => {
               name={selectedTab.name}
             />}
           </div>
+          {selectedTab.value === 'aitokens' && appId && (
+            <AiUsageBreakdown appId={appId} startDate={dates.startDate} endDate={dates.endDate} />
+          )}
         </div>
       </div>
     </div>

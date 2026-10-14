@@ -135,6 +135,9 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
           return json(route, { status: 'queued', jobId: 'a'.repeat(32), watchId: watch.id, url: watch.url });
         }
       }
+      if (pathname === `/v2/agents/${AGENT_ID}/ai-usage`) {
+        return json(route, { ok: true, result: { month: '2026-10', monthToDate: 48352, lastMonth: 120000, byKind: [{ kind: 'reply', totalTokens: 40000, calls: 30 }, { kind: 'embed_query', totalTokens: 8352, calls: 30 }] } });
+      }
       if (pathname === `/v2/agents/${AGENT_ID}/knowledge/rebuild` && method === 'POST') {
         return json(route, { ok: true, pages: 2, docs: 0 }, 202);
       }
@@ -486,4 +489,13 @@ test.describe('Agent Settings: Web Index sites kept up to date', () => {
     await expect(page.getByPlaceholder('https://example.com')).toBeEnabled();
     await expect(page.getByTestId('site-watches')).toHaveCount(0);
   });
+});
+
+test('the agent header shows its AI tokens this month', async ({ page }) => {
+  await fakeBackend(page);
+  await openTab(page, 'Persona');
+  const chip = page.getByTestId('agent-ai-usage');
+  await expect(chip).toHaveText('AI tokens this month: 48,352');
+  await expect(chip).toHaveAttribute('title', /Agent replies: 40,000/);
+  await expect(chip).toHaveAttribute('title', /Last month: 120,000/);
 });

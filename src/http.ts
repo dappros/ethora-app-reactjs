@@ -338,6 +338,42 @@ export function httpUpdateApp(appId: string, options: any) {
   });
 }
 
+// AI tokens from the per-App ledger: totals by purpose (kind), agent, model and
+// day for [from, to) in UTC days, plus month to date.
+export interface AiUsageRow {
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cachedInputTokens: number;
+  estimatedTokens: number;
+}
+export interface AppAiUsage {
+  from: string;
+  to: string;
+  monthToDate: number;
+  total: AiUsageRow & { chatTokens: number; embeddingTokens: number };
+  byKind: (AiUsageRow & { kind: string })[];
+  byAgent: (AiUsageRow & { agentId: string | null; agentName?: string | null })[];
+  byModel: (AiUsageRow & { model: string })[];
+}
+
+export function httpGetAppAiUsage(appId: string, from: string, to: string) {
+  return httpV2.get<{ ok: boolean; result: AppAiUsage }>(`/apps/${appId}/ai-usage`, { params: { from, to } });
+}
+
+// One agent's tokens this UTC month across every App it answers in (owner only).
+export interface AgentAiUsage {
+  month: string;
+  monthToDate: number;
+  lastMonth: number;
+  byKind: { kind: string; totalTokens: number; calls: number }[];
+}
+
+export function httpGetAgentAiUsage(agentId: string) {
+  return httpV2.get<{ ok: boolean; result: AgentAiUsage }>(`/agents/${agentId}/ai-usage`);
+}
+
 export function httpGetGraphStatistic(
   appId: string,
   startDate: string,
