@@ -59,6 +59,7 @@ export const license = {
     'licenseReason.call_home_overdue': 'The license server has not been reached for too long.',
 
     'licenseSource.env': 'deploy.yml (environment)',
+    'licenseSource.env.compose': '.env (ETHORA_LICENSE_KEY)',
     'licenseSource.stored': 'Admin panel upload',
     'licenseSource.none': 'None',
 
@@ -91,7 +92,8 @@ export const license = {
     'adminLicense.callHomeNever': 'Never',
     'adminLicense.rowInstance': 'Instance ID',
     'adminLicense.registryHeading': 'Enterprise module images',
-    'adminLicense.registryBody': 'The AI, push, playground and MCP modules run from private images on Docker Hub. Sign the server in to the registry with this token (the password at the prompt), then enable the modules in the compose bundle (COMPOSE_PROFILES=caddy,ai) or in deploy.yml.',
+    'adminLicense.registryBody': 'The AI, push, SDK playground, MCP and uptime modules run from private images on Docker Hub. Sign the server in to the registry with this token (the password at the prompt), then enable the modules under services in deploy.yml.',
+    'adminLicense.registryBody.compose': 'The AI, push, SDK playground, MCP and uptime modules run from private images on Docker Hub. ./configure.sh --license-key ... signs the server in with this token on its own; enable the modules with ./configure.sh --modules ai,push,playground,mcp,uptime. To sign in by hand, run the command below and give this token as the password.',
     'adminLicense.registryShow': 'Show token',
     'adminLicense.registryHide': 'Hide token',
     'adminLicense.registryCopy': 'Copy token',
@@ -110,6 +112,8 @@ export const license = {
     'adminLicense.applyFailed': 'Could not update the license. Please try again.',
     'adminLicense.envKeyNote':
       'The active key comes from deploy.yml. A key uploaded here is kept but only takes effect once the deploy.yml key is removed.',
+    'adminLicense.envKeyNote.compose':
+      'The active key comes from ETHORA_LICENSE_KEY in the compose bundle\'s .env. A key uploaded here is kept but only takes effect once that .env key is removed.',
   },
   fr: {
     'nav.license': 'Licence',
@@ -167,6 +171,7 @@ export const license = {
     'licenseReason.call_home_overdue': "Le serveur de licences n'a pas été joint depuis trop longtemps.",
 
     'licenseSource.env': 'deploy.yml (environnement)',
+    'licenseSource.env.compose': '.env (ETHORA_LICENSE_KEY)',
     'licenseSource.stored': "Téléversée depuis le panneau d'administration",
     'licenseSource.none': 'Aucune',
 
@@ -199,7 +204,8 @@ export const license = {
     'adminLicense.callHomeNever': 'Jamais',
     'adminLicense.rowInstance': "Identifiant d'instance",
     'adminLicense.registryHeading': 'Images des modules Enterprise',
-    'adminLicense.registryBody': 'Les modules IA, push, playground et MCP s\'exécutent à partir d\'images privées sur Docker Hub. Connectez le serveur au registre avec ce jeton (le mot de passe à l\'invite), puis activez les modules dans le bundle compose (COMPOSE_PROFILES=caddy,ai) ou dans deploy.yml.',
+    'adminLicense.registryBody': 'Les modules IA, push, SDK playground, MCP et uptime s\'exécutent à partir d\'images privées sur Docker Hub. Connectez le serveur au registre avec ce jeton (le mot de passe à l\'invite), puis activez les modules sous services dans deploy.yml.',
+    'adminLicense.registryBody.compose': 'Les modules IA, push, SDK playground, MCP et uptime s\'exécutent à partir d\'images privées sur Docker Hub. ./configure.sh --license-key ... connecte le serveur au registre avec ce jeton automatiquement ; activez les modules avec ./configure.sh --modules ai,push,playground,mcp,uptime. Pour vous connecter à la main, lancez la commande ci-dessous et donnez ce jeton comme mot de passe.',
     'adminLicense.registryShow': 'Afficher le jeton',
     'adminLicense.registryHide': 'Masquer le jeton',
     'adminLicense.registryCopy': 'Copier le jeton',
@@ -218,6 +224,8 @@ export const license = {
     'adminLicense.applyFailed': 'Impossible de mettre à jour la licence. Veuillez réessayer.',
     'adminLicense.envKeyNote':
       "La clé active provient de deploy.yml. Une clé téléversée ici est conservée mais ne prend effet qu'une fois la clé de deploy.yml retirée.",
+    'adminLicense.envKeyNote.compose':
+      "La clé active provient de ETHORA_LICENSE_KEY dans le .env du bundle compose. Une clé téléversée ici est conservée mais ne prend effet qu'une fois cette clé retirée du .env.",
   },
   es: {
     'nav.license': 'Licencia',
@@ -275,6 +283,7 @@ export const license = {
     'licenseReason.call_home_overdue': 'No se ha contactado con el servidor de licencias durante demasiado tiempo.',
 
     'licenseSource.env': 'deploy.yml (entorno)',
+    'licenseSource.env.compose': '.env (ETHORA_LICENSE_KEY)',
     'licenseSource.stored': 'Subida desde el panel de administración',
     'licenseSource.none': 'Ninguna',
 
@@ -307,7 +316,8 @@ export const license = {
     'adminLicense.callHomeNever': 'Nunca',
     'adminLicense.rowInstance': 'ID de instancia',
     'adminLicense.registryHeading': 'Imágenes de los módulos Enterprise',
-    'adminLicense.registryBody': 'Los módulos de IA, push, playground y MCP se ejecutan desde imágenes privadas en Docker Hub. Inicie sesión en el registro desde el servidor con este token (la contraseña en el aviso) y active los módulos en el bundle de compose (COMPOSE_PROFILES=caddy,ai) o en deploy.yml.',
+    'adminLicense.registryBody': 'Los módulos de IA, push, SDK playground, MCP y uptime se ejecutan desde imágenes privadas en Docker Hub. Inicie sesión en el registro desde el servidor con este token (la contraseña en el aviso) y active los módulos en services de deploy.yml.',
+    'adminLicense.registryBody.compose': 'Los módulos de IA, push, SDK playground, MCP y uptime se ejecutan desde imágenes privadas en Docker Hub. ./configure.sh --license-key ... inicia sesión en el registro con este token por sí solo; active los módulos con ./configure.sh --modules ai,push,playground,mcp,uptime. Para iniciar sesión a mano, ejecute el comando de abajo y use este token como contraseña.',
     'adminLicense.registryShow': 'Mostrar token',
     'adminLicense.registryHide': 'Ocultar token',
     'adminLicense.registryCopy': 'Copiar token',
@@ -326,5 +336,7 @@ export const license = {
     'adminLicense.applyFailed': 'No se pudo actualizar la licencia. Inténtelo de nuevo.',
     'adminLicense.envKeyNote':
       'La clave activa proviene de deploy.yml. Una clave subida aquí se conserva, pero solo tendrá efecto cuando se retire la clave de deploy.yml.',
+    'adminLicense.envKeyNote.compose':
+      'La clave activa proviene de ETHORA_LICENSE_KEY en el .env del bundle de compose. Una clave subida aquí se conserva, pero solo tendrá efecto cuando se retire esa clave del .env.',
   },
 } satisfies Record<UiLanguageCode, Record<string, string>>;

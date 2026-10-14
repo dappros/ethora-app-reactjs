@@ -16,22 +16,12 @@ import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
 import { env } from '../../config/env';
+import { isEthoraHostedEnv } from '../../utils/hostedEnv';
 interface Props {
   isAdmin?: boolean;
   onClose: () => void;
 }
 
-// Mirror of the desktop sidebar's Billing gate: Ethora-hosted only.
-function isEthoraHostedEnv(): boolean {
-  if (typeof window === 'undefined') return false;
-  const host = window.location.hostname;
-  return (
-    host === 'chat.ethora.com' ||
-    host === 'chat-qa.ethora.com' ||
-    host.endsWith('.chat.ethora.com') ||
-    host.endsWith('.chat-qa.ethora.com')
-  );
-}
 
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const { t } = useTranslation();

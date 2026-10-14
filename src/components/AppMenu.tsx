@@ -18,6 +18,7 @@ import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
+import { isEthoraHostedEnv } from '../utils/hostedEnv';
 const ITEM_CLASS =
   'flex group hover:bg-gray-100 flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
 const LABEL_CLASS =
@@ -29,18 +30,7 @@ const ITEM_WRAP_CLASS = 'py-[3px] first:pt-0 last:pb-0';
 // hosted customers shouldn't see it - it would imply an Ethora-Inc billing
 // relationship that doesn't apply to their install. Hide the icon and link
 // in the sidebar unless the host is one of ours; the route itself stays so
-// internal tooling that deep-links keeps working.
-function isEthoraHostedEnv(): boolean {
-  if (typeof window === 'undefined') return false;
-  const host = window.location.hostname;
-  return (
-    host === 'chat.ethora.com' ||
-    host === 'chat-qa.ethora.com' ||
-    host.endsWith('.chat.ethora.com') ||
-    host.endsWith('.chat-qa.ethora.com')
-  );
-}
-
+// internal tooling that deep-links keeps working. See utils/hostedEnv.ts.
 export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);

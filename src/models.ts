@@ -476,6 +476,8 @@ export interface ServerSetting {
 export interface ServerSettingsResponse {
   settings: ServerSetting[];
   processes: Record<string, string | null>;
+  // How the server was installed; older APIs omit it.
+  installKind?: 'compose' | 'host';
 }
 
 export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
@@ -521,6 +523,8 @@ export interface LicenseStatus {
   // Pull credential for the private Enterprise module images (Docker Hub),
   // issued per customer by the license server; super admins only.
   registry?: { username: string; token: string; updatedAt: string | null } | null;
+  // How the server was installed; older APIs omit it (treat as 'host').
+  installKind?: 'compose' | 'host';
   callHome: {
     enabled: boolean;
     serverConfigured: boolean;

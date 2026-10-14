@@ -27,6 +27,9 @@ export default function AdminServerSettings() {
   const [busyGroup, setBusyGroup] = useState<string | null>(null);
   const [message, setMessage] = useState<{ group: string; kind: 'ok' | 'error'; text: string } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  // Name the one configuration file once the API says how the server was
+  // installed (compose bundle .env or deploy.yml); generic text until then.
+  const kind = data?.installKind ? `.${data.installKind}` : '';
 
   const load = useCallback(async () => {
     try {
@@ -158,12 +161,12 @@ export default function AdminServerSettings() {
 
       <div className="rounded-2xl bg-white p-4 md:p-8 overflow-y-auto">
         <div className="max-w-3xl">
-          <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{t('serverSettings.intro')}</p>
+          <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{t(`serverSettings.intro${kind}`)}</p>
           {!canEdit && <p className="mb-6 text-sm text-gray-500">{t('serverSettings.readOnly')}</p>}
 
           {pendingScopes.length > 0 && (
             <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-300 p-4 text-sm">
-              {t('serverSettings.restartBanner').replace('{scopes}', pendingScopes.map(scopeName).join(', '))}
+              {t(`serverSettings.restartBanner${kind}`).replace('{scopes}', pendingScopes.map(scopeName).join(', '))}
             </div>
           )}
 
