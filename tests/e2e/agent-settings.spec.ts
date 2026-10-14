@@ -44,8 +44,10 @@ function bare(agent: Agent): Agent {
   return { ...agent, originAppName: null, botInstancesCount: null };
 }
 
-async function fakeBackend(page: Page, opts: { botInstances?: unknown[] } = {}) {
+async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches?: Array<Record<string, unknown>> } = {}) {
   const agent = freshAgent();
+  const watches = (opts.watches || []).map((w) => ({ ...w }));
+  const watchesPath = `/v2/apps/${OWNED_APP._id}/sources/site-watches`;
   const writes: Array<{ method: string; path: string; body: unknown }> = [];
 
   const json = (route: Route, body: unknown, status = 200) =>
@@ -106,6 +108,21 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[] } = {}) 
           lastIndexedAt: '2026-10-05T10:00:00.000Z',
           indexAvailable: true,
         });
+      }
+      if (pathname === watchesPath && method === 'GET') return json(route, { result: watches });
+      const watchMatch = pathname.startsWith(`${watchesPath}/`) ? pathname.slice(watchesPath.length + 1).split('/') : null;
+      if (watchMatch) {
+        const watch = watches.find((w) => w.id === watchMatch[0]);
+        if (!watch) return json(route, { error: 'Site not found', code: 'SITE_WATCH_NOT_FOUND' }, 404);
+        if (method === 'PATCH') {
+          Object.assign(watch, { schedule: (body as { schedule: string }).schedule, pausedReason: null });
+          return json(route, { result: watch });
+        }
+        if (watchMatch[1] === 'refresh' && method === 'POST') {
+          if (watch.lastJobId === 'running') return json(route, { error: 'busy', code: 'SITE_REFRESH_IN_PROGRESS' }, 409);
+          watch.lastJobId = 'running';
+          return json(route, { status: 'queued', jobId: 'a'.repeat(32), watchId: watch.id, url: watch.url });
+        }
       }
       if (pathname === `/v2/agents/${AGENT_ID}/knowledge/rebuild` && method === 'POST') {
         return json(route, { ok: true, pages: 2, docs: 0 }, 202);
@@ -386,5 +403,60 @@ test.describe('Agent Settings: renamed tabs, Try it, knowledge health', () => {
     await health.getByRole('button', { name: 'Rebuild index' }).click();
     await expect(page.getByText('Rebuilding the index for 2 items.')).toBeVisible();
     expect(writes.some((w) => w.path.endsWith('/knowledge/rebuild') && JSON.stringify(w.body) === '{"onlyMissing":true}')).toBe(true);
+  });
+});
+
+test.describe('Agent Settings: Web Index sites kept up to date', () => {
+  const site = {
+    id: 'e2ewatch0000000000000001',
+    url: 'https://example.com/docs',
+    agentId: AGENT_ID,
+    followLink: true,
+    schedule: 'weekly',
+    nextRunAt: '2026-10-20T10:00:00.000Z',
+    pausedReason: null,
+    lastRunAt: '2026-10-13T10:00:00.000Z',
+    lastFinishedAt: '2026-10-13T10:05:00.000Z',
+    lastStatus: 'completed',
+    lastError: null,
+    lastSkipReason: null,
+    lastJobId: null,
+    lastResult: { savedPages: 12, addedPages: 1, updatedPages: 3, unchangedPages: 8, removedPages: 2 },
+    excludedCount: 0,
+  };
+
+  test('lists the site with its last refresh and saves a new schedule', async ({ page }) => {
+    const { writes } = await fakeBackend(page, { watches: [site] });
+    await openTab(page, 'Web Index');
+    const row = page.getByTestId(`site-watch-${site.id}`);
+    await expect(row).toContainText('https://example.com/docs');
+    await expect(row).toContainText('whole site');
+    await expect(row).toContainText('3 changed, 1 new, 2 removed');
+    await row.getByRole('combobox', { name: `Refresh schedule for ${site.url}` }).selectOption('daily');
+    await expect(page.getByText('Schedule saved')).toBeVisible();
+    expect(writes.some((w) => w.method === 'PATCH' && w.path.endsWith(`/site-watches/${site.id}`) && JSON.stringify(w.body) === '{"schedule":"daily"}')).toBe(true);
+  });
+
+  test('Refresh now starts a refresh and shows it running', async ({ page }) => {
+    await fakeBackend(page, { watches: [site] });
+    await openTab(page, 'Web Index');
+    await page.getByTestId(`site-watch-${site.id}`).getByRole('button', { name: 'Refresh now' }).click();
+    await expect(page.getByText('Refresh started.')).toBeVisible();
+    await expect(page.getByText('refreshing - 0 pages checked')).toBeVisible();
+    await page.getByTestId(`site-watch-${site.id}`).getByRole('button', { name: 'Refresh now' }).click();
+    await expect(page.getByText('A refresh of this site is already running.')).toBeVisible();
+  });
+
+  test('a paused site says why and how to resume', async ({ page }) => {
+    await fakeBackend(page, { watches: [{ ...site, pausedReason: 'failures', lastStatus: 'failed', lastError: 'crawler unreachable' }] });
+    await openTab(page, 'Web Index');
+    await expect(page.getByTestId(`site-watch-${site.id}`)).toContainText('Paused after 3 failed refreshes: crawler unreachable');
+  });
+
+  test('the section stays hidden when no site is watched', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Web Index');
+    await expect(page.getByPlaceholder('https://example.com')).toBeEnabled();
+    await expect(page.getByTestId('site-watches')).toHaveCount(0);
   });
 });

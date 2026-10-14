@@ -10,7 +10,7 @@ import { useAppStore } from '../store/useAppStore';
 // Settings of kind "restart" show which process has to restart before a saved
 // value is live; the API reports when each process last started.
 
-const GROUPS = ['email', 'feedback', 'rooms', 'reports', 'rateLimits', 'ai'] as const;
+const GROUPS = ['email', 'feedback', 'rooms', 'reports', 'rateLimits', 'webIndex', 'ai'] as const;
 
 type ApiErr = AxiosError<{ error?: string; code?: string; details?: Record<string, string> }>;
 
@@ -112,6 +112,15 @@ export default function AdminServerSettings() {
         <select value={draftOf(s)} onChange={(e) => set(e.target.value)} disabled={disabled} className={base}>
           <option value="true">{t('serverSettings.boolean.true')}</option>
           <option value="false">{t('serverSettings.boolean.false')}</option>
+        </select>
+      );
+    }
+    if (s.type === 'choice') {
+      return (
+        <select value={draftOf(s)} onChange={(e) => set(e.target.value)} disabled={disabled} className={base}>
+          {(s.options || []).map((o) => (
+            <option key={o} value={o}>{t(`serverSettings.option.${s.key}.${o}`)}</option>
+          ))}
         </select>
       );
     }

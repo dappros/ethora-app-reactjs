@@ -462,7 +462,9 @@ export interface ServerSetting {
   group: string;
   kind: 'live' | 'restart';
   scope: 'api' | 'jobs' | 'ai';
-  type: 'boolean' | 'integer' | 'string' | 'secret' | 'cron';
+  type: 'boolean' | 'integer' | 'string' | 'secret' | 'cron' | 'choice';
+  // The allowed values of a 'choice' setting.
+  options?: string[];
   value: string; // effective value; secrets masked
   source: 'panel' | 'env' | 'default';
   envValue: string | null;

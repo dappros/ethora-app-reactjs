@@ -39,8 +39,9 @@ export interface SiteCrawlEvent {
   type: SiteCrawlEventType;
   appId: string;
   jobId: string;
-  // 'crawl' for a new URL, 'reindex' for refreshing a row already indexed.
-  kind: 'crawl' | 'reindex';
+  // 'crawl' for a new URL, 'reindex' for refreshing a row already indexed,
+  // 'refresh' for re-running a watched site's crawl (Refresh now).
+  kind: 'crawl' | 'reindex' | 'refresh';
   url: string;
   status: string;
   // Rows stored by the batch this event reports.
@@ -53,6 +54,12 @@ export interface SiteCrawlEvent {
   totalBytes: number;
   truncated: boolean;
   truncatedReason: string | null;
+  // How the saved pages compare with the index (new / text changed / same),
+  // and pages taken out because they are gone.
+  addedPages?: number;
+  updatedPages?: number;
+  unchangedPages?: number;
+  removedPages?: number;
   error?: string | null;
 }
 
