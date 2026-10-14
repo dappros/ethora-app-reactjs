@@ -132,6 +132,11 @@ export const miscPages = {
     'chat.demoNoAppsBanner.suffix': ' where you will set up your own chats.',
     'chat.demoHasAppsBanner':
       'You are testing the public chats in our demo base app. Use the drop-down selector above to switch to your own Apps and chats.',
+    'chat.demoNoAppsBanner.prefix.selfHosted':
+      'These are the chats of this server\'s base app. Explore as an end user or ',
+    'chat.demoNoAppsBanner.suffix.selfHosted': ' to set up its own chats.',
+    'chat.demoHasAppsBanner.selfHosted':
+      'These are the chats of this server\'s base app. Pick another App in the selector above to see its chats.',
     'chat.toastRestoreFailed':
       'Could not restore Chats context. Reverting to your base app. ',
     'chat.toastSwitchFailed': 'Failed to switch app: ',
@@ -261,6 +266,11 @@ export const miscPages = {
       ' où vous configurerez vos propres discussions.',
     'chat.demoHasAppsBanner':
       "Vous testez les discussions publiques de notre application de démonstration. Utilisez le sélecteur déroulant ci-dessus pour passer à vos propres applications et discussions.",
+    'chat.demoNoAppsBanner.prefix.selfHosted':
+      "Voici les discussions de l'application de base de ce serveur. Explorez en tant qu'utilisateur final ou ",
+    'chat.demoNoAppsBanner.suffix.selfHosted': ' pour configurer ses propres discussions.',
+    'chat.demoHasAppsBanner.selfHosted':
+      "Voici les discussions de l'application de base de ce serveur. Choisissez une autre application dans le sélecteur ci-dessus pour voir ses discussions.",
     'chat.toastRestoreFailed':
       'Impossible de restaurer le contexte des discussions. Retour à votre application de base. ',
     'chat.toastSwitchFailed': "Échec du changement d'application : ",
@@ -387,6 +397,11 @@ export const miscPages = {
     'chat.demoNoAppsBanner.suffix': ' donde podrás configurar tus propios chats.',
     'chat.demoHasAppsBanner':
       'Estás probando los chats públicos de nuestra aplicación de demostración. Usa el selector desplegable de arriba para cambiar a tus propias aplicaciones y chats.',
+    'chat.demoNoAppsBanner.prefix.selfHosted':
+      'Estos son los chats de la aplicación base de este servidor. Explora como usuario final o ',
+    'chat.demoNoAppsBanner.suffix.selfHosted': ' para configurar sus propios chats.',
+    'chat.demoHasAppsBanner.selfHosted':
+      'Estos son los chats de la aplicación base de este servidor. Elige otra aplicación en el selector de arriba para ver sus chats.',
     'chat.toastRestoreFailed':
       'No se pudo restaurar el contexto de chats. Volviendo a tu aplicación base. ',
     'chat.toastSwitchFailed': 'Error al cambiar de aplicación: ',

@@ -105,6 +105,8 @@ export default function AdminLicense() {
   };
 
   const registry = canEdit && status?.registry?.token ? status.registry : null;
+  // Compose installs keep the key in .env and enable modules with configure.sh.
+  const kind = status?.installKind === 'compose' ? '.compose' : '';
   const loginCommand = registry ? `docker login -u ${registry.username || 'dappros'} docker.io` : '';
   const copyToken = async () => {
     if (!registry) return;
@@ -163,7 +165,7 @@ export default function AdminLicense() {
         [t('adminLicense.rowCustomer'), status.license?.customer || '-'],
         [t('adminLicense.rowDomain'), status.license?.domain || '-'],
         [t('adminLicense.rowSupport'), supportText()],
-        [t('adminLicense.rowSource'), t(`licenseSource.${status.source}`)],
+        [t('adminLicense.rowSource'), t(`licenseSource.${status.source}${status.source === 'env' ? kind : ''}`)],
         [t('adminLicense.rowInstalled'), fmtDate(status.installedAt)],
         [t('adminLicense.rowHosts'), status.hosts.join(', ') || '-'],
         ...(status.callHome.serverConfigured
@@ -274,7 +276,7 @@ export default function AdminLicense() {
           {registry && (
             <div className="rounded-2xl bg-gray-50 p-6 md:p-8 mb-6">
               <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.registryHeading')}</h3>
-              <p className="font-sans text-sm text-gray-600 dark:text-gray-300 mb-4">{t('adminLicense.registryBody')}</p>
+              <p className="font-sans text-sm text-gray-600 dark:text-gray-300 mb-4">{t(`adminLicense.registryBody${kind}`)}</p>
               <pre className="rounded-xl border border-gray-300 bg-white p-3 font-mono text-xs overflow-x-auto mb-3">{loginCommand}</pre>
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <code className="rounded-xl border border-gray-300 bg-white p-3 font-mono text-xs break-all flex-1 min-w-0">
@@ -332,7 +334,7 @@ export default function AdminLicense() {
               )}
             </div>
             {status?.source === 'env' && (
-              <p className="mt-4 text-xs text-gray-500">{t('adminLicense.envKeyNote')}</p>
+              <p className="mt-4 text-xs text-gray-500">{t(`adminLicense.envKeyNote${kind}`)}</p>
             )}
           </div>
 

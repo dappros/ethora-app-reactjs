@@ -15,6 +15,7 @@ import { useResolvedUiTheme } from '../theme/useResolvedUiTheme';
 import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 
 import { env } from '../config/env';
+import { isEthoraHostedEnv } from '../utils/hostedEnv';
 interface ChatComponentProps {
   // The app whose chat space is being rendered. For the legacy base-app
   // path this is the user's own currentApp; for owner-session mode this is
@@ -322,6 +323,9 @@ export default function ChatPage() {
   const allowedDomains =
     env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
   const currentDomain = window.location.hostname;
+  // The demo wording is for Ethora's hosted service; a self-hosted server's
+  // base app is the operator's own.
+  const hostedSuffix = isEthoraHostedEnv() ? '' : '.selfHosted';
 
   const handleSwitch = async (nextAppId: string | null) => {
     setSwitching(true);
@@ -392,18 +396,18 @@ export default function ChatPage() {
             // Variant 1: hosted demo, no owned apps yet.
             return (
               <div className="bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-900/60 px-4 py-2 text-sm border max-w-[640px]">
-                {t('chat.demoNoAppsBanner.prefix')}
+                {t(`chat.demoNoAppsBanner.prefix${hostedSuffix}`)}
                 <NavLink to="/app/admin/apps" className="text-brand-500 underline">
                   {t('chat.demoNoAppsBanner.linkText')}
                 </NavLink>
-                {t('chat.demoNoAppsBanner.suffix')}
+                {t(`chat.demoNoAppsBanner.suffix${hostedSuffix}`)}
               </div>
             );
           }
           // Variant 2: hosted demo, has owned apps - point at the switcher.
           return (
             <div className="bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-900/60 px-4 py-2 text-sm border max-w-[640px]">
-              {t('chat.demoHasAppsBanner')}
+              {t(`chat.demoHasAppsBanner${hostedSuffix}`)}
             </div>
           );
         })()}
