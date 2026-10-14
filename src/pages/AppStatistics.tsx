@@ -174,10 +174,12 @@ export const AppStatistics = (): ReactElement => {
 
     try {
       if (appId) {
+        // Calendar days as the viewer sees them: an instant would land on
+        // the previous day on the server for anyone east of UTC.
         const response = await httpGetGraphStatistic(
           appId,
-          dates.startDate,
-          dates.endDate
+          DateTime.fromISO(dates.startDate).toISODate() || dates.startDate,
+          DateTime.fromISO(dates.endDate).toISODate() || dates.endDate
         );
         const result = convert(response.data);
         setGraphStatistics(result);

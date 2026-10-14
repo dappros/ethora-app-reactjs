@@ -40,9 +40,9 @@ export const AiUsageBreakdown: React.FC<{ appId: string; startDate: string; endD
 
   useEffect(() => {
     if (!appId) return;
-    // The ledger counts whole UTC days, `to` exclusive.
-    const from = DateTime.fromISO(startDate).toUTC().toISODate();
-    const to = DateTime.fromISO(endDate).toUTC().plus({ days: 1 }).toISODate();
+    // The viewer's calendar days, `to` exclusive (the ledger keys UTC days).
+    const from = DateTime.fromISO(startDate).toISODate();
+    const to = DateTime.fromISO(endDate).plus({ days: 1 }).toISODate();
     if (!from || !to) return;
     let cancelled = false;
     setFailed(false);
