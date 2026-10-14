@@ -48,6 +48,7 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
   const agent = freshAgent();
   const watches = (opts.watches || []).map((w) => ({ ...w }));
   const watchesPath = `/v2/apps/${OWNED_APP._id}/sources/site-watches`;
+  let refreshKey: Record<string, unknown> = { exists: false };
   const writes: Array<{ method: string; path: string; body: unknown }> = [];
 
   const json = (route: Route, body: unknown, status = 200) =>
@@ -110,6 +111,16 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
         });
       }
       if (pathname === watchesPath && method === 'GET') return json(route, { result: watches });
+      const keyPath = `/v2/apps/${OWNED_APP._id}/sources/refresh-key`;
+      if (pathname === keyPath && method === 'GET') return json(route, { result: refreshKey });
+      if (pathname === keyPath && method === 'POST') {
+        refreshKey = { exists: true, keyPrefix: 'erk_abc123', createdAt: '2026-10-14T10:00:00.000Z', lastUsedAt: null };
+        return json(route, { result: { ...refreshKey, key: 'erk_abc123e2efullkey' } });
+      }
+      if (pathname === keyPath && method === 'DELETE') {
+        refreshKey = { exists: false };
+        return json(route, { result: { revoked: true } });
+      }
       const watchMatch = pathname.startsWith(`${watchesPath}/`) ? pathname.slice(watchesPath.length + 1).split('/') : null;
       if (watchMatch) {
         const watch = watches.find((w) => w.id === watchMatch[0]);
@@ -451,6 +462,22 @@ test.describe('Agent Settings: Web Index sites kept up to date', () => {
     await fakeBackend(page, { watches: [{ ...site, pausedReason: 'failures', lastStatus: 'failed', lastError: 'crawler unreachable' }] });
     await openTab(page, 'Web Index');
     await expect(page.getByTestId(`site-watch-${site.id}`)).toContainText('Paused after 3 failed refreshes: crawler unreachable');
+  });
+
+  test('Publish hook: creating a refresh key shows it once with the WordPress and curl instructions', async ({ page }) => {
+    const { writes } = await fakeBackend(page, { watches: [site] });
+    await openTab(page, 'Web Index');
+    const hookBox = page.getByTestId('publish-hook');
+    await hookBox.getByRole('button', { name: /Publish hook/ }).click();
+    await expect(hookBox).toContainText('No refresh key yet.');
+    await hookBox.getByRole('button', { name: 'Create key' }).click();
+    await expect(hookBox.getByRole('textbox', { name: 'Refresh key' })).toHaveValue('erk_abc123e2efullkey');
+    await expect(hookBox).toContainText('it is not shown again');
+    await expect(hookBox).toContainText('Ethora AI Chatbot plugin');
+    await expect(hookBox.locator('pre')).toContainText('Authorization: Bearer erk_abc123e2efullkey');
+    await expect(hookBox.locator('pre')).toContainText('/v2/sources/refresh-hook');
+    await expect(hookBox).toContainText('Refresh key erk_abc123... created');
+    expect(writes.some((w) => w.method === 'POST' && w.path.endsWith('/sources/refresh-key'))).toBe(true);
   });
 
   test('the section stays hidden when no site is watched', async ({ page }) => {

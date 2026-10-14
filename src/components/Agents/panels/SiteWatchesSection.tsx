@@ -4,7 +4,18 @@
 // The operator picks the schedule per site or refreshes one now.
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { httpListSiteWatches, httpRefreshSiteWatch, httpUpdateSiteWatch, SiteWatchRow, SiteWatchSchedule } from '../../../http';
+import {
+  httpCreateRefreshKey,
+  httpGetRefreshKey,
+  httpListSiteWatches,
+  httpRefreshSiteWatch,
+  httpRevokeRefreshKey,
+  httpUpdateSiteWatch,
+  RefreshKeyInfo,
+  refreshHookUrl,
+  SiteWatchRow,
+  SiteWatchSchedule,
+} from '../../../http';
 import { useTranslation } from '../../../i18n/useTranslation';
 
 const SCHEDULES: SiteWatchSchedule[] = ['weekly', 'daily', 'off'];
@@ -17,6 +28,114 @@ function apiError(e: unknown): { message: string; code?: string } {
 function fmtDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : '';
 }
+
+// Publish hook: the App's refresh key, so the website re-indexes a page as soon
+// as it is published or changed (WordPress plugin, or any CMS webhook). The key
+// can only re-check pages of the sites listed above.
+const PublishHook: React.FC<{ appId: string; isDisabled?: boolean }> = ({ appId, isDisabled }) => {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [info, setInfo] = useState<RefreshKeyInfo | null>(null);
+  const [shownKey, setShownKey] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open || !appId) return;
+    httpGetRefreshKey(appId).then((r) => setInfo(r.data?.result || { exists: false })).catch(() => setInfo({ exists: false }));
+  }, [open, appId]);
+
+  const create = async () => {
+    if (info?.exists && !confirm(t('agentPanels.hookConfirmReplace'))) return;
+    setBusy(true);
+    try {
+      const r = await httpCreateRefreshKey(appId);
+      setShownKey(r.data?.result?.key || '');
+      setInfo(r.data?.result || null);
+    } catch (e) {
+      toast.error(`${t('agentPanels.failedPrefix')} ${apiError(e).message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const revoke = async () => {
+    if (!confirm(t('agentPanels.hookConfirmRevoke'))) return;
+    setBusy(true);
+    try {
+      await httpRevokeRefreshKey(appId);
+      setInfo({ exists: false });
+      setShownKey('');
+      toast.success(t('agentPanels.hookRevoked'));
+    } catch (e) {
+      toast.error(`${t('agentPanels.failedPrefix')} ${apiError(e).message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(shownKey);
+      toast.success(t('agentPanels.hookCopied'));
+    } catch {
+      // the key stays selectable in the field
+    }
+  };
+
+  return (
+    <div className="border-t px-2 py-2 text-xs" data-testid="publish-hook">
+      <button className="text-brand-500 hover:underline" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+        {open ? '▾' : '▸'} {t('agentPanels.hookTitle')}
+      </button>
+      <span className="text-gray-500"> · {t('agentPanels.hookHint')}</span>
+      {open && (
+        <div className="mt-2 space-y-2 text-gray-600">
+          {info === null ? (
+            <div className="text-gray-500">{t('agentPanels.loading')}</div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              {info.exists ? (
+                <span>
+                  {t('agentPanels.hookKeyInfo')
+                    .replace('{prefix}', `${info.keyPrefix || ''}...`)
+                    .replace('{created}', fmtDate(info.createdAt || null))
+                    .replace('{used}', info.lastUsedAt ? fmtDate(info.lastUsedAt) : t('agentPanels.hookNeverUsed'))}
+                </span>
+              ) : (
+                <span>{t('agentPanels.hookNoKey')}</span>
+              )}
+              <button disabled={isDisabled || busy} onClick={create} className="border rounded px-2 py-0.5 disabled:opacity-50">
+                {info.exists ? t('agentPanels.hookReplaceKey') : t('agentPanels.hookCreateKey')}
+              </button>
+              {info.exists && (
+                <button disabled={isDisabled || busy} onClick={revoke} className="text-red-600 hover:underline disabled:opacity-50">
+                  {t('agentPanels.hookRevokeKey')}
+                </button>
+              )}
+            </div>
+          )}
+          {shownKey && (
+            <div className="space-y-1">
+              <div className="flex gap-2">
+                <input readOnly value={shownKey} aria-label={t('agentPanels.hookKeyLabel')} className="border rounded px-2 py-1 flex-1 font-mono text-xs" onFocus={(e) => e.target.select()} />
+                <button onClick={copy} className="border rounded px-2 py-1">{t('agentPanels.hookCopy')}</button>
+              </div>
+              <div className="text-amber-600 dark:text-amber-400">{t('agentPanels.hookShownOnce')}</div>
+            </div>
+          )}
+          <div>{t('agentPanels.hookWordPress')}</div>
+          <div>
+            {t('agentPanels.hookOtherSites')}
+            <pre className="mt-1 p-2 bg-gray-50 rounded overflow-x-auto whitespace-pre-wrap break-all font-mono text-[11px]">{`curl -X POST ${refreshHookUrl()} \\
+  -H "Authorization: Bearer ${shownKey || 'erk_...'}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"urls":["https://your-site.example/changed-page"]}'`}</pre>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const SiteWatchesSection: React.FC<{
   appId: string;
@@ -149,6 +268,7 @@ export const SiteWatchesSection: React.FC<{
           );
         })}
       </ul>
+      <PublishHook appId={appId} isDisabled={isDisabled} />
     </div>
   );
 };
