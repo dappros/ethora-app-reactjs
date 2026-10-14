@@ -45,6 +45,7 @@ import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCate
 import { useAppStore } from '../../../store/useAppStore';
 import { KnowledgeHealth } from './KnowledgeHealth';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
+import { SiteWatchesSection } from './SiteWatchesSection';
 
 export const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <label className="block">
@@ -339,11 +340,27 @@ const LIVE_RELOAD_DEBOUNCE_MS = 1200;
 // reconnecting) the progress line would otherwise sit there forever.
 const JOB_RECONCILE_MS = 15000;
 
-// A crawl or reindex this panel is currently watching.
+// A crawl, reindex or site refresh this panel is currently watching.
+type CrawlKind = 'crawl' | 'reindex' | 'refresh';
 interface LiveCrawlJob {
   url: string;
-  kind: 'crawl' | 'reindex';
+  kind: CrawlKind;
   savedPages: number;
+}
+
+interface CrawlOutcome {
+  kind: CrawlKind;
+  url: string;
+  savedPages: number;
+  failed: boolean;
+  cancelled?: boolean;
+  error?: string | null;
+  truncated?: boolean;
+  truncatedReason?: string | null;
+  reconcile?: boolean;
+  addedPages?: number;
+  updatedPages?: number;
+  removedPages?: number;
 }
 
 // Did a refetch actually bring anything new? Compares what the table renders -
@@ -423,6 +440,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [liveJobs, setLiveJobs] = useState<Record<string, LiveCrawlJob>>({});
   // Jobs the operator asked to stop; the line stays until the crawler confirms.
   const [stoppingJobs, setStoppingJobs] = useState<Set<string>>(new Set());
+  // Bumped whenever the kept-up-to-date list may have changed.
+  const [watchesKey, setWatchesKey] = useState(0);
+  const reloadWatches = () => setWatchesKey((k) => k + 1);
   const stopJob = async (jobId: string) => {
     setStoppingJobs((prev) => new Set(prev).add(jobId));
     try {
@@ -568,10 +588,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
 
   // Shared by the event path and the reconcile poll, so a job that finishes
   // while the socket is down is reported exactly the same way.
-  const finishJob = (
-    jobId: string,
-    outcome: { kind: 'crawl' | 'reindex'; url: string; savedPages: number; failed: boolean; cancelled?: boolean; error?: string | null; truncated?: boolean; truncatedReason?: string | null; reconcile?: boolean }
-  ) => {
+  const finishJob = (jobId: string, outcome: CrawlOutcome) => {
     forgetJob(jobId);
     setStoppingJobs((prev) => {
       if (!prev.has(jobId)) return prev;
@@ -587,7 +604,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       );
     } else if (outcome.failed) {
       toast.error(
-        t(outcome.kind === 'reindex' ? 'agentPanels.reindexFailedEvent' : 'agentPanels.crawlFailedEvent')
+        t(outcome.kind === 'reindex' ? 'agentPanels.reindexFailedEvent' : outcome.kind === 'refresh' ? 'agentPanels.refreshFailedEvent' : 'agentPanels.crawlFailedEvent')
           .replace('{url}', outcome.url)
           .replace('{error}', outcome.error || '')
       );
@@ -595,9 +612,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       toast.success(
         outcome.kind === 'reindex'
           ? t('agentPanels.reindexDone').replace('{url}', outcome.url)
-          : t('agentPanels.crawlDone')
-              .replace('{n}', String(outcome.savedPages))
-              .replace('{url}', outcome.url)
+          : outcome.kind === 'refresh'
+            ? t('agentPanels.refreshDone')
+                .replace('{url}', outcome.url)
+                .replace('{updated}', String(outcome.updatedPages || 0))
+                .replace('{added}', String(outcome.addedPages || 0))
+                .replace('{removed}', String(outcome.removedPages || 0))
+            : t('agentPanels.crawlDone')
+                .replace('{n}', String(outcome.savedPages))
+                .replace('{url}', outcome.url)
       );
       if (outcome.truncated) {
         toast.warning(t('agentPanels.crawlTruncated').replace('{reason}', outcome.truncatedReason || ''));
@@ -608,6 +631,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     // count and pick up anything an event could not carry (or that arrived while
     // the socket was down and the poll below found instead).
     if (outcome.reconcile !== false) scheduleReload();
+    // A finished refresh has a new outcome to show; a finished crawl may have
+    // created the site's entry. Pages it removed also leave the table.
+    reloadWatches();
   };
 
   useSiteCrawlEvents({
@@ -637,6 +663,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         error: ev.error,
         truncated: ev.truncated,
         truncatedReason: ev.truncatedReason,
+        addedPages: ev.addedPages,
+        updatedPages: ev.updatedPages,
+        removedPages: ev.removedPages,
       });
     },
   });
@@ -659,7 +688,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
           if (!job) continue;
           if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
             finishJob(jobId, {
-              kind: job.kind === 'reindex' ? 'reindex' : 'crawl',
+              kind: job.kind === 'reindex' || job.kind === 'refresh' ? job.kind : 'crawl',
               url: job.url,
               savedPages: Number(job.savedPages) || 0,
               failed: job.status === 'failed',
@@ -667,6 +696,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
               error: job.error,
               truncated: Boolean(job.truncated),
               truncatedReason: job.truncatedReason,
+              addedPages: Number(job.addedPages) || 0,
+              updatedPages: Number(job.updatedPages) || 0,
+              removedPages: Number(job.removedPages) || 0,
             });
           } else if (Number(job.savedPages) > (liveJobs[jobId]?.savedPages || 0)) {
             // Progress events can be missed too, not just the terminal one.
@@ -730,6 +762,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       const deleted = Number(r.data?.summary?.deleted ?? ids.length);
       toast.success(t('agentPanels.removedSelected').replace('{n}', String(deleted)));
       setSelected(new Set());
+      reloadWatches();
       await reloadAfterRowsRemoved(deleted);
     } catch (e) {
       toast.error(`${t('agentPanels.removeFailedPrefix')} ${apiErrorMessage(e)}`);
@@ -749,6 +782,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       setLiveJobs((prev) => ({ ...prev, [jobId]: { url: r.data?.url || url, kind: 'crawl', savedPages: 0 } }));
     }
     setUrl('');
+    reloadWatches();
     // Nothing has been fetched yet, so this reload shows no new rows. Still worth
     // doing: it resets paging to where the rows will appear as they land, since
     // the list sorts newest-first. Silent for the same reason - there is nothing
@@ -831,7 +865,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                 <span className="text-gray-500 whitespace-nowrap">
                   {job.kind === 'reindex'
                     ? t('agentPanels.reindexRunning')
-                    : t('agentPanels.crawlRunning').replace('{n}', String(job.savedPages))}
+                    : job.kind === 'refresh'
+                      ? t('agentPanels.refreshRunning').replace('{n}', String(job.savedPages))
+                      : t('agentPanels.crawlRunning').replace('{n}', String(job.savedPages))}
                 </span>
                 {!isDisabled && (
                   <button
@@ -846,6 +882,18 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
             );
           })}
         </div>
+      )}
+
+      {appId && (
+        <SiteWatchesSection
+          appId={appId}
+          agentId={agent.id}
+          isDisabled={isDisabled}
+          reloadKey={watchesKey}
+          onRefreshQueued={(jobId, watchUrl) =>
+            setLiveJobs((prev) => ({ ...prev, [jobId]: { url: watchUrl, kind: 'refresh', savedPages: 0 } }))
+          }
+        />
       )}
 
       <div className="flex items-center justify-between gap-2 text-xs text-gray-500 min-h-[28px]">
@@ -959,6 +1007,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                       try {
                         await httpDeleteSiteSourceV2Url(appId, row.id);
                         toast.success(t('agentPanels.removed'));
+                        reloadWatches();
                         // A row removed on its own must not linger in the selection
                         // and get re-sent as a NOT_FOUND id on the next bulk delete.
                         setSelected((prev) => {

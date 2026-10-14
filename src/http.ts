@@ -1057,6 +1057,41 @@ export function httpCancelSiteCrawlJob(appId: string, jobId: string) {
   return httpV2.post(`/apps/${appId}/sources/site-crawl-jobs/${jobId}/cancel`);
 }
 
+// A crawled site the Web Index keeps up to date: one per crawl start URL, re-run
+// on its schedule (changed pages re-indexed, new ones added, gone ones removed).
+export type SiteWatchSchedule = 'off' | 'daily' | 'weekly';
+export interface SiteWatchRow {
+  id: string;
+  url: string;
+  agentId: string | null;
+  followLink: boolean;
+  schedule: SiteWatchSchedule;
+  nextRunAt: string | null;
+  pausedReason: string | null;
+  lastRunAt: string | null;
+  lastFinishedAt: string | null;
+  lastStatus: 'completed' | 'failed' | 'cancelled' | null;
+  lastError: string | null;
+  lastSkipReason: string | null;
+  lastJobId: string | null;
+  lastResult: { savedPages: number; addedPages: number; updatedPages: number; unchangedPages: number; removedPages: number } | null;
+  excludedCount: number;
+}
+
+export function httpListSiteWatches(appId: string, agentId?: string) {
+  return httpV2.get<{ result: SiteWatchRow[] }>(`/apps/${appId}/sources/site-watches`, agentId ? { params: { agentId } } : undefined);
+}
+
+export function httpUpdateSiteWatch(appId: string, watchId: string, schedule: SiteWatchSchedule) {
+  return httpV2.patch<{ result: SiteWatchRow }>(`/apps/${appId}/sources/site-watches/${watchId}`, { schedule });
+}
+
+// Answers { status: 'queued', jobId } like a crawl; 409 SITE_REFRESH_IN_PROGRESS
+// while a refresh of the site is already running.
+export function httpRefreshSiteWatch(appId: string, watchId: string) {
+  return httpV2.post<{ status: string; jobId: string; url: string }>(`/apps/${appId}/sources/site-watches/${watchId}/refresh`);
+}
+
 export function httpGetBotInstance(id: string) {
   return httpV2.get(`/bot-instances/${id}`);
 }
