@@ -64,7 +64,7 @@ export const AiUsageBreakdown: React.FC<{ appId: string; startDate: string; endD
   return (
     <div className="mt-6 border-t pt-4" data-testid="ai-usage-breakdown">
       <div className="text-sm text-gray-700">
-        {t('aiUsage.summary')
+        {t(usage.total.cachedInputTokens > 0 ? 'aiUsage.summary' : 'aiUsage.summaryNoCache')
           .replace('{total}', fmt(total))
           .replace('{input}', fmt(usage.total.inputTokens))
           .replace('{output}', fmt(usage.total.outputTokens))
