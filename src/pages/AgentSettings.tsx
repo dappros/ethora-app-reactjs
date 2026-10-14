@@ -33,7 +33,8 @@ import {
 } from '../components/Agents/panels/AgentPanels';
 import { TryItPanel } from '../components/Agents/panels/TryItPanel';
 import { AgentBotInstanceRow, WebsiteWidgetPanel } from '../components/Agents/panels/WebsiteWidgetPanel';
-import { httpListAgentBotInstances } from '../http';
+import { AgentAiUsage, httpGetAgentAiUsage, httpListAgentBotInstances } from '../http';
+import { aiUsageKindLabel } from '../components/Statistics/aiUsageKinds';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -211,6 +212,7 @@ export default function AgentSettings() {
         onVisibilityChanged={(updated) => setAgent(updated)}
         onInstancesChanged={reloadInstances}
         readOnly={readOnly}
+        showUsage={isOwned}
       />
 
       {readOnly && (
@@ -441,8 +443,26 @@ const Header: React.FC<{
   onVisibilityChanged: (a: ModelAgent) => void;
   onInstancesChanged: () => void;
   readOnly: boolean;
-}> = ({ agent, defaultBotInstance, onBack, onInstancesChanged, readOnly }) => {
+  showUsage?: boolean;
+}> = ({ agent, defaultBotInstance, onBack, onInstancesChanged, readOnly, showUsage }) => {
   const { t } = useTranslation();
+  // This month's AI tokens for the agent, across every App it answers in.
+  // Owner only (the endpoint refuses anyone else).
+  const [usage, setUsage] = useState<AgentAiUsage | null>(null);
+  useEffect(() => {
+    if (!showUsage || !agent.id) return;
+    let cancelled = false;
+    httpGetAgentAiUsage(agent.id)
+      .then((r) => { if (!cancelled) setUsage(r.data?.result || null); })
+      .catch(() => { if (!cancelled) setUsage(null); });
+    return () => { cancelled = true; };
+  }, [showUsage, agent.id]);
+  const usageTitle = usage
+    ? [
+        ...usage.byKind.map((k) => `${aiUsageKindLabel(t, k.kind)}: ${k.totalTokens.toLocaleString('en-US')}`),
+        t('agentSettings.tokensLastMonth').replace('{n}', usage.lastMonth.toLocaleString('en-US')),
+      ].join('\n')
+    : undefined;
   // The visibility selector moved out of the header into its own
   // "Visibility" tab (see VisibilityPanel below). Header is now identity
   // + the per-app Start/Stop affordance, gated on ownership.
@@ -465,6 +485,15 @@ const Header: React.FC<{
         </div>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
+        {usage && (
+          <span
+            className="text-xs text-gray-600 border border-gray-200 rounded-full px-2.5 py-1 whitespace-nowrap"
+            title={usageTitle}
+            data-testid="agent-ai-usage"
+          >
+            {t('agentSettings.tokensThisMonth').replace('{n}', usage.monthToDate.toLocaleString('en-US'))}
+          </span>
+        )}
         {!readOnly && defaultBotInstance && (
           <button
             onClick={async () => {
