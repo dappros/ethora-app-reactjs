@@ -34,7 +34,7 @@ import {
 import { TryItPanel } from '../components/Agents/panels/TryItPanel';
 import { AgentBotInstanceRow, WebsiteWidgetPanel } from '../components/Agents/panels/WebsiteWidgetPanel';
 import { AgentAiUsage, httpGetAgentAiUsage, httpListAgentBotInstances } from '../http';
-import { aiUsageKindLabel } from '../components/Statistics/AiUsageBreakdown';
+import { aiUsageKindLabel } from '../components/Statistics/aiUsageKinds';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../models';
 import { useAppStore } from '../store/useAppStore';

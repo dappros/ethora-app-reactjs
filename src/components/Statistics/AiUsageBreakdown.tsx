@@ -5,13 +5,7 @@ import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { AppAiUsage, httpGetAppAiUsage } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-
-// Purposes in the order they are shown; anything else falls under "other".
-export const AI_USAGE_KINDS = ['reply', 'gate', 'heartbeat', 'flow', 'agent_reply', 'embed_site', 'embed_docs', 'embed_query'] as const;
-
-export function aiUsageKindLabel(t: (key: string) => string, kind: string) {
-  return (AI_USAGE_KINDS as readonly string[]).includes(kind) ? t(`aiUsage.kind.${kind}`) : t('aiUsage.kind.other');
-}
+import { aiUsageKindLabel } from './aiUsageKinds';
 
 function fmt(n: number) {
   return (Number(n) || 0).toLocaleString('en-US');
