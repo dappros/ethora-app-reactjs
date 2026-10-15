@@ -16,9 +16,11 @@ import { useAppStore } from '../store/useAppStore';
 // tab. An API that sends no tabs gets the single list it always had.
 
 const LEGACY_GROUPS = ['email', 'feedback', 'rooms', 'reports', 'rateLimits', 'webIndex', 'ai'];
-const TAB_ORDER: ServerSettingsTab[] = ['chats', 'users', 'ai', 'email', 'system'];
+const TAB_ORDER: ServerSettingsTab[] = ['api', 'chats', 'users', 'ai', 'email', 'system'];
 // Groups rendered inside a module card rather than on their own.
-const MODULE_GROUP: Record<string, string> = { ai: 'agents' };
+const MODULE_GROUP: Record<string, string> = { ai: 'agents', mcp: 'mcp' };
+// Groups with no Save button while the install keeps them locked.
+const LOCKABLE_GROUP = 'encryption';
 
 type ApiErr = AxiosError<{ error?: string; code?: string; details?: Record<string, string> }>;
 
@@ -171,7 +173,10 @@ export default function AdminServerSettings() {
   const renderInput = (s: ServerSetting) => {
     const locked = s.key === 'E2EE_ALLOWED' && e2eeLocked;
     const disabled = !canEdit || busyGroup === s.group || locked;
-    const base = 'w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60';
+    const base = cn(
+      'w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60',
+      locked && 'bg-gray-100 text-gray-500 cursor-not-allowed',
+    );
     const set = (v: string) => setDrafts((d) => ({ ...d, [s.key]: v }));
     if (s.type === 'boolean') {
       return (
@@ -262,6 +267,7 @@ export default function AdminServerSettings() {
           </div>
         ))}
       </div>
+      {!(group === LOCKABLE_GROUP && e2eeLocked) && (
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -275,12 +281,25 @@ export default function AdminServerSettings() {
           <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
         )}
       </div>
+      )}
     </>
+  );
+
+  const openLink = (url: string) => (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-brand-500 underline shrink-0">
+      {t('serverSettings.open')}
+    </a>
   );
 
   const renderGroup = (group: string) => (
     <div key={group} className="rounded-2xl bg-gray-50 p-4 md:p-8 mb-6 min-w-0">
       <h3 className="font-varela text-[18px] md:text-[20px] mb-4">{tr(`serverSettings.group.${group}`, group)}</h3>
+      {group === 'swagger' && data?.info?.apiDocsUrl && (
+        <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600 min-w-0">
+          <span className="break-all">{data.info.apiDocsUrl}</span>
+          {openLink(data.info.apiDocsUrl)}
+        </p>
+      )}
       {renderGroupBody(group)}
     </div>
   );
@@ -305,6 +324,23 @@ export default function AdminServerSettings() {
           )}
         </div>
         {tr(`serverSettings.module.${m.key}.desc`) && <p className="mt-2 text-sm text-gray-600">{tr(`serverSettings.module.${m.key}.desc`)}</p>}
+        {m.url && m.key === 'mcp' && (
+          <div className="mt-3">
+            <div className="text-xs text-gray-500 mb-1">{t('serverSettings.module.connectorUrl')}</div>
+            <div className="flex items-stretch gap-2 min-w-0">
+              <code className="flex-1 min-w-0 overflow-x-auto whitespace-nowrap rounded-xl bg-gray-100 px-3 py-2 text-xs font-mono">{m.url}</code>
+              <button type="button" onClick={() => copy(m.url || '', `url-${m.key}`)} className="shrink-0 rounded-xl border border-gray-300 px-3 text-xs hover:bg-gray-50">
+                {copied === `url-${m.key}` ? t('serverSettings.module.copied') : t('serverSettings.module.copy')}
+              </button>
+            </div>
+          </div>
+        )}
+        {m.url && m.key !== 'mcp' && (
+          <p className="mt-3 flex flex-wrap items-center gap-2 text-sm min-w-0">
+            <span className="break-all text-gray-600">{m.url}</span>
+            {openLink(m.url)}
+          </p>
+        )}
         {m.installed === false && m.enableCommand && (
           <div className="mt-3">
             <div className="text-xs text-gray-500 mb-1">{t('serverSettings.module.installHint')}</div>
@@ -339,6 +375,15 @@ export default function AdminServerSettings() {
           </details>
         )}
         {!modules.length && !groups.length && <p className="text-sm text-gray-500">{t('serverSettings.emptyTab')}</p>}
+        {tab === 'api' && tabs.includes('system') && (
+          <p className="text-sm text-gray-600">
+            {t('serverSettings.apiRateLimitsNote.before')}
+            <button type="button" onClick={() => selectTab('system')} className="text-brand-500 underline">
+              {t('serverSettings.tab.system')}
+            </button>
+            {t('serverSettings.apiRateLimitsNote.after')}
+          </p>
+        )}
       </>
     );
   };

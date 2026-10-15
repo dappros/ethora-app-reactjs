@@ -476,7 +476,7 @@ export interface ServerSetting {
   tab?: ServerSettingsTab;
   advanced?: boolean;
 }
-export type ServerSettingsTab = 'chats' | 'users' | 'ai' | 'email' | 'system';
+export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'ai' | 'email' | 'system';
 // An Enterprise module as the API sees it: installed = its service is part of
 // this install (null: the API cannot tell), running = it answered just now.
 export interface ServerModule {
@@ -486,6 +486,8 @@ export interface ServerModule {
   running: boolean | null;
   licensed: boolean;
   enableCommand: string | null;
+  // Public page of the module (playground, MCP connector, uptime dashboard).
+  url?: string | null;
 }
 export interface ServerSettingsResponse {
   settings: ServerSetting[];
@@ -495,7 +497,7 @@ export interface ServerSettingsResponse {
   tabs?: ServerSettingsTab[];
   groups?: Array<{ key: string; tab: ServerSettingsTab }>;
   modules?: ServerModule[];
-  info?: { installKind?: 'compose' | 'host'; translateUrl: string | null; e2eeInstall: boolean };
+  info?: { installKind?: 'compose' | 'host'; translateUrl: string | null; e2eeInstall: boolean; apiDocsUrl?: string | null };
 }
 
 export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
