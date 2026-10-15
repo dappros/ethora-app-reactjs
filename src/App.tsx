@@ -99,7 +99,10 @@ function App() {
         if (match) {
           const arr = match.map(Number);
           let [r, g, b] = arr;
-          const [a] = arr;
+          // rgba(r, g, b, a): the alpha is the fourth number. Taking the
+          // first made the hover colour transparent for any brand colour
+          // without red (the default #0052CD), so brand buttons vanished on hover.
+          const a = arr.length > 3 ? arr[3] : 1;
           r = Math.ceil(r * 0.8);
           g = Math.ceil(g * 0.8);
           b = Math.ceil(b * 0.8);

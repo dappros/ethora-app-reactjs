@@ -18,6 +18,7 @@ import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
+import { useLicenseStatus } from '../hooks/useLicenseStatus';
 import { isEthoraHostedEnv } from '../utils/hostedEnv';
 const ITEM_CLASS =
   'flex group hover:bg-gray-100 flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
@@ -38,6 +39,9 @@ export function AppMenu() {
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
+  // The server's admin can turn agents off for everyone (Server settings > AI).
+  const { status: licenseStatus } = useLicenseStatus();
+  const agentsOff = licenseStatus?.operator?.aiAgents === false;
   // Apps / Agents / Billing / Help belong to the base app (app.<root>). An app
   // created inside it is served from its own subdomain and shows chat only.
   const isBaseApp = isBaseAppHost();
@@ -86,7 +90,7 @@ export function AppMenu() {
             <div className={LABEL_CLASS}>{t('nav.chats')}</div>
           </NavLink>
         </div>
-        {isAdmin && isBaseApp && (
+        {isAdmin && isBaseApp && !agentsOff && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink
               to="/app/admin/agents"

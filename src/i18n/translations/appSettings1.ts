@@ -124,6 +124,8 @@ export const appSettings1 = {
       'Allow Users to start end-to-end encrypted Chats',
     'appSettingsChats.e2eeHelp':
       'When enabled, your Users can start an encrypted 1-to-1 Chat alongside their normal one. Messages in it are encrypted on the device and neither this server nor you can read them, so they cannot be moderated, searched, exported or recovered. A Chat stays encrypted for life; turning this off only stops new encrypted Chats being created.',
+    'appSettingsChats.e2eeOperatorOff':
+      'Turned off for this server by the server admin (Server settings > Chats). Chats that are already encrypted stay encrypted.',
     'appSettingsChats.pinnedChatsHeading': 'Pinned Chats',
     'appSettingsChats.pinnedChatsHelp':
       'Pinned or “starred” Chats are permanent chat rooms that your Users will automatically see and join.',
@@ -372,6 +374,8 @@ export const appSettings1 = {
       'Autoriser les utilisateurs à lancer des discussions chiffrées de bout en bout',
     'appSettingsChats.e2eeHelp':
       "Lorsque cette option est activée, vos utilisateurs peuvent lancer une discussion privée chiffrée en plus de la discussion normale. Les messages y sont chiffrés sur l'appareil : ni ce serveur ni vous ne pouvez les lire, ils ne peuvent donc être ni modérés, ni recherchés, ni exportés, ni récupérés. Une discussion reste chiffrée à vie ; désactiver cette option empêche seulement la création de nouvelles discussions chiffrées.",
+    'appSettingsChats.e2eeOperatorOff':
+      'Désactivé pour ce serveur par l\'administrateur du serveur (Paramètres du serveur > Discussions). Les discussions déjà chiffrées le restent.',
     'appSettingsChats.pinnedChatsHeading': 'Discussions épinglées',
     'appSettingsChats.pinnedChatsHelp':
       "Les discussions épinglées (ou « favorites ») sont des salons permanents que vos utilisateurs verront et rejoindront automatiquement.",
@@ -638,6 +642,8 @@ export const appSettings1 = {
       'Permitir que los usuarios inicien chats cifrados de extremo a extremo',
     'appSettingsChats.e2eeHelp':
       'Cuando está activado, tus usuarios pueden iniciar un chat individual cifrado además del normal. Los mensajes se cifran en el dispositivo y ni este servidor ni tú podéis leerlos, por lo que no se pueden moderar, buscar, exportar ni recuperar. Un chat permanece cifrado de por vida; desactivar esta opción solo impide que se creen chats cifrados nuevos.',
+    'appSettingsChats.e2eeOperatorOff':
+      'Desactivado para este servidor por el administrador del servidor (Ajustes del servidor > Chats). Los chats ya cifrados siguen cifrados.',
     'appSettingsChats.pinnedChatsHeading': 'Chats fijados',
     'appSettingsChats.pinnedChatsHelp':
       'Los chats fijados (o "destacados") son salas permanentes a las que tus usuarios se unirán y verán automáticamente.',
