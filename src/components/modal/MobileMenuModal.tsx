@@ -16,6 +16,7 @@ import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
 import { env } from '../../config/env';
+import { useLicenseStatus } from '../../hooks/useLicenseStatus';
 import { isEthoraHostedEnv } from '../../utils/hostedEnv';
 interface Props {
   isAdmin?: boolean;
@@ -26,6 +27,9 @@ interface Props {
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const { t } = useTranslation();
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
+  // The server's admin can turn agents off for everyone (Server settings > AI).
+  const { status: licenseStatus } = useLicenseStatus();
+  const agentsOff = licenseStatus?.operator?.aiAgents === false;
   const isBaseApp = isBaseAppHost();
   const showBilling = isBaseApp && isEthoraHostedEnv();
 
@@ -66,7 +70,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
             <span className={labelBase}>{t('nav.chats')}</span>
             <UnreadBadge className="ml-2" />
           </NavLink>
-          {isAdmin && (
+          {isAdmin && !agentsOff && (
             <NavLink
               to="/app/admin/agents"
               onClick={onClose}

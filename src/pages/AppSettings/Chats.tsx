@@ -18,6 +18,7 @@ import { phCapture } from '../../posthog';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { env } from '../../config/env';
+import { useLicenseStatus } from '../../hooks/useLicenseStatus';
 import { ModelAgent, ModelBotInstance } from '../../models';
 
 interface Props {
@@ -64,6 +65,10 @@ export function Chats({
   // for a chat to be encryptable, and the backend enforces the app one on
   // POST /v1/chats/private regardless of what this tab shows.
   const installSupportsE2ee = env.VITE_E2EE_ENABLED === 'true';
+  // The server's admin can stop new encrypted chats on every App (Server
+  // settings > Chats); the switch then shows, disabled, with the reason.
+  const { status: licenseStatus } = useLicenseStatus();
+  const e2eeOperatorOff = licenseStatus?.operator?.e2eeAllowed === false;
   const [showCreate, setShowCreate] = useState(false);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -402,9 +407,10 @@ export function Chats({
           </p>
           <Field className="flex items-center cursor-pointer mb-2">
             <Checkbox
-              className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 flex justify-center items-center"
-              checked={e2eeEnabled}
+              className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 data-[disabled]:opacity-50 flex justify-center items-center"
+              checked={e2eeEnabled && !e2eeOperatorOff}
               onChange={setE2eeEnabled}
+              disabled={e2eeOperatorOff}
             >
               <IconCheckbox className="hidden group-data-[checked]:block" />
             </Checkbox>
@@ -412,6 +418,11 @@ export function Chats({
               {t('appSettingsChats.e2eeLabel')}
             </Label>
           </Field>
+          {e2eeOperatorOff && (
+            <p className="font-sans text-xs text-amber-800 mb-2">
+              {t('appSettingsChats.e2eeOperatorOff')}
+            </p>
+          )}
           <p className="font-sans text-xs text-gray-500 mb-8">
             {t('appSettingsChats.e2eeHelp')}
           </p>

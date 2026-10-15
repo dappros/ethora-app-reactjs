@@ -472,12 +472,30 @@ export interface ServerSetting {
   updatedAt: string | null;
   updatedBy: string | null;
   restartPending: boolean;
+  // Page tab and whether the group sits under "Advanced"; older APIs omit both.
+  tab?: ServerSettingsTab;
+  advanced?: boolean;
+}
+export type ServerSettingsTab = 'chats' | 'users' | 'ai' | 'email' | 'system';
+// An Enterprise module as the API sees it: installed = its service is part of
+// this install (null: the API cannot tell), running = it answered just now.
+export interface ServerModule {
+  key: 'ai' | 'push' | 'playground' | 'mcp' | 'uptime';
+  tab: ServerSettingsTab;
+  installed: boolean | null;
+  running: boolean | null;
+  licensed: boolean;
+  enableCommand: string | null;
 }
 export interface ServerSettingsResponse {
   settings: ServerSetting[];
   processes: Record<string, string | null>;
   // How the server was installed; older APIs omit it.
   installKind?: 'compose' | 'host';
+  tabs?: ServerSettingsTab[];
+  groups?: Array<{ key: string; tab: ServerSettingsTab }>;
+  modules?: ServerModule[];
+  info?: { installKind?: 'compose' | 'host'; translateUrl: string | null; e2eeInstall: boolean };
 }
 
 export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
@@ -525,6 +543,9 @@ export interface LicenseStatus {
   registry?: { username: string; token: string; updatedAt: string | null } | null;
   // How the server was installed; older APIs omit it (treat as 'host').
   installKind?: 'compose' | 'host';
+  // Features the server's admin turned off for users (Server settings);
+  // older APIs omit it, which means nothing is turned off.
+  operator?: { aiAgents: boolean; e2eeAllowed: boolean };
   callHome: {
     enabled: boolean;
     serverConfigured: boolean;
