@@ -39,6 +39,9 @@ export default function AdminServerSettings() {
   const [message, setMessage] = useState<{ group: string; kind: 'ok' | 'error'; text: string } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState<string | null>(null);
+  // Module page sign-ins, fetched only when "Show" is pressed.
+  const [creds, setCreds] = useState<Record<string, { username: string; password: string } | null>>({});
+  const [credsError, setCredsError] = useState<Record<string, string>>({});
   // Name the one configuration file once the API says how the server was
   // installed (compose bundle .env or deploy.yml); generic text until then.
   const installKind = data?.installKind || data?.info?.installKind;
@@ -162,6 +165,21 @@ export default function AdminServerSettings() {
       setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500);
     } catch {
       // Clipboard refused (no permission / insecure context): the text stays selectable.
+    }
+  };
+
+  const toggleCreds = async (key: string) => {
+    if (creds[key]) {
+      setCreds((c) => ({ ...c, [key]: null }));
+      return;
+    }
+    try {
+      const r = await httpV2.get<{ username: string; password: string }>(`/server-settings/modules/${encodeURIComponent(key)}/credentials`);
+      setCreds((c) => ({ ...c, [key]: r.data }));
+      setCredsError((e) => ({ ...e, [key]: '' }));
+    } catch (e) {
+      const err = e as ApiErr;
+      setCredsError((x) => ({ ...x, [key]: err.response?.data?.error || err.message }));
     }
   };
 
@@ -340,6 +358,32 @@ export default function AdminServerSettings() {
             <span className="break-all text-gray-600">{m.url}</span>
             {openLink(m.url)}
           </p>
+        )}
+        {m.hasCredentials && (
+          <div className="mt-3 text-sm min-w-0">
+            <div className="text-xs text-gray-500 mb-1">{t('serverSettings.module.credentials')}</div>
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <span className="text-gray-600">{t('serverSettings.module.username')}</span>
+              <code className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-mono">{creds[m.key]?.username ?? '••••'}</code>
+              {creds[m.key] && (
+                <button type="button" onClick={() => copy(creds[m.key]?.username || '', `user-${m.key}`)} className="rounded-xl border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50">
+                  {copied === `user-${m.key}` ? t('serverSettings.module.copied') : t('serverSettings.module.copy')}
+                </button>
+              )}
+              <span className="text-gray-600 ml-2">{t('serverSettings.module.password')}</span>
+              <code className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-mono break-all">{creds[m.key]?.password ?? '••••••••••••'}</code>
+              {creds[m.key] && (
+                <button type="button" onClick={() => copy(creds[m.key]?.password || '', `pass-${m.key}`)} className="rounded-xl border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50">
+                  {copied === `pass-${m.key}` ? t('serverSettings.module.copied') : t('serverSettings.module.copy')}
+                </button>
+              )}
+              <button type="button" onClick={() => toggleCreds(m.key)} className="rounded-xl border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50">
+                {creds[m.key] ? t('serverSettings.module.hide') : t('serverSettings.module.show')}
+              </button>
+            </div>
+            {credsError[m.key] && <p className="mt-1 text-xs text-red-700">{credsError[m.key]}</p>}
+            <p className="mt-1 text-xs text-gray-500">{t(`serverSettings.module.${m.key}.credentialsHint`)}</p>
+          </div>
         )}
         {m.installed === false && m.enableCommand && (
           <div className="mt-3">

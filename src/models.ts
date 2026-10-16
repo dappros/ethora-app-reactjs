@@ -488,6 +488,9 @@ export interface ServerModule {
   enableCommand: string | null;
   // Public page of the module (playground, MCP connector, uptime dashboard).
   url?: string | null;
+  // The page has a sign-in the super admin can reveal (uptime's basic auth):
+  // GET /v2/server-settings/modules/:key/credentials.
+  hasCredentials?: boolean;
 }
 export interface ServerSettingsResponse {
   settings: ServerSetting[];
