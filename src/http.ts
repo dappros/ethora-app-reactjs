@@ -801,6 +801,16 @@ export function updateMe(data: any) {
   return http.put('/users', data);
 }
 
+// Users the caller has blocked in 1-1 private chats (GET), and unblock (DELETE
+// by the peer's xmppUsername). See ethora-backend chat.block controller.
+export function getBlockedUsers() {
+  return http.get('/chats/blocked');
+}
+
+export function unblockUser(xmppUsername: string) {
+  return http.delete(`/chats/blocked/${encodeURIComponent(xmppUsername)}`);
+}
+
 export function getShareDoc(token: string) {
   return http.get(`/docs/share/${token}`);
 }

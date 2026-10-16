@@ -197,6 +197,12 @@ export const userSettings = {
 
     // src/pages/UserSettings/BlockedUsers.tsx
     'userSettingsBlockedUsers.title': 'Users you have blocked',
+    'userSettingsBlockedUsers.description':
+      'Blocked users stay hidden from your chats and cannot reach you in real time. Unblock to restore the conversation.',
+    'userSettingsBlockedUsers.empty': "You haven't blocked anyone.",
+    'userSettingsBlockedUsers.unblock': 'Unblock',
+    'userSettingsBlockedUsers.loadError': 'Could not load your blocked users.',
+    'userSettingsBlockedUsers.unblockError': 'Could not unblock this user. Please try again.',
 
     // src/pages/UserSettings/ManageData.tsx
     'userSettingsManageData.downloadHeading': 'Download your data',
