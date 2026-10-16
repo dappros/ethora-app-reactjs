@@ -1,3 +1,4 @@
+import { BlockedUsers } from './BlockedUsers';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
 import { useVisibilitySetting } from './useVisibilitySetting';
@@ -22,6 +23,9 @@ export function PrivacyData() {
           <ProfileShares />
         </section>
       )}
+      <section className="border-t border-gray-200 pt-8">
+        <BlockedUsers />
+      </section>
       <section className="border-t border-gray-200 pt-8">
         <ManageData />
       </section>
