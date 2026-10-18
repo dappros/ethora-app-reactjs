@@ -877,6 +877,28 @@ export function httpGetBroadcastChatsJobV2(jobId: string) {
   return httpV2App.get(`/chats/broadcast/${jobId}`);
 }
 
+// Owner/admin opens a 1-1 private chat between two OTHER users of an app they
+// manage (POST /v2/apps/:appId/chats/private). `members` are the two users'
+// ids or xmppUsernames; the backend prefixes bare ids with `${appId}_`. Same
+// room/name/DB shape as the user-facing POST /v1/chats/private, so it is
+// idempotent: re-creating an existing pair returns `{ created: false }` with
+// the existing room. `e2ee: true` targets the pair's encrypted room and
+// requires the app to have e2ee enabled. Authenticated as the owner (httpV2),
+// which the backend's `tenantActor` accepts for a dashboard app owner.
+export function httpCreatePrivateChatForUsersV2(
+  appId: string,
+  members: [string, string],
+  e2ee: boolean = false
+) {
+  return httpV2.post<{
+    created: boolean;
+    result: {
+      name: string;
+      members: Array<{ _id: string; firstName?: string; lastName?: string; xmppUsername?: string }>;
+    };
+  }>(`/apps/${encodeURIComponent(appId)}/chats/private`, { members, e2ee });
+}
+
 export const sendHSFormData = async (
   appId: string,
   formId: string,
