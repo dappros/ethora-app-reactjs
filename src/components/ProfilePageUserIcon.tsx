@@ -5,7 +5,7 @@ import {
   MenuItems,
   MenuSeparator,
 } from '@headlessui/react';
-import { useRef, useState } from 'react';
+import { CSSProperties, useRef, useState } from 'react';
 import 'react-image-crop/dist/ReactCrop.css';
 import { IconCamera } from './Icons/IconCamera';
 import { IconDelete } from './Icons/IconDelete';
@@ -74,27 +74,13 @@ export function ProfilePageUserIcon({
     }
   };
 
-  const innerStyle: any = {};
+  const hasImage = !!profileImage;
+  const innerStyle: CSSProperties = { width, height };
 
-  if (profileImage) {
+  if (hasImage) {
     innerStyle.backgroundImage = `url('${profileImage}')`;
   } else {
-    innerStyle.backgroundColor = 'white';
-  }
-
-  innerStyle.width = width;
-  innerStyle.height = height;
-
-  if (!profileImage) {
-    const color = getColorFromString(`${firstName} ${lastName}`)
-    innerStyle.backgroundColor = color
-    return (
-      <div className='flex justify-center items-center' >
-        <div className="border border-brand-500 rounded-full flex items-center justify-center" style={innerStyle}>
-          <span className={cn("font-varela font-semibold text-[#121219]", {"text-[18px]": small, "text-[50px]": !small})}>{firstName.toUpperCase()[0]}</span>
-        </div>
-      </div>
-    )
+    innerStyle.backgroundColor = getColorFromString(`${firstName} ${lastName}`);
   }
 
   return (
@@ -107,7 +93,20 @@ export function ProfilePageUserIcon({
         className="hidden"
         type="file"
       />
-      <div className="inner" style={innerStyle}>
+      <div
+        className={cn("inner", { "border border-brand-500": !hasImage })}
+        style={innerStyle}
+      >
+        {!hasImage && !editMode && (
+          <span
+            className={cn("font-varela font-semibold text-[#121219]", {
+              "text-[18px]": small,
+              "text-[50px]": !small,
+            })}
+          >
+            {firstName.toUpperCase()[0]}
+          </span>
+        )}
         {editMode && (
           <div className="dimmed">
             <Menu>
@@ -132,8 +131,12 @@ export function ProfilePageUserIcon({
                   </button>
                 </MenuItem>
                 <MenuSeparator className="separator" />
-                <MenuItem>
-                  <button onClick={() => setProfileImage('')}>
+                <MenuItem disabled={!hasImage}>
+                  <button
+                    onClick={() => setProfileImage('')}
+                    disabled={!hasImage}
+                    className={cn({ "pointer-events-none text-gray-300": !hasImage })}
+                  >
                     <span>{t('profilePageUserIcon.delete')}</span>
                     <IconDelete />
                   </button>
