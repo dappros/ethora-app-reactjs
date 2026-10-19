@@ -203,6 +203,7 @@ export const userSettings = {
     'userSettingsBlockedUsers.unblock': 'Unblock',
     'userSettingsBlockedUsers.loadError': 'Could not load your blocked users.',
     'userSettingsBlockedUsers.unblockError': 'Could not unblock this user. Please try again.',
+    'userSettingsBlockedUsers.unblockSuccess': 'User unblocked. The conversation is back in your chat list.',
 
     // src/pages/UserSettings/ManageData.tsx
     'userSettingsManageData.downloadHeading': 'Download your data',

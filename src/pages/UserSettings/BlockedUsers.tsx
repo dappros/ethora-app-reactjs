@@ -45,6 +45,7 @@ export function BlockedUsers() {
       try {
         await unblockUser(user.xmppUsername);
         setItems((prev) => prev.filter((u) => u._id !== user._id));
+        toast.success(t('userSettingsBlockedUsers.unblockSuccess'));
       } catch {
         toast.error(t('userSettingsBlockedUsers.unblockError'));
       } finally {
