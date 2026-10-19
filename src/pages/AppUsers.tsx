@@ -24,6 +24,7 @@ import {
   getExportCsv,
   httpArchiveUsers,
   httpCraeteUser,
+  httpCreatePrivateChatForUsersV2,
   httpGetAppUserTags,
   httpGetUsers,
   httpHardDeleteUsers,
@@ -36,6 +37,7 @@ import {
   httpUpdateAcl,
   httpUpdateAppUser,
 } from '../http';
+import { env } from '../config/env';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
 
@@ -107,6 +109,12 @@ export default function AppUsers() {
   const tagFilter = searchParams.get('tag') || undefined;
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
+  // Create a 1-1 private chat between the two selected users (owner/admin
+  // action; the two users need not include the caller). Enabled only when
+  // exactly two users are selected - see the action bar below.
+  const [showCreatePrivateChat, setShowCreatePrivateChat] = useState(false);
+  const [createPrivateChatBusy, setCreatePrivateChatBusy] = useState(false);
+  const [createPrivateChatE2ee, setCreatePrivateChatE2ee] = useState(false);
   // "Platform access" (superadmin flag, AI agents, network statistics) is
   // per user across the installation: shown to superadmins, on the base
   // app only (the backend refuses elsewhere).
@@ -339,6 +347,60 @@ export default function AppUsers() {
   const getSelectedUserIds = () => {
     const indexes = getSelectedIndexes();
     return indexes.map((el) => items[el]._id);
+  };
+
+  const getSelectedUsers = (): ModelAppUser[] => {
+    return getSelectedIndexes().map((el) => items[el]);
+  };
+
+  const userDisplayName = (u?: ModelAppUser): string => {
+    if (!u) return '';
+    const name = `${u.firstName || ''} ${u.lastName || ''}`.trim();
+    return name || u.email || u._id;
+  };
+
+  // The create-private-chat dialog only ever addresses exactly two users.
+  const privateChatPair = getSelectedUsers();
+
+  // E2EE is offered only when both the install (VITE_E2EE_ENABLED) and this
+  // app (e2eeEnabled) have it on - mirrors the gating in AppSettings > Chats,
+  // and the backend refuses `e2ee: true` otherwise anyway.
+  const privateChatE2eeAvailable =
+    env.VITE_E2EE_ENABLED === 'true' && Boolean(currentApp?.e2eeEnabled);
+
+  const onCreatePrivateChat = async () => {
+    if (!appId || privateChatPair.length !== 2) return;
+    const [a, b] = privateChatPair;
+    const wantE2ee = privateChatE2eeAvailable && createPrivateChatE2ee;
+    setCreatePrivateChatBusy(true);
+    try {
+      const { data } = await httpCreatePrivateChatForUsersV2(
+        appId,
+        [a._id, b._id],
+        wantE2ee
+      );
+      const names = { userA: userDisplayName(a), userB: userDisplayName(b) };
+      if (data?.created === false) {
+        toast.info(
+          t('appUsers.createPrivateChatExistsToast')
+            .replace('{userA}', names.userA)
+            .replace('{userB}', names.userB)
+        );
+      } else {
+        toast.success(
+          t('appUsers.createPrivateChatCreatedToast')
+            .replace('{userA}', names.userA)
+            .replace('{userB}', names.userB)
+        );
+      }
+      setShowCreatePrivateChat(false);
+      setCreatePrivateChatE2ee(false);
+      refreshAndClearSelection();
+    } catch (e: unknown) {
+      toast.error(`${t('appUsers.createPrivateChatFailedToast')} ${apiError(e).message}`);
+    } finally {
+      setCreatePrivateChatBusy(false);
+    }
   };
 
   // Manage Tags applies a diff: tags typed under "Add" are added to every
@@ -741,6 +803,20 @@ export default function AppUsers() {
             >
               {t('appUsers.revokeAccess')}
             </button>
+            {/* Open a 1-1 private chat between two users. Only meaningful for a
+                pair, so it shows only when exactly two users are selected. */}
+            {lifecycleTab === 'active' && length === 2 && (
+              <button
+                className="text-brand-500 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+                onClick={() => {
+                  setCreatePrivateChatE2ee(false);
+                  setShowCreatePrivateChat(true);
+                }}
+                title={t('appUsers.createPrivateChatTitle')}
+              >
+                {t('appUsers.createPrivateChat')}
+              </button>
+            )}
             {lifecycleTab === 'active' ? (
               <button
                 className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
@@ -1250,6 +1326,35 @@ export default function AppUsers() {
           busy={revokeBusy}
           onConfirm={onRevokeAccess}
           onCancel={() => setShowRevokeAccess(false)}
+        />
+      )}
+      {showCreatePrivateChat && privateChatPair.length === 2 && (
+        <ConfirmModal
+          title={t('appUsers.createPrivateChatDialogTitle')}
+          message={
+            <span className="block">
+              {t('appUsers.createPrivateChatDialogBody')
+                .replace('{userA}', userDisplayName(privateChatPair[0]))
+                .replace('{userB}', userDisplayName(privateChatPair[1]))}
+              {privateChatE2eeAvailable && (
+                <label className="mt-4 flex items-center justify-center gap-2 cursor-pointer font-sans text-sm">
+                  <input
+                    type="checkbox"
+                    checked={createPrivateChatE2ee}
+                    onChange={(e) => setCreatePrivateChatE2ee(e.target.checked)}
+                  />
+                  {t('appUsers.createPrivateChatE2eeLabel')}
+                </label>
+              )}
+            </span>
+          }
+          confirmLabel={t('appUsers.createPrivateChat')}
+          busy={createPrivateChatBusy}
+          onConfirm={onCreatePrivateChat}
+          onCancel={() => {
+            setShowCreatePrivateChat(false);
+            setCreatePrivateChatE2ee(false);
+          }}
         />
       )}
       {showArchive && (

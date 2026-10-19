@@ -22,6 +22,16 @@ export const adminCore = {
     'appUsers.resetMfaConfirmMessage': 'Their authenticator and backup codes stop working and all their sessions are signed out. They sign in with their password and can set up two-step verification again.',
     'appUsers.mfaResetToast': 'Two-step verification reset for {count} user(s).',
     'appUsers.mfaResetFailedPrefix': 'Could not reset two-step verification:',
+    // src/pages/AppUsers.tsx - owner/admin creates a 1-1 private chat between
+    // the two selected users (POST /v2/apps/:appId/chats/private).
+    'appUsers.createPrivateChat': 'Create private chat',
+    'appUsers.createPrivateChatTitle': 'Open a 1-to-1 private chat between the two selected users',
+    'appUsers.createPrivateChatDialogTitle': 'Create a private chat',
+    'appUsers.createPrivateChatDialogBody': 'Open a 1-to-1 private chat between {userA} and {userB}. Both will see it in their chat list.',
+    'appUsers.createPrivateChatE2eeLabel': 'End-to-end encrypted chat',
+    'appUsers.createPrivateChatCreatedToast': 'Private chat created between {userA} and {userB}.',
+    'appUsers.createPrivateChatExistsToast': 'A private chat between {userA} and {userB} already exists.',
+    'appUsers.createPrivateChatFailedToast': 'Could not create the private chat:',
     // Admin.tsx - shared support footer shown under every admin sub-page.
     'adminShell.needAssistance': 'Need assistance?',
     'adminShell.helpSupportPage': 'Help & Support',
