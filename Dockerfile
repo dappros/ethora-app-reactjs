@@ -7,12 +7,34 @@
 #   docker build -t ethora-frontend .
 #   docker run --env-file .env -p 8080:8080 ethora-frontend            # serve
 #   docker run --env-file .env -v /srv/www:/out ethora-frontend export # for host nginx
+#
+# Optional: build against a local @ethora/chat-component checkout instead of
+# the npm release pinned in package.json (the monoserver release workflow
+# passes its pinned submodule this way):
+#   docker buildx build --build-context chat-component-src=../ethora-chat-component .
 ARG NODE_VERSION=24
+
+# Empty by default; --build-context chat-component-src=<dir> replaces it.
+FROM scratch AS chat-component-src
+
+FROM node:${NODE_VERSION}-bookworm-slim AS chat-component
+WORKDIR /src
+COPY --from=chat-component-src / ./
+RUN mkdir -p /pack && if [ -f package.json ]; then \
+      npm ci --no-audit --no-fund --ignore-scripts \
+      && npm run build:lib \
+      && npm pack --pack-destination /pack; \
+    fi
 
 FROM node:${NODE_VERSION}-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
+# Overlay the locally built chat-component, if one was supplied.
+COPY --from=chat-component /pack /pack
+RUN if ls /pack/*.tgz >/dev/null 2>&1; then \
+      npm install --no-save --no-audit --no-fund /pack/*.tgz; \
+    fi
 COPY . .
 ARG VITE_BUILD_VERSION=""
 ARG VITE_BUILD_COMMIT=""
