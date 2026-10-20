@@ -25,6 +25,7 @@ import { Api } from './Api';
 import { Appearance } from './Appearance';
 import { Chats } from './Chats';
 import { DeleteSetting } from './DeleteSetting';
+import { ChatComponent } from './ChatComponent';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
@@ -54,6 +55,7 @@ const tabs = [
   'Sign-on options',
   'Home screen',
   'Menu',
+  'Chat component',
   'Chats',
   // Phase 1 follow-up: AI Bots tab moved out of per-App settings into a top-level
   // /app/admin/agents area (Agents are tenant-scoped, not app-scoped). The "Active Agent"
@@ -65,7 +67,7 @@ const tabs = [
 
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
-  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
+  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu', 'Chat component'],
   System: ['Chats', 'Visibility & Privacy', 'API', LIFECYCLE_TAB],
 };
 
@@ -81,6 +83,7 @@ const TAB_LABEL_KEYS: Record<string, string> = {
   'Sign-on options': 'appSettings.tab.signOnOptions',
   'Home screen': 'appSettings.tab.homeScreen',
   Menu: 'appSettings.tab.menu',
+  'Chat component': 'appSettings.tab.chatComponent',
   Chats: 'appSettings.tab.chats',
   'Visibility & Privacy': 'appSettings.tab.visibilityPrivacy',
   API: 'appSettings.tab.api',
@@ -809,6 +812,13 @@ export default function AppSettings() {
               availableMenuItems={availableMenuItems}
               setAvailableMenuItems={setAvailableMenuItems}
             />
+          </TabPanel>
+
+          <TabPanel
+            key="Chat component"
+            className="grid grid-rows-1 lg:ml-4 h-full "
+          >
+            <ChatComponent appId={appId as string} brandColor={app.primaryColor} />
           </TabPanel>
 
           <TabPanel

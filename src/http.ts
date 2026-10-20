@@ -1101,6 +1101,22 @@ export function httpSaveWidgetAppearance(appId: string, appearance: Record<strin
   return httpV2.put<{ ok: boolean; appearance: Record<string, string> }>(`/apps/${appId}/widget/appearance`, { appearance });
 }
 
+// The App's chat component config: a flat record of dotted IConfig paths the
+// operator set in the Chat component tab (non-defaults only). The public read
+// is what the web chat applies at load; options the license no longer covers
+// are left out of it.
+export function httpGetChatComponentConfig(appId: string) {
+  return httpV2.get<{ ok: boolean; config: Record<string, string | boolean> }>(`/apps/${appId}/chat-component/config`);
+}
+
+export function httpSaveChatComponentConfig(appId: string, config: Record<string, string | boolean>) {
+  return httpV2.put<{ ok: boolean; config: Record<string, string | boolean> }>(`/apps/${appId}/chat-component/config`, { config });
+}
+
+export function httpGetPublicChatComponentConfig(appId: string) {
+  return httpV2.get<{ ok: boolean; config: Record<string, string | boolean> }>('/chat-component/config', { params: { appId } });
+}
+
 // Queues a re-crawl of one already-indexed row. Answers { status: 'queued', jobId }
 // the same way a fresh crawl does - the stored copy is overwritten later, when the
 // crawler calls back, so the row's size and updatedAt only move then.

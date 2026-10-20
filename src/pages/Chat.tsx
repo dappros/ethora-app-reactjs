@@ -8,6 +8,8 @@ import {
   actionSwitchChatApp,
 } from '../actions';
 import { createChatConfig } from '../config/chatBootstrap';
+import { httpGetPublicChatComponentConfig } from '../http';
+import { applyChatComponentConfig } from '../lib/chatComponentConfig';
 import { useIsMobileView } from '../hooks/useIsMobileView';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
@@ -167,7 +169,27 @@ const MemoizedChat = React.memo(function ChatComponent({
     ]
   );
 
-  return <Chat config={chatConfig} />;
+  // What the operator saved in the Chat component tab, applied on top of the
+  // config above. The chat waits for this read (it settles even when it fails)
+  // so it starts once, with the final config, instead of restarting.
+  const appIdForConfig = config?._id;
+  const [serverConfig, setServerConfig] = useState<Record<string, string | boolean> | null>(null);
+  useEffect(() => {
+    if (!appIdForConfig) return;
+    let cancelled = false;
+    setServerConfig(null);
+    httpGetPublicChatComponentConfig(appIdForConfig)
+      .then((r) => !cancelled && setServerConfig(r.data?.config || {}))
+      .catch(() => !cancelled && setServerConfig({}));
+    return () => {
+      cancelled = true;
+    };
+  }, [appIdForConfig]);
+  const finalConfig = useMemo(() => applyChatComponentConfig(chatConfig, serverConfig), [chatConfig, serverConfig]);
+
+  if (appIdForConfig && serverConfig === null) return null;
+
+  return <Chat config={finalConfig} />;
 });
 
 // Header App-switcher (Option A). For tenant admins with at least one
