@@ -613,6 +613,7 @@ export function createChatConfig({
         });
       },
     },
+    features: { userBlock: true },
     setRoomJidInPath: true,
     enableRoomsRetry: { enabled: false, helperText: '' },
     inAppNotifications: {
