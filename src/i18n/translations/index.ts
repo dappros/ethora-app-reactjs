@@ -6,6 +6,7 @@ import { appSettings1 } from './appSettings1';
 import { appSettings2 } from './appSettings2';
 import { authFlows } from './authFlows';
 import { authShared } from './authShared';
+import { callJoin } from './callJoin';
 import { common } from './common';
 import { license } from './license';
 import { miscComponents } from './miscComponents';
@@ -39,6 +40,7 @@ const dictionaries = [
   appSettings2,
   authFlows,
   authShared,
+  callJoin,
   license,
   miscComponents,
   miscPages,

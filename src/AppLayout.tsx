@@ -4,6 +4,7 @@ import { AppMenu } from './components/AppMenu';
 import { LicenseBanner } from './components/LicenseBanner';
 import { Loading } from './components/Loading';
 import { useAppStore } from './store/useAppStore';
+import { isReturnablePath, rememberReturnPath } from './utils/returnPath';
 
 export default function AppLayout() {
   const location = useLocation();
@@ -26,10 +27,15 @@ export default function AppLayout() {
     if (hasToken) {
       return <Loading />;
     }
+    // A scheduled-call join link opened signed out: park it so the login
+    // sends the user back here (see utils/returnPath.ts).
+    rememberReturnPath(location.pathname + location.search);
     return <Navigate to="/login" replace />;
   }
 
-  if (location.pathname !== '/login') {
+  // A join link is a one-off destination, not "where the user last was":
+  // remembering it would send every later visit to / back into that call.
+  if (location.pathname !== '/login' && !isReturnablePath(location.pathname)) {
     localStorage.setItem('lastPath', location.pathname + location.search);
   }
 

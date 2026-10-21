@@ -1,5 +1,6 @@
 import { NavigateFunction } from 'react-router-dom';
 import { defaultLandingPath } from './appHost';
+import { consumeReturnPath } from './returnPath';
 
 export function navigateToUserPage(
   navigate: NavigateFunction,
@@ -7,6 +8,13 @@ export function navigateToUserPage(
 ) {
   if (page === 'login') {
     return navigate('/login');
+  }
+
+  // A join link opened while signed out: land back on it, not on the app's
+  // configured landing page. Every login path ends here.
+  const returnPath = consumeReturnPath();
+  if (returnPath) {
+    return navigate(returnPath, { replace: true });
   }
 
   switch (page) {

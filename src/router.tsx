@@ -7,6 +7,7 @@ import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
 import RegistrationOpenRoute from './pages/AuthPage/Register/RegistrationOpenRoute';
+import CallJoin from './pages/CallJoin';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 const Admin = lazy(() => import('./pages/Admin'));
@@ -75,6 +76,14 @@ export const router = createBrowserRouter(
             {
               path: '/wp-setup',
               Component: WpSetup,
+            },
+            {
+              // Join link of a scheduled call (calendar event, invite card,
+              // reminder push). Same shell as the chat; AppLayout sends a
+              // signed-out visitor through the login and back here.
+              path: '/call/:slug',
+              element: <AppLayout />,
+              children: [{ index: true, Component: CallJoin }],
             },
             {
               path: '/app',

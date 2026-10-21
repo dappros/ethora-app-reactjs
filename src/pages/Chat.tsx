@@ -29,6 +29,10 @@ interface ChatComponentProps {
   // chatTokens.accessToken instead and ignores this.
   currentUser: ModelCurrentUser | null;
   ownerSession: ModelOwnerSession | null;
+  // Open a scheduled call: select its room and show the pre-join panel once
+  // signed in (the /call/:slug route, pages/CallJoin.tsx).
+  scheduledCallSlug?: string;
+  roomJID?: string;
 }
 
 // Build a user-readable summary of an axios error from /v2/apps/:id/owner-session.
@@ -83,6 +87,8 @@ const MemoizedChat = React.memo(function ChatComponent({
   config,
   currentUser,
   ownerSession,
+  scheduledCallSlug,
+  roomJID,
 }: ChatComponentProps) {
   // The override path packs the target app's appToken + a freshly-minted
   // owner JWT and a refreshFunction that re-mints it on expiry. We DON'T
@@ -169,6 +175,12 @@ const MemoizedChat = React.memo(function ChatComponent({
     ]
   );
 
+  // `scheduledCallSlug` exists from the chat-component release that ships
+  // scheduled calls. It goes through a spread so this file also compiles
+  // against the older pinned release, where the prop is simply ignored and
+  // the chat still opens on `roomJID` (without the pre-join panel).
+  const callProps = scheduledCallSlug ? { scheduledCallSlug } : {};
+
   // What the operator saved in the Chat component tab, applied on top of the
   // config above. The chat waits for the FIRST read (it settles even when it
   // fails) so it starts once, with the final config. After that the config is
@@ -189,7 +201,7 @@ const MemoizedChat = React.memo(function ChatComponent({
 
   if (appIdForConfig && serverConfig === null) return null;
 
-  return <Chat config={finalConfig} />;
+  return <Chat config={finalConfig} roomJID={roomJID} {...callProps} />;
 });
 
 // Header App-switcher (Option A). For tenant admins with at least one
@@ -266,7 +278,12 @@ function ChatAppSwitcher({
   );
 }
 
-export default function ChatPage() {
+interface ChatPageProps {
+  scheduledCallSlug?: string;
+  roomJID?: string;
+}
+
+export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps = {}) {
   const { t } = useTranslation();
   const config = useAppStore((s) => s.currentApp);
   // Use the dedicated ownedApps slot, not the paginated `apps` slot. The
@@ -463,6 +480,8 @@ export default function ChatPage() {
             config={effectiveApp}
             currentUser={currentUser}
             ownerSession={ownerSession}
+            scheduledCallSlug={scheduledCallSlug}
+            roomJID={roomJID}
           />
         )}
       </div>

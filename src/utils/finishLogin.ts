@@ -8,6 +8,7 @@ import { env } from '../config/env';
 import { logLogin } from '../hooks/withTracking.tsx';
 import type { ModelApp } from '../models';
 import { navigateToUserPage } from './navigateToUserPage';
+import { consumeReturnPath } from './returnPath';
 
 const ROOT_DOMAIN = String(env.VITE_ROOT_DOMAIN || '').trim();
 
@@ -60,7 +61,11 @@ export async function finishLogin(
     navigate(SECURITY_TAB_PATH);
     return 'mfa-enrolment-required' as const;
   }
-  if (config?.afterLoginPage) {
+  // A join link opened while signed out: land back on it.
+  const returnPath = consumeReturnPath();
+  if (returnPath) {
+    navigate(returnPath, { replace: true });
+  } else if (config?.afterLoginPage) {
     navigateToUserPage(navigate, config.afterLoginPage as string);
   } else {
     navigate('/');
