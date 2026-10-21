@@ -973,10 +973,90 @@ export function httpUpdateAgent(idOrAddress: string, body: any) {
 
 export type FlowsValidationError = { path: string; message: string; line?: number };
 
+// The Map tab's data: what the API's flowMap.js derives from the compiled
+// flows. `reach` says how a conversation can get to a flow: the opening menu
+// ('entry'), a trigger phrase, a button / goto from a reachable flow
+// ('linked'), or only when the agent decides to start it ('intent').
+export type FlowMapStep = {
+  index: number;
+  kind: 'say' | 'ask' | 'goto' | 'end';
+  line?: number;
+  when?: string;
+  text?: string;
+  id?: string;
+  type?: string;
+  required?: boolean;
+  options?: string[];
+  buttons?: { label: string; goto?: string; end?: boolean; missing?: boolean }[];
+  goto?: string;
+  missing?: boolean;
+};
+export type FlowMapFlow = {
+  key: string;
+  description: string;
+  isStart: boolean;
+  phrases: string[];
+  reach: 'entry' | 'trigger' | 'linked' | 'intent';
+  line?: number;
+  steps: FlowMapStep[];
+};
+export type FlowMapEdge = {
+  from: { flow: string; step: number; button?: number };
+  to: string;
+  via: 'button' | 'goto';
+  label?: string;
+  missing?: boolean;
+};
+export type FlowMapWarning = { code: string; message: string; flow?: string; step?: number };
+export type FlowMapData = {
+  partial: boolean;
+  entry: string | null;
+  flows: FlowMapFlow[];
+  edges: FlowMapEdge[];
+  warnings: FlowMapWarning[];
+};
+
 // Dry-run the flows compiler (no save). 200 either way; `ok` says whether the
-// script compiled and `errors` carries line-numbered problems otherwise.
+// script compiled and `errors` carries line-numbered problems otherwise. `map`
+// is the diagram data: null when nothing is readable (empty script, YAML
+// syntax error), `partial` when the script has errors.
 export function httpValidateAgentFlows(flowsYaml: string) {
-  return httpV2.post<{ ok: boolean; flowKeys?: string[]; errors?: FlowsValidationError[] }>('/agents/flows/validate', { flowsYaml });
+  return httpV2.post<{ ok: boolean; flowKeys?: string[]; errors?: FlowsValidationError[]; map?: FlowMapData | null }>(
+    '/agents/flows/validate',
+    { flowsYaml },
+  );
+}
+
+export type FlowsGenerateResult = { ok: boolean; flowsYaml: string; flowKeys: string[]; warnings: string[]; map?: FlowMapData | null; attempts?: number };
+
+// "Generate with AI": a script that already compiled server side (nothing is
+// saved). 422 FLOWS_GENERATION_INVALID carries the compiler errors in `details`
+// when the model could not get it right.
+export function httpGenerateAgentFlows(
+  body: { description: string; agentId?: string; currentYaml?: string; language?: string },
+  signal?: AbortSignal,
+) {
+  return httpV2.post<FlowsGenerateResult>('/agents/flows/generate', body, { signal, timeout: 540000 });
+}
+
+export type FlowSimButton = { label: string; value: string };
+export type FlowSimMessage =
+  | { kind: 'bot'; text: string; buttons: FlowSimButton[] }
+  | { kind: 'llm'; reason: 'free' | 'aside' | 'handoff'; label?: string };
+export type FlowSimState = { flowKey: string; stepIndex: number; slots: Record<string, string>; retries: number; reask: boolean };
+export type FlowSimResult = {
+  ok: boolean;
+  messages: FlowSimMessage[];
+  buttons: FlowSimButton[];
+  state: FlowSimState | null;
+  ended: boolean;
+  outcome: 'opened' | 'consumed' | 'none' | 'aside' | 'handoff' | 'started' | 'noop';
+};
+
+// One turn of the "Try flow" simulator: stateless, no LLM, nothing stored. Send
+// back the `state` of the previous result; omit `input` to open the conversation.
+export function httpSimulateAgentFlows(body: { flowsYaml: string; state?: FlowSimState | null; input?: string; startFlow?: string }) {
+  return httpV2.post<FlowSimResult>('/agents/flows/simulate', body);
 }
 
 export function httpDeleteAgent(idOrAddress: string) {

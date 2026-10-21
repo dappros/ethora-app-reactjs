@@ -35,6 +35,7 @@ import {
   httpTestMessageAgentBotInstance,
   httpValidateAgentFlows,
   FlowsValidationError,
+  FlowMapData,
 } from '../../../http';
 import { useSiteCrawlEvents, SiteCrawlEvent } from '../../../hooks/useSiteCrawlEvents';
 import { useTranslation } from '../../../i18n/useTranslation';
@@ -43,6 +44,9 @@ import { agentPromptTemplates } from '../../../constants/agentPromptTemplates';
 import { agentFlowTemplates } from '../../../constants/agentFlowTemplates';
 import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../../../lib/agentCategories';
 import { useAppStore } from '../../../store/useAppStore';
+import { FlowGenerateDialog } from './flows/FlowGenerateDialog';
+import { FlowMapView } from './flows/FlowMapView';
+import { FlowSimulator } from './flows/FlowSimulator';
 import { KnowledgeHealth } from './KnowledgeHealth';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
 import { SiteWatchesSection } from './SiteWatchesSection';
@@ -1289,63 +1293,96 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
 
 // Flows: the operator's scripted conversations (opening menu, intake,
 // appointment request...). Plain YAML in a textarea, like Context, with
-// starter templates. The script is checked against the API's compiler while
-// the operator types, so errors (with line numbers) show up before Save; the
-// same compiler runs on Save, so a script that does not compile is never stored.
+// starter templates and "Generate with AI". The script is checked against the
+// API's compiler while the operator types, so errors (with line numbers) show up
+// before Save; the same compiler runs on Save, so a script that does not compile
+// is never stored. Three views of the same text: Editor, Map (the compiled
+// flows as a diagram) and Try flow (a no-AI simulator). Map and Try work on the
+// editor's text, saved or not; nothing but Save writes anything.
 const FLOWS_CHECK_DELAY_MS = 700;
+
+type FlowsTab = 'editor' | 'map' | 'try';
+const FLOWS_TABS: { id: FlowsTab; labelKey: string }[] = [
+  { id: 'editor', labelKey: 'agentPanels.flowsTabEditor' },
+  { id: 'map', labelKey: 'agentPanels.flowsTabMap' },
+  { id: 'try', labelKey: 'agentPanels.flowsTabTry' },
+];
 
 export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
   const { t } = useTranslation();
   const [yaml, setYaml] = useState(agent.flowsYaml || '');
   const [errors, setErrors] = useState<FlowsValidationError[]>([]);
   const [flowKeys, setFlowKeys] = useState<string[] | null>(null);
-  // The text the current errors / flowKeys describe; null until a check returns.
+  const [map, setMap] = useState<FlowMapData | null>(null);
+  // The text the current errors / flowKeys / map describe; null until a check returns.
   const [checkedYaml, setCheckedYaml] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<FlowsTab>('editor');
+  const [generating, setGenerating] = useState(false);
+  // Try flow mounts on first visit and then stays (hidden) so a conversation
+  // survives a trip to the editor; that is also what makes "the script changed
+  // since this conversation started" meaningful.
+  const [tryOpened, setTryOpened] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const checkSeq = useRef(0);
   useEffect(() => {
     setYaml(agent.flowsYaml || '');
     setErrors([]);
     setFlowKeys(null);
+    setMap(null);
     setCheckedYaml(null);
+    setTab('editor');
+    setTryOpened(false);
   }, [agent.id]);
+  useEffect(() => {
+    if (tab === 'try') setTryOpened(true);
+  }, [tab]);
 
   const dirty = yaml !== (agent.flowsYaml || '');
   const lines = useMemo(() => Math.min(40, Math.max(16, yaml.split('\n').length + 2)), [yaml]);
 
-  // Live check of unsaved edits. Responses for older text are dropped, and a
-  // failed request just leaves the last result; Save still compiles server-side.
+  // Live check of the editor's text. Responses for older text are dropped, and
+  // a failed request just leaves the last result; Save still compiles
+  // server-side. Unsaved edits are checked while typing (debounced); Map and
+  // Try also need the result for a script that is not dirty, checked as soon as
+  // the tab opens.
   useEffect(() => {
-    if (!dirty || isDisabled) {
+    const wanted = (dirty && !isDisabled) || (tab !== 'editor' && yaml.trim() !== '');
+    if (!wanted) {
       // Back to the stored script, which compiled when it was saved.
       checkSeq.current++;
       setChecking(false);
       if (!dirty) {
         setErrors([]);
         setFlowKeys(null);
+        setMap(null);
         setCheckedYaml(null);
       }
       return;
     }
+    if (checkedYaml === yaml) return;
     const seq = ++checkSeq.current;
     setChecking(true);
-    const timer = setTimeout(async () => {
-      try {
-        const r = await httpValidateAgentFlows(yaml);
-        if (seq !== checkSeq.current) return;
-        setErrors(r.data.errors || []);
-        setFlowKeys(r.data.ok ? r.data.flowKeys || [] : null);
-        setCheckedYaml(yaml);
-      } catch {
-        // Network or auth hiccup: keep the previous result, Save reports for real.
-      } finally {
-        if (seq === checkSeq.current) setChecking(false);
-      }
-    }, FLOWS_CHECK_DELAY_MS);
+    const timer = setTimeout(
+      async () => {
+        try {
+          const r = await httpValidateAgentFlows(yaml);
+          if (seq !== checkSeq.current) return;
+          setErrors(r.data.errors || []);
+          setFlowKeys(r.data.ok ? r.data.flowKeys || [] : null);
+          setMap(r.data.map || null);
+          setCheckedYaml(yaml);
+        } catch {
+          // Network or auth hiccup: keep the previous result, Save reports for real.
+        } finally {
+          if (seq === checkSeq.current) setChecking(false);
+        }
+      },
+      tab === 'editor' ? FLOWS_CHECK_DELAY_MS : 0
+    );
     return () => clearTimeout(timer);
-  }, [yaml, dirty, isDisabled]);
+  }, [yaml, dirty, isDisabled, tab, checkedYaml]);
 
   const current = checkedYaml === yaml;
   const hasErrors = current && errors.length > 0;
@@ -1359,7 +1396,7 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
   const [scroll, setScroll] = useState({ top: 0, left: 0 });
 
   // Select the offending line in the editor.
-  const jumpToLine = (line?: number) => {
+  const selectLine = (line?: number) => {
     const el = textareaRef.current;
     if (!el || !line) return;
     const all = yaml.split('\n');
@@ -1369,6 +1406,16 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
     el.setSelectionRange(start, end);
     const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 20;
     el.scrollTop = Math.max(0, (line - 3) * lineHeight);
+  };
+
+  // From an error, a map box or a warning: show the editor, then select the line.
+  const jumpToLine = (line?: number) => {
+    if (tab !== 'editor') {
+      setTab('editor');
+      setTimeout(() => selectLine(line), 0);
+    } else {
+      selectLine(line);
+    }
   };
 
   const save = async () => {
@@ -1393,11 +1440,25 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
     }
   };
 
+  const flowOptions = useMemo(
+    () => (map?.flows || []).filter((f) => !f.isStart).map((f) => ({ key: f.key, description: f.description })),
+    [map]
+  );
+
   return (
-    <div className="space-y-3 max-w-3xl">
+    <div className={classNames('space-y-3', tab === 'editor' ? 'max-w-3xl' : 'max-w-5xl')}>
       <p className="text-sm text-gray-600">{t('agentPanels.flowsIntro')}</p>
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-gray-500">{t('agentPanels.templatesLabel')}</span>
+        <button
+          type="button"
+          data-testid="flows-generate-open"
+          disabled={isDisabled}
+          onClick={() => setGenerating(true)}
+          className="text-xs rounded px-3 py-1 bg-brand-500 hover:bg-brand-400 text-white disabled:opacity-50"
+        >
+          {t('agentPanels.flowsGenerate')}
+        </button>
+        <span className="text-sm text-gray-500 ml-2">{t('agentPanels.templatesLabel')}</span>
         {agentFlowTemplates.map((tpl) => (
           <button
             key={tpl.id}
@@ -1405,23 +1466,46 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
             onClick={() => {
               setYaml(tpl.yaml);
             }}
-            className="text-xs border rounded px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+            className="text-xs border rounded px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-200 disabled:opacity-50"
           >
             {tpl.label}
           </button>
         ))}
       </div>
+
+      <div role="tablist" aria-label={t('agentPanels.flowsTabsLabel')} className="flex gap-1 border-b">
+        {FLOWS_TABS.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            role="tab"
+            id={`flows-tab-${x.id}`}
+            aria-selected={tab === x.id}
+            data-testid={`flows-tab-${x.id}`}
+            onClick={() => setTab(x.id)}
+            className={classNames(
+              '-mb-px border-b-2 px-4 py-2 text-sm',
+              tab === x.id ? 'border-brand-500 font-medium text-brand-500' : 'border-transparent text-gray-600 hover:text-gray-900'
+            )}
+          >
+            {t(x.labelKey)}
+          </button>
+        ))}
+      </div>
+
       {/* Line numbers + error highlight. Text never wraps (wrap="off"), so line N
-          of the textarea is always row N of the gutter and of the highlight layer. */}
+          of the textarea is always row N of the gutter and of the highlight layer.
+          The editor stays mounted on the other tabs so its scroll and selection survive. */}
       <div
         className={classNames(
           'flex border rounded overflow-hidden font-mono text-sm leading-5',
-          hasErrors ? 'border-red-400' : ''
+          hasErrors ? 'border-red-400' : '',
+          tab !== 'editor' && 'hidden'
         )}
       >
         <div
           aria-hidden
-          className="select-none overflow-hidden border-r bg-gray-50 py-2 text-right text-gray-400 dark:border-gray-700 dark:bg-gray-900/40"
+          className="select-none overflow-hidden border-r bg-gray-50 py-2 text-right text-gray-400 dark:text-gray-500"
         >
           <div style={{ transform: `translateY(-${scroll.top}px)` }}>
             {Array.from({ length: lineCount }, (_, i) => {
@@ -1469,6 +1553,24 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
           />
         </div>
       </div>
+
+      {tab === 'map' && (
+        <div role="tabpanel" aria-labelledby="flows-tab-map">
+          {checking && !map ? (
+            <p className="text-sm text-gray-500">{t('agentPanels.flowsChecking')}</p>
+          ) : (
+            <div className={classNames(!current && 'opacity-60')}>
+              <FlowMapView map={map} onJump={jumpToLine} />
+            </div>
+          )}
+        </div>
+      )}
+      {tryOpened && (
+        <div role="tabpanel" aria-labelledby="flows-tab-try" className={tab === 'try' ? '' : 'hidden'}>
+          <FlowSimulator yaml={yaml} blocked={hasErrors} flowOptions={flowOptions} />
+        </div>
+      )}
+
       {errors.length > 0 && (
         <ul
           data-testid="flows-errors"
@@ -1509,8 +1611,23 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
           {t('agentPanels.saveFlows')}
         </button>
         {hasErrors && <span className="text-xs text-red-700 dark:text-red-300">{t('agentPanels.flowsFixFirst')}</span>}
+        {dirty && !hasErrors && tab !== 'editor' && <span className="text-xs text-gray-500">{t('agentPanels.flowsUnsaved')}</span>}
       </div>
       <p className="text-xs text-gray-500">{t('agentPanels.flowsHint')}</p>
+
+      {generating && (
+        <FlowGenerateDialog
+          agentId={agent.id}
+          currentYaml={yaml}
+          onClose={() => setGenerating(false)}
+          onApply={(next) => {
+            setYaml(next);
+            setTab('editor');
+            setGenerating(false);
+            toast.success(t('agentPanels.flowsGenApplied'));
+          }}
+        />
+      )}
     </div>
   );
 };
