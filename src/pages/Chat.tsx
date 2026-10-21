@@ -8,6 +8,8 @@ import {
   actionSwitchChatApp,
 } from '../actions';
 import { createChatConfig } from '../config/chatBootstrap';
+import { useChatComponentConfig } from '../hooks/useChatComponentConfig';
+import { applyChatComponentConfig, withConfigUpdatedHandler } from '../lib/chatComponentConfig';
 import { useIsMobileView } from '../hooks/useIsMobileView';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
@@ -167,7 +169,27 @@ const MemoizedChat = React.memo(function ChatComponent({
     ]
   );
 
-  return <Chat config={chatConfig} />;
+  // What the operator saved in the Chat component tab, applied on top of the
+  // config above. The chat waits for the FIRST read (it settles even when it
+  // fails) so it starts once, with the final config. After that the config is
+  // re-read when the server says it changed (the SDK's update callback), when
+  // the admin saves in this browser, and when the page returns to the
+  // foreground, and the chat takes the new look in place: nothing reconnects
+  // and no state is reset, the SDK applies colours, fonts and layout switches
+  // to the mounted chat.
+  const appIdForConfig = config?._id;
+  const { record: serverConfig, refresh: refreshServerConfig } = useChatComponentConfig(appIdForConfig);
+  const finalConfig = useMemo(
+    () =>
+      withConfigUpdatedHandler(applyChatComponentConfig(chatConfig, serverConfig), (event) =>
+        refreshServerConfig(event.version)
+      ),
+    [chatConfig, serverConfig, refreshServerConfig]
+  );
+
+  if (appIdForConfig && serverConfig === null) return null;
+
+  return <Chat config={finalConfig} />;
 });
 
 // Header App-switcher (Option A). For tenant admins with at least one

@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "prettier": "prettier --write .",
+    "test:unit": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
