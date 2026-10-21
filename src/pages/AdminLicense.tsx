@@ -16,7 +16,7 @@ function fmtDate(iso: string | null | undefined) {
 const STATE_CLASS: Record<LicenseStatus['state'], string> = {
   licensed: 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300',
   grace: 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-300',
-  unlicensed: 'bg-gray-100 text-gray-800 dark:bg-gray-800/60 dark:text-gray-200',
+  unlicensed: 'bg-gray-100 text-gray-800',
 };
 
 const PACKAGE_KEYS = ['ai', 'b2b', 'compliance', 'analytics'] as const;
@@ -214,7 +214,7 @@ export default function AdminLicense() {
               )}
 
               {isCore && status.state !== 'grace' && (
-                <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">{t('adminLicense.coreExplain')}</p>
+                <p className="mb-6 text-sm text-gray-700">{t('adminLicense.coreExplain')}</p>
               )}
               {status.state === 'grace' && (
                 <p className="mb-6 text-sm text-amber-900 dark:text-amber-300">{t('adminLicense.graceExplain')}</p>
@@ -236,7 +236,7 @@ export default function AdminLicense() {
           {unregistered && (
             <div className="rounded-2xl bg-brand-50 dark:bg-brand-950/20 p-6 md:p-8 mb-6">
               <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.registerHeading')}</h3>
-              <p className="font-sans text-sm text-gray-600 dark:text-gray-300 mb-4">
+              <p className="font-sans text-sm text-gray-600 mb-4">
                 {canEdit ? t('adminLicense.registerBody') : t('adminLicense.adminOnly')}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
@@ -276,7 +276,7 @@ export default function AdminLicense() {
           {registry && (
             <div className="rounded-2xl bg-gray-50 p-6 md:p-8 mb-6">
               <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.registryHeading')}</h3>
-              <p className="font-sans text-sm text-gray-600 dark:text-gray-300 mb-4">{t(`adminLicense.registryBody${kind}`)}</p>
+              <p className="font-sans text-sm text-gray-600 mb-4">{t(`adminLicense.registryBody${kind}`)}</p>
               <pre className="rounded-xl border border-gray-300 bg-white p-3 font-mono text-xs overflow-x-auto mb-3">{loginCommand}</pre>
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <code className="rounded-xl border border-gray-300 bg-white p-3 font-mono text-xs break-all flex-1 min-w-0">

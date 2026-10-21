@@ -118,7 +118,7 @@ export function ProfilePageUserIcon({
                 className="profile-icon-menu-items"
               >
                 <MenuItem>
-                  <button className="pointer-events-none text-gray-300" onClick={() => {}}>
+                  <button className="pointer-events-none text-gray-300 dark:text-gray-500" onClick={() => {}}>
                     <span>{t('profilePageUserIcon.makePhoto')}</span>
                     <IconCamera />
                   </button>
@@ -135,7 +135,7 @@ export function ProfilePageUserIcon({
                   <button
                     onClick={() => setProfileImage('')}
                     disabled={!hasImage}
-                    className={cn({ "pointer-events-none text-gray-300": !hasImage })}
+                    className={cn({ "pointer-events-none text-gray-300 dark:text-gray-500": !hasImage })}
                   >
                     <span>{t('profilePageUserIcon.delete')}</span>
                     <IconDelete />

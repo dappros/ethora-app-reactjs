@@ -80,6 +80,17 @@
   --brand-text: color-mix(in srgb, var(--bg-brand-primary) 60%, white);
 }
 
+/* Tailwind's preflight paints every bare `border` (no colour class) with a
+   fixed light grey (#e5e7eb), so panel and editor frames stay light in dark
+   mode. Retheme that default to the gray-200 token in dark only. `:where()`
+   gives zero specificity: this still beats preflight (same specificity, later
+   in the file) but never beats an explicit border colour utility. */
+:where(.dark) *,
+:where(.dark) ::before,
+:where(.dark) ::after {
+  border-color: rgb(var(--c-gray-200));
+}
+
 /* Chrome paints autofilled inputs with its own blue fill, which in dark mode
    covers only the <input> and leaves the password eye-button area in the
    field's real colour - a two-tone field. Repaint the autofill in the field's

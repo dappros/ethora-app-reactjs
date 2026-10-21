@@ -216,7 +216,7 @@ export function SignonOptions({
       </p>
       <Field className="flex items-center cursor-pointer mb-2" disabled>
         <Checkbox className="group mr-2 size-4 rounded-[4px] border border-brand-500 data-[checked]:bg-brand-500 data-[disabled]:border-gray-300 flex justify-center items-center"></Checkbox>
-        <Label className="cursor-pointer font-sans text-sm data-[disabled]:text-gray-300">
+        <Label className="cursor-pointer font-sans text-sm data-[disabled]:text-gray-300 dark:data-[disabled]:text-gray-500">
           {t('appSettingsSignonOptions.apiIntegrationLabel')}
         </Label>
       </Field>

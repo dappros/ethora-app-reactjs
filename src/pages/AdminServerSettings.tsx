@@ -480,7 +480,7 @@ export default function AdminServerSettings() {
 
       <div className="rounded-2xl bg-white p-4 md:p-8 overflow-y-auto min-w-0">
         <div className={activeTab === 'chats' && searchParams.get('sub') === 'appearance' ? 'min-w-0' : 'max-w-3xl min-w-0'}>
-          <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{t(`serverSettings.intro${kind}`)}</p>
+          <p className="mb-4 text-sm text-gray-700">{t(`serverSettings.intro${kind}`)}</p>
           {!canEdit && <p className="mb-6 text-sm text-gray-500">{t('serverSettings.readOnly')}</p>}
 
           {pendingScopes.length > 0 && (

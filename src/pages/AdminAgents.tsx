@@ -439,7 +439,7 @@ const AgentCard: React.FC<{
             superadmin who can see them is auditing, not shopping. */}
         {cardMode === 'public' && (
           <>
-            <span className="text-gray-300">|</span>
+            <span className="text-gray-300 dark:text-gray-500">|</span>
             <button onClick={onClone} className="text-xs text-brand-500 hover:underline">
               {t('adminAgents.cloneToMyAgents')}
             </button>
@@ -448,17 +448,17 @@ const AgentCard: React.FC<{
         {/* Export is available to anyone who can see the agent (owners always,
             public-others because the bundle holds nothing private). Backend
             enforces final authz. */}
-        <span className="text-gray-300">|</span>
+        <span className="text-gray-300 dark:text-gray-500">|</span>
         <button onClick={() => onExport('json')} className="text-xs text-brand-500 hover:underline">
           {t('adminAgents.exportJson')}
         </button>
-        <span className="text-gray-300">|</span>
+        <span className="text-gray-300 dark:text-gray-500">|</span>
         <button onClick={() => onExport('zip')} className="text-xs text-brand-500 hover:underline">
           {t('adminAgents.exportZip')}
         </button>
         {isOwned && (
           <>
-            <span className="text-gray-300">|</span>
+            <span className="text-gray-300 dark:text-gray-500">|</span>
             <button onClick={onDelete} className="text-xs text-red-500 hover:underline">
               {t('adminAgents.delete')}
             </button>
