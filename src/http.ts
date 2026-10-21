@@ -1105,16 +1105,29 @@ export function httpSaveWidgetAppearance(appId: string, appearance: Record<strin
 // operator set in the Chat component tab (non-defaults only). The public read
 // is what the web chat applies at load; options the license no longer covers
 // are left out of it.
+// `version` identifies the stored state (the save time in ms, '0' = never saved)
+// and changes on every real change; `updatedAt` is the same moment as an ISO date.
+export interface ChatComponentConfigResponse {
+  ok: boolean;
+  config: Record<string, string | boolean>;
+  version?: string;
+  updatedAt?: string | null;
+}
+
 export function httpGetChatComponentConfig(appId: string) {
-  return httpV2.get<{ ok: boolean; config: Record<string, string | boolean> }>(`/apps/${appId}/chat-component/config`);
+  return httpV2.get<ChatComponentConfigResponse>(`/apps/${appId}/chat-component/config`);
 }
 
 export function httpSaveChatComponentConfig(appId: string, config: Record<string, string | boolean>) {
-  return httpV2.put<{ ok: boolean; config: Record<string, string | boolean> }>(`/apps/${appId}/chat-component/config`, { config });
+  return httpV2.put<ChatComponentConfigResponse>(`/apps/${appId}/chat-component/config`, { config });
 }
 
-export function httpGetPublicChatComponentConfig(appId: string) {
-  return httpV2.get<{ ok: boolean; config: Record<string, string | boolean> }>('/chat-component/config', { params: { appId } });
+// `version` is only a cache key: the public read is cached for 30 s, so a client
+// that was told about a newer state asks with `v=<version>` to get past it.
+export function httpGetPublicChatComponentConfig(appId: string, version?: string) {
+  return httpV2.get<ChatComponentConfigResponse>('/chat-component/config', {
+    params: version ? { appId, v: version } : { appId },
+  });
 }
 
 // Queues a re-crawl of one already-indexed row. Answers { status: 'queued', jobId }

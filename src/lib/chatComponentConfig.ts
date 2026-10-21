@@ -49,6 +49,17 @@ export function applyChatComponentConfig<T extends object>(base: T, record: Chat
   return out as T;
 }
 
+// The chat config with a handler for the SDK's "the App's chat component config
+// changed" event added to its `eventHandlers`. Written loosely on purpose: the
+// option exists from the chat-component release that ships live config, and an
+// older pinned release simply never calls it (and does not mind the extra key).
+export function withConfigUpdatedHandler<T extends { eventHandlers?: object }>(
+  base: T,
+  handler: (event: { appId: string; version: string }) => void
+): T {
+  return { ...base, eventHandlers: { ...(base.eventHandlers || {}), onChatComponentConfigUpdated: handler } };
+}
+
 export function sameChatConfig(a: ChatConfigRecord, b: ChatConfigRecord) {
   const ak = Object.keys(a);
   return ak.length === Object.keys(b).length && ak.every((k) => a[k] === b[k]);
