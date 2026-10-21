@@ -1365,6 +1365,8 @@ export function httpGetAppsWithStatus(opts: {
   orderBy?: OrderByType;
   includeArchived?: boolean;
   status?: 'archived';
+  // Case-insensitive substring match on the app name / domain name.
+  search?: string;
 }) {
   const params = new URLSearchParams();
   if (opts.limit !== undefined) params.set('limit', String(opts.limit));
@@ -1373,6 +1375,8 @@ export function httpGetAppsWithStatus(opts: {
   if (opts.orderBy) params.set('orderBy', opts.orderBy);
   if (opts.includeArchived) params.set('includeArchived', 'true');
   if (opts.status) params.set('status', opts.status);
+  const search = opts.search?.trim();
+  if (search) params.set('search', search);
   return http.get(`/apps?${params.toString()}`);
 }
 

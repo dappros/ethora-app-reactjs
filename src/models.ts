@@ -153,6 +153,8 @@ export interface ModelApp {
     totalChats: number;
     totalTokens: number;
     recentlyChats: number;
+    // ISO start-of-day of the latest day with any activity; null = never.
+    lastActivityAt?: string | null;
   };
   systemChatAccount: {
     jid: string;
@@ -444,6 +446,9 @@ export type OrderByType =
   | 'totalApiCalls'
   | 'totalFiles'
   | 'totalTransactions'
+  | 'totalChats'
+  | 'totalTokens'
+  | 'lastActivityAt'
   | 'lastName'
   | 'email'
   | 'firstName'
