@@ -29,7 +29,9 @@ const DEFAULT_QR_URL =
 const videoCallsConfig: NonNullable<ChatConfig['videoCalls']> = {
   enabled: env.VITE_VIDEO_CALLS_ENABLED === 'true',
   livekitUrl: env.VITE_LIVEKIT_URL || '',
-  allowedRoomTypes: ['private'],
+  // Group rooms call over LiveKit (the same livekitUrl); the SDK also needs
+  // this to offer "Schedule call" and the card's Join in groups.
+  allowedRoomTypes: ['private', 'group'],
   enableAudioCalls: true,
   startWithMicOn: true,
   // End-to-end encrypt call media. The media key is exchanged over the chat's
@@ -481,6 +483,9 @@ function makeChatUserLogin(user: {
   // every room-list refresh 401s and the response interceptor's refresh
   // path runs in a loop until it bails.
   return {
+    // The SDK matches this against a scheduled call's creator to offer Edit and
+    // Cancel, so it must be the Mongo user id.
+    _id: user._id || '',
     xmppUsername,
     xmppPassword,
     token: user.token || '',
