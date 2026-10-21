@@ -368,7 +368,7 @@ export const AppStatistics = (): ReactElement => {
               className="flex items-center px-2 sm:px-7 py-2 bg-gray-100 border border-gray-300 rounded-xl"
             >
               <img src={downloadIcon} alt={t('appStatistics.downloadAlt')} />
-              <span className="text-gray-300 pl-3 hidden xs:block">
+              <span className="text-gray-300 dark:text-gray-500 pl-3 hidden xs:block">
                 {t('appStatistics.exportCsv')}
               </span>
             </button>

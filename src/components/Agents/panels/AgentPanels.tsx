@@ -311,7 +311,7 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
 
 // Web Index / Docs Index need an appId because source ingestion still keys per-(appId, agentId).
 // Default scope is the agent's originAppId (where it was created). The operator can
-// switch to a different App they own — useful when the same agent is deployed across
+// switch to a different App they own - useful when the same agent is deployed across
 // multiple apps and you want to ingest sources under a specific one.
 
 type SiteSourceRow = {
@@ -427,7 +427,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [rows, setRows] = useState<SiteSourceRow[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [offset, setOffset] = useState(0);
-  // Server-side total, not rows.length — a crawl can leave far more rows than one page.
+  // Server-side total, not rows.length - a crawl can leave far more rows than one page.
   const [total, setTotal] = useState(0);
   // Row ids ticked for bulk removal. Held as ids rather than indexes so a
   // selection survives paging: a crawl of any size is removed in one request.
@@ -736,7 +736,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       return next;
     });
 
-  // The header checkbox acts on the current page only — "select all" across a
+  // The header checkbox acts on the current page only - "select all" across a
   // list the operator hasn't seen is too easy to fire by accident.
   const pageIds = rows.map((r) => r.id);
   const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
@@ -757,7 +757,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     try {
       const r = await httpDeleteSiteSourceV2Url(appId, ids);
       // The endpoint is idempotent and reports per-id results, so a selection
-      // holding a row someone else already deleted still succeeds — report what
+      // holding a row someone else already deleted still succeeds - report what
       // actually went away rather than what was asked for.
       const deleted = Number(r.data?.summary?.deleted ?? ids.length);
       toast.success(t('agentPanels.removedSelected').replace('{n}', String(deleted)));
@@ -1032,7 +1032,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         </table>
       </div>
 
-      {/* Hidden while everything fits on one page — a single-page index needs no controls. */}
+      {/* Hidden while everything fits on one page - a single-page index needs no controls. */}
       {(hasPrev || hasNext) && (
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>
@@ -1758,7 +1758,7 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
         <td className="p-2 text-gray-500 text-xs">{bi.lastActiveAt || ''}</td>
         <td className="p-2 text-right">
           {/* Inspect surfaces the bot's live ai-service runtime state +
-              recent message/response pairs. That's privileged info — it
+              recent message/response pairs. That's privileged info - it
               would let a non-owner viewer (e.g. a cross-tenant superadmin
               audit, or anyone browsing public agents) read chat content
               from another tenant's rooms. Gate it on ownership; non-
@@ -1804,7 +1804,7 @@ const DiagRow: React.FC<{ agent: ModelAgent; bi: AgentBotInstance; onChanged?: (
                     <DiagItem label={t('agentPanels.ragLabel')} value={String(inMem?.isRAG ?? false)} />
                     <DiagItem label={t('agentPanels.cooldownSecLabel')} value={String(inMem?.cooldownSec ?? 0)} />
                     <DiagItem label={t('agentPanels.promptLengthLabel')} value={String(inMem?.promptLength ?? 0)} />
-                    <DiagItem label={t('agentPanels.lastErrorLabel')} value={inMem?.lastError || '—'} />
+                    <DiagItem label={t('agentPanels.lastErrorLabel')} value={inMem?.lastError || '-'} />
                   </dl>
                   {(inMem?.joinedRooms || []).length > 0 && (
                     <div className="mt-2">

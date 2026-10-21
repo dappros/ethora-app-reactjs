@@ -57,7 +57,7 @@ export default function TabApp({
       <Tab
         key={text}
         className={cn(HORIZONTAL_TAB, v.tab, {
-          'pointer-events-none text-gray-300': disabled,
+          'pointer-events-none text-gray-300 dark:text-gray-500': disabled,
           // Destructive tab: red underline in the strip, red pill on the rail.
           [cn(
             'text-red-400 data-[selected]:!text-red-500 data-[selected]:!border-red-400',
