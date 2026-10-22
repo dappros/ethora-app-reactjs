@@ -1079,7 +1079,7 @@ export type FlowSubmission = {
   delivery: FlowSubmissionDelivery;
 };
 export type FlowSubmissionsQuery = { flow?: string; delivery?: string; q?: string; since?: string; limit?: number; offset?: number };
-export type FlowWebhook = { enabled: boolean; url: string; hasSecret: boolean };
+export type FlowWebhook = { enabled: boolean; url: string; hasSecret: boolean; retentionDays: number };
 
 const agentPath = (idOrAddress: string) => `/agents/${encodeURIComponent(idOrAddress)}`;
 
@@ -1101,7 +1101,7 @@ export function httpPushFlowSubmissions(idOrAddress: string, body: { ids?: strin
 export function httpGetFlowWebhook(idOrAddress: string) {
   return httpV2.get<{ ok: boolean; webhook: FlowWebhook }>(`${agentPath(idOrAddress)}/flow-webhook`);
 }
-export function httpPutFlowWebhook(idOrAddress: string, body: { enabled?: boolean; url?: string; rotateSecret?: boolean }) {
+export function httpPutFlowWebhook(idOrAddress: string, body: { enabled?: boolean; url?: string; rotateSecret?: boolean; retentionDays?: number }) {
   return httpV2.put<{ ok: boolean; webhook: FlowWebhook; secret?: string }>(`${agentPath(idOrAddress)}/flow-webhook`, body);
 }
 export function httpTestFlowWebhook(idOrAddress: string) {

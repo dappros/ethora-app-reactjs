@@ -60,9 +60,10 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
   const [delivery, setDelivery] = useState('');
   const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
 
-  const [hook, setHook] = useState<FlowWebhook>({ enabled: false, url: '', hasSecret: false });
+  const [hook, setHook] = useState<FlowWebhook>({ enabled: false, url: '', hasSecret: false, retentionDays: 90 });
   const [hookUrl, setHookUrl] = useState('');
   const [hookOn, setHookOn] = useState(false);
+  const [retention, setRetention] = useState('90');
   const [secret, setSecret] = useState('');
 
   const filters = useCallback(() => ({ q: q || undefined, flow: flow || undefined, delivery: delivery || undefined }), [q, flow, delivery]);
@@ -94,13 +95,14 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
         setHook(r.data.webhook);
         setHookUrl(r.data.webhook.url);
         setHookOn(r.data.webhook.enabled);
+        setRetention(String(r.data.webhook.retentionDays));
       })
       .catch(() => {});
   }, [agentId]);
 
   const saveHook = async (rotateSecret = false) => {
     try {
-      const r = await httpPutFlowWebhook(agentId, { enabled: hookOn, url: hookUrl.trim(), rotateSecret });
+      const r = await httpPutFlowWebhook(agentId, { enabled: hookOn, url: hookUrl.trim(), rotateSecret, retentionDays: Math.max(0, Math.floor(Number(retention) || 0)) });
       setHook(r.data.webhook);
       setSecret(r.data.secret || '');
       setNote({ text: t('agentPanels.flowHookSaved') });
@@ -177,6 +179,20 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
           aria-label={t('agentPanels.flowHookUrl')}
           data-testid="flows-webhook-url"
         />
+        <label className="flex flex-wrap items-center gap-2 text-sm">
+          {t('agentPanels.flowRetention')}
+          <input
+            type="number"
+            min={0}
+            max={3650}
+            className={classNames(input, 'w-24')}
+            value={retention}
+            disabled={isDisabled}
+            onChange={(e) => setRetention(e.target.value)}
+            data-testid="flows-retention"
+          />
+          <span className="text-xs text-gray-500">{t('agentPanels.flowRetentionHint')}</span>
+        </label>
         <div className="flex flex-wrap gap-2">
           <button type="button" className="rounded bg-brand-500 px-3 py-1 text-sm text-white disabled:opacity-50" disabled={isDisabled} onClick={() => void saveHook(false)} data-testid="flows-webhook-save">
             {t('agentPanels.flowHookSave')}

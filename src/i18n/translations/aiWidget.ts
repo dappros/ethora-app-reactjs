@@ -376,6 +376,8 @@ export const aiWidget = {
     'agentPanels.subsDelivery': 'Delivery',
     'agentPanels.subsTotal': '{n} total',
     'agentPanels.subsMore': 'Load more',
+    'agentPanels.flowRetention': 'Keep submissions for (days)',
+    'agentPanels.flowRetentionHint': '0 = forever. Older ones are deleted daily; submissions still waiting for delivery are kept.',
     'agentPanels.flowHookTitle': 'Webhook',
     'agentPanels.flowHookHint': 'Every completed flow is POSTed here as JSON, signed with HMAC (X-Ethora-Signature). Failed deliveries retry for about 15 hours. You can also pull the same data with the API.',
     'agentPanels.flowHookEnabled': 'Send completed flows to this URL',
