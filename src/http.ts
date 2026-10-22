@@ -1059,6 +1059,55 @@ export function httpSimulateAgentFlows(body: { flowsYaml: string; state?: FlowSi
   return httpV2.post<FlowSimResult>('/agents/flows/simulate', body);
 }
 
+// Flow submissions: completed flow runs (answers), the pull/push side and the webhook.
+export type FlowSubmissionAnswer = { id: string; question: string; type: string; value: string };
+export type FlowSubmissionDelivery = {
+  status: 'none' | 'pending' | 'delivered' | 'failed';
+  attempts: number;
+  deliveredAt: string | null;
+  lastAttemptAt: string | null;
+  lastStatus: number | null;
+  lastError: string;
+};
+export type FlowSubmission = {
+  id: string;
+  flow: string;
+  room: string;
+  completedAt: string | null;
+  answers: FlowSubmissionAnswer[];
+  data: Record<string, string>;
+  delivery: FlowSubmissionDelivery;
+};
+export type FlowSubmissionsQuery = { flow?: string; delivery?: string; q?: string; since?: string; limit?: number; offset?: number };
+export type FlowWebhook = { enabled: boolean; url: string; hasSecret: boolean; retentionDays: number };
+
+const agentPath = (idOrAddress: string) => `/agents/${encodeURIComponent(idOrAddress)}`;
+
+export function httpListFlowSubmissions(idOrAddress: string, params: FlowSubmissionsQuery = {}) {
+  return httpV2.get<{ ok: boolean; total: number; items: FlowSubmission[] }>(`${agentPath(idOrAddress)}/flow-submissions`, { params });
+}
+export function httpExportFlowSubmissionsCsv(idOrAddress: string, params: FlowSubmissionsQuery = {}) {
+  return httpV2.get(`${agentPath(idOrAddress)}/flow-submissions.csv`, { params, responseType: 'blob' });
+}
+export function httpDeleteFlowSubmission(idOrAddress: string, id: string) {
+  return httpV2.delete(`${agentPath(idOrAddress)}/flow-submissions/${encodeURIComponent(id)}`);
+}
+export function httpPushFlowSubmissions(idOrAddress: string, body: { ids?: string[]; url?: string; flow?: string; since?: string }) {
+  return httpV2.post<{ ok: boolean; matched: number; sent: number; failed: number; failures: { id: string; error: string }[] }>(
+    `${agentPath(idOrAddress)}/flow-submissions/push`,
+    body
+  );
+}
+export function httpGetFlowWebhook(idOrAddress: string) {
+  return httpV2.get<{ ok: boolean; webhook: FlowWebhook }>(`${agentPath(idOrAddress)}/flow-webhook`);
+}
+export function httpPutFlowWebhook(idOrAddress: string, body: { enabled?: boolean; url?: string; rotateSecret?: boolean; retentionDays?: number }) {
+  return httpV2.put<{ ok: boolean; webhook: FlowWebhook; secret?: string }>(`${agentPath(idOrAddress)}/flow-webhook`, body);
+}
+export function httpTestFlowWebhook(idOrAddress: string) {
+  return httpV2.post<{ ok: boolean; status: number | null; error: string }>(`${agentPath(idOrAddress)}/flow-webhook/test`, {});
+}
+
 export function httpDeleteAgent(idOrAddress: string) {
   return httpV2.delete(`/agents/${encodeURIComponent(idOrAddress)}`);
 }
