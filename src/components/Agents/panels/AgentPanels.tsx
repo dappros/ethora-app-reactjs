@@ -46,6 +46,7 @@ import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCate
 import { useAppStore } from '../../../store/useAppStore';
 import { FlowGenerateDialog } from './flows/FlowGenerateDialog';
 import { FlowMapView } from './flows/FlowMapView';
+import { FlowSubmissions } from './flows/FlowSubmissions';
 import { FlowSimulator } from './flows/FlowSimulator';
 import { KnowledgeHealth } from './KnowledgeHealth';
 import { SiteSourceMarkdownModal } from './SiteSourceMarkdownModal';
@@ -1301,11 +1302,12 @@ export const SoulMdPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> 
 // editor's text, saved or not; nothing but Save writes anything.
 const FLOWS_CHECK_DELAY_MS = 700;
 
-type FlowsTab = 'editor' | 'map' | 'try';
+type FlowsTab = 'editor' | 'map' | 'try' | 'submissions';
 const FLOWS_TABS: { id: FlowsTab; labelKey: string }[] = [
   { id: 'editor', labelKey: 'agentPanels.flowsTabEditor' },
   { id: 'map', labelKey: 'agentPanels.flowsTabMap' },
   { id: 'try', labelKey: 'agentPanels.flowsTabTry' },
+  { id: 'submissions', labelKey: 'agentPanels.flowsTabSubmissions' },
 ];
 
 export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
@@ -1563,6 +1565,11 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
               <FlowMapView map={map} onJump={jumpToLine} />
             </div>
           )}
+        </div>
+      )}
+      {tab === 'submissions' && (
+        <div role="tabpanel" aria-labelledby="flows-tab-submissions">
+          <FlowSubmissions agentId={agent.id} flowKeys={flowOptions.map((f) => f.key)} isDisabled={isDisabled} />
         </div>
       )}
       {tryOpened && (
