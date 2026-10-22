@@ -32,6 +32,24 @@ function errText(e: any) {
   return e?.response?.data?.error || e?.message || 'Error';
 }
 
+const Answers: React.FC<{ s: FlowSubmission }> = ({ s }) => (
+  <dl className="space-y-0.5">
+    {s.answers.map((a) => (
+      <div key={a.id} className="flex gap-2">
+        <dt className="w-16 shrink-0 text-xs text-gray-500 truncate" title={a.question}>{a.id}</dt>
+        <dd className="min-w-0 break-words">{a.value}</dd>
+      </div>
+    ))}
+  </dl>
+);
+
+const DeliveryBadge: React.FC<{ s: FlowSubmission }> = ({ s }) => (
+  <span className={classNames('rounded px-2 py-0.5 text-xs', STATUS_STYLE[s.delivery.status])} title={s.delivery.lastError || undefined}>
+    {s.delivery.status}
+    {s.delivery.attempts > 1 ? ` (${s.delivery.attempts})` : ''}
+  </span>
+);
+
 export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; isDisabled?: boolean }> = ({ agentId, flowKeys, isDisabled }) => {
   const { t } = useTranslation();
   const [items, setItems] = useState<FlowSubmission[]>([]);
@@ -180,7 +198,7 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
       </section>
 
       <div className="flex flex-wrap items-center gap-2">
-        <input className={input} placeholder={t('agentPanels.subsSearch')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('agentPanels.subsSearch')} data-testid="flows-subs-search" />
+        <input className={classNames(input, 'w-full sm:w-auto')} placeholder={t('agentPanels.subsSearch')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('agentPanels.subsSearch')} data-testid="flows-subs-search" />
         <select className={input} value={flow} onChange={(e) => setFlow(e.target.value)} aria-label={t('agentPanels.subsFlow')}>
           <option value="">{t('agentPanels.subsAllFlows')}</option>
           {flowKeys.map((k) => (
@@ -212,8 +230,8 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
       {!items.length && !loading ? (
         <p className="text-sm text-gray-500" data-testid="flows-subs-empty">{t('agentPanels.subsEmpty')}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm" data-testid="flows-subs-table">
+        <div>
+          <table className="hidden md:table w-full text-sm" data-testid="flows-subs-table">
             <thead>
               <tr className="text-left text-xs text-gray-500">
                 <th className="py-1 pr-3 font-medium">{t('agentPanels.subsCompleted')}</th>
@@ -229,20 +247,10 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
                   <td className="py-2 pr-3 whitespace-nowrap">{s.completedAt ? new Date(s.completedAt).toLocaleString() : ''}</td>
                   <td className="py-2 pr-3 font-mono text-xs">{s.flow}</td>
                   <td className="py-2 pr-3">
-                    <dl className="space-y-0.5">
-                      {s.answers.map((a) => (
-                        <div key={a.id} className="flex gap-2">
-                          <dt className="text-xs text-gray-500 shrink-0" title={a.question}>{a.id}</dt>
-                          <dd className="break-words">{a.value}</dd>
-                        </div>
-                      ))}
-                    </dl>
+                    <Answers s={s} />
                   </td>
                   <td className="py-2 pr-3">
-                    <span className={classNames('rounded px-2 py-0.5 text-xs', STATUS_STYLE[s.delivery.status])} title={s.delivery.lastError || undefined}>
-                      {s.delivery.status}
-                      {s.delivery.attempts > 1 ? ` (${s.delivery.attempts})` : ''}
-                    </span>
+                    <DeliveryBadge s={s} />
                   </td>
                   <td className="py-2 text-right whitespace-nowrap">
                     <button type="button" className="text-xs underline mr-2 disabled:opacity-40" disabled={isDisabled || !hook.enabled} onClick={() => void pushRows([s.id])}>
@@ -256,6 +264,26 @@ export const FlowSubmissions: React.FC<{ agentId: string; flowKeys: string[]; is
               ))}
             </tbody>
           </table>
+          <ul className="md:hidden space-y-3" data-testid="flows-subs-cards">
+            {items.map((s) => (
+              <li key={s.id} className="rounded border p-3 space-y-2 dark:border-gray-700" data-testid="flows-subs-card">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-500">{s.completedAt ? new Date(s.completedAt).toLocaleString() : ''}</span>
+                  <DeliveryBadge s={s} />
+                </div>
+                <div className="font-mono text-xs">{s.flow}</div>
+                <Answers s={s} />
+                <div className="flex gap-4 pt-1">
+                  <button type="button" className="text-xs underline disabled:opacity-40" disabled={isDisabled || !hook.enabled} onClick={() => void pushRows([s.id])}>
+                    {t('agentPanels.subsPush')}
+                  </button>
+                  <button type="button" className="text-xs underline text-red-700 dark:text-red-400 disabled:opacity-40" disabled={isDisabled} onClick={() => void remove(s.id)}>
+                    {t('agentPanels.subsDelete')}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
           {items.length < total && (
             <button type="button" className="mt-2 rounded border px-3 py-1 text-sm" disabled={loading} onClick={() => void load(items.length)}>
               {t('agentPanels.subsMore')}
