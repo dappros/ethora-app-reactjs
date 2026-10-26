@@ -61,7 +61,7 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
         )}
       </div>
 
-      <div className="border rounded-xl p-3 min-h-[240px] max-h-[55vh] overflow-y-auto space-y-3 bg-gray-50 dark:bg-gray-900/30" data-testid="try-transcript">
+      <div className="border rounded-xl p-3 min-h-[240px] max-h-[55vh] overflow-y-auto space-y-3 bg-gray-50" data-testid="try-transcript">
         {turns.length === 0 && <div className="text-sm text-gray-400">{t('agentPanels.tryEmpty')}</div>}
         {turns.map((turn, i) => (
           <div key={i} className={turn.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>

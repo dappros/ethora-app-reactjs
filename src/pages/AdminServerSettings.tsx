@@ -2,6 +2,8 @@ import type { AxiosError } from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { httpV2 } from '../http';
+import { Segmented } from '../components/AIWidget/appearance/Fields';
+import { ChatComponent } from './AppSettings/ChatComponent';
 import { useTranslation } from '../i18n/useTranslation';
 import type { ServerModule, ServerSetting, ServerSettingsResponse, ServerSettingsTab } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -31,6 +33,10 @@ function cn(...parts: Array<string | false | null | undefined>) {
 export default function AdminServerSettings() {
   const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
+  // The install's own app: the chat customized on the Chats tab is its web chat.
+  const baseApp = useAppStore((s) => s.currentApp);
+  const baseAppId = baseApp?._id;
+  const baseAppColor = baseApp?.primaryColor;
   const canEdit = Boolean(currentUser?.isSuperAdmin?.write);
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<ServerSettingsResponse | null>(null);
@@ -402,6 +408,40 @@ export default function AdminServerSettings() {
   };
 
   const renderTab = (tab: ServerSettingsTab) => {
+    const chatsSub = searchParams.get('sub') === 'appearance' ? 'appearance' : 'main';
+    const selectSub = (sub: 'main' | 'appearance') => {
+      const next = new URLSearchParams(searchParams);
+      next.set('tab', 'chats');
+      if (sub === 'main') next.delete('sub');
+      else next.set('sub', sub);
+      setSearchParams(next, { replace: true });
+    };
+    if (tab === 'chats' && baseAppId) {
+      return (
+        <>
+          <div className="mb-6">
+            <Segmented<'main' | 'appearance'>
+              ariaLabel="Chats"
+              value={chatsSub}
+              onChange={selectSub}
+              options={[
+                { value: 'main', label: 'Chat settings' },
+                { value: 'appearance', label: 'Chat appearance' },
+              ]}
+            />
+          </div>
+          {chatsSub === 'appearance' ? (
+            <ChatComponent appId={baseAppId} brandColor={baseAppColor} inline />
+          ) : (
+            renderTabBody(tab)
+          )}
+        </>
+      );
+    }
+    return renderTabBody(tab);
+  };
+
+  const renderTabBody = (tab: ServerSettingsTab) => {
     const modules = (data?.modules || []).filter((m) => m.tab === tab);
     const hosted = new Set(modules.map((m) => MODULE_GROUP[m.key]).filter(Boolean));
     const groups = (groupsByTab[tab] || []).filter((g) => !hosted.has(g));
@@ -439,8 +479,8 @@ export default function AdminServerSettings() {
       </div>
 
       <div className="rounded-2xl bg-white p-4 md:p-8 overflow-y-auto min-w-0">
-        <div className="max-w-3xl min-w-0">
-          <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{t(`serverSettings.intro${kind}`)}</p>
+        <div className={activeTab === 'chats' && searchParams.get('sub') === 'appearance' ? 'min-w-0' : 'max-w-3xl min-w-0'}>
+          <p className="mb-4 text-sm text-gray-700">{t(`serverSettings.intro${kind}`)}</p>
           {!canEdit && <p className="mb-6 text-sm text-gray-500">{t('serverSettings.readOnly')}</p>}
 
           {pendingScopes.length > 0 && (

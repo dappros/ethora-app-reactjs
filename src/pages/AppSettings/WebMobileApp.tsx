@@ -110,7 +110,7 @@ export function WebMobileApp({
           <input
             placeholder={t('appSettingsWebMobileApp.appNamePlaceholder')}
             type="text"
-            className="p-2  w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-300"
+            className="p-2  w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-300 dark:text-gray-500"
             name=""
             id="domain-input"
           />
@@ -122,7 +122,7 @@ export function WebMobileApp({
           </label>
         </div>
         <div className="flex items-center">
-          <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300">
+          <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300 dark:text-gray-500">
             {t('appSettingsWebMobileApp.upgradeToBusinessButton')}
           </button>
           <span>{t('appSettingsWebMobileApp.toUnlockText')}</span>

@@ -50,6 +50,7 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
   const watchesPath = `/v2/apps/${OWNED_APP._id}/sources/site-watches`;
   let refreshKey: Record<string, unknown> = { exists: false };
   const writes: Array<{ method: string; path: string; body: unknown }> = [];
+  const generateCalls: Array<{ description: string; currentYaml?: string }> = [];
 
   const json = (route: Route, body: unknown, status = 200) =>
     route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
@@ -73,7 +74,17 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
         if (text.includes('oops')) {
           return json(route, { ok: false, errors: [{ path: 'flows.start.steps[0]', message: 'unknown step kind "oops"', line: 3 }] });
         }
+        if (text.includes('booking:')) return json(route, { ok: true, flowKeys: ['start', 'booking'], map: BOOKING_MAP });
         return json(route, { ok: true, flowKeys: ['main'] });
+      }
+      if (pathname === '/v2/agents/flows/simulate') return json(route, fakeSimulate(body as { state?: { flowKey: string } | null; input?: string }));
+      if (pathname === '/v2/agents/flows/generate') {
+        const { description, currentYaml } = body as { description: string; currentYaml?: string };
+        generateCalls.push({ description, currentYaml });
+        if (/invalid/i.test(description)) {
+          return json(route, { error: 'The generated flows did not pass validation', code: 'FLOWS_GENERATION_INVALID', details: [{ path: 'flows.start.steps[0]', message: 'unknown flow "bookingg"', line: 5 }] }, 422);
+        }
+        return json(route, { ok: true, flowsYaml: BOOKING_YAML, flowKeys: ['start', 'booking'], warnings: ['Flow "booking" has no button.'], map: BOOKING_MAP });
       }
       if (pathname === `/v2/agents/${AGENT_ID}/bot-instances`) return json(route, { ok: true, items: opts.botInstances || [] });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'GET') return json(route, { ok: true, agent });
@@ -153,7 +164,69 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
     localStorage.setItem('refreshToken-538', 'e2e-refresh');
   });
 
-  return { agent, writes };
+  return { agent, writes, generateCalls };
+}
+
+
+// A two-flow script the fake flows API understands (map, simulate, generate).
+const BOOKING_YAML = `version: 1
+flows:
+  start:
+    steps:
+      - say: "Hi! What do you need?"
+        buttons:
+          - { label: "Book", goto: booking }
+  booking:
+    trigger: { phrases: ["book"] }
+    steps:
+      - ask: "For how many people?"
+        id: guests
+      - end: true
+`;
+
+const BOOKING_MAP = {
+  partial: false,
+  entry: 'start',
+  flows: [
+    {
+      key: 'start',
+      description: '',
+      isStart: true,
+      phrases: [],
+      reach: 'entry',
+      line: 3,
+      steps: [{ index: 0, kind: 'say', line: 5, text: 'Hi! What do you need?', buttons: [{ label: 'Book', goto: 'booking' }] }],
+    },
+    {
+      key: 'booking',
+      description: '',
+      isStart: false,
+      phrases: ['book'],
+      reach: 'trigger',
+      line: 8,
+      steps: [
+        { index: 0, kind: 'ask', line: 10, text: 'For how many people?', id: 'guests', type: 'text', required: true },
+        { index: 1, kind: 'end', line: 12 },
+      ],
+    },
+  ],
+  edges: [{ from: { flow: 'start', step: 0, button: 0 }, to: 'booking', via: 'button', label: 'Book' }],
+  warnings: [{ code: 'UNKNOWN_PLACEHOLDER', flow: 'booking', step: 0, message: 'Flow "booking", step 1: {nobody} is not the id of any asked question, so it shows as empty.' }],
+};
+
+// The fake simulator: opening shows the menu, "Book" asks, any answer ends, anything else is the agent's.
+function fakeSimulate(body: { state?: { flowKey: string } | null; input?: string }) {
+  const bot = (text: string, buttons: Array<{ label: string; value: string }> = []) => ({ kind: 'bot', text, buttons });
+  if (!body.input && !body.state) {
+    return { ok: true, messages: [bot('Hi! What do you need?', [{ label: 'Book', value: 'Book' }])], buttons: [{ label: 'Book', value: 'Book' }], state: { flowKey: 'start', stepIndex: 0, slots: {}, retries: 0, reask: false }, ended: false, outcome: 'opened' };
+  }
+  if (body.input === 'Book') {
+    return { ok: true, messages: [bot('For how many people?')], buttons: [], state: { flowKey: 'booking', stepIndex: 0, slots: {}, retries: 0, reask: false }, ended: false, outcome: 'consumed' };
+  }
+  if (body.state && body.state.flowKey === 'booking') {
+    return { ok: true, messages: [], buttons: [], state: null, ended: true, outcome: 'consumed' };
+  }
+  return { ok: true, messages: [{ kind: 'llm', reason: 'free' }], buttons: [], state: null, ended: true, outcome: 'none' };
 }
 
 const appConfig = {
@@ -321,6 +394,140 @@ test.describe('Agent Settings keeps saved values across tab switches', () => {
     await expect(page.locator('input[type="radio"][value="unlisted"]')).toBeChecked();
     await switchAwayAndBack(page, 'Visibility');
     await expect(page.locator('input[type="radio"][value="unlisted"]')).toBeChecked();
+  });
+});
+
+test.describe('Agent Flows: generate, map and try', () => {
+  test('Generate with AI previews the change and only fills the editor', async ({ page }) => {
+    const { writes, generateCalls } = await fakeBackend(page);
+    await openTab(page, 'Flows');
+    const editor = page.getByTestId('flows-editor');
+    await page.getByTestId('flows-generate-open').click();
+    const dialog = page.getByTestId('flows-generate-dialog');
+    const submit = page.getByTestId('flows-generate-submit');
+    await expect(submit).toBeDisabled();
+    await page.getByTestId('flows-generate-description').fill('Take table bookings');
+    await submit.click();
+
+    // The result is a preview: diff against the (empty) editor, warnings, nothing applied yet.
+    await expect(page.getByTestId('flows-generate-summary')).toContainText('start, booking');
+    await expect(page.getByTestId('flows-generate-warnings')).toContainText('has no button');
+    await expect(dialog.locator('[data-diff="add"]').first()).toContainText('version: 1');
+    await expect(editor).toHaveValue('');
+    expect(generateCalls).toEqual([{ description: 'Take table bookings', currentYaml: undefined }]);
+    await page.getByTestId('flows-generate-view-map').click();
+    await expect(dialog.getByTestId('flows-card-booking')).toBeVisible();
+    await page.getByTestId('flows-generate-view-yaml').click();
+    await expect(page.getByTestId('flows-generate-yaml')).toContainText('goto: booking');
+
+    await page.getByTestId('flows-generate-apply').click();
+    await expect(dialog).toHaveCount(0);
+    await expect(editor).toHaveValue(BOOKING_YAML);
+    // Dirty, not saved: the operator still has to press Save.
+    const save = page.getByRole('button', { name: 'Save flows' });
+    await expect(save).toBeEnabled();
+    expect(writes.filter((w) => w.method === 'PUT')).toHaveLength(0);
+    await save.click();
+    await expect(page.getByText('Flows saved')).toBeVisible();
+    expect(writes.filter((w) => w.method === 'PUT')).toHaveLength(1);
+  });
+
+  test('Generate with AI extends the current script and can be discarded', async ({ page }) => {
+    const { generateCalls } = await fakeBackend(page);
+    await openTab(page, 'Flows');
+    const editor = page.getByTestId('flows-editor');
+    await editor.fill('flows:\n  main:\n    steps: []\n');
+    await page.getByTestId('flows-generate-open').click();
+    // With a script in the editor the default is to extend it.
+    await expect(page.getByLabel('Extend the current script')).toBeChecked();
+    await page.getByTestId('flows-generate-description').fill('Add bookings');
+    await page.getByTestId('flows-generate-submit').click();
+    await expect(page.getByTestId('flows-generate-diff').locator('[data-diff="del"]').first()).toContainText('main:');
+    expect(generateCalls[0].currentYaml).toBe('flows:\n  main:\n    steps: []\n');
+    await page.getByRole('button', { name: 'Discard' }).click();
+    await expect(page.getByTestId('flows-generate-dialog')).toHaveCount(0);
+    await expect(editor).toHaveValue('flows:\n  main:\n    steps: []\n');
+  });
+
+  test('Generate with AI shows why a script could not be produced', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Flows');
+    await page.getByTestId('flows-generate-open').click();
+    await page.getByTestId('flows-generate-description').fill('something invalid');
+    await page.getByTestId('flows-generate-submit').click();
+    const err = page.getByTestId('flows-generate-error');
+    await expect(err).toContainText('could not produce a valid script');
+    await expect(err).toContainText('unknown flow "bookingg"');
+    await expect(page.getByTestId('flows-editor')).toHaveValue('');
+    // The request stays editable for another try.
+    await expect(page.getByTestId('flows-generate-description')).toHaveValue('something invalid');
+  });
+
+  test('Map draws the flows of the editor text and jumps to the line', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Flows');
+    const editor = page.getByTestId('flows-editor');
+    await expect(page.getByTestId('flows-tab-map')).toBeVisible();
+    await page.getByTestId('flows-tab-map').click();
+    await expect(page.getByTestId('flows-map-empty')).toBeVisible();
+
+    await page.getByTestId('flows-tab-editor').click();
+    await editor.fill(BOOKING_YAML);
+    await page.getByTestId('flows-tab-map').click();
+    await expect(page.getByTestId('flows-card-start')).toHaveAttribute('data-reach', 'entry');
+    await expect(page.getByTestId('flows-card-booking')).toHaveAttribute('data-reach', 'trigger');
+    await expect(page.getByTestId('flows-edge')).toHaveCount(1);
+    await expect(page.getByTestId('flows-map-warnings')).toContainText('{nobody}');
+
+    // A box jumps to its line in the editor.
+    await page.getByTestId('flows-card-booking').getByRole('button', { name: /booking/ }).first().click();
+    await expect(editor).toBeVisible();
+    const selected = await editor.evaluate((el: HTMLTextAreaElement) => el.value.slice(el.selectionStart, el.selectionEnd));
+    expect(selected).toBe('  booking:');
+  });
+
+  test('Try flow plays the script without saving anything', async ({ page }) => {
+    const { writes } = await fakeBackend(page);
+    await openTab(page, 'Flows');
+    await page.getByTestId('flows-editor').fill(BOOKING_YAML);
+    await page.getByTestId('flows-tab-try').click();
+
+    const transcript = page.getByTestId('flows-try-transcript');
+    await expect(transcript).toContainText('Hi! What do you need?');
+    await transcript.getByRole('button', { name: 'Book' }).click();
+    await expect(transcript).toContainText('For how many people?');
+    await page.getByTestId('flows-try-input').fill('four');
+    await page.getByTestId('flows-try-send').click();
+    await expect(transcript).toContainText('The script ended');
+
+    // Outside the script the live agent would answer: a placeholder bubble.
+    await page.getByTestId('flows-try-input').fill('what are your hours?');
+    await page.getByTestId('flows-try-send').click();
+    await expect(page.getByTestId('flows-try-llm')).toContainText('The agent answers here');
+
+    await page.getByTestId('flows-try-restart').click();
+    await expect(page.getByTestId('flows-try-llm')).toHaveCount(0);
+    await expect(transcript).toContainText('Hi! What do you need?');
+
+    // Editing the script mid-conversation offers a restart instead of breaking the run.
+    await page.getByTestId('flows-tab-editor').click();
+    await page.getByTestId('flows-editor').fill(BOOKING_YAML + '# edited\n');
+    await page.getByTestId('flows-tab-try').click();
+    await expect(page.getByTestId('flows-try-stale')).toBeVisible();
+    expect(writes.filter((w) => w.method === 'PUT')).toHaveLength(0);
+  });
+
+  test('Try flow with nothing written or with errors does not run', async ({ page }) => {
+    await fakeBackend(page);
+    await openTab(page, 'Flows');
+    await page.getByTestId('flows-tab-try').click();
+    await expect(page.getByTestId('flows-try-empty')).toBeVisible();
+    await page.getByTestId('flows-tab-editor').click();
+    await page.getByTestId('flows-editor').fill('version: 1\nflows:\n  oops: true\n');
+    await expect(page.getByTestId('flows-errors')).toContainText('unknown step kind');
+    await page.getByTestId('flows-tab-try').click();
+    await expect(page.getByTestId('flows-try-blocked')).toBeVisible();
+    await expect(page.getByTestId('flows-try-input')).toBeDisabled();
   });
 });
 

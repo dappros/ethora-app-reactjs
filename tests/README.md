@@ -20,6 +20,16 @@ npx playwright test tests/e2e/smoke.spec.ts   # one spec
 `playwright.config.ts` boots `npm run dev` automatically and points the
 browser at it. No external service is touched.
 
+## `tests/unit/`
+
+Plain `node:test` specs for pure modules (no React, no network), such as the
+Flows tab's map layout and line diff in `src/lib/flows/`. They import the
+TypeScript sources directly, so they need Node 22.6 or newer (type stripping):
+
+```bash
+npm run test:unit
+```
+
 ## `tests/diagnostics/`
 
 Scripted diagnostic harnesses that drive a **remote** environment (QA,

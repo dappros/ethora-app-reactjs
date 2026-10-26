@@ -973,10 +973,139 @@ export function httpUpdateAgent(idOrAddress: string, body: any) {
 
 export type FlowsValidationError = { path: string; message: string; line?: number };
 
+// The Map tab's data: what the API's flowMap.js derives from the compiled
+// flows. `reach` says how a conversation can get to a flow: the opening menu
+// ('entry'), a trigger phrase, a button / goto from a reachable flow
+// ('linked'), or only when the agent decides to start it ('intent').
+export type FlowMapStep = {
+  index: number;
+  kind: 'say' | 'ask' | 'goto' | 'end';
+  line?: number;
+  when?: string;
+  text?: string;
+  id?: string;
+  type?: string;
+  required?: boolean;
+  options?: string[];
+  buttons?: { label: string; goto?: string; end?: boolean; missing?: boolean }[];
+  goto?: string;
+  missing?: boolean;
+};
+export type FlowMapFlow = {
+  key: string;
+  description: string;
+  isStart: boolean;
+  phrases: string[];
+  reach: 'entry' | 'trigger' | 'linked' | 'intent';
+  line?: number;
+  steps: FlowMapStep[];
+};
+export type FlowMapEdge = {
+  from: { flow: string; step: number; button?: number };
+  to: string;
+  via: 'button' | 'goto';
+  label?: string;
+  missing?: boolean;
+};
+export type FlowMapWarning = { code: string; message: string; flow?: string; step?: number };
+export type FlowMapData = {
+  partial: boolean;
+  entry: string | null;
+  flows: FlowMapFlow[];
+  edges: FlowMapEdge[];
+  warnings: FlowMapWarning[];
+};
+
 // Dry-run the flows compiler (no save). 200 either way; `ok` says whether the
-// script compiled and `errors` carries line-numbered problems otherwise.
+// script compiled and `errors` carries line-numbered problems otherwise. `map`
+// is the diagram data: null when nothing is readable (empty script, YAML
+// syntax error), `partial` when the script has errors.
 export function httpValidateAgentFlows(flowsYaml: string) {
-  return httpV2.post<{ ok: boolean; flowKeys?: string[]; errors?: FlowsValidationError[] }>('/agents/flows/validate', { flowsYaml });
+  return httpV2.post<{ ok: boolean; flowKeys?: string[]; errors?: FlowsValidationError[]; map?: FlowMapData | null }>(
+    '/agents/flows/validate',
+    { flowsYaml },
+  );
+}
+
+export type FlowsGenerateResult = { ok: boolean; flowsYaml: string; flowKeys: string[]; warnings: string[]; map?: FlowMapData | null; attempts?: number };
+
+// "Generate with AI": a script that already compiled server side (nothing is
+// saved). 422 FLOWS_GENERATION_INVALID carries the compiler errors in `details`
+// when the model could not get it right.
+export function httpGenerateAgentFlows(
+  body: { description: string; agentId?: string; currentYaml?: string; language?: string },
+  signal?: AbortSignal,
+) {
+  return httpV2.post<FlowsGenerateResult>('/agents/flows/generate', body, { signal, timeout: 540000 });
+}
+
+export type FlowSimButton = { label: string; value: string };
+export type FlowSimMessage =
+  | { kind: 'bot'; text: string; buttons: FlowSimButton[] }
+  | { kind: 'llm'; reason: 'free' | 'aside' | 'handoff'; label?: string };
+export type FlowSimState = { flowKey: string; stepIndex: number; slots: Record<string, string>; retries: number; reask: boolean };
+export type FlowSimResult = {
+  ok: boolean;
+  messages: FlowSimMessage[];
+  buttons: FlowSimButton[];
+  state: FlowSimState | null;
+  ended: boolean;
+  outcome: 'opened' | 'consumed' | 'none' | 'aside' | 'handoff' | 'started' | 'noop';
+};
+
+// One turn of the "Try flow" simulator: stateless, no LLM, nothing stored. Send
+// back the `state` of the previous result; omit `input` to open the conversation.
+export function httpSimulateAgentFlows(body: { flowsYaml: string; state?: FlowSimState | null; input?: string; startFlow?: string }) {
+  return httpV2.post<FlowSimResult>('/agents/flows/simulate', body);
+}
+
+// Flow submissions: completed flow runs (answers), the pull/push side and the webhook.
+export type FlowSubmissionAnswer = { id: string; question: string; type: string; value: string };
+export type FlowSubmissionDelivery = {
+  status: 'none' | 'pending' | 'delivered' | 'failed';
+  attempts: number;
+  deliveredAt: string | null;
+  lastAttemptAt: string | null;
+  lastStatus: number | null;
+  lastError: string;
+};
+export type FlowSubmission = {
+  id: string;
+  flow: string;
+  room: string;
+  completedAt: string | null;
+  answers: FlowSubmissionAnswer[];
+  data: Record<string, string>;
+  delivery: FlowSubmissionDelivery;
+};
+export type FlowSubmissionsQuery = { flow?: string; delivery?: string; q?: string; since?: string; limit?: number; offset?: number };
+export type FlowWebhook = { enabled: boolean; url: string; hasSecret: boolean; retentionDays: number };
+
+const agentPath = (idOrAddress: string) => `/agents/${encodeURIComponent(idOrAddress)}`;
+
+export function httpListFlowSubmissions(idOrAddress: string, params: FlowSubmissionsQuery = {}) {
+  return httpV2.get<{ ok: boolean; total: number; items: FlowSubmission[] }>(`${agentPath(idOrAddress)}/flow-submissions`, { params });
+}
+export function httpExportFlowSubmissionsCsv(idOrAddress: string, params: FlowSubmissionsQuery = {}) {
+  return httpV2.get(`${agentPath(idOrAddress)}/flow-submissions.csv`, { params, responseType: 'blob' });
+}
+export function httpDeleteFlowSubmission(idOrAddress: string, id: string) {
+  return httpV2.delete(`${agentPath(idOrAddress)}/flow-submissions/${encodeURIComponent(id)}`);
+}
+export function httpPushFlowSubmissions(idOrAddress: string, body: { ids?: string[]; url?: string; flow?: string; since?: string }) {
+  return httpV2.post<{ ok: boolean; matched: number; sent: number; failed: number; failures: { id: string; error: string }[] }>(
+    `${agentPath(idOrAddress)}/flow-submissions/push`,
+    body
+  );
+}
+export function httpGetFlowWebhook(idOrAddress: string) {
+  return httpV2.get<{ ok: boolean; webhook: FlowWebhook }>(`${agentPath(idOrAddress)}/flow-webhook`);
+}
+export function httpPutFlowWebhook(idOrAddress: string, body: { enabled?: boolean; url?: string; rotateSecret?: boolean; retentionDays?: number }) {
+  return httpV2.put<{ ok: boolean; webhook: FlowWebhook; secret?: string }>(`${agentPath(idOrAddress)}/flow-webhook`, body);
+}
+export function httpTestFlowWebhook(idOrAddress: string) {
+  return httpV2.post<{ ok: boolean; status: number | null; error: string }>(`${agentPath(idOrAddress)}/flow-webhook/test`, {});
 }
 
 export function httpDeleteAgent(idOrAddress: string) {
@@ -1099,6 +1228,35 @@ export function httpGetWidgetAppearance(appId: string) {
 
 export function httpSaveWidgetAppearance(appId: string, appearance: Record<string, string>) {
   return httpV2.put<{ ok: boolean; appearance: Record<string, string> }>(`/apps/${appId}/widget/appearance`, { appearance });
+}
+
+// The App's chat component config: a flat record of dotted IConfig paths the
+// operator set in the Chat component tab (non-defaults only). The public read
+// is what the web chat applies at load; options the license no longer covers
+// are left out of it.
+// `version` identifies the stored state (the save time in ms, '0' = never saved)
+// and changes on every real change; `updatedAt` is the same moment as an ISO date.
+export interface ChatComponentConfigResponse {
+  ok: boolean;
+  config: Record<string, string | boolean>;
+  version?: string;
+  updatedAt?: string | null;
+}
+
+export function httpGetChatComponentConfig(appId: string) {
+  return httpV2.get<ChatComponentConfigResponse>(`/apps/${appId}/chat-component/config`);
+}
+
+export function httpSaveChatComponentConfig(appId: string, config: Record<string, string | boolean>) {
+  return httpV2.put<ChatComponentConfigResponse>(`/apps/${appId}/chat-component/config`, { config });
+}
+
+// `version` is only a cache key: the public read is cached for 30 s, so a client
+// that was told about a newer state asks with `v=<version>` to get past it.
+export function httpGetPublicChatComponentConfig(appId: string, version?: string) {
+  return httpV2.get<ChatComponentConfigResponse>('/chat-component/config', {
+    params: version ? { appId, v: version } : { appId },
+  });
 }
 
 // Queues a re-crawl of one already-indexed row. Answers { status: 'queued', jobId }
@@ -1256,6 +1414,8 @@ export function httpGetAppsWithStatus(opts: {
   orderBy?: OrderByType;
   includeArchived?: boolean;
   status?: 'archived';
+  // Case-insensitive substring match on the app name / domain name.
+  search?: string;
 }) {
   const params = new URLSearchParams();
   if (opts.limit !== undefined) params.set('limit', String(opts.limit));
@@ -1264,6 +1424,8 @@ export function httpGetAppsWithStatus(opts: {
   if (opts.orderBy) params.set('orderBy', opts.orderBy);
   if (opts.includeArchived) params.set('includeArchived', 'true');
   if (opts.status) params.set('status', opts.status);
+  const search = opts.search?.trim();
+  if (search) params.set('search', search);
   return http.get(`/apps?${params.toString()}`);
 }
 

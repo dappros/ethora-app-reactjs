@@ -13,6 +13,11 @@
 #   2. fills the Content-Security-Policy connect-src placeholder in
 #      index.html with the origins derived from the URL-valued variables,
 #      mirroring originsFrom() in vite-plugin-csp.ts
+#   3. writes .well-known/apple-app-site-association and
+#      .well-known/assetlinks.json (universal links / app links for /call/*)
+#      from VITE_APPLE_TEAM_ID, VITE_IOS_BUNDLE_IDS, VITE_ANDROID_PACKAGE and
+#      VITE_ANDROID_SHA256_FINGERPRINTS, mirroring buildWellKnownFiles() in
+#      vite-plugin-well-known.ts (same defaults, same validation)
 # Everything else in the bundle is identical for every install.
 set -eu
 
@@ -85,10 +90,65 @@ fill_csp() {
   fi
 }
 
+# --- Universal links / app links (mirrors vite-plugin-well-known.ts) -------
+# Defaults are the production Ethora mobile app.
+WK_DEFAULT_TEAM="822G3N7CA5"
+WK_DEFAULT_BUNDLES="com.ethora.app"
+WK_DEFAULT_ANDROID_PACKAGE="com.ethora.mobile"
+
+# Comma list on stdin -> one trimmed, de-duplicated item per line.
+split_list() {
+  tr ',' '\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | awk 'NF && !seen[$0]++'
+}
+
+# Lines on stdin -> "a","b","c" (items are validated beforehand, no escaping).
+quote_join() {
+  awk 'BEGIN { first = 1 } { printf "%s\"%s\"", (first ? "" : ","), $0; first = 0 }'
+}
+
+apple_site_association() {
+  team="$(printf '%s' "${VITE_APPLE_TEAM_ID:-$WK_DEFAULT_TEAM}" | tr -d '[:space:]' | tr 'a-z' 'A-Z')"
+  ids=""
+  if printf '%s' "$team" | grep -Eq '^[A-Z0-9]{10}$'; then
+    ids="$(printf '%s' "${VITE_IOS_BUNDLE_IDS:-$WK_DEFAULT_BUNDLES}" | split_list \
+      | grep -E '^[A-Za-z0-9][A-Za-z0-9.-]*$' | awk -v t="$team" '{ print t "." $0 }' | quote_join || true)"
+  fi
+  if [ -n "$ids" ]; then
+    printf '{\n  "applinks": {\n    "details": [\n      { "appIDs": [%s], "components": [{ "/": "/call/*" }] }\n    ]\n  }\n}\n' "$ids"
+  else
+    printf '{\n  "applinks": {\n    "details": []\n  }\n}\n'
+  fi
+}
+
+android_asset_links() {
+  pkg="$(printf '%s' "${VITE_ANDROID_PACKAGE:-$WK_DEFAULT_ANDROID_PACKAGE}" | tr -d '[:space:]')"
+  prints=""
+  if printf '%s' "$pkg" | grep -Eq '^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$'; then
+    prints="$(printf '%s' "${VITE_ANDROID_SHA256_FINGERPRINTS:-}" | split_list \
+      | tr -d ':' | tr 'a-f' 'A-F' | grep -E '^[0-9A-F]{64}$' \
+      | sed -e 's/\(..\)/\1:/g' -e 's/:$//' | awk '!seen[$0]++' | quote_join || true)"
+  fi
+  if [ -n "$prints" ]; then
+    printf '[\n  {\n    "relation": ["delegate_permission/common.handle_all_urls"],\n    "target": {\n      "namespace": "android_app",\n      "package_name": "%s",\n      "sha256_cert_fingerprints": [%s]\n    }\n  }\n]\n' "$pkg" "$prints"
+  else
+    # No signing fingerprint configured: an empty statement list, so Android
+    # keeps opening the browser rather than verifying against nothing.
+    printf '[]\n'
+  fi
+}
+
+write_well_known() {
+  wk_dir="$1/.well-known"
+  mkdir -p "$wk_dir"
+  apple_site_association > "$wk_dir/apple-app-site-association"
+  android_asset_links > "$wk_dir/assetlinks.json"
+}
+
 render() {
   dir="$1"
   write_config_js "$dir"
   fill_csp "$dir"
+  write_well_known "$dir"
   echo "[ethora-frontend] rendered config.js ($(grep -c '^  "VITE_' "$dir/config.js") keys) and CSP origins into $dir"
 }
 

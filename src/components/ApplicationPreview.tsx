@@ -5,6 +5,7 @@ import { ModelApp } from '../models';
 import { AppActionsMenu } from './AppActionsMenu';
 import { IconArrowRight } from './Icons/IconArrowRight';
 import { IconExternalLink } from './Icons/IconExternalLink';
+import { AppInactiveStat } from './AppInactiveStat';
 import { IconInfo } from './Icons/IconInfo';
 import { Tooltip } from './Tooltip';
 
@@ -139,7 +140,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
         </div>
         {/* stat */}
-        <div className="grid grid-cols-2 gap-x-[33px] gap-y-4 grid-rows-3 md:grid-cols-3 md:grid-rows-2 lg:grid-cols-7 lg:grid-rows-1">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:gap-x-[33px] 2xl:grid-cols-8">
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">{t('applicationPreview.stats.users')}</span>
@@ -273,6 +274,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
               </span>
             </div>
           </div>
+          <AppInactiveStat lastActivityAt={app.stats.lastActivityAt} />
         </div>
         <div className="flex md:hidden">
           <button onClick={onExternalClick} className="mr-4">

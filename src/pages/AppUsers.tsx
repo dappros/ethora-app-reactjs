@@ -730,7 +730,7 @@ export default function AppUsers() {
           onClick={() => updateSearchParams({ orderBy: field, order: nextDir, page: 0 })}
         >
           {label}
-          <span className={classNames('text-[10px]', active ? 'text-brand-500' : 'text-gray-300')}>
+          <span className={classNames('text-[10px]', active ? 'text-brand-500' : 'text-gray-300 dark:text-gray-500')}>
             {active ? (order === 'asc' ? '▲' : '▼') : '↕'}
           </span>
         </button>
