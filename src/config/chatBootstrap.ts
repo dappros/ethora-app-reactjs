@@ -597,7 +597,9 @@ export function createChatConfig({
       disableMenu: true,
       disableCreate: app?.allowUsersToCreateRooms === false,
     },
-    defaultRooms: app?.defaultRooms || [],
+    // Membership comes from /v1/chats/my. Passing app defaults here makes
+    // older chat-component versions auto-join rooms users have left.
+    defaultRooms: [],
     eventHandlers: {
       onMessageSent: ({ roomJID, messageType, metadata }) => {
         // The chat component reports the MIME type as metadata.fileType - it
