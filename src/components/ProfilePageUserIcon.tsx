@@ -58,20 +58,19 @@ export function ProfilePageUserIcon({
   };
 
   const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const file = files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImageSrc(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        return;
       }
 
-      setFileInputKey((key) => key + 1);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') setImageSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
+    setFileInputKey((key) => key + 1);
   };
 
   const hasImage = !!profileImage;
@@ -85,14 +84,16 @@ export function ProfilePageUserIcon({
 
   return (
     <div className={cn("profile-user-icon", className)}>
-      <input
-        key={fileInputKey}
-        ref={fileRef}
-        onChange={onFileInputChange}
-        accept="image/*"
-        className="hidden"
-        type="file"
-      />
+      {editMode && (
+        <input
+          key={fileInputKey}
+          ref={fileRef}
+          onChange={onFileInputChange}
+          accept="image/*"
+          className="hidden"
+          type="file"
+        />
+      )}
       <div
         className={cn("inner", { "border border-brand-500": !hasImage })}
         style={innerStyle}
