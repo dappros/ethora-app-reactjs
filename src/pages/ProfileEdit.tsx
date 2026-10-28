@@ -9,14 +9,16 @@ import { useAppStore } from '../store/useAppStore';
 import './ProfilePageEdit.scss';
 
 function base64ToFile(base64String: string, fileName: string) {
-  const byteString = atob(base64String.split(',')[1]);
+  const [metadata, encoded] = base64String.split(',');
+  const mimeType = metadata.match(/data:(.*?);base64/)?.[1] || 'image/jpeg';
+  const byteString = atob(encoded);
   const arrayBuffer = new ArrayBuffer(byteString.length);
   const uintArray = new Uint8Array(arrayBuffer);
   for (let i = 0; i < byteString.length; i++) {
     uintArray[i] = byteString.charCodeAt(i);
   }
-  const blob = new Blob([uintArray], { type: 'image/jpeg' });
-  return new File([blob], fileName, { type: 'image/jpeg' });
+  const blob = new Blob([uintArray], { type: mimeType });
+  return new File([blob], fileName, { type: mimeType });
 }
 
 type Inputs = {
