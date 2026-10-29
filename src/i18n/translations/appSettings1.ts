@@ -160,6 +160,13 @@ export const appSettings1 = {
     'appSettingsChats.memberRemovedToast': '{name} was removed from the chat',
     'appSettingsChats.memberRemoveError': 'Failed to remove {name}',
     'appSettingsChats.unnamedMember': 'Unnamed user',
+    'appSettingsChats.membersSearchPlaceholder': 'Search members',
+    'appSettingsChats.membersNoMatches': 'No members match your search.',
+    'appSettingsChats.membersSelectAll': 'Select all',
+    'appSettingsChats.membersSelectedCount': '{count} selected',
+    'appSettingsChats.removeSelectedButton': 'Remove selected ({count})',
+    'appSettingsChats.membersRemovedToast': '{count} member(s) removed from the chat',
+    'appSettingsChats.membersRemoveError': 'Failed to remove {count} member(s)',
     'appSettingsChats.defaultBroadcastSenderHeading':
       'Default Broadcast Sender',
     'appSettingsChats.defaultBroadcastSenderHelp':
@@ -434,6 +441,13 @@ export const appSettings1 = {
     'appSettingsChats.memberRemovedToast': '{name} a été retiré du chat',
     'appSettingsChats.memberRemoveError': 'Impossible de retirer {name}',
     'appSettingsChats.unnamedMember': 'Utilisateur sans nom',
+    'appSettingsChats.membersSearchPlaceholder': 'Rechercher des membres',
+    'appSettingsChats.membersNoMatches': 'Aucun membre ne correspond à votre recherche.',
+    'appSettingsChats.membersSelectAll': 'Tout sélectionner',
+    'appSettingsChats.membersSelectedCount': '{count} sélectionné(s)',
+    'appSettingsChats.removeSelectedButton': 'Retirer la sélection ({count})',
+    'appSettingsChats.membersRemovedToast': '{count} membre(s) retiré(s) du chat',
+    'appSettingsChats.membersRemoveError': 'Impossible de retirer {count} membre(s)',
     'appSettingsChats.defaultBroadcastSenderHeading':
       'Expéditeur de diffusion par défaut',
     'appSettingsChats.defaultBroadcastSenderHelp':
@@ -726,6 +740,13 @@ export const appSettings1 = {
     'appSettingsChats.memberRemovedToast': '{name} fue retirado del chat',
     'appSettingsChats.memberRemoveError': 'No se pudo retirar a {name}',
     'appSettingsChats.unnamedMember': 'Usuario sin nombre',
+    'appSettingsChats.membersSearchPlaceholder': 'Buscar miembros',
+    'appSettingsChats.membersNoMatches': 'Ningún miembro coincide con tu búsqueda.',
+    'appSettingsChats.membersSelectAll': 'Seleccionar todo',
+    'appSettingsChats.membersSelectedCount': '{count} seleccionado(s)',
+    'appSettingsChats.removeSelectedButton': 'Retirar seleccionados ({count})',
+    'appSettingsChats.membersRemovedToast': '{count} miembro(s) retirado(s) del chat',
+    'appSettingsChats.membersRemoveError': 'No se pudo retirar a {count} miembro(s)',
     'appSettingsChats.defaultBroadcastSenderHeading':
       'Remitente predeterminado de difusiones',
     'appSettingsChats.defaultBroadcastSenderHelp':
