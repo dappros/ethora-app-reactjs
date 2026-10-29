@@ -19,9 +19,11 @@ const CALL_PATH = /^\/call\/[A-Za-z0-9_-]{22,128}\/?(\?[^#\s]*)?$/;
 
 const AGENT_PATH = /^\/agent\/0x[0-9a-fA-F]{40}\/?(\?[^#\s]*)?$/;
 
+const CHAT_LINK_PATH = /^\/app\/chat\/?\?(?:[^#\s]*&)?(?:chatId|qrChatId)=[A-Za-z0-9_.@-]{3,300}(?:&[^#\s]*)?$/;
+
 /** True when `path` is one this module is willing to park and return to. */
 export function isReturnablePath(path: unknown): path is string {
-  return typeof path === 'string' && (CALL_PATH.test(path) || AGENT_PATH.test(path));
+  return typeof path === 'string' && (CALL_PATH.test(path) || AGENT_PATH.test(path) || CHAT_LINK_PATH.test(path));
 }
 
 export function signedOutEntryPath(path: string): '/register' | '/login' {

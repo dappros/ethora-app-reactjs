@@ -846,6 +846,10 @@ export function getBlockedUsers() {
   return http.get('/chats/blocked');
 }
 
+export function httpGetMyChat(chatName: string) {
+  return http.get(`/chats/my/${encodeURIComponent(chatName)}`);
+}
+
 export function unblockUser(xmppUsername: string) {
   return http.delete(`/chats/blocked/${encodeURIComponent(xmppUsername)}`);
 }

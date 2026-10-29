@@ -1,6 +1,6 @@
 import { Chat } from '@ethora/chat-component';
 import React, { useEffect, useMemo, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   actionLoadOwnedApps,
@@ -8,6 +8,7 @@ import {
   actionSwitchChatApp,
 } from '../actions';
 import { createChatConfig } from '../config/chatBootstrap';
+import { forgetParkedChatLink, linkedChatName, useChatLinkJoin } from '../hooks/useChatLinkJoin';
 import { useChatComponentConfig } from '../hooks/useChatComponentConfig';
 import { applyChatComponentConfig, withConfigUpdatedHandler } from '../lib/chatComponentConfig';
 import { useIsMobileView } from '../hooks/useIsMobileView';
@@ -299,6 +300,20 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
   const currentUser = useAppStore((s) => s.currentUser);
 
   const [switching, setSwitching] = useState(false);
+  const navigate = useNavigate();
+  const [linkChat, setLinkChat] = useState(() =>
+    roomJID || scheduledCallSlug ? null : linkedChatName(window.location.search)
+  );
+  const userAppId = currentUser?.appId;
+  const gatedLinkChat =
+    linkChat && !chatAppId && userAppId && linkChat.startsWith(`${userAppId}_`) ? linkChat : null;
+  const { state: linkState, remountKey } = useChatLinkJoin(gatedLinkChat);
+
+  const leaveDeniedLink = () => {
+    forgetParkedChatLink();
+    navigate('/app/chat', { replace: true });
+    setLinkChat(null);
+  };
 
   // Load the full owned-apps list once on mount, independent of the
   // paginated AdminApps view. Failures are non-fatal: the dropdown
@@ -474,9 +489,31 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
           <div className="flex items-center justify-center min-h-[400px] text-sm text-gray-500 font-sans">
             {t('chat.switchingContext')}
           </div>
+        ) : linkState === 'denied' || linkState === 'notFound' ? (
+          <div
+            className="h-full min-h-[320px] flex items-center justify-center p-6"
+            data-testid="chat-link-denied"
+            data-reason={linkState}
+          >
+            <div className="max-w-[440px] text-center flex flex-col items-center gap-3 font-sans">
+              <h1 className="text-2xl font-medium">
+                {t(linkState === 'notFound' ? 'chat.linkNotFound.title' : 'chat.linkDenied.title')}
+              </h1>
+              <p className="text-gray-600">
+                {t(linkState === 'notFound' ? 'chat.linkNotFound.description' : 'chat.linkDenied.description')}
+              </p>
+              <button
+                type="button"
+                onClick={leaveDeniedLink}
+                className="mt-2 rounded-xl bg-brand-500 hover:bg-brand-darker text-white px-4 py-2"
+              >
+                {t('chat.linkDenied.back')}
+              </button>
+            </div>
+          </div>
         ) : (
           <MemoizedChat
-            key={chatAppId || 'base'}
+            key={`${chatAppId || 'base'}-${remountKey}`}
             config={effectiveApp}
             currentUser={currentUser}
             ownerSession={ownerSession}

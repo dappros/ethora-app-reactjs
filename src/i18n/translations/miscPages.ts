@@ -124,6 +124,11 @@ export const miscPages = {
 
     // --- Chat.tsx ---
     'chat.heading': 'Chats',
+    'chat.linkDenied.title': 'This is a private group chat',
+    'chat.linkDenied.description': 'Only members of this chat can open it. Ask one of them to add you.',
+    'chat.linkDenied.back': 'Back to chats',
+    'chat.linkNotFound.title': 'This chat no longer exists',
+    'chat.linkNotFound.description': 'The link may be wrong, or the chat was deleted.',
     'chat.switcherLabel': 'Testing chats in',
     'chat.baseApp': 'Base app',
     'chat.baseAppSuffix': '(base app)',
@@ -263,6 +268,11 @@ export const miscPages = {
 
     // --- Chat.tsx ---
     'chat.heading': 'Discussions',
+    'chat.linkDenied.title': 'Cette discussion de groupe est privée',
+    'chat.linkDenied.description': 'Seuls ses membres peuvent l\'ouvrir. Demandez à l\'un d\'eux de vous ajouter.',
+    'chat.linkDenied.back': 'Retour aux discussions',
+    'chat.linkNotFound.title': 'Cette discussion n\'existe plus',
+    'chat.linkNotFound.description': 'Le lien est peut-être erroné, ou la discussion a été supprimée.',
     'chat.switcherLabel': 'Test des discussions dans',
     'chat.baseApp': 'Application de base',
     'chat.baseAppSuffix': '(application de base)',
@@ -402,6 +412,11 @@ export const miscPages = {
 
     // --- Chat.tsx ---
     'chat.heading': 'Chats',
+    'chat.linkDenied.title': 'Este es un chat de grupo privado',
+    'chat.linkDenied.description': 'Solo sus miembros pueden abrirlo. Pide a uno de ellos que te añada.',
+    'chat.linkDenied.back': 'Volver a los chats',
+    'chat.linkNotFound.title': 'Este chat ya no existe',
+    'chat.linkNotFound.description': 'Puede que el enlace sea incorrecto o que el chat se haya eliminado.',
     'chat.switcherLabel': 'Probando chats en',
     'chat.baseApp': 'Aplicación base',
     'chat.baseAppSuffix': '(aplicación base)',
