@@ -8,6 +8,7 @@ import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
 import RegistrationOpenRoute from './pages/AuthPage/Register/RegistrationOpenRoute';
 import CallJoin from './pages/CallJoin';
+import AgentChatJoin from './pages/AgentChatJoin';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 const Admin = lazy(() => import('./pages/Admin'));
@@ -84,6 +85,11 @@ export const router = createBrowserRouter(
               path: '/call/:slug',
               element: <AppLayout />,
               children: [{ index: true, Component: CallJoin }],
+            },
+            {
+              path: '/agent/:address',
+              element: <AppLayout />,
+              children: [{ index: true, Component: AgentChatJoin }],
             },
             {
               path: '/app',

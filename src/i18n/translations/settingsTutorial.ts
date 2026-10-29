@@ -9,6 +9,19 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // (components/StepChooseTutorial.tsx), hubspotForm.* (components/HubspotForm.tsx).
 export const settingsTutorial = {
   en: {
+    'agentsTutorialModal.title': 'Welcome! Let\'s set up your first AI agent',
+    'agentsTutorialModal.subtitle':
+      'An AI agent answers your visitors or your team in chat, using your own content. It takes three steps:',
+    'agentsTutorialModal.create.title': 'Create the agent',
+    'agentsTutorialModal.create.text':
+      'Start from scratch or from a ready-made template such as customer support. Give it a name and tell it how to behave.',
+    'agentsTutorialModal.knowledge.title': 'Teach it your business',
+    'agentsTutorialModal.knowledge.text':
+      'Index your website or upload documents, so the agent answers from your content rather than guessing.',
+    'agentsTutorialModal.deploy.title': 'Put it to work',
+    'agentsTutorialModal.deploy.text':
+      'Test it right here in the admin panel, then add it to your website as a chat widget, through the WordPress plugin or in your own branded app.',
+    'agentsTutorialModal.close': 'Close',
     'stepStartTutorial.heading': 'Choose Your Path',
     'stepStartTutorial.subheading':
       'Select one of the three approaches to continue with your personalized experience.',
@@ -101,6 +114,19 @@ export const settingsTutorial = {
     'hubspotForm.submitButton': 'Request a call',
   },
   fr: {
+    'agentsTutorialModal.title': 'Bienvenue ! Configurons votre premier agent IA',
+    'agentsTutorialModal.subtitle':
+      'Un agent IA répond à vos visiteurs ou à votre équipe dans le chat, à partir de votre propre contenu. Cela se fait en trois étapes :',
+    'agentsTutorialModal.create.title': 'Créez l\'agent',
+    'agentsTutorialModal.create.text':
+      'Partez de zéro ou d\'un modèle prêt à l\'emploi, comme le support client. Donnez-lui un nom et indiquez-lui comment se comporter.',
+    'agentsTutorialModal.knowledge.title': 'Apprenez-lui votre activité',
+    'agentsTutorialModal.knowledge.text':
+      'Indexez votre site web ou téléversez des documents, pour que l\'agent réponde à partir de votre contenu au lieu de deviner.',
+    'agentsTutorialModal.deploy.title': 'Mettez-le au travail',
+    'agentsTutorialModal.deploy.text':
+      'Testez-le directement dans le panneau d\'administration, puis ajoutez-le à votre site sous forme de widget de chat, via le plugin WordPress ou dans votre propre application.',
+    'agentsTutorialModal.close': 'Fermer',
     'stepStartTutorial.heading': 'Choisissez votre parcours',
     'stepStartTutorial.subheading':
       "Sélectionnez l'une des trois approches pour poursuivre votre expérience personnalisée.",
@@ -196,6 +222,19 @@ export const settingsTutorial = {
     'hubspotForm.submitButton': 'Demander un appel',
   },
   es: {
+    'agentsTutorialModal.title': '¡Bienvenido! Configuremos tu primer agente de IA',
+    'agentsTutorialModal.subtitle':
+      'Un agente de IA responde a tus visitantes o a tu equipo en el chat usando tu propio contenido. Son tres pasos:',
+    'agentsTutorialModal.create.title': 'Crea el agente',
+    'agentsTutorialModal.create.text':
+      'Empieza desde cero o desde una plantilla lista, como atención al cliente. Ponle un nombre e indícale cómo comportarse.',
+    'agentsTutorialModal.knowledge.title': 'Enséñale tu negocio',
+    'agentsTutorialModal.knowledge.text':
+      'Indexa tu sitio web o sube documentos para que el agente responda con tu contenido en lugar de adivinar.',
+    'agentsTutorialModal.deploy.title': 'Ponlo a trabajar',
+    'agentsTutorialModal.deploy.text':
+      'Pruébalo aquí mismo en el panel de administración y luego añádelo a tu sitio como widget de chat, con el plugin de WordPress o en tu propia app.',
+    'agentsTutorialModal.close': 'Cerrar',
     'stepStartTutorial.heading': 'Elige tu camino',
     'stepStartTutorial.subheading':
       'Selecciona uno de los tres enfoques para continuar con tu experiencia personalizada.',

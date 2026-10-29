@@ -10,6 +10,7 @@ import { logSignup } from '../../../../hooks/withTracking';
 import { httpLoginWithEmail, setPermanentPassword } from '../../../../http';
 import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
+import { markAgentsOnboarding } from '../../../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../../../utils/navigateToUserPage';
 import CustomButton from '../../Button';
 import SkeletonLoader from '../../SkeletonLoader';
@@ -119,9 +120,8 @@ const ThirdStep = () => {
             await actionAfterLogin(data);
 
             logSignup('email', data.user._id, data.user?.email);
-            if (config?.afterLoginPage) {
-              navigateToUserPage(navigate, config.afterLoginPage as string);
-            }
+            markAgentsOnboarding();
+            navigateToUserPage(navigate, config?.afterLoginPage as string);
           })
           .catch((error) => {
             toast.error(error.response.data.error);

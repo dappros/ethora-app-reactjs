@@ -505,6 +505,45 @@ export function httpRevokeUserAccess(appId: string, userId: string) {
   );
 }
 
+export type AppCollaboratorRole = 'admin' | 'userManager' | 'analyst';
+export type AppCollaborator = {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: AppCollaboratorRole | 'owner' | 'custom';
+  isOwner: boolean;
+  isAppUser: boolean;
+};
+export type AppCollaboratorInvite = {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: AppCollaboratorRole;
+  created: boolean;
+  hadAccess: boolean;
+  emailSent: boolean;
+  tempPassword?: string;
+};
+
+export function httpListAppCollaborators(appId: string) {
+  return httpV2.get<{ items: AppCollaborator[]; total: number }>(`/apps/${encodeURIComponent(appId)}/collaborators`);
+}
+
+export function httpInviteAppCollaborator(
+  appId: string,
+  body: { email: string; role: AppCollaboratorRole; firstName?: string; lastName?: string }
+) {
+  return httpV2.post<AppCollaboratorInvite>(`/apps/${encodeURIComponent(appId)}/collaborators`, body);
+}
+
+export function httpRemoveAppCollaborator(appId: string, userId: string) {
+  return httpV2.delete<{ success: boolean; userId: string }>(
+    `/apps/${encodeURIComponent(appId)}/collaborators/${encodeURIComponent(userId)}`
+  );
+}
+
 export function httpDeleteManyUsers(appId: string, usersIdList: Array<string>) {
   return http.post(`/users/delete-many-with-app-id/${appId}`, { usersIdList });
 }
@@ -807,6 +846,10 @@ export function getBlockedUsers() {
   return http.get('/chats/blocked');
 }
 
+export function httpGetMyChat(chatName: string) {
+  return http.get(`/chats/my/${encodeURIComponent(chatName)}`);
+}
+
 export function unblockUser(xmppUsername: string) {
   return http.delete(`/chats/blocked/${encodeURIComponent(xmppUsername)}`);
 }
@@ -897,6 +940,48 @@ export function httpCreatePrivateChatForUsersV2(
       members: Array<{ _id: string; firstName?: string; lastName?: string; xmppUsername?: string }>;
     };
   }>(`/apps/${encodeURIComponent(appId)}/chats/private`, { members, e2ee });
+}
+
+export interface ModelChatMember {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  description?: string;
+  profileImage?: string;
+  profilePicture?: string;
+  xmppUsername?: string;
+}
+
+export async function httpGetAppChatMembersV2(
+  appId: string,
+  chatName: string
+): Promise<ModelChatMember[]> {
+  const limit = 100;
+  for (let offset = 0; ; offset += limit) {
+    const { data } = await httpV2.get<{
+      items: Array<{ name: string; members?: ModelChatMember[] }>;
+      total: number;
+    }>(`/apps/${encodeURIComponent(appId)}/chats`, {
+      params: { limit, offset, includeMembers: true },
+    });
+    const chat = data.items.find((c) => c.name === chatName);
+    if (chat) return chat.members || [];
+    if (!data.items.length || offset + limit >= data.total) return [];
+  }
+}
+
+export function httpRemoveAppChatMembersV2(
+  appId: string,
+  chatName: string,
+  members: string[]
+) {
+  return httpV2.delete<{
+    ok: boolean;
+    results: string[];
+    details: Array<{ xmppUsername: string; status: string; code?: string }>;
+  }>(`/apps/${encodeURIComponent(appId)}/chats/users-access`, {
+    data: { chatName, members },
+  });
 }
 
 export const sendHSFormData = async (
@@ -1151,6 +1236,17 @@ export function httpTryAgent(idOrAddress: string, text: string, history: AgentTr
     `/agents/${encodeURIComponent(idOrAddress)}/try`,
     { text, history },
   );
+}
+
+export type AgentMyChat = {
+  chatJid: string;
+  chatName: string;
+  created: boolean;
+  agent: { id: string; displayName?: string; avatarUrl?: string };
+};
+
+export function httpOpenMyAgentChat(idOrAddress: string) {
+  return httpV2.post<AgentMyChat>(`/agents/${encodeURIComponent(idOrAddress)}/my-chat`, {});
 }
 
 export function httpInviteAgentToChat(idOrAddress: string, body: { appId?: string; chatId?: string; chatJid?: string }) {

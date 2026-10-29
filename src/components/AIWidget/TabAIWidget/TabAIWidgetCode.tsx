@@ -8,6 +8,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { AiWidgetAppearance, getAppearanceAttributes } from '../../../lib/aiWidgetAppearance';
 import { ModelApp } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
+import { markWidgetCodeCopied } from '../../../utils/agentSetupChecklist';
 import { resolveWidgetUrl } from '../../../utils/widgetUrl';
 
 import { env } from '../../../config/env';
@@ -201,7 +202,13 @@ export const TabAIWidgetCode = ({
           >
             <div className="absolute top-1 right-1 z-10">
               <Tooltip title={copied ? t('aiWidgetCode.copied') : t('aiWidgetCode.copy')}>
-                <IconButton onClick={() => handleCopy(scriptCode)} size="small">
+                <IconButton
+                  onClick={() => {
+                    handleCopy(scriptCode);
+                    if (appId) markWidgetCodeCopied(appId);
+                  }}
+                  size="small"
+                >
                   {copied ? (
                     <CheckIcon
                       fontSize="small"

@@ -49,6 +49,19 @@ export const appSettings1 = {
     'appSettingsAppearance.logoRecommendedSize':
       '(Recommended size: 500px x 500px)',
     'appSettingsAppearance.addLogoButton': 'Add logo',
+    'appSettingsAppearance.sectionLabel': 'Appearance section',
+    'appSettingsAppearance.sectionSignIn': 'Sign-in screen',
+    'appSettingsAppearance.sectionChat': 'Chat',
+    'appSettingsAppearance.previewHeading': 'Preview',
+    'appSettingsAppearance.previewThemeLabel': 'Preview theme',
+    'appSettingsAppearance.chatPreviewNote': 'An approximation of the web chat. Save, then open the chat to see the real thing.',
+    'appSettingsAppearance.helpButtonLabel': 'What is this page?',
+    'appSettingsAppearance.helpTitle': 'About Appearance',
+    'appSettingsAppearance.helpIntro': 'Here you set how your app looks to your users. The page has two parts - switch between them at the top.',
+    'appSettingsAppearance.helpSignInBody': 'The first screen people see: your app name, tagline, brand color and logo. The color is also used for buttons and links. These changes are saved with the Save button at the top of the page.',
+    'appSettingsAppearance.helpChatBody': 'How the web chat looks and behaves: colors, message bubbles, font, which parts are shown (room list, header, media and more) and extra features. This part has its own Save button; open chats pick up the change on their next load. Options your license does not include are shown locked.',
+    'appSettingsAppearance.helpPreviewBody': 'The preview shows a desktop browser and a phone and updates as you edit. Switch between Light and Dark to check both themes. It is an approximation - open your app to see the real thing.',
+    'appSettingsAppearance.helpClose': 'Got it',
 
     // appSettingsApi.* - Api.tsx
     'appSettingsApi.heading':
@@ -137,6 +150,16 @@ export const appSettings1 = {
     'appSettingsChats.chatNameColumn': 'Chat Name',
     'appSettingsChats.createdByColumn': 'Created By',
     'appSettingsChats.botsColumn': 'Bots',
+    'appSettingsChats.membersDialogTitle': 'Members of “{title}”',
+    'appSettingsChats.membersButtonTitle': 'Manage members',
+    'appSettingsChats.membersEmpty': 'There are no members in this chat yet.',
+    'appSettingsChats.membersLoadError': 'Failed to load chat members',
+    'appSettingsChats.membersRejoinNote': 'Pinned chats are joined automatically, so a removed user who signs in again will be added back. Use this to clean up test accounts and guests.',
+    'appSettingsChats.removeMemberButton': 'Remove',
+    'appSettingsChats.removeMemberConfirmButton': 'Confirm',
+    'appSettingsChats.memberRemovedToast': '{name} was removed from the chat',
+    'appSettingsChats.memberRemoveError': 'Failed to remove {name}',
+    'appSettingsChats.unnamedMember': 'Unnamed user',
     'appSettingsChats.defaultBroadcastSenderHeading':
       'Default Broadcast Sender',
     'appSettingsChats.defaultBroadcastSenderHelp':
@@ -300,6 +323,19 @@ export const appSettings1 = {
     'appSettingsAppearance.logoRecommendedSize':
       '(Taille recommandée : 500 x 500 px)',
     'appSettingsAppearance.addLogoButton': 'Ajouter un logo',
+    'appSettingsAppearance.sectionLabel': "Section d'apparence",
+    'appSettingsAppearance.sectionSignIn': 'Écran de connexion',
+    'appSettingsAppearance.sectionChat': 'Chat',
+    'appSettingsAppearance.previewHeading': 'Aperçu',
+    'appSettingsAppearance.previewThemeLabel': "Thème de l'aperçu",
+    'appSettingsAppearance.chatPreviewNote': 'Une approximation du chat web. Enregistrez, puis ouvrez le chat pour voir le rendu réel.',
+    'appSettingsAppearance.helpButtonLabel': 'À quoi sert cette page ?',
+    'appSettingsAppearance.helpTitle': "À propos de l'apparence",
+    'appSettingsAppearance.helpIntro': "Ici, vous définissez l'apparence de votre application pour vos utilisateurs. La page a deux parties - passez de l'une à l'autre en haut.",
+    'appSettingsAppearance.helpSignInBody': "Le premier écran que voient les utilisateurs : nom de l'application, slogan, couleur de marque et logo. La couleur sert aussi aux boutons et aux liens. Ces changements sont enregistrés avec le bouton Enregistrer en haut de la page.",
+    'appSettingsAppearance.helpChatBody': "L'apparence et le comportement du chat web : couleurs, bulles de messages, police, éléments affichés (liste des salons, en-tête, médias, etc.) et fonctionnalités supplémentaires. Cette partie a son propre bouton Enregistrer ; les chats ouverts appliquent le changement à leur prochain chargement. Les options non incluses dans votre licence sont verrouillées.",
+    'appSettingsAppearance.helpPreviewBody': "L'aperçu montre un navigateur de bureau et un téléphone et se met à jour pendant que vous modifiez. Passez de Clair à Sombre pour vérifier les deux thèmes. C'est une approximation - ouvrez votre application pour voir le rendu réel.",
+    'appSettingsAppearance.helpClose': 'Compris',
 
     // appSettingsApi.* - Api.tsx
     'appSettingsApi.heading':
@@ -388,6 +424,16 @@ export const appSettings1 = {
     'appSettingsChats.chatNameColumn': 'Nom de la discussion',
     'appSettingsChats.createdByColumn': 'Créé par',
     'appSettingsChats.botsColumn': 'Bots',
+    'appSettingsChats.membersDialogTitle': 'Membres de « {title} »',
+    'appSettingsChats.membersButtonTitle': 'Gérer les membres',
+    'appSettingsChats.membersEmpty': "Ce chat n'a pas encore de membres.",
+    'appSettingsChats.membersLoadError': 'Impossible de charger les membres du chat',
+    'appSettingsChats.membersRejoinNote': 'Les chats épinglés sont rejoints automatiquement : un utilisateur retiré qui se reconnecte y sera ajouté à nouveau. Utilisez ceci pour nettoyer les comptes de test et les invités.',
+    'appSettingsChats.removeMemberButton': 'Retirer',
+    'appSettingsChats.removeMemberConfirmButton': 'Confirmer',
+    'appSettingsChats.memberRemovedToast': '{name} a été retiré du chat',
+    'appSettingsChats.memberRemoveError': 'Impossible de retirer {name}',
+    'appSettingsChats.unnamedMember': 'Utilisateur sans nom',
     'appSettingsChats.defaultBroadcastSenderHeading':
       'Expéditeur de diffusion par défaut',
     'appSettingsChats.defaultBroadcastSenderHelp':
@@ -569,6 +615,19 @@ export const appSettings1 = {
     'appSettingsAppearance.logoRecommendedSize':
       '(Tamaño recomendado: 500 x 500 px)',
     'appSettingsAppearance.addLogoButton': 'Añadir logotipo',
+    'appSettingsAppearance.sectionLabel': 'Sección de apariencia',
+    'appSettingsAppearance.sectionSignIn': 'Pantalla de inicio de sesión',
+    'appSettingsAppearance.sectionChat': 'Chat',
+    'appSettingsAppearance.previewHeading': 'Vista previa',
+    'appSettingsAppearance.previewThemeLabel': 'Tema de la vista previa',
+    'appSettingsAppearance.chatPreviewNote': 'Una aproximación del chat web. Guarda y abre el chat para ver el resultado real.',
+    'appSettingsAppearance.helpButtonLabel': '¿Para qué sirve esta página?',
+    'appSettingsAppearance.helpTitle': 'Acerca de la apariencia',
+    'appSettingsAppearance.helpIntro': 'Aquí defines cómo ven tu aplicación tus usuarios. La página tiene dos partes - cambia entre ellas arriba.',
+    'appSettingsAppearance.helpSignInBody': 'La primera pantalla que ve la gente: nombre de la aplicación, eslogan, color de marca y logotipo. El color también se usa en botones y enlaces. Estos cambios se guardan con el botón Guardar de la parte superior de la página.',
+    'appSettingsAppearance.helpChatBody': 'Cómo se ve y funciona el chat web: colores, burbujas de mensajes, fuente, qué partes se muestran (lista de salas, encabezado, multimedia y más) y funciones adicionales. Esta parte tiene su propio botón Guardar; los chats abiertos aplican el cambio en su próxima carga. Las opciones que tu licencia no incluye aparecen bloqueadas.',
+    'appSettingsAppearance.helpPreviewBody': 'La vista previa muestra un navegador de escritorio y un teléfono y se actualiza mientras editas. Cambia entre Claro y Oscuro para revisar ambos temas. Es una aproximación - abre tu aplicación para ver el resultado real.',
+    'appSettingsAppearance.helpClose': 'Entendido',
 
     // appSettingsApi.* - Api.tsx
     'appSettingsApi.heading':
@@ -657,6 +716,16 @@ export const appSettings1 = {
     'appSettingsChats.chatNameColumn': 'Nombre del chat',
     'appSettingsChats.createdByColumn': 'Creado por',
     'appSettingsChats.botsColumn': 'Bots',
+    'appSettingsChats.membersDialogTitle': 'Miembros de «{title}»',
+    'appSettingsChats.membersButtonTitle': 'Gestionar miembros',
+    'appSettingsChats.membersEmpty': 'Este chat todavía no tiene miembros.',
+    'appSettingsChats.membersLoadError': 'No se pudieron cargar los miembros del chat',
+    'appSettingsChats.membersRejoinNote': 'Los chats fijados se unen automáticamente: un usuario retirado que vuelva a iniciar sesión se añadirá de nuevo. Úsalo para limpiar cuentas de prueba y visitantes.',
+    'appSettingsChats.removeMemberButton': 'Retirar',
+    'appSettingsChats.removeMemberConfirmButton': 'Confirmar',
+    'appSettingsChats.memberRemovedToast': '{name} fue retirado del chat',
+    'appSettingsChats.memberRemoveError': 'No se pudo retirar a {name}',
+    'appSettingsChats.unnamedMember': 'Usuario sin nombre',
     'appSettingsChats.defaultBroadcastSenderHeading':
       'Remitente predeterminado de difusiones',
     'appSettingsChats.defaultBroadcastSenderHelp':

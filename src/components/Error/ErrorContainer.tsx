@@ -1,5 +1,5 @@
 import { Box, Container, Typography } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from '../../pages/AuthPage/Button';
@@ -11,10 +11,11 @@ interface ErrorContainerProps {
   description: string;
   image: string;
   navigateUrl?: string;
+  children?: ReactNode;
 }
 
 export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
-  const { status, title, description, image, navigateUrl } = props;
+  const { status, title, description, image, navigateUrl, children } = props;
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export const ErrorContainer = (props: ErrorContainerProps): ReactElement => {
         <span className="text-brand-850 dark:text-brand-300 font-bold text-base">{status}</span>
         <span className="py-8 text-4xl md:text-5xl font-medium">{title}</span>
         <Typography className="pb-8">{description}</Typography>
+        {children}
         <CustomButton
           variant="contained"
           startIcon={<IconArrowLeft stroke="#ffffff" />}

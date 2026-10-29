@@ -10,6 +10,7 @@ import {
   sendHSFormData,
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
+import { markAgentsOnboarding } from '../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button.tsx';
@@ -85,6 +86,7 @@ export const FacebookButton = () => {
             const { firstName, lastName, email } = user;
 
             logSignup('facebook', userResult?.data?.user?._id, userResult?.data?.user?.email);
+            markAgentsOnboarding();
 
             const website = `${window?.location?.origin || ''}/facebook`;
             const allowedDomains =

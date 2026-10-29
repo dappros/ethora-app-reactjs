@@ -13,6 +13,13 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // (this dictionary has no ICU/interpolation engine).
 export const miscPages = {
   en: {
+    'error403.appTitle': "You don't have access to this app",
+    'error403.appDescription': 'Only the app owner and the colleagues they invite can open it.',
+    'error403.appStepsTitle': 'To get access, ask the app owner to:',
+    'error403.appStep1': 'Open Apps → this app → Users.',
+    'error403.appStep2': 'Open the Admins tab and click "Invite a colleague" with your email.',
+    'error403.appStep3': 'Pick a role for you (Admin, User manager or Analyst).',
+    'error403.appYourAccount': 'Your account:',
     // --- Error403Page.tsx ---
     'error403.status': '403 error',
     'error403.title': 'Access Forbidden',
@@ -117,6 +124,11 @@ export const miscPages = {
 
     // --- Chat.tsx ---
     'chat.heading': 'Chats',
+    'chat.linkDenied.title': 'This is a private group chat',
+    'chat.linkDenied.description': 'Only members of this chat can open it. Ask one of them to add you.',
+    'chat.linkDenied.back': 'Back to chats',
+    'chat.linkNotFound.title': 'This chat no longer exists',
+    'chat.linkNotFound.description': 'The link may be wrong, or the chat was deleted.',
     'chat.switcherLabel': 'Testing chats in',
     'chat.baseApp': 'Base app',
     'chat.baseAppSuffix': '(base app)',
@@ -142,6 +154,13 @@ export const miscPages = {
     'chat.toastSwitchFailed': 'Failed to switch app: ',
   },
   fr: {
+    'error403.appTitle': "Vous n'avez pas accès à cette application",
+    'error403.appDescription': "Seuls le propriétaire de l'application et les collègues qu'il invite peuvent l'ouvrir.",
+    'error403.appStepsTitle': "Pour obtenir l'accès, demandez au propriétaire de l'application de :",
+    'error403.appStep1': 'Ouvrir Applications → cette application → Utilisateurs.',
+    'error403.appStep2': "Ouvrir l'onglet Administrateurs et cliquer sur « Inviter un collègue » avec votre e-mail.",
+    'error403.appStep3': 'Vous attribuer un rôle (Administrateur, Gestionnaire des utilisateurs ou Analyste).',
+    'error403.appYourAccount': 'Votre compte :',
     // --- Error403Page.tsx ---
     'error403.status': 'Erreur 403',
     'error403.title': 'Accès interdit',
@@ -249,6 +268,11 @@ export const miscPages = {
 
     // --- Chat.tsx ---
     'chat.heading': 'Discussions',
+    'chat.linkDenied.title': 'Cette discussion de groupe est privée',
+    'chat.linkDenied.description': 'Seuls ses membres peuvent l\'ouvrir. Demandez à l\'un d\'eux de vous ajouter.',
+    'chat.linkDenied.back': 'Retour aux discussions',
+    'chat.linkNotFound.title': 'Cette discussion n\'existe plus',
+    'chat.linkNotFound.description': 'Le lien est peut-être erroné, ou la discussion a été supprimée.',
     'chat.switcherLabel': 'Test des discussions dans',
     'chat.baseApp': 'Application de base',
     'chat.baseAppSuffix': '(application de base)',
@@ -276,6 +300,13 @@ export const miscPages = {
     'chat.toastSwitchFailed': "Échec du changement d'application : ",
   },
   es: {
+    'error403.appTitle': 'No tienes acceso a esta app',
+    'error403.appDescription': 'Solo el propietario de la app y los compañeros que invita pueden abrirla.',
+    'error403.appStepsTitle': 'Para obtener acceso, pide al propietario de la app que:',
+    'error403.appStep1': 'Abra Apps → esta app → Usuarios.',
+    'error403.appStep2': 'Abra la pestaña Administradores y pulse «Invitar a un compañero» con tu email.',
+    'error403.appStep3': 'Te asigne un rol (Administrador, Gestor de usuarios o Analista).',
+    'error403.appYourAccount': 'Tu cuenta:',
     // --- Error403Page.tsx ---
     'error403.status': 'Error 403',
     'error403.title': 'Acceso prohibido',
@@ -381,6 +412,11 @@ export const miscPages = {
 
     // --- Chat.tsx ---
     'chat.heading': 'Chats',
+    'chat.linkDenied.title': 'Este es un chat de grupo privado',
+    'chat.linkDenied.description': 'Solo sus miembros pueden abrirlo. Pide a uno de ellos que te añada.',
+    'chat.linkDenied.back': 'Volver a los chats',
+    'chat.linkNotFound.title': 'Este chat ya no existe',
+    'chat.linkNotFound.description': 'Puede que el enlace sea incorrecto o que el chat se haya eliminado.',
     'chat.switcherLabel': 'Probando chats en',
     'chat.baseApp': 'Aplicación base',
     'chat.baseAppSuffix': '(aplicación base)',

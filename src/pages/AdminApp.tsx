@@ -8,9 +8,12 @@ import {
 } from 'react-router-dom';
 import { actionSwitchChatApp } from '../actions';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
+import { isForbidden } from '../utils/accessError';
+import { Error403Page } from './ErrorPage/Error403Page';
 import { Error404Page } from './ErrorPage/Error404Page';
 
 export default function AdminApp() {
@@ -21,7 +24,7 @@ export default function AdminApp() {
   const doSetApp = useAppStore((s) => s.doSetApp);
   const app = apps.find((app) => app._id === appId);
   const navigate = useNavigate();
-  const [isValidApp, setIsValidApp] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<'notFound' | 'forbidden' | null>(null);
 
   const goBack = useCallback(() => {
     const backUrl = location.state?.from;
@@ -33,10 +36,11 @@ export default function AdminApp() {
 
     const getApp = async () => {
       try {
+        setLoadError(null);
         const response = await httpGetApp(appId);
         doSetApp(response.data.result);
       } catch (e) {
-        setIsValidApp(false);
+        setLoadError(isForbidden(e) ? 'forbidden' : 'notFound');
         console.error(e);
       }
     };
@@ -44,7 +48,11 @@ export default function AdminApp() {
     getApp();
   }, [appId, doSetApp]);
 
-  if (!isValidApp) {
+  if (loadError === 'forbidden') {
+    return <Error403Page forApp navigateUrl="/app/admin/apps" />;
+  }
+
+  if (loadError) {
     return (
       <Error404Page navigateUrl={location.state?.from || '/app/admin/apps/'} />
     );
@@ -69,39 +77,42 @@ export default function AdminApp() {
             from the switcher. The onClick eagerly switches chatAppId so
             the destination renders the right context immediately rather
             than after a hydration round-trip on Chat.tsx mount. */}
-        <div className="grid justify-center content-center grid-cols-4 w-auto md:w-full md:max-w-[520px] md:mr-[32px] px-4">
-          <NavLink
-            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
-            to={`/app/admin/apps/${appId}/users`}
-          >
-            {t('adminApp.tabUsers')}
-          </NavLink>
-          <NavLink
-            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
-            to={`/app/admin/apps/${appId}/settings`}
-          >
-            {t('adminApp.tabSettings')}
-          </NavLink>
-          <NavLink
-            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
-            to={`/app/admin/apps/${appId}/statistics`}
-          >
-            {t('adminApp.tabStatistics')}
-          </NavLink>
-          <NavLink
-            className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
-            to="/app/chat"
-            onClick={() => {
-              if (!appId) return;
-              // Fire-and-forget: the destination page will retry on
-              // mount if this fails. We intentionally don't await so
-              // the navigation feels instant; any error toast surfaces
-              // from Chat.tsx's hydration effect.
-              actionSwitchChatApp(appId).catch(() => {});
-            }}
-          >
-            {t('adminApp.tabChats')}
-          </NavLink>
+        <div className="flex items-center md:justify-end md:flex-1 md:mr-[32px]">
+          <ThemeToggle className="hidden md:flex" />
+          <div className="grid justify-center content-center grid-cols-4 w-full md:max-w-[520px] px-4">
+            <NavLink
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
+              to={`/app/admin/apps/${appId}/users`}
+            >
+              {t('adminApp.tabUsers')}
+            </NavLink>
+            <NavLink
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
+              to={`/app/admin/apps/${appId}/settings`}
+            >
+              {t('adminApp.tabSettings')}
+            </NavLink>
+            <NavLink
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
+              to={`/app/admin/apps/${appId}/statistics`}
+            >
+              {t('adminApp.tabStatistics')}
+            </NavLink>
+            <NavLink
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
+              to="/app/chat"
+              onClick={() => {
+                if (!appId) return;
+                // Fire-and-forget: the destination page will retry on
+                // mount if this fails. We intentionally don't await so
+                // the navigation feels instant; any error toast surfaces
+                // from Chat.tsx's hydration effect.
+                actionSwitchChatApp(appId).catch(() => {});
+              }}
+            >
+              {t('adminApp.tabChats')}
+            </NavLink>
+          </div>
         </div>
       </div>
       {/* overflow-hidden */}

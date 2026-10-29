@@ -6,6 +6,17 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // itself is the chat component's.
 export const callJoin = {
   en: {
+    'agentChatJoin.loading': 'Opening your chat...',
+    'agentChatJoin.notFound.title': 'Agent not found',
+    'agentChatJoin.notFound.description': 'This link points to an agent that does not exist. Check the link with whoever sent it.',
+    'agentChatJoin.notAvailable.title': 'This agent is not available here',
+    'agentChatJoin.notAvailable.description': 'The agent behind this link is not available in this app. Ask whoever sent the link to check it.',
+    'agentChatJoin.off.title': 'This agent is switched off',
+    'agentChatJoin.off.description': 'The agent is not answering in this app right now. Try again later.',
+    'agentChatJoin.error.title': 'Could not open the chat',
+    'agentChatJoin.error.description': 'Something went wrong while opening your chat with the agent.',
+    'agentChatJoin.retry': 'Try again',
+    'agentChatJoin.goToChats': 'Go to chats',
     'callJoin.loading': 'Opening your call...',
     'callJoin.notFound.title': 'Call not found',
     'callJoin.notFound.description':
@@ -23,6 +34,17 @@ export const callJoin = {
     'callJoin.goToChats': 'Go to chats',
   },
   fr: {
+    'agentChatJoin.loading': 'Ouverture de votre chat...',
+    'agentChatJoin.notFound.title': 'Agent introuvable',
+    'agentChatJoin.notFound.description': "Ce lien mène à un agent qui n'existe pas. Vérifiez le lien auprès de la personne qui vous l'a envoyé.",
+    'agentChatJoin.notAvailable.title': "Cet agent n'est pas disponible ici",
+    'agentChatJoin.notAvailable.description': "L'agent de ce lien n'est pas disponible dans cette application. Demandez à la personne qui vous a envoyé le lien de le vérifier.",
+    'agentChatJoin.off.title': 'Cet agent est désactivé',
+    'agentChatJoin.off.description': "L'agent ne répond pas dans cette application pour le moment. Réessayez plus tard.",
+    'agentChatJoin.error.title': "Impossible d'ouvrir le chat",
+    'agentChatJoin.error.description': "Un problème est survenu lors de l'ouverture de votre chat avec l'agent.",
+    'agentChatJoin.retry': 'Réessayer',
+    'agentChatJoin.goToChats': 'Aller aux chats',
     'callJoin.loading': 'Ouverture de votre appel...',
     'callJoin.notFound.title': 'Appel introuvable',
     'callJoin.notFound.description':
@@ -40,6 +62,17 @@ export const callJoin = {
     'callJoin.goToChats': 'Aller aux chats',
   },
   es: {
+    'agentChatJoin.loading': 'Abriendo tu chat...',
+    'agentChatJoin.notFound.title': 'Agente no encontrado',
+    'agentChatJoin.notFound.description': 'Este enlace lleva a un agente que no existe. Comprueba el enlace con quien te lo envió.',
+    'agentChatJoin.notAvailable.title': 'Este agente no está disponible aquí',
+    'agentChatJoin.notAvailable.description': 'El agente de este enlace no está disponible en esta app. Pide a quien te envió el enlace que lo revise.',
+    'agentChatJoin.off.title': 'Este agente está desactivado',
+    'agentChatJoin.off.description': 'El agente no responde en esta app ahora mismo. Inténtalo más tarde.',
+    'agentChatJoin.error.title': 'No se pudo abrir el chat',
+    'agentChatJoin.error.description': 'Algo salió mal al abrir tu chat con el agente.',
+    'agentChatJoin.retry': 'Reintentar',
+    'agentChatJoin.goToChats': 'Ir a los chats',
     'callJoin.loading': 'Abriendo tu llamada...',
     'callJoin.notFound.title': 'Llamada no encontrada',
     'callJoin.notFound.description':

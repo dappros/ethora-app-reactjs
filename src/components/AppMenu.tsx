@@ -11,10 +11,11 @@ import { IconBilling } from './Icons/IconBilling';
 import { IconChat } from './Icons/IconChat';
 import { IconHelp } from './Icons/IconHelp';
 import { IconLicense } from './Icons/IconLicense';
-import { IconSettings } from './Icons/IconSettings';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
+import { IconSettings } from './Icons/IconSettings';
 import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
+import { ThemeToggle } from './ThemeToggle';
 import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
@@ -63,12 +64,11 @@ export function AppMenu() {
 
   return (
     <div className="bg-white md:fixed p-2 flex justify-between items-center h-full md:h-[calc(100vh-32px)] md:rounded-2xl md:self-start md:flex-col">
-      <button
-        onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}
-        className="md:hidden"
-      >
-        <IconMenuBurger />
-      </button>
+      <div className="flex-1 flex md:hidden">
+        <button onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}>
+          <IconMenuBurger />
+        </button>
+      </div>
       <div className="font-varela text-[24px] leading-none md:hidden block">
         {getPageTitle}
       </div>
@@ -124,14 +124,16 @@ export function AppMenu() {
             </NavLink>
           </div>
         )}
-        {isBaseApp && (currentUser?.isSuperAdmin?.read || currentUser?.isSuperAdmin?.write) && (
-          <div className={ITEM_WRAP_CLASS}>
-            <NavLink to="/app/admin/server" className={ITEM_CLASS}>
-              <IconSettings />
-              <div className={LABEL_CLASS}>{t('nav.serverSettings')}</div>
-            </NavLink>
-          </div>
-        )}
+        {isBaseApp &&
+          (currentUser?.isSuperAdmin?.read ||
+            currentUser?.isSuperAdmin?.write) && (
+            <div className={ITEM_WRAP_CLASS}>
+              <NavLink to="/app/admin/server" className={ITEM_CLASS}>
+                <IconSettings />
+                <div className={LABEL_CLASS}>{t('nav.serverSettings')}</div>
+              </NavLink>
+            </div>
+          )}
         {isBaseApp && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/help" className={ITEM_CLASS}>
@@ -141,36 +143,39 @@ export function AppMenu() {
           </div>
         )}
       </div>
-      <div className="md:divide-y md:divide-gray-100">
-        <div className={ITEM_WRAP_CLASS}>
-          <NavLink
-            to="/app/profile"
-            className="flex hover:bg-gray-100 group flex-col items-center justify-center md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
-          >
-            <ProfilePageUserIcon
-              firstName={currentUser.firstName}
-              lastName={currentUser.lastName}
-              profileImage={currentUser.profileImage}
-              width="40px"
-              height="40px"
-              className="border border-brand-500 rounded-full"
-              small={true}
-            />
-            <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-xs max-w-full truncate">
-              {t('nav.profile')}
-            </div>
-          </NavLink>
-        </div>
-        <div className={cn(ITEM_WRAP_CLASS, 'hidden md:block')}>
-          <NavLink
-            to="/app/account"
-            className="hidden group hover:bg-gray-100 flex-col items-center justify-center md:flex md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
-          >
-            <IconAccount />
-            <div className="hidden md:block text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500">
-              {t('nav.account')}
-            </div>
-          </NavLink>
+      <div className="flex-1 flex items-center justify-end gap-2 md:flex-none md:block">
+        <ThemeToggle size="sm" className="md:hidden" />
+        <div className="md:divide-y md:divide-gray-100">
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink
+              to="/app/profile"
+              className="flex hover:bg-gray-100 group flex-col items-center justify-center md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
+            >
+              <ProfilePageUserIcon
+                firstName={currentUser.firstName}
+                lastName={currentUser.lastName}
+                profileImage={currentUser.profileImage}
+                width="40px"
+                height="40px"
+                className="border border-brand-500 rounded-full"
+                small={true}
+              />
+              <div className="hidden md:block group-aria-[current=page]:text-brand-500 text-center font-sans text-xs max-w-full truncate">
+                {t('nav.profile')}
+              </div>
+            </NavLink>
+          </div>
+          <div className={cn(ITEM_WRAP_CLASS, 'hidden md:block')}>
+            <NavLink
+              to="/app/account"
+              className="hidden group hover:bg-gray-100 flex-col items-center justify-center md:flex md:w-[80px] md:h-[64px] md:px-1 rounded-xl aria-[current=page]:bg-brand-150"
+            >
+              <IconAccount />
+              <div className="hidden md:block text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500">
+                {t('nav.account')}
+              </div>
+            </NavLink>
+          </div>
         </div>
       </div>
       {isMobileMenuVisible && (

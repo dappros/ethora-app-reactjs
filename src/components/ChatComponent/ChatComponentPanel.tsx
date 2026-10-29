@@ -6,7 +6,7 @@ import { ColorField } from '../AIWidget/appearance/ColorField';
 import { Card, Segmented, SelectField, SwitchRow, TextField } from '../AIWidget/appearance/Fields';
 import { getSwatches } from '../AIWidget/appearance/options';
 import { useWidth } from '../AIWidget/appearance/useWidth';
-import { ChatPreview } from './ChatPreview';
+import { ChatScreensPreview } from './ChatScreensPreview';
 
 // Editor for the chat component's look and options, same layout as the AI
 // Widget's "Customize appearance": tabs on the left, a live preview on the
@@ -22,6 +22,7 @@ interface Props {
   saving: boolean;
   features: string[] | undefined;
   brandColor?: string | null;
+  previewUrl?: string;
 }
 
 type TabId = 'style' | 'layout' | 'features';
@@ -78,7 +79,7 @@ function LockedHint() {
   );
 }
 
-export function ChatComponentPanel({ config: c, onChange, onSave, onReset, isDirty, saving, features, brandColor }: Props) {
+export function ChatComponentPanel({ config: c, onChange, onSave, onReset, isDirty, saving, features, brandColor, previewUrl }: Props) {
   const [tab, setTab] = useState<TabId>('style');
   const [rootRef, rootWidth] = useWidth<HTMLDivElement>();
   const twoColumns = rootWidth >= TWO_COLUMN_MIN_WIDTH;
@@ -200,7 +201,7 @@ export function ChatComponentPanel({ config: c, onChange, onSave, onReset, isDir
         </div>
       </div>
 
-      <div className={cn('grid gap-6 items-start', twoColumns ? 'grid-cols-[minmax(0,1fr)_minmax(340px,440px)]' : 'grid-cols-1')}>
+      <div className={cn('grid gap-6 items-start', twoColumns ? 'grid-cols-[minmax(300px,416px)_minmax(0,1fr)]' : 'grid-cols-1')}>
         <div className="flex flex-col gap-4 min-w-0">
           <Segmented<TabId>
             ariaLabel="Chat component"
@@ -217,7 +218,7 @@ export function ChatComponentPanel({ config: c, onChange, onSave, onReset, isDir
           {tab === 'features' && featuresTab}
         </div>
         <div className={cn(twoColumns && 'sticky top-4')}>
-          <ChatPreview config={c} features={features} />
+          <ChatScreensPreview config={c} features={features} brandColor={brandColor} url={previewUrl} />
         </div>
       </div>
     </div>

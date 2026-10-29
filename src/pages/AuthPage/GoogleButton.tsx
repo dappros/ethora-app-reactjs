@@ -11,6 +11,7 @@ import {
 } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
 import { getUserCredsFromGoogle, IUser } from '../../utils/firebase';
+import { markAgentsOnboarding } from '../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import { MfaPending, mfaPendingFrom } from '../../utils/finishLogin';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -103,6 +104,7 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
             const { firstName, lastName, email } = userResult.data.user;
 
             logSignup('google', userResult?.data?.user?._id, userResult?.data?.user?.email);
+            markAgentsOnboarding();
 
             const website = `${window?.location?.origin || ''}/google`;
             const allowedDomains =

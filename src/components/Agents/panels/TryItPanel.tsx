@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AgentTryTurn, httpTryAgent } from '../../../http';
+import { markAgentTried } from '../../../utils/agentSetupChecklist';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent } from '../../../models';
 
@@ -35,6 +36,7 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
     setBusy(true);
     try {
       const r = await httpTryAgent(agent.id, question, history);
+      markAgentTried(agent.id);
       setTurns((prev) => [
         ...prev,
         { role: 'assistant', content: r.data.reply || '', sources: r.data.sources || [], ragDocsUsed: r.data.ragDocsUsed || 0 },

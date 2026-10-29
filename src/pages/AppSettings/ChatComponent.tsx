@@ -10,6 +10,7 @@ import { announceChatComponentConfigSaved, noteChatComponentConfigVersion } from
 interface Props {
   appId: string;
   brandColor?: string | null;
+  previewUrl?: string;
   // Inside another page's card: no own scroll area.
   inline?: boolean;
 }
@@ -18,7 +19,7 @@ interface Props {
 // chat. Nothing saved means the chat keeps its defaults. A save reaches the
 // App's open chats on its own (the server pushes it); this page also tells
 // the other tabs of this browser, so the admin's own open chat updates at once.
-export function ChatComponent({ appId, brandColor, inline = false }: Props) {
+export function ChatComponent({ appId, brandColor, previewUrl, inline = false }: Props) {
   const { status, refresh } = useLicenseStatus();
   const [config, setConfig] = useState<ChatConfigRecord>({});
   const [saved, setSaved] = useState<ChatConfigRecord>({});
@@ -93,6 +94,7 @@ export function ChatComponent({ appId, brandColor, inline = false }: Props) {
         saving={saving}
         features={status?.features}
         brandColor={brandColor}
+        previewUrl={previewUrl}
       />
     </div>
   );

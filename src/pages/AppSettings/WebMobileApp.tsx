@@ -82,28 +82,33 @@ export function WebMobileApp({
           {t('appSettingsWebMobileApp.selfHostInfo')}
         </span>
       </div>
-      <div className="flex w-full max-w-[459px] relative mb-4 items-center">
-        <input
-          value={domainName}
-          onChange={(e) => setDomainName(e.target.value)}
-          placeholder={t('appSettingsWebMobileApp.appNamePlaceholder')}
-          type="text"
-          className=" p-2 w-full outline-none max-w-[308px] z-10 rounded-xl bg-gray-100 text-gray-500"
-          name=""
-          id="domain-input"
-        />
-        {/* <button onClick={onExternalClick} className='cursor-pointer'> */}
-        <button className="text-black tex-[16px] inline-block py-2 px-[24px] ml-[-20px] bg-brand-300 dark:bg-brand-250 rounded-xl">
-          .{hostedAppsRootDomain}
-        </button>
-        {/* </button> */}
-        <button
-          onClick={onExternalClick}
-          className="ml-4 w-[40px] h-[40px] p-2 flex items-center justify-center rounded-xl hover:bg-brand-hover"
-        >
-          <IconExternalLink />
-        </button>
-        <CopyButtonText textToCopy={`${domainName}.${hostedAppsRootDomain}`} />
+      <div className="flex w-full max-w-[600px] mb-4 items-center gap-2">
+        <div className="flex flex-1 min-w-0">
+          <input
+            value={domainName}
+            onChange={(e) => setDomainName(e.target.value)}
+            placeholder={t('appSettingsWebMobileApp.appNamePlaceholder')}
+            type="text"
+            className="p-2 flex-1 min-w-[80px] w-full outline-none z-10 rounded-xl bg-gray-100 text-gray-500"
+            name=""
+            id="domain-input"
+          />
+          <span
+            title={`.${hostedAppsRootDomain}`}
+            className="block min-w-0 max-w-[65%] truncate whitespace-nowrap text-black text-[14px] sm:text-[16px] leading-6 py-2 pl-[28px] pr-3 sm:pr-[20px] ml-[-20px] bg-brand-300 dark:bg-brand-250 rounded-xl"
+          >
+            .{hostedAppsRootDomain}
+          </span>
+        </div>
+        <div className="flex shrink-0 items-center">
+          <button
+            onClick={onExternalClick}
+            className="w-[40px] h-[40px] p-2 flex items-center justify-center rounded-xl hover:bg-brand-hover"
+          >
+            <IconExternalLink />
+          </button>
+          <CopyButtonText textToCopy={`${domainName}.${hostedAppsRootDomain}`} />
+        </div>
       </div>
       <div className="flex flex-col items-start xl:flex-row xl:items-center mb-8">
         <div className="flex w-full mb-4 xl:mb-0 max-w-[377px] relative  mr-[32px]">

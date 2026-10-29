@@ -31,6 +31,7 @@ import {
   SoulMdPanel,
   WebIndexPanel,
 } from '../components/Agents/panels/AgentPanels';
+import { AgentSetupChecklist } from '../components/Agents/AgentSetupChecklist';
 import { TryItPanel } from '../components/Agents/panels/TryItPanel';
 import { AgentBotInstanceRow, WebsiteWidgetPanel } from '../components/Agents/panels/WebsiteWidgetPanel';
 import { AgentAiUsage, httpGetAgentAiUsage, httpListAgentBotInstances } from '../http';
@@ -202,9 +203,7 @@ export default function AgentSettings() {
   if (!agent) return <div className="p-4 text-gray-500">{t('agentSettings.agentNotFound')}</div>;
 
   return (
-    // The read-only notice is a third row; without its own `auto` track it took
-    // the stretching one and filled a third of the page.
-    <div className={classNames('h-full rounded-2xl bg-white p-4 grid gap-y-4 overflow-hidden', readOnly ? 'grid-rows-[auto,auto,1fr]' : 'grid-rows-[auto,1fr]')}>
+    <div className="h-full rounded-2xl bg-white p-4 flex flex-col gap-y-4 overflow-hidden">
       <Header
         agent={agent}
         defaultBotInstance={defaultBotInstance}
@@ -225,8 +224,18 @@ export default function AgentSettings() {
         </div>
       )}
 
+      {isOwned && (
+        <AgentSetupChecklist
+          agent={agent}
+          instances={instances}
+          scopedAppId={scopedAppId}
+          onOpenTab={(tab) => handleTabChange(TABS.indexOf(tab))}
+          refreshKey={selectedIndex}
+        />
+      )}
+
       <TabGroup
-        className="grid h-full overflow-hidden grid-rows-[46px,1fr] gap-y-4 lg:grid-rows-1 lg:grid-cols-[260px,1fr] px-4"
+        className="grid flex-1 min-h-0 overflow-hidden grid-rows-[46px,1fr] gap-y-4 lg:grid-rows-1 lg:grid-cols-[260px,1fr] px-4"
         selectedIndex={selectedIndex}
         onChange={handleTabChange}
       >
