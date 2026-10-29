@@ -12,6 +12,7 @@ import { SubmitModal } from '../../components/modal/SubmitModal';
 import { toast } from 'react-toastify';
 import { IconMinus } from '../../components/Icons/IconMinus';
 import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
+import { ChatMembersModal } from '../../components/modal/ChatMembersModal';
 import { httpListBotInstances, httpLeaveChatAgentBotInstance } from '../../http';
 import { actionListAgents } from '../../actions';
 import { phCapture } from '../../posthog';
@@ -75,6 +76,7 @@ export function Chats({
   const [showDelete, setShowDelete] = useState(false);
   // Phase 1 (Agents): modal for inviting an Agent into a specific chat row.
   const [inviteForChat, setInviteForChat] = useState<ModelAppDefaulRooom | null>(null);
+  const [membersForChat, setMembersForChat] = useState<ModelAppDefaulRooom | null>(null);
   // Phase 1 (Agents): bot-instances + agents loaded for this app, used to render the
   // "bots in this room" inline list per chat row + the Remove buttons.
   // We fetch once per app and re-fetch after invite/leave so the row reflects reality.
@@ -498,7 +500,14 @@ export function Chats({
                         </Field>
                       </td>
                       <td className="px-4 py-[20px] font-sans font-normal text-sm  whitespace-nowrap">
-                        {el.title}
+                        <button
+                          type="button"
+                          onClick={() => setMembersForChat(el)}
+                          title={t('appSettingsChats.membersButtonTitle')}
+                          className="text-left text-brand-500 hover:underline"
+                        >
+                          {el.title}
+                        </button>
                       </td>
                       <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                         {el.creator}
@@ -835,6 +844,14 @@ export function Chats({
       {/* Phase 1 (Agents): Add-Bot-to-chat modal. Lists this user's Agents and accepts a
           paste-in agent address (so an unlisted public agent can be invited by someone
           who only knows the address). */}
+      {membersForChat && (
+        <ChatMembersModal
+          appId={appId}
+          chatJid={membersForChat.jid}
+          chatTitle={membersForChat.title}
+          onClose={() => setMembersForChat(null)}
+        />
+      )}
       {inviteForChat && (
         <InviteAgentToChatModal
           appId={appId}

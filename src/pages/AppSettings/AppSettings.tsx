@@ -12,6 +12,7 @@ import {
 } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
+import { accessErrorMessage } from '../../utils/accessError';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
@@ -22,10 +23,9 @@ import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIWidget } from './AIWidget';
 import { Api } from './Api';
-import { Appearance } from './Appearance';
+import { APPEARANCE_SECTION_PARAM, Appearance } from './Appearance';
 import { Chats } from './Chats';
 import { DeleteSetting } from './DeleteSetting';
-import { ChatComponent } from './ChatComponent';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
@@ -55,7 +55,6 @@ const tabs = [
   'Sign-on options',
   'Home screen',
   'Menu',
-  'Chat component',
   'Chats',
   // Phase 1 follow-up: AI Bots tab moved out of per-App settings into a top-level
   // /app/admin/agents area (Agents are tenant-scoped, not app-scoped). The "Active Agent"
@@ -65,9 +64,12 @@ const tabs = [
   LIFECYCLE_TAB,
 ];
 
+// Old `?tab=` value of the chat component settings, redirected below.
+const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
+
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
-  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu', 'Chat component'],
+  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
   System: ['Chats', 'Visibility & Privacy', 'API', LIFECYCLE_TAB],
 };
 
@@ -83,7 +85,6 @@ const TAB_LABEL_KEYS: Record<string, string> = {
   'Sign-on options': 'appSettings.tab.signOnOptions',
   'Home screen': 'appSettings.tab.homeScreen',
   Menu: 'appSettings.tab.menu',
-  'Chat component': 'appSettings.tab.chatComponent',
   Chats: 'appSettings.tab.chats',
   'Visibility & Privacy': 'appSettings.tab.visibilityPrivacy',
   API: 'appSettings.tab.api',
@@ -113,6 +114,16 @@ export default function AppSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tabFromUrl = searchParams.get('tab');
+
+  // The Chat component tab now lives in Appearance > Chat; keep old links working.
+  useEffect(() => {
+    if (tabFromUrl === LEGACY_CHAT_COMPONENT_TAB) {
+      setSearchParams(
+        { tab: 'Appearance', [APPEARANCE_SECTION_PARAM]: 'chat' },
+        { replace: true }
+      );
+    }
+  }, [tabFromUrl, setSearchParams]);
 
   const initialTabIndex = tabs.includes(tabFromUrl ?? '')
     ? tabs.indexOf(tabFromUrl!)
@@ -493,7 +504,7 @@ export default function AppSettings() {
           aiBot,
         });
         setIsModified(false);
-      });
+      }).catch((e) => toast.error(accessErrorMessage(e, t)));
     }
   };
 
@@ -757,11 +768,13 @@ export default function AppSettings() {
 
           <TabPanel
             key="Appearance"
-            // The preview column sizes itself now (it scales to the space it
-            // gets), so the second row is auto instead of a hard 368px.
-            className="grid grid-rows-[auto,_auto] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full min-w-0 overflow-y-auto"
+            // Appearance lays out its own sections (sign-in screen / chat).
+            className="lg:ml-4 h-full min-w-0 overflow-y-auto"
           >
             <Appearance
+              appId={appId as string}
+              brandColor={app.primaryColor}
+              previewUrl={`${domainName || app.domainName || 'app'}.${env.VITE_HOSTED_APPS_ROOT_DOMAIN || env.VITE_ROOT_DOMAIN || 'ethora.com'}`}
               displayName={displayName}
               setDisplayName={setDisplayName}
               tagline={tagline}
@@ -812,13 +825,6 @@ export default function AppSettings() {
               availableMenuItems={availableMenuItems}
               setAvailableMenuItems={setAvailableMenuItems}
             />
-          </TabPanel>
-
-          <TabPanel
-            key="Chat component"
-            className="grid grid-rows-1 lg:ml-4 h-full "
-          >
-            <ChatComponent appId={appId as string} brandColor={app.primaryColor} />
           </TabPanel>
 
           <TabPanel

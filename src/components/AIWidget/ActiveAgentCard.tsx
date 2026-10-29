@@ -2,6 +2,7 @@ import { FormControlLabel, Switch } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useActiveWidgetAgent } from '../../hooks/useActiveWidgetAgent';
+import { useAgentKnowledgeCount } from '../../hooks/useAgentKnowledgeCount';
 import { useAppStore } from '../../store/useAppStore';
 import { ModelApp } from '../../models';
 import { ActiveAgentSelector } from './ActiveAgentSelector';
@@ -17,6 +18,9 @@ interface Props {
   // when no agent is bound.
   legacyKnowledgeMb?: string | null;
 }
+
+const WARNING_CLASS =
+  'mt-3 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-sm text-yellow-900 dark:border-yellow-800/60 dark:bg-yellow-900/30 dark:text-yellow-200';
 
 function formatMb(bytes?: number | null): string | null {
   if (!bytes || bytes <= 0) return null;
@@ -42,6 +46,7 @@ export const ActiveAgentCard: React.FC<Props> = ({
   const ownsAgent = !!agent && !!currentUserId && String(agent.ownerId) === String(currentUserId);
   const knowledge = agent ? formatMb(agent.totalSiteSourceSize) : legacyKnowledgeMb ? `${legacyKnowledgeMb} MB` : null;
   const settingsUrl = agent ? `/app/admin/agents/${agent.id}/settings` : null;
+  const knowledgeCount = useAgentKnowledgeCount(agent?.id);
 
   return (
     <section className="border border-gray-200 rounded-xl bg-white p-4" data-testid="ai-agent-card">
@@ -72,7 +77,6 @@ export const ActiveAgentCard: React.FC<Props> = ({
         <div className="flex-1 min-w-[14rem]">
           <ActiveAgentSelector appId={appId} app={app} bare disabled={disabled} label={t('aiWidgetAgentCard.pickLabel')} />
           {agent?.bio && <div className="text-xs text-gray-500 mt-1 line-clamp-2">{agent.bio}</div>}
-          {!agent && <div className="text-xs text-gray-500 mt-1">{t('aiWidgetAgentCard.noAgent')}</div>}
         </div>
         {settingsUrl && (
           <Link to={settingsUrl} className="text-brand-500 hover:underline text-sm shrink-0">
@@ -80,6 +84,18 @@ export const ActiveAgentCard: React.FC<Props> = ({
           </Link>
         )}
       </div>
+
+      {!agent && <div className={WARNING_CLASS} role="status">{t('aiWidgetAgentCard.noAgent')}</div>}
+      {agent && knowledgeCount === 0 && (
+        <div className={WARNING_CLASS} role="status">
+          {t('aiWidgetAgentCard.noKnowledgeWarning')}{' '}
+          {ownsAgent && (
+            <Link to={`${settingsUrl}?tab=Web+Index`} className="font-semibold underline">
+              {t('aiWidgetAgentCard.addKnowledge')}
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 pt-3 border-t border-gray-100 text-sm font-sans">
         <FormControlLabel

@@ -14,6 +14,7 @@ import CustomInput from '../../components/input/Input';
 import { logLogin, logSignup } from '../../hooks/withTracking';
 import { loginSignature, registerSignature } from '../../http';
 import { useAppStore } from '../../store/useAppStore';
+import { isAgentsOnboarding, markAgentsOnboarding } from '../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import { MfaPending, mfaPendingFrom } from '../../utils/finishLogin';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -69,8 +70,8 @@ export const MetamaskButton = ({ utm, onMfaRequired }: MetamaskButtonProps) => {
 
     setEthoraUserCookie('accregred');
 
-    if (config?.afterLoginPage) {
-      navigateToUserPage(navigate, config.afterLoginPage as string);
+    if (config?.afterLoginPage || isAgentsOnboarding()) {
+      navigateToUserPage(navigate, config?.afterLoginPage as string);
     }
   };
 
@@ -138,6 +139,7 @@ export const MetamaskButton = ({ utm, onMfaRequired }: MetamaskButtonProps) => {
       );
       toast.success(t('authMetamaskButton.registerSuccess'));
       logSignup('metamask', res.data?.user?._id);
+      markAgentsOnboarding();
       setIsModalOpen(false);
 
       await actionAfterMetamask(res.data);

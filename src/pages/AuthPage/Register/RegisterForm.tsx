@@ -16,6 +16,7 @@ import {
 } from '../../../http';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
+import { markAgentsOnboarding } from '../../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../../utils/navigateToUserPage';
 import CustomButton from '../Button';
 import { GoogleButton } from '../GoogleButton';
@@ -218,9 +219,8 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           await actionAfterLogin(data);
 
           logSignup('email', data.user._id, email);
-          if (config?.afterLoginPage) {
-            navigateToUserPage(navigate, config.afterLoginPage as string);
-          }
+          markAgentsOnboarding();
+          navigateToUserPage(navigate, config?.afterLoginPage as string);
         })
         .catch((error) => {
           toast.error(error.response.data.error);

@@ -1,35 +1,11 @@
 import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 
 // Static UI text for a grab-bag of smaller/standalone components: the
-// Appearance (branding) preview mockups, the Billing box/table/modals, the
-// local statistics line chart, the feedback widget, and the app-wide error
+// Billing box/table/modals, the local statistics line chart, the feedback widget, and the app-wide error
 // surfaces. Namespaced per source file (see each `*.ComponentName.key`
 // prefix below) so this file can grow without key collisions.
 export const miscComponents = {
   en: {
-    // AppearanceIphone.tsx
-    'appearanceIphone.signUp': 'Sign Up',
-    'appearanceIphone.placeholderFirstName': 'First Name',
-    'appearanceIphone.placeholderLastName': 'Last Name',
-    'appearanceIphone.placeholderEmail': 'Email',
-    'appearanceIphone.agreementPrefix':
-      'By clicking the "Sign Up" button, you agree to our',
-    'appearanceIphone.termsAndConditions': 'Terms & Conditions.',
-    'appearanceIphone.or': 'or',
-    'appearanceIphone.continueWithGoogle': 'Continue with Google',
-    'appearanceIphone.alreadyHaveAccount': 'Already have an account?',
-    'appearanceIphone.signIn': 'Sign In',
-
-    // AppearanceRightImage.tsx
-    'appearanceRightImage.signUp': 'Sign Up',
-    'appearanceRightImage.joinCommunityTagline': '{name}: join our community',
-    'appearanceRightImage.agreementPrefix':
-      'By clicking the "Sign Up" button, you agree to our',
-    'appearanceRightImage.termsAndConditions': 'Terms & Conditions.',
-    'appearanceRightImage.continueWithGoogle': 'Continue with Google',
-    'appearanceRightImage.alreadyHaveAccount': 'Already have an account?',
-    'appearanceRightImage.signIn': 'Sign In',
-
     // BillingHistoryTable.tsx
     'billingHistoryTable.date': 'Date',
     'billingHistoryTable.amount': 'Amount',
@@ -122,30 +98,6 @@ export const miscComponents = {
     'routerErrorBoundary.unknownError': 'Unknown error',
   },
   fr: {
-    // AppearanceIphone.tsx
-    'appearanceIphone.signUp': "S'inscrire",
-    'appearanceIphone.placeholderFirstName': 'Prénom',
-    'appearanceIphone.placeholderLastName': 'Nom',
-    'appearanceIphone.placeholderEmail': 'E-mail',
-    'appearanceIphone.agreementPrefix':
-      "En cliquant sur le bouton « S'inscrire », vous acceptez nos",
-    'appearanceIphone.termsAndConditions': 'Conditions générales.',
-    'appearanceIphone.or': 'ou',
-    'appearanceIphone.continueWithGoogle': 'Continuer avec Google',
-    'appearanceIphone.alreadyHaveAccount': 'Vous avez déjà un compte ?',
-    'appearanceIphone.signIn': 'Se connecter',
-
-    // AppearanceRightImage.tsx
-    'appearanceRightImage.signUp': "S'inscrire",
-    'appearanceRightImage.joinCommunityTagline':
-      '{name} : rejoignez notre communauté',
-    'appearanceRightImage.agreementPrefix':
-      "En cliquant sur le bouton « S'inscrire », vous acceptez nos",
-    'appearanceRightImage.termsAndConditions': 'Conditions générales.',
-    'appearanceRightImage.continueWithGoogle': 'Continuer avec Google',
-    'appearanceRightImage.alreadyHaveAccount': 'Vous avez déjà un compte ?',
-    'appearanceRightImage.signIn': 'Se connecter',
-
     // BillingHistoryTable.tsx
     'billingHistoryTable.date': 'Date',
     'billingHistoryTable.amount': 'Montant',
@@ -243,30 +195,6 @@ export const miscComponents = {
     'routerErrorBoundary.unknownError': 'Erreur inconnue',
   },
   es: {
-    // AppearanceIphone.tsx
-    'appearanceIphone.signUp': 'Registrarse',
-    'appearanceIphone.placeholderFirstName': 'Nombre',
-    'appearanceIphone.placeholderLastName': 'Apellido',
-    'appearanceIphone.placeholderEmail': 'Correo electrónico',
-    'appearanceIphone.agreementPrefix':
-      'Al hacer clic en el botón "Registrarse", aceptas nuestros',
-    'appearanceIphone.termsAndConditions': 'Términos y condiciones.',
-    'appearanceIphone.or': 'o',
-    'appearanceIphone.continueWithGoogle': 'Continuar con Google',
-    'appearanceIphone.alreadyHaveAccount': '¿Ya tienes una cuenta?',
-    'appearanceIphone.signIn': 'Iniciar sesión',
-
-    // AppearanceRightImage.tsx
-    'appearanceRightImage.signUp': 'Registrarse',
-    'appearanceRightImage.joinCommunityTagline':
-      '{name}: únete a nuestra comunidad',
-    'appearanceRightImage.agreementPrefix':
-      'Al hacer clic en el botón "Registrarse", aceptas nuestros',
-    'appearanceRightImage.termsAndConditions': 'Términos y condiciones.',
-    'appearanceRightImage.continueWithGoogle': 'Continuar con Google',
-    'appearanceRightImage.alreadyHaveAccount': '¿Ya tienes una cuenta?',
-    'appearanceRightImage.signIn': 'Iniciar sesión',
-
     // BillingHistoryTable.tsx
     'billingHistoryTable.date': 'Fecha',
     'billingHistoryTable.amount': 'Importe',

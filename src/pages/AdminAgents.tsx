@@ -14,11 +14,15 @@
 // Both "My" and "Public" are shown by default; the viewer can toggle either
 // off. The superadmin "Private" cohort is gated and off by default.
 
+import { Dialog, DialogPanel } from '@headlessui/react';
+import { MenuItem } from '@mui/material';
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { IconAdd } from '../components/Icons/IconAdd';
+import { IconClose } from '../components/Icons/IconClose';
+import CustomInput from '../components/input/Input';
 import {
   actionCloneAgent,
   actionLoadOwnedApps,
@@ -27,11 +31,13 @@ import {
   actionListAgents,
 } from '../actions';
 import { httpExportAgent, httpImportAgent, saveBlobAs } from '../http';
+import { AgentsTutorialModal } from '../components/modal/AgentsTutorialModal';
 import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { useTranslation } from '../i18n/useTranslation';
 import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../lib/agentCategories';
 import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
+import { clearAgentsOnboarding, isAgentsOnboarding } from '../utils/agentsOnboarding';
 
 function fmtDate(iso?: string | null) {
   if (!iso) return '';
@@ -70,6 +76,7 @@ export default function AdminAgents() {
 
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(isAgentsOnboarding);
   const [showImport, setShowImport] = useState(false);
   const [filter, setFilter] = useState('');
   const [category, setCategory] = useState<AgentCategory | ''>('');
@@ -349,6 +356,21 @@ export default function AdminAgents() {
         />
       )}
 
+      {showTutorial && (
+        <AgentsTutorialModal
+          show={showTutorial}
+          onClose={() => {
+            clearAgentsOnboarding();
+            setShowTutorial(false);
+          }}
+          onNewAgent={() => {
+            clearAgentsOnboarding();
+            setShowTutorial(false);
+            setShowCreate(true);
+          }}
+        />
+      )}
+
       {showCreate && (
         <CreateAgentModal
           onCancel={() => setShowCreate(false)}
@@ -568,6 +590,9 @@ const CloneAgentModal: React.FC<{ agent: ModelAgent; onClose: () => void }> = ({
   );
 };
 
+const SELECT_IN_DIALOG = { MenuProps: { disablePortal: true } };
+const MULTILINE_SX = { '& .MuiInputBase-multiline': { padding: 0 } };
+
 const CreateAgentModal: React.FC<{
   onCancel: () => void;
   onCreated: (agent: ModelAgent, openTab?: string) => void;
@@ -634,100 +659,118 @@ const CreateAgentModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" role="dialog" aria-label={t('adminAgents.createModalTitle')}>
-      <div className="bg-white rounded-xl p-5 w-[560px] max-w-[92%] max-h-[90vh] overflow-y-auto space-y-3">
-        <h3 className="text-lg font-semibold">{t('adminAgents.createModalTitle')}</h3>
+    <Dialog
+      open
+      onClose={() => {
+        if (!busy) onCancel();
+      }}
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      aria-label={t('adminAgents.createModalTitle')}
+    >
+      <DialogPanel className="relative bg-white rounded-xl w-[560px] max-w-[92%] max-h-[90vh] flex flex-col overflow-hidden">
+        <button
+          type="button"
+          className="absolute top-[15px] right-[15px] z-10"
+          onClick={onCancel}
+          disabled={busy}
+          aria-label={t('adminAgents.cancel')}
+        >
+          <IconClose />
+        </button>
+        <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3">
+          <h3 className="text-lg font-semibold pr-8">{t('adminAgents.createModalTitle')}</h3>
 
-        <fieldset className="space-y-1">
-          <legend className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.startFromLabel')}</legend>
-          <div className="max-h-56 overflow-y-auto border rounded-lg divide-y">
-            <label className="flex items-start gap-2 p-2 cursor-pointer hover:bg-gray-50">
-              <input type="radio" name="start-from" className="mt-1" checked={!template} onChange={() => pickTemplate('')} />
-              <span>
-                <span className="block text-sm font-semibold">{t('adminAgents.startBlank')}</span>
-                <span className="block text-xs text-gray-500">{t('adminAgents.startBlankDesc')}</span>
-              </span>
-            </label>
-            {templates.map((a) => (
-              <label key={a.id} className="flex items-start gap-2 p-2 cursor-pointer hover:bg-gray-50">
-                <input type="radio" name="start-from" className="mt-1" checked={templateId === a.id} onChange={() => pickTemplate(a.id)} />
-                {a.avatarUrl ? (
-                  <img src={a.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px]">{(a.displayName || 'AI').slice(0, 2).toUpperCase()}</span>
-                )}
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold truncate">{a.displayName}</span>
-                  <span className="flex flex-wrap gap-1">
-                    {(a.categories || []).filter(isAgentCategory).map((c) => (
-                      <span key={c} className="text-[10px] px-1.5 rounded-full bg-gray-100 text-gray-700">{t(AGENT_CATEGORY_LABEL_KEYS[c])}</span>
-                    ))}
-                  </span>
-                  {a.bio && <span className="block text-xs text-gray-500 line-clamp-2">{a.bio}</span>}
+          <fieldset className="space-y-1">
+            <legend className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.startFromLabel')}</legend>
+            <div className="max-h-56 overflow-y-auto border rounded-lg divide-y">
+              <label className="flex items-start gap-2 p-2 cursor-pointer hover:bg-gray-50">
+                <input type="radio" name="start-from" className="mt-1" checked={!template} onChange={() => pickTemplate('')} />
+                <span>
+                  <span className="block text-sm font-semibold">{t('adminAgents.startBlank')}</span>
+                  <span className="block text-xs text-gray-500">{t('adminAgents.startBlankDesc')}</span>
                 </span>
               </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <label className="block">
-          <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.displayNameLabel')}</span>
-          <input className="border rounded px-2 py-1 w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-        </label>
-
-        {ownedApps.length > 0 && (
-          <label className="block">
-            <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.homeAppLabel')}</span>
-            <select className="border rounded px-2 py-1 w-full" value={ownerAppId} onChange={(e) => setOwnerAppId(e.target.value)}>
-              {ownedApps.map((a) => (
-                <option key={a._id} value={a._id}>{a.displayName}</option>
+              {templates.map((a) => (
+                <label key={a.id} className="flex items-start gap-2 p-2 cursor-pointer hover:bg-gray-50">
+                  <input type="radio" name="start-from" className="mt-1" checked={templateId === a.id} onChange={() => pickTemplate(a.id)} />
+                  {a.avatarUrl ? (
+                    <img src={a.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px]">{(a.displayName || 'AI').slice(0, 2).toUpperCase()}</span>
+                  )}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold truncate">{a.displayName}</span>
+                    <span className="flex flex-wrap gap-1">
+                      {(a.categories || []).filter(isAgentCategory).map((c) => (
+                        <span key={c} className="text-[10px] px-1.5 rounded-full bg-gray-100 text-gray-700">{t(AGENT_CATEGORY_LABEL_KEYS[c])}</span>
+                      ))}
+                    </span>
+                    {a.bio && <span className="block text-xs text-gray-500 line-clamp-2">{a.bio}</span>}
+                  </span>
+                </label>
               ))}
-            </select>
-          </label>
-        )}
+            </div>
+          </fieldset>
 
-        {template ? (
-          <div className="space-y-2">
-            <p className="text-xs text-gray-600">{t('adminAgents.templateHint')}</p>
-            {(template.totalSiteSourceSize || 0) > 0 && (
-              <label className="flex items-start gap-2 text-sm">
-                <input type="checkbox" className="mt-1" checked={includeKnowledge} onChange={(e) => setIncludeKnowledge(e.target.checked)} />
-                <span>{t('adminAgents.cloneIncludeKnowledge').replace('{size}', fmtBytes(template.totalSiteSourceSize))}</span>
+          <label className="block">
+            <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.displayNameLabel')}</span>
+            <CustomInput fullWidth value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          </label>
+
+          {ownedApps.length > 0 && (
+            <div>
+              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.homeAppLabel')}</span>
+              <CustomInput select fullWidth value={ownerAppId} onChange={(e) => setOwnerAppId(e.target.value)} SelectProps={SELECT_IN_DIALOG}>
+                {ownedApps.map((a) => (
+                  <MenuItem key={a._id} value={a._id}>{a.displayName}</MenuItem>
+                ))}
+              </CustomInput>
+            </div>
+          )}
+
+          {template ? (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-600">{t('adminAgents.templateHint')}</p>
+              {(template.totalSiteSourceSize || 0) > 0 && (
+                <label className="flex items-start gap-2 text-sm">
+                  <input type="checkbox" className="mt-1" checked={includeKnowledge} onChange={(e) => setIncludeKnowledge(e.target.checked)} />
+                  <span>{t('adminAgents.cloneIncludeKnowledge').replace('{size}', fmtBytes(template.totalSiteSourceSize))}</span>
+                </label>
+              )}
+            </div>
+          ) : (
+            <>
+              <label className="block">
+                <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.bioLabel')}</span>
+                <CustomInput fullWidth multiline minRows={2} sx={MULTILINE_SX} value={bio} onChange={(e) => setBio(e.target.value)} />
               </label>
-            )}
-          </div>
-        ) : (
-          <>
-            <label className="block">
-              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.bioLabel')}</span>
-              <textarea className="border rounded px-2 py-1 w-full" rows={2} value={bio} onChange={(e) => setBio(e.target.value)} />
-            </label>
-            <label className="block">
-              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.initialPromptLabel')}</span>
-              <textarea className="border rounded px-2 py-1 w-full font-mono text-sm" rows={5} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
-            </label>
-            <label className="block">
-              <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.visibilityLabel')}</span>
-              <select className="border rounded px-2 py-1" value={visibility} onChange={(e) => setVisibility(e.target.value as 'private' | 'unlisted' | 'public')}>
-                <option value="private">{t('adminAgents.visibilityPrivate')}</option>
-                <option value="unlisted">{t('adminAgents.visibilityUnlistedInviteByAddress')}</option>
-                <option value="public">{t('adminAgents.visibilityPublic')}</option>
-              </select>
-            </label>
-            {/* Public is platform-wide visible. Operators who skim through "+ New
-                Agent" defaults sometimes pick Public for an internal-only persona
-                without realising other tenants will see it in their AI Agents
-                list and be able to clone it. Make the trade-off explicit at
-                create time so this is a deliberate choice. */}
-            {visibility === 'public' && (
-              <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug dark:border-yellow-800/60 dark:bg-yellow-900/30 dark:text-yellow-200">
-                <strong>{t('adminAgents.publicVisibilityWarningTitle')}</strong>{' '}
-                {t('adminAgents.publicVisibilityWarningBody')}
+              <label className="block">
+                <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.initialPromptLabel')}</span>
+                <CustomInput fullWidth multiline minRows={5} sx={MULTILINE_SX} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+              </label>
+              <div>
+                <span className="block text-xs font-semibold text-gray-600 mb-1">{t('adminAgents.visibilityLabel')}</span>
+                <CustomInput select fullWidth value={visibility} onChange={(e) => setVisibility(e.target.value as 'private' | 'unlisted' | 'public')} SelectProps={SELECT_IN_DIALOG}>
+                  <MenuItem value="private">{t('adminAgents.visibilityPrivate')}</MenuItem>
+                  <MenuItem value="unlisted">{t('adminAgents.visibilityUnlistedInviteByAddress')}</MenuItem>
+                  <MenuItem value="public">{t('adminAgents.visibilityPublic')}</MenuItem>
+                </CustomInput>
               </div>
-            )}
-          </>
-        )}
-        <div className="flex justify-end gap-2 pt-2">
+              {/* Public is platform-wide visible. Operators who skim through "+ New
+                  Agent" defaults sometimes pick Public for an internal-only persona
+                  without realising other tenants will see it in their AI Agents
+                  list and be able to clone it. Make the trade-off explicit at
+                  create time so this is a deliberate choice. */}
+              {visibility === 'public' && (
+                <div className="rounded-md border border-yellow-300 bg-yellow-50 p-2 text-xs text-yellow-900 leading-snug dark:border-yellow-800/60 dark:bg-yellow-900/30 dark:text-yellow-200">
+                  <strong>{t('adminAgents.publicVisibilityWarningTitle')}</strong>{' '}
+                  {t('adminAgents.publicVisibilityWarningBody')}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div className="shrink-0 flex justify-end gap-2 px-5 py-3 border-t">
           <button onClick={onCancel} disabled={busy} className="border rounded px-4 py-2 hover:bg-gray-100">{t('adminAgents.cancel')}</button>
           <button
             disabled={busy || !displayName.trim()}
@@ -737,7 +780,7 @@ const CreateAgentModal: React.FC<{
             {busy ? t('adminAgents.creating') : t('adminAgents.create')}
           </button>
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 };

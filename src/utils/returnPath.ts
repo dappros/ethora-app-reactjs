@@ -17,9 +17,15 @@ const MAX_AGE_MS = 60 * 60 * 1000;
 // url-safe random id (22+ characters).
 const CALL_PATH = /^\/call\/[A-Za-z0-9_-]{22,128}\/?(\?[^#\s]*)?$/;
 
+const AGENT_PATH = /^\/agent\/0x[0-9a-fA-F]{40}\/?(\?[^#\s]*)?$/;
+
 /** True when `path` is one this module is willing to park and return to. */
 export function isReturnablePath(path: unknown): path is string {
-  return typeof path === 'string' && CALL_PATH.test(path);
+  return typeof path === 'string' && (CALL_PATH.test(path) || AGENT_PATH.test(path));
+}
+
+export function signedOutEntryPath(path: string): '/register' | '/login' {
+  return AGENT_PATH.test(path) ? '/register' : '/login';
 }
 
 export function rememberReturnPath(path: string, now: number = Date.now()): boolean {

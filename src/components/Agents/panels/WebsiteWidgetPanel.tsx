@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import CopyButtonText from '../../UI/Buttons/CopyButtonText';
+import { env } from '../../../config/env';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent, ModelBotInstance } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
@@ -18,6 +20,11 @@ export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentB
   const ownedApps = useAppStore((s) => s.ownedApps);
   const ownedIds = new Set((ownedApps || []).map((a) => String(a._id)));
   const rows = instances.filter((bi) => bi.isAppWidgetBot && ownedIds.has(String(bi.appId)));
+  const hostedIds = new Set(instances.map((bi) => String(bi.appId)));
+  const openToLink = agent.visibility === 'public' || agent.visibility === 'unlisted';
+  const linkApps = (ownedApps || []).filter((a) => openToLink || hostedIds.has(String(a._id)));
+  const hostedRoot = env.VITE_HOSTED_APPS_ROOT_DOMAIN || env.VITE_ROOT_DOMAIN || 'ethora.com';
+  const chatLink = (domainName: string) => `https://${domainName}.${hostedRoot}/agent/${agent.address}`;
 
   return (
     <div className="space-y-4 max-w-2xl">
@@ -50,6 +57,30 @@ export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentB
           {t('agentSettings.websiteWidgetEmpty').replace('{name}', agent.displayName || '')}
         </div>
       )}
+      <div className="pt-2">
+        <h3 className="text-lg font-semibold mb-1">{t('agentSettings.chatLinkHeading')}</h3>
+        <p className="text-sm text-gray-600 mb-3">{t('agentSettings.chatLinkIntro')}</p>
+        {agent.address && linkApps.length ? (
+          <ul className="divide-y divide-gray-200 rounded-xl border border-gray-200" data-testid="agent-chat-links">
+            {linkApps.map((a) => {
+              const url = chatLink(a.domainName);
+              return (
+                <li key={a._id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{a.displayName}</div>
+                    <div className="text-xs text-gray-500 break-all">{url}</div>
+                  </div>
+                  <CopyButtonText textToCopy={url} />
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="p-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
+            {t('agentSettings.chatLinkEmpty')}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

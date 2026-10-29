@@ -35,3 +35,6 @@ tsconfig.app.tsbuildinfo
 # Written by scripts/copy-widget.mjs (prebuild) from the pinned
 # @ethora/ai-chat-widget. Never edited by hand, never committed.
 public/widget/
+
+# Local task notes, never committed.
+.tasks/

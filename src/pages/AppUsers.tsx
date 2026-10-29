@@ -47,7 +47,10 @@ import { IconArrowDown } from '../components/Icons/IconArrowDown';
 import { AclModal } from '../components/modal/AclModal';
 import { PlatformAccessModal } from '../components/modal/PlatformAccessModal';
 import { IconSettings } from '../components/Icons/IconSettings';
+import { InviteColleagueModal } from '../components/modal/InviteColleagueModal';
+import { AppCollaboratorsPanel } from '../components/Users/AppCollaboratorsPanel';
 import { NewUserModal } from '../components/modal/NewUserModal';
+import { accessErrorMessage } from '../utils/accessError';
 import { apiError } from '../utils/apiError';
 import { downloadCsv } from '../utils/csv';
 import { SubmitModal } from '../components/modal/SubmitModal';
@@ -75,6 +78,8 @@ export default function AppUsers() {
   const [items, setItems] = useState<Array<ModelAppUser>>([]);
   const [rowsSelected, setRowsSelected] = useState(items.map(() => false));
   const [showNewUserModal, setShowNewUserModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [collaboratorsKey, setCollaboratorsKey] = useState(0);
   const [itemsPerTable, setItemsPerTable] = useState(10);
   const [pageCount, setPageCount] = useState(0);
   const [total, setTotal] = useState(0);
@@ -234,7 +239,7 @@ export default function AppUsers() {
           setPageCount(Math.ceil(total / itemsPerTable));
           setEditAcl(null);
         });
-      });
+      }).catch((e) => toast.error(accessErrorMessage(e, t)));
     }
   };
 
@@ -397,7 +402,7 @@ export default function AppUsers() {
       setCreatePrivateChatE2ee(false);
       refreshAndClearSelection();
     } catch (e: unknown) {
-      toast.error(`${t('appUsers.createPrivateChatFailedToast')} ${apiError(e).message}`);
+      toast.error(`${t('appUsers.createPrivateChatFailedToast')} ${accessErrorMessage(e, t)}`);
     } finally {
       setCreatePrivateChatBusy(false);
     }
@@ -420,7 +425,7 @@ export default function AppUsers() {
       refreshAndClearSelection();
       loadAppTags();
     } catch (e: unknown) {
-      toast.error(`${t('appUsers.tagsFailedPrefix')} ${apiError(e).message}`);
+      toast.error(`${t('appUsers.tagsFailedPrefix')} ${accessErrorMessage(e, t)}`);
     } finally {
       setLoading(false);
     }
@@ -455,7 +460,7 @@ export default function AppUsers() {
       refreshAndClearSelection();
       loadAppTags();
     } catch (e: unknown) {
-      toast.error(`${t('appUsers.userUpdateFailedPrefix')} ${apiError(e).message}`);
+      toast.error(`${t('appUsers.userUpdateFailedPrefix')} ${accessErrorMessage(e, t)}`);
     } finally {
       setEditBusy(false);
     }
@@ -507,6 +512,7 @@ export default function AppUsers() {
           toast(t('appUsers.userCreatedToast'));
         });
       })
+      .catch((e) => toast.error(accessErrorMessage(e, t)))
       .finally(() => setLoading(false));
   };
 
@@ -548,7 +554,7 @@ export default function AppUsers() {
       toast(t('appUsers.mfaResetToast').replace('{count}', String(cleared)));
       refreshAndClearSelection();
     } catch (e: unknown) {
-      toast.error(`${t('appUsers.mfaResetFailedPrefix')} ${apiError(e).message}`);
+      toast.error(`${t('appUsers.mfaResetFailedPrefix')} ${accessErrorMessage(e, t)}`);
     } finally {
       setResetMfaBusy(false);
     }
@@ -621,7 +627,7 @@ export default function AppUsers() {
       refreshAndClearSelection();
       toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.archivedSuccessSuffix')}`);
     }).catch((e: any) => {
-      toast.error(`${t('appUsers.archiveFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('appUsers.archiveFailedPrefix')} ${accessErrorMessage(e, t)}`);
     });
   };
 
@@ -635,7 +641,7 @@ export default function AppUsers() {
       refreshAndClearSelection();
       toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.deletedPermanentlySuffix')}`);
     }).catch((e: any) => {
-      toast.error(`${t('appUsers.hardDeleteFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('appUsers.hardDeleteFailedPrefix')} ${accessErrorMessage(e, t)}`);
     });
   };
 
@@ -647,7 +653,7 @@ export default function AppUsers() {
       toast.success(t('appUsers.userRestoredToast'));
       refreshAndClearSelection();
     } catch (e: any) {
-      toast.error(`${t('appUsers.restoreFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+      toast.error(`${t('appUsers.restoreFailedPrefix')} ${accessErrorMessage(e, t)}`);
     }
   };
 
@@ -841,7 +847,7 @@ export default function AppUsers() {
                     toast(`${ids.length > 1 ? t('appUsers.usersCapWord') : t('appUsers.userCapWord')} ${t('appUsers.restoredSuccessSuffix')}`);
                     refreshAndClearSelection();
                   } catch (e: any) {
-                    toast.error(`${t('appUsers.restoreFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+                    toast.error(`${t('appUsers.restoreFailedPrefix')} ${accessErrorMessage(e, t)}`);
                   }
                 }}
               >
@@ -964,6 +970,12 @@ export default function AppUsers() {
           <div className="flex items-center justify-end gap-4">
             <CsvButton onClick={getCsvFile} />
             <button
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4 whitespace-nowrap"
+            >
+              {t('appUsers.inviteColleague')}
+            </button>
+            <button
               onClick={() => setShowNewUserModal(true)}
               className="flex hover:bg-brand-darker items-center justify-center sm:w-[184px] p-2 h-[40px] w-[40px] bg-brand-500 rounded-xl text-white text-sm font-varela"
             >
@@ -979,6 +991,9 @@ export default function AppUsers() {
         </div>
       )}
       <div className={visitorsTab ? 'hidden' : 'overflow-hidden'}>
+        {accessTab === 'admin' && lifecycleTab === 'active' && appId && (
+          <AppCollaboratorsPanel appId={appId} onInvite={() => setShowInviteModal(true)} refreshKey={collaboratorsKey} />
+        )}
         {!items.length && (
           <div className="bg-brand-150 p-4 text-sm font-sans rounded-xl mb-4">
             {t('appUsers.emptyState')}
@@ -1384,6 +1399,17 @@ export default function AppUsers() {
           onClose={() => setEditAcl(null)}
           userLabel={editAclUser ? `${editAclUser.firstName || ''} ${editAclUser.lastName || ''}`.trim() || editAclUser.email : undefined}
           appLabel={currentApp?.displayName}
+        />
+      )}
+      {showInviteModal && appId && (
+        <InviteColleagueModal
+          appId={appId}
+          appName={currentApp?.displayName}
+          onClose={() => setShowInviteModal(false)}
+          onInvited={() => {
+            setCollaboratorsKey((k) => k + 1);
+            fetchUsers();
+          }}
         />
       )}
       {showNewUserModal && (

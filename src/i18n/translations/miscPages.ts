@@ -13,6 +13,13 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // (this dictionary has no ICU/interpolation engine).
 export const miscPages = {
   en: {
+    'error403.appTitle': "You don't have access to this app",
+    'error403.appDescription': 'Only the app owner and the colleagues they invite can open it.',
+    'error403.appStepsTitle': 'To get access, ask the app owner to:',
+    'error403.appStep1': 'Open Apps → this app → Users.',
+    'error403.appStep2': 'Open the Admins tab and click "Invite a colleague" with your email.',
+    'error403.appStep3': 'Pick a role for you (Admin, User manager or Analyst).',
+    'error403.appYourAccount': 'Your account:',
     // --- Error403Page.tsx ---
     'error403.status': '403 error',
     'error403.title': 'Access Forbidden',
@@ -142,6 +149,13 @@ export const miscPages = {
     'chat.toastSwitchFailed': 'Failed to switch app: ',
   },
   fr: {
+    'error403.appTitle': "Vous n'avez pas accès à cette application",
+    'error403.appDescription': "Seuls le propriétaire de l'application et les collègues qu'il invite peuvent l'ouvrir.",
+    'error403.appStepsTitle': "Pour obtenir l'accès, demandez au propriétaire de l'application de :",
+    'error403.appStep1': 'Ouvrir Applications → cette application → Utilisateurs.',
+    'error403.appStep2': "Ouvrir l'onglet Administrateurs et cliquer sur « Inviter un collègue » avec votre e-mail.",
+    'error403.appStep3': 'Vous attribuer un rôle (Administrateur, Gestionnaire des utilisateurs ou Analyste).',
+    'error403.appYourAccount': 'Votre compte :',
     // --- Error403Page.tsx ---
     'error403.status': 'Erreur 403',
     'error403.title': 'Accès interdit',
@@ -276,6 +290,13 @@ export const miscPages = {
     'chat.toastSwitchFailed': "Échec du changement d'application : ",
   },
   es: {
+    'error403.appTitle': 'No tienes acceso a esta app',
+    'error403.appDescription': 'Solo el propietario de la app y los compañeros que invita pueden abrirla.',
+    'error403.appStepsTitle': 'Para obtener acceso, pide al propietario de la app que:',
+    'error403.appStep1': 'Abra Apps → esta app → Usuarios.',
+    'error403.appStep2': 'Abra la pestaña Administradores y pulse «Invitar a un compañero» con tu email.',
+    'error403.appStep3': 'Te asigne un rol (Administrador, Gestor de usuarios o Analista).',
+    'error403.appYourAccount': 'Tu cuenta:',
     // --- Error403Page.tsx ---
     'error403.status': 'Error 403',
     'error403.title': 'Acceso prohibido',

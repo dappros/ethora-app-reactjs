@@ -1,5 +1,10 @@
 import { NavigateFunction } from 'react-router-dom';
-import { defaultLandingPath } from './appHost';
+import {
+  AGENTS_ONBOARDING_PATH,
+  clearAgentsOnboarding,
+  isAgentsOnboarding,
+} from './agentsOnboarding';
+import { defaultLandingPath, isBaseAppHost } from './appHost';
 import { consumeReturnPath } from './returnPath';
 
 export function navigateToUserPage(
@@ -15,6 +20,13 @@ export function navigateToUserPage(
   const returnPath = consumeReturnPath();
   if (returnPath) {
     return navigate(returnPath, { replace: true });
+  }
+
+  if (isAgentsOnboarding()) {
+    if (isBaseAppHost()) {
+      return navigate(AGENTS_ONBOARDING_PATH, { replace: true });
+    }
+    clearAgentsOnboarding();
   }
 
   switch (page) {

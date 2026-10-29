@@ -4,7 +4,7 @@ import { actionAfterLogin } from '../actions.ts';
 import { httpGetOneUser } from '../http.ts';
 import { isTransientRefreshFailure } from '../authRefresh.ts';
 import { defaultLandingPath } from '../utils/appHost.ts';
-import { rememberReturnPath } from '../utils/returnPath.ts';
+import { rememberReturnPath, signedOutEntryPath } from '../utils/returnPath.ts';
 
 const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup'];
 
@@ -25,14 +25,13 @@ export const useTrackUrl = () => {
       if (publicPath) {
         return;
       }
-      // A scheduled-call join link (/call/<slug>) opened signed out: park it
-      // so the login sends the user back here (see utils/returnPath.ts).
       rememberReturnPath(location.pathname + location.search);
+      const entry = signedOutEntryPath(location.pathname);
       // Guard against re-pushing /login onto itself: each push creates a new
       // history entry and a fresh location object, re-rendering the whole
       // route tree for nothing.
-      if (location.pathname !== '/login') {
-        navigate(`/login${location.search}`, { replace: true });
+      if (location.pathname !== entry) {
+        navigate(`${entry}${location.search}`, { replace: true });
       }
       return;
     }
