@@ -5,8 +5,7 @@ import { httpGetMyChat } from '../http';
 
 const LINK_PARAMS = ['chatId', 'qrChatId'];
 const PARKED_CHAT_KEY = '@ethora/chat-component-qrChatId';
-const RECHECK_DELAYS_MS = [1000, 2000, 3000, 4000];
-const COMPONENT_SYNC_WINDOW_MS = 9000;
+const RECHECK_DELAYS_MS = [1000, 2000, 3000, 4000, 5000];
 const ROOM_ACCESS_TIMEOUT_MS = 3000;
 
 export type ChatLinkState = 'none' | 'checking' | 'open' | 'denied' | 'notFound';
@@ -48,7 +47,6 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function useChatLinkJoin(chatName: string | null) {
   const [state, setState] = useState<ChatLinkState>(chatName ? 'checking' : 'none');
-  const [remountKey, setRemountKey] = useState(0);
   const { client } = useOptionalXmppClient();
   const clientRef = useRef(client);
   clientRef.current = client;
@@ -61,43 +59,31 @@ export function useChatLinkJoin(chatName: string | null) {
     let cancelled = false;
     setState('checking');
     const roomJID = env.VITE_XMPP_SERVICE ? `${chatName}@${env.VITE_XMPP_SERVICE}` : '';
-    let access: RoomAccess = 'unknown';
 
-    const probeAccess = async (current: RoomAccess): Promise<RoomAccess> => {
+    const probeAccess = async (): Promise<RoomAccess> => {
       const c = clientRef.current;
-      if (current !== 'unknown' || !roomJID || !c?.getRoomAccessStanza || c.status !== 'online') return current;
+      if (!roomJID || !c?.getRoomAccessStanza || c.status !== 'online') return 'unknown';
       return c.getRoomAccessStanza(roomJID, ROOM_ACCESS_TIMEOUT_MS).catch(() => 'unknown' as const);
     };
 
     (async () => {
-      const first = await isMember(chatName);
-      if (cancelled) return;
-      if (first !== false) {
-        setState('open');
-        return;
-      }
-      const startedAt = Date.now();
       let inconclusive = false;
-      access = await probeAccess(access);
-      for (const delay of RECHECK_DELAYS_MS) {
-        if (cancelled) return;
-        if (access === 'notFound') return setState('notFound');
-        if (access === 'membersOnly') return setState('denied');
-        await wait(delay);
+      for (const delay of [0, ...RECHECK_DELAYS_MS]) {
+        if (delay) await wait(delay);
         if (cancelled) return;
         const member = await isMember(chatName);
         if (cancelled) return;
         if (member) {
-          if (Date.now() - startedAt > COMPONENT_SYNC_WINDOW_MS) setRemountKey((n) => n + 1);
           setState('open');
           return;
         }
         if (member === null) inconclusive = true;
-        access = await probeAccess(access);
       }
+      if (inconclusive) return setState('open');
+      const access = await probeAccess();
       if (cancelled) return;
       if (access === 'notFound') return setState('notFound');
-      setState(inconclusive || access === 'open' ? 'open' : 'denied');
+      setState(access === 'membersOnly' ? 'denied' : 'open');
     })();
 
     return () => {
@@ -105,5 +91,5 @@ export function useChatLinkJoin(chatName: string | null) {
     };
   }, [chatName]);
 
-  return { state, remountKey };
+  return { state };
 }

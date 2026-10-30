@@ -14,12 +14,13 @@ import { IconMinus } from '../../components/Icons/IconMinus';
 import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
 import { ChatMembersModal } from '../../components/modal/ChatMembersModal';
 import { httpListBotInstances, httpLeaveChatAgentBotInstance } from '../../http';
-import { actionListAgents } from '../../actions';
+import { actionListAgents, actionUpdateAgent } from '../../actions';
 import { phCapture } from '../../posthog';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { env } from '../../config/env';
 import { useLicenseStatus } from '../../hooks/useLicenseStatus';
+import { apiError } from '../../utils/apiError';
 import { ModelAgent, ModelBotInstance } from '../../models';
 
 interface Props {
@@ -903,6 +904,7 @@ const RoomBotsCell: React.FC<{
             title={`${label}${ag?.address ? ' · ' + ag.address : ''} · ${t('appSettingsChats.botInstanceLabel')} ${bi.id}`}
           >
             <span className="truncate max-w-[140px]">{label}</span>
+            {ag && <MentionOnlyToggle agent={ag} label={label} />}
             <button
               onClick={async (e) => {
                 e.stopPropagation();
@@ -940,5 +942,46 @@ const RoomBotsCell: React.FC<{
         {t('appSettingsChats.addBotButton')}
       </button>
     </div>
+  );
+};
+
+const MentionOnlyToggle: React.FC<{ agent: ModelAgent; label: string }> = ({ agent, label }) => {
+  const { t } = useTranslation();
+  const [saving, setSaving] = useState(false);
+  const mentionOnly = agent.responseMode === 'mentioned';
+
+  const toggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const confirmKey = mentionOnly ? 'appSettingsChats.mentionOnlyOffConfirm' : 'appSettingsChats.mentionOnlyOnConfirm';
+    if (!confirm(t(confirmKey).replace('{label}', label))) return;
+    setSaving(true);
+    try {
+      await actionUpdateAgent(agent.id, { responseMode: mentionOnly ? 'smart' : 'mentioned' });
+      toast.success(
+        t(mentionOnly ? 'appSettingsChats.mentionOnlyOffToast' : 'appSettingsChats.mentionOnlyOnToast').replace('{label}', label)
+      );
+    } catch (err) {
+      toast.error(t('appSettingsChats.mentionOnlyFailedToast').replace('{error}', apiError(err).message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={saving}
+      aria-pressed={mentionOnly}
+      className={
+        mentionOnly
+          ? 'px-1 rounded-full bg-brand-500 text-white font-semibold disabled:opacity-50'
+          : 'px-1 rounded-full text-gray-400 hover:text-brand-500 disabled:opacity-50'
+      }
+      title={t(mentionOnly ? 'appSettingsChats.mentionOnlyOnTitle' : 'appSettingsChats.mentionOnlyOffTitle')}
+      aria-label={t(mentionOnly ? 'appSettingsChats.mentionOnlyOnTitle' : 'appSettingsChats.mentionOnlyOffTitle')}
+    >
+      @
+    </button>
   );
 };

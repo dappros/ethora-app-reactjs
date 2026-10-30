@@ -137,6 +137,10 @@ export const miscPages = {
     'chat.noChatsBanner.prefix':
       'You are within your own App context, but it seems there are no chats available yet. Go to ',
     'chat.noChatsBanner.linkText': 'App Settings → Chats',
+    'chat.nextStep.prefix': 'Your App has no chats yet. Next step: ',
+    'chat.nextStep.addKnowledge': 'Add knowledge',
+    'chat.nextStep.testAgent': 'Test your agent',
+    'chat.nextStep.orChats': ', or create chats in ',
     'chat.noChatsBanner.suffix': ' to create Pinned Chats, invite AI bots etc.',
     'chat.demoNoAppsBanner.prefix':
       'You are testing the public chats in our demo base app. Explore as an end user or ',
@@ -281,6 +285,10 @@ export const miscPages = {
     'chat.noChatsBanner.prefix':
       "Vous êtes dans le contexte de votre propre application, mais aucune discussion ne semble encore disponible. Rendez-vous dans ",
     'chat.noChatsBanner.linkText': "Paramètres de l'application → Discussions",
+    'chat.nextStep.prefix': "Votre application n'a pas encore de discussions. Étape suivante : ",
+    'chat.nextStep.addKnowledge': 'Ajouter des connaissances',
+    'chat.nextStep.testAgent': 'Tester votre agent',
+    'chat.nextStep.orChats': ', ou créez des discussions dans ',
     'chat.noChatsBanner.suffix':
       ' pour créer des discussions épinglées, inviter des bots IA, etc.',
     'chat.demoNoAppsBanner.prefix':
@@ -425,6 +433,10 @@ export const miscPages = {
     'chat.noChatsBanner.prefix':
       'Estás dentro del contexto de tu propia aplicación, pero parece que aún no hay chats disponibles. Ve a ',
     'chat.noChatsBanner.linkText': 'Configuración de la app → Chats',
+    'chat.nextStep.prefix': 'Tu aplicación aún no tiene chats. Siguiente paso: ',
+    'chat.nextStep.addKnowledge': 'Añadir conocimiento',
+    'chat.nextStep.testAgent': 'Prueba tu agente',
+    'chat.nextStep.orChats': ', o crea chats en ',
     'chat.noChatsBanner.suffix':
       ' para crear chats fijados, invitar bots de IA, etc.',
     'chat.demoNoAppsBanner.prefix':

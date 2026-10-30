@@ -219,6 +219,15 @@ export const appSettings1 = {
     'appSettingsChats.botInstanceLabel': 'Bot instance',
     'appSettingsChats.inviteAgentTitle': 'Invite an AI agent into this chat',
     'appSettingsChats.addBotButton': '+ Add Bot',
+    'appSettingsChats.mentionOnlyOffTitle': 'Replies to every message. Click to reply only when @mentioned',
+    'appSettingsChats.mentionOnlyOnTitle': 'Replies only when @mentioned or asked with /bot. Click to let it reply on its own',
+    'appSettingsChats.mentionOnlyOnConfirm':
+      'Let "{label}" reply only when @mentioned or asked with /bot, so it does not interrupt the discussion? This is a setting of the agent: it applies to every chat it is in, and it will stop answering visitors in your website widget. Direct chats with the agent keep working.',
+    'appSettingsChats.mentionOnlyOffConfirm':
+      'Let "{label}" decide on its own when to reply? This applies to every chat it is in.',
+    'appSettingsChats.mentionOnlyOnToast': '{label} now replies only when mentioned',
+    'appSettingsChats.mentionOnlyOffToast': '{label} now decides on its own when to reply',
+    'appSettingsChats.mentionOnlyFailedToast': 'Could not change the reply mode: {error}',
     'appSettingsChats.removeAriaLabel': 'Remove {label} from chat',
     'appSettingsChats.removeConfirm':
       'Remove "{label}" from this chat? The bot stays running and can be re-invited later.',
@@ -506,6 +515,15 @@ export const appSettings1 = {
     'appSettingsChats.inviteAgentTitle':
       'Inviter un agent IA dans cette discussion',
     'appSettingsChats.addBotButton': '+ Ajouter un bot',
+    'appSettingsChats.mentionOnlyOffTitle': 'Répond à chaque message. Cliquez pour qu\'il ne réponde que lorsqu\'il est @mentionné',
+    'appSettingsChats.mentionOnlyOnTitle': 'Répond uniquement lorsqu\'il est @mentionné ou sollicité avec /bot. Cliquez pour qu\'il réponde de lui-même',
+    'appSettingsChats.mentionOnlyOnConfirm':
+      '« {label} » ne répondra que lorsqu\'il est @mentionné ou sollicité avec /bot, pour ne pas interrompre la discussion ? Ce réglage appartient à l\'agent : il s\'applique à toutes ses discussions et l\'agent ne répondra plus aux visiteurs de votre widget web. Les discussions privées avec l\'agent continuent de fonctionner.',
+    'appSettingsChats.mentionOnlyOffConfirm':
+      'Laisser « {label} » décider seul quand répondre ? Cela s\'applique à toutes ses discussions.',
+    'appSettingsChats.mentionOnlyOnToast': '{label} ne répond plus que lorsqu\'il est mentionné',
+    'appSettingsChats.mentionOnlyOffToast': '{label} décide désormais seul quand répondre',
+    'appSettingsChats.mentionOnlyFailedToast': 'Impossible de changer le mode de réponse : {error}',
     'appSettingsChats.removeAriaLabel':
       'Retirer {label} de la discussion',
     'appSettingsChats.removeConfirm':
@@ -803,6 +821,15 @@ export const appSettings1 = {
     'appSettingsChats.inviteAgentTitle':
       'Invitar a un agente de IA a este chat',
     'appSettingsChats.addBotButton': '+ Añadir bot',
+    'appSettingsChats.mentionOnlyOffTitle': 'Responde a cada mensaje. Haz clic para que solo responda cuando lo @mencionen',
+    'appSettingsChats.mentionOnlyOnTitle': 'Solo responde cuando lo @mencionan o se le pide con /bot. Haz clic para que responda por sí mismo',
+    'appSettingsChats.mentionOnlyOnConfirm':
+      '¿Hacer que «{label}» solo responda cuando lo @mencionen o se le pida con /bot, para no interrumpir la conversación? Es un ajuste del agente: se aplica a todos sus chats y dejará de responder a los visitantes de tu widget web. Los chats directos con el agente siguen funcionando.',
+    'appSettingsChats.mentionOnlyOffConfirm':
+      '¿Dejar que «{label}» decida por sí mismo cuándo responder? Se aplica a todos sus chats.',
+    'appSettingsChats.mentionOnlyOnToast': '{label} ahora solo responde cuando lo mencionan',
+    'appSettingsChats.mentionOnlyOffToast': '{label} ahora decide por sí mismo cuándo responder',
+    'appSettingsChats.mentionOnlyFailedToast': 'No se pudo cambiar el modo de respuesta: {error}',
     'appSettingsChats.removeAriaLabel': 'Quitar a {label} del chat',
     'appSettingsChats.removeConfirm':
       '¿Quitar a "{label}" de este chat? El bot seguirá activo y podrá volver a invitarse más adelante.',

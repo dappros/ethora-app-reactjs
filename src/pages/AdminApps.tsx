@@ -295,6 +295,7 @@ export default function AdminApps() {
     if (urlQuery) return; // a search with no hits is not a tenant with no apps
     if (tenantActiveCount === null) return; // wait until we know the tenant-wide count
     if (tenantActiveCount > 0) return; // tenant has apps; nothing to onboard
+    if (localStorage.getItem('firstAdd') === 'true') return;
 
     const newUser = localStorage.getItem('newUser');
     if (newUser) {

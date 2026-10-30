@@ -7,6 +7,7 @@ import {
   actionRefreshOwnerSession,
   actionSwitchChatApp,
 } from '../actions';
+import { OwnerEmptyChatNextStep } from '../components/Agents/OwnerEmptyChatNextStep';
 import { createChatConfig } from '../config/chatBootstrap';
 import { forgetParkedChatLink, linkedChatName, useChatLinkJoin } from '../hooks/useChatLinkJoin';
 import { useChatComponentConfig } from '../hooks/useChatComponentConfig';
@@ -307,7 +308,7 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
   const userAppId = currentUser?.appId;
   const gatedLinkChat =
     linkChat && !chatAppId && userAppId && linkChat.startsWith(`${userAppId}_`) ? linkChat : null;
-  const { state: linkState, remountKey } = useChatLinkJoin(gatedLinkChat);
+  const { state: linkState } = useChatLinkJoin(gatedLinkChat);
 
   const leaveDeniedLink = () => {
     forgetParkedChatLink();
@@ -432,18 +433,7 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
             const targetApp = apps.find((a) => a._id === chatAppId);
             if (!targetApp) return null; // owned-apps list still loading
             if ((targetApp.defaultRooms?.length || 0) > 0) return null;
-            return (
-              <div className="bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-900/60 px-4 py-2 text-sm border max-w-[640px]">
-                {t('chat.noChatsBanner.prefix')}
-                <NavLink
-                  to={`/app/admin/apps/${chatAppId}/settings?tab=Chats`}
-                  className="text-brand-500 underline"
-                >
-                  {t('chat.noChatsBanner.linkText')}
-                </NavLink>
-                {t('chat.noChatsBanner.suffix')}
-              </div>
-            );
+            return <OwnerEmptyChatNextStep appId={chatAppId} />;
           }
           if (!allowedDomains.includes(currentDomain)) return null;
           if (apps.length === 0) {
@@ -513,7 +503,7 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
           </div>
         ) : (
           <MemoizedChat
-            key={`${chatAppId || 'base'}-${remountKey}`}
+            key={chatAppId || 'base'}
             config={effectiveApp}
             currentUser={currentUser}
             ownerSession={ownerSession}
