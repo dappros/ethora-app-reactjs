@@ -338,6 +338,7 @@ export interface ModelBotInstance {
   xmppUsername: string;
   status: 'on' | 'off';
   joinedRooms: string[];
+  roomSettings?: Array<{ roomJid: string; responseMode: ModelAgent['responseMode'] }>;
   lastActiveAt: string | null;
   createdAt: string;
   updatedAt: string;

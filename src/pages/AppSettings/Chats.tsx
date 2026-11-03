@@ -13,8 +13,8 @@ import { toast } from 'react-toastify';
 import { IconMinus } from '../../components/Icons/IconMinus';
 import { InviteAgentToChatModal } from '../../components/AIWidget/InviteAgentToChatModal';
 import { ChatMembersModal } from '../../components/modal/ChatMembersModal';
-import { httpListBotInstances, httpLeaveChatAgentBotInstance } from '../../http';
-import { actionListAgents, actionUpdateAgent } from '../../actions';
+import { httpListBotInstances, httpLeaveChatAgentBotInstance, httpSetBotInstanceRoomResponseMode } from '../../http';
+import { actionListAgents } from '../../actions';
 import { phCapture } from '../../posthog';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
@@ -432,8 +432,11 @@ export function Chats({
         </>
       )}
       <p className="font-semibold font-sans text-[16px] mb-2">{t('appSettingsChats.pinnedChatsHeading')}</p>
-      <p className="font-sans text-xs text-gray-500 mb-4">
+      <p className="font-sans text-xs text-gray-500 mb-2">
         {t('appSettingsChats.pinnedChatsHelp')}
+      </p>
+      <p className="font-sans text-xs text-gray-500 mb-4">
+        {t('appSettingsChats.botsReplyModeHelp')}
       </p>
       <div className="p-4 border border-gray-200 rounded-xl">
         <div className="flex justify-between items-center mb-4">
@@ -520,6 +523,9 @@ export function Chats({
                           agents={agentsCache}
                           onInvite={() => setInviteForChat(el)}
                           onRemoved={reloadBotInstances}
+                          onBotInstanceUpdated={(updated) =>
+                            setBotInstances((prev) => prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)))
+                          }
                         />
                       </td>
                     </tr>
@@ -804,6 +810,7 @@ export function Chats({
               />
               <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
                 <button
+                  type="button"
                   className="w-full rounded-xl border py-[12px] border-brand-500 text-brand-500 hover:bg-brand-hover"
                   onClick={() => setShowCreate(false)}
                 >
@@ -878,7 +885,8 @@ const RoomBotsCell: React.FC<{
   agents: ModelAgent[];
   onInvite: () => void;
   onRemoved: () => void;
-}> = ({ chatJid, botInstances, agents, onInvite, onRemoved }) => {
+  onBotInstanceUpdated: (bi: ModelBotInstance) => void;
+}> = ({ chatJid, botInstances, agents, onInvite, onRemoved, onBotInstanceUpdated }) => {
   const { t } = useTranslation();
   // Filter to bots whose joinedRooms contains this chat. We do the filter client-side
   // so the parent fetches once for the whole app instead of once per row.
@@ -904,7 +912,13 @@ const RoomBotsCell: React.FC<{
             title={`${label}${ag?.address ? ' · ' + ag.address : ''} · ${t('appSettingsChats.botInstanceLabel')} ${bi.id}`}
           >
             <span className="truncate max-w-[140px]">{label}</span>
-            {ag && <MentionOnlyToggle agent={ag} label={label} />}
+            <RoomReplyModeSelect
+              botInstance={bi}
+              agent={ag}
+              chatJid={chatJid}
+              label={label}
+              onUpdated={onBotInstanceUpdated}
+            />
             <button
               onClick={async (e) => {
                 e.stopPropagation();
@@ -945,43 +959,80 @@ const RoomBotsCell: React.FC<{
   );
 };
 
-const MentionOnlyToggle: React.FC<{ agent: ModelAgent; label: string }> = ({ agent, label }) => {
+type ResponseMode = ModelAgent['responseMode'];
+
+function sameRoom(a: string, b: string): boolean {
+  const local = (j: string) => String(j || '').trim().toLowerCase().split('/')[0].split('@')[0];
+  return !!a && !!b && local(a) === local(b);
+}
+
+const REPLY_MODE_LABEL_KEYS: Record<ResponseMode, string> = {
+  mentioned: 'appSettingsChats.replyModeMentioned',
+  smart: 'appSettingsChats.replyModeSmart',
+  always: 'appSettingsChats.replyModeAlways',
+  probability: 'appSettingsChats.replyModeProbability',
+};
+
+const RoomReplyModeSelect: React.FC<{
+  botInstance: ModelBotInstance;
+  agent?: ModelAgent;
+  chatJid: string;
+  label: string;
+  onUpdated: (bi: ModelBotInstance) => void;
+}> = ({ botInstance, agent, chatJid, label, onUpdated }) => {
   const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
-  const mentionOnly = agent.responseMode === 'mentioned';
+  const override = (botInstance.roomSettings || []).find((r) => sameRoom(r.roomJid, chatJid))?.responseMode || '';
+  const agentMode: ResponseMode = agent?.responseMode || 'smart';
+  const effective: ResponseMode = override || agentMode;
+  const modeLabel = (m: ResponseMode) => t(REPLY_MODE_LABEL_KEYS[m] || REPLY_MODE_LABEL_KEYS.smart);
+  const choices: ResponseMode[] = ['mentioned', 'smart', 'always'];
+  if (override === 'probability') choices.push('probability');
 
-  const toggle = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const confirmKey = mentionOnly ? 'appSettingsChats.mentionOnlyOffConfirm' : 'appSettingsChats.mentionOnlyOnConfirm';
-    if (!confirm(t(confirmKey).replace('{label}', label))) return;
+  const change = async (next: ResponseMode | '') => {
+    if (next === override) return;
     setSaving(true);
     try {
-      await actionUpdateAgent(agent.id, { responseMode: mentionOnly ? 'smart' : 'mentioned' });
+      const { data } = await httpSetBotInstanceRoomResponseMode(botInstance.id, chatJid, next);
+      if (data?.botInstance) onUpdated(data.botInstance as ModelBotInstance);
       toast.success(
-        t(mentionOnly ? 'appSettingsChats.mentionOnlyOffToast' : 'appSettingsChats.mentionOnlyOnToast').replace('{label}', label)
+        t('appSettingsChats.replyModeSavedToast')
+          .replace('{label}', label)
+          .replace('{mode}', modeLabel(next || agentMode))
       );
     } catch (err) {
-      toast.error(t('appSettingsChats.mentionOnlyFailedToast').replace('{error}', apiError(err).message));
+      toast.error(t('appSettingsChats.replyModeFailedToast').replace('{error}', apiError(err).message));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
+    <select
+      value={override}
       disabled={saving}
-      aria-pressed={mentionOnly}
+      onClick={(e) => e.stopPropagation()}
+      onChange={(e) => change(e.target.value as ResponseMode | '')}
+      aria-label={t('appSettingsChats.replyModeAriaLabel').replace('{label}', label)}
+      title={t('appSettingsChats.replyModeHelp')}
+      data-testid="room-reply-mode"
       className={
-        mentionOnly
-          ? 'px-1 rounded-full bg-brand-500 text-white font-semibold disabled:opacity-50'
-          : 'px-1 rounded-full text-gray-400 hover:text-brand-500 disabled:opacity-50'
+        'max-w-[190px] truncate rounded-full border px-1.5 py-0 text-[11px] leading-5 cursor-pointer disabled:opacity-50 ' +
+        (override
+          ? 'border-brand-500 text-brand-500 bg-white font-semibold'
+          : 'border-transparent text-gray-500 bg-transparent hover:border-gray-300')
       }
-      title={t(mentionOnly ? 'appSettingsChats.mentionOnlyOnTitle' : 'appSettingsChats.mentionOnlyOffTitle')}
-      aria-label={t(mentionOnly ? 'appSettingsChats.mentionOnlyOnTitle' : 'appSettingsChats.mentionOnlyOffTitle')}
     >
-      @
-    </button>
+      <option value="">
+        {override
+          ? t('appSettingsChats.replyModeInheritShort').replace('{mode}', modeLabel(agentMode))
+          : t('appSettingsChats.replyModeInherit').replace('{mode}', modeLabel(effective))}
+      </option>
+      {choices.map((m) => (
+        <option key={m} value={m}>
+          {modeLabel(m)}
+        </option>
+      ))}
+    </select>
   );
 };

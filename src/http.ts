@@ -1263,6 +1263,16 @@ export function httpLeaveChatAgentBotInstance(idOrAddress: string, botInstanceId
   return httpV2.post(`/agents/${encodeURIComponent(idOrAddress)}/bot-instances/${encodeURIComponent(botInstanceId)}/leave-chat`, { chatJid });
 }
 
+export function httpSetBotInstanceRoomResponseMode(
+  botInstanceId: string,
+  chatJid: string,
+  responseMode: 'always' | 'mentioned' | 'smart' | 'probability' | ''
+) {
+  return httpV2.post(`/bot-instances/${encodeURIComponent(botInstanceId)}/status`, {
+    roomResponseMode: { chatJid, responseMode },
+  });
+}
+
 // Convenience: list every BotInstance of an Agent (across all Apps it has been deployed
 // in), enriched with the App display name. Used by the global Agents UI's Chats Index tab.
 export function httpListAgentBotInstances(idOrAddress: string) {
