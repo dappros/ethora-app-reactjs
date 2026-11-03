@@ -4,6 +4,7 @@ import { aiWidget } from './aiWidget';
 import { aiWidgetAppearance } from './aiWidgetAppearance';
 import { appSettings1 } from './appSettings1';
 import { appSettings2 } from './appSettings2';
+import { appWebhooks } from './appWebhooks';
 import { authFlows } from './authFlows';
 import { authShared } from './authShared';
 import { callJoin } from './callJoin';
@@ -38,6 +39,7 @@ const dictionaries = [
   aiWidgetAppearance,
   appSettings1,
   appSettings2,
+  appWebhooks,
   authFlows,
   authShared,
   callJoin,
