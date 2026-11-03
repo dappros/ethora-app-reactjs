@@ -34,9 +34,9 @@ export const appSettings1 = {
     'appSettings.tab.visibilityPrivacy': 'Visibility & Privacy',
     'appSettings.tab.api': 'API',
     'appSettings.tab.deleteOrArchive': 'Delete or Archive',
-    'appSettings.section.publish': 'Publish',
-    'appSettings.section.ui': 'UI',
-    'appSettings.section.system': 'System',
+    'appSettings.section.publish': 'Channels',
+    'appSettings.section.ui': 'Design and access',
+    'appSettings.section.system': 'Advanced',
     'appSettings.toast.botNameTooShort':
       'The AI bot needs a first name',
     'appSettings.toast.settingsApplied': 'Settings applied successfully!',
@@ -321,9 +321,9 @@ export const appSettings1 = {
     'appSettings.tab.visibilityPrivacy': 'Visibilité et confidentialité',
     'appSettings.tab.api': 'API',
     'appSettings.tab.deleteOrArchive': 'Supprimer ou archiver',
-    'appSettings.section.publish': 'Publication',
-    'appSettings.section.ui': 'Interface',
-    'appSettings.section.system': 'Système',
+    'appSettings.section.publish': 'Canaux',
+    'appSettings.section.ui': 'Design et accès',
+    'appSettings.section.system': 'Avancé',
     'appSettings.toast.botNameTooShort':
       'Le bot IA doit avoir un prénom',
     'appSettings.toast.settingsApplied':
@@ -629,9 +629,9 @@ export const appSettings1 = {
     'appSettings.tab.visibilityPrivacy': 'Visibilidad y privacidad',
     'appSettings.tab.api': 'API',
     'appSettings.tab.deleteOrArchive': 'Eliminar o archivar',
-    'appSettings.section.publish': 'Publicación',
-    'appSettings.section.ui': 'Interfaz',
-    'appSettings.section.system': 'Sistema',
+    'appSettings.section.publish': 'Canales',
+    'appSettings.section.ui': 'Diseño y acceso',
+    'appSettings.section.system': 'Avanzado',
     'appSettings.toast.botNameTooShort':
       'El bot de IA necesita un nombre',
     'appSettings.toast.settingsApplied':

@@ -23,9 +23,11 @@ const ROUTE_TABS: RouteEntry[] = [
   { pattern: '/app/admin/apps/:appId/settings', tab: 'Settings' },
   { pattern: '/app/admin/apps/:appId/users', tab: 'Users' },
   { pattern: '/app/admin/apps/:appId/statistics', tab: 'Statistics' },
-  { pattern: '/app/admin/apps/:appId', tab: 'App' },
+  { pattern: '/app/admin/apps/:appId', tab: 'Overview' },
   // Tenant-level admin: show "{tab} - {brand}"
-  { pattern: '/app/admin/apps', tab: 'Apps' },
+  { pattern: '/app/admin/apps', tab: 'Projects' },
+  { pattern: '/app/admin/start', tab: 'New project' },
+  { pattern: '/app/admin/self-hosted', tab: 'Self-hosted setup' },
   { pattern: '/app/admin/agents/:agentId/settings', tab: 'Agent Settings' },
   { pattern: '/app/admin/agents', tab: 'Agents' },
   { pattern: '/app/admin/billing', tab: 'Billing' },
@@ -62,18 +64,8 @@ export default function AppHelmet() {
   const lastPath = localStorage.getItem('lastPath') || defaultLandingPath();
 
   useEffect(() => {
-    if (!token) {
-      if (
-        location.pathname.startsWith('/tempPassword') ||
-        location.pathname.startsWith('/resetPassword') ||
-        location.pathname === '/register' ||
-        location.pathname === '/turnstile' ||
-        location.pathname === '/wp-setup'
-      ) {
-        return;
-      } else {
-        navigate('/login');
-      }
+    if (!token && (location.pathname === '/' || /^\/app(?:\/|$)/.test(location.pathname) || location.pathname.startsWith('/call/') || location.pathname.startsWith('/agent/'))) {
+      navigate('/login');
     }
   }, [token, location.pathname, navigate]);
 

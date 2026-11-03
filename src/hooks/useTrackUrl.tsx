@@ -19,10 +19,11 @@ export const useTrackUrl = () => {
     const currentPath = location.pathname.split('?')[0];
     return currentPath.startsWith(path);
   })[0];
+  const requiresAuth = location.pathname === '/' || /^\/app(?:\/|$)/.test(location.pathname) || /^\/(call|agent)\//.test(location.pathname);
 
   useEffect(() => {
     if (!token) {
-      if (publicPath) {
+      if (publicPath || !requiresAuth) {
         return;
       }
       rememberReturnPath(location.pathname + location.search);
@@ -89,7 +90,7 @@ export const useTrackUrl = () => {
           console.error(e);
         }
       } else {
-        if (publicPath) {
+        if (publicPath || !requiresAuth) {
           return;
         }
         if (location.pathname !== '/login') {

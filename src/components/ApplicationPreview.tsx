@@ -32,8 +32,15 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const numberFormatter = new Intl.NumberFormat('en-US');
+  const isArchived = app.status === 'archived';
+  const hasAssistant = Boolean((app as ModelApp & { defaultBotInstanceId?: string }).defaultBotInstanceId || app.aiBot?.userId);
+  const nextAction = isArchived ? t('applicationPreview.archived') : hasAssistant ? t('projectCard.continueAssistant') : t('projectCard.configure');
+  const onNext = () => {
+    if (hasAssistant && !isArchived) navigate(`/app/admin/widgets/${app._id}/ai`);
+    else onClick();
+  };
   const onClick = () => {
-    navigate(`/app/admin/apps/${app._id}/settings`, {
+    navigate(`/app/admin/apps/${app._id}`, {
       state: { from: location.pathname + location.search },
     });
   };
@@ -89,7 +96,6 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
     );
   };
 
-  const isArchived = app.status === 'archived';
   // Tile is visually muted (greyed background, slightly desaturated logo) when
   // archived so a glance at the list distinguishes lifecycle state from a
   // healthy app, and the operator never confuses an archived app for one
@@ -106,7 +112,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
         </div>
       )}
       <div className="flex justify-center items-center">{renderLogo()}</div>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         {/* app title */}
         <div className="flex justify-center md:justify-between items-center">
           <div className="md:ml-[40px]">
@@ -119,26 +125,30 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
             <div className="font-sans text-[12px] text-gray-500">
               {t('applicationPreview.createdPrefix')} {DateTime.fromISO(app.createdAt).toFormat('dd LLL yyyy')}
             </div>
+            {!isArchived && <div className="mt-2 text-xs font-medium text-gray-600">{hasAssistant ? t('projectCard.assistantConnected') : t('projectCard.appProject')}</div>}
           </div>
           <div className="hidden md:flex items-ceter justify-center">
-            <button
+            {app.domainName && <button
               onClick={onExternalClick}
+              aria-label={t('projectCard.openApp')}
               className="mr-2 w-[40px] h-[40px] rounded-xl flex items-center justify-center hover:bg-brand-hover"
             >
               <IconExternalLink color={primaryColor} />
-            </button>
+            </button>}
             <AppActionsMenu app={app} onChanged={onChanged} />
             <button
-              onClick={onClick}
+              onClick={onNext}
               className="ml-2 flex justify-center hover:bg-brand-hover items-center p-2 rounded-xl w-[134px] h-[40px] border border-brand-500"
             >
               <span className="text-brand-500 font-varela text-sm mr-2">
-                {app.status === 'archived' ? t('applicationPreview.archived') : t('applicationPreview.details')}
+                {nextAction}
               </span>
               <IconArrowRight stroke={primaryColor} />
             </button>
           </div>
         </div>
+        <details className="rounded-lg border border-gray-100 px-3 py-2">
+          <summary className="cursor-pointer text-sm font-medium text-gray-600">{t('projectCard.usage')}</summary>
         {/* stat */}
         <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:gap-x-[33px] 2xl:grid-cols-8">
           <div className="flex flex-col justify-center items-center">
@@ -276,16 +286,17 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
           <AppInactiveStat lastActivityAt={app.stats.lastActivityAt} />
         </div>
+        </details>
         <div className="flex md:hidden">
-          <button onClick={onExternalClick} className="mr-4">
+          {app.domainName && <button onClick={onExternalClick} aria-label={t('projectCard.openApp')} className="mr-4">
             <IconExternalLink color={primaryColor} />
-          </button>
+          </button>}
           <button
-            onClick={onClick}
+            onClick={onNext}
             className="flex justify-center items-center p-2 rounded-xl w-full h-[40px] border border-brand-500"
           >
             <span className="text-brand-500 font-varela text-sm mr-2">
-              {t('applicationPreview.details')}
+              {nextAction}
             </span>
             <IconArrowRight stroke={primaryColor} />
           </button>

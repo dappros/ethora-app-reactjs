@@ -1,13 +1,9 @@
 import classNames from 'classnames';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ApplicationPreview } from '../components/ApplicationPreview';
-import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { Loading } from '../components/Loading.tsx';
-import { NewAppModal } from '../components/modal/NewAppModal';
-import { CreateWidgetModal } from '../components/modal/CreateWidgetModal';
-import { PreviewAppModal } from '../components/modal/PreviewAppModal.tsx';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
@@ -31,10 +27,7 @@ export default function AdminApps() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  const [showStarterInf, setShowStarterInf] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [showWidgetSetup, setShowWidgetSetup] = useState(false);
-  const [newShowModal, setNewShowModal] = useState(false);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState(false);
   // 'active' (default) / 'archived' (restore screen) - the new lifecycle filter
@@ -51,7 +44,6 @@ export default function AdminApps() {
   // Tenant-wide number of active apps (never narrowed by a search). The
   // first-run onboarding modals key off this one, so a search with no hits
   // cannot be mistaken for a tenant with no apps.
-  const [tenantActiveCount, setTenantActiveCount] = useState<number | null>(null);
 
   const apps = useAppStore((s) => s.apps);
   const [appsState, setAppState] = useState<ModelApp[]>(apps);
@@ -116,7 +108,6 @@ export default function AdminApps() {
         setArchivedCount(response.data.total ?? 0);
       } else {
         setActiveCount(response.data.total ?? 0);
-        if (!urlQuery) setTenantActiveCount(response.data.total ?? 0);
       }
       try {
         const otherResp = await httpGetAppsWithStatus({
@@ -130,7 +121,6 @@ export default function AdminApps() {
         if (isStale()) return;
         if (lifecycleTab === 'archived') {
           setActiveCount(otherResp.data.total ?? 0);
-          if (!urlQuery) setTenantActiveCount(otherResp.data.total ?? 0);
         } else {
           setArchivedCount(otherResp.data.total ?? 0);
         }
@@ -278,33 +268,6 @@ export default function AdminApps() {
   useEffect(() => {
     setCurrentPage(pageIndex);
   }, [pageIndex]);
-
-  useEffect(() => {
-    // Onboarding modals are only for first-time signups (the tenant has no
-    // active apps at all). They previously fired whenever the current PAGE
-    // was empty, which:
-    //   - Triggered on the Archived tab as soon as the user restored their
-    //     only archived app (the page legitimately empties, but the tenant
-    //     still has many active apps).
-    //   - Triggered on any out-of-range Active pagination page (e.g. /apps?page=205
-    //     when the tenant has 84 pages of apps).
-    //
-    // Gate strictly on tenantActiveCount === 0 (the tenant-wide count returned by
-    // the list endpoint) AND we're on the Active tab's first page. Anything
-    // else is a normal "page happens to be empty" state and we let the empty
-    // list speak for itself.
-    if (lifecycleTab !== 'active' || pageIndex > 0) return;
-    if (urlQuery) return; // a search with no hits is not a tenant with no apps
-    if (tenantActiveCount === null) return; // wait until we know the tenant-wide count
-    if (tenantActiveCount > 0) return; // tenant has apps; nothing to onboard
-    if (localStorage.getItem('firstAdd') === 'true') return;
-
-    const newUser = localStorage.getItem('newUser');
-    if (newUser) {
-      return setNewShowModal(true);
-    }
-    setShowModal(true);
-  }, [tenantActiveCount, lifecycleTab, pageIndex, urlQuery]);
 
   useEffect(() => {
     fetchApps();
@@ -465,7 +428,7 @@ export default function AdminApps() {
               Import lives in the closing tile of the list (CreateOrImportTile)
               so new operators don't trip into it first thing. */}
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => navigate('/app/admin/start')}
             aria-label={t('adminApps.createApp')}
             className={classNames(
               'order-2 md:order-6 flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela',
@@ -483,9 +446,7 @@ export default function AdminApps() {
           <Loading />
         ) : (
           <>
-            {showStarterInf && !apps.length && !urlQuery && (
-              <ApplicationStarterInf onClose={() => setShowStarterInf(false)} />
-            )}
+            {!apps.length && !urlQuery && lifecycleTab === 'active' && <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-5"><h2 className="font-semibold">{t('startProject.title')}</h2><p className="mt-1 text-sm text-gray-600">{t('startProject.subtitle')}</p><button type="button" onClick={() => navigate('/app/admin/start')} className="mt-3 text-sm font-semibold text-brand-500 underline">{t('startProject.continue')}</button></div>}
 
             {appsState &&
               appsState.map((app) => (
@@ -535,7 +496,7 @@ export default function AdminApps() {
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
-                      onClick={() => setShowModal(true)}
+                      onClick={() => navigate('/app/admin/start')}
                       className="flex items-center justify-center h-[40px] bg-brand-500 hover:bg-brand-darker rounded-xl text-white text-sm font-varela px-5"
                     >
                       <IconAdd color="white" className="mr-2" />
@@ -558,26 +519,6 @@ export default function AdminApps() {
               pageCount={pageCount}
               forcePage={currentPage}
             />
-
-            {showModal && (
-              <NewAppModal
-                haveApps={!!apps.length}
-                show={showModal}
-                onClose={() => setShowModal(false)}
-                onCreateWidget={() => { setShowModal(false); setShowWidgetSetup(true); }}
-              />
-            )}
-
-            {newShowModal && (
-              <PreviewAppModal
-                haveApps={!!apps.length}
-                show={newShowModal}
-                onClose={() => setNewShowModal(false)}
-                onCreateWidget={() => { setNewShowModal(false); setShowWidgetSetup(true); }}
-              />
-            )}
-
-            {showWidgetSetup && <CreateWidgetModal onClose={() => { setShowWidgetSetup(false); void fetchApps(); }} />}
 
             {showImportModal && (
               <ImportAppModal

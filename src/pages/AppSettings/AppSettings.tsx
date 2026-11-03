@@ -79,7 +79,7 @@ const tabsNew = {
 // English/untranslated. These maps translate only the label actually shown
 // to the user in the tab list.
 const TAB_LABEL_KEYS: Record<string, string> = {
-  'AI Widget': 'nav.ai',
+  'AI Widget': 'widgets.title',
   'Web App': 'appSettings.tab.webApp',
   'Mobile App': 'appSettings.tab.mobileApp',
   Appearance: 'appSettings.tab.appearance',
@@ -140,13 +140,6 @@ export default function AppSettings() {
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
 
-  const firstAdd = localStorage.getItem('firstAdd') === 'true';
-
-  useEffect(() => {
-    if (firstAdd) {
-      setIsInfo(true);
-    }
-  }, [firstAdd]);
 
   useEffect(() => {
     if (
@@ -652,7 +645,6 @@ export default function AppSettings() {
 
   useEffect(() => {
     if (isNew) {
-      setIsInfo(true);
       navigate(location.pathname, {
         replace: true,
         state: { from: location.pathname + location.search, isNew: false },

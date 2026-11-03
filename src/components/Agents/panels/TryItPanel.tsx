@@ -3,6 +3,7 @@ import { AgentTryTurn, httpGetAgentKnowledge, httpTryAgent } from '../../../http
 import { markAgentTried } from '../../../utils/agentSetupChecklist';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent } from '../../../models';
+import { phCapture } from '../../../posthog';
 
 type Turn = AgentTryTurn & { sources?: string[]; ragDocsUsed?: number; error?: boolean };
 
@@ -47,6 +48,7 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
     try {
       const r = await httpTryAgent(agent.id, question, history);
       markAgentTried(agent.id);
+      phCapture('assistant_test_completed', { used_knowledge: (r.data.ragDocsUsed || 0) > 0 });
       setTurns((prev) => [
         ...prev,
         { role: 'assistant', content: r.data.reply || '', sources: r.data.sources || [], ragDocsUsed: r.data.ragDocsUsed || 0 },

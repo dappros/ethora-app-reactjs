@@ -15,7 +15,10 @@ const Admin = lazy(() => import('./pages/Admin'));
 const Help = lazy(() => import('./pages/Help'));
 const WhatsNew = lazy(() => import('./pages/WhatsNew'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
+const ProjectOverview = lazy(() => import('./pages/ProjectOverview'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
+const StartProject = lazy(() => import('./pages/StartProject'));
+const SelfHostedStart = lazy(() => import('./pages/SelfHostedStart'));
 const Widgets = lazy(() => import('./pages/Widgets/Widgets'));
 const WidgetEditor = lazy(() => import('./pages/Widgets/WidgetEditor'));
 const WidgetAISettings = lazy(() => import('./pages/Widgets/WidgetAISettings'));
@@ -127,6 +130,8 @@ export const router = createBrowserRouter(
                           path: 'apps',
                           Component: AdminApps,
                         },
+                        { path: 'start', Component: StartProject },
+                        { path: 'self-hosted', Component: SelfHostedStart },
                         {
                           path: 'billing',
                           Component: AdminBilling,
@@ -157,7 +162,7 @@ export const router = createBrowserRouter(
                           children: [
                             {
                               index: true,
-                              element: <Navigate to="settings" replace />,
+                              Component: ProjectOverview,
                             },
                             {
                               path: 'settings',

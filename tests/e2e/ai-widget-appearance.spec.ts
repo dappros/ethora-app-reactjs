@@ -100,7 +100,7 @@ const me = {
 const openTab = (page: Page) => page.goto(`/app/admin/widgets/${APP_ID}?tab=install`);
 const openAppearance = (page: Page) => page.getByRole('tab', { name: /Customize appearance/ }).click();
 
-test('new app offers an intent and reuses it for website setup', async ({ page }) => {
+test('project intent is selected before any app is created', async ({ page }) => {
   await fakeBackend(page, {});
   let creates = 0;
   await page.route('**/v1/apps', async (route) => {
@@ -109,26 +109,60 @@ test('new app offers an intent and reuses it for website setup', async ({ page }
     return route.fulfill({ json: { app: { ...app, displayName: 'My new app' } } });
   });
   await page.goto('/app/admin/apps');
-  await page.getByRole('button', { name: 'Create App', exact: true }).first().click();
-  await page.getByPlaceholder('App Name').fill('My new app');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'New project', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: 'What would you like to build?' })).toBeVisible();
+  expect(creates).toBe(0);
+  await page.getByRole('button', { name: /An assistant for my website/ }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByText('We will create and connect an assistant for My new app.')).toBeVisible();
-  expect(creates).toBe(1);
+  await expect(page.getByRole('heading', { name: 'Create your website assistant' })).toBeVisible();
+  expect(creates).toBe(0);
 });
 
-test('chat intent opens chat component settings', async ({ page }) => {
+test('chat intent creates an app and opens chat appearance', async ({ page }) => {
   await fakeBackend(page, {});
   await page.route('**/v1/apps', async (route) => route.request().method() === 'POST'
     ? route.fulfill({ json: { app } }) : route.fulfill({ json: { apps: [app], total: 1 } }));
   await page.goto('/app/admin/apps');
-  await page.getByRole('button', { name: 'Create App', exact: true }).first().click();
-  await page.getByPlaceholder('App Name').fill('My chat app');
+  await page.getByRole('button', { name: 'New project', exact: true }).first().click();
+  await page.getByRole('button', { name: /Chat in my app/ }).click();
+  await page.getByPlaceholder('My app').fill('My chat app');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('radio', { name: /Chat in my app/ }).check();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Appearance&section=chat`));
+});
+
+test('calls intent still opens calling settings', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.route('**/v1/apps', (route) => route.request().method() === 'POST'
+    ? route.fulfill({ json: { app } }) : route.fulfill({ json: { apps: [app], total: 1 } }));
+  await page.goto('/app/admin/start');
+  await page.getByRole('button', { name: /Voice or video calls/ }).click();
+  await page.getByPlaceholder('My app').fill('My calls app');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chat%20component`));
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats`));
+});
+
+test('self-hosted setup does not create a cloud app', async ({ page }) => {
+  await fakeBackend(page, {});
+  let creates = 0;
+  await page.route('**/v1/apps', (route) => {
+    if (route.request().method() === 'POST') creates++;
+    return route.fulfill({ json: { apps: [app], total: 1 } });
+  });
+  await page.goto('/app/admin/start');
+  await page.getByRole('button', { name: /Run Ethora on my server/ }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/admin\/self-hosted$/);
+  await expect(page.getByRole('heading', { name: 'Set up Ethora on your server' })).toBeVisible();
+  expect(creates).toBe(0);
+});
+
+test('project opens on a short overview with focused navigation', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
 });
 
 test('loads the saved appearance from the App and saves changes back to it', async ({ page }) => {
@@ -238,7 +272,7 @@ test('warns before leaving with unsaved widget appearance', async ({ page }) => 
   await openAppearance(page);
   await page.getByLabel('Popup title').fill('Unsaved title');
   page.once('dialog', (dialog) => dialog.dismiss());
-  await page.getByRole('link', { name: 'Widgets', exact: true }).click();
+  await page.getByRole('link', { name: 'Website assistants', exact: true }).click();
   await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
 });
 
@@ -296,7 +330,7 @@ test('website assistant creates an app with the same name and makes its agent ac
   await page.route(`**/v2/apps/${newAppId}/sources/site-crawl-jobs/test-job`, (route) => route.fulfill({ json: { result: { status: 'completed', savedPages: 2 } } }));
   await page.route(`**/v2/agents/${agentId}/knowledge`, (route) => route.fulfill({ json: { ok: true, pages: 2, docs: 0, chunks: 2, indexAvailable: true, missing: { pages: 0, docs: 0, examples: [] }, lastIndexedAt: null } }));
   await page.goto('/app/admin/widgets');
-  await page.getByRole('button', { name: 'Create widget', exact: true }).click();
+  await page.getByRole('button', { name: 'New assistant', exact: true }).click();
   await page.getByLabel('Assistant name').fill('Store helper');
   await page.getByLabel('Website address (optional)').fill('https://example.com');
   await page.getByRole('button', { name: 'Create assistant' }).click();
@@ -305,7 +339,7 @@ test('website assistant creates an app with the same name and makes its agent ac
   await expect(page.getByText('Website processing finished: 2 pages saved.')).toBeVisible();
   await page.getByRole('button', { name: 'Test assistant' }).click();
   await expect(page.getByTestId('try-transcript')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Install on your site' })).toHaveAttribute('href', `/app/admin/widgets/${newAppId}?tab=install`);
+  await expect(page.getByRole('link', { name: 'Install on your site' })).toHaveCount(0);
   expect(calls.find((c) => c.path === '/v1/apps')?.body.displayName).toBe('Store helper');
   expect(calls.find((c) => c.path === '/v2/agents')?.body).toMatchObject({ displayName: 'Store helper', ownerAppId: newAppId });
   expect(calls.find((c) => c.path === 'update')?.body).toMatchObject({ defaultBotInstanceId: instanceId, botStatus: 'on' });
@@ -466,7 +500,7 @@ test('Config AI offers grouped, usable section navigation on a narrow screen', a
 test('Widget navigation works independently of app settings and AI configuration has its own page', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto('/app/admin/widgets');
-  await expect(page.getByRole('heading', { name: 'Widgets', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Website assistants', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Edit widget', exact: true }).first().click();
   await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}$`));
   const tabs = page.getByTestId('website-widget-card').getByRole('tab');
@@ -484,7 +518,7 @@ test('Widget navigation works independently of app settings and AI configuration
 test('app AI is an overview with links to dedicated configuration and widget editing', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);
-  await expect(page.getByRole('tab', { name: 'AI', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: 'Website assistants', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tab', { name: 'AI Widget', exact: true })).toHaveCount(0);
   await expect(page.getByTestId('widget-config-ai')).toHaveCount(0);
   await page.getByRole('link', { name: 'Configure AI' }).click();
@@ -505,12 +539,12 @@ test('Widgets are under AI rather than a separate main menu item', async ({ page
   await configAgentBackend(page);
   await page.goto('/app/admin/widgets');
   await expect(page.getByRole('link', { name: 'Widget', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'AI', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('link', { name: 'Assistants', exact: true })).toHaveAttribute('aria-current', 'page');
   const sections = page.getByRole('navigation', { name: 'AI sections' });
-  await expect(sections.getByRole('link', { name: 'Widgets', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(sections.getByRole('link', { name: 'Website assistants', exact: true })).toHaveAttribute('aria-current', 'page');
   await sections.getByRole('link', { name: 'Agents', exact: true }).click();
   await expect(page).toHaveURL(/\/app\/admin\/agents$/);
-  await sections.getByRole('link', { name: 'Widgets', exact: true }).click();
+  await sections.getByRole('link', { name: 'Website assistants', exact: true }).click();
   await expect(page).toHaveURL(/\/app\/admin\/widgets$/);
 });
 
@@ -521,9 +555,9 @@ test('mobile main menu also groups Widgets under AI', async ({ page }) => {
   await page.getByRole('button', { name: 'Open menu' }).click();
   const menu = page.getByRole('dialog');
   await expect(menu.getByRole('link', { name: 'Widget', exact: true })).toHaveCount(0);
-  await expect(menu.getByRole('link', { name: 'AI', exact: true })).toHaveAttribute('aria-current', 'page');
-  await menu.getByRole('link', { name: 'AI', exact: true }).click();
-  await page.getByRole('navigation', { name: 'AI sections' }).getByRole('link', { name: 'Widgets', exact: true }).click();
+  await expect(menu.getByRole('link', { name: 'Assistants', exact: true })).toHaveAttribute('aria-current', 'page');
+  await menu.getByRole('link', { name: 'Assistants', exact: true }).click();
+  await page.getByRole('navigation', { name: 'AI sections' }).getByRole('link', { name: 'Website assistants', exact: true }).click();
   await expect(page).toHaveURL(/\/app\/admin\/widgets$/);
 });
 
@@ -534,7 +568,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
     await configAgentBackend(page);
     const measure = async (section: string) => {
       await expect(page.getByRole('heading', { name: section, exact: true })).toBeVisible();
-      const mainTitle = page.getByRole('heading', { name: 'AI', exact: true });
+      const mainTitle = page.getByRole('heading', { name: 'Assistants', exact: true });
       await expect(mainTitle).toBeVisible();
       await expect(page.getByRole('searchbox')).toBeVisible();
       const content = await page.getByTestId('ai-workspace-content').boundingBox();
@@ -549,8 +583,8 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
     };
     await page.goto('/app/admin/agents');
     const agents = await measure('Agents');
-    await page.getByRole('navigation', { name: 'AI sections' }).getByRole('link', { name: 'Widgets', exact: true }).click();
-    const widgets = await measure('Widgets');
+    await page.getByRole('navigation', { name: 'AI sections' }).getByRole('link', { name: 'Website assistants', exact: true }).click();
+    const widgets = await measure('Website assistants');
     await page.getByRole('navigation', { name: 'AI sections' }).getByRole('link', { name: 'Agents', exact: true }).click();
     const returned = await measure('Agents');
     // Content length may differ; the page chrome must not jump or resize.

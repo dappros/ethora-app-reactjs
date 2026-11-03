@@ -6,7 +6,6 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom';
-import { actionSwitchChatApp } from '../actions';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { httpGetApp } from '../http';
@@ -71,17 +70,19 @@ export default function AdminApp() {
             {app?.displayName}
           </div>
         </div>
-        {/* Per-App segmented nav. The Chats segment (Option A) opens the
-            sidebar Chats page in this app's owner context, so admins can
-            jump straight into testing without manually picking the app
-            from the switcher. The onClick eagerly switches chatAppId so
-            the destination renders the right context immediately rather
-            than after a hydration round-trip on Chat.tsx mount. */}
+        {/* A short project navigation. Detailed controls stay in Settings. */}
         <div className="flex items-center md:justify-end md:flex-1 md:mr-[32px]">
           <ThemeToggle className="hidden md:flex" />
           <div className="grid justify-center content-center grid-cols-4 w-full md:max-w-[520px] px-4">
             <NavLink
               className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
+              to={`/app/admin/apps/${appId}`}
+              end
+            >
+              {t('projectOverview.tab')}
+            </NavLink>
+            <NavLink
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
               to={`/app/admin/apps/${appId}/users`}
             >
               {t('adminApp.tabUsers')}
@@ -93,24 +94,10 @@ export default function AdminApp() {
               {t('adminApp.tabSettings')}
             </NavLink>
             <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
               to={`/app/admin/apps/${appId}/statistics`}
             >
-              {t('adminApp.tabStatistics')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
-              to="/app/chat"
-              onClick={() => {
-                if (!appId) return;
-                // Fire-and-forget: the destination page will retry on
-                // mount if this fails. We intentionally don't await so
-                // the navigation feels instant; any error toast surfaces
-                // from Chat.tsx's hydration effect.
-                actionSwitchChatApp(appId).catch(() => {});
-              }}
-            >
-              {t('adminApp.tabChats')}
+              {t('projectOverview.activity')}
             </NavLink>
           </div>
         </div>

@@ -114,6 +114,12 @@ test('register page renders public auth form', async ({ page }) => {
   await expect(page.getByText('Playwright smoke environment')).toBeVisible();
 });
 
+test('registration explains the goal passed by the website', async ({ page }) => {
+  await page.goto('/register?intent=self-hosted&source_page=%2Fchat-sdk%2Fself-hosted-chat-server-aws%2F');
+  await expect(page.getByRole('heading', { name: 'Set up your own Ethora server' })).toBeVisible();
+  await expect(page.getByText(/right setup/i)).toBeVisible();
+});
+
 test('unknown route renders 404 page', async ({ page }) => {
   await page.goto('/does-not-exist');
 

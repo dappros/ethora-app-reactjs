@@ -1,73 +1,43 @@
 import { useEffect } from 'react';
-
 import { env } from '../config/env';
-interface Params {
-  utm_ref?: string;
-  first_page?: string;
-  device_type?: string;
+import { inferOnboardingIntent, setOnboardingIntent } from '../utils/onboardingIntent';
+
+const ATTRIBUTION_KEYS = [
+  'utm_ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term',
+  'utm_content', 'utm_id', 'first_page', 'source_page', 'source_site', 'device_type', 'intent',
+] as const;
+
+function safePage(value: string): string {
+  try {
+    const url = new URL(value, window.location.origin);
+    return url.pathname.slice(0, 300);
+  } catch { return ''; }
 }
 
 export const useCaptureParams = () => {
   useEffect(() => {
-    const hasCapturedParams = localStorage.getItem('hasCapturedParams');
-    if (hasCapturedParams) return;
+    const query = new URLSearchParams(window.location.search);
+    const intent = inferOnboardingIntent(query);
+    if (intent) setOnboardingIntent(intent);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const params: Params = {};
-
-    const utmRef = urlParams.get('utm_ref');
-    if (utmRef) {
-      params.utm_ref = utmRef;
-    }
-
-    const firstPage = urlParams.get('first_page');
-    if (firstPage) {
-      try {
-        params.first_page = decodeURIComponent(firstPage);
-      } catch {
-        params.first_page = firstPage;
+    try {
+      let existing: Record<string, string> = {};
+      try { existing = JSON.parse(localStorage.getItem('urlParams') || '{}') as Record<string, string>; } catch { /* Reset malformed old attribution. */ }
+      const captured: Record<string, string> = { ...existing };
+      for (const key of ATTRIBUTION_KEYS) {
+        const value = query.get(key);
+        if (!value || captured[key]) continue;
+        captured[key] = key === 'first_page' || key === 'source_page' ? safePage(value) : value.slice(0, 300);
       }
-    }
-
-    const deviceType = urlParams.get('device_type');
-    if (deviceType) {
-      params.device_type = deviceType;
-    }
-
-    const isAllowedDomain = (() => {
-      const allowed =
-        env.VITE_APP_ALLOWED_DOMAINS?.split(',') || [];
-      const current = window.location.hostname;
-      return allowed.includes(current);
-    })();
-
-    const isEmpty = Object.keys(params).length === 0;
-
-    if (isAllowedDomain && isEmpty) {
-      const utm_ref = document.referrer;
-      const fallbackFirstPage = window.location.pathname;
-      const ua = navigator.userAgent;
-
-      const isMobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          ua
-        );
-      const fallbackDeviceType = isMobile ? 'mobile' : 'desktop';
-
-      if (utm_ref) {
-        params.utm_ref = utm_ref;
+      const allowed = String(env.VITE_APP_ALLOWED_DOMAINS || '').split(',').map((item) => item.trim());
+      if (allowed.includes(window.location.hostname)) {
+        if (!captured.utm_ref && document.referrer) {
+          try { captured.utm_ref = new URL(document.referrer).hostname; } catch { /* Ignore malformed referrer. */ }
+        }
+        if (!captured.first_page) captured.first_page = window.location.pathname;
+        if (!captured.device_type) captured.device_type = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
       }
-
-      if (fallbackFirstPage) {
-        params.first_page = fallbackFirstPage;
-      }
-
-      params.device_type = fallbackDeviceType;
-    }
-
-    if (Object.keys(params).length > 0) {
-      localStorage.setItem('urlParams', JSON.stringify(params));
-      localStorage.setItem('hasCapturedParams', 'true');
-    }
+      if (Object.keys(captured).length) localStorage.setItem('urlParams', JSON.stringify(captured));
+    } catch { /* Attribution must never block registration. */ }
   }, []);
 };

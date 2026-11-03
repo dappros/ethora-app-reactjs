@@ -32,13 +32,11 @@ import {
   actionListAgents,
 } from '../actions';
 import { httpExportAgent, httpImportAgent, saveBlobAs } from '../http';
-import { AgentsTutorialModal } from '../components/modal/AgentsTutorialModal';
 import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { useTranslation } from '../i18n/useTranslation';
 import { AGENT_CATEGORIES, AGENT_CATEGORY_LABEL_KEYS, AgentCategory, isAgentCategory } from '../lib/agentCategories';
 import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import { clearAgentsOnboarding, isAgentsOnboarding } from '../utils/agentsOnboarding';
 
 function fmtDate(iso?: string | null) {
   if (!iso) return '';
@@ -77,7 +75,6 @@ export default function AdminAgents() {
 
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(isAgentsOnboarding);
   const [showImport, setShowImport] = useState(false);
   const [filter, setFilter] = useState('');
   const [category, setCategory] = useState<AgentCategory | ''>('');
@@ -330,21 +327,6 @@ export default function AdminAgents() {
             actionListAgents().finally(() => setLoading(false));
           }}
           doImport={(input) => httpImportAgent(input)}
-        />
-      )}
-
-      {showTutorial && (
-        <AgentsTutorialModal
-          show={showTutorial}
-          onClose={() => {
-            clearAgentsOnboarding();
-            setShowTutorial(false);
-          }}
-          onNewAgent={() => {
-            clearAgentsOnboarding();
-            setShowTutorial(false);
-            setShowCreate(true);
-          }}
         />
       )}
 

@@ -5,6 +5,8 @@ import { actionCreateAgent, actionCreateApp, actionInviteAgentToChat, actionSetB
 import { httpAgentSiteCrawl, httpUpdateApp, httpPrepareWidgetAgent } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAgent, ModelApp } from '../../models';
+import { phCapture } from '../../posthog';
+import { setOnboardingIntent } from '../../utils/onboardingIntent';
 
 /** A short entry point for owners who want a website assistant. */
 export function CreateWidgetModal({ onClose, existingApp }: { onClose: () => void; existingApp?: ModelApp }) {
@@ -70,6 +72,7 @@ export function CreateWidgetModal({ onClose, existingApp }: { onClose: () => voi
         try {
           const crawl = await httpAgentSiteCrawl(currentApp._id, currentAgent.id, website.trim(), true);
           jobId = crawl.data?.jobId || '';
+          if (jobId) phCapture('onboarding_crawl_started', { intent: 'website' });
         } catch (e) {
           const response = (e as { response?: { data?: { code?: string } } }).response;
           // A retry after a lost response can find an already-indexed page.
@@ -79,6 +82,8 @@ export function CreateWidgetModal({ onClose, existingApp }: { onClose: () => voi
       // Keep the setup visible after navigation and reload in this browser tab.
       try { sessionStorage.setItem(`widget-setup:${currentApp._id}`, JSON.stringify({ agentId: currentAgent.id, jobId })); } catch { /* Storage may be unavailable. */ }
       localStorage.removeItem('newUser');
+      setOnboardingIntent(null);
+      phCapture('onboarding_project_created', { intent: 'website', has_website: Boolean(website.trim()) });
       onClose();
       navigate(`/app/admin/widgets/${currentApp._id}/ai`);
     } catch (e) {

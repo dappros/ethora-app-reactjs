@@ -16,6 +16,7 @@ import { modalsB } from './modalsB';
 import { modalsC } from './modalsC';
 import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
+import { startProject } from './startProject';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
 
@@ -49,6 +50,7 @@ const dictionaries = [
   modalsC,
   serverSettings,
   settingsTutorial,
+  startProject,
   sharedComponents,
   userSettings,
 ] as const;

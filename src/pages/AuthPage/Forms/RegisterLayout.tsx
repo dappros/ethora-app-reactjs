@@ -6,6 +6,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import RegisterForm from '../Register/RegisterForm';
 import ThirdStep from '../Register/Steps/ThirdStep';
+import { getOnboardingIntent, inferOnboardingIntent } from '../../../utils/onboardingIntent';
 
 interface SignUpFormProps {
   isMobile?: boolean;
@@ -25,6 +26,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
   // used to switch to that step by index; the single-page form that replaced
   // it never did, so this route showed a plain Sign Up form.
   const isTempPassword = location.pathname.includes('tempPassword');
+  const intent = inferOnboardingIntent(new URLSearchParams(location.search)) || getOnboardingIntent();
 
   return (
     <Box
@@ -74,9 +76,10 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
                 m: 0,
               }}
             >
-              {t('authRegisterLayout.title')}
+              {intent ? t(`startProject.signup.${intent}`) : t('authRegisterLayout.title')}
             </Typography>
           )}
+          {!isTempPassword && intent && <Typography align="center" sx={{ mt: 1, fontSize: '14px', color: 'rgb(var(--c-gray-600))' }}>{t('startProject.signupHint')}</Typography>}
         </Box>
         {isTempPassword ? <ThirdStep /> : <RegisterForm />}
       </Box>
