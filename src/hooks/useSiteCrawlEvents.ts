@@ -1,8 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { useCentrifugeChannel } from './useCentrifuge';
+import { useEthoraEvents } from './useEthoraEvents';
 
-// Live crawl/reindex events, published by the backend to the actor who started
-// the job (see services/centrifugo.publishToUser on the API side).
+// Live crawl/reindex events, sent over XMPP by the backend to the actor who
+// started the job (see services/realtimeEvents.publishToUser on the API side).
 //
 // A crawl is asynchronous: the POST answers as soon as the job is queued, and
 // pages are stored in batches as the crawler finds them. These events are what
@@ -11,7 +10,7 @@ import { useCentrifugeChannel } from './useCentrifuge';
 //
 // Events carry the rows they stored, so a subscriber can render a crawl as it
 // happens without polling or refetching. They are still not the system of
-// record: a Centrifugo publish is unacknowledged and unreplayable, so a client
+// record: an event is unacknowledged and unreplayable, so a client
 // that was reloading or briefly offline misses one silently. Merge what arrives,
 // and reconcile against the Web Index list plus
 // GET /v2/apps/{appId}/sources/site-crawl-jobs/{jobId} - never assume the stream
@@ -75,23 +74,9 @@ interface Options {
 }
 
 export function useSiteCrawlEvents({ appId, onEvent }: Options) {
-  const { data, connected } = useCentrifugeChannel();
-  // Kept in a ref so a caller can pass an inline arrow function without every
-  // render re-running the effect and replaying the last event it still holds.
-  const onEventRef = useRef(onEvent);
-  onEventRef.current = onEvent;
-  // useCentrifugeChannel exposes only the most recent publication, so the same
-  // object stays in `data` until the next one arrives. Without this guard a
-  // re-render for any other reason would deliver it a second time.
-  const lastSeen = useRef<unknown>(null);
-
-  useEffect(() => {
-    if (!data || data === lastSeen.current) return;
-    lastSeen.current = data;
-    if (!isSiteCrawlEvent(data)) return;
-    if (appId && data.appId !== appId) return;
-    onEventRef.current(data);
-  }, [data, appId]);
-
-  return { connected };
+  useEthoraEvents(({ payload }) => {
+    if (!isSiteCrawlEvent(payload)) return;
+    if (appId && payload.appId !== appId) return;
+    onEvent(payload);
+  });
 }

@@ -7,6 +7,7 @@ import type { ModelApp, ModelCurrentUser, ModelOwnerSession } from '../models';
 import { getCachedTranslateLanguages } from '../utils/uiLanguage';
 import type { ResolvedUiTheme } from '../utils/uiTheme';
 import { env } from './env';
+import { handleXmppEvent } from '../lib/ethoraEvents';
 type XmppProviderConfig = NonNullable<ComponentProps<typeof XmppProvider>['config']>;
 type ChatConfig = NonNullable<ComponentProps<typeof Chat>['config']>;
 
@@ -368,6 +369,7 @@ export const buildEthoraBaseChatConfig = ({
       showInContext: true,
     },
     pushNotifications: webNotificationsConfig,
+    eventHandlers: { onXmppEvent: handleXmppEvent },
     // Static UI localization + dynamic message translation, from the two
     // independent choices (see ChatLanguageInputs).
     i18n: { locale: appLocale },
@@ -599,6 +601,9 @@ export function createChatConfig({
     },
     defaultRooms: app?.defaultRooms || [],
     eventHandlers: {
+      // <Chat> replaces the provider's config in the SDK store, so this has to
+      // be here too or server events stop once the Chats page has been opened.
+      onXmppEvent: handleXmppEvent,
       onMessageSent: ({ roomJID, messageType, metadata }) => {
         // The chat component reports the MIME type as metadata.fileType - it
         // never sets metadata.mimetype - so reading that key classified every
