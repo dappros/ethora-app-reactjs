@@ -68,11 +68,11 @@ export function WidgetSetupGuide({ appId, agentId, selected, onSelect }: { appId
     try { sessionStorage.removeItem(`widget-setup:${appId}`); } catch { /* Ignore unavailable storage. */ }
     setSetup(null);
   };
-  return <section className="m-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-gray-800" aria-label={t('widgetGuide.title')}>
-    <div className="flex justify-between gap-3"><h3 className="font-semibold">{t('widgetGuide.title')}</h3>{setup && <button type="button" onClick={dismiss} className="underline">{t('widgetGuide.dismiss')}</button>}</div>
+  return <section className="m-4 rounded-xl border border-brand-200 bg-brand-50 p-4 text-sm text-gray-800" aria-label={t('widgetGuide.title')}>
+    <div className="flex justify-between gap-3"><h3 className="font-semibold text-gray-900">{t('widgetGuide.title')}</h3>{setup && <button type="button" onClick={dismiss} className="text-brand-500 underline">{t('widgetGuide.dismiss')}</button>}</div>
     <ol className="mt-3 flex flex-wrap gap-2 text-xs font-medium" aria-label={t('widgetGuide.title')}>
-      <li className={`rounded-full px-3 py-1 ${ready ? 'bg-green-100 text-green-800' : 'bg-white text-gray-700'}`}>1 · {t('widgetGuide.addWebsite')}</li>
-      <li className={`rounded-full px-3 py-1 ${tried ? 'bg-green-100 text-green-800' : 'bg-white text-gray-700'}`}>2 · {t('widgetGuide.test')}</li>
+      <li className={`rounded-full px-3 py-1 ${ready ? 'bg-green-100 text-green-800 dark:bg-green-950/70 dark:text-green-300' : 'bg-white text-gray-700'}`}>1 · {t('widgetGuide.addWebsite')}</li>
+      <li className={`rounded-full px-3 py-1 ${tried ? 'bg-green-100 text-green-800 dark:bg-green-950/70 dark:text-green-300' : 'bg-white text-gray-700'}`}>2 · {t('widgetGuide.test')}</li>
       <li className="rounded-full bg-white px-3 py-1 text-gray-700">3 · {t('widgetGuide.install')}</li>
     </ol>
     {running && <p role="status" className="mt-2">{t('widgetGuide.crawling').replace('{n}', String(crawl?.savedPages || 0))}</p>}
