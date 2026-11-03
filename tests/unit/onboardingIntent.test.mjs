@@ -6,6 +6,7 @@ test('explicit intent takes priority over a landing page', () => {
   assert.equal(inferOnboardingIntent(new URLSearchParams('intent=chat-sdk&source_page=/ai-sdk/embeddable-ai-agent-script/')), 'chat');
   assert.equal(inferOnboardingIntent(new URLSearchParams('intent=self-hosted')), 'selfHost');
   assert.equal(inferOnboardingIntent(new URLSearchParams('intent=widget')), 'website');
+  assert.equal(inferOnboardingIntent(new URLSearchParams('intent=ai')), 'website');
   assert.equal(inferOnboardingIntent(new URLSearchParams('intent=video')), 'calls');
 });
 

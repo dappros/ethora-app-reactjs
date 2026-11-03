@@ -4,7 +4,7 @@ const STORAGE_KEY = 'ethora:onboarding-intent';
 
 export function inferOnboardingIntent(params: URLSearchParams): OnboardingIntent | null {
   const explicit = (params.get('intent') || '').toLowerCase();
-  if (['widget', 'website', 'ai-widget', 'assistant'].includes(explicit)) return 'website';
+  if (['ai', 'widget', 'website', 'ai-widget', 'assistant'].includes(explicit)) return 'website';
   if (['self-hosted', 'selfhosted', 'self-host', 'selfhost'].includes(explicit)) return 'selfHost';
   if (['chat', 'chat-sdk', 'sdk', 'mobile'].includes(explicit)) return 'chat';
   if (['calls', 'video', 'voice'].includes(explicit)) return 'calls';
