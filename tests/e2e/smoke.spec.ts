@@ -120,6 +120,16 @@ test('registration explains the goal passed by the website', async ({ page }) =>
   await expect(page.getByText(/right setup/i)).toBeVisible();
 });
 
+test('register without a goal stays neutral after visiting a widget link', async ({ page }) => {
+  await page.goto('/register?intent=widget');
+  await expect(page.getByRole('heading', { name: 'Create your website assistant' })).toBeVisible();
+
+  await page.goto('/register');
+  await expect(page.getByRole('heading', { name: 'Sign Up' })).toBeVisible();
+  await expect(page.getByText(/right setup/i)).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('ethora:onboarding-intent'))).toBeNull();
+});
+
 test('unknown route renders 404 page', async ({ page }) => {
   await page.goto('/does-not-exist');
 

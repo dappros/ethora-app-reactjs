@@ -1,12 +1,12 @@
 import { Box, Typography } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import RegisterForm from '../Register/RegisterForm';
 import ThirdStep from '../Register/Steps/ThirdStep';
-import { getOnboardingIntent, inferOnboardingIntent } from '../../../utils/onboardingIntent';
+import { inferOnboardingIntent, setOnboardingIntent } from '../../../utils/onboardingIntent';
 
 interface SignUpFormProps {
   isMobile?: boolean;
@@ -26,7 +26,11 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
   // used to switch to that step by index; the single-page form that replaced
   // it never did, so this route showed a plain Sign Up form.
   const isTempPassword = location.pathname.includes('tempPassword');
-  const intent = inferOnboardingIntent(new URLSearchParams(location.search)) || getOnboardingIntent();
+  const intent = inferOnboardingIntent(new URLSearchParams(location.search));
+
+  useEffect(() => {
+    if (!isTempPassword) setOnboardingIntent(intent);
+  }, [intent, isTempPassword]);
 
   return (
     <Box
