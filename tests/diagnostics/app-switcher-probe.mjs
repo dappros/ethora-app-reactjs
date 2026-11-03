@@ -108,7 +108,7 @@ let wsCount = 0;
 let wsOpens = 0;
 let wsCloses = 0;
 page.on('websocket', (ws) => {
-  if (!ws.url().includes('/ws')) return;  // ignore centrifuge
+  if (!ws.url().includes('/ws')) return;  // XMPP only
   wsOpens++;
   events.push({ kind: 'ws-open', t: Date.now(), text: ws.url() });
   ws.on('framesent', (data) => {

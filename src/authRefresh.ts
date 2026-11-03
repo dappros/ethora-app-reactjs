@@ -13,7 +13,6 @@ export type RefreshErrorCode =
 export interface RefreshResult {
   token: string;
   refreshToken: string;
-  wsToken: string;
   xmppPassword?: string;
   fileToken?: string;
 }
@@ -153,7 +152,6 @@ type PostFn = (
   data: {
     token: string;
     refreshToken: string;
-    wsToken: string;
     xmppPassword?: string;
     fileToken?: string;
   };
@@ -170,7 +168,7 @@ const adoptStoredTokens = (): RefreshResult | null => {
   const token = readStoredToken();
   if (!refreshToken || !token) return null;
 
-  const result: RefreshResult = { token, refreshToken, wsToken: '' };
+  const result: RefreshResult = { token, refreshToken };
   persistTokens(result);
   return result;
 };
@@ -183,7 +181,6 @@ const requestRotation = async (refreshToken: string): Promise<RefreshResult> => 
   const result: RefreshResult = {
     token: response?.data?.token || '',
     refreshToken: response?.data?.refreshToken || '',
-    wsToken: response?.data?.wsToken || '',
     xmppPassword: response?.data?.xmppPassword,
     fileToken: response?.data?.fileToken,
   };

@@ -14,7 +14,6 @@ import { env } from './config/env';
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
-  _wsToken: '',
   set refreshToken(token: string) {
     localStorage.setItem('refreshToken-538', token);
   },
@@ -27,12 +26,6 @@ export const httpTokens = {
   },
   get token() {
     return localStorage.getItem('token-538') || this._token;
-  },
-  set wsToken(wsToken: string) {
-    this._wsToken = wsToken;
-  },
-  get wsToken() {
-    return this._wsToken;
   }
 };
 
@@ -233,7 +226,7 @@ httpV2App.interceptors.request.use((config) => {
 }, null);
 
 setRefreshTransport((url, body, config) => http.post(url, body, config));
-setTokenSink(({ token, refreshToken, wsToken }) => {
+setTokenSink(({ token, refreshToken }) => {
   // Never resurrect a logged-out session: if a logout already started here,
   // or another tab cleared the stored refresh token, a late-resolving
   // rotation must NOT write its tokens back into localStorage - that
@@ -243,10 +236,6 @@ setTokenSink(({ token, refreshToken, wsToken }) => {
   }
   httpTokens.token = token;
   httpTokens.refreshToken = refreshToken;
-
-  if (wsToken) {
-    httpTokens.wsToken = wsToken;
-  }
 });
 
 export const refreshToken = async () => {
