@@ -1,6 +1,6 @@
 import cn from 'classnames';
 import { useMemo, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isBaseAppHost } from '../utils/appHost';
@@ -35,6 +35,7 @@ const ITEM_WRAP_CLASS = 'py-[3px] first:pt-0 last:pb-0';
 // internal tooling that deep-links keeps working. See utils/hostedEnv.ts.
 export function AppMenu() {
   const location = useLocation();
+  const inAI = /^\/app\/admin\/(agents|widgets)(\/|$)/.test(location.pathname);
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
   const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
@@ -64,11 +65,13 @@ export function AppMenu() {
 
   return (
     <div className="bg-white md:fixed p-2 flex justify-between items-center h-full md:h-[calc(100vh-32px)] md:rounded-2xl md:self-start md:flex-col">
-      <div className="flex-1 flex md:hidden">
-        <button onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}>
-          <IconMenuBurger />
-        </button>
-      </div>
+      <button
+        aria-label={t('nav.openMenu')}
+        onClick={() => setMobileMenuVisible(!isMobileMenuVisible)}
+        className="md:hidden"
+      >
+        <IconMenuBurger />
+      </button>
       <div className="font-varela text-[24px] leading-none md:hidden block">
         {getPageTitle}
       </div>
@@ -92,8 +95,9 @@ export function AppMenu() {
         </div>
         {isAdmin && isBaseApp && !agentsOff && (
           <div className={ITEM_WRAP_CLASS}>
-            <NavLink
+            <Link
               to="/app/admin/agents"
+              aria-current={inAI ? 'page' : undefined}
               title={
                 aiEnabled
                   ? undefined
@@ -104,8 +108,8 @@ export function AppMenu() {
               })}
             >
               <IconAgents />
-              <div className={LABEL_CLASS}>{t('nav.agents')}</div>
-            </NavLink>
+              <div className={LABEL_CLASS}>{t('nav.ai')}</div>
+            </Link>
           </div>
         )}
         {isAdmin && showBilling && (

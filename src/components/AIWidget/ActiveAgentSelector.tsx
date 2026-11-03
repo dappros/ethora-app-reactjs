@@ -8,15 +8,16 @@
 // continue to read/write `App.aiBot.*` and the v2/bot controller fans the changes
 // out to the linked Agent.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import CircularProgress from '@mui/material/CircularProgress';
 import { actionInviteAgentToChat, actionListAgents, actionListBotInstances } from '../../actions';
-import { httpUpdateApp } from '../../http';
+import { httpPrepareWidgetAgent, httpUpdateApp } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-import { ModelAgent, ModelApp } from '../../models';
+import { ModelApp } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
+import { useActiveWidgetAgent } from '../../hooks/useActiveWidgetAgent';
 
 interface ActiveAgentSelectorProps {
   appId: string;
@@ -30,16 +31,9 @@ interface ActiveAgentSelectorProps {
 export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId, app, bare = false, disabled = false, label }) => {
   const { t } = useTranslation();
   const agents = useAppStore((s) => s.agents);
-  const botInstances = useAppStore((s) => s.botInstances);
   const doUpdateApp = useAppStore((s) => s.doUpdateApp);
   const [busy, setBusy] = useState(false);
-  const [defaultBotInstanceId, setDefaultBotInstanceId] = useState<string | null>(
-    (app as any)?.defaultBotInstanceId || null
-  );
-
-  useEffect(() => {
-    setDefaultBotInstanceId((app as any)?.defaultBotInstanceId || null);
-  }, [app]);
+  const currentAgent = useActiveWidgetAgent(app);
 
   // Always refresh agents + this App's BotInstances when the selector mounts
   // or when appId changes. The previous lazy-load ("only if store empty")
@@ -64,13 +58,6 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
     }
   }, [appId]);
 
-  const currentAgent: ModelAgent | null = useMemo(() => {
-    if (!defaultBotInstanceId) return null;
-    const bi = botInstances.find((b) => b.id === defaultBotInstanceId);
-    if (!bi) return null;
-    return agents.find((a) => a.id === bi.agentId) || null;
-  }, [defaultBotInstanceId, botInstances, agents]);
-
   // After the API mutates the App row, mirror the new state into the
   // shared store so siblings reading `currentApp` (e.g. the persona
   // card under TabAIWidgetCode) re-render with the fresh
@@ -87,7 +74,6 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
       setBusy(true);
       try {
         const r = await httpUpdateApp(appId, { defaultBotInstanceId: '' });
-        setDefaultBotInstanceId(null);
         pushAppToStore(r?.data?.result);
         toast.success(t('aiWidgetActiveAgentSelector.clearedToast'));
       } finally {
@@ -96,17 +82,14 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
       return;
     }
     const widgetChatId = app?.aiBot?.chatId;
-    if (!widgetChatId) {
-      toast.warn(t('aiWidgetActiveAgentSelector.bindChatWarn'));
-      return;
-    }
     setBusy(true);
     try {
-      const out = await actionInviteAgentToChat(agentId, { appId, chatId: widgetChatId });
+      const out = widgetChatId
+        ? await actionInviteAgentToChat(agentId, { appId, chatId: widgetChatId })
+        : (await httpPrepareWidgetAgent(appId, agentId)).data;
       const bi = (out as any)?.botInstance || (out as any)?.respData?.botInstance;
       if (bi?.id) {
         const r = await httpUpdateApp(appId, { defaultBotInstanceId: bi.id });
-        setDefaultBotInstanceId(bi.id);
         pushAppToStore(r?.data?.result);
         // `currentAgent` is a useMemo that hasn't recomputed yet (the state
         // update we just dispatched flushes after this microtask), so it

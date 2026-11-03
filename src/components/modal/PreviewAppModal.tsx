@@ -5,32 +5,33 @@ import { IconClose } from '../Icons/IconClose';
 import { CircularProgress } from '@mui/material';
 import classNames from 'classnames';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
 import backgroundImage from '../../assets/tutorial/background.png';
 import welcomeImage from '../../assets/tutorial/welcome.png';
 import { useGoogleTranslateFix } from '../../hooks/useGoogleTranslateFix';
 import { useTranslation } from '../../i18n/useTranslation';
+import { ModelApp } from '../../models';
+import { AppIntentModal } from './AppIntentModal';
 // import { TextInput } from '../ui/TextInput';
 
 interface Props {
   onClose: () => void;
   show: boolean;
   haveApps: boolean;
+  onCreateWidget: () => void;
 }
 
 type Inputs = {
   appName: string;
 };
 
-export function PreviewAppModal({ onClose, show }: Props) {
-  const navigate = useNavigate();
-  const location = useLocation();
+export function PreviewAppModal({ onClose, show, onCreateWidget }: Props) {
   const fixKey = useGoogleTranslateFix();
   const { t } = useTranslation();
 
   const [step, setStep] = useState(0);
+  const [createdApp, setCreatedApp] = useState<ModelApp | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const {
@@ -64,19 +65,15 @@ export function PreviewAppModal({ onClose, show }: Props) {
         setTimeout(() => {
           toast(t('previewAppModal.toastCreatedSuccess'));
           setLoading(false);
-          navigate(`/app/admin/apps/${app._id}/settings`, {
-            state: { from: location.pathname + location.search },
-          });
           localStorage.removeItem('newUser');
-          localStorage.setItem('firstAdd', true.toString());
-
-          onClose();
+          setCreatedApp(app);
         }, 1500);
       })
       .catch(() => {
         toast.error(t('previewAppModal.toastCreateError'));
         clearInterval(interval);
         setLoading(false);
+        setStep(1);
       });
   };
 
@@ -90,6 +87,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
     return () => clearInterval(dotsInterval);
   }, [loading]);
 
+  if (createdApp) return <AppIntentModal app={createdApp} onClose={onClose} />;
   return (
     <Dialog
       key={fixKey}
@@ -157,6 +155,7 @@ export function PreviewAppModal({ onClose, show }: Props) {
               {t('previewAppModal.createFirstAppDescription')}
             </p>
             <form onSubmit={handleSubmit(onSubmit)}>
+              <button type="button" onClick={onCreateWidget} className="mb-4 w-full rounded-xl border border-brand-500 px-4 py-3 text-brand-500 font-semibold">{t('widgetSetup.entry')}</button>
               <div className="mb-4">
                 <input
                   type="text"

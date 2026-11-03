@@ -476,6 +476,7 @@ export const adminCore = {
     'agentSettings.websiteWidgetBotOn': 'Bot running',
     'agentSettings.websiteWidgetBotOff': 'Bot stopped',
     'agentSettings.websiteWidgetOpen': 'Open AI Widget settings',
+    'agentSettings.websiteWidgetCurrent': 'Current app',
     'agentSettings.websiteWidgetEmpty':
       "No App of yours uses {name} for its website widget yet. To use it, open an App's settings, AI Widget tab, and choose it as the active agent.",
     'agentSettings.tabWebIndex': 'Web Index',
@@ -936,6 +937,7 @@ export const adminCore = {
     'agentSettings.websiteWidgetBotOn': 'Bot actif',
     'agentSettings.websiteWidgetBotOff': 'Bot arrêté',
     'agentSettings.websiteWidgetOpen': 'Ouvrir les réglages AI Widget',
+    'agentSettings.websiteWidgetCurrent': 'Application actuelle',
     'agentSettings.websiteWidgetEmpty':
       "Aucune de vos Apps n'utilise encore {name} pour son widget. Pour l'utiliser, ouvrez les paramètres d'une App, onglet AI Widget, et choisissez-le comme agent actif.",
     'agentSettings.tabWebIndex': 'Index Web',
@@ -1395,6 +1397,7 @@ export const adminCore = {
     'agentSettings.websiteWidgetBotOn': 'Bot activo',
     'agentSettings.websiteWidgetBotOff': 'Bot detenido',
     'agentSettings.websiteWidgetOpen': 'Abrir ajustes de AI Widget',
+    'agentSettings.websiteWidgetCurrent': 'Aplicación actual',
     'agentSettings.websiteWidgetEmpty':
       'Ninguna de tus Apps usa todavía {name} en su widget. Para usarlo, abre los ajustes de una App, pestaña AI Widget, y elígelo como agente activo.',
     'agentSettings.tabWebIndex': 'Índice web',

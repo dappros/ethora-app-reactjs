@@ -9,9 +9,9 @@ const en = {
     'aiWidgetAppearance.title': 'Widget appearance',
     'aiWidgetAppearance.description':
       'Customize how the assistant widget looks and behaves on your site. The preview updates as you type; once saved, changes reach every site already using the embed code within a minute, no need to paste it again.',
-    'aiWidgetAppearance.saveButton': 'Save appearance',
+    'aiWidgetAppearance.saveButton': 'Save widget appearance',
     'aiWidgetAppearance.resetButton': 'Reset to defaults',
-    'aiWidgetAppearance.saved': 'Widget appearance saved',
+    'aiWidgetAppearance.saved': 'Widget appearance saved. It will reach sites using the embed code within a minute.',
     'aiWidgetAppearance.unsavedHint': 'Unsaved changes',
     'aiWidgetAppearance.saveFailed': 'Could not save the widget appearance',
     'aiWidgetAppearance.loadFailed': 'Could not load the saved widget appearance',

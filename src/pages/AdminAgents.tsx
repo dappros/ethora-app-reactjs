@@ -1,3 +1,4 @@
+import { AIWorkspacePage, AI_PRIMARY_ACTION_CLASS, AI_SECONDARY_ACTION_CLASS, AI_CARD_GRID_CLASS, AI_CARD_CLASS } from '../components/AIWidget/AIWorkspacePage';
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 //
 // AdminAgents: top-level Agents list (sibling of AdminApps).
@@ -210,7 +211,7 @@ export default function AdminAgents() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            <div className={AI_CARD_GRID_CLASS}>
               {visible.map((a) => (
                 <AgentCard
                   key={a.id}
@@ -240,41 +241,17 @@ export default function AdminAgents() {
   }
 
   return (
-    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
-      {/* Page-level header outside the white card - same shape as Apps. */}
-      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
-        <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
-          {t('adminAgents.title')}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <input
-            placeholder={t('adminAgents.filterPlaceholder')}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="border rounded px-3 h-[40px] text-sm w-64"
-          />
-          <button
-            onClick={() => setShowImport(true)}
-            className="flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4"
-            title={t('adminAgents.importAgentTitle')}
-          >
-            {t('adminAgents.importAgent')}
-          </button>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
-          >
-            <IconAdd color="white" className="mr-2" />
-            <span>{t('adminAgents.newAgent')}</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="rounded-2xl bg-white p-4 overflow-y-auto">
-        <p className="text-sm text-gray-500 mb-4">
-          {t('adminAgents.description')}
-        </p>
-
+    <AIWorkspacePage
+      title={t('adminAgents.title')}
+      description={t('adminAgents.description')}
+      searchLabel={t('adminAgents.filterPlaceholder')}
+      search={filter}
+      onSearch={setFilter}
+      actions={<>
+        <button onClick={() => setShowImport(true)} className={AI_SECONDARY_ACTION_CLASS} title={t('adminAgents.importAgentTitle')}>{t('adminAgents.importAgent')}</button>
+        <button onClick={() => setShowCreate(true)} className={AI_PRIMARY_ACTION_CLASS}><IconAdd color="white" /><span>{t('adminAgents.newAgent')}</span></button>
+      </>}
+    >
       {/* Superadmins can also audit other tenants' private agents. Everyone
           else sees their own agents first, then the public ones. */}
       {isSuperReadAdmin && (
@@ -381,8 +358,7 @@ export default function AdminAgents() {
           }}
         />
       )}
-      </div>{/* end white card */}
-    </div>
+    </AIWorkspacePage>
   );
 }
 
@@ -400,7 +376,7 @@ const AgentCard: React.FC<{
   const visibilityClass = VISIBILITY_BADGE[agent.visibility] || VISIBILITY_BADGE.private;
   const isOwned = cardMode === 'owned';
   return (
-    <div className="border rounded-xl p-3 hover:border-brand-500 transition-colors flex flex-col gap-2 bg-white">
+    <div className={AI_CARD_CLASS}>
       <div className="flex items-start gap-3">
         {agent.avatarUrl ? (
           <img src={agent.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
@@ -447,7 +423,7 @@ const AgentCard: React.FC<{
         </div>
       </dl>
 
-      <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+      <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
         {/* The settings page renders editable fields for the owner, read-only
             for everyone else. The verb on this button matches what the viewer
             will actually see when they land there. */}
@@ -617,7 +593,7 @@ const CreateAgentModal: React.FC<{
   const [prompt, setPrompt] = useState('You are a helpful assistant.');
   const [visibility, setVisibility] = useState<'private' | 'unlisted' | 'public'>('private');
   const [ownerAppId, setOwnerAppId] = useState('');
-  const [includeKnowledge, setIncludeKnowledge] = useState(true);
+  const [includeKnowledge, setIncludeKnowledge] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {

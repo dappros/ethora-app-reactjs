@@ -1257,6 +1257,10 @@ export function httpListBotInstances(params?: { appId?: string; agentId?: string
   return httpV2.get('/bot-instances', { params });
 }
 
+export function httpPrepareWidgetAgent(appId: string, agentId: string) {
+  return httpV2.post(`/apps/${encodeURIComponent(appId)}/agents/${encodeURIComponent(agentId)}/widget-instance`);
+}
+
 // Remove a BotInstance from a single chat (does NOT stop the bot or destroy the
 // instance). Used by the admin Chats "remove bot from this room" button.
 export function httpLeaveChatAgentBotInstance(idOrAddress: string, botInstanceId: string, chatJid: string) {
@@ -1291,7 +1295,7 @@ export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstance
 //
 // `agentId` narrows the list to one agent's rows. Omitting it lists the whole
 // app, which is what the legacy LinksTable wants — it has no agent to scope to.
-export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number; agentId?: string }) {
+export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number; agentId?: string; search?: string }) {
   const config = params ? { params } : undefined;
   if (appId) return httpV2.get(`/apps/${appId}/sources/site-crawl`, config);
   return httpV2.get('/sources/site-crawl', config);

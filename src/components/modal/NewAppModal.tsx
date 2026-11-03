@@ -4,30 +4,31 @@ import { IconClose } from '../Icons/IconClose';
 
 import { CircularProgress } from '@mui/material';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { actionCreateApp } from '../../actions';
 import { useGoogleTranslateFix } from '../../hooks/useGoogleTranslateFix';
 import { useTranslation } from '../../i18n/useTranslation';
+import { ModelApp } from '../../models';
+import { AppIntentModal } from './AppIntentModal';
 // import { TextInput } from '../ui/TextInput';
 
 interface Props {
   onClose: () => void;
   show: boolean;
   haveApps: boolean;
+  onCreateWidget: () => void;
 }
 
 type Inputs = {
   appName: string;
 };
 
-export function NewAppModal({ onClose, show }: Props) {
-  const navigate = useNavigate();
-  const location = useLocation();
+export function NewAppModal({ onClose, show, onCreateWidget }: Props) {
   const fixKey = useGoogleTranslateFix();
   const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
+  const [createdApp, setCreatedApp] = useState<ModelApp | null>(null);
   const [progress, setProgress] = useState(0);
   const {
     register,
@@ -62,13 +63,8 @@ export function NewAppModal({ onClose, show }: Props) {
         setTimeout(() => {
           toast(t('newAppModal.createSuccessToast'));
           setLoading(false);
-          navigate(`/app/admin/apps/${app._id}/settings`, {
-            state: { from: location.pathname + location.search },
-          });
           localStorage.removeItem('newUser');
-          localStorage.setItem('firstAdd', true.toString());
-
-          onClose();
+          setCreatedApp(app);
         }, 400);
       })
       .catch(() => {
@@ -88,6 +84,7 @@ export function NewAppModal({ onClose, show }: Props) {
     return () => clearInterval(dotsInterval);
   }, [loading]);
 
+  if (createdApp) return <AppIntentModal app={createdApp} onClose={onClose} />;
   return (
     <Dialog
       key={fixKey}
@@ -138,6 +135,7 @@ export function NewAppModal({ onClose, show }: Props) {
               {t('newAppModal.title')}
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
+              <button type="button" onClick={onCreateWidget} className="mb-4 w-full rounded-xl border border-brand-500 px-4 py-3 text-brand-500 font-semibold">{t('widgetSetup.entry')}</button>
               <div className="mb-4">
                 <input
                   type="text"

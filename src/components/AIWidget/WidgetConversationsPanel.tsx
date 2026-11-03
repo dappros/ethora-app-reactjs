@@ -106,6 +106,7 @@ export function WidgetConversationsPanel({
   appId,
   onTotalChange,
 }: WidgetConversationsPanelProps): ReactElement | null {
+  const [simpleView, setSimpleView] = useState(true);
   const { t } = useTranslation();
   const [rows, setRows] = useState<WidgetConversationRow[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -339,6 +340,9 @@ export function WidgetConversationsPanel({
           {t('aiWidgetConversations.heading')}
         </h3>
         <div className="flex items-center gap-2">
+          <button type="button" onClick={() => { setSimpleView((v) => !v); setSelected(new Set()); }} className="text-sm text-brand-500 hover:underline">
+            {t(simpleView ? 'aiWidgetConversations.tableView' : 'aiWidgetConversations.simpleList')}
+          </button>
           <span className="text-sm text-gray-600">
             {loading ? t('aiWidgetConversations.loading') : `${total} ${t('aiWidgetConversations.totalSuffix')}`}
           </span>
@@ -393,7 +397,21 @@ export function WidgetConversationsPanel({
         </div>
       )}
 
-      {!error && rows.length > 0 && (
+      {!error && rows.length > 0 && simpleView && (
+        <div className="divide-y rounded-xl border border-gray-200">
+          {rows.map((row) => (
+            <button key={row._id} type="button" onClick={() => setSelectedRow(row)} className="flex w-full items-center justify-between gap-3 p-4 text-left hover:bg-gray-50">
+              <span className="min-w-0">
+                <span className="block font-medium">{formatVisitor(row)}</span>
+                <span className="block break-all text-sm text-gray-500">{row.visitor?.metadata?.lastPageUrl || row.visitor?.metadata?.pageUrl || t('aiWidgetConversations.pageUnknown')}</span>
+                <span className="block text-xs text-gray-500">{t('aiWidgetConversations.lastActivityLabel')}: {formatDate(row.updatedAt)}</span>
+              </span>
+              <span className="shrink-0 text-sm text-brand-500">{t('aiWidgetConversations.open')}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {!error && rows.length > 0 && !simpleView && (
         <div className="overflow-x-auto rounded-xl border border-gray-200">
           {/* Bulk-action bar — appears as a sticky strip above the table
               once at least one row is ticked, so the operator doesn't

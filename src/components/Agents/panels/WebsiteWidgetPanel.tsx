@@ -12,9 +12,10 @@ export type AgentBotInstanceRow = ModelBotInstance & { appName?: string; isAppWi
 // So this tab only points at the Apps whose website widget this agent backs,
 // limited to Apps the viewer owns (a public agent's bots in other accounts'
 // Apps are none of their business and not editable by them).
-export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentBotInstanceRow[] }> = ({
+export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentBotInstanceRow[]; currentAppId?: string }> = ({
   agent,
   instances,
+  currentAppId,
 }) => {
   const { t } = useTranslation();
   const ownedApps = useAppStore((s) => s.ownedApps);
@@ -43,12 +44,12 @@ export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentB
                   {bi.status === 'on' ? t('agentSettings.websiteWidgetBotOn') : t('agentSettings.websiteWidgetBotOff')}
                 </div>
               </div>
-              <Link
+              {String(bi.appId) === String(currentAppId) ? <span className="text-sm text-gray-500">{t('agentSettings.websiteWidgetCurrent')}</span> : <Link
                 to={`/app/admin/apps/${bi.appId}/settings?tab=AI+Widget`}
                 className="text-brand-500 hover:underline text-sm"
               >
                 {t('agentSettings.websiteWidgetOpen')}
-              </Link>
+              </Link>}
             </li>
           ))}
         </ul>

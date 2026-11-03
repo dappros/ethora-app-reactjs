@@ -14,7 +14,7 @@ export function useActiveWidgetAgent(app?: ModelApp): ModelAgent | null {
     const cur = currentApp as unknown as { _id?: string; defaultBotInstanceId?: string } | null;
     const own = app as unknown as { _id?: string; defaultBotInstanceId?: string } | undefined;
     const sameApp = cur?._id && own?._id && String(cur._id) === String(own._id);
-    const biId = sameApp ? cur?.defaultBotInstanceId : own?.defaultBotInstanceId || cur?.defaultBotInstanceId;
+    const biId = sameApp ? (cur?.defaultBotInstanceId ?? own?.defaultBotInstanceId) : own?.defaultBotInstanceId;
     if (!biId) return null;
     const bi = botInstances.find((b) => b.id === biId);
     if (!bi) return null;

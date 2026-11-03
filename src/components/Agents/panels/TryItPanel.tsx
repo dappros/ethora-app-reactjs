@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AgentTryTurn, httpTryAgent } from '../../../http';
+import { AgentTryTurn, httpGetAgentKnowledge, httpTryAgent } from '../../../http';
 import { markAgentTried } from '../../../utils/agentSetupChecklist';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent } from '../../../models';
@@ -18,7 +18,17 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
+  const [noKnowledge, setNoKnowledge] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setNoKnowledge(false);
+    httpGetAgentKnowledge(agent.id).then(({ data }) => {
+      if (!cancelled) setNoKnowledge(data.pages + data.docs === 0);
+    }).catch(() => { /* A failed check does not prove the agent has no sources. */ });
+    return () => { cancelled = true; };
+  }, [agent.id]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ block: 'nearest' });
@@ -54,6 +64,7 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
 
   return (
     <div className="space-y-3 max-w-3xl">
+      {noKnowledge && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{t('widgetGuide.noKnowledge')}</p>}
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm text-gray-600">{t('agentPanels.tryIntro')}</p>
         {turns.length > 0 && (

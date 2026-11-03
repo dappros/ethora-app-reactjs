@@ -16,6 +16,9 @@ const Help = lazy(() => import('./pages/Help'));
 const WhatsNew = lazy(() => import('./pages/WhatsNew'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
+const Widgets = lazy(() => import('./pages/Widgets/Widgets'));
+const WidgetEditor = lazy(() => import('./pages/Widgets/WidgetEditor'));
+const WidgetAISettings = lazy(() => import('./pages/Widgets/WidgetAISettings'));
 const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
@@ -136,6 +139,10 @@ export const router = createBrowserRouter(
                           path: 'server',
                           Component: AdminServerSettings,
                         },
+                        { path: 'apps/:appId/ai', element: <WidgetAISettings appContext /> },
+                        { path: 'widgets', Component: Widgets },
+                        { path: 'widgets/:appId', Component: WidgetEditor },
+                        { path: 'widgets/:appId/ai', Component: WidgetAISettings },
                         {
                           path: 'agents',
                           Component: AdminAgents,

@@ -706,3 +706,20 @@ test('the agent header shows its AI tokens this month', async ({ page }) => {
   await expect(chip).toHaveAttribute('title', /Agent replies: 40,000/);
   await expect(chip).toHaveAttribute('title', /Last month: 120,000/);
 });
+
+test('Web Index searches all pages through the server and resets the page', async ({ page }) => {
+  await fakeBackend(page);
+  const requests: string[] = [];
+  await page.route(`**/v2/apps/${OWNED_APP._id}/sources/site-crawl*`, async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    const url = new URL(route.request().url());
+    requests.push(url.search);
+    const search = url.searchParams.get('search');
+    const results = search ? [{ id: 'found', url: 'https://example.com/target', mdByteSize: 10, updatedAt: '' }] : [];
+    return route.fulfill({ json: { result: results, pagination: { total: results.length, limit: 25, offset: 0, hasMore: false } } });
+  });
+  await openTab(page, 'Web Index');
+  await page.getByRole('searchbox', { name: 'Find a page' }).fill('target');
+  await expect(page.getByText('https://example.com/target', { exact: true })).toBeVisible();
+  expect(requests.some((q) => new URLSearchParams(q).get('search') === 'target' && new URLSearchParams(q).get('offset') === '0')).toBeTruthy();
+});

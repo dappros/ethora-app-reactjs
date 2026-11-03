@@ -18,9 +18,10 @@ import { ModelApp } from '../../models';
 import { ActiveAgentCard } from '../../components/AIWidget/ActiveAgentCard';
 import { useActiveWidgetAgent } from '../../hooks/useActiveWidgetAgent';
 import { useAppStore } from '../../store/useAppStore';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AssistantAppearancePanel } from '../../components/AIWidget/AssistantAppearancePanel';
 import { WidgetConversationsPanel } from '../../components/AIWidget/WidgetConversationsPanel';
+import { ConfigAIPanel } from '../../components/AIWidget/ConfigAIPanel';
 import { useTranslation } from '../../i18n/useTranslation';
 import {
   AiWidgetAppearance,
@@ -41,6 +42,7 @@ const statusAiBot = {
 };
 
 interface Props {
+  standalone?: boolean;
   appId: string;
   app?: ModelApp;
   setAiBot: (aiBot: ModelAIbot) => void;
@@ -54,6 +56,7 @@ interface Props {
   // banner explains the state.
   aiFeatureDisabled?: boolean;
   handleRagChange: () => void;
+  onAppearanceDirtyChange?: (dirty: boolean) => void;
 }
 
 // Inject the production widget bundle into the admin page so the operator
@@ -148,11 +151,13 @@ function teardownWidget() {
 }
 
 export function AIWidget({
+  standalone = false,
   appId,
   app,
   aiBot,
   setAiBot,
   handleRagChange: _handleRagChange,
+  onAppearanceDirtyChange,
   aiFeatureDisabled = false,
 }: Props) {
   const { t } = useTranslation();
@@ -160,7 +165,16 @@ export function AIWidget({
   const [value, setValue] = useState('1');
   const [previewActive, setPreviewActive] = useState<boolean>(false);
   const [conversationsTotal, setConversationsTotal] = useState<number | null>(null);
-  const [widgetTab, setWidgetTab] = useState<'code' | 'appearance'>('code');
+  const [searchParams, setSearchParams] = useSearchParams();
+  type WidgetTab = 'code' | 'appearance' | 'config' | 'conversations';
+  const routeTabs: Record<string, WidgetTab> = { install: 'code', appearance: 'appearance', conversations: 'conversations' };
+  const [localTab, setLocalTab] = useState<WidgetTab>('code');
+  const widgetTab = standalone ? (routeTabs[searchParams.get('tab') || 'install'] || 'code') : localTab;
+  const setWidgetTab = (tab: WidgetTab) => {
+    if (!standalone) { setLocalTab(tab); return; }
+    const value = Object.entries(routeTabs).find(([, candidate]) => candidate === tab)?.[0] || 'install';
+    setSearchParams({ tab: value });
+  };
   const activeAgent = useActiveWidgetAgent(app);
   const currentUserId = useAppStore((s) => (s.currentUser as { _id?: string } | null)?._id);
   const ownsActiveAgent = !!activeAgent && !!currentUserId && String(activeAgent.ownerId) === String(currentUserId);
@@ -253,6 +267,7 @@ export function AIWidget({
   }, []);
 
   const appearanceIsDirty = appearanceLoaded && !isEqual(appearance, savedAppearance);
+  useEffect(() => { onAppearanceDirtyChange?.(appearanceIsDirty); }, [appearanceIsDirty, onAppearanceDirtyChange]);
 
   // Env override first, then the copy bundled with this app. See
   // utils/widgetUrl.ts for the full resolution order.
@@ -381,10 +396,11 @@ export function AIWidget({
             the agent and widget cards it exercises. */}
         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
-            <h2 className="font-sans font-semibold text-lg">{t('appSettingsAIWidget.pageTitle')}</h2>
-            <p className="font-sans text-sm text-gray-600">{t('appSettingsAIWidget.pageSubtitle')}</p>
+            <h2 className="font-sans font-semibold text-lg">{standalone ? t('widgets.websiteWidget') : t('appSettingsAIWidget.pageTitle')}</h2>
+            <p className="font-sans text-sm text-gray-600">{standalone ? t('widgets.widgetIntro') : t('appSettingsAIWidget.pageSubtitle')}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {standalone && <Link to={`/app/admin/widgets/${appId}/ai`} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-brand-500">{t('widgets.openConfig')}</Link>}
             {previewActive ? (
               <>
                 <Button
@@ -432,6 +448,7 @@ export function AIWidget({
         {/* The agent behind the widget: which one, who it is, whether it
             answers, what it knows. Its full editor is under Agents. */}
         <ActiveAgentCard
+          compact={standalone || widgetTab === 'config'}
           appId={appId as string}
           app={app}
           enabled={statusBot}
@@ -460,20 +477,23 @@ export function AIWidget({
         {/* The website widget: the embed code first, its look on a second
             tab for those who want to change it. */}
         <section className="border border-gray-200 rounded-xl bg-white mt-4" data-testid="website-widget-card">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
+          {!standalone && <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
             <h3 className="font-sans font-semibold text-base">{t('appSettingsAIWidget.widgetCardTitle')}</h3>
-          </div>
+          </div>}
           <Tabs
             value={widgetTab}
             onChange={(_, v) => setWidgetTab(v)}
+            variant="scrollable"
+            scrollButtons="auto"
             sx={{ px: 2, borderBottom: 1, borderColor: 'divider', minHeight: 40 }}
           >
-            <Tab value="code" label={t('appSettingsAIWidget.codeTab')} sx={{ minHeight: 40, textTransform: 'none' }} />
+            <Tab value="code" label={t(standalone ? 'widgets.install' : 'appSettingsAIWidget.codeTab')} sx={{ minHeight: 40, textTransform: 'none' }} />
             <Tab
               value="appearance"
               label={appearanceIsDirty ? `${t('appSettingsAIWidget.appearanceTab')} *` : t('appSettingsAIWidget.appearanceTab')}
               sx={{ minHeight: 40, textTransform: 'none' }}
             />
+            {standalone ? <Tab value="conversations" label={t('widgets.conversations')} sx={{ minHeight: 40, textTransform: 'none' }} /> : <Tab value="config" label={t('appSettingsAIWidget.configTab')} sx={{ minHeight: 40, textTransform: 'none' }} />}
           </Tabs>
           {widgetTab === 'code' && (
             <div className="w-full overflow-x-auto">
@@ -519,15 +539,16 @@ export function AIWidget({
               }
             />
           )}
+          {widgetTab === 'config' && <ConfigAIPanel appId={appId} activeAgent={activeAgent} />}
         </section>
 
         {/* Widget Conversations: lists rooms with chats.type='widget' for
             this app. Operators can review historical visitor sessions
             here. */}
-        <WidgetConversationsPanel
+        {(!standalone || widgetTab === 'conversations') && <WidgetConversationsPanel
           appId={appId}
           onTotalChange={setConversationsTotal}
-        />
+        />}
       </div>
     </div>
   );

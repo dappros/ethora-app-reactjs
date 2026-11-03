@@ -9,6 +9,8 @@ import { ActiveAgentSelector } from './ActiveAgentSelector';
 
 interface Props {
   appId: string;
+  compact?: boolean;
+  appContext?: boolean;
   app?: ModelApp;
   enabled: boolean;
   onToggle: () => void;
@@ -31,6 +33,8 @@ function formatMb(bytes?: number | null): string | null {
 // which agent, who it is, whether it answers, and what it knows.
 export const ActiveAgentCard: React.FC<Props> = ({
   appId,
+  compact = false,
+  appContext = false,
   app,
   enabled,
   onToggle,
@@ -50,12 +54,12 @@ export const ActiveAgentCard: React.FC<Props> = ({
 
   return (
     <section className="border border-gray-200 rounded-xl bg-white p-4" data-testid="ai-agent-card">
-      <div className="flex items-center justify-between gap-2 mb-3">
+      {!compact && <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="font-sans font-semibold text-base">{t('aiWidgetAgentCard.title')}</h3>
         <Link to="/app/admin/agents" className="text-brand-500 hover:underline text-sm">
           {t('aiWidgetActiveAgentSelector.manageAgents')}
         </Link>
-      </div>
+      </div>}
 
       <div className="flex flex-wrap items-center gap-4">
         {agent ? (
@@ -76,8 +80,10 @@ export const ActiveAgentCard: React.FC<Props> = ({
         ) : null}
         <div className="flex-1 min-w-[14rem]">
           <ActiveAgentSelector appId={appId} app={app} bare disabled={disabled} label={t('aiWidgetAgentCard.pickLabel')} />
-          {agent?.bio && <div className="text-xs text-gray-500 mt-1 line-clamp-2">{agent.bio}</div>}
+          {!compact && agent?.bio && <div className="text-xs text-gray-500 mt-1 line-clamp-2">{agent.bio}</div>}
+          {!agent && <div className="text-xs text-gray-500 mt-1">{t('aiWidgetAgentCard.noAgent')}</div>}
         </div>
+        {compact && <Link to="/app/admin/agents" className="text-brand-500 hover:underline text-sm">{t('aiWidgetActiveAgentSelector.manageAgents')}</Link>}
         {settingsUrl && (
           <Link to={settingsUrl} className="text-brand-500 hover:underline text-sm shrink-0">
             {ownsAgent ? t('aiWidgetAgentCard.editAgent') : t('aiWidgetAgentCard.viewAgent')}
@@ -101,7 +107,7 @@ export const ActiveAgentCard: React.FC<Props> = ({
         <FormControlLabel
           sx={{ m: 0 }}
           control={<Switch size="small" checked={enabled} onChange={onToggle} disabled={disabled} />}
-          label={<span>{enabled ? t('aiWidgetAgentCard.answering') : t('aiWidgetAgentCard.paused')}</span>}
+          label={<span>{t(appContext ? (enabled ? 'widgets.appAIActive' : 'widgets.appAIPaused') : (enabled ? 'aiWidgetAgentCard.answering' : 'aiWidgetAgentCard.paused'))}</span>}
         />
         <div className="text-gray-700">
           <span className="font-semibold">{t('aiWidgetAgentCard.knowledge')}</span>{' '}
@@ -115,10 +121,10 @@ export const ActiveAgentCard: React.FC<Props> = ({
             t('appSettingsAIWidget.ragEmpty')
           )}
         </div>
-        <div className="text-gray-700">
+        {!appContext && <div className="text-gray-700">
           <span className="font-semibold">{t('appSettingsAIWidget.conversationsLabel')}</span>{' '}
           {conversationsTotal === null ? '-' : conversationsTotal}
-        </div>
+        </div>}
       </div>
     </section>
   );

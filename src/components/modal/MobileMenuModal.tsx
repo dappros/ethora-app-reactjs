@@ -1,7 +1,7 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 
 import { useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 import { IconAccount } from '../Icons/IconAccount';
 import { IconAdmin } from '../Icons/IconAdmin';
@@ -26,6 +26,7 @@ interface Props {
 
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const { t } = useTranslation();
+  const inAI = /^\/app\/admin\/(agents|widgets)(\/|$)/.test(useLocation().pathname);
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
   // The server's admin can turn agents off for everyone (Server settings > AI).
   const { status: licenseStatus } = useLicenseStatus();
@@ -71,8 +72,9 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
             <UnreadBadge className="ml-2" />
           </NavLink>
           {isAdmin && !agentsOff && (
-            <NavLink
+            <Link
               to="/app/admin/agents"
+              aria-current={inAI ? 'page' : undefined}
               onClick={onClose}
               title={
                 aiEnabled
@@ -84,8 +86,8 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               })}
             >
               <IconAgents />
-              <span className={labelBase}>{t('nav.agents')}</span>
-            </NavLink>
+              <span className={labelBase}>{t('nav.ai')}</span>
+            </Link>
           )}
           {isAdmin && showBilling && (
             <NavLink

@@ -6,6 +6,7 @@ import { ApplicationStarterInf } from '../components/ApplicationStarterInf';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { Loading } from '../components/Loading.tsx';
 import { NewAppModal } from '../components/modal/NewAppModal';
+import { CreateWidgetModal } from '../components/modal/CreateWidgetModal';
 import { PreviewAppModal } from '../components/modal/PreviewAppModal.tsx';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
@@ -32,6 +33,7 @@ export default function AdminApps() {
   const location = useLocation();
   const [showStarterInf, setShowStarterInf] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showWidgetSetup, setShowWidgetSetup] = useState(false);
   const [newShowModal, setNewShowModal] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -562,6 +564,7 @@ export default function AdminApps() {
                 haveApps={!!apps.length}
                 show={showModal}
                 onClose={() => setShowModal(false)}
+                onCreateWidget={() => { setShowModal(false); setShowWidgetSetup(true); }}
               />
             )}
 
@@ -570,8 +573,11 @@ export default function AdminApps() {
                 haveApps={!!apps.length}
                 show={newShowModal}
                 onClose={() => setNewShowModal(false)}
+                onCreateWidget={() => { setNewShowModal(false); setShowWidgetSetup(true); }}
               />
             )}
+
+            {showWidgetSetup && <CreateWidgetModal onClose={() => { setShowWidgetSetup(false); void fetchApps(); }} />}
 
             {showImportModal && (
               <ImportAppModal

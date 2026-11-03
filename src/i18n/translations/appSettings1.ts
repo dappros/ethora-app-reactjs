@@ -14,6 +14,10 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // interpolation support - callers do `t(key).replace('{token}', value)`.
 export const appSettings1 = {
   en: {
+    'appSettings.saveAppSettings': 'Save app settings',
+    'appSettings.saveFailed': 'Could not save app settings. Please try again.',
+    'appSettings.unsaved': 'Unsaved app settings',
+    'appSettings.unsavedLeave': 'You have unsaved changes. Leave without saving?',
     // appSettings.* - AppSettings.tsx
     'appSettings.heading': 'Settings',
     'appSettings.infoAriaLabel': 'Info',

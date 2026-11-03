@@ -6,6 +6,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import {
   useLocation,
+  useBlocker,
   useNavigate,
   useParams,
   useSearchParams,
@@ -21,7 +22,7 @@ import { deleteApp, httpUpdateOneUser } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
-import { AIWidget } from './AIWidget';
+import { AppAISettings } from './AppAISettings';
 import { Api } from './Api';
 import { APPEARANCE_SECTION_PARAM, Appearance } from './Appearance';
 import { Chats } from './Chats';
@@ -78,7 +79,7 @@ const tabsNew = {
 // English/untranslated. These maps translate only the label actually shown
 // to the user in the tab list.
 const TAB_LABEL_KEYS: Record<string, string> = {
-  'AI Widget': 'appSettings.tab.aiWidget',
+  'AI Widget': 'nav.ai',
   'Web App': 'appSettings.tab.webApp',
   'Mobile App': 'appSettings.tab.mobileApp',
   Appearance: 'appSettings.tab.appearance',
@@ -97,6 +98,14 @@ const SECTION_LABEL_KEYS: Record<string, string> = {
   System: 'appSettings.section.system',
 };
 
+function normalizeAiBot(bot: ModelApp['aiBot']): ModelAIbot {
+  if (!bot) return {} as ModelAIbot;
+  if (!bot.user?.firstName || !bot.user?.lastName) {
+    return { ...bot, user: { ...bot.user, firstName: bot.user?.firstName || '', lastName: bot.user?.lastName || '' } } as ModelAIbot;
+  }
+  return bot;
+}
+
 export default function AppSettings() {
   const { appId } = useParams();
   const navigate = useNavigate();
@@ -113,7 +122,8 @@ export default function AppSettings() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const tabFromUrl = searchParams.get('tab');
+  const rawTab = searchParams.get('tab');
+  const tabFromUrl = rawTab === 'AI' ? 'AI Widget' : rawTab;
 
   // The Chat component tab now lives in Appearance > Chat; keep old links working.
   useEffect(() => {
@@ -148,8 +158,12 @@ export default function AppSettings() {
   }, [tabFromUrl]);
 
   const handleTabChange = (index: number) => {
+    if (widgetDirty && index !== selectedIndex) {
+      if (!window.confirm(t('appSettings.unsavedLeave'))) return;
+      setWidgetDirty(false);
+    }
     if (tabs[index] !== tabFromUrl) {
-      setSearchParams({ tab: tabs[index] }, { replace: true });
+      setSearchParams({ tab: tabs[index] === 'AI Widget' ? 'AI' : tabs[index] }, { replace: true });
     }
     setSelectedIndex(index);
   };
@@ -157,6 +171,22 @@ export default function AppSettings() {
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
+  const [widgetDirty, setWidgetDirty] = useState(false);
+  const hasUnsavedChanges = isModified || widgetDirty;
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    if (window.confirm(t('appSettings.unsavedLeave'))) blocker.proceed();
+    else blocker.reset();
+  }, [blocker, t]);
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasUnsavedChanges]);
   const [initialState, setInitialState] = useState({});
 
   // appearance tab
@@ -229,12 +259,6 @@ export default function AppSettings() {
     Array<ModelAppDefaulRooom>
   >([]);
 
-  const handleRagChange = () => {
-    setAiBot({
-      ...aiBot,
-      isRAG: !aiBot.isRAG,
-    });
-  };
 
   const checkIfModified = () => {
     const currentState = {
@@ -267,7 +291,7 @@ export default function AppSettings() {
       broadcastSenderPhotoUrl,
       aiBot: cloneDeep(aiBot),
     };
-    const isModified = !isEqual(initialState, currentState);
+    const isModified = Object.keys(initialState).length > 0 && !isEqual(initialState, currentState);
     setIsModified(isModified);
   };
 
@@ -302,6 +326,7 @@ export default function AppSettings() {
     broadcastSenderName,
     broadcastSenderPhotoUrl,
     aiBot,
+    initialState,
   ]);
 
   useEffect(() => {
@@ -336,7 +361,7 @@ export default function AppSettings() {
         // leave blank and rely on the server-side fallback to app.displayName.
         broadcastSenderName: app.broadcastSender?.name || '',
         broadcastSenderPhotoUrl: app.broadcastSender?.photoUrl || '',
-        aiBot: cloneDeep(app.aiBot),
+        aiBot: cloneDeep(normalizeAiBot(app.aiBot)),
       };
 
       setBroadcastSenderName(initialData.broadcastSenderName);
@@ -591,21 +616,7 @@ export default function AppSettings() {
   useEffect(() => {
     if (!app) return;
 
-    if (
-      app.aiBot &&
-      (!app.aiBot?.user?.lastName || !app.aiBot?.user?.firstName)
-    ) {
-      setAiBot({
-        ...app.aiBot,
-        user: {
-          ...aiBot?.user,
-          firstName: aiBot?.user?.firstName || '',
-          lastName: aiBot?.user?.lastName || '',
-        },
-      });
-    } else {
-      setAiBot(app.aiBot || {});
-    }
+    setAiBot(normalizeAiBot(app.aiBot));
 
     setDisplayName(app.displayName || '');
     setTagline(app.appTagline || '');
@@ -680,6 +691,7 @@ export default function AppSettings() {
           </IconButton>
         </div>
         <div className="flex w-full lg:w-auto items-center">
+          {isModified && <span role="status" className="mr-3 text-sm text-amber-700">{t('appSettings.unsaved')}</span>}
           <button
             onClick={onExternalClick}
             className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover"
@@ -694,7 +706,7 @@ export default function AppSettings() {
             )}
             disabled={!isModified}
           >
-            {t('appSettings.saveButton')}
+            {t('appSettings.saveAppSettings')}
           </button>
         </div>
       </div>
@@ -718,17 +730,7 @@ export default function AppSettings() {
             key="AI bot"
             className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
           >
-            <AIWidget
-              appId={appId as string}
-              app={app}
-              aiBot={aiBot}
-              setAiBot={setAiBot}
-              defaultChatRooms={defaultChatRooms}
-              primaryColor={app.primaryColor}
-              isDisabled={app?.creatorId !== currentUser?._id}
-              aiFeatureDisabled={!aiEnabled}
-              handleRagChange={handleRagChange}
-            />
+            <AppAISettings app={app} aiBot={aiBot} setAiBot={setAiBot} disabled={!aiEnabled} />
           </TabPanel>
 
           <TabPanel
