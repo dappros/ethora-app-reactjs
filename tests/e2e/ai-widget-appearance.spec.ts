@@ -568,6 +568,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
     await configAgentBackend(page);
     const measure = async (section: string) => {
       await expect(page.getByRole('heading', { name: section, exact: true })).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
       const mainTitle = page.getByRole('heading', { name: 'Assistants', exact: true });
       await expect(mainTitle).toBeVisible();
       await expect(page.getByRole('searchbox')).toBeVisible();
