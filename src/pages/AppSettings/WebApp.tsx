@@ -361,7 +361,7 @@ measurementId: "G-WHMasd7asdxcvX4asdC8"
       <p className="font-sans text-sm pb-4 flex items-center gap-1">
         {t('appSettingsWebApp.additionalSettingsPrefix')}{' '}
         <NavLink
-          to={`/app/admin/apps/${appId}/settings?tab=AI+Widget`}
+          to={`/app/admin/apps/${appId}/widget`}
           className="text-blue-600 underline"
         >
           {t('appSettingsWebApp.aiWidgetLinkText')}

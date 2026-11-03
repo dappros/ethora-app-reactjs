@@ -4,7 +4,7 @@ import { ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
 /** Loads a widget's server context independently of the Apps screens. */
-export function useManagedWidgetApp(appId?: string) {
+export function useManagedWidgetApp(appId?: string, fetchIndependently = true) {
   const [app, setApp] = useState<ModelApp | null>(null);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -14,6 +14,7 @@ export function useManagedWidgetApp(appId?: string) {
     setApp(null);
     setError(false);
     if (!appId) { setError(true); return; }
+    if (!fetchIndependently) return;
     httpGetApp(appId).then(({ data }) => {
       if (cancelled) return;
       if (!data.result?._id) { setError(true); return; }
@@ -23,7 +24,7 @@ export function useManagedWidgetApp(appId?: string) {
       setApp(data.result);
     }).catch(() => { if (!cancelled) setError(true); });
     return () => { cancelled = true; };
-  }, [appId, attempt]);
+  }, [appId, attempt, fetchIndependently]);
   const storeApp = useAppStore((state) => state.apps.find((item) => item._id === appId));
-  return { app: app ? (storeApp || app) : null, error, retry };
+  return { app: storeApp || (app?._id === appId ? app : null), error, retry };
 }

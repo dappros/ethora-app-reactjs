@@ -83,7 +83,7 @@ export function WidgetSetupGuide({ appId, agentId, selected, onSelect }: { appId
     <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 font-medium text-brand-500">
       {!ready ? <><button type="button" className="rounded-lg bg-brand-500 px-4 py-2 text-white" onClick={() => onSelect(2)}>{t('widgetGuide.addWebsite')}</button><button type="button" className="underline" onClick={() => onSelect(3)}>{t('widgetGuide.addDocument')}</button></>
         : !tried ? <button type="button" className="rounded-lg bg-brand-500 px-4 py-2 text-white" onClick={() => onSelect(7)}>{t('widgetGuide.test')}</button>
-        : <Link className="rounded-lg bg-brand-500 px-4 py-2 text-white" to={`/app/admin/widgets/${appId}?tab=install`}>{t('widgetGuide.install')}</Link>}
+        : <Link className="rounded-lg bg-brand-500 px-4 py-2 text-white" to={`/app/admin/apps/${appId}/widget?tab=install`}>{t('widgetGuide.install')}</Link>}
     </div>
   </section>;
 }

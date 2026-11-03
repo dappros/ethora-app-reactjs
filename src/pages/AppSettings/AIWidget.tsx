@@ -435,7 +435,7 @@ export function AIWidget({
             <p className="font-sans text-sm text-gray-600">{standalone ? t('widgets.widgetIntro') : t('appSettingsAIWidget.pageSubtitle')}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {standalone && <Link to={`/app/admin/widgets/${appId}/ai`} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-brand-500">{t('widgets.openConfig')}</Link>}
+            {standalone && <Link to={`/app/admin/apps/${appId}/assistant`} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-brand-500">{t('widgets.openConfig')}</Link>}
             {previewActive ? (
               <>
                 <Button

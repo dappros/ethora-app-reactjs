@@ -23,7 +23,7 @@ interface Props {
   refreshKey?: unknown;
 }
 
-const widgetUrl = (appId: string) => `/app/admin/apps/${appId}/settings?tab=AI+Widget`;
+const widgetUrl = (appId: string) => `/app/admin/apps/${appId}/widget`;
 
 export const AgentSetupChecklist: React.FC<Props> = ({ agent, instances, scopedAppId, onOpenTab, refreshKey }) => {
   const { t } = useTranslation();

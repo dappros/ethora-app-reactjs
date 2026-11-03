@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Link,
   NavLink,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
 } from 'react-router-dom';
-import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
@@ -22,13 +21,7 @@ export default function AdminApp() {
   const apps = useAppStore((s) => s.apps);
   const doSetApp = useAppStore((s) => s.doSetApp);
   const app = apps.find((app) => app._id === appId);
-  const navigate = useNavigate();
   const [loadError, setLoadError] = useState<'notFound' | 'forbidden' | null>(null);
-
-  const goBack = useCallback(() => {
-    const backUrl = location.state?.from;
-    navigate(backUrl || '/app/admin/apps');
-  }, [location.state?.from, navigate]);
 
   useEffect(() => {
     if (!appId) return;
@@ -59,51 +52,33 @@ export default function AdminApp() {
 
   return (
     // overflow-hidden
-    <div className="h-full  grid grid-rows-[auto,_1fr]">
-      <div className="mb-4 flex md:flex-row flex-col md:justify-between">
-        <div className="pl-4 pt-2 flex mb-4 md:mb-0">
-          <button className="ml-[5px] md:mb-0 mr-[13px]" onClick={goBack}>
-            <IconArrowLeft />
-          </button>
-
-          <div className="font-varela  text-[24px] md:text-[34px]">
-            {app?.displayName}
+    <div className="grid h-full min-h-0 grid-rows-[auto,_1fr] overflow-hidden rounded-2xl bg-white">
+      <header className="min-w-0 border-b border-gray-200">
+        <div className="flex items-center justify-between gap-4 px-6 pb-3 pt-5">
+          <div className="min-w-0">
+            <Link to="/app/admin/apps" className="text-sm font-medium text-brand-500 hover:underline">{t('nav.apps')}</Link>
+            <h1 className="truncate font-varela text-2xl md:text-[32px]">{app?.displayName}</h1>
           </div>
-        </div>
-        {/* A short project navigation. Detailed controls stay in Settings. */}
-        <div className="flex items-center md:justify-end md:flex-1 md:mr-[32px]">
           <ThemeToggle className="hidden md:flex" />
-          <div className="grid justify-center content-center grid-cols-4 w-full md:max-w-[520px] px-4">
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
-              to={`/app/admin/apps/${appId}`}
-              end
-            >
-              {t('projectOverview.tab')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
-              to={`/app/admin/apps/${appId}/users`}
-            >
-              {t('adminApp.tabUsers')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
-              to={`/app/admin/apps/${appId}/settings`}
-            >
-              {t('adminApp.tabSettings')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
-              to={`/app/admin/apps/${appId}/statistics`}
-            >
-              {t('projectOverview.activity')}
-            </NavLink>
-          </div>
         </div>
-      </div>
+        <nav aria-label={t('projectOverview.navigation')} className="flex w-full gap-2 overflow-x-auto px-4">
+          {[
+            { path: '', label: t('projectOverview.tab'), end: true },
+            { path: '/assistant', label: t('projectOverview.assistant'), end: false },
+            { path: '/widget', label: t('projectOverview.widgetTab'), end: false },
+            { path: '/users', label: t('projectOverview.people'), end: false },
+            { path: '/statistics', label: t('projectOverview.activity'), end: false },
+            { path: '/settings', label: t('adminApp.tabSettings'), end: false },
+          ].map(({ path, label, end }) => (
+            <NavLink key={path} to={`/app/admin/apps/${appId}${path}`} end={end}
+              className={({ isActive }) => `min-h-11 shrink-0 rounded-t-lg border-b-[3px] px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${isActive ? 'border-brand-500 bg-brand-50 text-brand-500' : 'border-transparent text-gray-800 hover:bg-gray-100 hover:text-brand-500'}`}>
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+      </header>
       {/* overflow-hidden */}
-      <div className="bg-white rounded-2xl p-4">
+      <div className="min-h-0 p-4">
         <Outlet />
       </div>
     </div>

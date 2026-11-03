@@ -85,7 +85,7 @@ export function CreateWidgetModal({ onClose, existingApp }: { onClose: () => voi
       setOnboardingIntent(null);
       phCapture('onboarding_project_created', { intent: 'website', has_website: Boolean(website.trim()) });
       onClose();
-      navigate(`/app/admin/widgets/${currentApp._id}/ai`);
+      navigate(`/app/admin/apps/${currentApp._id}/assistant`);
     } catch (e) {
       const err = e as { message?: string; response?: { data?: { error?: string } } };
       // A lost response from a create request may still have created the item.

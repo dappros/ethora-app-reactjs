@@ -34,10 +34,9 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
   const numberFormatter = new Intl.NumberFormat('en-US');
   const isArchived = app.status === 'archived';
   const hasAssistant = Boolean((app as ModelApp & { defaultBotInstanceId?: string }).defaultBotInstanceId || app.aiBot?.userId);
-  const nextAction = isArchived ? t('applicationPreview.archived') : hasAssistant ? t('projectCard.continueAssistant') : t('projectCard.configure');
+  const nextAction = isArchived ? t('applicationPreview.archived') : t('projectOverview.tab');
   const onNext = () => {
-    if (hasAssistant && !isArchived) navigate(`/app/admin/widgets/${app._id}/ai`);
-    else onClick();
+    onClick();
   };
   const onClick = () => {
     navigate(`/app/admin/apps/${app._id}`, {
@@ -125,7 +124,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
             <div className="font-sans text-[12px] text-gray-500">
               {t('applicationPreview.createdPrefix')} {DateTime.fromISO(app.createdAt).toFormat('dd LLL yyyy')}
             </div>
-            {!isArchived && <div className="mt-2 text-xs font-medium text-gray-600">{hasAssistant ? t('projectCard.assistantConnected') : t('projectCard.appProject')}</div>}
+            {!isArchived && <div className="mt-2 text-xs font-medium text-gray-600">{hasAssistant ? t('projectCard.aiConnected') : t('projectCard.appProject')}</div>}
           </div>
           <div className="hidden md:flex items-ceter justify-center">
             {app.domainName && <button

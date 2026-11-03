@@ -190,7 +190,7 @@ export function MobileApp({
           to={`/app/admin/apps/${appId}/settings?tab=Web+App`}
           className="text-blue-600 underline"
         >{t('appSettingsMobileApp.webAppLinkText')}</NavLink> {t('appSettingsMobileApp.and')} <NavLink
-        to={`/app/admin/apps/${appId}/settings?tab=AI+Widget`}
+        to={`/app/admin/apps/${appId}/widget`}
         className="text-blue-600 underline"
       >{t('appSettingsMobileApp.aiWidgetLinkText')}</NavLink> {t('appSettingsMobileApp.quickNoCodeSuffix')}
       </div>

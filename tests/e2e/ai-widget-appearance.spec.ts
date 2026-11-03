@@ -167,6 +167,10 @@ test('project opens on a short overview with focused navigation', async ({ page 
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
   await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
+  await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Assistant', exact: true })).toHaveCSS('color', 'rgb(226, 229, 233)');
   await expect(page.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
@@ -341,7 +345,7 @@ test('website assistant creates an app with the same name and makes its agent ac
   await page.getByLabel('Assistant name').fill('Store helper');
   await page.getByLabel('Website address (optional)').fill('https://example.com');
   await page.getByRole('button', { name: 'Create assistant' }).click();
-  await expect(page).toHaveURL(new RegExp(`/widgets/${newAppId}/ai$`));
+  await expect(page).toHaveURL(new RegExp(`/apps/${newAppId}/assistant$`));
   await expect(page.getByTestId('widget-config-ai').getByLabel('Display name')).toHaveValue('Store helper');
   await expect(page.getByText('Website processing finished: 2 pages saved.')).toBeVisible();
   await page.getByRole('button', { name: 'Test assistant' }).click();
@@ -473,7 +477,7 @@ test('an agent can be selected for a widget without an existing chat', async ({ 
 
 test('newly opened app settings are clean and real edits are marked', async ({ page }) => {
   await fakeBackend(page, {});
-  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Appearance`);
   await expect(page.getByText('Unsaved app settings')).toHaveCount(0);
   await page.getByRole('tab', { name: 'Appearance', exact: true }).first().click();
   const name = page.getByPlaceholder("Enter App's Name");
@@ -504,95 +508,75 @@ test('Config AI offers grouped, usable section navigation on a narrow screen', a
   await expect(panel.getByRole('heading', { name: 'Instructions' })).toBeVisible();
 });
 
-test('Widget navigation works independently of app settings and AI configuration has its own page', async ({ page }) => {
+test('project menu keeps assistant and widget in the same project', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto('/app/admin/widgets');
-  await expect(page.getByRole('heading', { name: 'Website assistants', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Edit widget', exact: true }).first().click();
-  await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}$`));
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
+  await expect(page.getByRole('navigation', { name: 'Project navigation' })).toBeVisible();
   const tabs = page.getByTestId('website-widget-card').getByRole('tab');
-  await expect(tabs).toHaveCount(3);
   await expect(tabs).toHaveText(['Install', 'Customize appearance', 'Conversations']);
-  await expect(page.getByRole('tab', { name: 'Install', exact: true })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByTestId('widget-config-ai')).toHaveCount(0);
-  await page.getByRole('link', { name: 'Configure AI' }).click();
-  await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}/ai$`));
+  await page.getByRole('link', { name: 'Assistant', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/assistant$`));
   await expect(page.getByTestId('widget-config-ai').getByLabel('Display name')).toHaveValue('Test assistant');
-  await page.getByRole('link', { name: /E2E Widget App/ }).click();
-  await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}$`));
-});
-
-test('project opens its own widget appearance editor and returns to the project', async ({ page }) => {
-  await configAgentBackend(page);
-  await page.goto(`/app/admin/apps/${APP_ID}`);
-  const widget = page.getByRole('region', { name: 'Website widget' });
-  await expect(widget.getByText('Preview changes before saving.', { exact: false })).toBeVisible();
-  await widget.getByRole('link', { name: 'Edit widget' }).click();
-  await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}\\?tab=appearance$`));
-  await expect(page.getByRole('tab', { name: 'Customize appearance' })).toHaveAttribute('aria-selected', 'true');
-  await page.getByRole('link', { name: 'Overview' }).click();
+  await page.getByRole('link', { name: 'Overview', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
 });
 
-test('app AI config opens inside project settings', async ({ page }) => {
+test('overview opens widget appearance and returns through project navigation', async ({ page }) => {
   await configAgentBackend(page);
-  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);
-  await expect(page.getByRole('tab', { name: 'Website assistants', exact: true })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tab', { name: 'AI Widget', exact: true })).toHaveCount(0);
-  await expect(page.getByTestId('widget-config-ai')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Configure AI' }).click();
-  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=AI&panel=assistant$`));
-  await expect(page.getByTestId('widget-config-ai')).toBeVisible();
-  await page.getByRole('tab', { name: 'Web Index' }).click();
-  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Website assistants' }).click();
-  await expect(page.getByRole('button', { name: 'Configure AI' })).toBeVisible();
-  await page.getByRole('button', { name: 'Configure AI' }).click();
-  await expect(page.getByRole('tab', { name: 'Web Index' })).toHaveAttribute('aria-selected', 'true');
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  const widget = page.getByRole('region', { name: 'Website widget' });
+  await widget.getByRole('link', { name: 'Edit widget' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget\\?tab=appearance$`));
+  await expect(page.getByRole('tab', { name: 'Customize appearance' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('link', { name: 'Overview', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
 });
 
-test('project AI settings keeps a widget draft across tabs and breadcrumbs', async ({ page }) => {
+test('legacy settings AI link opens the dedicated assistant page', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);
-  await page.getByRole('button', { name: 'Edit widget', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=AI&panel=widget$`));
-  await expect(page.getByLabel('Popup title')).toBeVisible();
-  await expect(page.getByTestId('website-widget-card').getByRole('tab')).toHaveCount(0);
-  await expect(page.getByText('Conversations history')).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/assistant$`));
+  await expect(page.getByTestId('widget-config-ai')).toBeVisible();
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
+  await expect(page.getByRole('tab', { name: 'Website assistants', exact: true })).toHaveCount(0);
+});
+
+test('widget draft survives reload and project navigation', async ({ page }) => {
+  await configAgentBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/widget?tab=appearance`);
   await page.getByLabel('Popup title').fill('Unsaved title');
   await page.reload();
   await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
-  await page.getByRole('tab', { name: 'Appearance', exact: true }).click();
-  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: /Unsaved widget draft/ }).click();
-  await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
-  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Website assistants' }).click();
-  await expect(page.getByRole('button', { name: 'Edit widget', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Edit widget', exact: true }).click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
+  await page.getByRole('link', { name: 'Widget', exact: true }).click();
+  await page.getByRole('tab', { name: /Customize appearance/ }).click();
   await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
   await page.getByRole('button', { name: 'Save widget appearance' }).click();
   await expect.poll(() => page.evaluate((appId) => sessionStorage.getItem(`widget-appearance-draft:${appId}`), APP_ID)).toBeNull();
-  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Website assistants' }).click();
-  await expect(page.getByRole('link', { name: /Unsaved widget draft/ })).toHaveCount(0);
 });
 
-test('widget appearance loads inside its panel with a skeleton', async ({ page }) => {
+test('widget appearance uses a local skeleton while loading', async ({ page }) => {
   await configAgentBackend(page);
   await page.route(`**/v2/apps/${APP_ID}/widget/appearance`, async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     await route.fulfill({ json: { ok: true, appearance: {} } });
   });
-  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI&panel=widget`);
+  await page.goto(`/app/admin/apps/${APP_ID}/widget?tab=appearance`);
   await expect(page.getByRole('status', { name: 'Loading project…' })).toBeVisible();
   await expect(page.getByLabel('Popup title')).toBeVisible();
 });
 
-
-test('old widget AI tab links open the dedicated configuration page', async ({ page }) => {
+test('old widget AI tab link redirects to project assistant', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/widgets/${APP_ID}?tab=ai`);
-  await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}/ai$`));
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/assistant$`));
   await expect(page.getByTestId('widget-config-ai').getByLabel('Display name')).toHaveValue('Test assistant');
 });
-
 
 test('Widgets are under AI rather than a separate main menu item', async ({ page }) => {
   await configAgentBackend(page);

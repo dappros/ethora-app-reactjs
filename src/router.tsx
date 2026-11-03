@@ -11,6 +11,7 @@ import CallJoin from './pages/CallJoin';
 import AgentChatJoin from './pages/AgentChatJoin';
 import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
+import LegacyProjectRedirect from './pages/LegacyProjectRedirect';
 const Admin = lazy(() => import('./pages/Admin'));
 const Help = lazy(() => import('./pages/Help'));
 const WhatsNew = lazy(() => import('./pages/WhatsNew'));
@@ -144,10 +145,10 @@ export const router = createBrowserRouter(
                           path: 'server',
                           Component: AdminServerSettings,
                         },
-                        { path: 'apps/:appId/ai', element: <WidgetAISettings appContext /> },
+                        { path: 'apps/:appId/ai', element: <LegacyProjectRedirect section="assistant" /> },
                         { path: 'widgets', Component: Widgets },
-                        { path: 'widgets/:appId', Component: WidgetEditor },
-                        { path: 'widgets/:appId/ai', Component: WidgetAISettings },
+                        { path: 'widgets/:appId', element: <LegacyProjectRedirect section="widget" /> },
+                        { path: 'widgets/:appId/ai', element: <LegacyProjectRedirect section="assistant" /> },
                         {
                           path: 'agents',
                           Component: AdminAgents,
@@ -164,6 +165,8 @@ export const router = createBrowserRouter(
                               index: true,
                               Component: ProjectOverview,
                             },
+                            { path: 'assistant', element: <WidgetAISettings appContext /> },
+                            { path: 'widget', element: <WidgetEditor projectContext /> },
                             {
                               path: 'settings',
                               Component: AppSettings,

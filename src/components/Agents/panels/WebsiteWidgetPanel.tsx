@@ -45,7 +45,7 @@ export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentB
                 </div>
               </div>
               {String(bi.appId) === String(currentAppId) ? <span className="text-sm text-gray-500">{t('agentSettings.websiteWidgetCurrent')}</span> : <Link
-                to={`/app/admin/apps/${bi.appId}/settings?tab=AI+Widget`}
+                to={`/app/admin/apps/${bi.appId}/widget`}
                 className="text-brand-500 hover:underline text-sm"
               >
                 {t('agentSettings.websiteWidgetOpen')}

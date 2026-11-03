@@ -24,7 +24,6 @@ import { deleteApp, httpUpdateOneUser } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
-import { AppAISettings } from './AppAISettings';
 import { Api } from './Api';
 import { APPEARANCE_SECTION_PARAM, Appearance } from './Appearance';
 import { Chats } from './Chats';
@@ -36,7 +35,6 @@ import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { env } from '../../config/env';
-import { hasWidgetAppearanceDraft } from '../../utils/widgetAppearanceDraft';
 // Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
 // step content - we only want that chunk over the wire when firstAdd is
 // true, not on every Settings visit.
@@ -52,7 +50,6 @@ const SettingTutorialModal = lazy(() =>
 const LIFECYCLE_TAB = 'Delete or Archive';
 
 const tabs = [
-  'AI Widget',
   'Web App',
   'Mobile App',
   'Appearance',
@@ -60,9 +57,7 @@ const tabs = [
   'Home screen',
   'Menu',
   'Chats',
-  // Phase 1 follow-up: AI Bots tab moved out of per-App settings into a top-level
-  // /app/admin/agents area (Agents are tenant-scoped, not app-scoped). The "Active Agent"
-  // selector inside AI Widget below still handles per-App deployment.
+  // Agent configuration and widget appearance have dedicated project pages.
   'Visibility & Privacy',
   'API',
   LIFECYCLE_TAB,
@@ -72,7 +67,7 @@ const tabs = [
 const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
 
 const tabsNew = {
-  Publish: ['AI Widget', 'Web App', 'Mobile App'],
+  Publish: ['Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
   System: ['Chats', 'Visibility & Privacy', 'API', LIFECYCLE_TAB],
 };
@@ -82,7 +77,6 @@ const tabsNew = {
 // English/untranslated. These maps translate only the label actually shown
 // to the user in the tab list.
 const TAB_LABEL_KEYS: Record<string, string> = {
-  'AI Widget': 'widgets.title',
   'Web App': 'appSettings.tab.webApp',
   'Mobile App': 'appSettings.tab.mobileApp',
   Appearance: 'appSettings.tab.appearance',
@@ -128,7 +122,13 @@ export default function AppSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const rawTab = searchParams.get('tab');
-  const tabFromUrl = rawTab === 'AI' ? 'AI Widget' : rawTab;
+  const tabFromUrl = rawTab;
+
+  useEffect(() => {
+    if (rawTab === 'AI' || rawTab === 'AI Widget') {
+      navigate(`/app/admin/apps/${appId}/${searchParams.get('panel') === 'widget' ? 'widget' : 'assistant'}`, { replace: true });
+    }
+  }, [appId, navigate, rawTab, searchParams]);
 
   // The Chat component tab now lives in Appearance > Chat; keep old links working.
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function AppSettings() {
 
   const handleTabChange = (index: number) => {
     if (tabs[index] !== tabFromUrl) {
-      setSearchParams({ tab: tabs[index] === 'AI Widget' ? 'AI' : tabs[index] }, { replace: true });
+      setSearchParams({ tab: tabs[index] }, { replace: true });
     }
     setSelectedIndex(index);
   };
@@ -165,9 +165,7 @@ export default function AppSettings() {
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
-  const [widgetDirty, setWidgetDirty] = useState(false);
-  useEffect(() => { if (appId) setWidgetDirty(hasWidgetAppearanceDraft(appId)); }, [appId]);
-  const hasUnsavedChanges = isModified || widgetDirty;
+  const hasUnsavedChanges = isModified;
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
     hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
   );
@@ -538,12 +536,6 @@ export default function AppSettings() {
     }
   };
 
-  // AI feature umbrella surfaced from deploy.yml -> features.ai_service. When
-  // false, the AI Widget tab below renders disabled (visible but non-clickable)
-  // and the AIWidget panel itself goes into read-only "preview" mode.
-  const aiEnabled =
-    env.VITE_AI_FEATURE_ENABLED === 'true';
-
   const tabsMemo = useMemo(() => {
     return Object.entries(tabsNew).flatMap(([sectionTitle, items]) => {
       // Section headers only make sense on the vertical rail (lg+). In the
@@ -563,13 +555,11 @@ export default function AppSettings() {
           return null;
         }
 
-        const tabDisabled = tab === 'AI Widget' && !aiEnabled;
         return (
           <TabApp
             key={`${tab}_${index}`}
             text={t(TAB_LABEL_KEYS[tab] ?? tab)}
             last={tab === LIFECYCLE_TAB}
-            disabled={tabDisabled}
             breakpoint="lg"
           />
         );
@@ -578,7 +568,7 @@ export default function AppSettings() {
       return [sectionHeader, ...tabItems];
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [DOMAIN_NAME, domainName, aiEnabled, language]);
+  }, [DOMAIN_NAME, domainName, language]);
 
   useEffect(() => {
     if (apps) {
@@ -644,7 +634,7 @@ export default function AppSettings() {
     setUsersCanFree(app.usersCanFree);
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
     setE2eeEnabled(Boolean(app.e2eeEnabled));
-    setDefaultChatRooms(app.defaultRooms);
+    setDefaultChatRooms(app.defaultRooms || []);
   }, [app]);
 
   useEffect(() => {
@@ -694,7 +684,7 @@ export default function AppSettings() {
           >
             <IconExternalLink />
           </button>
-          {!(selectedIndex === 0 && ['widget', 'assistant'].includes(searchParams.get('panel') || '') && !isModified) && <button
+          <button
             onClick={onSave}
             className={classNames(
               'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white px-4',
@@ -703,7 +693,7 @@ export default function AppSettings() {
             disabled={!isModified}
           >
             {t('appSettings.saveAppSettings')}
-          </button>}
+          </button>
         </div>
       </div>
       <TabGroup
@@ -727,23 +717,11 @@ export default function AppSettings() {
             <span aria-hidden="true">/</span>
             <Link className="max-w-40 truncate hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}`}>{app.displayName}</Link>
             <span aria-hidden="true">/</span>
-            <Link className="hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}/settings?tab=AI`}>{t('adminApp.tabSettings')}</Link>
+            <span>{t('adminApp.tabSettings')}</span>
             <span aria-hidden="true">/</span>
-            {selectedIndex === 0 && ['widget', 'assistant'].includes(searchParams.get('panel') || '') ? <>
-              <Link className="hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}/settings?tab=AI`}>{t('widgets.title')}</Link>
-              <span aria-hidden="true">/</span>
-              <span aria-current="page" className="font-semibold text-gray-900">{t(searchParams.get('panel') === 'widget' ? 'widgets.edit' : 'widgets.openConfig')}</span>
-            </> : <span aria-current="page" className="font-semibold text-gray-900">{t(TAB_LABEL_KEYS[tabs[selectedIndex]] ?? tabs[selectedIndex])}</span>}
-            {widgetDirty && !(selectedIndex === 0 && searchParams.get('panel') === 'widget') && <Link className="ml-auto rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200" to={`/app/admin/apps/${app._id}/settings?tab=AI&panel=widget`}>{t('widgets.localDraft')} →</Link>}
+            <span aria-current="page" className="font-semibold text-gray-900">{t(TAB_LABEL_KEYS[tabs[selectedIndex]] ?? tabs[selectedIndex])}</span>
           </nav>
         <TabPanels className="min-h-0 flex-1 overflow-hidden">
-          <TabPanel
-            key="AI bot"
-            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
-          >
-            <AppAISettings app={app} aiBot={aiBot} setAiBot={setAiBot} disabled={!aiEnabled} onWidgetDirtyChange={setWidgetDirty} />
-          </TabPanel>
-
           <TabPanel
             key="Web App"
             className="grid grid-rows-1 lg:ml-4 h-full "
