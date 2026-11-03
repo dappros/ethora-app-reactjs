@@ -16,7 +16,7 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 export const adminCore = {
   en: {
     'agentSettings.chatLinkHeading': 'Direct chat link',
-    'agentSettings.chatLinkIntro': 'Share this link with your users (for example, students). After signing up or signing in they land in their own private chat with this agent; opening it again brings them back to the same conversation.',
+    'agentSettings.chatLinkIntro': 'Share this link with your users. After signing up or signing in they land in their own private chat with this agent; opening it again brings them back to the same conversation.',
     'agentSettings.chatLinkEmpty': 'This agent is private and not in any of your apps yet. Add it to an app (for example, as its website widget agent) or make it unlisted to get a link.',
     'appCollaborators.title': 'People who manage this app',
     'appCollaborators.subtitle': 'The owner and the colleagues invited to the admin panel for this app.',
@@ -490,7 +490,7 @@ export const adminCore = {
   },
   fr: {
     'agentSettings.chatLinkHeading': 'Lien de chat direct',
-    'agentSettings.chatLinkIntro': "Partagez ce lien avec vos utilisateurs (par exemple, des étudiants). Après inscription ou connexion, ils arrivent dans leur propre chat privé avec cet agent ; en le rouvrant, ils retrouvent la même conversation.",
+    'agentSettings.chatLinkIntro': "Partagez ce lien avec vos utilisateurs. Après inscription ou connexion, ils arrivent dans leur propre chat privé avec cet agent ; en le rouvrant, ils retrouvent la même conversation.",
     'agentSettings.chatLinkEmpty': "Cet agent est privé et n'est encore dans aucune de vos applications. Ajoutez-le à une application (par exemple comme agent du widget de site) ou rendez-le non répertorié pour obtenir un lien.",
     'appCollaborators.title': 'Personnes qui gèrent cette application',
     'appCollaborators.subtitle': "Le propriétaire et les collègues invités dans le panneau d'administration de cette application.",
@@ -951,7 +951,7 @@ export const adminCore = {
   },
   es: {
     'agentSettings.chatLinkHeading': 'Enlace directo al chat',
-    'agentSettings.chatLinkIntro': 'Comparte este enlace con tus usuarios (por ejemplo, estudiantes). Tras registrarse o iniciar sesión llegan a su propio chat privado con este agente; al abrirlo de nuevo vuelven a la misma conversación.',
+    'agentSettings.chatLinkIntro': 'Comparte este enlace con tus usuarios. Tras registrarse o iniciar sesión llegan a su propio chat privado con este agente; al abrirlo de nuevo vuelven a la misma conversación.',
     'agentSettings.chatLinkEmpty': 'Este agente es privado y aún no está en ninguna de tus apps. Añádelo a una app (por ejemplo, como agente del widget del sitio) o hazlo no listado para obtener un enlace.',
     'appCollaborators.title': 'Personas que gestionan esta app',
     'appCollaborators.subtitle': 'El propietario y los compañeros invitados al panel de administración de esta app.',

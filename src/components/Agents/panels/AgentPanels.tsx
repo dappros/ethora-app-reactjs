@@ -340,7 +340,7 @@ const SITE_SOURCES_PAGE_SIZE = 25;
 // reconcile is cheaper than trusting the merge to have been complete.
 const LIVE_RELOAD_DEBOUNCE_MS = 1200;
 
-// Fallback poll for jobs we are showing as running. Centrifugo delivery is
+// Fallback poll for jobs we are showing as running. XMPP event delivery is
 // unacknowledged: if the terminal event is missed (tab was reloading, socket was
 // reconnecting) the progress line would otherwise sit there forever.
 const JOB_RECONCILE_MS = 15000;

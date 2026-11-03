@@ -7,11 +7,12 @@ import { Loading } from '../components/Loading.tsx';
 import { Sorting } from '../components/Sorting';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
-import { useCentrifugeAppUpdater } from '../hooks/useCentrifugeAppUpdater.ts';
+import { useEthoraEvents, useXmppReconnected } from '../hooks/useEthoraEvents.ts';
 import { getExportAppsCsv, httpGetAppsWithStatus, httpImportApp } from '../http';
 import { ImportAppModal } from '../components/modal/ImportAppModal';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelApp, OrderByType } from '../models';
+import { APP_STATS_EVENT, applyAppStats, readAppStatDeltas } from '../lib/appStats.ts';
 import { useAppStore } from '../store/useAppStore';
 
 // Thousands-separated counts ("2,056") on the lifecycle tab labels. Cached
@@ -83,10 +84,10 @@ export default function AdminApps() {
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(pageIndex);
 
-  const fetchApps = useCallback(async () => {
+  const fetchApps = useCallback(async ({ silent = false } = {}) => {
     const requestId = ++requestIdRef.current;
     const isStale = () => requestId !== requestIdRef.current;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const response = await httpGetAppsWithStatus({
         limit,
@@ -277,28 +278,14 @@ export default function AdminApps() {
     setAppState(apps);
   }, [apps]);
 
-  useCentrifugeAppUpdater(setAppState);
+  useEthoraEvents(({ type, payload }) => {
+    if (type !== APP_STATS_EVENT) return;
+    const deltas = readAppStatDeltas(payload);
+    if (deltas) setAppState((prev) => applyAppStats(prev, deltas));
+  });
 
-  // useEffect(() => {
-  //   if (!data) return;
-
-  //   if (data.type === 'counter_chats') {
-  //     setAppState((prev) =>
-  //       prev.map((app) =>
-  //         app._id === data.appId
-  //           ? {
-  //               ...app,
-  //               stats: {
-  //                 ...app.stats,
-  //                 totalChats: app.stats.totalChats + 1,
-  //                 recentlyChats: app.stats.recentlyChats + 1,
-  //               },
-  //             }
-  //           : app
-  //       )
-  //     );
-  //   }
-  // }, [data]);
+  // Counters that ticked while the session was down never arrive as events.
+  useXmppReconnected(() => fetchApps({ silent: true }));
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">

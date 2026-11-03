@@ -22,7 +22,6 @@ export interface ModelCurrentUser {
   chatLanguage?: string;
   token: string;
   refreshToken: string;
-  wsToken: string;
   fileToken: string;
   walletAddress: string;
   xmppPassword: string;
@@ -338,6 +337,7 @@ export interface ModelBotInstance {
   xmppUsername: string;
   status: 'on' | 'off';
   joinedRooms: string[];
+  roomSettings?: Array<{ roomJid: string; responseMode: ModelAgent['responseMode'] }>;
   lastActiveAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -356,7 +356,6 @@ export interface ModelOwnerSession {
   chatTokens: {
     accessToken: string;
     refreshToken: string;
-    wsToken: string;
     fileToken?: string;
   };
   owner: {
