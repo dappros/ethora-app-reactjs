@@ -272,7 +272,7 @@ test('warns before leaving with unsaved widget appearance', async ({ page }) => 
   await openAppearance(page);
   await page.getByLabel('Popup title').fill('Unsaved title');
   page.once('dialog', (dialog) => dialog.dismiss());
-  await page.getByRole('link', { name: 'Website assistants', exact: true }).click();
+  await page.getByRole('link', { name: /Overview/ }).click();
   await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
 });
 
@@ -513,6 +513,18 @@ test('Widget navigation works independently of app settings and AI configuration
   await expect(page.getByTestId('widget-config-ai').getByLabel('Display name')).toHaveValue('Test assistant');
   await page.getByRole('link', { name: /E2E Widget App/ }).click();
   await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}$`));
+});
+
+test('project opens its own widget appearance editor and returns to the project', async ({ page }) => {
+  await configAgentBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  const widget = page.getByRole('region', { name: 'Website widget' });
+  await expect(widget.getByText('Preview changes before saving.', { exact: false })).toBeVisible();
+  await widget.getByRole('link', { name: 'Edit widget' }).click();
+  await expect(page).toHaveURL(new RegExp(`/widgets/${APP_ID}\\?tab=appearance$`));
+  await expect(page.getByRole('tab', { name: 'Customize appearance' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('link', { name: 'Overview' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
 });
 
 test('app AI is an overview with links to dedicated configuration and widget editing', async ({ page }) => {
