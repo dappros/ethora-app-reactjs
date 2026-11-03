@@ -1365,7 +1365,7 @@ export function httpReindexSiteSourceV2(appId: string, urlId: string) {
 // Status of a queued crawl or reindex: { status, kind, url, savedPages, totalBytes,
 // truncated, error, startedAt, finishedAt }.
 //
-// The live view of a crawl comes from Centrifugo events (useSiteCrawlEvents), but
+// The live view of a crawl comes from XMPP events (useSiteCrawlEvents), but
 // those are unacknowledged and unreplayable - a client that reloaded or briefly
 // lost the socket never learns the crawl ended. This is the reconcilable copy of
 // the same state; poll it for any job the UI still believes is running.
