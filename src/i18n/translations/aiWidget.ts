@@ -36,10 +36,12 @@ export const aiWidget = {
     'widgets.active': 'Active',
     'widgets.paused': 'Paused',
     'widgets.edit': 'Edit widget',
+    'widgets.backToAI': 'AI settings',
+    'widgets.localDraft': 'Unsaved widget draft',
     'widgets.install': 'Install',
     'widgets.empty': 'Your first website assistant starts here',
     'widgets.noMatches': 'No widgets match your search',
-    'widgets.configIntro': 'Manage identity, instructions, knowledge and behaviour on a dedicated agent settings page.',
+    'widgets.configIntro': 'Edit the connected assistant’s identity, instructions, knowledge and responses.',
     'widgets.widgetIntro': 'Customize the widget, add it to your website and review visitor conversations.',
     'widgets.appAIActive': 'AI is active for this app',
     'widgets.appAIPaused': 'AI is paused for this app',
@@ -645,6 +647,8 @@ export const aiWidget = {
     'nav.ai': 'Assistants',
     'widgets.title': 'Assistants pour sites web',
     'widgets.create': 'Nouvel assistant',
+    'widgets.backToAI': 'Paramètres IA',
+    'widgets.localDraft': 'Brouillon du widget non enregistré',
     // ActiveAgentSelector.tsx
     'aiWidgetActiveAgentSelector.label': 'Agent actif pour le widget IA :',
     'aiWidgetActiveAgentSelector.none': '- Aucun -',
@@ -1160,6 +1164,8 @@ export const aiWidget = {
     'nav.ai': 'Asistentes',
     'widgets.title': 'Asistentes para sitios web',
     'widgets.create': 'Nuevo asistente',
+    'widgets.backToAI': 'Ajustes de IA',
+    'widgets.localDraft': 'Borrador del widget sin guardar',
     // ActiveAgentSelector.tsx
     'aiWidgetActiveAgentSelector.label':
       'Agente activo para el widget de IA:',

@@ -1,6 +1,6 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import classNames from 'classnames';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './ConfigAIPanel.css';
 import { actionGetAgent, actionLoadOwnedApps } from '../../actions';
@@ -16,6 +16,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAgent } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { WidgetSetupGuide } from './WidgetSetupGuide';
+import { PanelSkeleton } from '../PanelSkeleton';
 
 const SECTIONS = [
   { label: 'agentSettings.sectionIdentity', tabs: ['agentSettings.tabPersona', 'agentSettings.tabInstructions'] },
@@ -25,15 +26,26 @@ const SECTIONS = [
   { label: 'agentSettings.sectionSharing', tabs: ['agentSettings.tabVisibility'] },
 ] as const;
 const TABS = SECTIONS.flatMap((section) => section.tabs);
+const sectionKey = (appId: string, agentId: string) => `config-ai-section:${appId}:${agentId}`;
+
+function readSection(appId: string, agentId?: string): number {
+  if (!agentId) return 0;
+  try {
+    const value = Number(sessionStorage.getItem(sectionKey(appId, agentId)));
+    return Number.isInteger(value) && value >= 0 && value < TABS.length ? value : 0;
+  } catch { return 0; }
+}
 
 /** The same agent panels used by Agent Settings, scoped to this App's widget. */
 export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAgent: ModelAgent | null }) {
   const { t } = useTranslation();
   const agentId = activeAgent?.id;
+  const selectionContext = `${appId}:${agentId || ''}`;
+  const lastSelectionContext = useRef(selectionContext);
   const [agent, setAgent] = useState<ModelAgent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(() => readSection(appId, agentId));
   const [instances, setInstances] = useState<AgentBotInstanceRow[]>([]);
   const [instancesLoading, setInstancesLoading] = useState(false);
   const [instancesError, setInstancesError] = useState(false);
@@ -60,12 +72,22 @@ export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAge
   useEffect(() => {
     const signal = { cancelled: false };
     setAgent(null);
-    setSelected(0);
+    setSelected(readSection(appId, agentId));
     if (agentId) {
       void load(signal);
     }
     return () => { signal.cancelled = true; };
-  }, [agentId, load]);
+  }, [agentId, appId, load]);
+
+  useEffect(() => {
+    if (lastSelectionContext.current !== selectionContext) {
+      lastSelectionContext.current = selectionContext;
+      return;
+    }
+    if (!agentId) return;
+    try { sessionStorage.setItem(sectionKey(appId, agentId), String(selected)); }
+    catch { /* Section navigation still works without storage. */ }
+  }, [agentId, appId, selected, selectionContext]);
 
   useEffect(() => {
     if (!agentId || selected !== 8) return;
@@ -92,7 +114,7 @@ export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAge
   }, [storeAgent]);
 
   if (!agentId) return <div className="m-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5 text-sm text-gray-600"><p className="font-semibold text-gray-900">{t('configAI.emptyTitle')}</p><p className="mt-1">{t('configAI.selectAgent')}</p></div>;
-  if (loading || (agent && agent.id !== agentId) || (!agent && !error)) return <p role="status" className="p-4 text-sm text-gray-600">{t('configAI.loading')}</p>;
+  if (loading || (agent && agent.id !== agentId) || (!agent && !error)) return <PanelSkeleton label={t('configAI.loading')} />;
   if (error || !agent) return <div role="alert" className="p-4 text-sm text-red-700">{t('configAI.loadFailed')} <button type="button" className="underline" onClick={() => void load({ cancelled: false })}>{t('configAI.retry')}</button></div>;
 
   const isOwned = !!user?._id && String(agent.ownerId) === String(user._id);
@@ -134,7 +156,7 @@ export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAge
             <TabPanel><FlowsPanel agent={agent} isDisabled={readOnly} /></TabPanel>
             <TabPanel><TryItPanel agent={agent} /></TabPanel>
             <TabPanel>
-              {instancesLoading ? <p role="status">{t('configAI.loading')}</p> : instancesError
+              {instancesLoading ? <PanelSkeleton label={t('configAI.loading')} /> : instancesError
                 ? <p role="alert">{t('configAI.loadFailed')}</p>
                 : <WebsiteWidgetPanel agent={agent} instances={instances} currentAppId={appId} />}
             </TabPanel>

@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { PanelSkeleton } from '../components/PanelSkeleton';
 import { actionSwitchChatApp } from '../actions';
 import { useTranslation } from '../i18n/useTranslation';
 import { ModelApp } from '../models';
@@ -9,7 +10,7 @@ export default function ProjectOverview() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const app = useAppStore((state) => state.apps.find((item) => item._id === appId));
-  if (!app) return <p role="status" className="p-5 text-gray-600">{t('configAI.loading')}</p>;
+  if (!app) return <PanelSkeleton label={t('projectOverview.loading')} />;
 
   const hasAssistant = Boolean((app as ModelApp & { defaultBotInstanceId?: string }).defaultBotInstanceId || app.aiBot?.userId);
   const base = `/app/admin/apps/${app._id}`;

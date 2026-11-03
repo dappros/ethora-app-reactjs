@@ -3,9 +3,10 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { cloneDeep, isEqual } from 'lodash';
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useLocation,
+  Link,
   useBlocker,
   useNavigate,
   useParams,
@@ -15,6 +16,7 @@ import { toast } from 'react-toastify';
 import { actionUpdateApp } from '../../actions';
 import { accessErrorMessage } from '../../utils/accessError';
 import { IconExternalLink } from '../../components/Icons/IconExternalLink';
+import { PanelSkeleton } from '../../components/PanelSkeleton';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import TabApp from '../../components/TabApp';
@@ -34,6 +36,7 @@ import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { env } from '../../config/env';
+import { hasWidgetAppearanceDraft } from '../../utils/widgetAppearanceDraft';
 // Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
 // step content - we only want that chunk over the wire when firstAdd is
 // true, not on every Settings visit.
@@ -119,6 +122,8 @@ export default function AppSettings() {
   const currentUser = useAppStore((s) => s.currentUser);
   const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
+  const initialStateAppId = useRef<string | null>(null);
+  const hydratedAppId = useRef<string | null>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -151,10 +156,6 @@ export default function AppSettings() {
   }, [tabFromUrl]);
 
   const handleTabChange = (index: number) => {
-    if (widgetDirty && index !== selectedIndex) {
-      if (!window.confirm(t('appSettings.unsavedLeave'))) return;
-      setWidgetDirty(false);
-    }
     if (tabs[index] !== tabFromUrl) {
       setSearchParams({ tab: tabs[index] === 'AI Widget' ? 'AI' : tabs[index] }, { replace: true });
     }
@@ -165,6 +166,7 @@ export default function AppSettings() {
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
   const [widgetDirty, setWidgetDirty] = useState(false);
+  useEffect(() => { if (appId) setWidgetDirty(hasWidgetAppearanceDraft(appId)); }, [appId]);
   const hasUnsavedChanges = isModified || widgetDirty;
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
     hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
@@ -323,7 +325,8 @@ export default function AppSettings() {
   ]);
 
   useEffect(() => {
-    if (app) {
+    if (app && initialStateAppId.current !== app._id) {
+      initialStateAppId.current = app._id;
       const initialData = {
         displayName: app.displayName || '',
         tagline: app.appTagline || '',
@@ -607,7 +610,8 @@ export default function AppSettings() {
   };
 
   useEffect(() => {
-    if (!app) return;
+    if (!app || hydratedAppId.current === app._id) return;
+    hydratedAppId.current = app._id;
 
     setAiBot(normalizeAiBot(app.aiBot));
 
@@ -652,8 +656,8 @@ export default function AppSettings() {
     }
   }, [isNew, location.pathname, location.search, navigate]);
 
-  if (!app) {
-    return <div></div>;
+  if (!app || app._id !== appId) {
+    return <PanelSkeleton label={t('projectOverview.loading')} />;
   }
 
   return (
@@ -690,7 +694,7 @@ export default function AppSettings() {
           >
             <IconExternalLink />
           </button>
-          <button
+          {!(selectedIndex === 0 && ['widget', 'assistant'].includes(searchParams.get('panel') || '') && !isModified) && <button
             onClick={onSave}
             className={classNames(
               'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white px-4',
@@ -699,7 +703,7 @@ export default function AppSettings() {
             disabled={!isModified}
           >
             {t('appSettings.saveAppSettings')}
-          </button>
+          </button>}
         </div>
       </div>
       <TabGroup
@@ -717,12 +721,27 @@ export default function AppSettings() {
           </TabList>
           <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" />
         </div>
-        <TabPanels className="h-full overflow-hidden">
+        <div className="flex min-h-0 flex-col">
+          <nav aria-label="Breadcrumb" className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 px-2 text-xs text-gray-600 lg:ml-4">
+            <Link className="hover:text-brand-500 hover:underline" to="/app/admin/apps">{t('nav.apps')}</Link>
+            <span aria-hidden="true">/</span>
+            <Link className="max-w-40 truncate hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}`}>{app.displayName}</Link>
+            <span aria-hidden="true">/</span>
+            <Link className="hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}/settings?tab=AI`}>{t('adminApp.tabSettings')}</Link>
+            <span aria-hidden="true">/</span>
+            {selectedIndex === 0 && ['widget', 'assistant'].includes(searchParams.get('panel') || '') ? <>
+              <Link className="hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}/settings?tab=AI`}>{t('widgets.title')}</Link>
+              <span aria-hidden="true">/</span>
+              <span aria-current="page" className="font-semibold text-gray-900">{t(searchParams.get('panel') === 'widget' ? 'widgets.edit' : 'widgets.openConfig')}</span>
+            </> : <span aria-current="page" className="font-semibold text-gray-900">{t(TAB_LABEL_KEYS[tabs[selectedIndex]] ?? tabs[selectedIndex])}</span>}
+            {widgetDirty && !(selectedIndex === 0 && searchParams.get('panel') === 'widget') && <Link className="ml-auto rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200" to={`/app/admin/apps/${app._id}/settings?tab=AI&panel=widget`}>{t('widgets.localDraft')} →</Link>}
+          </nav>
+        <TabPanels className="min-h-0 flex-1 overflow-hidden">
           <TabPanel
             key="AI bot"
             className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
           >
-            <AppAISettings app={app} aiBot={aiBot} setAiBot={setAiBot} disabled={!aiEnabled} />
+            <AppAISettings app={app} aiBot={aiBot} setAiBot={setAiBot} disabled={!aiEnabled} onWidgetDirtyChange={setWidgetDirty} />
           </TabPanel>
 
           <TabPanel
@@ -877,6 +896,7 @@ export default function AppSettings() {
             </TabPanel>
           )}
         </TabPanels>
+        </div>
       </TabGroup>
 
       {/* Legacy modal kept wired but no longer reachable from DeleteSetting.

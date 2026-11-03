@@ -118,6 +118,13 @@ test('project intent is selected before any app is created', async ({ page }) =>
   expect(creates).toBe(0);
 });
 
+test('project usage stats stay visible without expanding a control', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.goto('/app/admin/apps');
+  await expect(page.getByText('Sessions', { exact: true })).toBeVisible();
+  await expect(page.getByText('Usage and activity', { exact: true })).toHaveCount(0);
+});
+
 test('chat intent creates an app and opens chat appearance', async ({ page }) => {
   await fakeBackend(page, {});
   await page.route('**/v1/apps', async (route) => route.request().method() === 'POST'
@@ -527,15 +534,55 @@ test('project opens its own widget appearance editor and returns to the project'
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
 });
 
-test('app AI is an overview with links to dedicated configuration and widget editing', async ({ page }) => {
+test('app AI config opens inside project settings', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);
   await expect(page.getByRole('tab', { name: 'Website assistants', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tab', { name: 'AI Widget', exact: true })).toHaveCount(0);
   await expect(page.getByTestId('widget-config-ai')).toHaveCount(0);
-  await page.getByRole('link', { name: 'Configure AI' }).click();
-  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/ai$`));
+  await page.getByRole('button', { name: 'Configure AI' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=AI&panel=assistant$`));
   await expect(page.getByTestId('widget-config-ai')).toBeVisible();
+  await page.getByRole('tab', { name: 'Web Index' }).click();
+  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Website assistants' }).click();
+  await expect(page.getByRole('button', { name: 'Configure AI' })).toBeVisible();
+  await page.getByRole('button', { name: 'Configure AI' }).click();
+  await expect(page.getByRole('tab', { name: 'Web Index' })).toHaveAttribute('aria-selected', 'true');
+});
+
+test('project AI settings keeps a widget draft across tabs and breadcrumbs', async ({ page }) => {
+  await configAgentBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);
+  await page.getByRole('button', { name: 'Edit widget', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=AI&panel=widget$`));
+  await expect(page.getByLabel('Popup title')).toBeVisible();
+  await expect(page.getByTestId('website-widget-card').getByRole('tab')).toHaveCount(0);
+  await expect(page.getByText('Conversations history')).toHaveCount(0);
+  await page.getByLabel('Popup title').fill('Unsaved title');
+  await page.reload();
+  await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
+  await page.getByRole('tab', { name: 'Appearance', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: /Unsaved widget draft/ }).click();
+  await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
+  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Website assistants' }).click();
+  await expect(page.getByRole('button', { name: 'Edit widget', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Edit widget', exact: true }).click();
+  await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
+  await page.getByRole('button', { name: 'Save widget appearance' }).click();
+  await expect.poll(() => page.evaluate((appId) => sessionStorage.getItem(`widget-appearance-draft:${appId}`), APP_ID)).toBeNull();
+  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Website assistants' }).click();
+  await expect(page.getByRole('link', { name: /Unsaved widget draft/ })).toHaveCount(0);
+});
+
+test('widget appearance loads inside its panel with a skeleton', async ({ page }) => {
+  await configAgentBackend(page);
+  await page.route(`**/v2/apps/${APP_ID}/widget/appearance`, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await route.fulfill({ json: { ok: true, appearance: {} } });
+  });
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI&panel=widget`);
+  await expect(page.getByRole('status', { name: 'Loading project…' })).toBeVisible();
+  await expect(page.getByLabel('Popup title')).toBeVisible();
 });
 
 

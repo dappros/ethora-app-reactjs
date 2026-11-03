@@ -112,7 +112,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
         </div>
       )}
       <div className="flex justify-center items-center">{renderLogo()}</div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-8">
         {/* app title */}
         <div className="flex justify-center md:justify-between items-center">
           <div className="md:ml-[40px]">
@@ -147,8 +147,6 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
             </button>
           </div>
         </div>
-        <details className="rounded-lg border border-gray-100 px-3 py-2">
-          <summary className="cursor-pointer text-sm font-medium text-gray-600">{t('projectCard.usage')}</summary>
         {/* stat */}
         <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:gap-x-[33px] 2xl:grid-cols-8">
           <div className="flex flex-col justify-center items-center">
@@ -286,7 +284,6 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
           <AppInactiveStat lastActivityAt={app.stats.lastActivityAt} />
         </div>
-        </details>
         <div className="flex md:hidden">
           {app.domainName && <button onClick={onExternalClick} aria-label={t('projectCard.openApp')} className="mr-4">
             <IconExternalLink color={primaryColor} />

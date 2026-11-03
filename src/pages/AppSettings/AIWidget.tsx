@@ -16,6 +16,7 @@ import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 import { TabAIWidgetCode } from '../../components/AIWidget/TabAIWidget/TabAIWidgetCode';
 import { ModelApp } from '../../models';
 import { ActiveAgentCard } from '../../components/AIWidget/ActiveAgentCard';
+import { PanelSkeleton } from '../../components/PanelSkeleton';
 import { useActiveWidgetAgent } from '../../hooks/useActiveWidgetAgent';
 import { useAppStore } from '../../store/useAppStore';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -33,6 +34,7 @@ import {
   loadLegacyBrowserAppearance,
 } from '../../lib/aiWidgetAppearance';
 import { resolveWidgetUrl } from '../../utils/widgetUrl';
+import { widgetAppearanceDraftKey } from '../../utils/widgetAppearanceDraft';
 import './AIWidget.scss';
 
 import { env } from '../../config/env';
@@ -43,6 +45,9 @@ const statusAiBot = {
 
 interface Props {
   standalone?: boolean;
+  initialTab?: 'code' | 'appearance' | 'config' | 'conversations';
+  showAgentCard?: boolean;
+  appearanceOnly?: boolean;
   appId: string;
   app?: ModelApp;
   setAiBot: (aiBot: ModelAIbot) => void;
@@ -152,6 +157,9 @@ function teardownWidget() {
 
 export function AIWidget({
   standalone = false,
+  initialTab = 'code',
+  showAgentCard = true,
+  appearanceOnly = false,
   appId,
   app,
   aiBot,
@@ -168,12 +176,16 @@ export function AIWidget({
   const [searchParams, setSearchParams] = useSearchParams();
   type WidgetTab = 'code' | 'appearance' | 'config' | 'conversations';
   const routeTabs: Record<string, WidgetTab> = { install: 'code', appearance: 'appearance', conversations: 'conversations' };
-  const [localTab, setLocalTab] = useState<WidgetTab>('code');
-  const widgetTab = standalone ? (routeTabs[searchParams.get('tab') || 'install'] || 'code') : localTab;
+  const [localTab, setLocalTab] = useState<WidgetTab>(initialTab);
+  const widgetTab = appearanceOnly ? 'appearance' : standalone ? (routeTabs[searchParams.get('tab') || 'install'] || 'code') : localTab;
   const setWidgetTab = (tab: WidgetTab) => {
     if (!standalone) { setLocalTab(tab); return; }
     const value = Object.entries(routeTabs).find(([, candidate]) => candidate === tab)?.[0] || 'install';
-    setSearchParams({ tab: value });
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('tab', value);
+      return next;
+    });
   };
   const activeAgent = useActiveWidgetAgent(app);
   const currentUserId = useAppStore((s) => (s.currentUser as { _id?: string } | null)?._id);
@@ -202,15 +214,30 @@ export function AIWidget({
         if (cancelled) return;
         const attrs = resp?.data?.appearance || {};
         const loaded = appearanceFromAttributes(attrs);
-        setAppearance(loaded);
+        let draft = loaded;
+        try {
+          const stored = JSON.parse(sessionStorage.getItem(widgetAppearanceDraftKey(appId)) || 'null') as { base?: Record<string, string>; values?: Record<string, string> } | null;
+          if (stored?.base && stored.values && isEqual(stored.base, getAppearanceAttributeRecord(loaded))) draft = appearanceFromAttributes(stored.values);
+          else if (stored) sessionStorage.removeItem(widgetAppearanceDraftKey(appId));
+        } catch { /* An unavailable or malformed draft cannot block editing. */ }
+        setAppearance(draft);
         setSavedAppearance(loaded);
         setAppearanceLoaded(true);
         if (!Object.keys(attrs).length) setLegacyAppearance(loadLegacyBrowserAppearance(appId));
       })
       .catch(() => {
         if (cancelled) return;
-        setAppearance(defaultAiWidgetAppearance);
-        setSavedAppearance(defaultAiWidgetAppearance);
+        let base = defaultAiWidgetAppearance;
+        let draft = base;
+        try {
+          const stored = JSON.parse(sessionStorage.getItem(widgetAppearanceDraftKey(appId)) || 'null') as { base?: Record<string, string>; values?: Record<string, string> } | null;
+          if (stored?.base && stored.values) {
+            base = appearanceFromAttributes(stored.base);
+            draft = appearanceFromAttributes(stored.values);
+          }
+        } catch { /* Keep the default appearance if the draft is unavailable. */ }
+        setAppearance(draft);
+        setSavedAppearance(base);
         setAppearanceLoaded(true);
         toast.error(t('aiWidgetAppearance.loadFailed'));
       });
@@ -231,6 +258,7 @@ export function AIWidget({
         const stored = appearanceFromAttributes(resp?.data?.appearance || {});
         setAppearance(stored);
         setSavedAppearance(stored);
+        try { sessionStorage.removeItem(widgetAppearanceDraftKey(appId)); } catch { /* Ignore unavailable storage. */ }
         toast.success(t('aiWidgetAppearance.saved'));
         return true;
       } catch (error) {
@@ -267,6 +295,13 @@ export function AIWidget({
   }, []);
 
   const appearanceIsDirty = appearanceLoaded && !isEqual(appearance, savedAppearance);
+  useEffect(() => {
+    if (!appearanceLoaded) return;
+    try {
+      if (appearanceIsDirty) sessionStorage.setItem(widgetAppearanceDraftKey(appId), JSON.stringify({ base: getAppearanceAttributeRecord(savedAppearance), values: getAppearanceAttributeRecord(appearance) }));
+      else sessionStorage.removeItem(widgetAppearanceDraftKey(appId));
+    } catch { /* Private browsing may disable draft storage. */ }
+  }, [appId, appearance, appearanceIsDirty, appearanceLoaded, savedAppearance]);
   useEffect(() => { onAppearanceDirtyChange?.(appearanceIsDirty); }, [appearanceIsDirty, onAppearanceDirtyChange]);
 
   // Env override first, then the copy bundled with this app. See
@@ -332,7 +367,7 @@ export function AIWidget({
   // signals a change. AbortController prevents a stale response from
   // overwriting state if the user switches apps mid-flight.
   useEffect(() => {
-    if (!appId || aiFeatureDisabled) return;
+    if (!appId || aiFeatureDisabled || appearanceOnly) return;
     const ac = new AbortController();
     httpV2
       .get(`/apps/${appId}/widget/conversations`, {
@@ -347,7 +382,7 @@ export function AIWidget({
         setConversationsTotal(null);
       });
     return () => ac.abort();
-  }, [appId, aiFeatureDisabled]);
+  }, [appId, aiFeatureDisabled, appearanceOnly]);
 
   // Tear the preview down on unmount — operators navigating away from the
   // tab shouldn't keep a connected widget hanging in the DOM.
@@ -447,7 +482,7 @@ export function AIWidget({
 
         {/* The agent behind the widget: which one, who it is, whether it
             answers, what it knows. Its full editor is under Agents. */}
-        <ActiveAgentCard
+        {showAgentCard && <ActiveAgentCard
           compact={standalone || widgetTab === 'config'}
           appId={appId as string}
           app={app}
@@ -456,7 +491,7 @@ export function AIWidget({
           disabled={aiFeatureDisabled}
           conversationsTotal={conversationsTotal}
           legacyKnowledgeMb={ragSize}
-        />
+        />}
 
         {legacyAppearance && (
           <Box
@@ -480,7 +515,7 @@ export function AIWidget({
           {!standalone && <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
             <h3 className="font-sans font-semibold text-base">{t('appSettingsAIWidget.widgetCardTitle')}</h3>
           </div>}
-          <Tabs
+          {!appearanceOnly && <Tabs
             value={widgetTab}
             onChange={(_, v) => setWidgetTab(v)}
             variant="scrollable"
@@ -494,7 +529,7 @@ export function AIWidget({
               sx={{ minHeight: 40, textTransform: 'none' }}
             />
             {standalone ? <Tab value="conversations" label={t('widgets.conversations')} sx={{ minHeight: 40, textTransform: 'none' }} /> : <Tab value="config" label={t('appSettingsAIWidget.configTab')} sx={{ minHeight: 40, textTransform: 'none' }} />}
-          </Tabs>
+          </Tabs>}
           {widgetTab === 'code' && (
             <div className="w-full overflow-x-auto">
               <TabAIWidgetCode
@@ -509,6 +544,7 @@ export function AIWidget({
           )}
           {/* Shown once the saved values are in, so nothing typed before the
               load finishes gets overwritten by it. */}
+          {widgetTab === 'appearance' && !appearanceLoaded && <PanelSkeleton label={t('projectOverview.loading')} />}
           {widgetTab === 'appearance' && appearanceLoaded && (
             <AssistantAppearancePanel
               embedded
@@ -545,7 +581,7 @@ export function AIWidget({
         {/* Widget Conversations: lists rooms with chats.type='widget' for
             this app. Operators can review historical visitor sessions
             here. */}
-        {(!standalone || widgetTab === 'conversations') && <WidgetConversationsPanel
+        {!appearanceOnly && (!standalone || widgetTab === 'conversations') && <WidgetConversationsPanel
           appId={appId}
           onTotalChange={setConversationsTotal}
         />}
