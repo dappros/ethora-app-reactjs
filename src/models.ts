@@ -22,7 +22,6 @@ export interface ModelCurrentUser {
   chatLanguage?: string;
   token: string;
   refreshToken: string;
-  wsToken: string;
   fileToken: string;
   walletAddress: string;
   xmppPassword: string;
@@ -356,7 +355,6 @@ export interface ModelOwnerSession {
   chatTokens: {
     accessToken: string;
     refreshToken: string;
-    wsToken: string;
     fileToken?: string;
   };
   owner: {

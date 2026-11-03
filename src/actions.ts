@@ -221,7 +221,6 @@ export async function actionAfterLogin(data: any) {
     isProfileOpen: data.user.isProfileOpen,
     refreshToken: data.refreshToken,
     token: data.token,
-    wsToken: data.wsToken || '',
     fileToken: data.fileToken || '',
     xmppPassword: data.user.xmppPassword,
     walletAddress: walletAddress,
