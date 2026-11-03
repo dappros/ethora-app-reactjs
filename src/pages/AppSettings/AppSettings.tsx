@@ -32,6 +32,7 @@ import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
+import { Webhooks } from './Webhooks';
 import { env } from '../../config/env';
 // Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
 // step content - we only want that chunk over the wire when firstAdd is
@@ -61,6 +62,7 @@ const tabs = [
   // selector inside AI Widget below still handles per-App deployment.
   'Visibility & Privacy',
   'API',
+  'Webhooks',
   LIFECYCLE_TAB,
 ];
 
@@ -70,7 +72,7 @@ const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
-  System: ['Chats', 'Visibility & Privacy', 'API', LIFECYCLE_TAB],
+  System: ['Chats', 'Visibility & Privacy', 'API', 'Webhooks', LIFECYCLE_TAB],
 };
 
 // `tabs` / `tabsNew` above are internal identifiers (compared against the
@@ -88,6 +90,7 @@ const TAB_LABEL_KEYS: Record<string, string> = {
   Chats: 'appSettings.tab.chats',
   'Visibility & Privacy': 'appSettings.tab.visibilityPrivacy',
   API: 'appSettings.tab.api',
+  Webhooks: 'appSettings.tab.webhooks',
   [LIFECYCLE_TAB]: 'appSettings.tab.deleteOrArchive',
 };
 
@@ -872,6 +875,10 @@ export default function AppSettings() {
 
           <TabPanel key="API" className="grid grid-rows-1 lg:ml-4 h-full">
             <Api app={app} />
+          </TabPanel>
+
+          <TabPanel key="Webhooks" className="grid grid-rows-1 lg:ml-4 h-full overflow-y-auto">
+            <Webhooks app={app} />
           </TabPanel>
 
           {domainName !== DOMAIN_NAME && (

@@ -1743,6 +1743,66 @@ export function httpRevokeAppServerToken(appId: string, id: string) {
   );
 }
 
+// App webhooks: events of an app's chats POSTed to the app's own endpoints
+// (backend: /v2/apps/:appId/webhooks). The signing secret comes back only on
+// create and on rotateSecret.
+export interface AppWebhook {
+  id: string;
+  url: string;
+  events: string[];
+  description: string;
+  enabled: boolean;
+  disabledReason: string;
+  hasSecret: boolean;
+  consecutiveFailures: number;
+  lastDeliveryAt: string | null;
+  lastStatus: number | null;
+  lastError: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AppWebhookWithSecret extends AppWebhook {
+  secret?: string;
+}
+
+const appWebhooksPath = (appId: string) => `/apps/${encodeURIComponent(appId)}/webhooks`;
+
+export function httpListAppWebhooks(appId: string) {
+  return httpV2.get<{ data: { items: AppWebhook[]; events: string[] } }>(appWebhooksPath(appId));
+}
+
+export function httpCreateAppWebhook(
+  appId: string,
+  body: { url: string; events: string[]; description?: string }
+) {
+  return httpV2.post<{ data: AppWebhookWithSecret }>(appWebhooksPath(appId), body);
+}
+
+export function httpUpdateAppWebhook(
+  appId: string,
+  id: string,
+  body: { url?: string; events?: string[]; description?: string; enabled?: boolean; rotateSecret?: boolean }
+) {
+  return httpV2.patch<{ data: AppWebhookWithSecret }>(
+    `${appWebhooksPath(appId)}/${encodeURIComponent(id)}`,
+    body
+  );
+}
+
+export function httpDeleteAppWebhook(appId: string, id: string) {
+  return httpV2.delete<{ data: { id: string; deleted: boolean } }>(
+    `${appWebhooksPath(appId)}/${encodeURIComponent(id)}`
+  );
+}
+
+export function httpTestAppWebhook(appId: string, id: string) {
+  return httpV2.post<{ data: { delivered: boolean; status: number | null; error: string } }>(
+    `${appWebhooksPath(appId)}/${encodeURIComponent(id)}/test`,
+    {}
+  );
+}
+
 // --- Account > Security: own password + multi-factor authentication ---
 // v2 endpoints; responses are flat `{ success, ...fields }`.
 
