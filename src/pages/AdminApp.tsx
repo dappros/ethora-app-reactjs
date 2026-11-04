@@ -66,10 +66,14 @@ export default function AdminApp() {
       <header className="min-w-0 border-b border-gray-200">
         <div className="flex items-center justify-between gap-4 px-6 pb-3 pt-5">
           <div className="min-w-0">
-            <Link to="/app/admin/apps" className="text-sm font-medium text-brand-500 hover:underline">{t('nav.apps')}</Link>
             <h1 className="truncate font-varela text-2xl md:text-[32px]">{app?.displayName}</h1>
           </div>
-          <ThemeToggle className="hidden md:flex" />
+          <div className="flex shrink-0 items-center gap-3">
+            <ThemeToggle className="hidden md:flex" />
+            <Link to="/app/admin/apps" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-brand-500 hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+              <span aria-hidden="true">←</span>{t('nav.apps')}
+            </Link>
+          </div>
         </div>
         <nav aria-label={t('projectOverview.navigation')} className="flex w-full gap-2 overflow-x-auto px-4 py-2">
           {[

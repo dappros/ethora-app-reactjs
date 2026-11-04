@@ -167,6 +167,10 @@ test('project opens on a short overview with focused navigation', async ({ page 
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
   await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
+  const projectHeader = page.locator('header');
+  const titleBounds = await projectHeader.getByRole('heading', { name: app.displayName }).boundingBox();
+  const projectsBounds = await projectHeader.getByRole('link', { name: 'Projects' }).boundingBox();
+  expect(titleBounds && projectsBounds && projectsBounds.x > titleBounds.x + titleBounds.width).toBeTruthy();
   await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
