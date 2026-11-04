@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useBlocker, useParams, useSearchParams } from 'react-router-dom';
 import { AIWidget } from '../AppSettings/AIWidget';
+import { ProjectAssistantNav } from '../../components/AIWidget/ProjectAssistantNav';
 import { PanelSkeleton } from '../../components/PanelSkeleton';
 import { ModelAIbot } from '../../models';
 import { useManagedWidgetApp } from '../../hooks/useManagedWidgetApp';
@@ -31,6 +32,7 @@ export default function WidgetEditor({ projectContext = false }: { projectContex
   if (!app) return error ? <div className="p-6" role="alert">{t('widgets.loadFailed')}<button className="ml-3 underline" onClick={retry}>{t('configAI.retry')}</button></div> : <PanelSkeleton label={t('projectOverview.loading')} />;
   return <div className="space-y-5 p-2 md:p-4">
     <header>{!projectContext && <Link className="text-sm text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}`}>← {t('projectOverview.tab')}</Link>}<h1 className="text-2xl font-semibold">{t('projectOverview.widget')}</h1></header>
+    {projectContext && <ProjectAssistantNav appId={app._id} />}
     <div className="rounded-2xl bg-white p-4 md:p-6"><AIWidget key={app._id} standalone onAppearanceDirtyChange={setDirty} appId={app._id} app={app} aiBot={aiBot || app.aiBot || {} as ModelAIbot} setAiBot={setAiBot} defaultChatRooms={app.defaultRooms || []} primaryColor={app.primaryColor} isDisabled={false} aiFeatureDisabled={env.VITE_AI_FEATURE_ENABLED !== 'true'} handleRagChange={() => {}} /></div>
   </div>;
 }

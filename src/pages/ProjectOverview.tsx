@@ -2,7 +2,6 @@ import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import HistoryIcon from '@mui/icons-material/History';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
-import WidgetsOutlinedIcon from '@mui/icons-material/WidgetsOutlined';
 import { Link, useParams } from 'react-router-dom';
 import { PanelSkeleton } from '../components/PanelSkeleton';
 import { useTranslation } from '../i18n/useTranslation';
@@ -34,7 +33,7 @@ export default function ProjectOverview() {
     }[recent.section]) : '';
   const resumeAction = t('projectOverview.resumeAction').replace('{section}', recentLabel);
 
-  return <main className="mx-auto max-w-7xl p-2 md:p-6">
+  return <main className="mx-auto max-w-6xl p-2 md:p-6">
     <div className="mb-4">
       <h1 className="text-2xl font-semibold">{t('projectOverview.title')}</h1>
       <p className="mt-2 text-sm text-gray-700">{t(recent ? 'projectOverview.chooseDirectionAfter' : 'projectOverview.chooseDirection')}</p>
@@ -53,13 +52,14 @@ export default function ProjectOverview() {
         <span aria-hidden="true" className="text-2xl font-semibold text-brand-500 transition-transform group-hover:translate-x-1">→</span>
       </Link>
     )}
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <section className={`${cardClass} ${recent ? '' : 'border-brand-200 bg-brand-50'}`} aria-label={t('projectOverview.assistant')}>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <section className={`${cardClass} ${recent ? '' : 'border-brand-200 bg-brand-50'}`} aria-label={t('projectOverview.assistantWidget')}>
         <span className={iconClass}><SmartToyOutlinedIcon fontSize="small" /></span>
-        <h2 className="mt-5 text-lg font-semibold">{t('projectOverview.assistant')}</h2>
-        <p className="mt-2 flex-1 text-sm leading-6 text-gray-700">{t('projectOverview.assistantSetupText')}</p>
-        <div className="mt-5">
-          <Link to={`${base}/assistant`} className={`${buttonClass} ${recent ? 'border border-gray-300 text-gray-900 hover:bg-gray-100' : 'bg-brand-500 text-white hover:bg-brand-darker'}`}>{t('projectOverview.configureAssistant')} →</Link>
+        <h2 className="mt-5 text-lg font-semibold">{t('projectOverview.assistantWidget')}</h2>
+        <p className="mt-2 flex-1 text-sm leading-6 text-gray-700">{t('projectOverview.assistantWidgetText')}</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Link to={`${base}/assistant`} className={`${buttonClass} ${recent ? 'border border-gray-300 text-gray-900 hover:bg-gray-100' : 'bg-brand-500 text-white hover:bg-brand-darker'}`}>{t('projectOverview.assistant')} →</Link>
+          <Link to={`${base}/widget`} className={`${buttonClass} border border-gray-300 text-gray-900 hover:bg-gray-100`}>{t('projectOverview.widgetTab')} →</Link>
         </div>
       </section>
 
@@ -81,14 +81,6 @@ export default function ProjectOverview() {
         </div>
       </section>
 
-      <section className={cardClass} aria-label={t('projectOverview.widget')}>
-        <span className={iconClass}><WidgetsOutlinedIcon fontSize="small" /></span>
-        <h2 className="mt-5 text-lg font-semibold">{t('projectOverview.widget')}</h2>
-        <p className="mt-2 flex-1 text-sm leading-6 text-gray-700">{t('projectOverview.widgetDirectionText')}</p>
-        <div className="mt-5">
-          <Link to={`${base}/widget`} className={`${buttonClass} border border-gray-300 text-gray-900 hover:bg-gray-100`}>{t('projectOverview.openWidget')} →</Link>
-        </div>
-      </section>
     </div>
   </main>;
 }
