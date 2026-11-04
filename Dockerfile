@@ -49,6 +49,9 @@ RUN npm run build
 
 FROM nginx:1.27-alpine AS runtime
 # Pick up base-image security fixes (the scan blocks fixable CRITICALs in openssl etc.).
+# Set to the build date by CI (release-images), so the upgrade below runs
+# again each day instead of coming back from an old layer cache.
+ARG SECURITY_UPGRADE_DATE=""
 RUN apk upgrade --no-cache
 ARG VITE_BUILD_VERSION=""
 ARG VITE_BUILD_COMMIT=""
