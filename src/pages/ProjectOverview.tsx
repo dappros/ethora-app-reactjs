@@ -32,21 +32,34 @@ export default function ProjectOverview() {
       statistics: 'projectOverview.activity',
       settings: 'adminApp.tabSettings',
     }[recent.section]) : '';
+  const resumeAction = t('projectOverview.resumeAction').replace('{section}', recentLabel);
 
   return <main className="mx-auto max-w-7xl p-2 md:p-6">
-    <div className="mb-6">
+    <div className="mb-4">
       <h1 className="text-2xl font-semibold">{t('projectOverview.title')}</h1>
-      <p className="mt-2 text-sm text-gray-700">{t('projectOverview.chooseDirection')}</p>
+      <p className="mt-2 text-sm text-gray-700">{t(recent ? 'projectOverview.chooseDirectionAfter' : 'projectOverview.chooseDirection')}</p>
     </div>
+    {recent && (
+      <Link
+        to={recentProjectUrl(app._id, recent)}
+        aria-label={resumeAction}
+        className="group mb-4 flex min-h-24 w-full items-center gap-4 rounded-2xl border border-brand-300 bg-brand-50 p-4 text-left transition-colors hover:border-brand-500 hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 md:gap-5 md:p-5"
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-white"><HistoryIcon fontSize="small" /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs font-semibold uppercase tracking-wide text-brand-500">{t('projectOverview.resumeLabel')}</span>
+          <span className="mt-1 block text-lg font-semibold text-gray-900 md:text-xl">{resumeAction}</span>
+        </span>
+        <span aria-hidden="true" className="text-2xl font-semibold text-brand-500 transition-transform group-hover:translate-x-1">→</span>
+      </Link>
+    )}
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <section className={`${cardClass} border-brand-200 bg-brand-50`} aria-label={recent ? t('projectOverview.continue') : t('projectOverview.assistant')}>
-        <span className={iconClass}>{recent ? <HistoryIcon fontSize="small" /> : <SmartToyOutlinedIcon fontSize="small" />}</span>
-        <h2 className="mt-5 text-lg font-semibold">{recent ? t('projectOverview.continue') : t('projectOverview.assistant')}</h2>
-        <p className="mt-2 flex-1 text-sm leading-6 text-gray-700">
-          {recent ? t('projectOverview.continueText').replace('{section}', recentLabel) : t('projectOverview.assistantSetupText')}
-        </p>
+      <section className={`${cardClass} ${recent ? '' : 'border-brand-200 bg-brand-50'}`} aria-label={t('projectOverview.assistant')}>
+        <span className={iconClass}><SmartToyOutlinedIcon fontSize="small" /></span>
+        <h2 className="mt-5 text-lg font-semibold">{t('projectOverview.assistant')}</h2>
+        <p className="mt-2 flex-1 text-sm leading-6 text-gray-700">{t('projectOverview.assistantSetupText')}</p>
         <div className="mt-5">
-          <Link to={recent ? recentProjectUrl(app._id, recent) : `${base}/assistant`} className={`${buttonClass} bg-brand-500 text-white hover:bg-brand-darker`}>{t(recent ? 'projectOverview.continue' : 'projectOverview.configureAssistant')} →</Link>
+          <Link to={`${base}/assistant`} className={`${buttonClass} ${recent ? 'border border-gray-300 text-gray-900 hover:bg-gray-100' : 'bg-brand-500 text-white hover:bg-brand-darker'}`}>{t('projectOverview.configureAssistant')} →</Link>
         </div>
       </section>
 

@@ -555,9 +555,18 @@ test('overview opens widget and offers to continue there next time', async ({ pa
   await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('widget');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
-  await expect(page.getByRole('region', { name: 'Continue' })).toContainText('Website widget');
+  const resume = page.getByRole('link', { name: 'Back to Website widget' });
+  await expect(resume).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Assistant' })).toBeVisible();
+  await expect(widget).toBeVisible();
+  const resumeBounds = await resume.boundingBox();
+  const widgetBounds = await widget.boundingBox();
+  expect(resumeBounds && widgetBounds && resumeBounds.width > widgetBounds.width && resumeBounds.y + resumeBounds.height < widgetBounds.y).toBeTruthy();
+  const contentBounds = await page.getByTestId('project-content-scroll').boundingBox();
+  const widgetButtonBounds = await widget.getByRole('link', { name: 'Open widget' }).boundingBox();
+  expect(contentBounds && widgetButtonBounds && widgetButtonBounds.y + widgetButtonBounds.height <= contentBounds.y + contentBounds.height).toBeTruthy();
   await page.reload();
-  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await page.getByRole('link', { name: 'Back to Website widget' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
 });
 
@@ -572,8 +581,9 @@ test('overview opens mobile settings and remembers the selected tab', async ({ p
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Mobile\\+App$`));
   await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('settings');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Continue' })).toContainText('Mobile App');
-  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await expect(page.getByRole('link', { name: 'Back to Mobile App' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Mobile App' })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to Mobile App' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Mobile\\+App$`));
 });
 
@@ -584,8 +594,7 @@ test('overview opens this project chat settings', async ({ page }) => {
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
   await expect(page.getByRole('tab', { name: 'Chats' })).toHaveAttribute('aria-selected', 'true');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Continue' })).toContainText('Chat settings');
-  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await page.getByRole('link', { name: 'Back to Chat settings' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
 });
 
@@ -593,7 +602,7 @@ test('old project chat bookmark continues to chat settings', async ({ page }) =>
   await fakeBackend(page, {});
   await page.addInitScript((appId) => localStorage.setItem(`ethora:project-recent:${appId}`, JSON.stringify({ section: 'chat' })), APP_ID);
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await page.getByRole('link', { name: 'Back to Chat settings' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
 });
 
