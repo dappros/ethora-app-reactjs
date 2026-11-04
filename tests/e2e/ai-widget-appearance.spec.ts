@@ -585,6 +585,18 @@ test('overview opens this project chat', async ({ page }) => {
   await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('chat');
 });
 
+test('long app settings remain scrollable inside the project', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Visibility+%26+Privacy`);
+  const panels = page.getByTestId('settings-panels-scroll');
+  await expect(page.getByRole('tab', { name: 'Visibility & Privacy' })).toHaveAttribute('aria-selected', 'true');
+  await expect.poll(() => panels.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
+  await panels.hover();
+  await page.mouse.wheel(0, 600);
+  await expect.poll(() => panels.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  await expect(page.getByText('All User accounts are tied to your App')).toBeVisible();
+});
+
 test('legacy settings AI link opens the dedicated assistant page', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI`);

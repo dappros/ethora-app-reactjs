@@ -714,7 +714,7 @@ export default function AppSettings() {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" />
         </div>
         <div className="flex min-h-0 flex-col">
-        <TabPanels className="min-h-0 flex-1 overflow-hidden">
+        <TabPanels data-testid="settings-panels-scroll" className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <TabPanel
             key="Web App"
             className="grid grid-rows-1 lg:ml-4 h-full "
