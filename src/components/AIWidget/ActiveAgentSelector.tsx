@@ -122,11 +122,11 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
   const publicAgents = agents.filter((a) => a.visibility === 'public');
 
   return (
-    <div className={bare ? 'flex flex-wrap items-center gap-3 text-sm' : 'border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-3 text-sm'}>
-      <label htmlFor={`active-agent-${appId}`} className="text-gray-600">{label || t('aiWidgetActiveAgentSelector.label')}</label>
+    <div className={bare ? 'flex flex-wrap items-center gap-2 text-sm' : 'border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm'}>
+      <label htmlFor={`active-agent-${appId}`} className="shrink-0 font-medium text-gray-700">{label || t('aiWidgetActiveAgentSelector.label')}</label>
       <select
         id={`active-agent-${appId}`}
-        className="h-11 w-60 max-w-full rounded-xl border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 disabled:cursor-wait disabled:bg-gray-100"
+        className="active-agent-select h-10 w-44 max-w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 disabled:cursor-wait disabled:bg-gray-100 sm:w-48"
         value={currentAgent?.id || ''}
         disabled={busy || disabled}
         onChange={(e) => pick(e.target.value)}

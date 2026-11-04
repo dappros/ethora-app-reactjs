@@ -570,6 +570,23 @@ test('overview opens widget and offers to continue there next time', async ({ pa
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
 });
 
+test('agent picker stays compact with room for its arrow', async ({ page }) => {
+  await configAgentBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/assistant`);
+  await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
+  await page.reload();
+  const picker = page.locator('select.active-agent-select').first();
+  await expect(picker).toBeVisible();
+  const metrics = await picker.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height, left: parseFloat(style.paddingLeft), right: parseFloat(style.paddingRight) };
+  });
+  expect(metrics.width).toBeLessThanOrEqual(192);
+  expect(metrics.height).toBe(40);
+  expect(metrics.left).toBeGreaterThanOrEqual(12);
+  expect(metrics.right).toBeGreaterThanOrEqual(36);
+});
+
 test('overview opens mobile settings and remembers the selected tab', async ({ page }) => {
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
