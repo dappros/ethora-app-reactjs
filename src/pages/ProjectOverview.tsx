@@ -25,7 +25,7 @@ export default function ProjectOverview() {
     ? t('appSettings.tab.mobileApp')
     : settingsTab === 'Chats' ? t('projectOverview.chatSettings')
     : recent ? t({
-      assistant: 'projectOverview.assistant',
+      assistant: 'projectOverview.setUpAssistant',
       widget: 'projectOverview.widget',
       users: 'projectOverview.people',
       statistics: 'projectOverview.activity',
@@ -57,9 +57,8 @@ export default function ProjectOverview() {
         <span className={iconClass}><SmartToyOutlinedIcon fontSize="small" /></span>
         <h2 className="mt-5 text-lg font-semibold">{t('projectOverview.assistantWidget')}</h2>
         <p className="mt-2 flex-1 text-sm leading-6 text-gray-700">{t('projectOverview.assistantWidgetText')}</p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <Link to={`${base}/assistant`} className={`${buttonClass} ${recent ? 'border border-gray-300 text-gray-900 hover:bg-gray-100' : 'bg-brand-500 text-white hover:bg-brand-darker'}`}>{t('projectOverview.assistant')} →</Link>
-          <Link to={`${base}/widget`} className={`${buttonClass} border border-gray-300 text-gray-900 hover:bg-gray-100`}>{t('projectOverview.widgetTab')} →</Link>
+        <div className="mt-5">
+          <Link to={`${base}/assistant`} className={`${buttonClass} ${recent ? 'border border-gray-300 text-gray-900 hover:bg-gray-100' : 'bg-brand-500 text-white hover:bg-brand-darker'}`}>{t('projectOverview.openAiWidget')} →</Link>
         </div>
       </section>
 

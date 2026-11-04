@@ -174,7 +174,7 @@ test('project opens on a short overview with focused navigation', async ({ page 
   await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
-  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'Assistant & Widget' })).toHaveCSS('color', 'rgb(226, 229, 233)');
+  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveCSS('color', 'rgb(226, 229, 233)');
   await expect(page.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
@@ -524,9 +524,9 @@ test('project assistant sections can scroll without clipping the project tabs', 
   await expect.poll(() => content.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
   await content.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
-  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'Assistant & Widget' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveAttribute('aria-current', 'page');
   const nav = await page.getByRole('navigation', { name: 'Project navigation' }).boundingBox();
-  const selected = await page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'Assistant & Widget' }).boundingBox();
+  const selected = await page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' }).boundingBox();
   expect(nav && selected && selected.y >= nav.y && selected.y + selected.height <= nav.y + nav.height).toBeTruthy();
 });
 
@@ -535,23 +535,42 @@ test('project menu keeps assistant and widget in the same project', async ({ pag
   await page.goto('/app/admin/widgets');
   await page.getByRole('link', { name: 'Edit widget', exact: true }).first().click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
-  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'Assistant & Widget' })).toHaveAttribute('aria-current', 'page');
-  await expect(page.getByRole('navigation', { name: 'Assistant and widget settings' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('navigation', { name: 'AI Widget setup' })).toBeVisible();
   const tabs = page.getByTestId('website-widget-card').getByRole('tab');
   await expect(tabs).toHaveText(['Install', 'Customize appearance', 'Conversations']);
-  await page.getByRole('navigation', { name: 'Assistant and widget settings' }).getByRole('link', { name: 'Assistant' }).click();
+  await page.getByRole('navigation', { name: 'AI Widget setup' }).getByRole('link', { name: 'Set up assistant' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/assistant$`));
   await expect(page.getByTestId('widget-config-ai').getByLabel('Display name')).toHaveValue('Test assistant');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
 });
 
+test('AI Widget explains optional placements and opens Ethora chat setup', async ({ page }) => {
+  await configAgentBackend(page);
+  await page.route(`**/v1/apps/${APP_ID}`, (route) => route.fulfill({ json: { result: {
+    ...app,
+    defaultBotInstanceId: 'bot-instance-test',
+    aiBot: { ...app.aiBot, chatId: 'chat-id' },
+    defaultRooms: [{ chatId: 'room-1', jid: 'general@example.test', title: 'General', pinned: false, creator: USER_ID }],
+  } } }));
+  await page.goto(`/app/admin/apps/${APP_ID}/assistant`);
+  const placements = page.getByRole('region', { name: 'Use it in' });
+  await expect(placements.getByText('Optional')).toHaveCount(2);
+  await expect(placements.getByRole('link', { name: /Website widget/ })).toBeVisible();
+  await placements.getByRole('link', { name: /Ethora chats/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/assistant\\?section=chats$`));
+  await expect(page.getByRole('tab', { name: 'Chats Index' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('button', { name: /General/ })).toBeVisible();
+});
+
 test('overview opens widget and offers to continue there next time', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  const assistantWidget = page.getByRole('region', { name: 'Assistant & Widget' });
-  await expect(assistantWidget.getByRole('link', { name: 'Assistant' })).toBeVisible();
-  await assistantWidget.getByRole('link', { name: 'Widget' }).click();
+  const assistantWidget = page.getByRole('region', { name: 'AI Widget' });
+  await assistantWidget.getByRole('link', { name: 'Open AI Widget' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/assistant$`));
+  await page.getByRole('navigation', { name: 'AI Widget setup' }).getByRole('link', { name: 'Website widget' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
   await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('widget');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
@@ -563,7 +582,7 @@ test('overview opens widget and offers to continue there next time', async ({ pa
   const cardBounds = await assistantWidget.boundingBox();
   expect(resumeBounds && cardBounds && resumeBounds.width > cardBounds.width && resumeBounds.y + resumeBounds.height < cardBounds.y).toBeTruthy();
   const contentBounds = await page.getByTestId('project-content-scroll').boundingBox();
-  const widgetButtonBounds = await assistantWidget.getByRole('link', { name: 'Widget' }).boundingBox();
+  const widgetButtonBounds = await assistantWidget.getByRole('link', { name: 'Open AI Widget' }).boundingBox();
   expect(contentBounds && widgetButtonBounds && widgetButtonBounds.y + widgetButtonBounds.height <= contentBounds.y + contentBounds.height).toBeTruthy();
   await page.reload();
   await page.getByRole('link', { name: 'Back to Website widget' }).click();
@@ -594,8 +613,8 @@ test('agent picker has balanced text and arrow spacing in dark mode', async ({ p
 test('overview opens mobile settings and remembers the selected tab', async ({ page }) => {
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await expect(page.getByRole('region', { name: 'Assistant & Widget' })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Chat' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'AI Widget' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Chat settings' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Mobile App' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Website widget' })).toHaveCount(0);
   await page.getByRole('region', { name: 'Mobile App' }).getByRole('link', { name: 'Mobile app settings' }).click();
@@ -611,7 +630,7 @@ test('overview opens mobile settings and remembers the selected tab', async ({ p
 test('overview opens this project chat settings', async ({ page }) => {
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await page.getByRole('region', { name: 'Chat' }).getByRole('link', { name: 'Configure chat' }).click();
+  await page.getByRole('region', { name: 'Chat settings' }).getByRole('link', { name: 'Configure chat' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
   await expect(page.getByRole('tab', { name: 'Chats' })).toHaveAttribute('aria-selected', 'true');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
@@ -658,8 +677,8 @@ test('widget draft survives reload and project navigation', async ({ page }) => 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
-  await page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'Assistant & Widget' }).click();
-  await page.getByRole('navigation', { name: 'Assistant and widget settings' }).getByRole('link', { name: 'Widget' }).click();
+  await page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' }).click();
+  await page.getByRole('navigation', { name: 'AI Widget setup' }).getByRole('link', { name: 'Website widget' }).click();
   await page.getByRole('tab', { name: /Customize appearance/ }).click();
   await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');
   await page.getByRole('button', { name: 'Save widget appearance' }).click();

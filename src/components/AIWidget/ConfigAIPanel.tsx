@@ -1,7 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import classNames from 'classnames';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import './ConfigAIPanel.css';
 import { actionGetAgent, actionLoadOwnedApps } from '../../actions';
 import {
@@ -13,7 +13,7 @@ import { AgentBotInstanceRow, WebsiteWidgetPanel } from '../Agents/panels/Websit
 import { VisibilityPanel } from '../Agents/panels/VisibilityPanel';
 import { httpListAgentBotInstances } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-import { ModelAgent } from '../../models';
+import { ModelAgent, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { WidgetSetupGuide } from './WidgetSetupGuide';
 import { PanelSkeleton } from '../PanelSkeleton';
@@ -26,6 +26,7 @@ const SECTIONS = [
   { label: 'agentSettings.sectionSharing', tabs: ['agentSettings.tabVisibility'] },
 ] as const;
 const TABS = SECTIONS.flatMap((section) => section.tabs);
+const CHATS_SECTION_INDEX = TABS.indexOf('agentSettings.tabChatsIndex');
 const sectionKey = (appId: string, agentId: string) => `config-ai-section:${appId}:${agentId}`;
 
 function readSection(appId: string, agentId?: string): number {
@@ -37,8 +38,10 @@ function readSection(appId: string, agentId?: string): number {
 }
 
 /** The same agent panels used by Agent Settings, scoped to this App's widget. */
-export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAgent: ModelAgent | null }) {
+export function ConfigAIPanel({ appId, activeAgent, defaultChatRooms = [] }: { appId: string; activeAgent: ModelAgent | null; defaultChatRooms?: ModelAppDefaulRooom[] }) {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const chatsRequested = searchParams.get('section') === 'chats';
   const agentId = activeAgent?.id;
   const selectionContext = `${appId}:${agentId || ''}`;
   const lastSelectionContext = useRef(selectionContext);
@@ -78,6 +81,19 @@ export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAge
     }
     return () => { signal.cancelled = true; };
   }, [agentId, appId, load]);
+
+  useEffect(() => {
+    if (chatsRequested) setSelected(CHATS_SECTION_INDEX);
+  }, [chatsRequested, agentId]);
+
+  const chooseSection = (index: number) => {
+    setSelected(index);
+    if (chatsRequested && index !== CHATS_SECTION_INDEX) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('section');
+      setSearchParams(next, { replace: true });
+    }
+  };
 
   useEffect(() => {
     if (lastSelectionContext.current !== selectionContext) {
@@ -121,15 +137,15 @@ export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAge
   const readOnly = !isOwned;
   return (
     <div className="config-ai" data-testid="widget-config-ai">
-      {!readOnly && <WidgetSetupGuide appId={appId} agentId={agent.id} selected={selected} onSelect={setSelected} />}
+      {!readOnly && <WidgetSetupGuide appId={appId} agentId={agent.id} selected={selected} onSelect={chooseSection} />}
       {readOnly && <div className="config-ai-notice" role="status">
         <span><strong>{t('agentSettings.readOnlyTitle')}</strong> {t('configAI.readOnlyDescription')}</span>
         <Link to="/app/admin/agents">{t('aiWidgetActiveAgentSelector.manageAgents')} <span aria-hidden="true">↗</span></Link>
       </div>}
-      <TabGroup selectedIndex={selected} onChange={setSelected}>
+      <TabGroup selectedIndex={selected} onChange={chooseSection}>
         <label className="block text-sm font-medium text-gray-700 lg:hidden">
           {t('configAI.chooseSection')}
-          <select className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" value={selected} onChange={(event) => setSelected(Number(event.target.value))}>
+          <select className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" value={selected} onChange={(event) => chooseSection(Number(event.target.value))}>
             {SECTIONS.map((section) => <optgroup key={section.label} label={t(section.label)}>
               {section.tabs.map((key) => <option key={key} value={TABS.indexOf(key)}>{t(key)}</option>)}
             </optgroup>)}
@@ -160,7 +176,7 @@ export function ConfigAIPanel({ appId, activeAgent }: { appId: string; activeAge
                 ? <p role="alert">{t('configAI.loadFailed')}</p>
                 : <WebsiteWidgetPanel agent={agent} instances={instances} currentAppId={appId} />}
             </TabPanel>
-            <TabPanel><ChatsIndexPanel agent={agent} isDisabled={readOnly} /></TabPanel>
+            <TabPanel><ChatsIndexPanel agent={agent} scopedAppId={appId} defaultChatRooms={defaultChatRooms} isDisabled={readOnly} /></TabPanel>
             <TabPanel><VisibilityPanel agent={agent} isOwned={isOwned} isSuperWriteAdmin={!!user?.isSuperAdmin?.write} onChanged={setAgent} /></TabPanel>
           </TabPanels>
         </div>

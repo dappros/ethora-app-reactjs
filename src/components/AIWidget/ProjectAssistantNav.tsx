@@ -7,8 +7,8 @@ export function ProjectAssistantNav({ appId }: { appId: string }) {
 
   return (
     <nav aria-label={t('projectOverview.assistantWidgetNav')} className="inline-flex max-w-full gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1">
-      <NavLink to={`/app/admin/apps/${appId}/assistant`} end className={({ isActive }) => linkClass(isActive)}>{t('projectOverview.assistant')}</NavLink>
-      <NavLink to={`/app/admin/apps/${appId}/widget`} end className={({ isActive }) => linkClass(isActive)}>{t('projectOverview.widgetTab')}</NavLink>
+      <NavLink to={`/app/admin/apps/${appId}/assistant`} end className={({ isActive }) => linkClass(isActive)}>{t('projectOverview.setUpAssistant')}</NavLink>
+      <NavLink to={`/app/admin/apps/${appId}/widget`} end className={({ isActive }) => linkClass(isActive)}>{t('projectOverview.widget')}</NavLink>
     </nav>
   );
 }
