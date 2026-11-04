@@ -124,36 +124,41 @@ export const ActiveAgentSelector: React.FC<ActiveAgentSelectorProps> = ({ appId,
   return (
     <div className={bare ? 'flex flex-wrap items-center gap-2 text-sm' : 'border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-2 text-sm'}>
       <label htmlFor={`active-agent-${appId}`} className="shrink-0 font-medium text-gray-700">{label || t('aiWidgetActiveAgentSelector.label')}</label>
-      <select
-        id={`active-agent-${appId}`}
-        className="active-agent-select h-10 w-44 max-w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 disabled:cursor-wait disabled:bg-gray-100 sm:w-48"
-        value={currentAgent?.id || ''}
-        disabled={busy || disabled}
-        onChange={(e) => pick(e.target.value)}
-      >
-        {/* "None" lets an operator deliberately unbind the widget (default
-            assistant is already attached on App creation; this is the
-            opt-out). The legacy "aiBot" path is gone as of Phase B.5. */}
-        <option value="">{t('aiWidgetActiveAgentSelector.none')}</option>
-        {myAgents.length > 0 && (
-          <optgroup label={t('aiWidgetActiveAgentSelector.myAgents')}>
-            {myAgents.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.displayName}
-              </option>
-            ))}
-          </optgroup>
-        )}
-        {publicAgents.length > 0 && (
-          <optgroup label={t('aiWidgetActiveAgentSelector.publicAgents')}>
-            {publicAgents.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.displayName}
-              </option>
-            ))}
-          </optgroup>
-        )}
-      </select>
+      <span className="relative inline-flex w-44 max-w-full shrink-0 sm:w-48">
+        <select
+          id={`active-agent-${appId}`}
+          className="active-agent-select h-10 w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 disabled:cursor-wait disabled:bg-gray-100"
+          value={currentAgent?.id || ''}
+          disabled={busy || disabled}
+          onChange={(e) => pick(e.target.value)}
+        >
+          {/* "None" lets an operator deliberately unbind the widget (default
+              assistant is already attached on App creation; this is the
+              opt-out). The legacy "aiBot" path is gone as of Phase B.5. */}
+          <option value="">{t('aiWidgetActiveAgentSelector.none')}</option>
+          {myAgents.length > 0 && (
+            <optgroup label={t('aiWidgetActiveAgentSelector.myAgents')}>
+              {myAgents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.displayName}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {publicAgents.length > 0 && (
+            <optgroup label={t('aiWidgetActiveAgentSelector.publicAgents')}>
+              {publicAgents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.displayName}
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700">
+          <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
       {/* Spinner + status text while the bind is in flight. The full
           chain (invite-to-chat → updateApp → reload bot instances) takes
           ~10s on QA-class hardware, which is long enough that operators

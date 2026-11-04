@@ -570,7 +570,7 @@ test('overview opens widget and offers to continue there next time', async ({ pa
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
 });
 
-test('agent picker stays compact with room for its arrow', async ({ page }) => {
+test('agent picker has balanced text and arrow spacing in dark mode', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/assistant`);
   await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
@@ -579,12 +579,16 @@ test('agent picker stays compact with room for its arrow', async ({ page }) => {
   await expect(picker).toBeVisible();
   const metrics = await picker.evaluate((element) => {
     const style = getComputedStyle(element);
-    return { width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height, left: parseFloat(style.paddingLeft), right: parseFloat(style.paddingRight) };
+    return { width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height, left: parseFloat(style.paddingLeft), right: parseFloat(style.paddingRight), appearance: style.appearance };
   });
   expect(metrics.width).toBeLessThanOrEqual(192);
   expect(metrics.height).toBe(40);
-  expect(metrics.left).toBeGreaterThanOrEqual(12);
-  expect(metrics.right).toBeGreaterThanOrEqual(36);
+  expect(metrics.left).toBe(12);
+  expect(metrics.right).toBe(40);
+  expect(metrics.appearance).toBe('none');
+  const pickerBounds = await picker.boundingBox();
+  const arrowBounds = await picker.locator('xpath=following-sibling::*[name()="svg"]').boundingBox();
+  expect(pickerBounds && arrowBounds && Math.abs((pickerBounds.x + pickerBounds.width) - (arrowBounds.x + arrowBounds.width) - metrics.left) < 1).toBeTruthy();
 });
 
 test('overview opens mobile settings and remembers the selected tab', async ({ page }) => {
