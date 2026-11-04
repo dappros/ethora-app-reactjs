@@ -186,6 +186,7 @@ function attachAuthInterceptors(client: AxiosInstance) {
       url === '/users/login-with-email' ||
       url === '/users/login' ||
       url === '/users/login/mfa' ||
+      url === '/users/reset' ||
       // A wrong current password / code is a 401 by design, not a stale session.
       url === '/users/me/password' ||
       url.startsWith('/users/me/mfa')
@@ -762,10 +763,11 @@ export async function httpPostForgotPassword(email: string) {
   });
 }
 
-export async function httpResetPassword(token: string, password: string) {
+export async function httpResetPassword(token: string, password: string, mfaCode?: string) {
   return await http.post('/users/reset', {
     token,
     password,
+    ...(mfaCode ? { mfaCode } : {}),
   });
 }
 

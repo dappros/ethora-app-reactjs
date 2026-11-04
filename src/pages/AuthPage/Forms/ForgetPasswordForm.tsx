@@ -42,9 +42,7 @@ const ForgetPasswordForm: React.FC<ForgetPasswordFormProps> = ({
   };
 
   useEffect(() => {
-    if (token) {
-      setActiveStep(2);
-    }
+    setActiveStep(token ? 2 : 0);
   }, [token]);
 
   if (!config) {
