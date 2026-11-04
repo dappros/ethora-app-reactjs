@@ -1,8 +1,8 @@
-export type ProjectSection = 'assistant' | 'widget' | 'users' | 'statistics' | 'settings' | 'chat';
+export type ProjectSection = 'assistant' | 'widget' | 'users' | 'statistics' | 'settings';
 
 type RecentPage = { section: ProjectSection; search?: string };
 
-const sections = new Set<ProjectSection>(['assistant', 'widget', 'users', 'statistics', 'settings', 'chat']);
+const sections = new Set<ProjectSection>(['assistant', 'widget', 'users', 'statistics', 'settings']);
 const key = (appId: string) => `ethora:project-recent:${appId}`;
 
 export function saveRecentProjectPage(appId: string, section: ProjectSection, search = '') {
@@ -17,14 +17,14 @@ export function saveRecentProjectPage(appId: string, section: ProjectSection, se
 
 export function readRecentProjectPage(appId: string): RecentPage | null {
   try {
-    const value = JSON.parse(localStorage.getItem(key(appId)) || 'null') as RecentPage | null;
+    const value = JSON.parse(localStorage.getItem(key(appId)) || 'null') as RecentPage | { section: 'chat' } | null;
+    if (value?.section === 'chat') return { section: 'settings', search: '?tab=Chats' };
     if (!value || !sections.has(value.section)) return null;
     return { section: value.section, search: typeof value.search === 'string' && value.search.length < 200 ? value.search : '' };
   } catch { return null; }
 }
 
 export function recentProjectUrl(appId: string, page: RecentPage): string {
-  if (page.section === 'chat') return '/app/chat';
   const search = page.section === 'settings' || page.section === 'widget' ? page.search || '' : '';
   return `/app/admin/apps/${appId}/${page.section}${search}`;
 }

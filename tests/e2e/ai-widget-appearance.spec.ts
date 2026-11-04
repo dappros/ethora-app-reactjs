@@ -548,6 +548,7 @@ test('project menu keeps assistant and widget in the same project', async ({ pag
 test('overview opens widget and offers to continue there next time', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByRole('region', { name: 'Assistant' })).toBeVisible();
   const widget = page.getByRole('region', { name: 'Website widget' });
   await widget.getByRole('link', { name: 'Open widget' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
@@ -563,9 +564,10 @@ test('overview opens widget and offers to continue there next time', async ({ pa
 test('overview opens mobile settings and remembers the selected tab', async ({ page }) => {
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await expect(page.getByRole('region', { name: 'Website widget' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Assistant' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Chat' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Mobile App' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Website widget' })).toBeVisible();
   await page.getByRole('region', { name: 'Mobile App' }).getByRole('link', { name: 'Mobile app settings' }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Mobile\\+App$`));
   await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('settings');
@@ -575,18 +577,24 @@ test('overview opens mobile settings and remembers the selected tab', async ({ p
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Mobile\\+App$`));
 });
 
-test('overview opens this project chat', async ({ page }) => {
+test('overview opens this project chat settings', async ({ page }) => {
   await fakeBackend(page, {});
-  await page.route(`**/v2/apps/${APP_ID}/owner-session`, (route) => route.fulfill({ json: {
-    appId: APP_ID,
-    appToken: 'e2e-app-token',
-    chatTokens: { accessToken: 'e2e-chat-token', refreshToken: 'e2e-chat-refresh' },
-    owner: { _id: USER_ID, appId: APP_ID, xmppUsername: `${APP_ID}_${USER_ID}` },
-  } }));
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await page.getByRole('region', { name: 'Chat' }).getByRole('button', { name: 'Open project chat' }).click();
-  await expect(page).toHaveURL(/\/app\/chat\??$/);
-  await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('chat');
+  await page.getByRole('region', { name: 'Chat' }).getByRole('link', { name: 'Configure chat' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
+  await expect(page.getByRole('tab', { name: 'Chats' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('link', { name: 'Overview', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Continue' })).toContainText('Chat settings');
+  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
+});
+
+test('old project chat bookmark continues to chat settings', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.addInitScript((appId) => localStorage.setItem(`ethora:project-recent:${appId}`, JSON.stringify({ section: 'chat' })), APP_ID);
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Chats$`));
 });
 
 test('long app settings remain scrollable inside the project', async ({ page }) => {
