@@ -243,10 +243,10 @@ export const SiteWatchesSection: React.FC<{
                 </div>
                 <div className={`mt-0.5 ${s.warn ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500'}`}>{s.text}</div>
               </div>
-              <label className="flex items-center gap-1 text-gray-600">
+              <label className="flex items-center gap-2 text-gray-600">
                 <span>{t('agentPanels.watchScheduleLabel')}</span>
                 <select
-                  className="border rounded px-1 py-0.5 text-xs"
+                  className="site-watch-schedule h-10 w-36 rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900"
                   value={w.schedule}
                   disabled={isDisabled || busyId === w.id}
                   aria-label={t('agentPanels.watchScheduleFor').replace('{url}', w.url)}

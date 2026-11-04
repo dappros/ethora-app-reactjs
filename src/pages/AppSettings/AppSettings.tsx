@@ -6,7 +6,6 @@ import { cloneDeep, isEqual } from 'lodash';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useLocation,
-  Link,
   useBlocker,
   useNavigate,
   useParams,
@@ -712,15 +711,6 @@ export default function AppSettings() {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" />
         </div>
         <div className="flex min-h-0 flex-col">
-          <nav aria-label="Breadcrumb" className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 px-2 text-xs text-gray-600 lg:ml-4">
-            <Link className="hover:text-brand-500 hover:underline" to="/app/admin/apps">{t('nav.apps')}</Link>
-            <span aria-hidden="true">/</span>
-            <Link className="max-w-40 truncate hover:text-brand-500 hover:underline" to={`/app/admin/apps/${app._id}`}>{app.displayName}</Link>
-            <span aria-hidden="true">/</span>
-            <span>{t('adminApp.tabSettings')}</span>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page" className="font-semibold text-gray-900">{t(TAB_LABEL_KEYS[tabs[selectedIndex]] ?? tabs[selectedIndex])}</span>
-          </nav>
         <TabPanels className="min-h-0 flex-1 overflow-hidden">
           <TabPanel
             key="Web App"

@@ -541,15 +541,48 @@ test('project menu keeps assistant and widget in the same project', async ({ pag
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
 });
 
-test('overview opens widget appearance and returns through project navigation', async ({ page }) => {
+test('overview opens widget and offers to continue there next time', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}`);
   const widget = page.getByRole('region', { name: 'Website widget' });
-  await widget.getByRole('link', { name: 'Edit widget' }).click();
-  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget\\?tab=appearance$`));
-  await expect(page.getByRole('tab', { name: 'Customize appearance' })).toHaveAttribute('aria-selected', 'true');
+  await widget.getByRole('link', { name: 'Open widget' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
+  await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('widget');
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}$`));
+  await expect(page.getByRole('region', { name: 'Continue' })).toContainText('Website widget');
+  await page.reload();
+  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
+});
+
+test('overview opens mobile settings and remembers the selected tab', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByRole('region', { name: 'Website widget' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Chat' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Mobile App' })).toBeVisible();
+  await page.getByRole('region', { name: 'Mobile App' }).getByRole('link', { name: 'Mobile app settings' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Mobile\\+App$`));
+  await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('settings');
+  await page.getByRole('link', { name: 'Overview', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Continue' })).toContainText('Mobile App');
+  await page.getByRole('region', { name: 'Continue' }).getByRole('link', { name: 'Continue' }).click();
+  await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings\\?tab=Mobile\\+App$`));
+});
+
+test('overview opens this project chat', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.route(`**/v2/apps/${APP_ID}/owner-session`, (route) => route.fulfill({ json: {
+    appId: APP_ID,
+    appToken: 'e2e-app-token',
+    chatTokens: { accessToken: 'e2e-chat-token', refreshToken: 'e2e-chat-refresh' },
+    owner: { _id: USER_ID, appId: APP_ID, xmppUsername: `${APP_ID}_${USER_ID}` },
+  } }));
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await page.getByRole('region', { name: 'Chat' }).getByRole('button', { name: 'Open project chat' }).click();
+  await expect(page).toHaveURL(/\/app\/chat\??$/);
+  await expect.poll(() => page.evaluate((appId) => localStorage.getItem(`ethora:project-recent:${appId}`), APP_ID)).toContain('chat');
 });
 
 test('legacy settings AI link opens the dedicated assistant page', async ({ page }) => {

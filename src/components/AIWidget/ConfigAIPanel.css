@@ -15,7 +15,7 @@
 .config-ai-section-heading h4 { font-size: 18px; line-height: 1.4; font-weight: 600; }
 .config-ai-section-heading p { font-size: 12px; margin-top: 4px; color: rgb(var(--c-gray-500)); }
 .config-ai-content > [role="tabpanel"] { max-width: 920px; }
-.config-ai-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), .config-ai-content textarea, .config-ai-content select { border-radius: 8px; border-color: rgb(var(--c-gray-300)); padding: 9px 12px; font-size: 13px; }
+.config-ai-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), .config-ai-content textarea, .config-ai-content select:not(.site-watch-schedule) { border-radius: 8px; border-color: rgb(var(--c-gray-300)); padding: 9px 12px; font-size: 13px; }
 .config-ai-content input:disabled, .config-ai-content textarea:disabled, .config-ai-content select:disabled { color: rgb(var(--c-gray-600)); opacity: 1; }
 .config-ai-content input:focus-visible, .config-ai-content textarea:focus-visible, .config-ai-content select:focus-visible { outline: 2px solid var(--brand-text); outline-offset: 2px; }
 .config-ai-persona > div { max-width: none; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px 28px; align-items: start; }

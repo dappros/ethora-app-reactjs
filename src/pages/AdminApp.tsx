@@ -11,6 +11,7 @@ import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isForbidden } from '../utils/accessError';
+import { saveRecentProjectPage, type ProjectSection } from '../utils/projectRecentPage';
 import { Error403Page } from './ErrorPage/Error403Page';
 import { Error404Page } from './ErrorPage/Error404Page';
 
@@ -39,6 +40,16 @@ export default function AdminApp() {
 
     getApp();
   }, [appId, doSetApp]);
+
+  useEffect(() => {
+    if (!appId) return;
+    const prefix = `/app/admin/apps/${appId}/`;
+    if (!location.pathname.startsWith(prefix)) return;
+    const section = location.pathname.slice(prefix.length);
+    if (['assistant', 'widget', 'users', 'statistics', 'settings'].includes(section)) {
+      saveRecentProjectPage(appId, section as ProjectSection, location.search);
+    }
+  }, [appId, location.pathname, location.search]);
 
   if (loadError === 'forbidden') {
     return <Error403Page forApp navigateUrl="/app/admin/apps" />;
