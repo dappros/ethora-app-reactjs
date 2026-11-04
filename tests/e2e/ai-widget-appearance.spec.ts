@@ -508,6 +508,24 @@ test('Config AI offers grouped, usable section navigation on a narrow screen', a
   await expect(panel.getByRole('heading', { name: 'Instructions' })).toBeVisible();
 });
 
+test('project assistant sections can scroll without clipping the project tabs', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 600 });
+  await configAgentBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/assistant`);
+  await expect(page.getByTestId('widget-config-ai')).toBeVisible();
+  await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
+  await page.reload();
+  await expect(page.getByTestId('widget-config-ai')).toBeVisible();
+  const content = page.getByTestId('project-content-scroll');
+  await expect.poll(() => content.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
+  await content.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+  await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  await expect(page.getByRole('link', { name: 'Assistant', exact: true })).toBeVisible();
+  const nav = await page.getByRole('navigation', { name: 'Project navigation' }).boundingBox();
+  const selected = await page.getByRole('link', { name: 'Assistant', exact: true }).boundingBox();
+  expect(nav && selected && selected.y >= nav.y && selected.y + selected.height <= nav.y + nav.height).toBeTruthy();
+});
+
 test('project menu keeps assistant and widget in the same project', async ({ page }) => {
   await configAgentBackend(page);
   await page.goto('/app/admin/widgets');

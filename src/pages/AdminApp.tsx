@@ -51,7 +51,6 @@ export default function AdminApp() {
   }
 
   return (
-    // overflow-hidden
     <div className="grid h-full min-h-0 grid-rows-[auto,_1fr] overflow-hidden rounded-2xl bg-white">
       <header className="min-w-0 border-b border-gray-200">
         <div className="flex items-center justify-between gap-4 px-6 pb-3 pt-5">
@@ -61,7 +60,7 @@ export default function AdminApp() {
           </div>
           <ThemeToggle className="hidden md:flex" />
         </div>
-        <nav aria-label={t('projectOverview.navigation')} className="flex w-full gap-2 overflow-x-auto px-4">
+        <nav aria-label={t('projectOverview.navigation')} className="flex w-full gap-2 overflow-x-auto px-4 py-2">
           {[
             { path: '', label: t('projectOverview.tab'), end: true },
             { path: '/assistant', label: t('projectOverview.assistant'), end: false },
@@ -71,14 +70,13 @@ export default function AdminApp() {
             { path: '/settings', label: t('adminApp.tabSettings'), end: false },
           ].map(({ path, label, end }) => (
             <NavLink key={path} to={`/app/admin/apps/${appId}${path}`} end={end}
-              className={({ isActive }) => `min-h-11 shrink-0 rounded-t-lg border-b-[3px] px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${isActive ? 'border-brand-500 bg-brand-50 text-brand-500' : 'border-transparent text-gray-800 hover:bg-gray-100 hover:text-brand-500'}`}>
+              className={({ isActive }) => `min-h-11 shrink-0 rounded-lg px-4 py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500 ${isActive ? 'bg-brand-50 text-brand-500' : 'text-gray-800 hover:bg-gray-100 hover:text-brand-500'}`}>
               {label}
             </NavLink>
           ))}
         </nav>
       </header>
-      {/* overflow-hidden */}
-      <div className="min-h-0 p-4">
+      <div data-testid="project-content-scroll" className="min-h-0 overflow-y-auto p-4">
         <Outlet />
       </div>
     </div>
