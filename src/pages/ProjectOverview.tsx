@@ -3,7 +3,6 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import HistoryIcon from '@mui/icons-material/History';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import { Link, useParams } from 'react-router-dom';
-import { PanelSkeleton } from '../components/PanelSkeleton';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { readRecentProjectPage, recentProjectUrl } from '../utils/projectRecentPage';
@@ -12,11 +11,30 @@ const cardClass = 'flex min-h-[228px] flex-col rounded-2xl border border-gray-20
 const iconClass = 'flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-500';
 const buttonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
 
+function OverviewSkeleton({ label, hasRecent }: { label: string; hasRecent: boolean }) {
+  return <main role="status" aria-label={label} className="mx-auto max-w-6xl animate-pulse p-2 md:p-6">
+    <span className="sr-only">{label}</span>
+    <div className="mb-4 space-y-3">
+      <div className="h-8 w-56 rounded bg-gray-200" />
+      <div className="h-4 w-80 max-w-full rounded bg-gray-200" />
+    </div>
+    {hasRecent && <div className="mb-4 h-24 rounded-2xl border border-gray-200 bg-gray-100" />}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[0, 1, 2].map((item) => <div key={item} className={`${cardClass} space-y-4`}>
+        <div className="h-11 w-11 rounded-xl bg-gray-100" />
+        <div className="h-6 w-2/3 rounded bg-gray-200" />
+        <div className="h-10 w-full rounded bg-gray-100" />
+        <div className="mt-auto h-11 w-36 rounded-xl bg-gray-200" />
+      </div>)}
+    </div>
+  </main>;
+}
+
 export default function ProjectOverview() {
   const { appId } = useParams();
   const { t } = useTranslation();
   const app = useAppStore((state) => state.apps.find((item) => item._id === appId));
-  if (!app) return <PanelSkeleton label={t('projectOverview.loading')} />;
+  if (!app) return <OverviewSkeleton label={t('projectOverview.loading')} hasRecent={Boolean(appId && readRecentProjectPage(appId))} />;
 
   const base = `/app/admin/apps/${app._id}`;
   const recent = readRecentProjectPage(app._id);

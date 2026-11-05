@@ -130,13 +130,14 @@ export function ConfigAIPanel({ appId, activeAgent, defaultChatRooms = [] }: { a
   }, [storeAgent]);
 
   if (!agentId) return <div className="m-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5 text-sm text-gray-600"><p className="font-semibold text-gray-900">{t('configAI.emptyTitle')}</p><p className="mt-1">{t('configAI.selectAgent')}</p></div>;
-  if (loading || (agent && agent.id !== agentId) || (!agent && !error)) return <PanelSkeleton label={t('configAI.loading')} />;
+  if ((agent && agent.id !== agentId) || (!agent && !error)) return <PanelSkeleton label={t('configAI.loading')} />;
   if (error || !agent) return <div role="alert" className="p-4 text-sm text-red-700">{t('configAI.loadFailed')} <button type="button" className="underline" onClick={() => void load({ cancelled: false })}>{t('configAI.retry')}</button></div>;
 
   const isOwned = !!user?._id && String(agent.ownerId) === String(user._id);
   const readOnly = !isOwned;
   return (
-    <div className="config-ai" data-testid="widget-config-ai">
+    <div className="config-ai" data-testid="widget-config-ai" aria-busy={loading}>
+      {loading && <span role="status" className="sr-only">{t('configAI.loading')}</span>}
       {!readOnly && <WidgetSetupGuide appId={appId} agentId={agent.id} selected={selected} onSelect={chooseSection} />}
       {readOnly && <div className="config-ai-notice" role="status">
         <span><strong>{t('agentSettings.readOnlyTitle')}</strong> {t('configAI.readOnlyDescription')}</span>

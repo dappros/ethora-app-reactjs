@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import {
   Link,
   NavLink,
@@ -7,6 +7,7 @@ import {
   useParams,
 } from 'react-router-dom';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { PanelSkeleton } from '../components/PanelSkeleton';
 import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
@@ -25,23 +26,27 @@ export default function AdminApp() {
   const doSetApp = useAppStore((s) => s.doSetApp);
   const app = apps.find((app) => app._id === appId);
   const assistantAreaActive = location.pathname === `/app/admin/apps/${appId}/assistant` || location.pathname === `/app/admin/apps/${appId}/widget`;
-  const [loadError, setLoadError] = useState<'notFound' | 'forbidden' | null>(null);
+  const [loadError, setLoadError] = useState<{ appId: string; reason: 'notFound' | 'forbidden' } | null>(null);
 
   useEffect(() => {
     if (!appId) return;
+    let cancelled = false;
 
     const getApp = async () => {
       try {
         setLoadError(null);
         const response = await httpGetApp(appId);
-        doSetApp(response.data.result);
+        if (!cancelled) doSetApp(response.data.result);
       } catch (e) {
-        setLoadError(isForbidden(e) ? 'forbidden' : 'notFound');
-        console.error(e);
+        if (!cancelled) {
+          setLoadError({ appId, reason: isForbidden(e) ? 'forbidden' : 'notFound' });
+          console.error(e);
+        }
       }
     };
 
-    getApp();
+    void getApp();
+    return () => { cancelled = true; };
   }, [appId, doSetApp]);
 
   useEffect(() => {
@@ -54,11 +59,12 @@ export default function AdminApp() {
     }
   }, [appId, location.pathname, location.search]);
 
-  if (loadError === 'forbidden') {
+  const currentLoadError = loadError && loadError.appId === appId ? loadError.reason : null;
+  if (currentLoadError === 'forbidden') {
     return <Error403Page forApp navigateUrl="/app/admin/apps" />;
   }
 
-  if (loadError) {
+  if (currentLoadError) {
     return (
       <Error404Page navigateUrl={location.state?.from || '/app/admin/apps/'} />
     );
@@ -73,7 +79,9 @@ export default function AdminApp() {
               <span aria-hidden="true">←</span>{t('nav.apps')}
             </Link>
             <span aria-hidden="true" className="h-6 w-px shrink-0 bg-gray-300" />
-            <h1 className="truncate font-varela text-2xl md:text-[32px]">{app?.displayName}</h1>
+            <h1 className="min-w-0 truncate font-varela text-2xl md:text-[32px]">
+              {app?.displayName || <span aria-hidden="true" className="inline-block h-7 w-36 animate-pulse rounded-md bg-gray-200 align-middle md:h-9" />}
+            </h1>
           </div>
           <ThemeToggle className="hidden md:flex" />
         </div>
@@ -92,7 +100,9 @@ export default function AdminApp() {
         </nav>
       </header>
       <div data-testid="project-content-scroll" className="min-h-0 overflow-y-auto p-4">
-        <Outlet />
+        <Suspense fallback={<PanelSkeleton label={t('projectOverview.loading')} />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   );
