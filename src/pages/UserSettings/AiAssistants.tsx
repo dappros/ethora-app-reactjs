@@ -164,6 +164,33 @@ function Snippet({ label, value, hint, multiline }: SnippetProps) {
   );
 }
 
+// Three paste-ready first prompts. Added after an early adopter connected an
+// assistant on four more days without making a tool call: the connector was
+// on, but nothing suggested what to ask. Server instructions reach the model,
+// not the person, so the prompts live where people read: here, on the OAuth
+// consent page and on the connector landing page.
+const STARTER_PROMPT_KEYS = ['starter1', 'starter2', 'starter3'] as const;
+
+function StarterPrompts({ t }: { t: (k: string) => string }) {
+  return (
+    <div className="mb-6">
+      <div className="font-sans text-regular font-semibold mb-1">{t('userSettingsAi.startersHeading')}</div>
+      <div className="text-gray-500 font-sans text-[12px] mb-2">{t('userSettingsAi.startersHint')}</div>
+      <div className="flex flex-col gap-2">
+        {STARTER_PROMPT_KEYS.map((k) => {
+          const text = t(`userSettingsAi.${k}`);
+          return (
+            <div key={k} className="flex items-start gap-2 bg-gray-100 rounded-xl px-[12px] py-[10px]">
+              <div className="flex-1 min-w-0 text-[13px] font-sans">{text}</div>
+              <CopyButton value={text} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function InstallButton({ href, label }: { href: string; label: string }) {
   return (
     <a
@@ -466,7 +493,10 @@ export function AiAssistants() {
       <EmailVerification />
 
       {MCP_URL ? (
-        <Snippet label={t('userSettingsAi.endpointLabel')} value={MCP_URL} />
+        <>
+          <Snippet label={t('userSettingsAi.endpointLabel')} value={MCP_URL} />
+          <StarterPrompts t={t} />
+        </>
       ) : (
         <div className="mb-6 text-[12px] font-sans bg-gray-100 rounded-xl px-[12px] py-[12px]">
           {t('userSettingsAi.mcpDisabled')}
