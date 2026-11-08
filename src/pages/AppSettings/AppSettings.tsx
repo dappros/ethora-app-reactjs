@@ -454,11 +454,12 @@ export default function AppSettings() {
 
     //AI bot
     if (Object.keys(aiBot).length > 0) {
-      body.botPrompt = aiBot.prompt;
-      body.botGreetingMessage = aiBot.greetingMessage;
-      body.botTrigger = aiBot.trigger;
-      body.botChatId = aiBot.chatId;
-      body.botIsRAG = aiBot.isRAG;
+      if (aiBot.prompt != null) body.botPrompt = aiBot.prompt;
+      if (aiBot.greetingMessage != null)
+        body.botGreetingMessage = aiBot.greetingMessage;
+      if (aiBot.trigger != null) body.botTrigger = aiBot.trigger;
+      if (aiBot.chatId) body.botChatId = aiBot.chatId;
+      if (aiBot.isRAG != null) body.botIsRAG = aiBot.isRAG;
     }
 
     if (

@@ -56,10 +56,20 @@ export const authFlows = {
       'Enter New Password',
     'authForgetPasswordThirdStep.passwordRequired': 'Password is required',
     'authForgetPasswordThirdStep.passwordMinLength':
-      'Password must be at least 4 characters',
+      'Password must be at least 6 characters',
     'authForgetPasswordThirdStep.repeatPasswordPlaceholder':
       'Repeat New Password',
     'authForgetPasswordThirdStep.submit': 'Reset password',
+    'authForgetPasswordThirdStep.passwordMismatch': 'Passwords do not match',
+    'authForgetPasswordThirdStep.requestFailed': 'Could not reset your password. Please try again.',
+    'authForgetPasswordThirdStep.mfaEither': 'Enter a code from your authenticator app or a backup code.',
+    'authForgetPasswordThirdStep.mfaBackup': 'Enter a backup code.',
+    'authForgetPasswordThirdStep.mfaAuthenticator': 'Enter a code from your authenticator app.',
+    'authForgetPasswordThirdStep.mfaLabel': 'Verification code',
+    'authForgetPasswordThirdStep.mfaInvalid': 'That code is not valid. Try again.',
+    'authForgetPasswordThirdStep.attemptsLeft': 'Attempts remaining: {count}',
+    'authForgetPasswordThirdStep.tokenInvalid': 'This reset link is invalid or expired, or too many incorrect codes were entered.',
+    'authForgetPasswordThirdStep.requestNewLink': 'Request a new reset link.',
 
     // Forms/ForgetPasswordForm.tsx
     'authForgetPasswordForm.stepNotFound': 'Step not found',
@@ -223,7 +233,7 @@ export const authFlows = {
     'authForgetPasswordThirdStep.passwordRequired':
       'Le mot de passe est requis',
     'authForgetPasswordThirdStep.passwordMinLength':
-      'Le mot de passe doit contenir au moins 4 caractères',
+      'Le mot de passe doit contenir au moins 6 caractères',
     'authForgetPasswordThirdStep.repeatPasswordPlaceholder':
       'Répéter le nouveau mot de passe',
     'authForgetPasswordThirdStep.submit': 'Réinitialiser le mot de passe',
@@ -395,7 +405,7 @@ export const authFlows = {
     'authForgetPasswordThirdStep.passwordRequired':
       'La contraseña es obligatoria',
     'authForgetPasswordThirdStep.passwordMinLength':
-      'La contraseña debe tener al menos 4 caracteres',
+      'La contraseña debe tener al menos 6 caracteres',
     'authForgetPasswordThirdStep.repeatPasswordPlaceholder':
       'Repite la nueva contraseña',
     'authForgetPasswordThirdStep.submit': 'Restablecer contraseña',
