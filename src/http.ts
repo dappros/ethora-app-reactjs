@@ -367,6 +367,23 @@ export function httpGetAgentAiUsage(agentId: string) {
   return httpV2.get<{ ok: boolean; result: AgentAiUsage }>(`/agents/${agentId}/ai-usage`);
 }
 
+// Whether the agent's heartbeat runs and, if not, why (owner only).
+export type AgentHeartbeatState = 'off' | 'no-schedule' | 'invalid-schedule' | 'no-bot' | 'no-rooms' | 'idle-rooms' | 'running';
+export interface AgentHeartbeatStatus {
+  enabled: boolean;
+  schedule: string;
+  description: string | null;
+  state: AgentHeartbeatState;
+  abandonAfterHours: number;
+  roomsTotal: number;
+  lastRunAt: string | null;
+  rooms: { room: string; title: string; lastRunAt: string | null; lastHumanAt: string | null; skipped: 'idle' | null }[];
+}
+
+export function httpGetAgentHeartbeat(agentId: string) {
+  return httpV2.get<{ ok: boolean; result: AgentHeartbeatStatus }>(`/agents/${agentId}/heartbeat`);
+}
+
 export function httpGetGraphStatistic(
   appId: string,
   startDate: string,

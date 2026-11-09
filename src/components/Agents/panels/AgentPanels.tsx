@@ -36,6 +36,8 @@ import {
   httpValidateAgentFlows,
   FlowsValidationError,
   FlowMapData,
+  AgentHeartbeatStatus,
+  httpGetAgentHeartbeat,
 } from '../../../http';
 import { useSiteCrawlEvents, SiteCrawlEvent } from '../../../hooks/useSiteCrawlEvents';
 import { useTranslation } from '../../../i18n/useTranslation';
@@ -1639,27 +1641,93 @@ export const FlowsPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> =
   );
 };
 
+// What the heartbeat worker is doing for this agent, from the API's reading of
+// the same inputs (schedule, switched-on bots, their rooms, recent activity).
+const HeartbeatStatusBox: React.FC<{ status: AgentHeartbeatStatus }> = ({ status }) => {
+  const { t } = useTranslation();
+  const when = (v: string | null) => (v ? new Date(v).toLocaleString() : '');
+  const served = status.rooms.filter((r) => !r.skipped).length;
+  const message = (() => {
+    switch (status.state) {
+      case 'running':
+        return t('agentPanels.heartbeatRunning')
+          .replace('{schedule}', status.description || status.schedule)
+          .replace('{n}', String(served))
+          .replace('{total}', String(status.roomsTotal));
+      case 'off':
+        return t('agentPanels.heartbeatStateOff');
+      case 'no-schedule':
+        return t('agentPanels.heartbeatStateNoSchedule');
+      case 'invalid-schedule':
+        return t('agentPanels.heartbeatStateInvalid');
+      case 'no-bot':
+        return t('agentPanels.heartbeatStateNoBot');
+      case 'no-rooms':
+        return t('agentPanels.heartbeatStateNoRooms');
+      case 'idle-rooms':
+        return t('agentPanels.heartbeatStateIdle').replace('{h}', String(status.abandonAfterHours));
+      default:
+        return '';
+    }
+  })();
+  const ok = status.state === 'running' || status.state === 'off';
+  return (
+    <div className="border rounded p-2 text-xs space-y-1" data-testid="heartbeat-status">
+      <div className={ok ? 'text-gray-700' : 'text-amber-600 dark:text-amber-400'}>
+        {message}
+        {status.lastRunAt && <> {t('agentPanels.heartbeatLastRun').replace('{date}', when(status.lastRunAt))}</>}
+      </div>
+      {status.rooms.length > 0 && (
+        <ul className="space-y-0.5 text-gray-500">
+          {status.rooms.map((r) => (
+            <li key={r.room} className="break-all">
+              <span className="text-gray-700">{r.title || r.room.split('@')[0]}</span>
+              {' · '}
+              {r.skipped === 'idle'
+                ? t('agentPanels.heartbeatRoomIdle').replace('{h}', String(status.abandonAfterHours))
+                : r.lastRunAt
+                  ? t('agentPanels.heartbeatRoomLastRun').replace('{date}', when(r.lastRunAt))
+                  : t('agentPanels.heartbeatRoomNotYet')}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 export const HeartbeatPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }> = ({ agent, isDisabled }) => {
   const { t } = useTranslation();
   const [enabled, setEnabled] = useState(agent.heartbeat?.enabled || false);
   const [schedule, setSchedule] = useState(agent.heartbeat?.schedule || '');
   const [hbPrompt, setHbPrompt] = useState(agent.heartbeat?.prompt || '');
+  const [status, setStatus] = useState<AgentHeartbeatStatus | null>(null);
   useEffect(() => {
     setEnabled(agent.heartbeat?.enabled || false);
     setSchedule(agent.heartbeat?.schedule || '');
     setHbPrompt(agent.heartbeat?.prompt || '');
   }, [agent.id]);
 
+  const loadStatus = () => {
+    if (isDisabled) return;
+    httpGetAgentHeartbeat(agent.id)
+      .then((r) => setStatus(r.data?.result || null))
+      // An older API, or not the owner: no status, the form still works.
+      .catch(() => setStatus(null));
+  };
+  useEffect(loadStatus, [agent.id, isDisabled]);
+
   return (
     <div className="space-y-3 max-w-2xl">
       <div className="text-sm text-gray-600">
         {t('agentPanels.heartbeatDescription')}
       </div>
+      {status && <HeartbeatStatusBox status={status} />}
       <Field label={t('agentPanels.enabledLabel')}>
         <input type="checkbox" disabled={isDisabled} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
       </Field>
       <Field label={t('agentPanels.scheduleLabel')}>
-        <input className="border rounded px-2 py-1 w-full" disabled={isDisabled} placeholder="e.g. '0 9 * * MON-FRI' or 'inactive 1h'" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
+        <input className="border rounded px-2 py-1 w-full" disabled={isDisabled} placeholder={t('agentPanels.heartbeatSchedulePlaceholder')} value={schedule} onChange={(e) => setSchedule(e.target.value)} />
       </Field>
       <Field label={t('agentPanels.heartbeatPromptLabel')}>
         <textarea className="border rounded px-2 py-1 w-full" rows={5} disabled={isDisabled} value={hbPrompt} onChange={(e) => setHbPrompt(e.target.value)} />
@@ -1669,6 +1737,7 @@ export const HeartbeatPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean 
           try {
             await actionUpdateAgent(agent.id, { heartbeat: { enabled, schedule, prompt: hbPrompt } });
             toast.success(t('agentPanels.heartbeatSaved'));
+            loadStatus();
           } catch (e: any) {
             toast.error(`${t('agentPanels.failedPrefix')} ${e?.response?.data?.error || e.message}`);
           }
