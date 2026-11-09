@@ -12,6 +12,25 @@ const OWNED_APP = { _id: 'e2eapp000000000000000001', displayName: 'E2E Owned App
 
 type Agent = Record<string, unknown> & { id: string };
 
+// What GET /v2/agents/:id/heartbeat answers for the fake agent.
+function heartbeatStatus(agent: Agent) {
+  const hb = (agent.heartbeat || {}) as { enabled?: boolean; schedule?: string };
+  const base = { enabled: !!hb.enabled, schedule: hb.schedule || '', description: null, abandonAfterHours: 72, roomsTotal: 0, lastRunAt: null, rooms: [] as unknown[] };
+  if (!hb.enabled) return { ...base, state: 'off' };
+  if (!hb.schedule) return { ...base, state: 'no-schedule' };
+  return {
+    ...base,
+    state: 'running',
+    description: 'every 30 minutes',
+    roomsTotal: 2,
+    lastRunAt: '2026-11-09T10:00:00.000Z',
+    rooms: [
+      { room: 'app_lesson@conference.x', title: 'Lesson room', lastRunAt: '2026-11-09T10:00:00.000Z', lastHumanAt: null, skipped: null },
+      { room: 'app_old@conference.x', title: 'Old room', lastRunAt: null, lastHumanAt: null, skipped: 'idle' },
+    ],
+  };
+}
+
 function freshAgent(): Agent {
   return {
     id: AGENT_ID,
@@ -88,7 +107,13 @@ async function fakeBackend(page: Page, opts: { botInstances?: unknown[]; watches
       }
       if (pathname === `/v2/agents/${AGENT_ID}/bot-instances`) return json(route, { ok: true, items: opts.botInstances || [] });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'GET') return json(route, { ok: true, agent });
+      if (pathname === `/v2/agents/${AGENT_ID}/heartbeat`) return json(route, { ok: true, result: heartbeatStatus(agent) });
       if (pathname === `/v2/agents/${AGENT_ID}` && method === 'PUT') {
+        // Like the API: a switched-on heartbeat needs a schedule it understands.
+        const hb = (body as { heartbeat?: { enabled?: boolean; schedule?: string } })?.heartbeat;
+        if (hb?.enabled && !/^(every |idle )?\d+\s*[mhd]$|^daily|^[\d*]/.test(String(hb.schedule || ''))) {
+          return json(route, { error: 'Heartbeat schedule "twice a day" is not understood. Use an interval, an idle time, a daily time or a 5-field cron, for example: every 2h, idle 30m, daily 09:00, 0 9 * * mon-fri', code: 'HEARTBEAT_SCHEDULE_INVALID' }, 422);
+        }
         Object.assign(agent, body);
         return json(route, { ok: true, agent: bare(agent) });
       }
@@ -322,6 +347,21 @@ test.describe('Agent Settings keeps saved values across tab switches', () => {
     await expect(page.getByLabel('Enabled')).toBeChecked();
     await expect(page.getByLabel(/^Schedule/)).toHaveValue('every 30m');
     await expect(page.getByLabel('Heartbeat prompt')).toHaveValue('Post a short status.');
+    const status = page.getByTestId('heartbeat-status');
+    await expect(status).toContainText('Running every 30 minutes in 1 of 2 rooms.');
+    await expect(status).toContainText('Lesson room');
+    await expect(status).toContainText('Old room · skipped: nobody has written here for 72 hours');
+  });
+
+  test('Heartbeat: a switched-on heartbeat without a schedule says why it is not running, and an unreadable schedule is refused', async ({ page }) => {
+    const { agent } = await fakeBackend(page);
+    agent.heartbeat = { enabled: true, schedule: '', prompt: '' };
+    await openTab(page, 'Heartbeat');
+    await expect(page.getByTestId('heartbeat-status')).toContainText('Not running: add a schedule.');
+    await expect(page.getByLabel(/^Schedule/)).toHaveAttribute('placeholder', /0 9 \* \* mon-fri/);
+    await page.getByLabel(/^Schedule/).fill('twice a day');
+    await page.getByRole('button', { name: 'Save heartbeat' }).click();
+    await expect(page.getByText(/is not understood/)).toBeVisible();
   });
 
   test('Flows', async ({ page }) => {
