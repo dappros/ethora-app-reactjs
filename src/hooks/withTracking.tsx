@@ -1,5 +1,5 @@
-import Clarity from '@microsoft/clarity';
 import { ComponentType, useEffect, useState } from 'react';
+import { initializeClarity } from '../clarity.ts';
 import { phCapture } from '../posthog.ts';
 import { useAppStore } from '../store/useAppStore.ts';
 
@@ -32,14 +32,6 @@ export const initializeGA4 = (measurementId: string) => {
     gtag('config', '${measurementId}', { debug_mode: true });
   `;
   document.head.appendChild(inlineScript);
-};
-
-export const initializeClarity = (clarityId: string) => {
-  try {
-    Clarity.init(clarityId);
-  } catch (error) {
-    console.error('Microsoft Clarity failed to start', error);
-  }
 };
 
 export function withTracking<T>(Component: ComponentType<T>) {

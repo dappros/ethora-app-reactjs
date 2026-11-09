@@ -37,6 +37,7 @@ import {
   resolveAvailableLanguages,
 } from './constants/languageOptionsConstants';
 import { ModelAgent, ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
+import { clarityIdentify } from './clarity';
 import { phCapture, phIdentify, phReset } from './posthog';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
@@ -247,6 +248,7 @@ export async function actionAfterLogin(data: any) {
     name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
     created_at: data.user.createdAt,
   });
+  clarityIdentify(data.user._id, data.user.appId);
 
   state.doSetUser(user);
   applySessionLanguages(data);
