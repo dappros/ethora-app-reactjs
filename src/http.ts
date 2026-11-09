@@ -80,6 +80,7 @@ const AUTH_WHITELIST: Array<string | RegExp> = [
   '/users/login-with-email',
   '/users/login',
   '/users/login/mfa', // second login step: app-JWT auth like login-with-email
+  '/users/login/handoff', // ethora.com Get Access handoff: app-JWT auth like login-with-email
   /^\/users\/checkEmail\//,
   '/users/sign-up-with-email',
   '/v2/users/sign-up-with-email', // V2 signup endpoint
@@ -108,6 +109,7 @@ function shouldInjectAppIdInBody(url: string | undefined, method?: string) {
   if (url === '/users/login' && m === 'post') return true;
   if (url === '/users/login-with-email' && m === 'post') return true;
   if (url === '/users/login/mfa' && m === 'post') return true;
+  if (url === '/users/login/handoff' && m === 'post') return true;
   if (url === '/users/sign-up-with-email' && m === 'post') return true;
   if (url === '/users/sign-up-resend-email' && m === 'post') return true;
   if (url === '/users/forgot' && m === 'post') return true;
@@ -186,6 +188,7 @@ function attachAuthInterceptors(client: AxiosInstance) {
       url === '/users/login-with-email' ||
       url === '/users/login' ||
       url === '/users/login/mfa' ||
+      url === '/users/login/handoff' ||
       url === '/users/reset' ||
       // A wrong current password / code is a 401 by design, not a stale session.
       url === '/users/me/password' ||
@@ -1890,6 +1893,12 @@ export function httpRegenerateMfaBackupCodes(code: string) {
 // Second login step. Same response shape as login-with-email on success.
 export function httpVerifyMfaLogin(mfaToken: string, code: string) {
   return httpV2.post('/users/login/mfa', { mfaToken, code });
+}
+
+// Trades a single-use handoff code (minted by ethora.com after signup, passed
+// in the ethora_handoff cookie) for a session. Same response as login.
+export function httpLoginHandoff(code: string) {
+  return httpV2.post('/users/login/handoff', { code });
 }
 
 // Owner/admin recovery for a user of the managed app (lost device).
