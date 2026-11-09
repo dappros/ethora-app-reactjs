@@ -153,7 +153,7 @@ function DesktopLogin({
         <Logo src={logoImage} height={180} width={420} />
         <div
           className="font-varela break-words text-center"
-          style={{ fontSize: 48, lineHeight: '56px', color: p.text }}
+          style={{ fontSize: 26, lineHeight: 1.4, color: p.text }}
         >
           {tagline ||
             `${displayName || ''}${t('authLogoContent.taglineSuffix')}`}

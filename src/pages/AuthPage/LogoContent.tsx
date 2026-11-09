@@ -90,10 +90,9 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
           sx={{
             fontFamily: 'Varela Round',
             fontWeight: 400,
-            fontSize: 48,
+            fontSize: 'clamp(20px, 2vw, 26px)',
             color: 'rgb(var(--c-gray-950))',
-            lineHeight: '56px',
-            height: '112px',
+            lineHeight: 1.4,
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
             textAlign: 'left',
