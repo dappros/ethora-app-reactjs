@@ -9,6 +9,15 @@ interface LogoContentProps {
   isMobile?: boolean;
 }
 
+const logoStyle: React.CSSProperties = {
+  display: 'block',
+  width: 'auto',
+  height: 'auto',
+  maxWidth: '100%',
+  maxHeight: 'min(30vh, 240px)',
+  objectFit: 'contain',
+};
+
 const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const [imageError, setImageError] = useState(false);
@@ -29,7 +38,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
           alt={t('authLogoContent.logoAlt')}
           src={YouLogo}
           onError={() => setImageError(true)}
-          style={{ maxWidth: '100%' }}
+          style={logoStyle}
         />
       );
     }
@@ -41,7 +50,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
             alt={t('authLogoContent.logoAlt')}
             src={config.logoImage}
             onError={() => setImageError(true)}
-            style={{ maxWidth: '100%' }}
+            style={logoStyle}
           />
         </a>
       );
@@ -52,7 +61,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
         alt={t('authLogoContent.logoAlt')}
         src={config.logoImage}
         onError={() => setImageError(true)}
-        style={{ maxWidth: '100%' }}
+        style={logoStyle}
       />
     );
     // `t` is a dep: the memo renders translated alt text, so it must
@@ -71,7 +80,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
         minWidth: 221,
         textAlign: 'left',
         justifyContent: 'center',
-        gap: 5,
+        gap: 3,
       }}
     >
       <Box
