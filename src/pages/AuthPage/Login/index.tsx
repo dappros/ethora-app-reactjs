@@ -1,6 +1,10 @@
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { httpLoginHandoff } from '../../../http';
 import { useAppStore } from '../../../store/useAppStore';
+import { finishLogin } from '../../../utils/finishLogin';
+import { takeHandoffCode } from '../../../utils/loginHandoff';
 import EthoraSplitLayout, { isEthoraDomain } from '../EthoraSplitLayout';
 import SignInForm from '../Forms/LoginForm';
 import { FullPageSpinner } from '../FullPageSpinner';
@@ -9,9 +13,23 @@ import Wrapper from '../Wrapper';
 
 export default function LoginComponent() {
   const config = useAppStore((s) => s.currentApp);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024));
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!config) return;
+    const code = takeHandoffCode();
+    if (!code) return;
+    setLoading(true);
+    httpLoginHandoff(code)
+      .then(({ data }) => finishLogin(data, navigate, config))
+      .catch((error: unknown) => {
+        console.warn('[login] handoff failed, showing the sign-in form', error);
+        setLoading(false);
+      });
+  }, [config, navigate]);
 
   if (!config) {
     return null;
