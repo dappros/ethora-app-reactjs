@@ -355,6 +355,30 @@ export function httpGetAppAiUsage(appId: string, from: string, to: string) {
   return httpV2.get<{ ok: boolean; result: AppAiUsage }>(`/apps/${appId}/ai-usage`, { params: { from, to } });
 }
 
+// The App's daily AI token cap and today's use (owner, App admin or server token).
+// dailyTokenCap 0 = no cap; appDailyTokenCap null = the App follows the server
+// default. state: 'warning' from `warnAt` of the cap, 'paused' at the cap.
+export interface AppAiBudget {
+  appId: string;
+  dailyTokenCap: number;
+  capSource: 'app' | 'server';
+  appDailyTokenCap: number | null;
+  usedToday: number;
+  remaining: number | null;
+  state: 'ok' | 'warning' | 'paused';
+  warnAt: number;
+  resetsAt: string;
+  countedKinds: string[];
+}
+
+export function httpGetAppAiBudget(appId: string) {
+  return httpV2.get<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`);
+}
+
+export function httpSetAppAiBudget(appId: string, dailyTokenCap: number | null) {
+  return httpV2.patch<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`, { dailyTokenCap });
+}
+
 // One agent's tokens this UTC month across every App it answers in (owner only).
 export interface AgentAiUsage {
   month: string;

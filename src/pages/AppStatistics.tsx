@@ -10,6 +10,7 @@ import 'react-date-range/dist/theme/default.css';
 // Components
 import { LineChartLocal } from '../components/Statistics/LineChartLocal';
 import { AiUsageBreakdown } from '../components/Statistics/AiUsageBreakdown';
+import { AiBudgetCard } from '../components/Statistics/AiBudgetCard';
 
 // Http
 import { httpGetGraphStatistic, httpWithAuth } from '../http';
@@ -444,7 +445,10 @@ export const AppStatistics = (): ReactElement => {
             />}
           </div>
           {selectedTab.value === 'aitokens' && appId && (
-            <AiUsageBreakdown appId={appId} startDate={dates.startDate} endDate={dates.endDate} />
+            <>
+              <div className="mt-6"><AiBudgetCard appId={appId} /></div>
+              <AiUsageBreakdown appId={appId} startDate={dates.startDate} endDate={dates.endDate} />
+            </>
           )}
         </div>
       </div>
