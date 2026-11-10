@@ -152,6 +152,8 @@ export const serverSettings = {
     'serverSettings.desc.REPORT_MONTHLY_SCHEDULE': 'Cron expression.',
     'serverSettings.key.REPORT_TIMEZONE': 'Report time zone',
     'serverSettings.desc.REPORT_TIMEZONE': 'IANA name such as Europe/London; empty = the server\'s.',
+    'serverSettings.key.REPORT_INTERNAL_OWNERS': 'Internal app owners',
+    'serverSettings.desc.REPORT_INTERNAL_OWNERS': 'Owner emails and/or @domains, comma separated. Apps they created (your demos and tests) are left out of the stats email\'s activity figures. The base app is never left out.',
     'serverSettings.key.RATE_LIMIT_DISABLED': 'Disable rate limits',
     'serverSettings.desc.RATE_LIMIT_DISABLED': 'Only for load tests on a throwaway server; never on a public one.',
     'serverSettings.key.RATE_LIMIT_AUTH_LOGIN_MAX': 'Logins per minute per IP',
