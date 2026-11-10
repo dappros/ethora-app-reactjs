@@ -369,14 +369,23 @@ export interface AppAiBudget {
   warnAt: number;
   resetsAt: string;
   countedKinds: string[];
+  // Daily Web Index embedding allowance: pages past it are indexed on a later
+  // day. Absent from APIs before it existed.
+  indexing?: {
+    dailyTokenCap: number;
+    capSource: 'app' | 'server';
+    appDailyTokenCap: number | null;
+    reservedToday: number;
+  };
 }
 
 export function httpGetAppAiBudget(appId: string) {
   return httpV2.get<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`);
 }
 
-export function httpSetAppAiBudget(appId: string, dailyTokenCap: number | null) {
-  return httpV2.patch<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`, { dailyTokenCap });
+// Each cap: tokens, 0 for none, null for the server default; omitted = unchanged.
+export function httpSetAppAiBudget(appId: string, caps: { dailyTokenCap?: number | null; dailyIndexingTokenCap?: number | null }) {
+  return httpV2.patch<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`, caps);
 }
 
 // One agent's tokens this UTC month across every App it answers in (owner only).

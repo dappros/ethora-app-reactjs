@@ -93,6 +93,8 @@ export const serverSettings = {
     'serverSettings.module.copied': 'Copied',
     'serverSettings.key.AI_AGENTS_ENABLED': 'Let users create and manage AI agents',
     'serverSettings.desc.AI_AGENTS_ENABLED': 'Off hides Agents from the admin panel and refuses new agents; agents already in rooms keep answering.',
+    'serverSettings.key.AI_APP_DAILY_INDEXING_TOKEN_CAP': 'Daily indexing allowance per App (default, tokens)',
+    'serverSettings.desc.AI_APP_DAILY_INDEXING_TOKEN_CAP': 'For Apps that set none of their own: Web Index pages beyond this many embedding tokens in a UTC day are stored and indexed on a later day. 0 means no cap.',
     'serverSettings.key.AI_APP_DAILY_TOKEN_CAP': 'Daily AI token cap per App (default)',
     'serverSettings.desc.AI_APP_DAILY_TOKEN_CAP': 'For Apps that set no cap of their own: at this many tokens in a UTC day an App\'s agents stop answering until the next day. Indexing is not counted. 0 means no cap.',
     'serverSettings.key.UPLOAD_MAX_FILE_SIZE_MB': 'Largest file (MB)',

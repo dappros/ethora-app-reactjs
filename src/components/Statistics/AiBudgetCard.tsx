@@ -24,11 +24,13 @@ export const AiBudgetCard: React.FC<{ appId: string }> = ({ appId }) => {
   const [budget, setBudget] = useState<AppAiBudget | null>(null);
   const [failed, setFailed] = useState(false);
   const [draft, setDraft] = useState('');
+  const [indexDraft, setIndexDraft] = useState('');
   const [saving, setSaving] = useState(false);
 
   const apply = useCallback((b: AppAiBudget | null) => {
     setBudget(b);
     setDraft(b?.appDailyTokenCap != null ? String(b.appDailyTokenCap) : '');
+    setIndexDraft(b?.indexing?.appDailyTokenCap != null ? String(b.indexing.appDailyTokenCap) : '');
   }, []);
 
   useEffect(() => {
@@ -41,10 +43,10 @@ export const AiBudgetCard: React.FC<{ appId: string }> = ({ appId }) => {
     return () => { cancelled = true; };
   }, [appId, apply]);
 
-  const save = async (cap: number | null) => {
+  const save = async (caps: { dailyTokenCap?: number | null; dailyIndexingTokenCap?: number | null }) => {
     setSaving(true);
     try {
-      const r = await httpSetAppAiBudget(appId, cap);
+      const r = await httpSetAppAiBudget(appId, caps);
       apply(r.data?.result || null);
       toast.success(t('aiBudget.saved'));
     } catch (e) {
@@ -61,8 +63,12 @@ export const AiBudgetCard: React.FC<{ appId: string }> = ({ appId }) => {
   const capped = budget.dailyTokenCap > 0;
   const share = capped ? Math.min(100, Math.round((budget.usedToday / budget.dailyTokenCap) * 100)) : 0;
   const resets = DateTime.fromISO(budget.resetsAt).toLocaleString(DateTime.DATETIME_SHORT);
-  const parsed = draft.trim() === '' ? null : Number(draft);
-  const draftValid = parsed === null || (Number.isInteger(parsed) && parsed >= 0);
+  const parse = (v: string) => (v.trim() === '' ? null : Number(v));
+  const isValid = (n: number | null) => n === null || (Number.isInteger(n) && n >= 0);
+  const parsed = parse(draft);
+  const draftValid = isValid(parsed);
+  const indexing = budget.indexing;
+  const indexParsed = parse(indexDraft);
   const counted = budget.countedKinds.map((k) => aiUsageKindLabel(t, k)).join(', ');
 
   return (
@@ -110,7 +116,7 @@ export const AiBudgetCard: React.FC<{ appId: string }> = ({ appId }) => {
           type="button"
           className="hover:bg-brand-darker py-[6px] px-4 rounded-xl bg-brand-500 text-white disabled:opacity-50 text-sm"
           disabled={saving || !draftValid || parsed === budget.appDailyTokenCap}
-          onClick={() => save(parsed)}
+          onClick={() => save({ dailyTokenCap: parsed })}
           data-testid="ai-budget-save"
         >
           {t('aiBudget.save')}
@@ -120,13 +126,61 @@ export const AiBudgetCard: React.FC<{ appId: string }> = ({ appId }) => {
             type="button"
             className="py-[6px] px-3 rounded-xl border text-sm text-gray-700 disabled:opacity-50"
             disabled={saving}
-            onClick={() => save(null)}
+            onClick={() => save({ dailyTokenCap: null })}
           >
             {t('aiBudget.useDefault')}
           </button>
         )}
       </div>
       <p className="text-[11px] text-gray-400 mt-1">{t('aiBudget.capHint')}</p>
+      {indexing && (
+        <div className="mt-4 border-t pt-3" data-testid="ai-budget-indexing">
+          <div className="text-sm font-semibold text-gray-700">{t('aiBudget.indexingTitle')}</div>
+          <p className="text-xs text-gray-500 mt-1">
+            {indexing.dailyTokenCap > 0
+              ? t('aiBudget.indexingUsed').replace('{used}', fmt(indexing.reservedToday)).replace('{cap}', fmt(indexing.dailyTokenCap))
+              : t('aiBudget.indexingNoCap')}
+            {' '}
+            {indexing.capSource === 'server' && indexing.dailyTokenCap > 0 ? t('aiBudget.indexingServerDefault') : ''}
+            {' '}
+            {t('aiBudget.indexingExplain')}
+          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <label className="text-xs text-gray-600" htmlFor="ai-budget-indexing-cap">{t('aiBudget.capLabel')}</label>
+            <input
+              id="ai-budget-indexing-cap"
+              type="number"
+              min={0}
+              step={10000}
+              inputMode="numeric"
+              className="w-40 rounded-lg border px-2 py-1 text-sm"
+              placeholder={t('aiBudget.capPlaceholder')}
+              value={indexDraft}
+              onChange={(e) => setIndexDraft(e.target.value)}
+              data-testid="ai-budget-indexing-input"
+            />
+            <button
+              type="button"
+              className="hover:bg-brand-darker py-[6px] px-4 rounded-xl bg-brand-500 text-white disabled:opacity-50 text-sm"
+              disabled={saving || !isValid(indexParsed) || indexParsed === indexing.appDailyTokenCap}
+              onClick={() => save({ dailyIndexingTokenCap: indexParsed })}
+              data-testid="ai-budget-indexing-save"
+            >
+              {t('aiBudget.save')}
+            </button>
+            {indexing.appDailyTokenCap != null && (
+              <button
+                type="button"
+                className="py-[6px] px-3 rounded-xl border text-sm text-gray-700 disabled:opacity-50"
+                disabled={saving}
+                onClick={() => save({ dailyIndexingTokenCap: null })}
+              >
+                {t('aiBudget.useDefault')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
