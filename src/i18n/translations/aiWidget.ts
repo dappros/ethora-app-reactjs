@@ -315,6 +315,11 @@ export const aiWidget = {
     'agentPanels.uploadingParsingEmbedding':
       'Uploading + parsing + embedding...',
     'agentPanels.uploadedFilesToast': 'Uploaded {n} file(s)',
+    'agentPanels.indexPending': 'Waiting to be indexed',
+    'agentPanels.indexPendingHint': 'Stored, but agents cannot answer from it yet. The App reached today\'s indexing limit (or indexing failed and is being retried); it is indexed automatically, usually the next day after 00:00 UTC.',
+    'agentPanels.indexFailed': 'Not indexed',
+    'agentPanels.indexFailedHint': 'Indexing failed several times and was stopped. Remove it and add it again to retry.',
+    'agentPanels.uploadedSomeWaitToast': '{n} file(s) will be indexed later: this App reached today\'s indexing limit. Agents can answer from them once indexed.',
     'agentPanels.fileHeader': 'File',
     'agentPanels.uploadedHeader': 'Uploaded',
     'agentPanels.noFilesIndexed': 'No files indexed for this app yet.',
@@ -851,6 +856,11 @@ export const aiWidget = {
     'agentPanels.uploadingParsingEmbedding':
       "Téléversement + analyse + génération des embeddings...",
     'agentPanels.uploadedFilesToast': '{n} fichier(s) téléversé(s)',
+    'agentPanels.indexPending': 'En attente d\'indexation',
+    'agentPanels.indexPendingHint': 'Enregistré, mais les agents ne peuvent pas encore s\'en servir. L\'App a atteint la limite d\'indexation du jour (ou l\'indexation a échoué et sera relancée) ; l\'indexation se fait automatiquement, en général le lendemain après 00:00 UTC.',
+    'agentPanels.indexFailed': 'Non indexé',
+    'agentPanels.indexFailedHint': 'L\'indexation a échoué plusieurs fois et a été arrêtée. Supprimez l\'élément et ajoutez-le de nouveau pour réessayer.',
+    'agentPanels.uploadedSomeWaitToast': '{n} fichier(s) seront indexés plus tard : cette App a atteint la limite d\'indexation du jour. Les agents pourront s\'en servir une fois indexés.',
     'agentPanels.fileHeader': 'Fichier',
     'agentPanels.uploadedHeader': 'Téléversé',
     'agentPanels.noFilesIndexed':
@@ -1360,6 +1370,11 @@ export const aiWidget = {
     'agentPanels.uploadingParsingEmbedding':
       'Subiendo + analizando + generando embeddings...',
     'agentPanels.uploadedFilesToast': '{n} archivo(s) subido(s)',
+    'agentPanels.indexPending': 'Pendiente de indexar',
+    'agentPanels.indexPendingHint': 'Guardado, pero los agentes aún no pueden usarlo. La App alcanzó el límite de indexación de hoy (o la indexación falló y se reintentará); se indexa automáticamente, normalmente al día siguiente después de las 00:00 UTC.',
+    'agentPanels.indexFailed': 'No indexado',
+    'agentPanels.indexFailedHint': 'La indexación falló varias veces y se detuvo. Quítalo y vuelve a añadirlo para reintentar.',
+    'agentPanels.uploadedSomeWaitToast': '{n} archivo(s) se indexarán más tarde: esta App alcanzó el límite de indexación de hoy. Los agentes podrán usarlos una vez indexados.',
     'agentPanels.fileHeader': 'Archivo',
     'agentPanels.uploadedHeader': 'Subido',
     'agentPanels.noFilesIndexed':

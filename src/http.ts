@@ -355,6 +355,39 @@ export function httpGetAppAiUsage(appId: string, from: string, to: string) {
   return httpV2.get<{ ok: boolean; result: AppAiUsage }>(`/apps/${appId}/ai-usage`, { params: { from, to } });
 }
 
+// The App's daily AI token cap and today's use (owner, App admin or server token).
+// dailyTokenCap 0 = no cap; appDailyTokenCap null = the App follows the server
+// default. state: 'warning' from `warnAt` of the cap, 'paused' at the cap.
+export interface AppAiBudget {
+  appId: string;
+  dailyTokenCap: number;
+  capSource: 'app' | 'server';
+  appDailyTokenCap: number | null;
+  usedToday: number;
+  remaining: number | null;
+  state: 'ok' | 'warning' | 'paused';
+  warnAt: number;
+  resetsAt: string;
+  countedKinds: string[];
+  // Daily Web Index embedding allowance: pages past it are indexed on a later
+  // day. Absent from APIs before it existed.
+  indexing?: {
+    dailyTokenCap: number;
+    capSource: 'app' | 'server';
+    appDailyTokenCap: number | null;
+    reservedToday: number;
+  };
+}
+
+export function httpGetAppAiBudget(appId: string) {
+  return httpV2.get<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`);
+}
+
+// Each cap: tokens, 0 for none, null for the server default; omitted = unchanged.
+export function httpSetAppAiBudget(appId: string, caps: { dailyTokenCap?: number | null; dailyIndexingTokenCap?: number | null }) {
+  return httpV2.patch<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`, caps);
+}
+
 // One agent's tokens this UTC month across every App it answers in (owner only).
 export interface AgentAiUsage {
   month: string;

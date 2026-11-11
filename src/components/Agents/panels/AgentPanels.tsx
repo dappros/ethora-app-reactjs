@@ -321,14 +321,35 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
 // switch to a different App they own - useful when the same agent is deployed across
 // multiple apps and you want to ingest sources under a specific one.
 
+// Whether agents can answer from a page or document yet (API `indexStatus`):
+// `pending` waits for the App's daily indexing allowance or for a retry,
+// `failed` was given up on. Absent from older APIs, which means indexed.
+type IndexStatus = 'indexed' | 'pending' | 'failed';
+
 type SiteSourceRow = {
   id: string;
   url: string;
   originUrl?: string;
   mdByteSize?: number;
   tags?: string[];
+  indexStatus?: IndexStatus;
   createdAt?: string;
   updatedAt?: string;
+};
+
+const IndexStatusBadge: React.FC<{ status?: IndexStatus }> = ({ status }) => {
+  const { t } = useTranslation();
+  if (status !== 'pending' && status !== 'failed') return null;
+  const pending = status === 'pending';
+  return (
+    <span
+      className={`inline-block mt-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${pending ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700'}`}
+      title={t(pending ? 'agentPanels.indexPendingHint' : 'agentPanels.indexFailedHint')}
+      data-testid={`index-status-${status}`}
+    >
+      {t(pending ? 'agentPanels.indexPending' : 'agentPanels.indexFailed')}
+    </span>
+  );
 };
 
 // Page size for the Web Index table. The backend caps `limit` at 500; 25 keeps the
@@ -377,6 +398,7 @@ function sameSiteSourceRows(a: SiteSourceRow[], b: SiteSourceRow[]) {
   if (a.length !== b.length) return false;
   return a.every((row, i) =>
     row.id === b[i].id && row.mdByteSize === b[i].mdByteSize && row.updatedAt === b[i].updatedAt
+    && row.indexStatus === b[i].indexStatus
   );
 }
 
@@ -975,6 +997,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
                   {row.originUrl && row.originUrl !== row.url && (
                     <div className="text-gray-400 text-[10px] mt-0.5">{t('agentPanels.viaPrefix')} {row.originUrl}</div>
                   )}
+                  <IndexStatusBadge status={row.indexStatus} />
                 </td>
                 <td className="p-2 text-gray-600">{fmtBytesShort(row.mdByteSize)}</td>
                 <td className="p-2 text-gray-500">{row.updatedAt ? new Date(row.updatedAt).toLocaleString() : ''}</td>
@@ -1085,6 +1108,7 @@ type DocSourceRow = {
   title?: string;
   mimeType?: string;
   size: number;
+  indexStatus?: IndexStatus;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -1199,8 +1223,11 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
           if (!files.length) return;
           setBusy(true);
           try {
-            await httpAgentDocsUpload(appId, agent.id, files);
+            const resp = await httpAgentDocsUpload(appId, agent.id, files);
             toast.success(t('agentPanels.uploadedFilesToast').replace('{n}', String(files.length)));
+            const uploaded: { indexStatus?: IndexStatus }[] = Array.isArray(resp?.data?.result) ? resp.data.result : [];
+            const waiting = uploaded.filter((r) => r.indexStatus === 'pending').length;
+            if (waiting) toast.info(t('agentPanels.uploadedSomeWaitToast').replace('{n}', String(waiting)));
             await loadList();
           } catch (err: any) {
             toast.error(`${t('agentPanels.uploadFailedPrefix')} ${err?.response?.data?.error || err.message}`);
@@ -1234,7 +1261,10 @@ export const DocsIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisa
             )}
             {!loadingList && rows.map((row) => (
               <tr key={row.id} className="border-t align-top">
-                <td className="p-2 break-all">{row.originalName || row.title || row.id}</td>
+                <td className="p-2 break-all">
+                  {row.originalName || row.title || row.id}
+                  <div><IndexStatusBadge status={row.indexStatus} /></div>
+                </td>
                 <td className="p-2 text-gray-600">{fmtBytesShort(row.size)}</td>
                 <td className="p-2 text-gray-500">{row.createdAt ? new Date(row.createdAt).toLocaleString() : ''}</td>
                 <td className="p-2 text-right whitespace-nowrap">
