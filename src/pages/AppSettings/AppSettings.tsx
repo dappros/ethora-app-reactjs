@@ -3,7 +3,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { cloneDeep, isEqual } from 'lodash';
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   useLocation,
   useBlocker,
@@ -146,6 +146,10 @@ export default function AppSettings() {
     ? tabs.indexOf(tabFromUrl!)
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
+  const settingsPanels = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (settingsPanels.current) settingsPanels.current.scrollTop = 0;
+  }, [selectedIndex]);
 
 
   useEffect(() => {
@@ -715,7 +719,7 @@ export default function AppSettings() {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" />
         </div>
         <div className="flex min-h-0 flex-col">
-        <TabPanels data-testid="settings-panels-scroll" className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <TabPanels ref={settingsPanels} data-testid="settings-panels-scroll" className="min-h-0 min-w-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
           <TabPanel
             key="Web App"
             className="grid grid-rows-1 lg:ml-4 h-full "
@@ -754,7 +758,7 @@ export default function AppSettings() {
           <TabPanel
             key="Appearance"
             // Appearance lays out its own sections (sign-in screen / chat).
-            className="lg:ml-4 h-full min-w-0 overflow-y-auto"
+            className="lg:ml-4 min-w-0"
           >
             <Appearance
               appId={appId as string}

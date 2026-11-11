@@ -8,7 +8,7 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 export const common = {
   en: {
     'accessError.noPermission': "Your role in this app doesn't allow this. Ask the app owner to extend your permissions in Users → Permissions.",
-    'nav.apps': 'Projects',
+    'nav.apps': 'Apps',
     'nav.chats': 'Chats',
     'nav.agents': 'Agents',
     'nav.billing': 'Billing',
@@ -48,7 +48,7 @@ export const common = {
   },
   fr: {
     'accessError.noPermission': "Votre rôle dans cette application ne permet pas cette action. Demandez au propriétaire de l'application d'étendre vos autorisations dans Utilisateurs → Autorisations.",
-    'nav.apps': 'Projets',
+    'nav.apps': 'Applications',
     'nav.chats': 'Discussions',
     'nav.agents': 'Agents',
     'nav.billing': 'Facturation',
@@ -88,7 +88,7 @@ export const common = {
   },
   es: {
     'accessError.noPermission': 'Tu rol en esta app no permite esta acción. Pide al propietario de la app que amplíe tus permisos en Usuarios → Permisos.',
-    'nav.apps': 'Proyectos',
+    'nav.apps': 'Aplicaciones',
     'nav.chats': 'Chats',
     'nav.agents': 'Agentes',
     'nav.billing': 'Facturación',

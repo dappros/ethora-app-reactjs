@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppHelmet from './AppHelmet';
 import AppLayout from './AppLayout';
 import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
+import { ProjectAssistantLayout } from './components/AIWidget/ProjectAssistantLayout';
 import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
@@ -21,13 +22,10 @@ const AdminApps = lazy(() => import('./pages/AdminApps'));
 const StartProject = lazy(() => import('./pages/StartProject'));
 const SelfHostedStart = lazy(() => import('./pages/SelfHostedStart'));
 const Widgets = lazy(() => import('./pages/Widgets/Widgets'));
-const WidgetEditor = lazy(() => import('./pages/Widgets/WidgetEditor'));
-const WidgetAISettings = lazy(() => import('./pages/Widgets/WidgetAISettings'));
 const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
 const AdminServerSettings = lazy(() => import('./pages/AdminServerSettings'));
-const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
 const Profile = lazy(() => import('./pages/Profile'));
@@ -165,11 +163,22 @@ export const router = createBrowserRouter(
                               index: true,
                               Component: ProjectOverview,
                             },
-                            { path: 'assistant', element: <WidgetAISettings appContext /> },
-                            { path: 'widget', element: <WidgetEditor projectContext /> },
+                            {
+                              element: <ProjectAssistantLayout />,
+                              children: [
+                                {
+                                  path: 'assistant',
+                                  lazy: async () => ({ Component: (await import('./pages/Widgets/WidgetAISettings')).default }),
+                                },
+                                {
+                                  path: 'widget',
+                                  lazy: async () => ({ Component: (await import('./pages/Widgets/WidgetEditor')).default }),
+                                },
+                              ],
+                            },
                             {
                               path: 'settings',
-                              Component: AppSettings,
+                              lazy: async () => ({ Component: (await import('./pages/AppSettings/AppSettings')).default }),
                             },
                             {
                               path: 'users',

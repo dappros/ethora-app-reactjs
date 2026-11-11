@@ -64,7 +64,7 @@ export const adminCore = {
     'adminShell.bookACall': 'Book a Call',
 
     // AdminApps.tsx
-    'adminApps.title': 'Projects',
+    'adminApps.title': 'Apps',
     'adminApps.tabActive': 'Active',
     'adminApps.tabArchived': 'Archived',
     'adminApps.sortDisplayName': 'Display Name',
@@ -83,10 +83,10 @@ export const adminCore = {
     'adminApps.noMatch': 'No apps match',
     'adminApps.clearSearch': 'Clear search',
     'adminApps.tabsAria': 'Show active or archived apps',
-    'adminApps.createApp': 'New project',
+    'adminApps.createApp': 'New app',
     'adminApps.emptyArchived':
       'No archived apps. Archived apps appear here so you can restore them or permanently delete their data.',
-    'adminApps.addAnotherApp': 'Start another project',
+    'adminApps.addAnotherApp': 'Start another app',
     'adminApps.addAnotherAppDesc':
       'Start a fresh app, or bring one in from a JSON / ZIP bundle.',
     'adminApps.importFromBundle': 'or import from a bundle',
@@ -526,7 +526,7 @@ export const adminCore = {
     'adminShell.or': 'ou',
     'adminShell.bookACall': 'Réserver un appel',
 
-    'adminApps.title': 'Projets',
+    'adminApps.title': 'Applications',
     'adminApps.tabActive': 'Actives',
     'adminApps.tabArchived': 'Archivées',
     'adminApps.sortDisplayName': "Nom d'affichage",
@@ -545,10 +545,10 @@ export const adminCore = {
     'adminApps.noMatch': 'Aucune application ne correspond à',
     'adminApps.clearSearch': 'Effacer la recherche',
     'adminApps.tabsAria': 'Afficher les applications actives ou archivées',
-    'adminApps.createApp': 'Nouveau projet',
+    'adminApps.createApp': 'Nouvelle application',
     'adminApps.emptyArchived':
       'Aucune application archivée. Les applications archivées apparaissent ici afin que vous puissiez les restaurer ou supprimer définitivement leurs données.',
-    'adminApps.addAnotherApp': 'Créer un autre projet',
+    'adminApps.addAnotherApp': 'Créer une autre application',
     'adminApps.addAnotherAppDesc':
       "Créez une nouvelle application, ou importez-en une à partir d'un fichier JSON / ZIP.",
     'adminApps.importFromBundle': 'ou importer depuis un fichier',
@@ -987,7 +987,7 @@ export const adminCore = {
     'adminShell.or': 'o',
     'adminShell.bookACall': 'Reservar una llamada',
 
-    'adminApps.title': 'Proyectos',
+    'adminApps.title': 'Aplicaciones',
     'adminApps.tabActive': 'Activas',
     'adminApps.tabArchived': 'Archivadas',
     'adminApps.sortDisplayName': 'Nombre visible',
@@ -1006,10 +1006,10 @@ export const adminCore = {
     'adminApps.noMatch': 'Ninguna aplicación coincide con',
     'adminApps.clearSearch': 'Borrar búsqueda',
     'adminApps.tabsAria': 'Mostrar aplicaciones activas o archivadas',
-    'adminApps.createApp': 'Nuevo proyecto',
+    'adminApps.createApp': 'Nueva aplicación',
     'adminApps.emptyArchived':
       'No hay aplicaciones archivadas. Las aplicaciones archivadas aparecen aquí para que puedas restaurarlas o eliminar sus datos de forma permanente.',
-    'adminApps.addAnotherApp': 'Crear otro proyecto',
+    'adminApps.addAnotherApp': 'Crear otra aplicación',
     'adminApps.addAnotherAppDesc':
       'Crea una aplicación nueva o importa una desde un archivo JSON / ZIP.',
     'adminApps.importFromBundle': 'o importar desde un archivo',

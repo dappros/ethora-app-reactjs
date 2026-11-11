@@ -109,7 +109,7 @@ test('project intent is selected before any app is created', async ({ page }) =>
     return route.fulfill({ json: { app: { ...app, displayName: 'My new app' } } });
   });
   await page.goto('/app/admin/apps');
-  await page.getByRole('button', { name: 'New project', exact: true }).first().click();
+  await page.getByRole('button', { name: 'New app', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: 'What would you like to build?' })).toBeVisible();
   expect(creates).toBe(0);
   await page.getByRole('button', { name: /An assistant for my website/ }).click();
@@ -130,7 +130,7 @@ test('chat intent creates an app and opens chat appearance', async ({ page }) =>
   await page.route('**/v1/apps', async (route) => route.request().method() === 'POST'
     ? route.fulfill({ json: { app } }) : route.fulfill({ json: { apps: [app], total: 1 } }));
   await page.goto('/app/admin/apps');
-  await page.getByRole('button', { name: 'New project', exact: true }).first().click();
+  await page.getByRole('button', { name: 'New app', exact: true }).first().click();
   await page.getByRole('button', { name: /Chat in my app/ }).click();
   await page.getByPlaceholder('My app').fill('My chat app');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
@@ -166,15 +166,15 @@ test('self-hosted setup does not create a cloud app', async ({ page }) => {
 test('project opens on a short overview with focused navigation', async ({ page }) => {
   await fakeBackend(page, {});
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'App overview' })).toBeVisible();
   const projectHeader = page.locator('header');
   const titleBounds = await projectHeader.getByRole('heading', { name: app.displayName }).boundingBox();
-  const projectsBounds = await projectHeader.getByRole('link', { name: 'Projects' }).boundingBox();
+  const projectsBounds = await projectHeader.getByRole('link', { name: 'Apps' }).boundingBox();
   expect(titleBounds && projectsBounds && projectsBounds.x + projectsBounds.width < titleBounds.x).toBeTruthy();
   await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
-  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveCSS('color', 'rgb(226, 229, 233)');
+  await expect(page.getByRole('heading', { name: 'App overview' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'App navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveCSS('color', 'rgb(226, 229, 233)');
   await expect(page.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
@@ -512,7 +512,7 @@ test('Config AI offers grouped, usable section navigation on a narrow screen', a
   await expect(panel.getByRole('heading', { name: 'Instructions' })).toBeVisible();
 });
 
-test('project assistant sections can scroll without clipping the project tabs', async ({ page }) => {
+test('AI Widget tabs stay in place while scrolling and switching editors', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 600 });
   await configAgentBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/assistant`);
@@ -520,13 +520,24 @@ test('project assistant sections can scroll without clipping the project tabs', 
   await page.evaluate(() => localStorage.setItem('uiTheme-538', 'dark'));
   await page.reload();
   await expect(page.getByTestId('widget-config-ai')).toBeVisible();
-  const content = page.getByTestId('project-content-scroll');
+  const setup = page.getByRole('navigation', { name: 'AI Widget setup' });
+  const fixedPosition = await setup.boundingBox();
+  expect(fixedPosition).not.toBeNull();
+  const content = page.getByTestId('assistant-panel-scroll');
   await expect.poll(() => content.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
   await content.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
-  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveAttribute('aria-current', 'page');
-  const nav = await page.getByRole('navigation', { name: 'Project navigation' }).boundingBox();
-  const selected = await page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' }).boundingBox();
+  expect(await setup.boundingBox()).toEqual(fixedPosition);
+  await setup.getByRole('link', { name: 'Website widget', exact: true }).click();
+  await expect(page.getByTestId('website-widget-card')).toBeVisible();
+  await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBe(0);
+  expect(await setup.boundingBox()).toEqual(fixedPosition);
+  await setup.getByRole('link', { name: 'Set up assistant', exact: true }).click();
+  await expect(page.getByTestId('widget-config-ai')).toBeVisible();
+  expect(await setup.boundingBox()).toEqual(fixedPosition);
+  await expect(page.getByRole('navigation', { name: 'App navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveAttribute('aria-current', 'page');
+  const nav = await page.getByRole('navigation', { name: 'App navigation' }).boundingBox();
+  const selected = await page.getByRole('navigation', { name: 'App navigation' }).getByRole('link', { name: 'AI Widget' }).boundingBox();
   expect(nav && selected && selected.y >= nav.y && selected.y + selected.height <= nav.y + nav.height).toBeTruthy();
 });
 
@@ -535,7 +546,7 @@ test('project menu keeps assistant and widget in the same project', async ({ pag
   await page.goto('/app/admin/widgets');
   await page.getByRole('link', { name: 'Edit widget', exact: true }).first().click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/widget$`));
-  await expect(page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('navigation', { name: 'App navigation' }).getByRole('link', { name: 'AI Widget' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('navigation', { name: 'AI Widget setup' })).toBeVisible();
   const tabs = page.getByTestId('website-widget-card').getByRole('tab');
   await expect(tabs).toHaveText(['Install', 'Customize appearance', 'Conversations']);
@@ -677,7 +688,7 @@ test('widget draft survives reload and project navigation', async ({ page }) => 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/apps/${APP_ID}/settings$`));
-  await page.getByRole('navigation', { name: 'Project navigation' }).getByRole('link', { name: 'AI Widget' }).click();
+  await page.getByRole('navigation', { name: 'App navigation' }).getByRole('link', { name: 'AI Widget' }).click();
   await page.getByRole('navigation', { name: 'AI Widget setup' }).getByRole('link', { name: 'Website widget' }).click();
   await page.getByRole('tab', { name: /Customize appearance/ }).click();
   await expect(page.getByLabel('Popup title')).toHaveValue('Unsaved title');

@@ -99,7 +99,7 @@ export default function AdminApp() {
           ))}
         </nav>
       </header>
-      <div data-testid="project-content-scroll" className="min-h-0 overflow-y-auto p-4">
+      <div data-testid="project-content-scroll" className={`min-h-0 p-4 [scrollbar-gutter:stable] ${assistantAreaActive ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         <Suspense fallback={<PanelSkeleton label={t('projectOverview.loading')} />}>
           <Outlet />
         </Suspense>
