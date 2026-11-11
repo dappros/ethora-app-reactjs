@@ -37,7 +37,7 @@ export default function StartProject() {
       phCapture('onboarding_project_created', { intent });
       localStorage.removeItem('newUser');
       setOnboardingIntent(null);
-      navigate(intent === 'calls' ? `/app/admin/apps/${app._id}/settings?tab=Chats` : `/app/admin/apps/${app._id}/settings?tab=Appearance&section=chat`);
+      navigate(intent === 'calls' ? `/app/admin/apps/${app._id}/settings?tab=Web+App` : `/app/admin/apps/${app._id}/settings?tab=Appearance&section=chat`);
     } catch (e) {
       setError((e as { response?: { data?: { error?: string } } })?.response?.data?.error || t('startProject.createFailed'));
     } finally { setBusy(false); }

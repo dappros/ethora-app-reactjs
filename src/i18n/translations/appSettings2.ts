@@ -78,6 +78,8 @@ export const appSettings2 = {
       'or for a Base App on your dedicated server.',
 
     // --- Menu.tsx ---
+    'appSettingsMenu.memberLinksTitle': 'Member menu',
+    'appSettingsMenu.memberLinksDescription': 'Choose which links members see. People with project management access keep their usual menu.',
     'appSettingsMenu.description':
       'Manage items that are displayed in your App menu.',
     'appSettingsMenu.emailPasswordLabel': 'Email + Password',
@@ -437,6 +439,8 @@ export const appSettings2 = {
       'ou pour une Application de base sur votre serveur dédié.',
 
     // --- Menu.tsx ---
+    'appSettingsMenu.memberLinksTitle': 'Menu des membres',
+    'appSettingsMenu.memberLinksDescription': 'Choisissez les liens visibles par les membres. Les personnes autorisées à gérer des projets conservent leur menu habituel.',
     'appSettingsMenu.description':
       'Gérez les éléments affichés dans le menu de votre Application.',
     'appSettingsMenu.emailPasswordLabel': 'E-mail + Mot de passe',
@@ -805,6 +809,8 @@ export const appSettings2 = {
       'o para una Aplicación base en tu servidor dedicado.',
 
     // --- Menu.tsx ---
+    'appSettingsMenu.memberLinksTitle': 'Menú de miembros',
+    'appSettingsMenu.memberLinksDescription': 'Elige los enlaces que ven los miembros. Quienes pueden gestionar proyectos conservan su menú habitual.',
     'appSettingsMenu.description':
       'Administra los elementos que se muestran en el menú de tu Aplicación.',
     'appSettingsMenu.emailPasswordLabel': 'Correo electrónico + Contraseña',

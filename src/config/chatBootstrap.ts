@@ -542,6 +542,9 @@ export function createChatConfig({
     resolvedTheme,
   });
 
+  baseConfig.videoCalls = { ...videoCallsConfig, enabled: Boolean(videoCallsConfig.enabled && app?.callsEnabled !== false) };
+  baseConfig.scheduledCalls = { enabled: Boolean(baseConfig.videoCalls.enabled && app?.scheduledCallsEnabled !== false) };
+
   if (ownerOverride) {
     baseConfig.refreshTokens = {
       enabled: true,
@@ -599,7 +602,7 @@ export function createChatConfig({
       disableMenu: true,
       disableCreate: app?.allowUsersToCreateRooms === false,
     },
-    defaultRooms: app?.defaultRooms || [],
+    defaultRooms: app?.defaultRooms?.filter((room) => room.autoJoin !== false) || [],
     eventHandlers: {
       // <Chat> replaces the provider's config in the SDK store, so this has to
       // be here too or server events stop once the Chats page has been opened.

@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import LoginStep, { MfaPending } from '../Login/Steps/LoginForm';
@@ -12,7 +12,6 @@ interface SignInFormProps {
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const config = useAppStore((s) => s.currentApp);
@@ -34,7 +33,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: '24px',
-        minWidth: '300px',
+        minWidth: 0,
         width: '100%',
         maxWidth: isMobile ? '486px' : '600px',
         // On mobile the card must hug its content: stretching it to the full
@@ -60,7 +59,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
             align="center"
             gutterBottom
             sx={{
-              fontFamily: 'Varela Round',
+              fontFamily: '"Varela Round", system-ui, sans-serif',
               fontWeight: 400,
               fontSize: '24px',
               height: '32px',
@@ -83,19 +82,9 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
       {!config.userRegistrationDisabled && (
         <Typography align="center" component="span" fontSize={'14px'}>
           {t('authLoginForm.noAccount')}{' '}
-          <Typography
-            style={{
-              textDecoration: 'underline',
-              color: config?.primaryColor ? config.primaryColor : '#0052CD',
-              fontSize: '14px',
-              display: 'inline',
-              cursor: 'pointer',
-              fontWeight: '400px',
-            }}
-            onClick={() => navigate('/register')}
-          >
+          <Link to="/register" className="font-medium text-gray-800 underline underline-offset-2 hover:text-brand-500">
             {t('authLoginForm.signUp')}
-          </Typography>
+          </Link>
         </Typography>
       )}
     </Box>

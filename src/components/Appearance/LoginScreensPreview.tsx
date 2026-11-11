@@ -3,6 +3,7 @@ import YouLogo from '../../assets/YouLogo.svg';
 import { useTranslation } from '../../i18n/useTranslation';
 import { Segmented } from '../AIWidget/appearance/Fields';
 import { DevicePreviewStage, PhoneStatusBar } from './DeviceFrames';
+import { WelcomeArtwork } from './WelcomeArtwork';
 import { DESKTOP_SCREEN, PHONE_SCREEN } from './deviceScreens';
 
 type PreviewTheme = 'light' | 'dark';
@@ -13,6 +14,11 @@ interface Props {
   color: string;
   logoImage: string;
   url: string;
+  welcomeTitle?: string;
+  welcomeDescription?: string;
+  welcomeImage?: string;
+  welcomeImageFit?: 'cover' | 'contain';
+  welcomeLayout?: 'split' | 'centered';
 }
 
 function palette(dark: boolean) {
@@ -77,12 +83,12 @@ function SignInForm({
     </div>
   );
   return (
-    <div className="flex flex-col" style={{ gap: 32 }}>
+    <div className="flex flex-col" style={{ gap: compact ? 18 : 32 }}>
       {field(t('authLoginStep.emailPlaceholder'))}
       {field(t('authLoginStep.passwordPlaceholder'), true)}
       <span
         className="font-sans underline"
-        style={{ color, fontSize: 16, marginTop: -8 }}
+        style={{ color: p.text, fontSize: 16, marginTop: -8 }}
       >
         {t('authLoginStep.forgotPassword')}
       </span>
@@ -96,7 +102,7 @@ function SignInForm({
   );
 }
 
-function SignUpLine({ color, dark }: { color: string; dark: boolean }) {
+function SignUpLine({ dark }: { dark: boolean }) {
   const { t } = useTranslation();
   return (
     <div
@@ -104,7 +110,7 @@ function SignUpLine({ color, dark }: { color: string; dark: boolean }) {
       style={{ fontSize: 16, color: palette(dark).text }}
     >
       {t('authLoginForm.noAccount')}{' '}
-      <span className="underline" style={{ color }}>
+      <span className="underline">
         {t('authLoginForm.signUp')}
       </span>
     </div>
@@ -135,27 +141,37 @@ function DesktopLogin({
   tagline,
   color,
   logoImage,
+  welcomeTitle,
+  welcomeDescription,
+  welcomeImage,
+  welcomeImageFit,
+  welcomeLayout,
   dark,
 }: Props & { dark: boolean }) {
   const { t } = useTranslation();
   const p = palette(dark);
   return (
     <div
-      className="grid grid-cols-2 items-center"
+      className="grid items-center"
       style={{
         ...DESKTOP_SCREEN,
         background: p.page,
         padding: '0 80px',
-        gap: 80,
+        gap: welcomeLayout === 'centered' ? 20 : 80,
+        gridTemplateColumns: welcomeLayout === 'centered' ? 'minmax(0, 600px)' : 'repeat(2, minmax(0, 1fr))',
+        justifyContent: 'center',
+        alignContent: 'center',
       }}
     >
-      <div className="flex flex-col items-center" style={{ gap: 40 }}>
-        <Logo src={logoImage} height={180} width={420} />
+      <div className="flex flex-col items-center" style={{ gap: welcomeLayout === 'centered' ? 14 : 28 }}>
+        <Logo src={logoImage} height={welcomeImage ? 56 : welcomeLayout === 'centered' ? 65 : 150} width={420} />
+        {welcomeImage && <WelcomeArtwork key={welcomeImage} src={welcomeImage} fit={welcomeImageFit} className={welcomeLayout === 'centered' ? 'max-h-[145px] max-w-[440px]' : 'max-h-[300px]'} />}
+        {welcomeTitle && <div className="text-center font-varela [overflow-wrap:anywhere]" style={{ fontSize: 32, color: p.text }}>{welcomeTitle}</div>}
         <div
-          className="font-varela break-words text-center"
+          className="font-varela break-words whitespace-pre-wrap text-center"
           style={{ fontSize: 26, lineHeight: 1.4, color: p.text }}
         >
-          {tagline ||
+          {welcomeDescription || tagline ||
             `${displayName || ''}${t('authLogoContent.taglineSuffix')}`}
         </div>
       </div>
@@ -163,9 +179,9 @@ function DesktopLogin({
         className="flex flex-col rounded-3xl"
         style={{
           background: p.card,
-          padding: '32px 48px',
-          gap: 32,
-          height: 600,
+          padding: welcomeLayout === 'centered' ? '20px 38px' : '32px 48px',
+          gap: welcomeLayout === 'centered' ? 16 : 32,
+          height: welcomeLayout === 'centered' ? undefined : 600,
         }}
       >
         <div
@@ -174,16 +190,16 @@ function DesktopLogin({
         >
           {t('authLoginForm.title')}
         </div>
-        <SignInForm color={color} dark={dark} />
+        <SignInForm color={color} dark={dark} compact={welcomeLayout === 'centered'} />
         <div className="mt-auto">
-          <SignUpLine color={color} dark={dark} />
+          <SignUpLine dark={dark} />
         </div>
       </div>
     </div>
   );
 }
 
-function MobileLogin({ color, logoImage, dark }: Props & { dark: boolean }) {
+function MobileLogin({ color, logoImage, welcomeTitle, welcomeDescription, welcomeImage, welcomeImageFit, dark }: Props & { dark: boolean }) {
   const { t } = useTranslation();
   const p = palette(dark);
   return (
@@ -194,10 +210,10 @@ function MobileLogin({ color, logoImage, dark }: Props & { dark: boolean }) {
       <PhoneStatusBar color={p.text} />
       <div
         className="flex-1 flex flex-col justify-center"
-        style={{ padding: '0 24px', gap: 32 }}
+        style={{ padding: '0 24px', gap: welcomeImage ? 14 : 24 }}
       >
         <div className="flex justify-center">
-          <Logo src={logoImage} height={84} />
+          <Logo src={logoImage} height={welcomeImage ? 54 : 84} />
         </div>
         <div
           className="text-center font-varela"
@@ -205,9 +221,12 @@ function MobileLogin({ color, logoImage, dark }: Props & { dark: boolean }) {
         >
           {t('authLoginForm.title')}
         </div>
+        {welcomeImage && <WelcomeArtwork key={welcomeImage} src={welcomeImage} fit={welcomeImageFit} className="max-h-[140px]" />}
+        {welcomeTitle && <div className="text-center font-varela [overflow-wrap:anywhere]" style={{ fontSize: 24, color: p.text }}>{welcomeTitle}</div>}
+        {welcomeDescription && <div className="break-words whitespace-pre-wrap text-center" style={{ fontSize: 16, color: p.muted }}>{welcomeDescription}</div>}
         <SignInForm color={color} dark={dark} compact />
         <div style={{ marginTop: 24 }}>
-          <SignUpLine color={color} dark={dark} />
+          <SignUpLine dark={dark} />
         </div>
       </div>
     </div>

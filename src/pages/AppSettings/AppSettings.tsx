@@ -1,3 +1,6 @@
+import AppAssistantRequests from '../AppAssistantRequests';
+import { getWelcomeOptions, type WelcomeOptions } from './WelcomePageEditor';
+import { CommunicationSettings } from './TenantExperienceSettings';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
@@ -57,6 +60,7 @@ const tabs = [
   'Home screen',
   'Menu',
   'Chats',
+  'Assistant requests',
   // Agent configuration and widget appearance have dedicated project pages.
   'Visibility & Privacy',
   'API',
@@ -70,7 +74,7 @@ const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
 const tabsNew = {
   Publish: ['Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
-  System: ['Chats', 'Visibility & Privacy', 'API', 'Webhooks', LIFECYCLE_TAB],
+  System: ['Chats', 'Assistant requests', 'Visibility & Privacy', 'API', 'Webhooks', LIFECYCLE_TAB],
 };
 
 // `tabs` / `tabsNew` above are internal identifiers (compared against the
@@ -85,6 +89,7 @@ const TAB_LABEL_KEYS: Record<string, string> = {
   'Home screen': 'appSettings.tab.homeScreen',
   Menu: 'appSettings.tab.menu',
   Chats: 'appSettings.tab.chats',
+  'Assistant requests': 'appSettings.tab.assistantRequests',
   'Visibility & Privacy': 'appSettings.tab.visibilityPrivacy',
   API: 'appSettings.tab.api',
   Webhooks: 'appSettings.tab.webhooks',
@@ -151,7 +156,6 @@ export default function AppSettings() {
     if (settingsPanels.current) settingsPanels.current.scrollTop = 0;
   }, [selectedIndex]);
 
-
   useEffect(() => {
     if (
       tabs.includes(tabFromUrl ?? '') &&
@@ -193,6 +197,7 @@ export default function AppSettings() {
   const [tagline, setTagline] = useState('');
   const [coinName, setCoinName] = useState('');
   const [color, setColor] = useState('');
+  const [welcome, setWelcome] = useState<WelcomeOptions>(() => getWelcomeOptions());
   const [logoImage, setLogoImage] = useState('');
   const [sublogoImage, setSublogoImage] = useState('');
 
@@ -215,7 +220,7 @@ export default function AppSettings() {
   const [googleServicesJson, setGoogleServicesJson] = useState('');
   const [googleServiceInfoPlist, setGoogleServiceInfoPlist] = useState('');
 
-  const [availableMenuItems, setAvailableMenuItems] = useState({
+  const [availableMenuItems, setAvailableMenuItems] = useState<ModelApp['availableMenuItems']>({
     chats: false,
     profile: false,
     settings: false,
@@ -263,6 +268,7 @@ export default function AppSettings() {
     const currentState = {
       displayName,
       tagline,
+      welcome,
       coinName,
       color,
       logoImage,
@@ -299,6 +305,7 @@ export default function AppSettings() {
   }, [
     displayName,
     tagline,
+    welcome,
     coinName,
     color,
     logoImage,
@@ -334,6 +341,7 @@ export default function AppSettings() {
       const initialData = {
         displayName: app.displayName || '',
         tagline: app.appTagline || '',
+        welcome: getWelcomeOptions(app),
         coinName: app.coinName || '',
         color: app.primaryColor || '',
         logoImage: app.logoImage,
@@ -375,6 +383,7 @@ export default function AppSettings() {
     const body: any = {};
 
     // appearance
+    if (!isEqual(welcome, getWelcomeOptions(app))) Object.assign(body, welcome);
     if (displayName) {
       body.displayName = displayName;
     }
@@ -423,6 +432,11 @@ export default function AppSettings() {
     }
 
     body.signonOptions = signonOptions;
+
+    const menuChanges = Object.entries(availableMenuItems).filter(([name, visible]) =>
+      app?.availableMenuItems?.[name as keyof ModelApp['availableMenuItems']] !== visible
+    );
+    if (menuChanges.length) body.availableMenuItems = Object.fromEntries(menuChanges);
 
     // Sent unconditionally (and as a plain boolean) so the owner can re-open
     // registration as well as close it. Never inverted outside SignonOptions.
@@ -502,6 +516,7 @@ export default function AppSettings() {
         setInitialState({
           displayName,
           tagline,
+          welcome,
           coinName,
           color,
           logoImage,
@@ -614,6 +629,7 @@ export default function AppSettings() {
 
     setDisplayName(app.displayName || '');
     setTagline(app.appTagline || '');
+    setWelcome(getWelcomeOptions(app));
     setCoinName(app.coinName || '');
     setColor(app.primaryColor || '');
     setLogoImage(app.logoImage);
@@ -646,7 +662,7 @@ export default function AppSettings() {
 
   useEffect(() => {
     if (isNew) {
-      navigate(location.pathname, {
+      navigate({ pathname: location.pathname, search: location.search }, {
         replace: true,
         state: { from: location.pathname + location.search, isNew: false },
       });
@@ -725,19 +741,22 @@ export default function AppSettings() {
             className="grid grid-rows-1 lg:ml-4 h-full "
             // className="grid grid-rows-[auto,_368px] 2xl:grid-rows-1 2xl:gap-x-[40px] 2xl:grid-cols-[416px,_1fr] lg:ml-4 h-full "
           >
-            <WebApp
-              appId={appId as string}
-              aiBot={aiBot}
-              setAiBot={setAiBot}
-              defaultChatRooms={defaultChatRooms}
-              isDisabled={app?.creatorId !== currentUser?._id}
-              domainName={domainName}
-              setDomainName={setDomainName}
-              firebaseWebConfigString={firebaseWebConfigString}
-              setFirebaseWebConfigString={setFirebaseWebConfigString}
-              primaryColor={app.primaryColor}
-              onExternalClick={onExternalClick}
-            />
+            <div className="min-w-0">
+              <CommunicationSettings key={app._id} app={app} />
+              <WebApp
+                appId={appId as string}
+                aiBot={aiBot}
+                setAiBot={setAiBot}
+                defaultChatRooms={defaultChatRooms}
+                isDisabled={app?.creatorId !== currentUser?._id}
+                domainName={domainName}
+                setDomainName={setDomainName}
+                firebaseWebConfigString={firebaseWebConfigString}
+                setFirebaseWebConfigString={setFirebaseWebConfigString}
+                primaryColor={app.primaryColor}
+                onExternalClick={onExternalClick}
+              />
+            </div>
           </TabPanel>
 
           <TabPanel
@@ -762,6 +781,9 @@ export default function AppSettings() {
           >
             <Appearance
               appId={appId as string}
+              key={app._id}
+              welcome={welcome}
+              updateWelcome={(patch) => setWelcome((previous) => ({ ...previous, ...patch }))}
               brandColor={app.primaryColor}
               previewUrl={`${domainName || app.domainName || 'app'}.${env.VITE_HOSTED_APPS_ROOT_DOMAIN || env.VITE_ROOT_DOMAIN || 'ethora.com'}`}
               displayName={displayName}
@@ -828,12 +850,15 @@ export default function AppSettings() {
               defaultChatRooms={defaultChatRooms}
               setDefaultChatRooms={setDefaultChatRooms}
               appId={appId as string}
-              domainName={domainName}
               broadcastSenderName={broadcastSenderName}
               setBroadcastSenderName={setBroadcastSenderName}
               broadcastSenderPhotoUrl={broadcastSenderPhotoUrl}
               setBroadcastSenderPhotoUrl={setBroadcastSenderPhotoUrl}
             />
+          </TabPanel>
+
+          <TabPanel key="Assistant requests" className="lg:ml-4">
+            <AppAssistantRequests key={app._id} />
           </TabPanel>
 
           {/* Phase 1 follow-up: AI Bots tab removed (now lives at /app/admin/agents).

@@ -913,9 +913,15 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         />
       )}
 
-      <label className="block text-sm font-medium">
-        {t('agentPanels.searchPages')}
-        <input type="search" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder={t('agentPanels.searchPagesPlaceholder')} className="mt-1 w-full max-w-md rounded border px-3 py-2" />
+      <label className="flex max-w-md flex-col gap-2 text-sm font-medium">
+        <span>{t('agentPanels.searchPages')}</span>
+        <input
+          type="search"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder={t('agentPanels.searchPagesPlaceholder')}
+          className="w-full rounded border px-3 py-2"
+        />
       </label>
       <div className="flex items-center justify-between gap-2 text-xs text-gray-500 min-h-[28px]">
         <span>

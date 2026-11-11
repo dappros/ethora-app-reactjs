@@ -1,3 +1,4 @@
+import { preparePrivateAssistantChat, privateAssistantChatKey } from '../utils/preparePrivateAssistantChat';
 import { Chat } from '@ethora/chat-component';
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -306,6 +307,17 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
     roomJID || scheduledCallSlug ? null : linkedChatName(window.location.search)
   );
   const userAppId = currentUser?.appId;
+  const assistantChatKey = !chatAppId && !scheduledCallSlug && !roomJID && !linkChat
+    ? privateAssistantChatKey(config, currentUser) : '';
+  const [preparedFor, setPreparedFor] = useState('');
+  useEffect(() => {
+    if (!assistantChatKey) return;
+    let live = true;
+    preparePrivateAssistantChat(assistantChatKey).finally(() => {
+      if (live) setPreparedFor(assistantChatKey);
+    });
+    return () => { live = false; };
+  }, [assistantChatKey]);
   const gatedLinkChat =
     linkChat && !chatAppId && userAppId && linkChat.startsWith(`${userAppId}_`) ? linkChat : null;
   const { state: linkState } = useChatLinkJoin(gatedLinkChat);
@@ -369,8 +381,8 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
   // owner-session mode this comes from `apps[chatAppId]`; otherwise we use
   // the admin's own currentApp.
   const effectiveApp: ModelApp | null = useMemo(() => {
-    if (ownerSession && chatAppId) {
-      return apps.find((a) => a._id === chatAppId) || null;
+    if (chatAppId) {
+      return ownerSession?.appId === chatAppId ? apps.find((a) => a._id === chatAppId) || null : null;
     }
     return config;
   }, [apps, chatAppId, config, ownerSession]);
@@ -457,7 +469,8 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
         })()}
         <div />
       </div>
-      <div className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden">
+      <div className="row-start-2 flex min-h-0 flex-col md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP
             socket and fresh chat-component state. React's reconciliation
             of MemoizedChat alone wouldn't recreate the underlying XMPP
@@ -475,7 +488,11 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
             connection is already wedged. Rendering a placeholder
             until the credentials catch up keeps the chat-component
             from seeing inconsistent state. */}
-        {chatAppId && ownerSession?.appId !== chatAppId ? (
+        {assistantChatKey && preparedFor !== assistantChatKey ? (
+          <div className="space-y-3 p-4" aria-busy="true" aria-label="Loading chats">
+            {[0, 1, 2].map((i) => <div key={i} className="h-14 w-full max-w-sm animate-pulse rounded-xl bg-gray-100" />)}
+          </div>
+        ) : chatAppId && ownerSession?.appId !== chatAppId ? (
           <div className="flex items-center justify-center min-h-[400px] text-sm text-gray-500 font-sans">
             {t('chat.switchingContext')}
           </div>
@@ -511,6 +528,7 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
             roomJID={roomJID}
           />
         )}
+        </div>
       </div>
     </div>
   );

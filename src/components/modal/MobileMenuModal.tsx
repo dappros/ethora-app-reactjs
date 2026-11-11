@@ -10,29 +10,22 @@ import { IconBilling } from '../Icons/IconBilling';
 import { IconChat } from '../Icons/IconChat';
 import { IconClose } from '../Icons/IconClose';
 import { IconHelp } from '../Icons/IconHelp';
+import { IconLicense } from '../Icons/IconLicense';
 import { useTranslation } from '../../i18n/useTranslation';
-import { isBaseAppHost } from '../../utils/appHost';
 import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
 import { env } from '../../config/env';
-import { useLicenseStatus } from '../../hooks/useLicenseStatus';
-import { isEthoraHostedEnv } from '../../utils/hostedEnv';
 interface Props {
-  isAdmin?: boolean;
+  visibility: { projects: boolean; assistants: boolean; license: boolean; help: boolean; billing: boolean };
   onClose: () => void;
 }
 
 
-export function MobileMenuModal({ onClose, isAdmin }: Props) {
+export function MobileMenuModal({ onClose, visibility }: Props) {
   const { t } = useTranslation();
   const inAI = /^\/app\/admin\/(agents|widgets)(\/|$)/.test(useLocation().pathname);
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
-  // The server's admin can turn agents off for everyone (Server settings > AI).
-  const { status: licenseStatus } = useLicenseStatus();
-  const agentsOff = licenseStatus?.operator?.aiAgents === false;
-  const isBaseApp = isBaseAppHost();
-  const showBilling = isBaseApp && isEthoraHostedEnv();
 
   useEffect(() => {
     function onResize() {
@@ -60,7 +53,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
           <IconClose />
         </button>
         <div className="mt-[72px]">
-          {isAdmin && (
+          {visibility.projects && (
             <NavLink to="/app/admin/apps" onClick={onClose} className={itemBase}>
               <IconAdmin />
               <span className={labelBase}>{t('nav.apps')}</span>
@@ -71,7 +64,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
             <span className={labelBase}>{t('nav.chats')}</span>
             <UnreadBadge className="ml-2" />
           </NavLink>
-          {isAdmin && !agentsOff && (
+          {visibility.assistants && (
             <Link
               to="/app/admin/agents"
               aria-current={inAI ? 'page' : undefined}
@@ -89,7 +82,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               <span className={labelBase}>{t('nav.ai')}</span>
             </Link>
           )}
-          {isAdmin && showBilling && (
+          {visibility.billing && (
             <NavLink
               to="/app/admin/billing"
               onClick={onClose}
@@ -99,7 +92,13 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
               <span className={labelBase}>{t('nav.billing')}</span>
             </NavLink>
           )}
-          {isBaseApp && (
+          {visibility.license && (
+            <NavLink to="/app/admin/license" onClick={onClose} className={itemBase}>
+              <IconLicense />
+              <span className={labelBase}>{t('nav.license')}</span>
+            </NavLink>
+          )}
+          {visibility.help && (
             <NavLink to="/app/help" onClick={onClose} className={itemBase}>
               <IconHelp />
               <span className={labelBase}>{t('nav.help')}</span>

@@ -433,7 +433,29 @@ export default function AdminApps() {
           <Loading />
         ) : (
           <>
-            {!apps.length && !urlQuery && lifecycleTab === 'active' && <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-5"><h2 className="font-semibold">{t('startProject.title')}</h2><p className="mt-1 text-sm text-gray-600">{t('startProject.subtitle')}</p><button type="button" onClick={() => navigate('/app/admin/start')} className="mt-3 text-sm font-semibold text-brand-500 underline">{t('startProject.continue')}</button></div>}
+            {activeCount === 0 && !urlQuery && lifecycleTab === 'active' && (
+              <section className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+                <h2 className="text-lg font-semibold text-fg">{t('startProject.title')}</h2>
+                <p className="mt-1 text-sm text-gray-700">{t('startProject.subtitle')}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/app/admin/start')}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-500 px-4 font-varela text-sm text-white hover:bg-brand-darker"
+                  >
+                    <IconAdd color="white" />
+                    {t('adminApps.createApp')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowImportModal(true)}
+                    className="min-h-10 rounded-xl px-3 text-sm font-varela text-gray-800 hover:bg-gray-200"
+                  >
+                    {t('adminApps.importFromBundle')}
+                  </button>
+                </div>
+              </section>
+            )}
 
             {appsState &&
               appsState.map((app) => (
@@ -469,7 +491,7 @@ export default function AdminApps() {
             {/* Trailing tile shown only on the Active tab. Re-exposes Create
                 (visual peer of an app tile so the next obvious action stays
                 in flow), with Import as the muted secondary affordance. */}
-            {lifecycleTab === 'active' && !urlQuery && (
+            {activeCount !== 0 && lifecycleTab === 'active' && !urlQuery && (
               <div className="grid grid-rows-[auto,_1fr] md:grid-cols-[auto,_1fr] gap-x-4 p-4 rounded-xl border border-dashed border-gray-300 mb-4 bg-gray-50/40">
                 <div className="flex justify-center items-center">
                   <div className="w-[120px] h-[120px] rounded-xl flex justify-center items-center bg-white border border-gray-200">

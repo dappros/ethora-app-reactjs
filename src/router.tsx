@@ -176,6 +176,7 @@ export const router = createBrowserRouter(
                                 },
                               ],
                             },
+                            { path: 'requests', element: <Navigate to="../settings?tab=Assistant+requests" replace /> },
                             {
                               path: 'settings',
                               lazy: async () => ({ Component: (await import('./pages/AppSettings/AppSettings')).default }),

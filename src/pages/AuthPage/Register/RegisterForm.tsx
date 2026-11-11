@@ -16,7 +16,7 @@ import {
 } from '../../../http';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
-import { markAgentsOnboarding } from '../../../utils/agentsOnboarding';
+import { clearAgentsOnboarding, markAgentsOnboarding } from '../../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../../utils/navigateToUserPage';
 import CustomButton from '../Button';
 import { GoogleButton } from '../GoogleButton';
@@ -214,12 +214,15 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
       httpLoginWithEmail(email, password)
         .then(async ({ data }) => {
           setEthoraUserCookie('1');
-          localStorage.setItem('newUser', true.toString());
+          if (config?.afterLoginPage === 'chats' && config.autoCreateAssistantChat) {
+            clearAgentsOnboarding();
+          } else {
+            markAgentsOnboarding();
+          }
 
           await actionAfterLogin(data);
 
           logSignup('email', data.user._id, email);
-          markAgentsOnboarding();
           navigateToUserPage(navigate, config?.afterLoginPage as string);
         })
         .catch((error) => {

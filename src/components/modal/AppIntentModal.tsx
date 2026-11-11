@@ -18,7 +18,7 @@ export function AppIntentModal({ app, onClose }: { app: ModelApp; onClose: () =>
     if (intent === 'website') { setWebsiteSetup(true); return; }
     onClose();
     if (intent === 'chat') navigate(`/app/admin/apps/${app._id}/settings?tab=Chat%20component`);
-    else if (intent === 'calls') navigate(`/app/admin/apps/${app._id}/settings?tab=Chats`);
+    else if (intent === 'calls') navigate(`/app/admin/apps/${app._id}/settings?tab=Web+App`);
     else navigate('/app/help');
   };
   if (websiteSetup) return <CreateWidgetModal existingApp={app} onClose={() => setWebsiteSetup(false)} />;

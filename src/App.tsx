@@ -1,6 +1,6 @@
 import { usePushNotifications } from '@ethora/chat-component';
 import hexToRgba from 'hex-to-rgba';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
@@ -8,6 +8,7 @@ import { buildPushNotificationsConfig } from './config/chatBootstrap';
 import { useCaptureParams } from './hooks/useCaptureParams';
 import { useTrackUrl } from './hooks/useTrackUrl';
 import { withTracking } from './hooks/withTracking';
+import { useTranslation } from './i18n/useTranslation';
 import { useAppStore } from './store/useAppStore';
 import { initFirebase } from './utils/firebase';
 import { useHandleRedirectLogin } from './hooks/useHandleRedirectLogin';
@@ -53,9 +54,17 @@ function getBootstrapDomainName(): string | undefined {
 function App() {
   const currentApp = useAppStore((s) => s.currentApp);
 
+  const { t } = useTranslation();
+  const [bootstrapAttempt, setBootstrapAttempt] = useState(0);
+  const [bootstrapFailed, setBootstrapFailed] = useState(false);
+
   useEffect(() => {
-    actionGetConfig(getBootstrapDomainName());
-  }, []);
+    let active = true;
+    void actionGetConfig(getBootstrapDomainName()).catch(() => {
+      if (active) setBootstrapFailed(true);
+    });
+    return () => { active = false; };
+  }, [bootstrapAttempt]);
 
   const pushConfig = useMemo(() => buildPushNotificationsConfig(), []);
   const pushOptions = useMemo(
@@ -120,11 +129,29 @@ function App() {
   useTrackUrl();
   useHandleRedirectLogin();
 
-  if (!currentApp) {
-    return <Loading></Loading>;
-  } else {
-    return <Outlet />;
-  }
+  if (currentApp) return <Outlet />;
+  if (!bootstrapFailed) return <Loading />;
+
+  return (
+    <main className="grid min-h-dvh place-items-center bg-white p-6 text-gray-950">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-200 p-6">
+        <div role="alert">
+          <h1 className="text-xl font-semibold">{t('appBootstrap.loadFailed')}</h1>
+          <p className="mt-2 text-sm text-gray-600">{t('appBootstrap.tryAgainHint')}</p>
+        </div>
+        <button
+          type="button"
+          className="mt-5 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white"
+          onClick={() => {
+            setBootstrapFailed(false);
+            setBootstrapAttempt((attempt) => attempt + 1);
+          }}
+        >
+          {t('appBootstrap.retry')}
+        </button>
+      </div>
+    </main>
+  );
 }
 
 export default withTracking(App);

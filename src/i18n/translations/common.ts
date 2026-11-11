@@ -7,6 +7,9 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // file.
 export const common = {
   en: {
+    'appBootstrap.loadFailed': 'Could not load the app',
+    'appBootstrap.tryAgainHint': 'The app did not respond. Check your connection and try again.',
+    'appBootstrap.retry': 'Try again',
     'accessError.noPermission': "Your role in this app doesn't allow this. Ask the app owner to extend your permissions in Users → Permissions.",
     'nav.apps': 'Apps',
     'nav.chats': 'Chats',
@@ -47,6 +50,9 @@ export const common = {
       "Language changed on this device, but couldn't be saved to your profile",
   },
   fr: {
+    'appBootstrap.loadFailed': 'Impossible de charger l’application',
+    'appBootstrap.tryAgainHint': 'L’application n’a pas répondu. Vérifiez votre connexion, puis réessayez.',
+    'appBootstrap.retry': 'Réessayer',
     'accessError.noPermission': "Votre rôle dans cette application ne permet pas cette action. Demandez au propriétaire de l'application d'étendre vos autorisations dans Utilisateurs → Autorisations.",
     'nav.apps': 'Applications',
     'nav.chats': 'Discussions',
@@ -87,6 +93,9 @@ export const common = {
       "Langue modifiée sur cet appareil, mais impossible de l'enregistrer dans votre profil",
   },
   es: {
+    'appBootstrap.loadFailed': 'No se pudo cargar la aplicación',
+    'appBootstrap.tryAgainHint': 'La aplicación no respondió. Comprueba tu conexión y vuelve a intentarlo.',
+    'appBootstrap.retry': 'Reintentar',
     'accessError.noPermission': 'Tu rol en esta app no permite esta acción. Pide al propietario de la app que amplíe tus permisos en Usuarios → Permisos.',
     'nav.apps': 'Aplicaciones',
     'nav.chats': 'Chats',

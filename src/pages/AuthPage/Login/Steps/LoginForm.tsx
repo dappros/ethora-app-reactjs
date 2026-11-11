@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 import CustomInput from '../../../../components/input/Input';
@@ -144,18 +144,9 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
           error={errors['password']?.message ? true : false}
           helperText={errors['password']?.message}
         />
-        <Typography
-          style={{
-            textDecoration: 'underline',
-            color: config?.primaryColor ? config.primaryColor : '#0052CD',
-            fontSize: '14px',
-            display: 'inline',
-            cursor: 'pointer',
-          }}
-          onClick={() => navigate('/resetPassword')}
-        >
+        <Link to="/resetPassword" className="self-start text-sm font-medium text-gray-800 underline underline-offset-2 hover:text-brand-500">
           {t('authLoginStep.forgotPassword')}
-        </Typography>
+        </Link>
         <CustomButton
           fullWidth
           variant="contained"

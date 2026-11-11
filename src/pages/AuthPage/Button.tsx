@@ -26,7 +26,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         gap: '8px',
-        fontFamily: 'Varela Round',
+        fontFamily: '"Varela Round", system-ui, sans-serif',
         fontSize: '16px',
         textAlign: 'center',
         flex: 1,

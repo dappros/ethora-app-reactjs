@@ -1,3 +1,4 @@
+import { WelcomePageEditor, type WelcomeOptions } from './WelcomePageEditor';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -17,6 +18,8 @@ export const APPEARANCE_SECTION_PARAM = 'section';
 
 interface Props {
   appId: string;
+  welcome: WelcomeOptions;
+  updateWelcome: (patch: Partial<WelcomeOptions>) => void;
   brandColor?: string | null;
   previewUrl: string;
   displayName: string;
@@ -34,6 +37,8 @@ interface Props {
 // (the chat component config - saved on its own, see ChatComponent).
 export function Appearance({
   appId,
+  welcome,
+  updateWelcome,
   brandColor,
   previewUrl,
   displayName,
@@ -105,65 +110,74 @@ export function Appearance({
       {showHelp && <AppearanceHelpModal onClose={() => setShowHelp(false)} />}
 
       {section === 'signin' && (
-        <div className="grid grid-cols-1 gap-y-6 2xl:grid-cols-[416px,_1fr] 2xl:gap-x-[40px] items-start">
-          <div className="appearance-left">
-            <div className="font-sans font-semibold text-base mb-4">
-              {t('appSettingsAppearance.displayNameLabel')}
-            </div>
-            <input
-              placeholder={t('appSettingsAppearance.displayNamePlaceholder')}
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
-              type="text"
-            />
-            <div className="font-sans font-semibold text-base mb-4">
-              {t('appSettingsAppearance.taglineLabel')}
-            </div>
-            <input
-              placeholder={t('appSettingsAppearance.taglinePlaceholder')}
-              className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
-              type="text"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-            />
-            <div className="font-sans font-semibold text-base mb-4">
-              {t('appSettingsAppearance.colorLabel')}
-            </div>
-            <div className="mb-4">
-              <PopoverColorPicker color={color} onChange={onChangeColor} />
-            </div>
-            <div className="xs:flex items-center justify-between">
-              <div className="font-sans font-semibold text-base mb-4">
-                {t('appSettingsAppearance.logoLabel')}
+        <div className="grid grid-cols-1 gap-y-6 xl:grid-cols-[minmax(280px,0.9fr),minmax(0,1.1fr)] xl:gap-x-6 items-start">
+          <div className="appearance-left space-y-4">
+            <WelcomePageEditor value={welcome} onChange={updateWelcome} />
+            <details className="rounded-2xl border border-gray-200 bg-white p-4 md:p-5">
+              <summary className="cursor-pointer font-semibold">App branding <span className="ml-1 text-sm font-normal text-gray-600">Logo, name and color</span></summary>
+              <div className="mt-4">
+                <div className="font-sans font-semibold text-base mb-4">
+                  {t('appSettingsAppearance.displayNameLabel')}
+                </div>
+                <input
+                  placeholder={t('appSettingsAppearance.displayNamePlaceholder')}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
+                  type="text"
+                />
+                <div className="font-sans font-semibold text-base mb-4">
+                  {t('appSettingsAppearance.taglineLabel')}
+                </div>
+                <input
+                  placeholder={t('appSettingsAppearance.taglinePlaceholder')}
+                  className="bg-gray-100 py-2 px-4 rounded-xl w-full mb-4"
+                  type="text"
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                />
+                <div className="font-sans font-semibold text-base mb-4">
+                  {t('appSettingsAppearance.colorLabel')}
+                </div>
+                <div className="mb-4">
+                  <PopoverColorPicker color={color} onChange={onChangeColor} />
+                </div>
+                <div className="xs:flex items-center justify-between">
+                  <div className="font-sans font-semibold text-base mb-4">
+                    {t('appSettingsAppearance.logoLabel')}
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <span className="text-xs inline-block ml-auto text-gray-500">
+                      {t('appSettingsAppearance.logoRecommendedSize')}
+                    </span>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  onChange={(e) => postLogo(e.target.files && e.target.files[0])}
+                  ref={logoRef}
+                  className="hidden"
+                  id="logo-file"
+                />
+                <button
+                  onClick={() => logoRef.current?.click()}
+                  className="w-full hover:bg-brand-hover p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
+                >
+                  {t('appSettingsAppearance.addLogoButton')}
+                </button>
               </div>
-              <div className="flex items-center mb-2">
-                <span className="text-xs inline-block ml-auto text-gray-500">
-                  {t('appSettingsAppearance.logoRecommendedSize')}
-                </span>
-              </div>
-            </div>
-            <input
-              type="file"
-              onChange={(e) => postLogo(e.target.files && e.target.files[0])}
-              ref={logoRef}
-              className="hidden"
-              id="logo-file"
-            />
-            <button
-              onClick={() => logoRef.current?.click()}
-              className="w-full hover:bg-brand-hover p-2 border border-brand-500 rounded-xl text-brand-500 mb-4 text-[16px] font-varela"
-            >
-              {t('appSettingsAppearance.addLogoButton')}
-            </button>
+            </details>
           </div>
-          <LoginScreensPreview
-            displayName={displayName}
-            tagline={tagline}
-            color={color}
-            logoImage={logoImage}
-            url={previewUrl}
-          />
+          <div className="min-w-0 xl:sticky xl:top-0">
+            <LoginScreensPreview
+              {...welcome}
+              displayName={displayName}
+              tagline={tagline}
+              color={color}
+              logoImage={logoImage}
+              url={previewUrl}
+            />
+          </div>
         </div>
       )}
 

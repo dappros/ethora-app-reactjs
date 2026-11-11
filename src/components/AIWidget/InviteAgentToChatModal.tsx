@@ -9,16 +9,18 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { actionInviteAgentToChat, actionListAgents } from '../../actions';
+import { httpSetBotInstanceRoomResponseMode } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ModelAgent, ModelAppDefaulRooom } from '../../models';
 
 interface Props {
   appId: string;
+  activate?: boolean;
   chat: ModelAppDefaulRooom;
   onClose: () => void;
 }
 
-export const InviteAgentToChatModal: React.FC<Props> = ({ appId, chat, onClose }) => {
+export const InviteAgentToChatModal: React.FC<Props> = ({ appId, chat, onClose, activate = false }) => {
   const { t } = useTranslation();
   const [mine, setMine] = useState<ModelAgent[]>([]);
   const [publicAgents, setPublicAgents] = useState<ModelAgent[]>([]);
@@ -34,7 +36,13 @@ export const InviteAgentToChatModal: React.FC<Props> = ({ appId, chat, onClose }
   async function invite(idOrAddress: string) {
     setBusy(true);
     try {
-      await actionInviteAgentToChat(idOrAddress, { appId, chatId: chat.chatId });
+      const result = await actionInviteAgentToChat(idOrAddress, { appId, chatJid: chat.jid });
+      if (activate) {
+        if (result.botInstance?.status === 'off') throw new Error('This assistant is switched off. Turn it on in the assistant settings.');
+        if (!result.aiServiceOk || !result.botInstance?.id) throw new Error('The assistant is not online. Try again shortly.');
+        const { data } = await httpSetBotInstanceRoomResponseMode(result.botInstance.id, result.chatJid, 'always');
+        if (!data.aiServiceOk) throw new Error('Reply settings were saved, but the assistant could not be reached. Try again shortly.');
+      }
       toast.success(
         t('aiWidgetInviteAgent.invitedToast').replace('{title}', chat.title)
       );

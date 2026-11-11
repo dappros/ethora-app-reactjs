@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
-import { ModelUserACL, OrderByType } from './models';
+import { ModelAppDefaulRooom, ModelUserACL, OrderByType } from './models';
 import {
   isRefreshFatalError,
   isSessionKilled,
@@ -259,7 +259,7 @@ export function httpGetConfig(domainName?: string) {
     path += `?domainName=${domainName}`;
   }
 
-  return http.get(path);
+  return http.get(path, { timeout: 10000 });
 }
 
 export function httpLoginWithEmail(email: string, password: string) {
@@ -290,6 +290,10 @@ export function httpDiscardSession(token?: string) {
 
 export function httpGetOneUser() {
   return http.get('/users/me');
+}
+
+export function httpGetMyAppAcl() {
+  return http.get<{ result: ModelUserACL[] }>('/users/acl');
 }
 
 export function httpGetOneUserWallet(wallet: string) {
@@ -875,15 +879,22 @@ export function setPermanentPassword(tempPassword: string, password: string) {
   });
 }
 
-export function createAppChat(appId: string, title: string, pinned: boolean) {
+export function createAppChat(appId: string, title: string, pinned: boolean, autoJoin = true) {
   return http.post(`/apps/create-app-chat/${appId}`, {
     title,
     pinned,
+    autoJoin,
   });
 }
 
 export function getDefaultRooms(appId: string) {
   return http.get(`/apps/get-default-rooms/app-id/${appId}`);
+}
+
+export function updateAppChatDefaults(appId: string, jid: string, settings: { autoJoin?: boolean; pinned?: boolean }) {
+  return http.patch<{ result: ModelAppDefaulRooom }>(
+    `/apps/${appId}/chats/${encodeURIComponent(jid)}/defaults`, settings
+  );
 }
 
 export function deleteApp(appId: string) {
@@ -1931,3 +1942,25 @@ export function httpResetUserMfa(appId: string, userId: string) {
     `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/mfa`
   );
 }
+
+export interface ChatChannelPolicy {
+  readOnly: boolean;
+  commentsEnabled: boolean;
+  reactionsEnabled: boolean;
+}
+const chatChannelPath = (appId: string, room: string) => `/apps/${appId}/chats/${encodeURIComponent(room.split('@')[0])}/channel`;
+export const httpGetChatChannel = (appId: string, room: string) => http.get<ChatChannelPolicy>(chatChannelPath(appId, room));
+export const httpPutChatChannel = (appId: string, room: string, policy: ChatChannelPolicy) => http.put<ChatChannelPolicy>(chatChannelPath(appId, room), policy);
+
+export const httpEnsureAssistantChat = () => http.post<{ created: boolean }>('/apps/assistant-chat', undefined, { timeout: 15000 });
+export interface AppAssistantRequest {
+  _id: string;
+  flowKey: string;
+  completedAt: string;
+  canMessageClient: boolean;
+  answers: { id: string; question: string; value: string }[];
+}
+export const httpAppAssistantRequests = (appId: string, offset: number) =>
+  http.get<{ items: AppAssistantRequest[]; total: number }>(`/apps/${appId}/assistant-requests`, { params: { offset } });
+export const httpOpenAssistantRequestChat = (appId: string, requestId: string) =>
+  http.post<{ chatName: string }>(`/apps/${appId}/assistant-requests/${requestId}/chat`);

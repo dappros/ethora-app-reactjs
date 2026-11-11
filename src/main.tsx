@@ -1,5 +1,6 @@
+import { preparePrivateAssistantChat, privateAssistantChatKey } from './utils/preparePrivateAssistantChat';
 import { XmppProvider } from '@ethora/chat-component';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
@@ -149,9 +150,20 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
   // app's theme (Profile > Appearance, or the OS in 'system' mode) recolours
   // the chat live instead of only on next login.
   const resolvedTheme = useResolvedUiTheme();
+  const assistantKey = privateAssistantChatKey(currentApp, currentUser);
+  const [preparedFor, setPreparedFor] = useState('');
+  useEffect(() => {
+    if (!assistantKey) return;
+    let live = true;
+    preparePrivateAssistantChat(assistantKey).finally(() => {
+      if (live) setPreparedFor(assistantKey);
+    });
+    return () => { live = false; };
+  }, [assistantKey]);
+  const waitingForAssistant = Boolean(assistantKey && preparedFor !== assistantKey);
   const providerConfig = useMemo(
-    () =>
-      buildEthoraBaseChatConfig({
+    () => {
+      const config = buildEthoraBaseChatConfig({
         chat_token: currentUser?.token || null,
         currentUser,
         primaryColor: currentApp?.primaryColor,
@@ -164,7 +176,9 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
         // install default and disagree with the Chats page.
         e2eeEnabled: currentApp?.e2eeEnabled,
         resolvedTheme,
-      }),
+      });
+      return waitingForAssistant ? { ...config, initBeforeLoad: false } : config;
+    },
     [
       currentUser,
       currentApp?.primaryColor,
@@ -173,6 +187,7 @@ function XmppProviderBridge({ children }: { children: React.ReactNode }) {
       uiLanguage,
       chatLanguage,
       resolvedTheme,
+      waitingForAssistant,
     ]
   );
 

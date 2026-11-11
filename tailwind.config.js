@@ -90,9 +90,9 @@ export default {
         'brand-500': 'var(--brand-text)',
       },
       fontFamily: {
-        sans: ['Open Sans'],
-        varela: ['Varela Round'],
-        inter: ['Inter'],
+        sans: ['Open Sans', 'system-ui', 'sans-serif'],
+        varela: ['Varela Round', 'system-ui', 'sans-serif'],
+        inter: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
     screens: {

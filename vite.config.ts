@@ -1,5 +1,6 @@
+import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { cspPlugin } from './vite-plugin-csp';
 import { wellKnownPlugin } from './vite-plugin-well-known';
 
@@ -7,10 +8,16 @@ import { wellKnownPlugin } from './vite-plugin-well-known';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiProxyTarget = env.VITE_DEV_API_TARGET || 'http://localhost:8080';
+  // Use a built sibling SDK locally when the App and chat changes ship together.
+  const localChatSdk = env.ETHORA_LOCAL_CHAT_SDK ? resolve(env.ETHORA_LOCAL_CHAT_SDK) : null;
   return ({
   // cspPlugin is build-only (see vite-plugin-csp.ts) — the dev server
   // keeps working exactly as before.
   plugins: [react(), cspPlugin(env), wellKnownPlugin(env)],
+  resolve: localChatSdk ? {
+    alias: [{ find: /^@ethora\/chat-component$/, replacement: resolve(localChatSdk, 'dist/main.js') }],
+    dedupe: ['react', 'react-dom'],
+  } : undefined,
   css: {
     preprocessorOptions: {
       scss: {
@@ -50,6 +57,7 @@ export default defineConfig(({ mode }) => {
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
   server: {
+    fs: localChatSdk ? { allow: [searchForWorkspaceRoot(process.cwd()), localChatSdk] } : undefined,
     // Suppress source map warnings in dev mode
     hmr: {
       overlay: false, // Disable error overlay for cleaner console

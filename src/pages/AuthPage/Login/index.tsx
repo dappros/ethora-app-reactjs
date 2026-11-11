@@ -42,13 +42,15 @@ export default function LoginComponent() {
   // Ethora-branded split layout: blue marketing panel on the left, sign-in
   // form on the right. Only for our own domains; white-label apps and mobile
   // keep the standard layout below.
-  if (isEthoraDomain() && !isMobileDevice) {
+  if (config.isBaseApp && isEthoraDomain() && !isMobileDevice) {
     return (
       <EthoraSplitLayout>
         <SignInForm />
       </EthoraSplitLayout>
     );
   }
+
+  const centered = isMobileDevice || config.welcomeLayout === 'centered';
 
   return (
     <Wrapper>
@@ -71,12 +73,12 @@ export default function LoginComponent() {
             margin: 'auto 0',
             width: '100%',
             display: 'flex',
-            flexDirection: isMobileDevice ? 'column' : 'row',
+            flexDirection: centered ? 'column' : 'row',
             gap: isMobileDevice ? '20px' : '16px',
             alignItems: 'center',
           }}
         >
-          <LogoContent isMobile={isMobileDevice} />
+          <LogoContent isMobile={centered} welcome />
           <SignInForm isMobile={isMobileDevice} />
         </Box>
       </Box>

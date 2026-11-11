@@ -46,6 +46,7 @@ export interface ModelCurrentApp {
 
 export interface ModelAppDefaulRooom {
   jid: string;
+  autoJoin?: boolean;
   pinned: boolean;
   title: string;
   creator: string;
@@ -117,6 +118,14 @@ export interface ModelApp {
   logoImage: string;
   sublogoImage: string;
   appTagline: string;
+  welcomeTitle?: string;
+  welcomeDescription?: string;
+  welcomeImage?: string;
+  welcomeImageFit?: 'cover' | 'contain';
+  welcomeLayout?: 'split' | 'centered';
+  callsEnabled?: boolean;
+  scheduledCallsEnabled?: boolean;
+  autoCreateAssistantChat?: boolean;
   firebaseWebConfigString?: string;
   firebaseConfigParsed?: {
     apiKey: string;
@@ -166,6 +175,10 @@ export interface ModelApp {
     chats: boolean;
     profile: boolean;
     settings: boolean;
+    projects?: boolean;
+    assistants?: boolean;
+    license?: boolean;
+    help?: boolean;
   };
   googleServicesJson: string;
   googleServiceInfoPlist: string;

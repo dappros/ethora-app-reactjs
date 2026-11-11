@@ -1,13 +1,17 @@
-import { Checkbox, Field, Label } from '@headlessui/react';
+import { Checkbox, Field, Label, Switch } from '@headlessui/react';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { useTranslation } from '../../i18n/useTranslation';
+import type { ModelApp } from '../../models';
 import './Menu.scss';
 
-interface MenuItems {
-  chats: boolean;
-  profile: boolean;
-  settings: boolean;
-}
+type MenuItems = ModelApp['availableMenuItems'];
+
+const memberLinks = [
+  ['projects', 'nav.apps'],
+  ['assistants', 'nav.ai'],
+  ['license', 'nav.license'],
+  ['help', 'nav.help'],
+] as const;
 
 interface Props {
   availableMenuItems: MenuItems;
@@ -16,11 +20,27 @@ interface Props {
 
 export function Menu({ availableMenuItems, setAvailableMenuItems }: Props) {
   const { t } = useTranslation();
-  const onChange = (isOn: boolean, name: 'profile' | 'chats' | 'settings') => {
+  const onChange = (isOn: boolean, name: keyof MenuItems) => {
     setAvailableMenuItems({ ...availableMenuItems, [name]: isOn });
   };
   return (
     <div className="">
+      <fieldset className="mb-8 rounded-xl border border-gray-200 px-4 pb-2">
+        <legend className="px-1 text-base font-semibold">{t('appSettingsMenu.memberLinksTitle')}</legend>
+        <p className="mb-2 text-sm text-gray-600">{t('appSettingsMenu.memberLinksDescription')}</p>
+        {memberLinks.map(([key, label]) => (
+          <Field key={key} className="flex min-h-11 items-center justify-between gap-4 border-b border-gray-200 last:border-b-0">
+            <Label className="cursor-pointer text-sm font-medium">{t(label)}</Label>
+            <Switch
+              checked={availableMenuItems[key] !== false}
+              onChange={(visible) => onChange(visible, key)}
+              className="group relative h-6 w-11 shrink-0 rounded-full bg-gray-300 data-[checked]:bg-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            >
+              <span aria-hidden="true" className="absolute left-1 top-1 size-4 rounded-full bg-[#fff] shadow transition-transform group-data-[checked]:translate-x-5" />
+            </Switch>
+          </Field>
+        ))}
+      </fieldset>
       <p className="font-sans text-sm mb-8">
         {t('appSettingsMenu.description')}
       </p>

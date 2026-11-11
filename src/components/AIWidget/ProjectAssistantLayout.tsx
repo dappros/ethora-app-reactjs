@@ -1,5 +1,5 @@
 import { Suspense, useLayoutEffect, useRef } from 'react';
-import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { PanelSkeleton } from '../PanelSkeleton';
 
@@ -28,6 +28,9 @@ export function ProjectAssistantLayout() {
             <NavLink to={`${basePath}/assistant`} end className={({ isActive }) => linkClass(isActive)}>{t('projectOverview.setUpAssistant')}</NavLink>
             <NavLink to={`${basePath}/widget`} end className={({ isActive }) => linkClass(isActive)}>{t('projectOverview.widget')}</NavLink>
           </nav>
+          <Link to={`${basePath}/settings?tab=Assistant+requests`} className="inline-flex min-h-10 items-center rounded-xl border border-gray-300 px-4 text-sm font-semibold hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+            {t('projectOverview.viewAssistantRequests')}
+          </Link>
         </div>
       </header>
       <div ref={panel} data-testid="assistant-panel-scroll" className="min-w-0 overflow-y-auto [overflow-anchor:none] [scrollbar-gutter:stable]">

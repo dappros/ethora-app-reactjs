@@ -1,11 +1,12 @@
+import { ChatChannelSettings } from './ChatChannelSettings';
 import { Checkbox, Dialog, DialogPanel, Field, Label } from '@headlessui/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { IconAdd } from '../../components/Icons/IconAdd';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { ModelAppDefaulRooom } from '../../models';
 import { IconClose } from '../../components/Icons/IconClose';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { createAppChat, deleteDefaultRooms, getDefaultRooms, httpBroadcastChatsV2, httpGetBroadcastChatsJobV2 } from '../../http';
+import { createAppChat, deleteDefaultRooms, getDefaultRooms, httpBroadcastChatsV2, httpGetBroadcastChatsJobV2, updateAppChatDefaults } from '../../http';
 import { Loading } from '../../components/Loading';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { SubmitModal } from '../../components/modal/SubmitModal';
@@ -32,9 +33,8 @@ interface Props {
   e2eeEnabled: boolean
   setE2eeEnabled: (value: boolean) => void
   defaultChatRooms: Array<ModelAppDefaulRooom>,
-  setDefaultChatRooms: (value: Array<ModelAppDefaulRooom>) => void,
+  setDefaultChatRooms: Dispatch<SetStateAction<ModelAppDefaulRooom[]>>,
   appId: string,
-  domainName?: string,
   // Per-app default broadcast sender (Save Settings persists; per-broadcast
   // override below is a separate, session-only toggle).
   broadcastSenderName: string,
@@ -45,7 +45,8 @@ interface Props {
 
 interface Inputs {
   chatTitle: string;
-  pinned: false;
+  pinned: boolean;
+  autoJoin: boolean;
 }
 
 export function Chats({
@@ -56,7 +57,6 @@ export function Chats({
   defaultChatRooms,
   setDefaultChatRooms,
   appId,
-  domainName,
   broadcastSenderName,
   setBroadcastSenderName,
   broadcastSenderPhotoUrl,
@@ -72,11 +72,15 @@ export function Chats({
   const { status: licenseStatus } = useLicenseStatus();
   const e2eeOperatorOff = licenseStatus?.operator?.e2eeAllowed === false;
   const [showCreate, setShowCreate] = useState(false);
+  const [activateInRoom, setActivateInRoom] = useState(false);
+  const [offerAgentFor, setOfferAgentFor] = useState<ModelAppDefaulRooom | null>(null);
   const [allRowsSelected, setAllRowsSelected] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   // Phase 1 (Agents): modal for inviting an Agent into a specific chat row.
   const [inviteForChat, setInviteForChat] = useState<ModelAppDefaulRooom | null>(null);
+  const [channelForChat, setChannelForChat] = useState<ModelAppDefaulRooom | null>(null);
+  const [savingChatDefaults, setSavingChatDefaults] = useState(false);
   const [membersForChat, setMembersForChat] = useState<ModelAppDefaulRooom | null>(null);
   // Phase 1 (Agents): bot-instances + agents loaded for this app, used to render the
   // "bots in this room" inline list per chat row + the Remove buttons.
@@ -134,7 +138,7 @@ export function Chats({
     register,
     handleSubmit,
     reset
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({ defaultValues: { chatTitle: '', autoJoin: true, pinned: true } });
 
   const setSelect = (select: boolean, index: number) => {
     const newRowsSelected = rowsSelected.concat([]);
@@ -207,24 +211,38 @@ export function Chats({
     return indexes;
   };
 
-  const onSubmit: SubmitHandler<Inputs> = async ({ chatTitle }) => {
+  async function saveChatDefaults(chat: ModelAppDefaulRooom, settings: { autoJoin?: boolean; pinned?: boolean }) {
+    setSavingChatDefaults(true);
+    try {
+      const { data } = await updateAppChatDefaults(appId, chat.jid, settings);
+      setDefaultChatRooms((rooms) => rooms.map((room) => room.jid === chat.jid ? data.result : room));
+    } catch (error) {
+      toast.error(apiError(error, t('appSettingsChats.saveDefaultsError')).message);
+    } finally {
+      setSavingChatDefaults(false);
+    }
+  }
+
+  const onSubmit: SubmitHandler<Inputs> = async ({ chatTitle, autoJoin, pinned }) => {
     setShowLoading(true)
     try {
-      await createAppChat(appId, chatTitle, true)
-      const { data } = await getDefaultRooms(appId)
-      setDefaultChatRooms(data)
+      const { data } = await createAppChat(appId, chatTitle.trim(), pinned, autoJoin)
+      const createdRoom = data?.result as ModelAppDefaulRooom | undefined
+      try {
+        const { data: rooms } = await getDefaultRooms(appId)
+        setDefaultChatRooms(rooms)
+      } catch {
+        if (createdRoom) setDefaultChatRooms([...defaultChatRooms, createdRoom])
+      }
 
-      const createdRoom = (data as ModelAppDefaulRooom[]).find(
-        (room) => room.title === chatTitle
-      )
       phCapture('chat_room_created', {
         room_id: createdRoom?.jid || createdRoom?.chatId || '',
         is_private: false,
       })
       
-      // Refresh app config to update defaultRooms in the store
-      const { actionGetConfig } = await import('../../actions')
-      await actionGetConfig(domainName)
+      // Updating the global tenant config here changes admin navigation.
+      // The room list is local to this project; keep the current session intact.
+      if (createdRoom && env.VITE_AI_FEATURE_ENABLED === 'true') setOfferAgentFor(createdRoom)
       
       setShowLoading(false)
       reset()
@@ -482,6 +500,9 @@ export function Chats({
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                     {t('appSettingsChats.createdByColumn')}
                   </th>
+                  <th className="px-4 text-gray-500 font-normal font-inter text-xs text-left whitespace-nowrap">
+                    {t('appSettingsChats.newMembers')}
+                  </th>
                   {/* Phase 1 (Agents): per-row action to invite an Agent into the chat. */}
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                     {t('appSettingsChats.botsColumn')}
@@ -512,9 +533,24 @@ export function Chats({
                         >
                           {el.title}
                         </button>
+                        <button type="button" onClick={() => setChannelForChat(el)} className="ml-3 rounded-lg border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100" aria-label={`Channel settings for ${el.title}`}>Channel settings</button>
                       </td>
                       <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                         {el.creator}
+                      </td>
+                      <td className="px-4 py-2">
+                        <fieldset aria-label={el.title} disabled={savingChatDefaults} className="space-y-1 text-xs whitespace-nowrap">
+                          <label className="flex items-center gap-2">
+                            <input type="checkbox" className="accent-brand-500" checked={el.autoJoin !== false}
+                              onChange={(event) => void saveChatDefaults(el, { autoJoin: event.target.checked })} />
+                            {t('appSettingsChats.autoJoin')}
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input type="checkbox" className="accent-brand-500" checked={el.pinned === true}
+                              onChange={(event) => void saveChatDefaults(el, { pinned: event.target.checked })} />
+                            {t('appSettingsChats.pinAtStart')}
+                          </label>
+                        </fieldset>
                       </td>
                       <td className="px-4 font-sans font-normal text-sm text-left">
                         <RoomBotsCell
@@ -805,9 +841,20 @@ export function Chats({
               <input
                 type="text"
                 placeholder={t('appSettingsChats.chatTitlePlaceholder')}
-                {...register('chatTitle', { required: true })}
+                {...register('chatTitle', { required: true, validate: (value) => Boolean(value.trim()) })}
                 className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-[24px] md:mb-8 outline-none"
               />
+              <fieldset className="mb-6 space-y-2 text-sm">
+                <legend className="mb-2 font-semibold">{t('appSettingsChats.newMembers')}</legend>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="accent-brand-500" {...register('autoJoin')} />
+                  {t('appSettingsChats.autoJoin')}
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="accent-brand-500" {...register('pinned')} />
+                  {t('appSettingsChats.pinAtStart')}
+                </label>
+              </fieldset>
               <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
                 <button
                   type="button"
@@ -823,6 +870,20 @@ export function Chats({
             </form>
           </DialogPanel>
         </Dialog>
+      )}
+      {offerAgentFor && !inviteForChat && (
+        <SubmitModal onClose={() => setOfferAgentFor(null)}>
+          <h2 className="mb-2 text-xl font-semibold">Activate an assistant?</h2>
+          <p className="mb-5 text-sm text-gray-600">{offerAgentFor.title} is ready. Add an assistant if you want it to answer in this chat.</p>
+          <div className="flex flex-wrap justify-end gap-3">
+            <button type="button" className="rounded-xl border border-gray-300 px-4 py-2" onClick={() => setOfferAgentFor(null)}>Not now</button>
+            <button type="button" className="rounded-xl bg-brand-500 px-4 py-2 text-white" onClick={() => {
+              setActivateInRoom(true);
+              setInviteForChat(offerAgentFor);
+              setOfferAgentFor(null);
+            }}>Activate assistant</button>
+          </div>
+        </SubmitModal>
       )}
       {showDelete && (
         <SubmitModal onClose={() => setShowDelete(false)}>
@@ -852,6 +913,7 @@ export function Chats({
       {/* Phase 1 (Agents): Add-Bot-to-chat modal. Lists this user's Agents and accepts a
           paste-in agent address (so an unlisted public agent can be invited by someone
           who only knows the address). */}
+      {channelForChat && <ChatChannelSettings appId={appId} chat={channelForChat} onClose={() => setChannelForChat(null)} />}
       {membersForChat && (
         <ChatMembersModal
           appId={appId}
@@ -864,8 +926,10 @@ export function Chats({
         <InviteAgentToChatModal
           appId={appId}
           chat={inviteForChat}
+          activate={activateInRoom}
           onClose={() => {
             setInviteForChat(null);
+            setActivateInRoom(false);
             // Refresh chips so a freshly-invited bot appears in the row immediately.
             reloadBotInstances();
           }}

@@ -20,6 +20,7 @@ import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
 import { useLicenseStatus } from '../hooks/useLicenseStatus';
+import { useAppMenuVisibility } from '../hooks/useAppMenuVisibility';
 import { isEthoraHostedEnv } from '../utils/hostedEnv';
 const ITEM_CLASS =
   'flex group hover:bg-gray-100 flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
@@ -40,6 +41,7 @@ export function AppMenu() {
   const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
   const isAdmin = useAppStore((s) => s.currentApp?.isAllowedNewAppCreate);
+  const menu = useAppMenuVisibility();
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
   // The server's admin can turn agents off for everyone (Server settings > AI).
   const { status: licenseStatus } = useLicenseStatus();
@@ -48,6 +50,7 @@ export function AppMenu() {
   // created inside it is served from its own subdomain and shows chat only.
   const isBaseApp = isBaseAppHost();
   const showBilling = isBaseApp && isEthoraHostedEnv();
+  const showAssistants = menu.assistants && !agentsOff;
 
   const getPageTitle = useMemo(() => {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -76,7 +79,7 @@ export function AppMenu() {
         {getPageTitle}
       </div>
       <div className="hidden md:flex flex-col divide-y divide-gray-100">
-        {isAdmin && isBaseApp && (
+        {menu.projects && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
               <IconAdmin />
@@ -93,7 +96,7 @@ export function AppMenu() {
             <div className={LABEL_CLASS}>{t('nav.chats')}</div>
           </NavLink>
         </div>
-        {isAdmin && isBaseApp && !agentsOff && (
+        {showAssistants && (
           <div className={ITEM_WRAP_CLASS}>
             <Link
               to="/app/admin/agents"
@@ -120,7 +123,7 @@ export function AppMenu() {
             </NavLink>
           </div>
         )}
-        {isAdmin && isBaseApp && (
+        {menu.license && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/admin/license" className={ITEM_CLASS}>
               <IconLicense />
@@ -138,7 +141,7 @@ export function AppMenu() {
               </NavLink>
             </div>
           )}
-        {isBaseApp && (
+        {menu.help && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/help" className={ITEM_CLASS}>
               <IconHelp />
@@ -184,7 +187,7 @@ export function AppMenu() {
       </div>
       {isMobileMenuVisible && (
         <MobileMenuModal
-          isAdmin={isAdmin && isBaseApp}
+          visibility={{ ...menu, assistants: showAssistants, billing: !!isAdmin && showBilling }}
           onClose={() => setMobileMenuVisible(false)}
         />
       )}
