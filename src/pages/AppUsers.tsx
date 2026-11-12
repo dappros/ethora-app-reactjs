@@ -86,8 +86,9 @@ export default function AppUsers() {
   const [showManageTags, setShowManageTags] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetResults, setResetResults] = useState<
-    Array<{ userId: string; email: string; tempPassword: string }> | null
+    { links: Array<{ userId: string; email: string; setPasswordUrl: string }>; failed: Array<{ userId: string; email: string }>; passwords: Array<{ userId: string; email: string; tempPassword: string }> } | null
   >(null);
+  const [resetBusy, setResetBusy] = useState(false);
   const [showResetMfa, setShowResetMfa] = useState(false);
   const [resetMfaBusy, setResetMfaBusy] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -516,25 +517,27 @@ export default function AppUsers() {
       .finally(() => setLoading(false));
   };
 
-  const onResetPassword = () => {
-    if (!appId) {
-      return;
-    }
-
-    const selectedUserIds = getSelectedUserIds();
-
-    actionResetPasswords(appId, selectedUserIds).then((res) => {
+  const onResetPassword = async () => {
+    if (!appId || resetBusy) return;
+    setResetBusy(true);
+    try {
+      const res = await actionResetPasswords(appId, getSelectedUserIds());
       setShowResetPassword(false);
-      // Installs without outbound email get the temporary passwords back
-      // instead of an email going out; show them once so the admin can pass
-      // them on. The user still has to choose a new password at login.
-      const tempPasswords = res.data?.emailSent === false ? res.data?.tempPasswords : undefined;
-      if (Array.isArray(tempPasswords) && tempPasswords.length) {
-        setResetResults(tempPasswords);
+      const links = Array.isArray(res.data?.setPasswordLinks) ? res.data.setPasswordLinks : [];
+      const failed = Array.isArray(res.data?.failedUsers) ? res.data.failedUsers : [];
+      const passwords = Array.isArray(res.data?.tempPasswords) ? res.data.tempPasswords : [];
+      if (links.length || failed.length || passwords.length) {
+        setResetResults({ links, failed, passwords });
+      } else if (res.data?.ok === false || res.data?.emailSent === false) {
+        toast.error(t('appUsers.passwordResetFailed'));
       } else {
         toast(t('appUsers.passwordResetToast'));
       }
-    });
+    } catch (e) {
+      toast.error(accessErrorMessage(e, t));
+    } finally {
+      setResetBusy(false);
+    }
   };
 
   // Owner recovery for a locked-out user (lost authenticator, no backup
@@ -1266,27 +1269,38 @@ export default function AppUsers() {
       {resetResults && (
         <SubmitModal onClose={() => setResetResults(null)}>
           <div className="font-varela text-[24px] text-center mb-4">
-            {t('appUsers.tempPasswordsTitle')}
+            {t('appUsers.setPasswordLinksTitle')}
           </div>
-          <p className="font-sans text-[14px] mb-6 text-center">
-            {t('appUsers.tempPasswordsHint')}
-          </p>
+          {resetResults.links.length > 0 && <p className="font-sans text-[14px] mb-6 text-center">
+            {t('appUsers.setPasswordLinksHint')}
+          </p>}
           <div className="flex flex-col gap-3 mb-8 max-h-[320px] overflow-y-auto">
-            {resetResults.map((r) => (
+            {resetResults.links.map((r) => (
               <div key={r.userId} className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3">
                 <div className="min-w-0">
                   <div className="font-sans text-[14px] truncate">{r.email}</div>
-                  <code className="font-mono text-[14px] select-all">{r.tempPassword}</code>
+                  <code className="font-mono text-[14px] select-all break-all">{r.setPasswordUrl}</code>
                 </div>
-                <CopyButtonText textToCopy={r.tempPassword} />
+                <CopyButtonText textToCopy={r.setPasswordUrl} />
               </div>
             ))}
           </div>
+          {resetResults.passwords.length > 0 && <div className="mb-6">
+            <p className="text-sm mb-3">{t('appUsers.legacyPasswordsHint')}</p>
+            {resetResults.passwords.map((user) => <div key={user.userId} className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3">
+              <div className="min-w-0"><div>{user.email}</div><code className="break-all select-all">{user.tempPassword}</code></div>
+              <CopyButtonText textToCopy={user.tempPassword} />
+            </div>)}
+          </div>}
+          {resetResults.failed.length > 0 && <div role="alert" className="mb-6 text-red-700 text-sm">
+            <p>{t('appUsers.passwordResetFailedUsers')}</p>
+            <ul className="list-disc pl-5">{resetResults.failed.map((user) => <li key={user.userId}>{user.email}</li>)}</ul>
+          </div>}
           <button
             onClick={() => setResetResults(null)}
             className="w-full bg-brand-500 hover:bg-brand-darker rounded-xl py-[12px] text-white"
           >
-            {t('appUsers.tempPasswordsDone')}
+            {t('appUsers.setPasswordLinksDone')}
           </button>
         </SubmitModal>
       )}
@@ -1301,13 +1315,15 @@ export default function AppUsers() {
           <div className="flex gap-8">
             <button
               onClick={() => setShowResetPassword(false)}
+              disabled={resetBusy}
               className="w-full hover:bg-brand-hover rounded-xl border py-[12px] border-brand-500 text-brand-500"
             >
               {t('appUsers.cancel')}
             </button>
             <button
               onClick={onResetPassword}
-              className="w-full hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white"
+              disabled={resetBusy}
+              className="w-full disabled:opacity-50 hover:bg-brand-darker py-[12px] rounded-xl bg-brand-500 text-white"
             >
               {t('appUsers.submit')}
             </button>
