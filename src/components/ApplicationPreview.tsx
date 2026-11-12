@@ -140,7 +140,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
           </div>
         </div>
         {/* stat */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:gap-x-[33px] 2xl:grid-cols-8">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-4 md:gap-x-[33px] 2xl:grid-cols-9">
           <div className="flex flex-col justify-center items-center">
             <div className="text-gray-500 font-sans text-xs flex items-center">
               <span className="mr-2">{t('applicationPreview.stats.users')}</span>
@@ -158,6 +158,24 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
               <span className="text-gray-500"> / </span>{' '}
               <span className="text-green-600 dark:text-green-400 font-sans text-sm">
                 {app.stats.recentlyRegistered}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center" data-testid="app-mau">
+            <div className="text-gray-500 font-sans text-xs flex items-center">
+              <span className="mr-2">{t('applicationPreview.stats.mau')}</span>
+              <Tooltip
+                title={t('applicationPreview.stats.mauTooltip')}
+                className="relative"
+              >
+                <IconInfo />
+              </Tooltip>
+            </div>
+            <div>
+              <span className="font-sans text-sm">
+                {typeof app.stats.activeUsers30d === 'number'
+                  ? numberFormatter.format(app.stats.activeUsers30d)
+                  : '—'}
               </span>
             </div>
           </div>
