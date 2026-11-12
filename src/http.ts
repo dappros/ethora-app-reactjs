@@ -592,9 +592,13 @@ export function httpDeleteManyUsers(appId: string, usersIdList: Array<string>) {
 }
 
 export function httpResetPasswords(appId: string, usersIdList: Array<string>) {
-  return http.post(`/users/reset-passwords-with-app-id/${appId}`, {
-    usersIdList,
-  });
+  return http.post<{
+    ok: boolean;
+    emailSent: boolean;
+    setPasswordLinks?: Array<{ userId: string; email: string; setPasswordUrl: string }>;
+    failedUsers?: Array<{ userId: string; email: string }>;
+    tempPasswords?: Array<{ userId: string; email: string; tempPassword: string }>;
+  }>(`/users/reset-passwords-with-app-id/${appId}`, { usersIdList });
 }
 
 export function httpCraeteUser(
