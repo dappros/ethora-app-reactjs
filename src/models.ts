@@ -154,6 +154,10 @@ export interface ModelApp {
     recentlyChats: number;
     // ISO start-of-day of the latest day with any activity; null = never.
     lastActivityAt?: string | null;
+    // Monthly active users: distinct accounts that logged in, refreshed a
+    // session or wrote a message in the last 30 days. null when the server
+    // could not compute it; absent on backends that predate it.
+    activeUsers30d?: number | null;
   };
   systemChatAccount: {
     jid: string;
