@@ -7,6 +7,8 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // file.
 export const common = {
   en: {
+    'server.reconnecting': 'Reconnecting to the server...',
+    'server.restarting': 'The server is restarting. Try again in a moment.',
     'accessError.noPermission': "Your role in this app doesn't allow this. Ask the app owner to extend your permissions in Users → Permissions.",
     'nav.apps': 'Apps',
     'nav.chats': 'Chats',
@@ -47,6 +49,8 @@ export const common = {
       "Language changed on this device, but couldn't be saved to your profile",
   },
   fr: {
+    'server.reconnecting': 'Reconnexion au serveur...',
+    'server.restarting': 'Le serveur redémarre. Réessayez dans un instant.',
     'accessError.noPermission': "Votre rôle dans cette application ne permet pas cette action. Demandez au propriétaire de l'application d'étendre vos autorisations dans Utilisateurs → Autorisations.",
     'nav.apps': 'Applications',
     'nav.chats': 'Discussions',
@@ -87,6 +91,8 @@ export const common = {
       "Langue modifiée sur cet appareil, mais impossible de l'enregistrer dans votre profil",
   },
   es: {
+    'server.reconnecting': 'Reconectando con el servidor...',
+    'server.restarting': 'El servidor se está reiniciando. Inténtelo de nuevo en un momento.',
     'accessError.noPermission': 'Tu rol en esta app no permite esta acción. Pide al propietario de la app que amplíe tus permisos en Usuarios → Permisos.',
     'nav.apps': 'Aplicaciones',
     'nav.chats': 'Chats',

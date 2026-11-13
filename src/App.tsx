@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { Outlet } from 'react-router-dom';
 import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
+import { ReconnectingBanner } from './components/ReconnectingBanner';
 import { buildPushNotificationsConfig } from './config/chatBootstrap';
 import { useCaptureParams } from './hooks/useCaptureParams';
 import { useTrackUrl } from './hooks/useTrackUrl';
@@ -121,9 +122,19 @@ function App() {
   useHandleRedirectLogin();
 
   if (!currentApp) {
-    return <Loading></Loading>;
+    return (
+      <>
+        <ReconnectingBanner />
+        <Loading></Loading>
+      </>
+    );
   } else {
-    return <Outlet />;
+    return (
+      <>
+        <ReconnectingBanner />
+        <Outlet />
+      </>
+    );
   }
 }
 

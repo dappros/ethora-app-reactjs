@@ -11,6 +11,7 @@ import {
 } from './authRefresh';
 
 import { env } from './config/env';
+import { attachRestartRetry } from './utils/serverRestart';
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
@@ -221,6 +222,11 @@ export function refreshOnce(): Promise<unknown> {
 
 attachAuthInterceptors(http);
 attachAuthInterceptors(httpV2);
+// After the auth interceptors: a server restart / update window is waited out
+// (reads) instead of surfacing as an error or a logout.
+attachRestartRetry(http);
+attachRestartRetry(httpV2);
+attachRestartRetry(httpV2App);
 
 // App-auth for certain admin actions (do NOT refresh/logout user on 401 here).
 httpV2App.interceptors.request.use((config) => {
