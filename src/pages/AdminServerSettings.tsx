@@ -5,7 +5,7 @@ import { httpV2 } from '../http';
 import { Segmented } from '../components/AIWidget/appearance/Fields';
 import { ChatComponent } from './AppSettings/ChatComponent';
 import { useTranslation } from '../i18n/useTranslation';
-import type { ServerModule, ServerSetting, ServerSettingsResponse, ServerSettingsTab } from '../models';
+import type { ServerModule, ServerSetting, ServerSettingsResponse, ServerSettingsTab, ServerStatus } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
 // Server settings page (super admins): install-wide values with their source
@@ -30,6 +30,9 @@ function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+const GB = 1024 * 1024 * 1024;
+const gb = (bytes: number) => (bytes >= 10 * GB ? Math.round(bytes / GB) : Math.round((bytes / GB) * 10) / 10);
+
 export default function AdminServerSettings() {
   const { t } = useTranslation();
   const currentUser = useAppStore((s) => s.currentUser);
@@ -48,6 +51,10 @@ export default function AdminServerSettings() {
   // Module page sign-ins, fetched only when "Show" is pressed.
   const [creds, setCreds] = useState<Record<string, { username: string; password: string } | null>>({});
   const [credsError, setCredsError] = useState<Record<string, string>>({});
+  // Read-only status (System tab): null until loaded, 'unsupported' on an API without it.
+  const [status, setStatus] = useState<ServerStatus | 'unsupported' | null>(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
   // Name the one configuration file once the API says how the server was
   // installed (compose bundle .env or deploy.yml); generic text until then.
   const installKind = data?.installKind || data?.info?.installKind;
@@ -98,6 +105,25 @@ export default function AdminServerSettings() {
 
   const requestedTab = searchParams.get('tab') as ServerSettingsTab | null;
   const activeTab: ServerSettingsTab | null = tabs.length ? (requestedTab && tabs.includes(requestedTab) ? requestedTab : tabs[0]) : null;
+  const loadStatus = useCallback(async () => {
+    setStatusLoading(true);
+    setStatusError(null);
+    try {
+      const r = await httpV2.get<ServerStatus>('/server-settings/status');
+      setStatus(r.data);
+    } catch (e) {
+      const err = e as ApiErr;
+      if (err.response?.status === 404) setStatus('unsupported');
+      else setStatusError(err.response?.data?.error || err.message);
+    } finally {
+      setStatusLoading(false);
+    }
+  }, []);
+  // Loaded when the System tab is opened, not with the page.
+  useEffect(() => {
+    if (activeTab === 'system' && status === null && !statusLoading && !statusError) loadStatus();
+  }, [activeTab, status, statusLoading, statusError, loadStatus]);
+
   const selectTab = (tab: ServerSettingsTab) => {
     const next = new URLSearchParams(searchParams);
     next.set('tab', tab);
@@ -441,6 +467,129 @@ export default function AdminServerSettings() {
     return renderTabBody(tab);
   };
 
+  const relTime = (iso: string | null | undefined) => {
+    if (!iso) return t('serverSettings.status.never');
+    const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+    if (s < 60) return t('serverSettings.status.justNow');
+    if (s < 3600) return t('serverSettings.status.minutesAgo').replace('{n}', String(Math.round(s / 60)));
+    if (s < 86400) return t('serverSettings.status.hoursAgo').replace('{n}', String(Math.round(s / 3600)));
+    return t('serverSettings.status.daysAgo').replace('{n}', String(Math.round(s / 86400)));
+  };
+  const dot = (ok: boolean | null) => (
+    <span className={cn('inline-block h-2.5 w-2.5 rounded-full shrink-0', ok === true ? 'bg-green-500' : ok === false ? 'bg-red-500' : 'bg-gray-300')} aria-hidden />
+  );
+
+  const renderStatus = () => {
+    if (status === 'unsupported') return null;
+    const st = status;
+    return (
+      <div key="status" className="rounded-2xl border border-gray-200 p-4 md:p-6 mb-6 min-w-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h3 className="font-varela text-[18px] md:text-[20px] mr-auto">{t('serverSettings.status.title')}</h3>
+          {st && <span className="text-xs text-gray-500">{t('serverSettings.status.checked').replace('{when}', relTime(st.checkedAt))}</span>}
+          <button type="button" onClick={loadStatus} disabled={statusLoading} className="text-sm text-brand-500 underline disabled:opacity-50">
+            {statusLoading ? t('serverSettings.status.loading') : t('serverSettings.status.refresh')}
+          </button>
+        </div>
+        {statusError && <p className="mt-2 text-sm text-red-700">{t('serverSettings.status.failed').replace('{error}', statusError)}</p>}
+        {!st && !statusError && <p className="mt-2 text-sm text-gray-500">{t('serverSettings.status.loading')}</p>}
+        {st && (
+          <div className="mt-3 space-y-4 text-sm min-w-0">
+            <div>
+              <div className="text-gray-800">
+                {t('serverSettings.status.version').replace('{build}', st.version.build || '?')}
+                {st.version.installKind && <span className="text-gray-500"> ({st.version.installKind})</span>}
+              </div>
+              {st.update.checked && st.update.available && (
+                <div className="mt-2 rounded-xl bg-amber-50 border border-amber-200 p-3 min-w-0">
+                  <div className="text-amber-900 font-semibold">{t('serverSettings.status.updateAvailable').replace('{latest}', st.update.latest || '')}</div>
+                  {st.update.command && (
+                    <>
+                      <div className="text-xs text-gray-600 mt-2 mb-1">{t('serverSettings.status.runOnServer')}</div>
+                      <div className="flex items-stretch gap-2 min-w-0">
+                        <code className="flex-1 min-w-0 overflow-x-auto whitespace-nowrap rounded-xl bg-white px-3 py-2 text-xs font-mono">{st.update.command}</code>
+                        <button type="button" onClick={() => copy(st.update.command || '', 'update-cmd')} className="shrink-0 rounded-xl border border-gray-300 bg-white px-3 text-xs hover:bg-gray-50">
+                          {copied === 'update-cmd' ? t('serverSettings.module.copied') : t('serverSettings.module.copy')}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              {st.update.checked && !st.update.available && <div className="mt-1 text-green-700">{t('serverSettings.status.upToDate')}</div>}
+              {!st.update.checked && (
+                <div className="mt-1 text-gray-500">{st.update.reason === 'offline' ? t('serverSettings.status.updateOff') : t('serverSettings.status.updateUnknown')}</div>
+              )}
+            </div>
+
+            {st.services.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('serverSettings.status.services')}</div>
+                <ul className="space-y-1">
+                  {st.services.map((s) => (
+                    <li key={s.key} className="flex items-center gap-2 min-w-0">
+                      {dot(s.ok)}
+                      <span className="text-gray-800 shrink-0">{s.label}</span>
+                      {s.detail && <span className="text-gray-500 truncate min-w-0">{s.detail}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {st.disk && st.disk.totalBytes > 0 && (() => {
+              const free = st.disk.freeBytes / st.disk.totalBytes;
+              const tone = free < 0.05 ? 'bg-red-500' : free < 0.15 ? 'bg-amber-500' : 'bg-green-500';
+              return (
+                <div>
+                  <div className={cn(free < 0.05 ? 'text-red-700' : free < 0.15 ? 'text-amber-800' : 'text-gray-800')}>
+                    {t('serverSettings.status.disk').replace('{free}', String(gb(st.disk.freeBytes))).replace('{total}', String(gb(st.disk.totalBytes)))}
+                  </div>
+                  <div className="mt-1 h-1.5 w-full max-w-sm rounded-full bg-gray-200 overflow-hidden">
+                    <div className={cn('h-full', tone)} style={{ width: `${Math.min(100, Math.max(0, (1 - free) * 100))}%` }} />
+                  </div>
+                </div>
+              );
+            })()}
+
+            {st.certificates.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('serverSettings.status.certificates')}</div>
+                <ul className="space-y-1">
+                  {st.certificates.map((c) => {
+                    const bad = Boolean(c.error) || (c.daysLeft !== null && c.daysLeft < 7);
+                    const warn = !bad && c.daysLeft !== null && c.daysLeft < 21;
+                    return (
+                      <li key={c.host} className="flex flex-wrap items-center gap-x-2 min-w-0">
+                        {dot(bad ? false : warn ? null : true)}
+                        <span className="text-gray-800 break-all">{c.host}</span>
+                        <span className={cn(bad ? 'text-red-700' : warn ? 'text-amber-800' : 'text-gray-500')}>
+                          {c.error ? c.error : c.daysLeft !== null ? t('serverSettings.status.daysLeft').replace('{n}', String(c.daysLeft)) : ''}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            <div>
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('serverSettings.status.license')}</div>
+              <div className="text-gray-800">
+                {[st.license.tier, st.license.state].filter(Boolean).join(', ') || '?'}
+                <span className="text-gray-500">
+                  {' '}{t('serverSettings.status.lastContact').replace('{when}', relTime(st.license.lastContactAt))}
+                  {st.license.lastContactStatus && st.license.lastContactAt ? ` (${st.license.lastContactStatus})` : ''}
+                </span>
+                {' '}<a href="/app/admin/license" className="text-brand-500 underline">{t('serverSettings.status.licensePage')}</a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderTabBody = (tab: ServerSettingsTab) => {
     const modules = (data?.modules || []).filter((m) => m.tab === tab);
     const hosted = new Set(modules.map((m) => MODULE_GROUP[m.key]).filter(Boolean));
@@ -450,6 +599,7 @@ export default function AdminServerSettings() {
     const advanced = groups.filter(isAdvanced);
     return (
       <>
+        {tab === 'system' && renderStatus()}
         {modules.map(renderModule)}
         {plain.map(renderGroup)}
         {advanced.length > 0 && (

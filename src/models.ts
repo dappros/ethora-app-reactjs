@@ -489,6 +489,17 @@ export interface ServerSetting {
   advanced?: boolean;
 }
 export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'ai' | 'email' | 'system';
+// Read-only health of the install (GET /v2/server-settings/status, super admins).
+export interface ServerStatus {
+  version: { build: string | null; commit: string | null; line: string | null; installKind: string | null };
+  update: { checked: boolean; latest: string | null; available: boolean; command: string | null; reason?: string | null };
+  services: Array<{ key: string; label: string; ok: boolean | null; detail?: string | null }>;
+  disk: { totalBytes: number; freeBytes: number } | null;
+  certificates: Array<{ host: string; validTo: string | null; daysLeft: number | null; error?: string | null }>;
+  license: { state: string | null; tier: string | null; lastContactAt: string | null; lastContactStatus: string | null };
+  checkedAt: string;
+}
+
 // An Enterprise module as the API sees it: installed = its service is part of
 // this install (null: the API cannot tell), running = it answered just now.
 export interface ServerModule {
