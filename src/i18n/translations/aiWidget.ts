@@ -207,6 +207,9 @@ export const aiWidget = {
     'agentPanels.templatesLabel': 'Templates:',
     'agentPanels.instructionsSaved': 'Instructions saved',
     'agentPanels.saveInstructions': 'Save instructions',
+    'agentPanels.groundingLabel': 'Answer business facts only from instructions and knowledge',
+    'agentPanels.groundingHint':
+      "Prices, delivery terms, policies, contact details, health information and links come only from these instructions and the agent's knowledge. When something is not there, the agent says so instead of guessing, and links that are not in its sources are removed from replies. Turn off for persona agents that should talk from general knowledge.",
     'agentPanels.webIndexDescription':
       "Crawl a website and store content as embeddings under this agent's RAG namespace.",
     'agentPanels.failedToLoadUrlsPrefix': 'Failed to load indexed URLs:',
@@ -743,6 +746,9 @@ export const aiWidget = {
     'agentPanels.templatesLabel': 'Modèles :',
     'agentPanels.instructionsSaved': 'Instructions enregistrées',
     'agentPanels.saveInstructions': 'Enregistrer les instructions',
+    'agentPanels.groundingLabel': "Faits sur l'activité uniquement à partir des instructions et des connaissances",
+    'agentPanels.groundingHint':
+      "Les prix, conditions de livraison, politiques, coordonnées, informations de santé et liens proviennent uniquement de ces instructions et des connaissances de l'agent. Si une information n'y figure pas, l'agent le dit au lieu de deviner, et les liens absents de ses sources sont retirés des réponses. À désactiver pour les agents de personnage qui doivent s'appuyer sur des connaissances générales.",
     'agentPanels.webIndexDescription':
       "Explorez un site web et stockez son contenu sous forme d'embeddings dans l'espace RAG de cet agent.",
     'agentPanels.failedToLoadUrlsPrefix':
@@ -1258,6 +1264,9 @@ export const aiWidget = {
     'agentPanels.templatesLabel': 'Plantillas:',
     'agentPanels.instructionsSaved': 'Instrucciones guardadas',
     'agentPanels.saveInstructions': 'Guardar instrucciones',
+    'agentPanels.groundingLabel': 'Datos del negocio solo a partir de las instrucciones y el conocimiento',
+    'agentPanels.groundingHint':
+      'Los precios, condiciones de envío, políticas, datos de contacto, información de salud y enlaces provienen solo de estas instrucciones y del conocimiento del agente. Si algo no está ahí, el agente lo dice en lugar de adivinar, y los enlaces que no están en sus fuentes se eliminan de las respuestas. Desactívalo para agentes de personaje que deben hablar desde el conocimiento general.',
     'agentPanels.webIndexDescription':
       'Rastrea un sitio web y almacena su contenido como embeddings en el espacio RAG de este agente.',
     'agentPanels.failedToLoadUrlsPrefix':
