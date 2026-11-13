@@ -1,13 +1,17 @@
 import { useSyncExternalStore } from 'react';
 import { useTranslation } from '../i18n/useTranslation';
+import { isNoticeVisible, subscribeNoticeVisible } from '../utils/serverNotice';
 import { isReconnecting, subscribeReconnecting } from '../utils/serverRestart';
 
 // Shown while a request waits for the server to come back (a restart from
-// Server settings, an update). Non-blocking: the page stays usable.
+// Server settings, an update). Non-blocking: the page stays usable. Hidden
+// while the maintenance notice is on screen, which already says the server
+// is restarting (the two never stack).
 export function ReconnectingBanner() {
   const { t } = useTranslation();
   const reconnecting = useSyncExternalStore(subscribeReconnecting, isReconnecting, () => false);
-  if (!reconnecting) return null;
+  const noticeShown = useSyncExternalStore(subscribeNoticeVisible, isNoticeVisible, () => false);
+  if (!reconnecting || noticeShown) return null;
   return (
     <div
       role="status"
