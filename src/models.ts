@@ -318,6 +318,10 @@ export interface ModelAgent {
   greetingMessage: string;
   isRAG: boolean;
   ragTags: string[];
+  // 'on' (default): business facts only from the instructions and knowledge;
+  // links not in them are removed. 'off' for persona agents. Absent from
+  // older APIs, which means 'on'.
+  grounding?: 'on' | 'off';
   // Directory categories, a fixed list (lib/agentCategories.ts).
   categories?: string[];
   soulMd: string;

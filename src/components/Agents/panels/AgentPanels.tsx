@@ -276,8 +276,43 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   const { t } = useTranslation();
   const [prompt, setPrompt] = useState(agent.prompt);
   useEffect(() => setPrompt(agent.prompt), [agent.id]);
+  // Grounding: business facts (prices, delivery, policies, links) only from
+  // these instructions and the agent's knowledge. On unless turned off; older
+  // APIs do not send the field, which also means on.
+  const [grounded, setGrounded] = useState(agent.grounding !== 'off');
+  const [groundingBusy, setGroundingBusy] = useState(false);
+  useEffect(() => setGrounded(agent.grounding !== 'off'), [agent.id]);
+
+  async function toggleGrounding(next: boolean) {
+    setGroundingBusy(true);
+    setGrounded(next);
+    try {
+      await actionUpdateAgent(agent.id, { grounding: next ? 'on' : 'off' });
+      toast.success(t('agentPanels.saved'));
+    } catch (e) {
+      setGrounded(!next);
+      const err = e as { response?: { data?: { error?: string } }; message?: string };
+      toast.error(`${t('agentPanels.saveFailedPrefix')} ${err?.response?.data?.error || err?.message}`);
+    } finally {
+      setGroundingBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-3 max-w-3xl">
+      <label className="flex items-start gap-2">
+        <input
+          type="checkbox"
+          className="mt-1"
+          disabled={isDisabled || groundingBusy}
+          checked={grounded}
+          onChange={(e) => toggleGrounding(e.target.checked)}
+        />
+        <span>
+          <span className="block text-sm font-semibold text-gray-700">{t('agentPanels.groundingLabel')}</span>
+          <span className="block text-xs text-gray-500">{t('agentPanels.groundingHint')}</span>
+        </span>
+      </label>
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-sm text-gray-500">{t('agentPanels.templatesLabel')}</span>
         {agentPromptTemplates.map((t) => (
