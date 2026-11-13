@@ -2,10 +2,11 @@ import type { AxiosError } from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { httpV2 } from '../http';
+import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { Segmented } from '../components/AIWidget/appearance/Fields';
 import { ChatComponent } from './AppSettings/ChatComponent';
 import { useTranslation } from '../i18n/useTranslation';
-import type { ServerModule, ServerSetting, ServerSettingsResponse, ServerSettingsTab, ServerStatus } from '../models';
+import type { RestartRequestResponse, RestartScope, ServerModule, ServerSetting, ServerSettingsResponse, ServerSettingsTab, ServerStatus } from '../models';
 import { useAppStore } from '../store/useAppStore';
 
 // Server settings page (super admins): install-wide values with their source
@@ -30,6 +31,9 @@ function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+const ALL_SCOPES: RestartScope[] = ['api', 'jobs', 'ai'];
+const RESTART_POLL_MS = 3000;
+const RESTART_TIMEOUT_MS = 3 * 60 * 1000;
 const GB = 1024 * 1024 * 1024;
 const gb = (bytes: number) => (bytes >= 10 * GB ? Math.round(bytes / GB) : Math.round((bytes / GB) * 10) / 10);
 
@@ -65,6 +69,14 @@ export default function AdminServerSettings() {
   const [status, setStatus] = useState<ServerStatus | 'unsupported' | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  // Restart from the admin panel: the dialog's scopes, then the request being
+  // waited for until every named process reports a start after it.
+  const [confirmScopes, setConfirmScopes] = useState<RestartScope[] | 'all' | null>(null);
+  const [restart, setRestart] = useState<
+    | { phase: 'running'; request: RestartRequestResponse }
+    | { phase: 'done' | 'timeout' | 'error'; text?: string }
+    | null
+  >(null);
   // Name the one configuration file once the API says how the server was
   // installed (compose bundle .env or deploy.yml); generic text until then.
   const installKind = data?.installKind || data?.info?.installKind;
@@ -133,6 +145,50 @@ export default function AdminServerSettings() {
   useEffect(() => {
     if (activeTab === 'system' && status === null && !statusLoading && !statusError) loadStatus();
   }, [activeTab, status, statusLoading, statusError, loadStatus]);
+
+  // POST the restart, then poll the status until every requested process has
+  // started after the request (failed polls are expected while the API is
+  // down; the HTTP client waits those out).
+  const startRestart = async (scopes: RestartScope[] | 'all') => {
+    setConfirmScopes(null);
+    let request: RestartRequestResponse;
+    try {
+      const r = await httpV2.post<RestartRequestResponse>('/server-settings/restart', { scopes });
+      request = r.data;
+    } catch (e) {
+      const err = e as ApiErr;
+      setRestart({ phase: 'error', text: err.response?.data?.error || err.message });
+      return;
+    }
+    setRestart({ phase: 'running', request });
+    const askedAt = new Date(request.at).getTime();
+    const deadline = Date.now() + RESTART_TIMEOUT_MS;
+    const poll = async () => {
+      if (Date.now() > deadline) {
+        setRestart({ phase: 'timeout' });
+        return;
+      }
+      try {
+        const r = await httpV2.get<ServerStatus>('/server-settings/status');
+        const processes = r.data.uptime?.processes || {};
+        const done = request.scopes.every((sc) => {
+          const startedAt = processes[sc];
+          return Boolean(startedAt) && new Date(startedAt as string).getTime() > askedAt;
+        });
+        if (done) {
+          setStatus(r.data);
+          setRestart({ phase: 'done' });
+          load();
+          return;
+        }
+      } catch {
+        // The API is restarting; try again on the next tick.
+      }
+      setTimeout(poll, RESTART_POLL_MS);
+    };
+    setTimeout(poll, RESTART_POLL_MS);
+  };
+  const restartRunning = restart?.phase === 'running';
 
   const selectTab = (tab: ServerSettingsTab) => {
     const next = new URLSearchParams(searchParams);
@@ -485,6 +541,28 @@ export default function AdminServerSettings() {
     if (s < 86400) return t('serverSettings.status.hoursAgo').replace('{n}', String(Math.round(s / 3600)));
     return t('serverSettings.status.daysAgo').replace('{n}', String(Math.round(s / 86400)));
   };
+  // "45 min", "3 h", "3 days 4 h"
+  const duration = (seconds: number | null | undefined) => {
+    if (seconds === null || seconds === undefined || !Number.isFinite(seconds) || seconds < 0) return null;
+    const m = Math.floor(seconds / 60);
+    if (m < 60) return t('serverSettings.uptime.minutes').replace('{n}', String(Math.max(1, m)));
+    const h = Math.floor(m / 60);
+    if (h < 48) return t('serverSettings.uptime.hours').replace('{n}', String(h));
+    const d = Math.floor(h / 24);
+    const rest = h % 24;
+    return rest ? t('serverSettings.uptime.daysHours').replace('{d}', String(d)).replace('{h}', String(rest)) : t('serverSettings.uptime.days').replace('{n}', String(d));
+  };
+  const sinceIso = (iso: string | null | undefined) => (iso ? duration((Date.now() - new Date(iso).getTime()) / 1000) : null);
+  // Uptime of one row of the services list: processes from their start, the
+  // data services from the seconds the API read from them.
+  const serviceUptime = (key: string, st: ServerStatus) => {
+    const up = st.uptime;
+    if (!up) return null;
+    if (key === 'api' || key === 'jobs' || key === 'ai') return sinceIso(up.processes?.[key]);
+    if (key === 'mongo' || key === 'redis' || key === 'xmpp') return duration(up.services?.[key]);
+    return null;
+  };
+  const scopesLabel = (scopes: RestartScope[]) => scopes.map(scopeName).join(', ');
   const dot = (ok: boolean | null) => (
     <span className={cn('inline-block h-2.5 w-2.5 rounded-full shrink-0', ok === true ? 'bg-green-500' : ok === false ? 'bg-red-500' : 'bg-gray-300')} aria-hidden />
   );
@@ -500,6 +578,11 @@ export default function AdminServerSettings() {
           <button type="button" onClick={loadStatus} disabled={statusLoading} className="text-sm text-brand-500 underline disabled:opacity-50">
             {statusLoading ? t('serverSettings.status.loading') : t('serverSettings.status.refresh')}
           </button>
+          {canEdit && st && (
+            <button type="button" onClick={() => setConfirmScopes(st.restart?.pendingScopes?.length ? st.restart.pendingScopes : 'all')} disabled={restartRunning} className="text-sm text-brand-500 underline disabled:opacity-50">
+              {t('serverSettings.restart.services')}
+            </button>
+          )}
         </div>
         {statusError && <p className="mt-2 text-sm text-red-700">{t('serverSettings.status.failed').replace('{error}', statusError)}</p>}
         {!st && !statusError && <p className="mt-2 text-sm text-gray-500">{t('serverSettings.status.loading')}</p>}
@@ -510,6 +593,9 @@ export default function AdminServerSettings() {
                 {t('serverSettings.status.version').replace('{build}', st.version.build || '?')}
                 {st.version.installKind && <span className="text-gray-500"> ({st.version.installKind})</span>}
               </div>
+              {duration(st.uptime?.serverSeconds) && (
+                <div className="text-gray-600">{t('serverSettings.uptime.server').replace('{d}', duration(st.uptime?.serverSeconds) || '')}</div>
+              )}
               {st.update.checked && st.update.available && (
                 <div className="mt-2 rounded-xl bg-amber-50 border border-amber-200 p-3 min-w-0">
                   <div className="text-amber-900 font-semibold">{t('serverSettings.status.updateAvailable').replace('{latest}', st.update.latest || '')}</div>
@@ -540,6 +626,9 @@ export default function AdminServerSettings() {
                     <li key={s.key} className="flex items-center gap-2 min-w-0">
                       {dot(s.ok)}
                       <span className="text-gray-800 shrink-0">{s.label}</span>
+                      {serviceUptime(s.key, st) && (
+                        <span className="text-gray-400 shrink-0">{t('serverSettings.uptime.up').replace('{d}', serviceUptime(s.key, st) || '')}</span>
+                      )}
                       {s.detail && <span className="text-gray-500 truncate min-w-0">{s.detail}</span>}
                     </li>
                   ))}
@@ -643,10 +732,54 @@ export default function AdminServerSettings() {
           <p className="mb-4 text-sm text-gray-700">{t(`serverSettings.intro${kind}`)}</p>
           {!canEdit && <p className="mb-6 text-sm text-gray-500">{t('serverSettings.readOnly')}</p>}
 
-          {pendingScopes.length > 0 && (
-            <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-300 p-4 text-sm">
-              {t(`serverSettings.restartBanner${kind}`).replace('{scopes}', pendingScopes.map(scopeName).join(', '))}
+          {pendingScopes.length > 0 && !restartRunning && (
+            <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-300 p-4 text-sm flex flex-col sm:flex-row sm:items-center gap-3">
+              <span className="flex-1 min-w-0">{t(`serverSettings.restartBanner${kind}`).replace('{scopes}', pendingScopes.map(scopeName).join(', '))}</span>
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmScopes(pendingScopes.filter((x): x is RestartScope => (ALL_SCOPES as string[]).includes(x)))}
+                  className="shrink-0 self-start sm:self-auto rounded-xl bg-brand-500 hover:bg-brand-darker text-white px-4 py-2 text-sm"
+                >
+                  {t('serverSettings.restart.now')}
+                </button>
+              )}
             </div>
+          )}
+
+          {restart && (
+            <div
+              role="status"
+              className={cn(
+                'mb-6 rounded-xl border p-4 text-sm',
+                restart.phase === 'running' && 'bg-blue-50 border-blue-200 text-blue-900',
+                restart.phase === 'done' && 'bg-green-50 border-green-200 text-green-900',
+                (restart.phase === 'timeout' || restart.phase === 'error') && 'bg-red-50 border-red-200 text-red-900',
+              )}
+            >
+              {restart.phase === 'running' && t('serverSettings.restart.running').replace('{scopes}', scopesLabel(restart.request.scopes))}
+              {restart.phase === 'done' && t('serverSettings.restart.done')}
+              {restart.phase === 'timeout' && t('serverSettings.restart.timeout')}
+              {restart.phase === 'error' && t('serverSettings.restart.failed').replace('{error}', restart.text || '')}
+              {restart.phase !== 'running' && (
+                <button type="button" onClick={() => setRestart(null)} className="ml-3 underline">
+                  {t('serverSettings.restart.dismiss')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {confirmScopes && (
+            <ConfirmModal
+              title={t('serverSettings.restart.confirmTitle')}
+              message={t('serverSettings.restart.confirmMessage').replace(
+                '{scopes}',
+                scopesLabel(confirmScopes === 'all' ? ALL_SCOPES.filter((x) => x !== 'ai' || (data?.modules || []).some((m) => m.key === 'ai' && m.installed !== false)) : confirmScopes),
+              )}
+              confirmLabel={t('serverSettings.restart.confirm')}
+              onConfirm={() => startRestart(confirmScopes)}
+              onCancel={() => setConfirmScopes(null)}
+            />
           )}
 
           {!data && <p className="text-sm text-gray-500">{t('serverSettings.loading')}</p>}

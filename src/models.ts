@@ -498,6 +498,24 @@ export interface ServerStatus {
   certificates: Array<{ host: string; validTo: string | null; daysLeft: number | null; error?: string | null }>;
   license: { state: string | null; tier: string | null; lastContactAt: string | null; lastContactStatus: string | null };
   checkedAt: string;
+  // How long the server and each part have been up (older APIs omit it).
+  uptime?: {
+    serverSeconds: number | null;
+    processes: Partial<Record<RestartScope, string | null>>;
+    services: Partial<Record<'mongo' | 'redis' | 'xmpp', number | null>>;
+  };
+  // The last restart asked from the admin panel, and what still waits for one.
+  restart?: {
+    lastRequest: { id: string; at: string; by?: string | null; scopes: RestartScope[] } | null;
+    pendingScopes: RestartScope[];
+  };
+}
+// The processes the admin panel can restart (POST /v2/server-settings/restart).
+export type RestartScope = 'api' | 'jobs' | 'ai';
+export interface RestartRequestResponse {
+  id: string;
+  scopes: RestartScope[];
+  at: string;
 }
 
 // An Enterprise module as the API sees it: installed = its service is part of
