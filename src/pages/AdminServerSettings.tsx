@@ -898,7 +898,7 @@ export default function AdminServerSettings() {
                 <div className="mt-2 rounded-xl bg-amber-50 border border-amber-200 p-3 min-w-0">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                     <div className="text-amber-900 font-semibold mr-auto">{t('serverSettings.status.updateAvailable').replace('{latest}', st.update.latest || '')}</div>
-                    {canUpdateNow(st) && (
+                    {canUpdateNow(st) && !jobActive && (
                       <button
                         type="button"
                         onClick={() => openUpdate('update', st.update.latest || '')}

@@ -34,7 +34,7 @@ function writeDismissed(ids: string[]) {
 }
 
 // A scheduled restart or update, announced to every signed-in user (mounted
-// once, in AppLayout). Polls the public GET /v2/server-notice every 60 s,
+// once, in AppLayout). Polls the public GET /v2/server-notice every 30 s,
 // every 10 s while a notice exists, and right after the HTTP retry layer
 // reconnects. While shown it stands in for the "Reconnecting" banner.
 export function ServerNoticeBanner() {

@@ -10,8 +10,9 @@ export interface NoticeLike {
   target?: string | null;
 }
 
-// Poll every 60 s, every 10 s while a notice exists.
-export const NOTICE_POLL_MS = 60_000;
+// Poll every 30 s (a restart "in 1 minute" reaches every session in time),
+// every 10 s while a notice exists.
+export const NOTICE_POLL_MS = 30_000;
 export const NOTICE_ACTIVE_POLL_MS = 10_000;
 // An API without the endpoint is asked again rarely (and after a reconnect).
 export const NOTICE_UNSUPPORTED_POLL_MS = 10 * 60_000;
