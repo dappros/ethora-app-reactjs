@@ -33,8 +33,18 @@ function cn(...parts: Array<string | false | null | undefined>) {
 const GB = 1024 * 1024 * 1024;
 const gb = (bytes: number) => (bytes >= 10 * GB ? Math.round(bytes / GB) : Math.round((bytes / GB) * 10) / 10);
 
+// "Ethora Core, not registered" rather than the raw "core, unlicensed".
+type Translate = (key: string) => string;
+const licenseLabelWith = (t: Translate) => (tier?: string | null, state?: string | null) => {
+  const key = `serverSettings.status.licenseState.${tier || 'unknown'}.${state || 'unknown'}`;
+  const known = t(key);
+  if (known && known !== key) return known;
+  return [tier, state].filter(Boolean).join(', ') || '?';
+};
+
 export default function AdminServerSettings() {
   const { t } = useTranslation();
+  const licenseLabel = licenseLabelWith(t);
   const currentUser = useAppStore((s) => s.currentUser);
   // The install's own app: the chat customized on the Chats tab is its web chat.
   const baseApp = useAppStore((s) => s.currentApp);
@@ -576,7 +586,7 @@ export default function AdminServerSettings() {
             <div>
               <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('serverSettings.status.license')}</div>
               <div className="text-gray-800">
-                {[st.license.tier, st.license.state].filter(Boolean).join(', ') || '?'}
+                {licenseLabel(st.license.tier, st.license.state)}
                 <span className="text-gray-500">
                   {' '}{t('serverSettings.status.lastContact').replace('{when}', relTime(st.license.lastContactAt))}
                   {st.license.lastContactStatus && st.license.lastContactAt ? ` (${st.license.lastContactStatus})` : ''}
