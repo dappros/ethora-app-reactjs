@@ -492,7 +492,15 @@ export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'ai' | 'email' | 'sy
 // Read-only health of the install (GET /v2/server-settings/status, super admins).
 export interface ServerStatus {
   version: { build: string | null; commit: string | null; line: string | null; installKind: string | null };
-  update: { checked: boolean; latest: string | null; available: boolean; command: string | null; reason?: string | null };
+  update: {
+    checked: boolean;
+    latest: string | null;
+    available: boolean;
+    command: string | null;
+    reason?: string | null;
+    // The in-place updater of a compose install (older APIs omit it).
+    updater?: { available: boolean };
+  };
   services: Array<{ key: string; label: string; ok: boolean | null; detail?: string | null }>;
   disk: { totalBytes: number; freeBytes: number } | null;
   certificates: Array<{ host: string; validTo: string | null; daysLeft: number | null; error?: string | null }>;
@@ -506,7 +514,7 @@ export interface ServerStatus {
   };
   // The last restart asked from the admin panel, and what still waits for one.
   restart?: {
-    lastRequest: { id: string; at: string; by?: string | null; scopes: RestartScope[] } | null;
+    lastRequest: { id: string; at: string; by?: string | null; scopes: RestartScope[]; notBefore?: string | null } | null;
     pendingScopes: RestartScope[];
   };
 }
@@ -516,6 +524,56 @@ export interface RestartRequestResponse {
   id: string;
   scopes: RestartScope[];
   at: string;
+  // A scheduled restart (delaySeconds > 0) acts from this time on.
+  notBefore?: string | null;
+}
+
+// The maintenance notice every user sees (GET /v2/server-notice, public).
+export interface ServerNotice {
+  id: string;
+  kind: 'restart' | 'update' | 'rollback';
+  startsAt: string;
+  expiresAt: string;
+  target: string | null;
+  downtimeSeconds?: number;
+}
+export interface ServerNoticeResponse {
+  notice: ServerNotice | null;
+}
+
+// The compose bundle's updater (its status as GET /v2/server-settings/update returns it).
+export type UpdaterStepName = 'bundle' | 'configure' | 'pull' | 'waiting' | 'restart' | 'check' | 'done';
+export type UpdaterStepState = 'pending' | 'running' | 'done' | 'skipped' | 'failed';
+export interface UpdaterJob {
+  id: string;
+  action: 'update' | 'rollback';
+  target: string;
+  from: string | null;
+  state: 'scheduled' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  step: UpdaterStepName | null;
+  steps: Array<{ name: UpdaterStepName; state: UpdaterStepState }>;
+  notBefore: string | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  error: string | null;
+  log: string[];
+}
+export interface UpdaterStatus {
+  ok: boolean;
+  line: string | null;
+  tag: string | null;
+  running: string | null;
+  previous: string | null;
+  bundle?: { commit: string | null; git: boolean };
+  job: UpdaterJob | null;
+}
+export interface ServerUpdateInfo {
+  available: boolean;
+  reason: null | 'not_configured' | 'unreachable';
+  current: string | null;
+  latest: string | null;
+  command: string | null;
+  updater: UpdaterStatus | null;
 }
 
 // An Enterprise module as the API sees it: installed = its service is part of

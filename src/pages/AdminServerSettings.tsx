@@ -1,12 +1,23 @@
 import type { AxiosError } from 'axios';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { httpV2 } from '../http';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { Segmented } from '../components/AIWidget/appearance/Fields';
 import { ChatComponent } from './AppSettings/ChatComponent';
 import { useTranslation } from '../i18n/useTranslation';
-import type { RestartRequestResponse, RestartScope, ServerModule, ServerSetting, ServerSettingsResponse, ServerSettingsTab, ServerStatus } from '../models';
+import type {
+  RestartRequestResponse,
+  RestartScope,
+  ServerModule,
+  ServerSetting,
+  ServerSettingsResponse,
+  ServerSettingsTab,
+  ServerStatus,
+  ServerUpdateInfo,
+  UpdaterJob,
+} from '../models';
+import { canCancelJob, fill, formatCountdown, isJobActive } from '../utils/serverNotice';
 import { useAppStore } from '../store/useAppStore';
 
 // Server settings page (super admins): install-wide values with their source
@@ -34,6 +45,21 @@ function cn(...parts: Array<string | false | null | undefined>) {
 const ALL_SCOPES: RestartScope[] = ['api', 'jobs', 'ai'];
 const RESTART_POLL_MS = 3000;
 const RESTART_TIMEOUT_MS = 3 * 60 * 1000;
+// "When" of a restart / update / rollback: now or a few minutes ahead, so
+// every user sees the notice before the server goes down.
+const WHEN_SECONDS = [0, 60, 300, 900] as const;
+type WhenSeconds = (typeof WHEN_SECONDS)[number];
+const WHEN_KEY: Record<WhenSeconds, string> = { 0: 'now', 60: 'in1', 300: 'in5', 900: 'in15' };
+const UPDATE_POLL_MS = 3000;
+const TARGET_RE = /^\d{4}\.\d+$/;
+const HIDDEN_JOB_KEY = 'ethora.serverSettings.hiddenUpdateJob';
+const readHiddenJob = () => {
+  try {
+    return localStorage.getItem(HIDDEN_JOB_KEY);
+  } catch {
+    return null;
+  }
+};
 const GB = 1024 * 1024 * 1024;
 const gb = (bytes: number) => (bytes >= 10 * GB ? Math.round(bytes / GB) : Math.round((bytes / GB) * 10) / 10);
 
@@ -73,10 +99,28 @@ export default function AdminServerSettings() {
   // waited for until every named process reports a start after it.
   const [confirmScopes, setConfirmScopes] = useState<RestartScope[] | 'all' | null>(null);
   const [restart, setRestart] = useState<
-    | { phase: 'running'; request: RestartRequestResponse }
-    | { phase: 'done' | 'timeout' | 'error'; text?: string }
+    | { phase: 'scheduled' | 'running'; request: RestartRequestResponse }
+    | { phase: 'done' | 'timeout' | 'error' | 'cancelled'; text?: string }
     | null
   >(null);
+  const [restartWhen, setRestartWhen] = useState<WhenSeconds>(0);
+  const [restartCancelError, setRestartCancelError] = useState<string | null>(null);
+  // Bumped to stop the timers of a restart being watched (cancel, unmount);
+  // `seen` keeps a scheduled request found in the status from being picked
+  // up twice.
+  const restartBox = useRef<{ gen: number; seen: Set<string> }>({ gen: 0, seen: new Set() });
+  // Update from the admin panel (compose installs with the updater).
+  const [update, setUpdate] = useState<ServerUpdateInfo | null>(null);
+  const [updatePollTick, setUpdatePollTick] = useState(0);
+  const [updateDialog, setUpdateDialog] = useState<'update' | 'rollback' | null>(null);
+  const [updateTarget, setUpdateTarget] = useState('');
+  const [updateWhen, setUpdateWhen] = useState<WhenSeconds>(0);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [jobError, setJobError] = useState<string | null>(null);
+  const [hiddenJob, setHiddenJob] = useState<string | null>(readHiddenJob);
+  // Clock for the countdowns.
+  const [now, setNow] = useState(() => Date.now());
   // Name the one configuration file once the API says how the server was
   // installed (compose bundle .env or deploy.yml); generic text until then.
   const installKind = data?.installKind || data?.info?.installKind;
@@ -146,49 +190,215 @@ export default function AdminServerSettings() {
     if (activeTab === 'system' && status === null && !statusLoading && !statusError) loadStatus();
   }, [activeTab, status, statusLoading, statusError, loadStatus]);
 
-  // POST the restart, then poll the status until every requested process has
-  // started after the request (failed polls are expected while the API is
-  // down; the HTTP client waits those out).
+  // Wait for a restart request: until its notBefore (a scheduled restart),
+  // then poll the status until every requested process has started after
+  // it (failed polls are expected while the API is down; the HTTP client
+  // waits those out).
+  const watchRestart = useCallback(
+    (request: RestartRequestResponse) => {
+      const box = restartBox.current;
+      box.gen += 1;
+      const gen = box.gen;
+      box.seen.add(request.id);
+      const notBefore = request.notBefore ? Date.parse(request.notBefore) : NaN;
+      const askedAt = Math.max(Date.parse(request.at) || 0, Number.isFinite(notBefore) ? notBefore : 0);
+      const startPolling = () => {
+        if (gen !== box.gen) return;
+        setRestart({ phase: 'running', request });
+        const deadline = Date.now() + RESTART_TIMEOUT_MS;
+        const poll = async () => {
+          if (gen !== box.gen) return;
+          if (Date.now() > deadline) {
+            setRestart({ phase: 'timeout' });
+            return;
+          }
+          try {
+            const r = await httpV2.get<ServerStatus>('/server-settings/status');
+            if (gen !== box.gen) return;
+            const processes = r.data.uptime?.processes || {};
+            const done = request.scopes.every((sc) => {
+              const startedAt = processes[sc];
+              return Boolean(startedAt) && new Date(startedAt as string).getTime() > askedAt;
+            });
+            if (done) {
+              setStatus(r.data);
+              setRestart({ phase: 'done' });
+              load();
+              return;
+            }
+          } catch {
+            // The API is restarting; try again on the next tick.
+          }
+          setTimeout(poll, RESTART_POLL_MS);
+        };
+        setTimeout(poll, RESTART_POLL_MS);
+      };
+      const wait = Number.isFinite(notBefore) ? notBefore - Date.now() : 0;
+      if (wait > 0) {
+        setRestart({ phase: 'scheduled', request });
+        setTimeout(startPolling, wait);
+      } else {
+        startPolling();
+      }
+    },
+    [load],
+  );
+  // Leaving the page stops the timers.
+  useEffect(() => {
+    const box = restartBox.current;
+    return () => {
+      box.gen += 1;
+    };
+  }, []);
+
+  const openRestart = (scopes: RestartScope[] | 'all') => {
+    setRestartWhen(0);
+    setConfirmScopes(scopes);
+  };
+
   const startRestart = async (scopes: RestartScope[] | 'all') => {
     setConfirmScopes(null);
-    let request: RestartRequestResponse;
+    setRestartCancelError(null);
     try {
-      const r = await httpV2.post<RestartRequestResponse>('/server-settings/restart', { scopes });
-      request = r.data;
+      const r = await httpV2.post<RestartRequestResponse>('/server-settings/restart', restartWhen ? { scopes, delaySeconds: restartWhen } : { scopes });
+      watchRestart(r.data);
     } catch (e) {
       const err = e as ApiErr;
       setRestart({ phase: 'error', text: err.response?.data?.error || err.message });
+    }
+  };
+
+  const cancelRestart = async () => {
+    setRestartCancelError(null);
+    try {
+      await httpV2.post('/server-settings/restart/cancel');
+      restartBox.current.gen += 1;
+      setRestart({ phase: 'cancelled' });
+      load();
+      loadStatus();
+    } catch (e) {
+      const err = e as ApiErr;
+      if (err.response?.status === 409 && err.response.data?.code === 'TOO_LATE') setRestartCancelError(t('serverSettings.restart.tooLate'));
+      else setRestartCancelError(fill(t('serverSettings.restart.cancelFailed'), { error: err.response?.data?.error || err.message }));
+    }
+  };
+  const restartRunning = restart?.phase === 'running' || restart?.phase === 'scheduled';
+
+  // A restart scheduled earlier (this admin on another visit, or another
+  // admin) shows its countdown and Cancel too.
+  useEffect(() => {
+    if (!status || status === 'unsupported' || restart) return;
+    const last = status.restart?.lastRequest;
+    if (!last?.notBefore || restartBox.current.seen.has(last.id)) return;
+    if (Date.parse(last.notBefore) > Date.now()) {
+      watchRestart({ id: last.id, scopes: last.scopes, at: last.at, notBefore: last.notBefore });
+    }
+  }, [status, restart, watchRestart]);
+
+  // ------------------------------------------------ update now --
+  const updaterAvailable = Boolean(status && status !== 'unsupported' && status.update.updater?.available);
+  const loadUpdate = useCallback(async () => {
+    try {
+      const r = await httpV2.get<ServerUpdateInfo>('/server-settings/update');
+      setUpdate(r.data);
+    } catch {
+      // Keep the last answer; the next poll tries again.
+    } finally {
+      setUpdatePollTick((n) => n + 1);
+    }
+  }, []);
+  useEffect(() => {
+    if (updaterAvailable && canEdit) loadUpdate();
+  }, [updaterAvailable, canEdit, loadUpdate]);
+  const job = update?.updater?.job ?? null;
+  const jobActive = isJobActive(job);
+  // Every 3 s while a job is scheduled or running. The API itself restarts
+  // mid-update; the HTTP client waits that out.
+  useEffect(() => {
+    if (!jobActive) return;
+    const id = setTimeout(loadUpdate, UPDATE_POLL_MS);
+    return () => clearTimeout(id);
+  }, [jobActive, updatePollTick, loadUpdate]);
+  // A job that just finished: the version, settings and status changed.
+  const wasJobActive = useRef(false);
+  useEffect(() => {
+    if (wasJobActive.current && !jobActive) {
+      load();
+      loadStatus();
+    }
+    wasJobActive.current = jobActive;
+  }, [jobActive, load, loadStatus]);
+
+  const ticking = restart?.phase === 'scheduled' || Boolean(jobActive && job?.notBefore);
+  useEffect(() => {
+    if (!ticking) return;
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [ticking]);
+
+  const apiErrorText = (err: ApiErr) => {
+    const code = err.response?.data?.code;
+    const known = code ? tr(`serverSettings.update.error.${code}`) : '';
+    return known || err.response?.data?.error || err.message;
+  };
+  const mergeJob = (next: UpdaterJob | undefined) => {
+    if (!next) return;
+    setUpdate((u) => (u && u.updater ? { ...u, updater: { ...u.updater, job: next } } : u));
+  };
+  const openUpdate = (kind: 'update' | 'rollback', target = '') => {
+    setUpdateTarget(target);
+    setUpdateWhen(0);
+    setUpdateError(null);
+    setUpdateDialog(kind);
+  };
+  const submitUpdate = async () => {
+    const kind = updateDialog;
+    if (!kind) return;
+    const target = updateTarget.trim();
+    if (kind === 'update' && !TARGET_RE.test(target)) {
+      setUpdateError(fill(t('serverSettings.update.invalidTarget'), { example: update?.latest || '2610.80' }));
       return;
     }
-    setRestart({ phase: 'running', request });
-    const askedAt = new Date(request.at).getTime();
-    const deadline = Date.now() + RESTART_TIMEOUT_MS;
-    const poll = async () => {
-      if (Date.now() > deadline) {
-        setRestart({ phase: 'timeout' });
-        return;
-      }
-      try {
-        const r = await httpV2.get<ServerStatus>('/server-settings/status');
-        const processes = r.data.uptime?.processes || {};
-        const done = request.scopes.every((sc) => {
-          const startedAt = processes[sc];
-          return Boolean(startedAt) && new Date(startedAt as string).getTime() > askedAt;
-        });
-        if (done) {
-          setStatus(r.data);
-          setRestart({ phase: 'done' });
-          load();
-          return;
-        }
-      } catch {
-        // The API is restarting; try again on the next tick.
-      }
-      setTimeout(poll, RESTART_POLL_MS);
-    };
-    setTimeout(poll, RESTART_POLL_MS);
+    setUpdateBusy(true);
+    setUpdateError(null);
+    setJobError(null);
+    try {
+      const delay = updateWhen ? { delaySeconds: updateWhen } : {};
+      const r =
+        kind === 'update'
+          ? await httpV2.post<{ job: UpdaterJob }>('/server-settings/update', { target, ...delay })
+          : await httpV2.post<{ job: UpdaterJob }>('/server-settings/update/rollback', delay);
+      mergeJob(r.data?.job);
+      setUpdateDialog(null);
+      loadUpdate();
+    } catch (e) {
+      setUpdateError(fill(t('serverSettings.update.requestFailed'), { error: apiErrorText(e as ApiErr) }));
+    } finally {
+      setUpdateBusy(false);
+    }
   };
-  const restartRunning = restart?.phase === 'running';
+  const cancelUpdate = async () => {
+    setUpdateBusy(true);
+    setJobError(null);
+    try {
+      const r = await httpV2.post<{ job: UpdaterJob }>('/server-settings/update/cancel');
+      mergeJob(r.data?.job);
+      loadUpdate();
+    } catch (e) {
+      setJobError(fill(t('serverSettings.update.requestFailed'), { error: apiErrorText(e as ApiErr) }));
+    } finally {
+      setUpdateBusy(false);
+    }
+  };
+  const hideJob = (id: string) => {
+    setHiddenJob(id);
+    try {
+      localStorage.setItem(HIDDEN_JOB_KEY, id);
+    } catch {
+      // Storage blocked: hidden until the page reloads.
+    }
+  };
 
   const selectTab = (tab: ServerSettingsTab) => {
     const next = new URLSearchParams(searchParams);
@@ -567,6 +777,94 @@ export default function AdminServerSettings() {
     <span className={cn('inline-block h-2.5 w-2.5 rounded-full shrink-0', ok === true ? 'bg-green-500' : ok === false ? 'bg-red-500' : 'bg-gray-300')} aria-hidden />
   );
 
+  // "Update now" instead of the command: an update is available and the
+  // install runs the updater.
+  const canUpdateNow = (st: ServerStatus) => canEdit && Boolean(st.update.available && st.update.updater?.available);
+
+  const whenPicker = (value: WhenSeconds, onChange: (v: WhenSeconds) => void) => (
+    <div className="mt-4 flex flex-col items-center gap-1">
+      <div className="text-xs text-gray-500">{t('serverSettings.when.label')}</div>
+      <Segmented<string>
+        ariaLabel={t('serverSettings.when.label')}
+        size="sm"
+        value={String(value)}
+        onChange={(v) => onChange(Number(v) as WhenSeconds)}
+        options={WHEN_SECONDS.map((sec) => ({ value: String(sec), label: t(`serverSettings.when.${WHEN_KEY[sec]}`) }))}
+      />
+    </div>
+  );
+
+  const stepDot = (state: string) =>
+    cn(
+      'inline-block h-2.5 w-2.5 rounded-full shrink-0',
+      state === 'done' && 'bg-green-500',
+      state === 'running' && 'bg-blue-500 animate-pulse',
+      state === 'failed' && 'bg-red-500',
+      (state === 'pending' || state === 'skipped') && 'bg-gray-300',
+    );
+
+  // Progress of an update / rollback, then its outcome.
+  const renderJob = (j: UpdaterJob) => {
+    const active = isJobActive(j);
+    const previous = update?.updater?.previous || null;
+    const notBefore = j.notBefore ? Date.parse(j.notBefore) : NaN;
+    const countdown = active && Number.isFinite(notBefore) && notBefore > now ? formatCountdown(notBefore - now) : null;
+    const canRollBack = canEdit && !active && (j.state === 'succeeded' || j.state === 'failed') && Boolean(previous) && previous !== j.target;
+    return (
+      <div
+        role="status"
+        className={cn(
+          'mt-3 rounded-xl border p-3 min-w-0',
+          active && 'bg-blue-50 border-blue-200 text-blue-900',
+          j.state === 'succeeded' && 'bg-green-50 border-green-200 text-green-900',
+          j.state === 'failed' && 'bg-red-50 border-red-200 text-red-900',
+          j.state === 'cancelled' && 'bg-gray-50 border-gray-200 text-gray-800',
+        )}
+      >
+        <div className="font-semibold">{fill(t(`serverSettings.update.title.${j.action}.${j.state}`), { target: j.target })}</div>
+        {j.state === 'failed' && j.error && <div className="mt-1">{j.error}</div>}
+        {countdown && <div className="mt-1 tabular-nums">{fill(t('serverSettings.update.restartsIn'), { countdown })}</div>}
+        {j.steps?.length > 0 && j.state !== 'cancelled' && (
+          <ul className="mt-2 space-y-1 text-gray-800">
+            {j.steps.map((stp) => (
+              <li key={stp.name} className={cn('flex items-center gap-2 min-w-0', stp.state === 'skipped' && 'text-gray-400')}>
+                <span className={stepDot(stp.state)} aria-hidden />
+                <span className="min-w-0">{tr(`serverSettings.update.step.${stp.name}`, stp.name)}</span>
+                <span className="text-xs text-gray-500">{tr(`serverSettings.update.stepState.${stp.state}`, stp.state)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <details className="mt-2" open={j.state === 'failed'}>
+          <summary className="cursor-pointer select-none text-xs text-gray-600">{t('serverSettings.update.log')}</summary>
+          {j.log?.length ? (
+            <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-gray-900 text-gray-100 p-3 text-xs font-mono whitespace-pre-wrap break-all">{j.log.join('\n')}</pre>
+          ) : (
+            <p className="mt-1 text-xs text-gray-500">{t('serverSettings.update.logEmpty')}</p>
+          )}
+        </details>
+        {jobError && <p className="mt-2 text-sm text-red-700">{jobError}</p>}
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {canEdit && canCancelJob(j) && (
+            <button type="button" onClick={cancelUpdate} disabled={updateBusy} className="rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50">
+              {t('serverSettings.update.cancel')}
+            </button>
+          )}
+          {canRollBack && (
+            <button type="button" onClick={() => openUpdate('rollback')} disabled={updateBusy || restartRunning} className="rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50">
+              {fill(t('serverSettings.update.rollback'), { previous: previous || '' })}
+            </button>
+          )}
+          {!active && (
+            <button type="button" onClick={() => hideJob(j.id)} className="text-sm underline">
+              {t('serverSettings.update.dismiss')}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderStatus = () => {
     if (status === 'unsupported') return null;
     const st = status;
@@ -579,7 +877,7 @@ export default function AdminServerSettings() {
             {statusLoading ? t('serverSettings.status.loading') : t('serverSettings.status.refresh')}
           </button>
           {canEdit && st && (
-            <button type="button" onClick={() => setConfirmScopes(st.restart?.pendingScopes?.length ? st.restart.pendingScopes : 'all')} disabled={restartRunning} className="text-sm text-brand-500 underline disabled:opacity-50">
+            <button type="button" onClick={() => openRestart(st.restart?.pendingScopes?.length ? st.restart.pendingScopes : 'all')} disabled={restartRunning} className="text-sm text-brand-500 underline disabled:opacity-50">
               {t('serverSettings.restart.services')}
             </button>
           )}
@@ -598,8 +896,20 @@ export default function AdminServerSettings() {
               )}
               {st.update.checked && st.update.available && (
                 <div className="mt-2 rounded-xl bg-amber-50 border border-amber-200 p-3 min-w-0">
-                  <div className="text-amber-900 font-semibold">{t('serverSettings.status.updateAvailable').replace('{latest}', st.update.latest || '')}</div>
-                  {st.update.command && (
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <div className="text-amber-900 font-semibold mr-auto">{t('serverSettings.status.updateAvailable').replace('{latest}', st.update.latest || '')}</div>
+                    {canUpdateNow(st) && !jobActive && (
+                      <button
+                        type="button"
+                        onClick={() => openUpdate('update', st.update.latest || '')}
+                        disabled={jobActive || restartRunning}
+                        className="shrink-0 rounded-xl bg-brand-500 hover:bg-brand-darker text-white px-4 py-2 text-sm disabled:opacity-50"
+                      >
+                        {t('serverSettings.update.now')}
+                      </button>
+                    )}
+                  </div>
+                  {st.update.command && !canUpdateNow(st) && (
                     <>
                       <div className="text-xs text-gray-600 mt-2 mb-1">{t('serverSettings.status.runOnServer')}</div>
                       <div className="flex items-stretch gap-2 min-w-0">
@@ -613,6 +923,7 @@ export default function AdminServerSettings() {
                 </div>
               )}
               {st.update.checked && !st.update.available && <div className="mt-1 text-green-700">{t('serverSettings.status.upToDate')}</div>}
+              {job && hiddenJob !== job.id && renderJob(job)}
               {!st.update.checked && (
                 <div className="mt-1 text-gray-500">{st.update.reason === 'offline' ? t('serverSettings.status.updateOff') : t('serverSettings.status.updateUnknown')}</div>
               )}
@@ -629,7 +940,8 @@ export default function AdminServerSettings() {
                       {serviceUptime(s.key, st) && (
                         <span className="text-gray-400 shrink-0">{t('serverSettings.uptime.up').replace('{d}', serviceUptime(s.key, st) || '')}</span>
                       )}
-                      {s.detail && <span className="text-gray-500 truncate min-w-0">{s.detail}</span>}
+                      {/* "started 1 min ago" repeats the uptime of a healthy process. */}
+                      {s.detail && !(s.ok === true && serviceUptime(s.key, st)) && <span className="text-gray-500 truncate min-w-0">{s.detail}</span>}
                     </li>
                   ))}
                 </ul>
@@ -738,7 +1050,7 @@ export default function AdminServerSettings() {
               {canEdit && (
                 <button
                   type="button"
-                  onClick={() => setConfirmScopes(pendingScopes.filter((x): x is RestartScope => (ALL_SCOPES as string[]).includes(x)))}
+                  onClick={() => openRestart(pendingScopes.filter((x): x is RestartScope => (ALL_SCOPES as string[]).includes(x)))}
                   className="shrink-0 self-start sm:self-auto rounded-xl bg-brand-500 hover:bg-brand-darker text-white px-4 py-2 text-sm"
                 >
                   {t('serverSettings.restart.now')}
@@ -752,16 +1064,32 @@ export default function AdminServerSettings() {
               role="status"
               className={cn(
                 'mb-6 rounded-xl border p-4 text-sm',
-                restart.phase === 'running' && 'bg-blue-50 border-blue-200 text-blue-900',
+                (restart.phase === 'running' || restart.phase === 'scheduled') && 'bg-blue-50 border-blue-200 text-blue-900',
+                restart.phase === 'cancelled' && 'bg-gray-50 border-gray-200 text-gray-800',
                 restart.phase === 'done' && 'bg-green-50 border-green-200 text-green-900',
                 (restart.phase === 'timeout' || restart.phase === 'error') && 'bg-red-50 border-red-200 text-red-900',
               )}
             >
+              {restart.phase === 'scheduled' && (
+                <span className="tabular-nums">
+                  {fill(t('serverSettings.restart.scheduled'), {
+                    scopes: scopesLabel(restart.request.scopes),
+                    countdown: formatCountdown((restart.request.notBefore ? Date.parse(restart.request.notBefore) : now) - now),
+                  })}
+                </span>
+              )}
+              {restart.phase === 'scheduled' && canEdit && (
+                <button type="button" onClick={cancelRestart} className="ml-3 underline">
+                  {t('serverSettings.restart.cancel')}
+                </button>
+              )}
+              {restart.phase === 'scheduled' && restartCancelError && <div className="mt-2 text-red-700">{restartCancelError}</div>}
               {restart.phase === 'running' && t('serverSettings.restart.running').replace('{scopes}', scopesLabel(restart.request.scopes))}
+              {restart.phase === 'cancelled' && t('serverSettings.restart.cancelled')}
               {restart.phase === 'done' && t('serverSettings.restart.done')}
               {restart.phase === 'timeout' && t('serverSettings.restart.timeout')}
               {restart.phase === 'error' && t('serverSettings.restart.failed').replace('{error}', restart.text || '')}
-              {restart.phase !== 'running' && (
+              {restart.phase !== 'running' && restart.phase !== 'scheduled' && (
                 <button type="button" onClick={() => setRestart(null)} className="ml-3 underline">
                   {t('serverSettings.restart.dismiss')}
                 </button>
@@ -772,13 +1100,56 @@ export default function AdminServerSettings() {
           {confirmScopes && (
             <ConfirmModal
               title={t('serverSettings.restart.confirmTitle')}
-              message={t('serverSettings.restart.confirmMessage').replace(
-                '{scopes}',
-                scopesLabel(confirmScopes === 'all' ? ALL_SCOPES.filter((x) => x !== 'ai' || (data?.modules || []).some((m) => m.key === 'ai' && m.installed !== false)) : confirmScopes),
-              )}
+              message={
+                <>
+                  {t('serverSettings.restart.confirmMessage').replace(
+                    '{scopes}',
+                    scopesLabel(confirmScopes === 'all' ? ALL_SCOPES.filter((x) => x !== 'ai' || (data?.modules || []).some((m) => m.key === 'ai' && m.installed !== false)) : confirmScopes),
+                  )}
+                  {whenPicker(restartWhen, setRestartWhen)}
+                </>
+              }
               confirmLabel={t('serverSettings.restart.confirm')}
               onConfirm={() => startRestart(confirmScopes)}
               onCancel={() => setConfirmScopes(null)}
+            />
+          )}
+
+          {updateDialog && (
+            <ConfirmModal
+              title={
+                updateDialog === 'update'
+                  ? t('serverSettings.update.confirmTitle')
+                  : fill(t('serverSettings.update.rollbackTitle'), { previous: update?.updater?.previous || '' })
+              }
+              message={
+                <>
+                  {updateDialog === 'update' ? (
+                    <>
+                      <label className="mb-4 flex flex-col items-center gap-1">
+                        <span className="text-xs text-gray-500">{t('serverSettings.update.target')}</span>
+                        <input
+                          type="text"
+                          value={updateTarget}
+                          onChange={(e) => setUpdateTarget(e.target.value)}
+                          disabled={updateBusy}
+                          spellCheck={false}
+                          className="w-40 rounded-xl border border-gray-300 p-2 text-center text-sm font-mono disabled:opacity-60"
+                        />
+                      </label>
+                      {t('serverSettings.update.confirmText')}
+                    </>
+                  ) : (
+                    fill(t('serverSettings.update.rollbackText'), { previous: update?.updater?.previous || '' })
+                  )}
+                  {whenPicker(updateWhen, setUpdateWhen)}
+                  {updateError && <div className="mt-4 text-red-700">{updateError}</div>}
+                </>
+              }
+              confirmLabel={updateDialog === 'update' ? t('serverSettings.update.confirm') : t('serverSettings.update.rollbackConfirm')}
+              busy={updateBusy}
+              onConfirm={submitUpdate}
+              onCancel={() => setUpdateDialog(null)}
             />
           )}
 

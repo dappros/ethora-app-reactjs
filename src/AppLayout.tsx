@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
 import { LicenseBanner } from './components/LicenseBanner';
 import { Loading } from './components/Loading';
+import { ServerNoticeBanner } from './components/ServerNoticeBanner';
 import { useAppStore } from './store/useAppStore';
 import { isReturnablePath, rememberReturnPath, signedOutEntryPath } from './utils/returnPath';
 
@@ -52,6 +53,7 @@ export default function AppLayout() {
             {/* router content — edge-to-edge on mobile (no grey inset between
                 the top bar and the chat panel); padded card on desktop. */}
             <div className="min-h-[calc(100vh-72px)] md:p-0 flex flex-col">
+              <ServerNoticeBanner />
               <LicenseBanner />
               <div className="flex-1 min-h-0">
                 <Outlet />
