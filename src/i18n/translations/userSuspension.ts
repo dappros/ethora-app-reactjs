@@ -76,6 +76,8 @@ export const userSuspension = {
     'userSuspension.toast.unsuspendFailedPrefix': 'Unsuspend failed:',
     'userSuspension.error.CANNOT_SUSPEND_SELF': 'You cannot suspend your own account.',
     'userSuspension.error.CANNOT_SUSPEND_OWNER': 'The app owner cannot be suspended.',
+    'userSuspension.error.CANNOT_SUSPEND_PRIVILEGED': 'You can only suspend users with a lower access level than yours.',
+    'userSuspension.error.CANNOT_UNSUSPEND_PRIVILEGED': 'This suspension was set by a higher access level and can only be lifted from there.',
     'userSuspension.error.USER_INVALID_STATE': 'Archived or deleted users cannot be suspended.',
     'userSuspension.error.USER_NOT_FOUND': 'User not found.',
 

@@ -20,6 +20,8 @@ import { IconCheckbox } from '../components/Icons/IconCheckbox';
 import { IconDelete } from '../components/Icons/IconDelete';
 import { IconEdit } from '../components/Icons/IconEdit';
 import { IconKey } from '../components/Icons/IconKey';
+import { IconBan } from '../components/Icons/IconBan';
+import { IconUnban } from '../components/Icons/IconUnban';
 import {
   getExportCsv,
   httpArchiveUsers,
@@ -151,6 +153,23 @@ export default function AppUsers() {
   const apps = useAppStore((s) => s.apps);
   const currentApp = apps.find((a) => a._id === appId);
   const canManagePlatformAccess = currentUser?.isSuperAdmin?.write === true && currentApp?.isBaseApp === true;
+
+  // Suspension follows access levels (member < admin < owner < superadmin):
+  // only accounts strictly below the current user's level can be suspended,
+  // and a suspension can be lifted only from the level that set it or above.
+  // The server enforces the same rules; this only hides actions that would
+  // be refused.
+  const SUSPEND_RANK: Record<string, number> = { member: 1, admin: 2, owner: 3, superadmin: 4 };
+  const myLevel = currentUser?.isSuperAdmin?.read || currentUser?.isSuperAdmin?.write
+    ? SUSPEND_RANK.superadmin
+    : currentApp?.creatorId && currentApp.creatorId === currentUser?._id
+      ? SUSPEND_RANK.owner
+      : SUSPEND_RANK.admin;
+  const levelOf = (u: ModelAppUser) =>
+    u.isSuperAdmin?.read || u.isSuperAdmin?.write ? SUSPEND_RANK.superadmin : SUSPEND_RANK[u.role || 'member'] || 1;
+  const canSuspend = (u: ModelAppUser) => u._id !== currentUser?._id && levelOf(u) < myLevel;
+  const canUnsuspend = (u: ModelAppUser) =>
+    canSuspend(u) && (SUSPEND_RANK[u.suspension?.suspendedByRole || ''] || 0) <= myLevel;
   const [platformUser, setPlatformUser] = useState<ModelAppUser | null>(null);
   // The user whose ACL is open, for the dialog title.
   const [editAclUser, setEditAclUser] = useState<ModelAppUser | null>(null);
@@ -1267,28 +1286,31 @@ export default function AppUsers() {
                               </button>
                             )}
                             {el.suspension ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setUnsuspendTenant(el.suspension?.scope === 'tenant');
-                                  setUnsuspendTarget(el);
-                                }}
-                                className="text-xs text-green-700 dark:text-green-400 hover:underline"
-                                title={t('userSuspension.action.unsuspendTitle')}
-                              >
-                                {t('userSuspension.action.unsuspend')}
-                              </button>
+                              canUnsuspend(el) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setUnsuspendTenant(el.suspension?.scope === 'tenant');
+                                    setUnsuspendTarget(el);
+                                  }}
+                                  className="text-green-700 dark:text-green-400 hover:opacity-80"
+                                  title={t('userSuspension.action.unsuspendTitle')}
+                                  aria-label={t('userSuspension.action.unsuspend')}
+                                >
+                                  <IconUnban width={16} height={16} />
+                                </button>
+                              )
                             ) : (
                               lifecycleTab !== 'archived' &&
-                              el._id !== currentUser?._id &&
-                              el.role !== 'owner' && (
+                              canSuspend(el) && (
                                 <button
                                   type="button"
                                   onClick={() => setSuspendTargets([el])}
-                                  className="text-xs text-red-600 dark:text-red-400 hover:underline"
+                                  className="text-red-600 dark:text-red-400 hover:opacity-80"
                                   title={t('userSuspension.action.suspendTitle')}
+                                  aria-label={t('userSuspension.action.suspend')}
                                 >
-                                  {t('userSuspension.action.suspend')}
+                                  <IconBan width={16} height={16} />
                                 </button>
                               )
                             )}

@@ -299,6 +299,7 @@ export interface ModelAppUser {
   // Derived server-side from the ACL row, the app owner and the platform
   // super-admin flags. Absent on older backends.
   role?: 'superadmin' | 'owner' | 'admin' | 'member';
+  isSuperAdmin?: { read?: boolean; write?: boolean };
   description?: string;
   // Account suspension (separate from archive: the account and its data stay
   // as they are, only login and API access are refused). null / absent = not
@@ -316,6 +317,8 @@ export interface ModelUserSuspension {
   internalNote?: string | null;
   suspendedAt?: string | null;
   suspendedBy?: string | null;
+  // Access level that set it; lifting it needs at least the same level.
+  suspendedByRole?: 'member' | 'admin' | 'owner' | 'superadmin' | null;
   until?: string | null;
   scope?: SuspensionScope | null;
 }
