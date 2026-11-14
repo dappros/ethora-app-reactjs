@@ -32,14 +32,26 @@ import {
   httpResetUserMfa,
   httpRestoreUser,
   httpRevokeUserAccess,
+  httpSuspendUser,
+  httpSuspendUsers,
   httpTagsAdd,
   httpTagsDelete,
   httpUpdateAcl,
+  httpUnsuspendUser,
   httpUpdateAppUser,
+  UsersLifecycleFilter,
 } from '../http';
 import { env } from '../config/env';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
-import { ModelAppUser, ModelUserACL, OrderByType } from '../models';
+import {
+  ModelAppUser,
+  ModelUserACL,
+  OrderByType,
+  SuspendUserBody,
+  SuspensionResultItem,
+} from '../models';
+import { SuspendUserModal } from '../components/modal/SuspendUserModal';
+import { suspensionReasonKey } from '../utils/suspension';
 
 import classNames from 'classnames';
 import { useSearchParams } from 'react-router-dom';
@@ -101,9 +113,14 @@ export default function AppUsers() {
   const [editUser, setEditUser] = useState<ModelAppUser | null>(null);
   const [editBusy, setEditBusy] = useState(false);
   const [loading, setLoading] = useState(false);
-  // Active vs Archived view. ?lifecycle=archived persists across refresh so the
-  // operator can land directly on the restore screen.
-  const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'archived') || 'active';
+  // Active / Suspended / Archived view. ?lifecycle=archived persists across
+  // refresh so the operator can land directly on the restore screen.
+  // Suspended users also stay in the Active list, with a badge.
+  const lifecycleTab = (searchParams.get('lifecycle') as 'active' | 'suspended' | 'archived') || 'active';
+  const lifecycleFilter = useMemo<UsersLifecycleFilter | undefined>(
+    () => (lifecycleTab === 'active' ? undefined : { status: lifecycleTab }),
+    [lifecycleTab]
+  );
   // Users, only those with admin-panel access (?access=admin), or anonymous
   // website visitors (?access=visitors), which the users list never includes.
   const accessTab = (searchParams.get('access') as 'all' | 'admin' | 'visitors') || 'all';
@@ -114,6 +131,12 @@ export default function AppUsers() {
   // Tag filter (?tag=): set by clicking a tag chip in the table.
   const tagFilter = searchParams.get('tag') || undefined;
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
+  // Suspend (per row or the bulk selection) and Unsuspend (per row).
+  const [suspendTargets, setSuspendTargets] = useState<ModelAppUser[] | null>(null);
+  const [suspendBusy, setSuspendBusy] = useState(false);
+  const [unsuspendTarget, setUnsuspendTarget] = useState<ModelAppUser | null>(null);
+  const [unsuspendTenant, setUnsuspendTenant] = useState(false);
+  const [unsuspendBusy, setUnsuspendBusy] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
   // Create a 1-1 private chat between the two selected users (owner/admin
   // action; the two users need not include the caller). Enabled only when
@@ -232,7 +255,7 @@ export default function AppUsers() {
           page * itemsPerTable,
           orderBy,
           order,
-          lifecycleTab === 'archived' ? { status: 'archived' } : undefined
+          lifecycleFilter
         ).then((response) => {
           const { total, items } = response.data;
           setItems(items);
@@ -295,8 +318,7 @@ export default function AppUsers() {
   const fetchUsers = useCallback(() => {
     if (!appId || visitorsTab) return;
 
-    const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
-    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycle, accessParam, tagFilter).then(
+    httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycleFilter, accessParam, tagFilter).then(
       (response) => {
         const { total, items } = response.data;
         setItems(items);
@@ -304,7 +326,7 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / limit));
       }
     );
-  }, [appId, limit, page, orderBy, order, lifecycleTab, accessParam, tagFilter, visitorsTab]);
+  }, [appId, limit, page, orderBy, order, lifecycleFilter, accessParam, tagFilter, visitorsTab]);
 
   const loadAppTags = useCallback(() => {
     if (!appId) return;
@@ -503,7 +525,7 @@ export default function AppUsers() {
           page * itemsPerTable,
           orderBy,
           order,
-          lifecycleTab === 'archived' ? { status: 'archived' } : undefined
+          lifecycleFilter
         ).then((response) => {
           const { total, items } = response.data;
           setItems(items);
@@ -599,14 +621,13 @@ export default function AppUsers() {
 
   const refreshAndClearSelection = () => {
     if (!appId) return;
-    const lifecycle = lifecycleTab === 'archived' ? { status: 'archived' as const } : undefined;
     httpGetUsers(
       appId,
       itemsPerTable,
       page * itemsPerTable,
       orderBy,
       order,
-      lifecycle,
+      lifecycleFilter,
       accessParam,
       tagFilter
     ).then((response) => {
@@ -646,6 +667,99 @@ export default function AppUsers() {
     }).catch((e: any) => {
       toast.error(`${t('appUsers.hardDeleteFailedPrefix')} ${accessErrorMessage(e, t)}`);
     });
+  };
+
+  const suspendErrorMessage = (code: string | undefined, fallback: string) => {
+    const key = `userSuspension.error.${code}`;
+    const msg = code ? t(key) : key;
+    return msg === key ? fallback : msg;
+  };
+
+  // One toast per outcome from the suspend results (single and bulk share
+  // the shape). Rows for other apps are the tenant-scope matches in the
+  // child apps; per-user failures come back as status 'error'.
+  const toastSuspendResults = (results: SuspensionResultItem[]) => {
+    const here = results.filter((r) => !r.appId || r.appId === appId);
+    const childApps = results.filter((r) => r.appId && r.appId !== appId && r.status === 'suspended');
+    const suspended = here.filter((r) => r.status === 'suspended').length;
+    const already = here.filter((r) => r.status === 'already_suspended').length;
+    const failed = results.filter((r) => r.status === 'error');
+    if (suspended) toast.success(t('userSuspension.toast.suspended').replace('{count}', String(suspended)));
+    if (already) toast.info(t('userSuspension.toast.alreadySuspended').replace('{count}', String(already)));
+    if (childApps.length) toast.info(t('userSuspension.toast.childApps').replace('{count}', String(childApps.length)));
+    if (failed.length) {
+      const shown = failed.slice(0, 3).map((r) => {
+        const who = r.email || items.find((u) => u._id === r.userId)?.email || r.userId;
+        return `${who}: ${suspendErrorMessage(r.code, r.error || r.code || '')}`;
+      });
+      const details = failed.length > 3 ? `${shown.join('; ')}; ...` : shown.join('; ');
+      toast.error(
+        t('userSuspension.toast.failed').replace('{count}', String(failed.length)).replace('{details}', details)
+      );
+    }
+  };
+
+  // Same permission model as archive / restore: no client-side gate, the API
+  // checks appUsers.delete (or owner / super admin) and a 403 reads as "no
+  // permission".
+  const onSuspend = async (body: SuspendUserBody) => {
+    if (!appId || !suspendTargets?.length) return;
+    setSuspendBusy(true);
+    try {
+      const ids = suspendTargets.map((u) => u._id);
+      const res =
+        ids.length === 1
+          ? await httpSuspendUser(appId, ids[0], body)
+          : await httpSuspendUsers(appId, ids, body);
+      toastSuspendResults(res.data?.results || []);
+      setSuspendTargets(null);
+      refreshAndClearSelection();
+    } catch (e: unknown) {
+      const { code, status } = apiError(e);
+      const msg = status === 403 ? accessErrorMessage(e, t) : suspendErrorMessage(code, accessErrorMessage(e, t));
+      toast.error(`${t('userSuspension.toast.suspendFailedPrefix')} ${msg}`);
+    } finally {
+      setSuspendBusy(false);
+    }
+  };
+
+  const onUnsuspend = async () => {
+    if (!appId || !unsuspendTarget) return;
+    setUnsuspendBusy(true);
+    try {
+      const res = await httpUnsuspendUser(appId, unsuspendTarget._id, unsuspendTenant ? 'tenant' : 'app');
+      const results = res.data?.results || [];
+      const lifted = results.some((r) => r.status === 'unsuspended');
+      if (lifted || !results.length) toast.success(t('userSuspension.toast.unsuspended'));
+      else toast.info(t('userSuspension.toast.notSuspended'));
+      setUnsuspendTarget(null);
+      refreshAndClearSelection();
+    } catch (e: unknown) {
+      toast.error(`${t('userSuspension.toast.unsuspendFailedPrefix')} ${accessErrorMessage(e, t)}`);
+    } finally {
+      setUnsuspendBusy(false);
+    }
+  };
+
+  const formatSuspensionDate = (iso?: string | null) => {
+    if (!iso) return '';
+    const d = DateTime.fromISO(iso);
+    return d.isValid ? d.toFormat('dd LLL yyyy t') : '';
+  };
+
+  // Native tooltip on the "Suspended" badge: reason, dates, scope and the
+  // admin-only note (this page is admin-only, so the note may show here).
+  const suspensionTooltip = (u: ModelAppUser): string => {
+    const s = u.suspension;
+    if (!s) return '';
+    const lines = [t('userSuspension.badgeTooltip.reason').replace('{reason}', t(suspensionReasonKey(s.reasonCode)))];
+    const since = formatSuspensionDate(s.suspendedAt);
+    if (since) lines.push(t('userSuspension.badgeTooltip.since').replace('{date}', since));
+    const until = formatSuspensionDate(s.until);
+    if (until) lines.push(t('userSuspension.badgeTooltip.until').replace('{date}', until));
+    if (s.scope === 'tenant') lines.push(t('userSuspension.badgeTooltip.tenant'));
+    if (s.internalNote) lines.push(t('userSuspension.badgeTooltip.note').replace('{note}', s.internalNote));
+    return lines.join('\n');
   };
 
   // Restore one user (used from the per-row button in the Archived tab).
@@ -826,7 +940,16 @@ export default function AppUsers() {
                 {t('appUsers.createPrivateChat')}
               </button>
             )}
-            {lifecycleTab === 'active' ? (
+            {lifecycleTab !== 'archived' && (
+              <button
+                className="text-red-600 dark:text-red-400 font-varela text-base py-[12px] md:py-0 px-[16px] md:px-0"
+                onClick={() => setSuspendTargets(getSelectedUsers())}
+                title={t('userSuspension.action.suspendTitle')}
+              >
+                {t('userSuspension.action.suspend')}
+              </button>
+            )}
+            {lifecycleTab !== 'archived' ? (
               <button
                 className="text-brand-500 flex font-varela text-base items-center justify-center py-[12px] md:py-0 px-[16px] md:px-0"
                 onClick={() => setShowArchive(true)}
@@ -880,7 +1003,7 @@ export default function AppUsers() {
           <div className="font-varela text-[24px]">{t('appUsers.title')}</div>
           {/* Active / Archived filter, mirrors the Apps page. */}
           {!visitorsTab && <div className="inline-flex rounded-xl border border-gray-200 p-1 bg-gray-50 text-sm">
-            {(['active', 'archived'] as const).map((tab) => (
+            {(['active', 'suspended', 'archived'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => updateSearchParams({ lifecycle: tab, page: 0 })}
@@ -891,7 +1014,11 @@ export default function AppUsers() {
                     : 'text-gray-500 hover:text-gray-700'
                 )}
               >
-                {tab === 'active' ? t('appUsers.tabActive') : t('appUsers.tabArchived')}
+                {tab === 'active'
+                  ? t('appUsers.tabActive')
+                  : tab === 'suspended'
+                    ? t('userSuspension.tab')
+                    : t('appUsers.tabArchived')}
               </button>
             ))}
           </div>}
@@ -1052,7 +1179,18 @@ export default function AppUsers() {
                           </Field>
                         </td>
                         <td className="px-3 py-2 text-left font-sans font-normal text-[13px] whitespace-nowrap">
-                          <div>{`${el.firstName || ''} ${el.lastName || ''}`.trim() || '-'}</div>
+                          <div className="flex items-center gap-2">
+                            <span>{`${el.firstName || ''} ${el.lastName || ''}`.trim() || '-'}</span>
+                            {el.suspension && (
+                              <span
+                                className="px-2 py-0.5 rounded-2xl text-xs bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 cursor-help"
+                                title={suspensionTooltip(el)}
+                                data-testid="user-suspended-badge"
+                              >
+                                {t('userSuspension.badge')}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-3 py-2 font-sans font-normal text-[13px] text-left whitespace-nowrap">
                           {el.email}
@@ -1127,6 +1265,32 @@ export default function AppUsers() {
                               >
                                 {t('appUsers.restore')}
                               </button>
+                            )}
+                            {el.suspension ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setUnsuspendTenant(el.suspension?.scope === 'tenant');
+                                  setUnsuspendTarget(el);
+                                }}
+                                className="text-xs text-green-700 dark:text-green-400 hover:underline"
+                                title={t('userSuspension.action.unsuspendTitle')}
+                              >
+                                {t('userSuspension.action.unsuspend')}
+                              </button>
+                            ) : (
+                              lifecycleTab !== 'archived' &&
+                              el._id !== currentUser?._id &&
+                              el.role !== 'owner' && (
+                                <button
+                                  type="button"
+                                  onClick={() => setSuspendTargets([el])}
+                                  className="text-xs text-red-600 dark:text-red-400 hover:underline"
+                                  title={t('userSuspension.action.suspendTitle')}
+                                >
+                                  {t('userSuspension.action.suspend')}
+                                </button>
+                              )
                             )}
                             <button type="button" onClick={() => setEditUser(el)} title={t('appUsers.editTitle')} aria-label={t('appUsers.editTitle')}>
                               <IconEdit width={16} />
@@ -1395,6 +1559,36 @@ export default function AppUsers() {
           confirmLabel={t('appUsers.archive')}
           onConfirm={onArchive}
           onCancel={() => setShowArchive(false)}
+        />
+      )}
+      {suspendTargets && suspendTargets.length > 0 && (
+        <SuspendUserModal
+          users={suspendTargets}
+          busy={suspendBusy}
+          onClose={() => setSuspendTargets(null)}
+          onSubmit={onSuspend}
+        />
+      )}
+      {unsuspendTarget && (
+        <ConfirmModal
+          title={t('userSuspension.unsuspend.title').replace('{name}', userDisplayName(unsuspendTarget))}
+          message={
+            <span className="block">
+              {t('userSuspension.unsuspend.message')}
+              <label className="mt-4 flex items-center justify-center gap-2 cursor-pointer font-sans text-sm">
+                <input
+                  type="checkbox"
+                  checked={unsuspendTenant}
+                  onChange={(e) => setUnsuspendTenant(e.target.checked)}
+                />
+                {t('userSuspension.unsuspend.tenantLabel')}
+              </label>
+            </span>
+          }
+          confirmLabel={t('userSuspension.action.unsuspend')}
+          busy={unsuspendBusy}
+          onConfirm={onUnsuspend}
+          onCancel={() => setUnsuspendTarget(null)}
         />
       )}
       {showHardDelete && (

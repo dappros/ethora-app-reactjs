@@ -6,7 +6,8 @@ import { isTransientRefreshFailure } from '../authRefresh.ts';
 import { defaultLandingPath } from '../utils/appHost.ts';
 import { rememberReturnPath, signedOutEntryPath } from '../utils/returnPath.ts';
 
-const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup'];
+// /account-suspended: shown after a 403 USER_SUSPENDED ended the session.
+const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup', '/account-suspended'];
 
 export const useTrackUrl = () => {
   const navigate = useNavigate();

@@ -6,6 +6,7 @@ import {
   httpGetApps,
   httpGetConfig,
   httpGetUsers,
+  UsersLifecycleFilter,
   httpPostFile,
   httpUploadFirebaseServiceAccount,
   httpDeleteFirebaseServiceAccount,
@@ -36,11 +37,12 @@ import {
   canonicalizeLocale,
   resolveAvailableLanguages,
 } from './constants/languageOptionsConstants';
-import { ModelAgent, ModelApp, ModelCurrentUser, ModelOwnerSession, OrderByType } from './models';
+import { ModelAgent, ModelApp, ModelCurrentUser, ModelOwnerSession, ModelSuspensionNotice, OrderByType } from './models';
 import { clarityIdentify } from './clarity';
 import { phCapture, phIdentify, phReset } from './posthog';
 import { useAppStore } from './store/useAppStore';
 import { getFirebaseConfigFromString } from './utils/getFbConfig';
+import { ACCOUNT_SUSPENDED_PATH, rememberSuspension } from './utils/suspension';
 import { resolveSessionUiLanguage } from './utils/uiLanguage';
 
 const getState = useAppStore.getState;
@@ -94,6 +96,9 @@ export async function actionGetConfig(domainName?: string) {
     // means registration is allowed.
     userRegistrationDisabled: result.userRegistrationDisabled ?? false,
     requireMfaForAdmins: result.requireMfaForAdmins ?? false,
+    // Fallback support contact for the "Account suspended" screen when the
+    // refusal itself carries none.
+    supportContact: result.supportContact || undefined,
     // Per-app end-to-end encryption opt-in. Absent on apps (or APIs) that
     // predate the field, and off is the platform default, so the coercion is
     // the safe direction: no app gains an encrypted-chat button it never
@@ -312,7 +317,7 @@ export async function actionGetUsers(
   offset: number = 0,
   orderBy: OrderByType = 'lastName',
   order: 'asc' | 'desc' = 'asc',
-  lifecycle?: { status?: 'archived'; includeArchived?: boolean }
+  lifecycle?: UsersLifecycleFilter
 ) {
   return httpGetUsers(appId, limit, offset, orderBy, order, lifecycle);
 }
@@ -403,12 +408,20 @@ export async function actionUpdateUser(fd: FormData) {
 
 let logoutStarted = false;
 
-export function actionLogout() {
+// `suspension`: the session ended because the account is suspended (403
+// USER_SUSPENDED). Same teardown, but the notice is kept for, and the user
+// sent to, the "Account suspended" screen instead of the login page.
+export function actionLogout(suspension?: ModelSuspensionNotice) {
   if (logoutStarted) return null;
   logoutStarted = true;
   markSessionKilled();
   phReset();
   localStorage.clear();
+  if (suspension) {
+    rememberSuspension(suspension);
+    window.location.replace(ACCOUNT_SUSPENDED_PATH);
+    return null;
+  }
   window.location.replace('/login');
   return null;
 }

@@ -205,6 +205,15 @@ export interface ModelApp {
     photoUrl?: string;
   };
   aiBot: ModelAIbot;
+  // Shown to suspended users of this app (email address or https URL).
+  // Empty falls back server-side to the parent app's value, then the install
+  // default.
+  supportContact?: string;
+  // Sign-ups (email, first-time social sign-in) whose email domain matches
+  // one of these patterns are refused with 403 SIGNUP_EMAIL_DOMAIN_BLOCKED.
+  // `example.org` also matches its subdomains; `*` matches one DNS label.
+  // Applies to this app only, not its child apps.
+  signupBlockedEmailDomains?: string[];
 }
 
 export interface ModelAiWidgetValues {
@@ -291,6 +300,58 @@ export interface ModelAppUser {
   // super-admin flags. Absent on older backends.
   role?: 'superadmin' | 'owner' | 'admin' | 'member';
   description?: string;
+  // Account suspension (separate from archive: the account and its data stay
+  // as they are, only login and API access are refused). null / absent = not
+  // suspended.
+  suspension?: ModelUserSuspension | null;
+}
+
+export type SuspensionReasonCode = 'child_safety' | 'terms_violation' | 'spam' | 'security' | 'other';
+export type SuspensionScope = 'app' | 'tenant';
+
+// Admin view of a suspension, as carried on user objects in the users list.
+export interface ModelUserSuspension {
+  reasonCode: SuspensionReasonCode | string;
+  message?: string | null;
+  internalNote?: string | null;
+  suspendedAt?: string | null;
+  suspendedBy?: string | null;
+  until?: string | null;
+  scope?: SuspensionScope | null;
+}
+
+// What a suspended user is told: `details.suspension` of a 403 USER_SUSPENDED.
+export interface ModelSuspensionNotice {
+  reasonCode?: SuspensionReasonCode | string | null;
+  message?: string | null;
+  suspendedAt?: string | null;
+  until?: string | null;
+  supportContact?: string | null;
+}
+
+export interface SuspendUserBody {
+  reasonCode: SuspensionReasonCode;
+  message?: string;
+  internalNote?: string;
+  scope?: SuspensionScope;
+  until?: string;
+}
+
+// One row of the results array returned by suspend / unsuspend (single and
+// bulk). Bulk per-user failures come back as status 'error' with code/error.
+export interface SuspensionResultItem {
+  userId: string;
+  appId?: string;
+  email?: string;
+  status: 'suspended' | 'already_suspended' | 'unsuspended' | 'not_suspended' | 'error';
+  code?: string;
+  error?: string;
+}
+
+export interface SuspensionResponse {
+  ok: boolean;
+  results: SuspensionResultItem[];
+  suspension?: ModelUserSuspension;
 }
 
 // Phase 1 (Agents): first-class AI Agent and per-App BotInstance projections returned by /v2/agents and /v2/bot-instances.

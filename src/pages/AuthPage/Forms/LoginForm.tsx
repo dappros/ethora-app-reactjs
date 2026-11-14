@@ -2,7 +2,9 @@ import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
+import { SuspendedAccountPanel } from '../../../components/SuspendedAccountPanel';
 import { useTranslation } from '../../../i18n/useTranslation';
+import { ModelSuspensionNotice } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
 import LoginStep, { MfaPending } from '../Login/Steps/LoginForm';
 import MfaStep from '../Login/Steps/MfaStep';
@@ -18,9 +20,24 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   // Set when the password step came back with an MFA pending token.
   const [mfaPending, setMfaPending] = useState<MfaPending | null>(null);
+  // Set when a sign-in answered 403 USER_SUSPENDED: the card is replaced by
+  // the blocking "Account suspended" panel until the user goes back.
+  const [suspension, setSuspension] = useState<ModelSuspensionNotice | null>(null);
 
   if (!config) {
     return null;
+  }
+
+  if (suspension) {
+    return (
+      <SuspendedAccountPanel
+        notice={suspension}
+        onBack={() => {
+          setSuspension(null);
+          setMfaPending(null);
+        }}
+      />
+    );
   }
 
   return (
@@ -72,9 +89,9 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
           </Typography>
         </Box>
         {mfaPending ? (
-          <MfaStep pending={mfaPending} onBack={() => setMfaPending(null)} />
+          <MfaStep pending={mfaPending} onBack={() => setMfaPending(null)} onSuspended={setSuspension} />
         ) : (
-          <LoginStep onMfaRequired={setMfaPending} />
+          <LoginStep onMfaRequired={setMfaPending} onSuspended={setSuspension} />
         )}
       </Box>
       {/* No sign-up entry point when the app has closed self-service

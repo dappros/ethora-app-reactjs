@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAppStore } from '../store/useAppStore';
 import { navigateToUserPage } from '../utils/navigateToUserPage';
+import { showSuspendedLogin } from '../utils/suspension';
 
 export const useHandleRedirectLogin = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export const useHandleRedirectLogin = () => {
   
         navigateToUserPage(navigate, config?.afterLoginPage);
       } catch (err) {
+        if (showSuspendedLogin(err, navigate)) return;
         console.error('Redirect login error:', err);
         toast.error('Login failed after redirect');
       }

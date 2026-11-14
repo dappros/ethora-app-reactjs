@@ -14,7 +14,9 @@ import { httpVerifyMfaLogin } from '../../../../http.ts';
 import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
 import { apiError } from '../../../../utils/apiError';
+import { ModelSuspensionNotice } from '../../../../models';
 import { finishLogin, MfaPending } from '../../../../utils/finishLogin';
+import { showSuspendedLogin } from '../../../../utils/suspension';
 import CustomButton from '../../Button';
 
 type Inputs = { code: string };
@@ -22,9 +24,10 @@ type Inputs = { code: string };
 interface Props {
   pending: MfaPending;
   onBack: () => void;
+  onSuspended?: (notice: ModelSuspensionNotice) => void;
 }
 
-export default function MfaStep({ pending, onBack }: Props) {
+export default function MfaStep({ pending, onBack, onSuspended }: Props) {
   const navigate = useNavigate();
   const config = useAppStore((s) => s.currentApp);
   const { t } = useTranslation();
@@ -61,6 +64,7 @@ export default function MfaStep({ pending, onBack }: Props) {
         toast.info(t('authMfaStep.enrolmentRequiredToast'));
       }
     } catch (error: unknown) {
+      if (showSuspendedLogin(error, navigate, onSuspended)) return;
       const { code, message } = apiError(error, t('authLoginStep.loginFailed'));
       if (code === 'MFA_TOKEN_INVALID') {
         setSecondsLeft(0);

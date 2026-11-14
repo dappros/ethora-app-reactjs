@@ -14,6 +14,8 @@ import { getUserCredsFromGoogle, IUser } from '../../utils/firebase';
 import { markAgentsOnboarding } from '../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import { MfaPending, mfaPendingFrom } from '../../utils/finishLogin';
+import { ModelSuspensionNotice } from '../../models';
+import { isSignupBlockedError, showSuspendedLogin } from '../../utils/suspension';
 import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import GoogleIcon from './Icons/socials/googleIcon';
@@ -31,12 +33,23 @@ interface GoogleButtonProps {
   // Login card hands the MFA second step to the caller (same as the
   // password form) when the account has two-step verification on.
   onMfaRequired?: (pending: MfaPending) => void;
+  // Login card swaps itself for the "Account suspended" panel; without it the
+  // /account-suspended screen opens.
+  onSuspended?: (notice: ModelSuspensionNotice) => void;
 }
 
-export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
+export const GoogleButton = ({ utm, onMfaRequired, onSuspended }: GoogleButtonProps) => {
   const config = useAppStore.getState().currentApp;
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  // Social login refusals: a suspended account gets the blocking panel, the
+  // rest the generic failure toast (they used to be swallowed silently).
+  const onSocialLoginError = (error: unknown) => {
+    if (showSuspendedLogin(error, navigate, onSuspended)) return;
+    console.error('Social login error:', error);
+    toast.error(t('authGoogleButton.loginFailed'));
+  };
 
   const onGoogleLogin = async () => {
     try {
@@ -132,6 +145,11 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
             setEthoraUserCookie('accregred');
           } catch (error) {
             console.error(error);
+            if (isSignupBlockedError(error)) {
+              // Blocked email / email domain: logging in next cannot work.
+              toast.error(t('userSuspension.signupBlocked'));
+              return;
+            }
             toast.error(t('authGoogleButton.registrationFailed'));
           }
 
@@ -145,7 +163,7 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
             localStorage.setItem('newUser', true.toString());
 
             navigateToUserPage(navigate, config?.afterLoginPage);
-          });
+          }).catch(onSocialLoginError);
         } else {
           console.error('existing user');
           httpLoginSocial(
@@ -165,7 +183,7 @@ export const GoogleButton = ({ utm, onMfaRequired }: GoogleButtonProps) => {
             setEthoraUserCookie('accregred');
 
             navigateToUserPage(navigate, config?.afterLoginPage);
-          });
+          }).catch(onSocialLoginError);
         }
       }
     } catch (error) {

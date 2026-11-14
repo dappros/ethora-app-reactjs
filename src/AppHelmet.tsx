@@ -9,6 +9,7 @@ import {
 import { ModelApp } from './models';
 import { useAppStore } from './store/useAppStore';
 import { defaultLandingPath } from './utils/appHost';
+import { ACCOUNT_SUSPENDED_PATH } from './utils/suspension';
 
 import { env } from './config/env';
 const PLATFORM_NAME = String(
@@ -68,6 +69,7 @@ export default function AppHelmet() {
         location.pathname.startsWith('/resetPassword') ||
         location.pathname === '/register' ||
         location.pathname === '/turnstile' ||
+        location.pathname === ACCOUNT_SUSPENDED_PATH ||
         location.pathname === '/wp-setup'
       ) {
         return;
