@@ -1,6 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
 import {
+  AppTrustSafetyInfo,
+  ModerationAction,
+  ModerationItem,
+  ModerationItemsResponse,
+  MyAge,
   ModelUserACL,
   OrderByType,
   SuspendUserBody,
@@ -1704,6 +1709,53 @@ export function httpSuspendUsers(appId: string, userIds: string[], body: Suspend
     ...body,
     userIds,
   });
+}
+
+// Trust & Safety (docs/TRUST_AND_SAFETY.md). Policy of an App (install and
+// App values for admins), the own declared age, the admin age reset, and the
+// moderation queue.
+export function httpGetAppTrustSafety(appId: string) {
+  return httpV2.get<AppTrustSafetyInfo>(`/apps/${encodeURIComponent(appId)}/trust-safety`);
+}
+
+export function httpGetMyAge() {
+  return httpV2.get<MyAge>('/users/me/age');
+}
+
+// `dateOfBirth` is YYYY-MM-DD; only the birth year is stored. 409 AGE_LOCKED
+// when a user who declared under 18 tries to declare 18+.
+export function httpSetMyAge(dateOfBirth: string) {
+  return httpV2.put<MyAge>('/users/me/age', { dateOfBirth });
+}
+
+export function httpResetUserAge(appId: string, userId: string) {
+  return httpV2.delete(`/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/age`);
+}
+
+export interface ModerationItemsQuery {
+  status?: string;
+  kind?: string;
+  category?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export function httpGetModerationItems(appId: string, query: ModerationItemsQuery = {}) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(query)) {
+    if (v !== undefined && v !== null && v !== '') params.set(k, String(v));
+  }
+  const qs = params.toString();
+  return httpV2.get<ModerationItemsResponse>(
+    `/apps/${encodeURIComponent(appId)}/moderation/items${qs ? `?${qs}` : ''}`
+  );
+}
+
+export function httpModerationItemAction(appId: string, itemId: string, action: ModerationAction) {
+  return httpV2.post<{ ok?: boolean; item?: ModerationItem }>(
+    `/apps/${encodeURIComponent(appId)}/moderation/items/${encodeURIComponent(itemId)}/action`,
+    { action }
+  );
 }
 
 // Agents: export / import.

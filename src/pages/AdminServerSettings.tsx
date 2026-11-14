@@ -19,6 +19,8 @@ import type {
 } from '../models';
 import { canCancelJob, fill, formatCountdown, isJobActive } from '../utils/serverNotice';
 import { useAppStore } from '../store/useAppStore';
+import { PresetBar } from '../components/TrustSafety/PresetBar';
+import { TS_GROUP, TS_PERCENT_KEYS, TS_PRESET_KEYS, TS_PRESET_VALUES, TsPresetName, matchingPreset } from '../utils/trustSafety';
 
 // Server settings page (super admins): install-wide values with their source
 // (saved here, the deployment configuration, or the default), saved per group.
@@ -30,7 +32,7 @@ import { useAppStore } from '../store/useAppStore';
 // tab. An API that sends no tabs gets the single list it always had.
 
 const LEGACY_GROUPS = ['email', 'feedback', 'rooms', 'reports', 'rateLimits', 'webIndex', 'ai'];
-const TAB_ORDER: ServerSettingsTab[] = ['api', 'chats', 'users', 'ai', 'email', 'system'];
+const TAB_ORDER: ServerSettingsTab[] = ['api', 'chats', 'users', 'safety', 'ai', 'email', 'system'];
 // Groups rendered inside a module card rather than on their own.
 const MODULE_GROUP: Record<string, string> = { ai: 'agents', mcp: 'mcp' };
 // Groups with no Save button while the install keeps them locked.
@@ -416,6 +418,29 @@ export default function AdminServerSettings() {
   const draftOf = (s: ServerSetting) => (drafts[s.key] !== undefined ? drafts[s.key] : s.type === 'secret' ? '' : s.value);
   const changed = (s: ServerSetting) => drafts[s.key] !== undefined && drafts[s.key] !== (s.type === 'secret' ? '' : s.value);
 
+  // Trust & Safety: the drafted value of every TS_* key, the preset those
+  // values match, and applying a preset (fills the drafts and TS_PROFILE).
+  const settingByKey = useMemo(() => {
+    const m: Record<string, ServerSetting> = {};
+    for (const s of data?.settings || []) m[s.key] = s;
+    return m;
+  }, [data]);
+  const tsValues = (d: Record<string, string>) => {
+    const out: Record<string, string> = {};
+    for (const k of TS_PRESET_KEYS) out[k] = d[k] !== undefined ? d[k] : settingByKey[k]?.value ?? '';
+    return out;
+  };
+  const tsCurrentPreset = matchingPreset(tsValues(drafts));
+  const applyPreset = (preset: TsPresetName) => {
+    setDrafts((d) => {
+      const next = { ...d, ...TS_PRESET_VALUES[preset] };
+      if (settingByKey.TS_PROFILE) next.TS_PROFILE = preset;
+      return next;
+    });
+    setFieldErrors({});
+    setMessage({ group: TS_GROUP, kind: 'ok', text: t('trustSafety.presets.applied').replace('{preset}', t(`trustSafety.preset.${preset}`)) });
+  };
+
   // A tab gets a dot when it holds unsaved edits or a value waiting for a restart.
   const tabNeedsAttention = (tab: string) =>
     (data?.settings || []).some((s) => (s.tab || '') === tab && (changed(s) || s.restartPending));
@@ -503,7 +528,16 @@ export default function AdminServerSettings() {
       'w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60',
       locked && 'bg-gray-100 text-gray-500 cursor-not-allowed',
     );
-    const set = (v: string) => setDrafts((d) => ({ ...d, [s.key]: v }));
+    const set = (v: string) =>
+      setDrafts((d) => {
+        const next = { ...d, [s.key]: v };
+        // A value changed by hand: the profile follows (a preset or Custom).
+        if (TS_PRESET_KEYS.includes(s.key) && settingByKey.TS_PROFILE) {
+          const preset = matchingPreset(tsValues(next));
+          next.TS_PROFILE = preset || 'custom';
+        }
+        return next;
+      });
     if (s.type === 'boolean') {
       return (
         <select value={draftOf(s)} onChange={(e) => set(e.target.value)} disabled={disabled} className={base}>
@@ -532,6 +566,22 @@ export default function AdminServerSettings() {
           autoComplete="new-password"
           className={cn(base, 'font-mono')}
         />
+      );
+    }
+    if (TS_PERCENT_KEYS.includes(s.key)) {
+      return (
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={1}
+            max={100}
+            value={draftOf(s)}
+            onChange={(e) => set(e.target.value)}
+            disabled={disabled}
+            className={cn(base, 'max-w-[140px]')}
+          />
+          <span className="text-sm text-gray-500">{t('trustSafety.percent')}</span>
+        </div>
       );
     }
     return (
@@ -563,6 +613,7 @@ export default function AdminServerSettings() {
   const renderGroupBody = (group: string) => (
     <>
       {groupNote(group) && <p className="mb-4 text-sm text-gray-600">{groupNote(group)}</p>}
+      {group === TS_GROUP && <PresetBar current={tsCurrentPreset} disabled={!canEdit || busyGroup === group} onApply={applyPreset} />}
       <div className="grid grid-cols-1 gap-5">
         {(byGroup[group] || []).map((s) => (
           <div key={s.key} className="grid grid-cols-1 md:grid-cols-[260px,_1fr] gap-x-4 gap-y-1 min-w-0">
@@ -1012,6 +1063,11 @@ export default function AdminServerSettings() {
       <>
         {tab === 'system' && renderStatus()}
         {modules.map(renderModule)}
+        {/* Detection runs in the moderation service; without its status from
+            the API, say where it is switched on. */}
+        {tab === 'safety' && !modules.some((m) => m.key === 'moderation') && (
+          <p className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">{t('trustSafety.service.note')}</p>
+        )}
         {plain.map(renderGroup)}
         {advanced.length > 0 && (
           <details className="mb-6">

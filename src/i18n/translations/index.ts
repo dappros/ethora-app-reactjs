@@ -17,6 +17,7 @@ import { modalsB } from './modalsB';
 import { modalsC } from './modalsC';
 import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
+import { trustSafety } from './trustSafety';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
 import { userSuspension } from './userSuspension';
@@ -55,6 +56,7 @@ const dictionaries = [
   sharedComponents,
   userSettings,
   userSuspension,
+  trustSafety,
 ] as const;
 
 function mergeLocale(locale: UiLanguageCode): Record<string, string> {

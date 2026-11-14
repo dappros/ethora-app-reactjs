@@ -24,6 +24,7 @@ const AdminServerSettings = lazy(() => import('./pages/AdminServerSettings'));
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
+const AppModeration = lazy(() => import('./pages/AppModeration'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
@@ -170,6 +171,10 @@ export const router = createBrowserRouter(
                             {
                               path: 'statistics',
                               Component: AppStatistics,
+                            },
+                            {
+                              path: 'moderation',
+                              Component: AppModeration,
                             },
                           ],
                         },

@@ -214,6 +214,9 @@ export interface ModelApp {
   // `example.org` also matches its subdomains; `*` matches one DNS label.
   // Applies to this app only, not its child apps.
   signupBlockedEmailDomains?: string[];
+  // Trust & Safety overrides; each can only make the install policy stricter.
+  // Absent / null keys follow the install value.
+  trustSafety?: TrustSafetyOverrides | null;
 }
 
 export interface ModelAiWidgetValues {
@@ -305,6 +308,8 @@ export interface ModelAppUser {
   // as they are, only login and API access are refused). null / absent = not
   // suspended.
   suspension?: ModelUserSuspension | null;
+  // Self-declared age (Trust & Safety). Absent / null = not declared.
+  age?: ModelUserAge | null;
 }
 
 export type SuspensionReasonCode = 'child_safety' | 'terms_violation' | 'spam' | 'security' | 'other';
@@ -321,6 +326,8 @@ export interface ModelUserSuspension {
   suspendedByRole?: 'member' | 'admin' | 'owner' | 'superadmin' | null;
   until?: string | null;
   scope?: SuspensionScope | null;
+  // What happened to the account's content (older APIs omit it).
+  content?: SuspensionContent | null;
 }
 
 // What a suspended user is told: `details.suspension` of a 403 USER_SUSPENDED.
@@ -338,6 +345,124 @@ export interface SuspendUserBody {
   internalNote?: string;
   scope?: SuspensionScope;
   until?: string;
+  // Content options; the API defaults each to 'keep'.
+  messagesMode?: SuspensionContentMode;
+  mediaMode?: SuspensionContentMode;
+  nameMode?: SuspensionNameMode;
+}
+
+export type SuspensionContentMode = 'keep' | 'hide' | 'delete' | 'quarantine';
+export type SuspensionNameMode = 'keep' | 'suspended';
+export interface SuspensionContent {
+  messagesMode?: SuspensionContentMode;
+  mediaMode?: SuspensionContentMode;
+  nameMode?: SuspensionNameMode;
+}
+
+// ---- Trust & Safety (docs/TRUST_AND_SAFETY.md) ----
+
+export type TsImageAction = 'allow' | 'blur' | 'hold' | 'block';
+export type TsTextAction = 'allow' | 'flag' | 'blur' | 'hide';
+export type TsProfile = 'business' | 'education' | 'community' | 'adult' | 'custom';
+
+// App.trustSafety: per-App overrides, stricter only.
+export interface TrustSafetyOverrides {
+  imageNudityAction?: TsImageAction | null;
+  imageNudityThreshold?: number | null;
+  textToxicityAction?: TsTextAction | null;
+  textToxicityThreshold?: number | null;
+  textSevereAction?: TsTextAction | null;
+  textSevereThreshold?: number | null;
+  piiAction?: TsTextAction | null;
+  phiAction?: TsTextAction | null;
+  phiThreshold?: number | null;
+}
+
+// The install policy (and the effective one, install tightened by the App).
+export interface TrustSafetyPolicy {
+  enabled: boolean;
+  profile?: TsProfile | string;
+  imageNudityAction: TsImageAction;
+  imageNudityThreshold: number;
+  ageGate: boolean;
+  textToxicityAction: TsTextAction;
+  textToxicityThreshold: number;
+  textSevereAction: TsTextAction;
+  textSevereThreshold: number;
+  piiAction: TsTextAction;
+  piiTypes?: string[];
+  phiAction: TsTextAction;
+  phiThreshold: number;
+  evidenceRetentionDays?: number;
+}
+
+// GET /v2/apps/:appId/trust-safety. `install` and `app` only for admins.
+export interface AppTrustSafetyInfo {
+  enabled: boolean;
+  ageGate: boolean;
+  imageNudityAction: TsImageAction;
+  install?: TrustSafetyPolicy;
+  app?: TrustSafetyOverrides | null;
+  effective?: TrustSafetyPolicy;
+  // Whether the moderation service answers (optional; older APIs omit it).
+  service?: { configured?: boolean; ok?: boolean | null; models?: Record<string, string> | null } | null;
+}
+
+// User.age as the users list carries it.
+export interface ModelUserAge {
+  birthYear?: number | null;
+  isAdult?: boolean | null;
+  declaredAt?: string | null;
+  source?: 'self' | 'admin' | null;
+}
+
+// GET / PUT /v2/users/me/age.
+export interface MyAge {
+  birthYear: number | null;
+  isAdult: boolean | null;
+  declaredAt: string | null;
+  canDeclareAdult: boolean;
+}
+
+export type ModerationItemKind = 'message' | 'media';
+export type ModerationItemStatus = 'open' | 'approved' | 'removed' | 'dismissed';
+export type ModerationAction = 'dismiss' | 'approve' | 'blur' | 'hide' | 'delete' | 'restore';
+
+// One row of GET /v2/apps/:appId/moderation/items.
+export interface ModerationItem {
+  _id: string;
+  id?: string;
+  appId: string;
+  kind: ModerationItemKind;
+  room?: string | null;
+  // Room title, when the API resolves it.
+  roomTitle?: string | null;
+  stanzaId?: string | null;
+  originId?: string | null;
+  fileId?: string | null;
+  senderUserId?: string | null;
+  // Sender details, when the API resolves them.
+  sender?: { _id?: string; firstName?: string; lastName?: string; email?: string; profileImage?: string } | null;
+  category?: string | null;
+  scores?: Record<string, number | string | string[] | null> | null;
+  // What was applied automatically: flag | blur | hold | hide | block.
+  action?: string | null;
+  status: ModerationItemStatus;
+  text?: string | null;
+  source?: 'auto' | 'moderator' | 'report' | null;
+  // Media items: the (server-side blurred) preview and file details.
+  previewUrl?: string | null;
+  file?: { locationPreview?: string | null; mimetype?: string | null; originalname?: string | null } | null;
+  createdAt: string;
+  resolvedBy?: string | null;
+  resolvedAt?: string | null;
+}
+
+export interface ModerationItemsResponse {
+  items: ModerationItem[];
+  total?: number;
+  limit?: number;
+  offset?: number;
 }
 
 // One row of the results array returned by suspend / unsuspend (single and
@@ -552,7 +677,7 @@ export interface ServerSetting {
   tab?: ServerSettingsTab;
   advanced?: boolean;
 }
-export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'ai' | 'email' | 'system';
+export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'safety' | 'ai' | 'email' | 'system';
 // Read-only health of the install (GET /v2/server-settings/status, super admins).
 export interface ServerStatus {
   version: { build: string | null; commit: string | null; line: string | null; installKind: string | null };
@@ -643,7 +768,7 @@ export interface ServerUpdateInfo {
 // An Enterprise module as the API sees it: installed = its service is part of
 // this install (null: the API cannot tell), running = it answered just now.
 export interface ServerModule {
-  key: 'ai' | 'push' | 'playground' | 'mcp' | 'uptime';
+  key: 'ai' | 'push' | 'playground' | 'mcp' | 'uptime' | 'moderation';
   tab: ServerSettingsTab;
   installed: boolean | null;
   running: boolean | null;
