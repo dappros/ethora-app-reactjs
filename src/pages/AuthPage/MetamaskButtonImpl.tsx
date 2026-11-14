@@ -17,6 +17,8 @@ import { useAppStore } from '../../store/useAppStore';
 import { isAgentsOnboarding, markAgentsOnboarding } from '../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../utils/navigateToUserPage';
 import { MfaPending, mfaPendingFrom } from '../../utils/finishLogin';
+import { ModelSuspensionNotice } from '../../models';
+import { showSuspendedLogin } from '../../utils/suspension';
 import { useTranslation } from '../../i18n/useTranslation';
 import CustomButton from './Button';
 import MetamaskIcon from './Icons/socials/metamaskIcon';
@@ -43,9 +45,10 @@ type FormData = {
 export interface MetamaskButtonProps {
   utm?: string | null;
   onMfaRequired?: (pending: MfaPending) => void;
+  onSuspended?: (notice: ModelSuspensionNotice) => void;
 }
 
-export const MetamaskButton = ({ utm, onMfaRequired }: MetamaskButtonProps) => {
+export const MetamaskButton = ({ utm, onMfaRequired, onSuspended }: MetamaskButtonProps) => {
   const config = useAppStore((s) => s.currentApp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [account, setAccount] = useState<string | null>(null);
@@ -106,6 +109,7 @@ export const MetamaskButton = ({ utm, onMfaRequired }: MetamaskButtonProps) => {
         throw new Error('No user in response');
       }
     } catch (err: any) {
+      if (showSuspendedLogin(err, navigate, onSuspended)) return;
       const errorData = err.response?.data;
       if (
         errorData?.errors?.[0]?.msg === 'no extWalletRecord for walletAddres'

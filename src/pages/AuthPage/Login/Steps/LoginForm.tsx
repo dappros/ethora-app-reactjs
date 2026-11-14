@@ -9,7 +9,9 @@ import PasswordInput from '../../../../components/input/PasswordInput';
 import { httpLoginWithEmail } from '../../../../http.ts';
 import { useTranslation } from '../../../../i18n/useTranslation';
 import { useAppStore } from '../../../../store/useAppStore';
+import { ModelSuspensionNotice } from '../../../../models';
 import { finishLogin, MfaPending, mfaPendingFrom } from '../../../../utils/finishLogin';
+import { showSuspendedLogin } from '../../../../utils/suspension';
 import CustomButton from '../../Button';
 import { GoogleButton } from '../../GoogleButton';
 import { MetamaskButton } from '../../MetamaskButton';
@@ -25,9 +27,11 @@ interface LoginStepProps {
   // Called instead of finishing the login when the account has MFA enabled:
   // the API answered with a pending token and no session.
   onMfaRequired?: (pending: MfaPending) => void;
+  // Called with the notice when the account is suspended (403 USER_SUSPENDED).
+  onSuspended?: (notice: ModelSuspensionNotice) => void;
 }
 
-const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
+const LoginStep = ({ onMfaRequired, onSuspended }: LoginStepProps) => {
   const navigate = useNavigate();
   const config = useAppStore((s) => s.currentApp);
   const { t } = useTranslation();
@@ -77,6 +81,11 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
       })
       .catch((error) => {
         console.error('Login error:', error);
+        localStorage.removeItem('token-538');
+        setIsLoggingIn(false);
+        if (showSuspendedLogin(error, navigate, onSuspended)) {
+          return;
+        }
 
         let errorMessage = t('authLoginStep.loginFailed');
 
@@ -93,8 +102,6 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
         }
 
         toast.error(errorMessage);
-        localStorage.removeItem('token-538');
-        setIsLoggingIn(false);
       });
   };
 
@@ -187,10 +194,10 @@ const LoginStep = ({ onMfaRequired }: LoginStepProps) => {
             {t('authLoginStep.or')}
           </Typography>
         )}
-        {config?.signonOptions.includes('google') && <GoogleButton onMfaRequired={onMfaRequired} />}
+        {config?.signonOptions.includes('google') && <GoogleButton onMfaRequired={onMfaRequired} onSuspended={onSuspended} />}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        {config?.signonOptions.includes('metamask') && <MetamaskButton onMfaRequired={onMfaRequired} />}
+        {config?.signonOptions.includes('metamask') && <MetamaskButton onMfaRequired={onMfaRequired} onSuspended={onSuspended} />}
         {/* {config?.signonOptions.includes('facebook') && <FacebookButton />} */}
       </Box>
     </Box>

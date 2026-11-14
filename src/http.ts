@@ -1,6 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
-import { ModelUserACL, OrderByType } from './models';
+import {
+  ModelUserACL,
+  OrderByType,
+  SuspendUserBody,
+  SuspensionResponse,
+  SuspensionScope,
+} from './models';
 import {
   isRefreshFatalError,
   isSessionKilled,
@@ -12,6 +18,7 @@ import {
 
 import { env } from './config/env';
 import { attachRestartRetry } from './utils/serverRestart';
+import { suspensionFromError } from './utils/suspension';
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
@@ -178,6 +185,20 @@ function attachAuthInterceptors(client: AxiosInstance) {
   }, null);
 
   client.interceptors.response.use(null, async (error) => {
+    // 403 USER_SUSPENDED: the account is suspended. Never retried or
+    // refreshed (the refresh endpoint answers the same). For a signed-in call,
+    // the token refresh included, the session is torn down through the normal
+    // logout path and the user lands on /account-suspended; actionLogout runs
+    // once, so parallel refusals cannot loop. Login calls (whitelisted, no
+    // session yet) are left to the login screen, which shows the notice itself.
+    const suspension = suspensionFromError(error);
+    if (suspension) {
+      if (!isWhitelisted(error.config?.url, error.config?.method)) {
+        actionLogout(suspension);
+      }
+      return Promise.reject(error);
+    }
+
     if (!error.response || error.response.status !== 401) {
       return Promise.reject(error);
     }
@@ -497,6 +518,8 @@ export function httpPostFile(file: File) {
   return http.post('/files', fd);
 }
 
+export type UsersLifecycleFilter = { status?: 'archived' | 'suspended'; includeArchived?: boolean };
+
 export function httpGetUsers(
   appId: string,
   limit: number = 10,
@@ -505,9 +528,10 @@ export function httpGetUsers(
   order: 'asc' | 'desc' = 'asc',
   // Lifecycle filter, wired in ethora-backend 2607+:
   //   status='archived' -> only archived users (restore screen)
+  //   status='suspended' -> only suspended users
   //   includeArchived=true -> active + archived
   //   default -> active only (current behavior)
-  lifecycle?: { status?: 'archived'; includeArchived?: boolean },
+  lifecycle?: UsersLifecycleFilter,
   // access='admin' -> only users who can act in the admin panel for this app
   // (any management permission, the app owner, platform super admins).
   access?: 'admin',
@@ -1654,6 +1678,32 @@ export function httpHardDeleteUsers(appId: string, usersIdList: string[], reason
 
 export function httpRestoreUser(appId: string, userId: string) {
   return httpV2.post(`/apps/${appId}/users/${userId}/restore`, {});
+}
+
+// Users: suspend / unsuspend. Distinct from archive: a suspended account keeps
+// its data and stays in the normal list (with a badge); login and every API
+// call are refused with 403 USER_SUSPENDED until it is lifted.
+export function httpSuspendUser(appId: string, userId: string, body: SuspendUserBody) {
+  return httpV2.post<SuspensionResponse>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/suspend`,
+    body
+  );
+}
+
+export function httpUnsuspendUser(appId: string, userId: string, scope?: SuspensionScope) {
+  return httpV2.post<SuspensionResponse>(
+    `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/unsuspend`,
+    scope ? { scope } : {}
+  );
+}
+
+// Bulk (1..200 users). Per-user failures come back in results with
+// status 'error', not as a failed request.
+export function httpSuspendUsers(appId: string, userIds: string[], body: SuspendUserBody) {
+  return httpV2.post<SuspensionResponse>(`/apps/${encodeURIComponent(appId)}/users/suspend`, {
+    ...body,
+    userIds,
+  });
 }
 
 // Agents: export / import.

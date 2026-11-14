@@ -18,6 +18,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import { markAgentsOnboarding } from '../../../utils/agentsOnboarding';
 import { navigateToUserPage } from '../../../utils/navigateToUserPage';
+import { isSignupBlockedError } from '../../../utils/suspension';
 import CustomButton from '../Button';
 import { GoogleButton } from '../GoogleButton';
 import { MetamaskButton } from '../MetamaskButton';
@@ -227,6 +228,10 @@ const RegisterForm: React.FC<FirstStepProps> = ({ isSmallDevice = false }) => {
           localStorage.removeItem('token-538');
         });
     } catch (error: any) {
+      if (isSignupBlockedError(error)) {
+        toast.error(t('userSuspension.signupBlocked'));
+        return;
+      }
       toast.error(
         error?.response?.data?.error ||
           t('authRegisterForm.accountExists')

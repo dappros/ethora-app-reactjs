@@ -1,7 +1,9 @@
 import { Checkbox, Field, Label } from '@headlessui/react';
 import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import classNames from 'classnames';
 import { useTranslation } from '../../i18n/useTranslation';
+import { isValidSupportContact, parseBlockedDomains } from '../../utils/suspension';
 
 interface Props {
   // The App field is negative (`userRegistrationDisabled`); this component is
@@ -11,6 +13,13 @@ interface Props {
   setUserRegistrationDisabled: (disabled: boolean) => void;
   requireMfaForAdmins: boolean;
   setRequireMfaForAdmins: (on: boolean) => void;
+  // Account suspension: contact shown to suspended users, and the blocked
+  // sign-up email domains (raw textarea text, one pattern per line; parsed
+  // and validated again on save).
+  supportContact: string;
+  setSupportContact: (value: string) => void;
+  signupBlockedDomainsText: string;
+  setSignupBlockedDomainsText: (value: string) => void;
   enableEmail: boolean;
   setEnableEmail: (on: boolean) => void;
   enableGoogle: boolean;
@@ -29,6 +38,10 @@ export function SignonOptions({
   setUserRegistrationDisabled,
   requireMfaForAdmins,
   setRequireMfaForAdmins,
+  supportContact,
+  setSupportContact,
+  signupBlockedDomainsText,
+  setSignupBlockedDomainsText,
   enableEmail,
   setEnableEmail,
   enableGoogle,
@@ -43,6 +56,8 @@ export function SignonOptions({
 }: Props) {
   const { t } = useTranslation();
   const isEmptyFirebaseConfig = !firebaseWebConfigString || firebaseWebConfigString.trim() === '';
+  const supportContactInvalid = !isValidSupportContact(supportContact);
+  const invalidBlockedDomains = parseBlockedDomains(signupBlockedDomainsText).invalid;
 
   const WarningMessage = ({ text }: { text: string }) => {
     if (!isEmptyFirebaseConfig) {
@@ -109,6 +124,33 @@ export function SignonOptions({
         </p>
       )}
       <p className="font-sans text-[24px] font-medium mb-2">
+        {t('userSuspension.settings.blockedHeading')}
+      </p>
+      <p className="font-sans text-[12px] text-gray-500 mb-1">
+        {t('userSuspension.settings.blockedDescription')}
+      </p>
+      <p className="font-sans text-[12px] text-gray-500 mb-4">
+        {t('userSuspension.settings.blockedExamples')}
+      </p>
+      <textarea
+        aria-label={t('userSuspension.settings.blockedHeading')}
+        className={classNames(
+          'rounded-2xl bg-gray-100 py-3 px-6 w-full max-w-[520px] min-h-[96px] outline-none font-mono text-sm',
+          invalidBlockedDomains.length ? 'border border-red-500' : ''
+        )}
+        placeholder={'*.sch.uk\n*.k12.*.us\nexample.org'}
+        spellCheck={false}
+        value={signupBlockedDomainsText}
+        onChange={(e) => setSignupBlockedDomainsText(e.target.value)}
+      />
+      {invalidBlockedDomains.length > 0 ? (
+        <p className="font-sans text-[12px] text-red-600 dark:text-red-400 mt-1 mb-8">
+          {t('userSuspension.settings.blockedInvalid').replace('{lines}', invalidBlockedDomains.join(', '))}
+        </p>
+      ) : (
+        <div className="mb-8" />
+      )}
+      <p className="font-sans text-[24px] font-medium mb-2">
         {t('appSettingsSignonOptions.mfaHeading')}
       </p>
       <p className="font-sans text-[12px] text-gray-500 mb-4">
@@ -129,6 +171,30 @@ export function SignonOptions({
       <p className="font-sans text-[12px] text-gray-500 mb-8">
         {t('appSettingsSignonOptions.requireMfaForAdminsHint')}
       </p>
+      <p className="font-sans text-[24px] font-medium mb-2">
+        {t('userSuspension.settings.supportHeading')}
+      </p>
+      <p className="font-sans text-[12px] text-gray-500 mb-4">
+        {t('userSuspension.settings.supportDescription')}
+      </p>
+      <input
+        type="text"
+        aria-label={t('userSuspension.settings.supportHeading')}
+        className={classNames(
+          'rounded-2xl bg-gray-100 py-3 px-6 w-full max-w-[520px] outline-none font-sans text-sm',
+          supportContactInvalid ? 'border border-red-500' : ''
+        )}
+        placeholder={t('userSuspension.settings.supportPlaceholder')}
+        value={supportContact}
+        onChange={(e) => setSupportContact(e.target.value)}
+      />
+      {supportContactInvalid ? (
+        <p className="font-sans text-[12px] text-red-600 dark:text-red-400 mt-1 mb-8">
+          {t('userSuspension.settings.supportInvalid')}
+        </p>
+      ) : (
+        <div className="mb-8" />
+      )}
       <p className="font-sans text-[24px] font-medium mb-2">
         {t('appSettingsSignonOptions.standardLoginHeading')}
       </p>

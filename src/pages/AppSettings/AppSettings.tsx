@@ -34,6 +34,7 @@ import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { Webhooks } from './Webhooks';
 import { env } from '../../config/env';
+import { isValidSupportContact, parseBlockedDomains } from '../../utils/suspension';
 // Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
 // step content - we only want that chunk over the wire when firstAdd is
 // true, not on every Settings visit.
@@ -212,6 +213,10 @@ export default function AppSettings() {
   // Security policy: admins/owners of this app are steered to MFA enrolment
   // at login. Plain positive boolean; absent on older apps means off.
   const [requireMfaForAdmins, setRequireMfaForAdmins] = useState(false);
+  // Account suspension settings: the contact shown to suspended users, and
+  // the blocked sign-up email domains, edited as one pattern per line.
+  const [supportContact, setSupportContact] = useState('');
+  const [signupBlockedDomainsText, setSignupBlockedDomainsText] = useState('');
 
   // chats
   const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
@@ -254,6 +259,8 @@ export default function AppSettings() {
       enableMetamask,
       userRegistrationDisabled,
       requireMfaForAdmins,
+      supportContact,
+      signupBlockedDomainsText,
       domainName,
       firebaseWebConfigString,
       bundleId,
@@ -290,6 +297,8 @@ export default function AppSettings() {
     enableMetamask,
     userRegistrationDisabled,
     requireMfaForAdmins,
+    supportContact,
+    signupBlockedDomainsText,
     domainName,
     firebaseWebConfigString,
     bundleId,
@@ -323,6 +332,8 @@ export default function AppSettings() {
         enableMetamask: app.signonOptions.includes('metamask'),
         userRegistrationDisabled: Boolean(app.userRegistrationDisabled),
         requireMfaForAdmins: Boolean(app.requireMfaForAdmins),
+        supportContact: app.supportContact || '',
+        signupBlockedDomainsText: (app.signupBlockedEmailDomains || []).join('\n'),
         domainName: app.domainName,
         firebaseWebConfigString: app.firebaseWebConfigString || '',
         bundleId: app.bundleId,
@@ -406,6 +417,17 @@ export default function AppSettings() {
     // registration as well as close it. Never inverted outside SignonOptions.
     body.userRegistrationDisabled = userRegistrationDisabled;
     body.requireMfaForAdmins = requireMfaForAdmins;
+
+    // Suspension settings. Sent unconditionally so either can be cleared;
+    // invalid input stops the save (SignonOptions marks the field).
+    const trimmedSupportContact = supportContact.trim();
+    const blockedDomains = parseBlockedDomains(signupBlockedDomainsText);
+    if (!isValidSupportContact(trimmedSupportContact) || blockedDomains.invalid.length) {
+      toast.error(t('userSuspension.settings.invalidToast'));
+      return;
+    }
+    body.supportContact = trimmedSupportContact;
+    body.signupBlockedEmailDomains = blockedDomains.patterns;
 
     // web app
     if (domainName) {
@@ -491,6 +513,8 @@ export default function AppSettings() {
           enableMetamask,
           userRegistrationDisabled,
           requireMfaForAdmins,
+          supportContact,
+          signupBlockedDomainsText,
           domainName,
           firebaseWebConfigString,
           bundleId,
@@ -626,6 +650,8 @@ export default function AppSettings() {
     // arrive with no such key; absent means registration allowed.
     setUserRegistrationDisabled(Boolean(app.userRegistrationDisabled));
     setRequireMfaForAdmins(Boolean(app.requireMfaForAdmins));
+    setSupportContact(app.supportContact || '');
+    setSignupBlockedDomainsText((app.signupBlockedEmailDomains || []).join('\n'));
     setDomainName(app.domainName);
     setFirebaseWebConfigString(
       app.firebaseWebConfigString ? app.firebaseWebConfigString : ''
@@ -799,6 +825,10 @@ export default function AppSettings() {
               setUserRegistrationDisabled={setUserRegistrationDisabled}
               requireMfaForAdmins={requireMfaForAdmins}
               setRequireMfaForAdmins={setRequireMfaForAdmins}
+              supportContact={supportContact}
+              setSupportContact={setSupportContact}
+              signupBlockedDomainsText={signupBlockedDomainsText}
+              setSignupBlockedDomainsText={setSignupBlockedDomainsText}
               enableEmail={enableEmail}
               setEnableEmail={setEnableEmail}
               enableGoogle={enableGoogle}

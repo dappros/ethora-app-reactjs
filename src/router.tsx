@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppHelmet from './AppHelmet';
 import AppLayout from './AppLayout';
 import { RouterErrorElement } from './components/Error/RouterErrorBoundary';
+import AccountSuspended from './pages/AccountSuspended';
 import ForgetPassword from './pages/AuthPage/ForgetPassword';
 import LoginComponent from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
@@ -69,6 +70,12 @@ export const router = createBrowserRouter(
             {
               path: '/resetPassword/:token?',
               Component: ForgetPassword,
+            },
+            {
+              // Blocking screen after a 403 USER_SUSPENDED ended the session
+              // (http.ts interceptor). Reachable without a token.
+              path: '/account-suspended',
+              Component: AccountSuspended,
             },
             {
               path: '/turnstile',

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { httpLoginHandoff } from '../../../http';
 import { useAppStore } from '../../../store/useAppStore';
 import { finishLogin } from '../../../utils/finishLogin';
+import { showSuspendedLogin } from '../../../utils/suspension';
 import { takeHandoffCode } from '../../../utils/loginHandoff';
 import EthoraSplitLayout, { isEthoraDomain } from '../EthoraSplitLayout';
 import SignInForm from '../Forms/LoginForm';
@@ -26,8 +27,9 @@ export default function LoginComponent() {
     httpLoginHandoff(code)
       .then(({ data }) => finishLogin(data, navigate, config))
       .catch((error: unknown) => {
-        console.warn('[login] handoff failed, showing the sign-in form', error);
         setLoading(false);
+        if (showSuspendedLogin(error, navigate)) return;
+        console.warn('[login] handoff failed, showing the sign-in form', error);
       });
   }, [config, navigate]);
 

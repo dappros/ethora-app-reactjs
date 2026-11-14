@@ -19,6 +19,7 @@ import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
+import { userSuspension } from './userSuspension';
 
 // Merges every per-area dictionary into one flat lookup table keyed by
 // locale. Keys are globally unique and namespaced by component/page (e.g.
@@ -53,6 +54,7 @@ const dictionaries = [
   settingsTutorial,
   sharedComponents,
   userSettings,
+  userSuspension,
 ] as const;
 
 function mergeLocale(locale: UiLanguageCode): Record<string, string> {
