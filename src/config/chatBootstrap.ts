@@ -599,7 +599,9 @@ export function createChatConfig({
       disableMenu: true,
       disableCreate: app?.allowUsersToCreateRooms === false,
     },
-    defaultRooms: app?.defaultRooms || [],
+    // Membership comes from /v1/chats/my. Passing app defaults here makes
+    // older chat-component versions auto-join rooms users have left.
+    defaultRooms: [],
     eventHandlers: {
       // <Chat> replaces the provider's config in the SDK store, so this has to
       // be here too or server events stop once the Chats page has been opened.
