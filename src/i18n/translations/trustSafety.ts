@@ -107,6 +107,9 @@ const en: Record<string, string> = {
   'serverSettings.key.TS_DELETED_CONTENT_RETENTION_DAYS': 'Keep deleted messages for (days)',
   'serverSettings.desc.TS_DELETED_CONTENT_RETENTION_DAYS':
     'Quarantine only. Deleted messages and their files are hidden from everyone but kept for this many days for compliance or investigations, then removed.',
+  'serverSettings.key.TS_DESCRIBE_MEDIA': 'Describe flagged media for reviewers',
+  'serverSettings.desc.TS_DESCRIBE_MEDIA':
+    'A short AI description of media that is blurred, held, flagged, hidden or quarantined, so reviewers can triage it before opening it. Runs on this server and needs a description model in the moderation service. Never used for end-to-end encrypted files.',
 
   'trustSafety.percent': '%',
   'trustSafety.presets.title': 'Start from a preset',
