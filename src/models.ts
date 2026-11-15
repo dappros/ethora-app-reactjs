@@ -465,6 +465,87 @@ export interface ModerationItemsResponse {
   offset?: number;
 }
 
+// Trust & Safety evidence review, superadmins (docs/TRUST_AND_SAFETY.md
+// section 11). A case groups the moderation_evidence rows of one deleted or
+// moderated message, or of one suspension.
+export type EvidenceReason = 'deleted' | 'auto' | 'moderator' | 'suspension';
+export type EvidenceMode = 'hide' | 'quarantine';
+export type EvidenceStatusFilter = 'active' | 'held' | 'expiring';
+export type EvidenceReportTarget = 'ncmec' | 'law_enforcement' | 'hr' | 'internal' | 'other';
+
+export interface EvidencePerson {
+  _id?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface EvidenceReport {
+  target: EvidenceReportTarget | string;
+  reference?: string | null;
+  note?: string | null;
+  // A user id, or the user when the API resolves it.
+  by?: string | EvidencePerson | null;
+  at?: string | null;
+}
+
+export interface EvidenceMessage {
+  evidenceId: string;
+  stanzaId?: string | null;
+  sentAt?: string | null;
+  text?: string | null;
+  // The sender's JID or name, or the user when the API resolves it.
+  sender?: string | EvidencePerson | null;
+}
+
+export interface EvidenceMedia {
+  evidenceId: string;
+  fileId?: string | null;
+  mimetype?: string | null;
+  size?: number | null;
+  sha256?: string | null;
+  md5?: string | null;
+  hasPreview?: boolean;
+  originalName?: string | null;
+}
+
+export interface EvidenceCase {
+  caseId: string;
+  reason: EvidenceReason | string;
+  mode?: EvidenceMode | string | null;
+  appId?: string | null;
+  appName?: string | null;
+  room?: string | null;
+  roomTitle?: string | null;
+  stanzaIds?: string[];
+  user?: EvidencePerson | null;
+  createdAt?: string | null;
+  expiresAt?: string | null;
+  hold?: boolean;
+  holdSetBy?: string | EvidencePerson | null;
+  holdSetAt?: string | null;
+  purgedAt?: string | null;
+  // The list may leave out the rows themselves and send only the counts.
+  messages?: EvidenceMessage[];
+  media?: EvidenceMedia[];
+  reports?: EvidenceReport[];
+  counts?: { messages?: number; media?: number };
+}
+
+export interface EvidenceCasesResponse {
+  items: EvidenceCase[];
+  total?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export type EvidenceCaseAction =
+  | { action: 'extend'; days: number }
+  | { action: 'hold' }
+  | { action: 'release_hold'; days?: number }
+  | { action: 'purge' }
+  | { action: 'report'; target: EvidenceReportTarget; reference?: string; note?: string };
+
 // One row of the results array returned by suspend / unsuspend (single and
 // bulk). Bulk per-user failures come back as status 'error' with code/error.
 export interface SuspensionResultItem {

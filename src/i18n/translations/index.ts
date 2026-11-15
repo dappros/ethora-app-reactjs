@@ -9,6 +9,7 @@ import { authFlows } from './authFlows';
 import { authShared } from './authShared';
 import { callJoin } from './callJoin';
 import { common } from './common';
+import { evidence } from './evidence';
 import { license } from './license';
 import { miscComponents } from './miscComponents';
 import { miscPages } from './miscPages';
@@ -57,6 +58,7 @@ const dictionaries = [
   userSettings,
   userSuspension,
   trustSafety,
+  evidence,
 ] as const;
 
 function mergeLocale(locale: UiLanguageCode): Record<string, string> {

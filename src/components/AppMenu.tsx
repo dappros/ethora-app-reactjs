@@ -9,6 +9,7 @@ import { IconAdmin } from './Icons/IconAdmin';
 import { IconAgents } from './Icons/IconAgents';
 import { IconBilling } from './Icons/IconBilling';
 import { IconChat } from './Icons/IconChat';
+import { IconEvidence } from './Icons/IconEvidence';
 import { IconHelp } from './Icons/IconHelp';
 import { IconLicense } from './Icons/IconLicense';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
@@ -134,6 +135,15 @@ export function AppMenu() {
               </NavLink>
             </div>
           )}
+        {/* Trust & Safety evidence review: superadmins with write access. */}
+        {isBaseApp && currentUser?.isSuperAdmin?.write && (
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink to="/app/admin/evidence" className={ITEM_CLASS}>
+              <IconEvidence />
+              <div className={LABEL_CLASS}>{t('nav.evidence')}</div>
+            </NavLink>
+          </div>
+        )}
         {isBaseApp && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/help" className={ITEM_CLASS}>

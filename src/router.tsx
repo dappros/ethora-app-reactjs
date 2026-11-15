@@ -21,6 +21,8 @@ const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
 const AdminServerSettings = lazy(() => import('./pages/AdminServerSettings'));
+const AdminEvidence = lazy(() => import('./pages/AdminEvidence'));
+const AdminEvidenceCase = lazy(() => import('./pages/AdminEvidenceCase'));
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
@@ -143,6 +145,16 @@ export const router = createBrowserRouter(
                         {
                           path: 'server',
                           Component: AdminServerSettings,
+                        },
+                        // Trust & Safety evidence review: superadmins with
+                        // write access; the pages show "not allowed" to others.
+                        {
+                          path: 'evidence',
+                          Component: AdminEvidence,
+                        },
+                        {
+                          path: 'evidence/:caseId',
+                          Component: AdminEvidenceCase,
                         },
                         {
                           path: 'agents',

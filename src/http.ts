@@ -2,6 +2,9 @@ import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
 import {
   AppTrustSafetyInfo,
+  EvidenceCase,
+  EvidenceCaseAction,
+  EvidenceCasesResponse,
   ModerationAction,
   ModerationItem,
   ModerationItemsResponse,
@@ -1756,6 +1759,40 @@ export function httpModerationItemAction(appId: string, itemId: string, action: 
     `/apps/${encodeURIComponent(appId)}/moderation/items/${encodeURIComponent(itemId)}/action`,
     { action }
   );
+}
+
+// Evidence review (superadmins with write access, docs/TRUST_AND_SAFETY.md
+// section 11). Every call is written to the audit log by the API. Media and
+// the export need the Authorization header, so they come back as blobs that
+// the page turns into object URLs or a saved file.
+export function httpGetEvidenceCases(queryString: string) {
+  return httpV2.get<EvidenceCasesResponse>(`/admin/evidence/cases${queryString ? `?${queryString}` : ''}`);
+}
+
+export function httpGetEvidenceCase(caseId: string) {
+  return httpV2.get<EvidenceCase>(`/admin/evidence/cases/${encodeURIComponent(caseId)}`);
+}
+
+export function httpEvidenceCaseAction(caseId: string, body: EvidenceCaseAction) {
+  return httpV2.post<{ ok?: boolean; case?: EvidenceCase }>(
+    `/admin/evidence/cases/${encodeURIComponent(caseId)}/action`,
+    body
+  );
+}
+
+export function httpGetEvidenceMedia(evidenceId: string, preview = false) {
+  return httpV2.get<Blob>(`/admin/evidence/${encodeURIComponent(evidenceId)}/media${preview ? '?preview=1' : ''}`, {
+    responseType: 'blob',
+    timeout: 120000,
+  });
+}
+
+export function httpExportEvidenceCase(caseId: string, includeMedia: boolean) {
+  return httpV2.get<Blob>(`/admin/evidence/cases/${encodeURIComponent(caseId)}/export?includeMedia=${includeMedia}`, {
+    responseType: 'blob',
+    // A case with media can be large; the default 30 s is too short.
+    timeout: 10 * 60 * 1000,
+  });
 }
 
 // Agents: export / import.

@@ -1,6 +1,6 @@
 import type { AxiosError } from 'axios';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { httpV2 } from '../http';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { Segmented } from '../components/AIWidget/appearance/Fields';
@@ -1067,6 +1067,15 @@ export default function AdminServerSettings() {
             the API, say where it is switched on. */}
         {tab === 'safety' && !modules.some((m) => m.key === 'moderation') && (
           <p className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">{t('trustSafety.service.note')}</p>
+        )}
+        {tab === 'safety' && canEdit && (
+          <p className="mb-6 text-sm text-gray-700">
+            {t('evidence.serverSettingsLink.before')}
+            <Link to="/app/admin/evidence" className="text-brand-500 underline">
+              {t('nav.evidence')}
+            </Link>
+            {t('evidence.serverSettingsLink.after')}
+          </p>
         )}
         {plain.map(renderGroup)}
         {advanced.length > 0 && (
