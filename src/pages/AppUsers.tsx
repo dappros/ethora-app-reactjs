@@ -32,6 +32,7 @@ import {
   httpHardDeleteUsers,
   httpV2,
   httpResetUserMfa,
+  httpResetUserAge,
   httpRestoreUser,
   httpRevokeUserAccess,
   httpSuspendUser,
@@ -54,6 +55,8 @@ import {
 } from '../models';
 import { SuspendUserModal } from '../components/modal/SuspendUserModal';
 import { suspensionReasonKey } from '../utils/suspension';
+import { ageStateOf } from '../utils/trustSafety';
+import EventBusyOutlinedIcon from '@mui/icons-material/EventBusyOutlined';
 
 import classNames from 'classnames';
 import { useSearchParams } from 'react-router-dom';
@@ -139,6 +142,9 @@ export default function AppUsers() {
   const [unsuspendTarget, setUnsuspendTarget] = useState<ModelAppUser | null>(null);
   const [unsuspendTenant, setUnsuspendTenant] = useState(false);
   const [unsuspendBusy, setUnsuspendBusy] = useState(false);
+  // Trust & Safety: clear a user's declared age (they declare it again).
+  const [resetAgeTarget, setResetAgeTarget] = useState<ModelAppUser | null>(null);
+  const [resetAgeBusy, setResetAgeBusy] = useState(false);
   const [revokeBusy, setRevokeBusy] = useState(false);
   // Create a 1-1 private chat between the two selected users (owner/admin
   // action; the two users need not include the caller). Enabled only when
@@ -781,6 +787,48 @@ export default function AppUsers() {
     return lines.join('\n');
   };
 
+  const onResetAge = async () => {
+    if (!appId || !resetAgeTarget) return;
+    setResetAgeBusy(true);
+    try {
+      await httpResetUserAge(appId, resetAgeTarget._id);
+      toast.success(t('trustSafetyUsers.resetDone'));
+      setResetAgeTarget(null);
+      fetchUsers();
+    } catch (e) {
+      toast.error(`${t('trustSafetyUsers.resetFailedPrefix')} ${accessErrorMessage(e, t)}`);
+    } finally {
+      setResetAgeBusy(false);
+    }
+  };
+
+  // Age column: 18+ / Under 18 / Unknown, with the birth year and the date
+  // of the declaration as a tooltip.
+  const renderAge = (u: ModelAppUser) => {
+    const state = ageStateOf(u.age);
+    if (state === 'unknown') return <span className="text-xs text-gray-400">{t('trustSafetyUsers.unknown')}</span>;
+    const lines: string[] = [];
+    if (u.age?.birthYear || u.age?.declaredAt) {
+      const date = u.age?.declaredAt ? DateTime.fromISO(u.age.declaredAt).toFormat('dd LLL yyyy') : '-';
+      lines.push(t('trustSafetyUsers.tooltip').replace('{year}', String(u.age?.birthYear ?? '-')).replace('{date}', date));
+    }
+    if (u.age?.source === 'admin') lines.push(t('trustSafetyUsers.tooltipAdmin'));
+    return (
+      <span
+        className={classNames(
+          'px-2 py-0.5 rounded-2xl text-xs',
+          lines.length && 'cursor-help',
+          state === 'adult'
+            ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300'
+            : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+        )}
+        title={lines.join('\n') || undefined}
+      >
+        {state === 'adult' ? t('trustSafetyUsers.adult') : t('trustSafetyUsers.minor')}
+      </span>
+    );
+  };
+
   // Restore one user (used from the per-row button in the Archived tab).
   const onRestoreOne = async (userId: string) => {
     if (!appId) return;
@@ -1172,6 +1220,7 @@ export default function AppUsers() {
                     {th('created', t('appUsers.colCreationSeenDate'))}
                     {th('role', t('appUsers.colRole'))}
                     {th('mfa', t('appUsers.colMfa'))}
+                    {th('age', t('trustSafetyUsers.col'))}
                     {th('auth', t('appUsers.colAuthMethod'))}
                     {th('actions', t('appUsers.colActions'), 'center', 'rounded-r-lg')}
                   </tr>
@@ -1270,6 +1319,9 @@ export default function AppUsers() {
                           )}
                         </td>
                         <td className="px-3 py-2 font-sans font-normal text-[13px] text-center whitespace-nowrap">
+                          {renderAge(el)}
+                        </td>
+                        <td className="px-3 py-2 font-sans font-normal text-[13px] text-center whitespace-nowrap">
                           <div className="flex items-center justify-center">
                             {renderAuthMethodIcon(el.authMethod)}
                           </div>
@@ -1313,6 +1365,17 @@ export default function AppUsers() {
                                   <IconBan width={16} height={16} />
                                 </button>
                               )
+                            )}
+                            {ageStateOf(el.age) !== 'unknown' && lifecycleTab !== 'archived' && (
+                              <button
+                                type="button"
+                                onClick={() => setResetAgeTarget(el)}
+                                className="text-gray-600 hover:opacity-80 inline-flex"
+                                title={t('trustSafetyUsers.resetTitle')}
+                                aria-label={t('trustSafetyUsers.reset')}
+                              >
+                                <EventBusyOutlinedIcon sx={{ fontSize: 16 }} />
+                              </button>
                             )}
                             <button type="button" onClick={() => setEditUser(el)} title={t('appUsers.editTitle')} aria-label={t('appUsers.editTitle')}>
                               <IconEdit width={16} />
@@ -1611,6 +1674,16 @@ export default function AppUsers() {
           busy={unsuspendBusy}
           onConfirm={onUnsuspend}
           onCancel={() => setUnsuspendTarget(null)}
+        />
+      )}
+      {resetAgeTarget && (
+        <ConfirmModal
+          title={t('trustSafetyUsers.resetConfirmTitle').replace('{name}', userDisplayName(resetAgeTarget))}
+          message={t('trustSafetyUsers.resetConfirmMessage')}
+          confirmLabel={t('trustSafetyUsers.reset')}
+          busy={resetAgeBusy}
+          onConfirm={onResetAge}
+          onCancel={() => setResetAgeTarget(null)}
         />
       )}
       {showHardDelete && (

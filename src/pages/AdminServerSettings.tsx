@@ -1,6 +1,6 @@
 import type { AxiosError } from 'axios';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { httpV2 } from '../http';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { Segmented } from '../components/AIWidget/appearance/Fields';
@@ -19,6 +19,9 @@ import type {
 } from '../models';
 import { canCancelJob, fill, formatCountdown, isJobActive } from '../utils/serverNotice';
 import { useAppStore } from '../store/useAppStore';
+import { SettingRow } from '../components/serverSettings/SettingRow';
+import { TS_GROUP, TS_TAB } from '../utils/trustSafety';
+import { hubTabPath } from '../utils/tsHub';
 
 // Server settings page (super admins): install-wide values with their source
 // (saved here, the deployment configuration, or the default), saved per group.
@@ -30,7 +33,7 @@ import { useAppStore } from '../store/useAppStore';
 // tab. An API that sends no tabs gets the single list it always had.
 
 const LEGACY_GROUPS = ['email', 'feedback', 'rooms', 'reports', 'rateLimits', 'webIndex', 'ai'];
-const TAB_ORDER: ServerSettingsTab[] = ['api', 'chats', 'users', 'ai', 'email', 'system'];
+const TAB_ORDER: ServerSettingsTab[] = ['api', 'chats', 'users', 'safety', 'ai', 'email', 'system'];
 // Groups rendered inside a module card rather than on their own.
 const MODULE_GROUP: Record<string, string> = { ai: 'agents', mcp: 'mcp' };
 // Groups with no Save button while the install keeps them locked.
@@ -496,56 +499,7 @@ export default function AdminServerSettings() {
   // Encryption cannot be allowed beyond what the install itself was set up for.
   const e2eeLocked = data?.info?.e2eeInstall === false;
 
-  const renderInput = (s: ServerSetting) => {
-    const locked = s.key === 'E2EE_ALLOWED' && e2eeLocked;
-    const disabled = !canEdit || busyGroup === s.group || locked;
-    const base = cn(
-      'w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60',
-      locked && 'bg-gray-100 text-gray-500 cursor-not-allowed',
-    );
-    const set = (v: string) => setDrafts((d) => ({ ...d, [s.key]: v }));
-    if (s.type === 'boolean') {
-      return (
-        <select value={draftOf(s)} onChange={(e) => set(e.target.value)} disabled={disabled} className={base}>
-          <option value="true">{t('serverSettings.boolean.true')}</option>
-          <option value="false">{t('serverSettings.boolean.false')}</option>
-        </select>
-      );
-    }
-    if (s.type === 'choice') {
-      return (
-        <select value={draftOf(s)} onChange={(e) => set(e.target.value)} disabled={disabled} className={base}>
-          {(s.options || []).map((o) => (
-            <option key={o} value={o}>{tr(`serverSettings.option.${s.key}.${o}`, o)}</option>
-          ))}
-        </select>
-      );
-    }
-    if (s.type === 'secret') {
-      return (
-        <input
-          type="password"
-          value={draftOf(s)}
-          onChange={(e) => set(e.target.value)}
-          disabled={disabled}
-          placeholder={s.value ? `${t('serverSettings.current')}: ${s.value}` : t('serverSettings.secretPlaceholder')}
-          autoComplete="new-password"
-          className={cn(base, 'font-mono')}
-        />
-      );
-    }
-    return (
-      <input
-        type={s.type === 'integer' ? 'number' : 'text'}
-        min={s.type === 'integer' ? 0 : undefined}
-        value={draftOf(s)}
-        onChange={(e) => set(e.target.value)}
-        disabled={disabled}
-        spellCheck={false}
-        className={cn(base, s.type === 'cron' && 'font-mono')}
-      />
-    );
-  };
+  const updateDraft = (key: string, v: string) => setDrafts((d) => ({ ...d, [key]: v }));
 
   // Read-only facts some groups carry next to their settings.
   const groupNote = (group: string) => {
@@ -558,41 +512,31 @@ export default function AdminServerSettings() {
     return '';
   };
 
+  // One setting (components/serverSettings/SettingRow.tsx).
+  const renderSettingRow = (s: ServerSetting) => {
+    const locked = s.key === 'E2EE_ALLOWED' && e2eeLocked;
+    return (
+      <SettingRow
+        key={s.key}
+        setting={s}
+        value={draftOf(s)}
+        disabled={!canEdit || busyGroup === s.group || locked}
+        locked={locked}
+        onChange={(v) => updateDraft(s.key, v)}
+        error={fieldErrors[s.key]}
+        canReset={canEdit}
+        resetDisabled={busyGroup === s.group}
+        onReset={() => reset(s)}
+      />
+    );
+  };
+
   // The settings of a group and its Save button; `embedded` drops the card
   // (used inside a module card).
   const renderGroupBody = (group: string) => (
     <>
       {groupNote(group) && <p className="mb-4 text-sm text-gray-600">{groupNote(group)}</p>}
-      <div className="grid grid-cols-1 gap-5">
-        {(byGroup[group] || []).map((s) => (
-          <div key={s.key} className="grid grid-cols-1 md:grid-cols-[260px,_1fr] gap-x-4 gap-y-1 min-w-0">
-            <div className="min-w-0">
-              <div className="text-sm font-semibold">{tr(`serverSettings.key.${s.key}`, s.key)}</div>
-              <div className="text-xs text-gray-500">
-                {t(`serverSettings.source.${s.source}`)}
-                {' | '}
-                {s.kind === 'live' ? t('serverSettings.kind.live') : t('serverSettings.kind.restart').replace('{scope}', scopeName(s.scope))}
-                {s.restartPending && (
-                  <span className="ml-2 inline-block rounded-full bg-amber-100 text-amber-900 px-2 py-0.5 text-[11px] font-semibold">{t('serverSettings.restartPending')}</span>
-                )}
-              </div>
-            </div>
-            <div className="min-w-0">
-              {renderInput(s)}
-              {fieldErrors[s.key] && <div className="mt-1 text-xs text-red-700">{fieldErrors[s.key]}</div>}
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                {tr(`serverSettings.desc.${s.key}`) && <span>{tr(`serverSettings.desc.${s.key}`)}</span>}
-                {s.source === 'panel' && canEdit && (
-                  <button type="button" onClick={() => reset(s)} disabled={busyGroup === s.group} className="text-brand-500 underline disabled:opacity-50">
-                    {t('serverSettings.reset')}
-                    {s.envValue !== null ? ` (${s.envValue})` : s.default ? ` (${s.default})` : ''}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="grid grid-cols-1 gap-5">{(byGroup[group] || []).map(renderSettingRow)}</div>
       {!(group === LOCKABLE_GROUP && e2eeLocked) && (
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <button
@@ -1004,7 +948,8 @@ export default function AdminServerSettings() {
   const renderTabBody = (tab: ServerSettingsTab) => {
     const modules = (data?.modules || []).filter((m) => m.tab === tab);
     const hosted = new Set(modules.map((m) => MODULE_GROUP[m.key]).filter(Boolean));
-    const groups = (groupsByTab[tab] || []).filter((g) => !hosted.has(g));
+    // The Trust & Safety group lives on T&S > Settings now.
+    const groups = (groupsByTab[tab] || []).filter((g) => !hosted.has(g) && g !== TS_GROUP);
     const isAdvanced = (g: string) => (byGroup[g] || []).every((s) => s.advanced);
     const plain = groups.filter((g) => !isAdvanced(g));
     const advanced = groups.filter(isAdvanced);
@@ -1012,6 +957,20 @@ export default function AdminServerSettings() {
       <>
         {tab === 'system' && renderStatus()}
         {modules.map(renderModule)}
+        {/* The Trust & Safety settings moved to T&S > Settings (with the
+            quarantine, the queue, rules and suspended users). */}
+        {tab === TS_TAB && (
+          <div className="mb-6 rounded-2xl border border-gray-200 p-4 md:p-6 min-w-0">
+            <h3 className="font-varela text-[18px] md:text-[20px] mb-2">{t('serverSettings.tsMoved.title')}</h3>
+            <p className="mb-4 text-sm text-gray-600">{t('serverSettings.tsMoved.body')}</p>
+            <Link
+              to={hubTabPath('settings')}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm"
+            >
+              {t('serverSettings.tsMoved.link')}
+            </Link>
+          </div>
+        )}
         {plain.map(renderGroup)}
         {advanced.length > 0 && (
           <details className="mb-6">
@@ -1019,7 +978,7 @@ export default function AdminServerSettings() {
             {advanced.map(renderGroup)}
           </details>
         )}
-        {!modules.length && !groups.length && <p className="text-sm text-gray-500">{t('serverSettings.emptyTab')}</p>}
+        {!modules.length && !groups.length && tab !== TS_TAB && <p className="text-sm text-gray-500">{t('serverSettings.emptyTab')}</p>}
         {tab === 'api' && tabs.includes('system') && (
           <p className="text-sm text-gray-600">
             {t('serverSettings.apiRateLimitsNote.before')}

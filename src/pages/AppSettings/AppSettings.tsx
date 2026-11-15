@@ -17,9 +17,9 @@ import { IconExternalLink } from '../../components/Icons/IconExternalLink';
 import { Loading } from '../../components/Loading';
 import DeleteAppModal from '../../components/modal/DeleteAppModal';
 import TabApp from '../../components/TabApp';
-import { deleteApp, httpUpdateOneUser } from '../../http';
+import { deleteApp, httpGetAppTrustSafety, httpUpdateOneUser } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-import { ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
+import { AppTrustSafetyInfo, ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
 import { AIWidget } from './AIWidget';
 import { Api } from './Api';
@@ -30,11 +30,14 @@ import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
+import { TrustSafety } from './TrustSafety';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { Webhooks } from './Webhooks';
 import { env } from '../../config/env';
 import { isValidSupportContact, parseBlockedDomains } from '../../utils/suspension';
+import { TsOverrideDraft, draftToOverrides, invalidOverrides, overridesToDraft } from '../../utils/trustSafety';
+import { apiError } from '../../utils/apiError';
 // Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
 // step content - we only want that chunk over the wire when firstAdd is
 // true, not on every Settings visit.
@@ -48,6 +51,8 @@ const SettingTutorialModal = lazy(() =>
 // The page now exposes both reversible Archive and irreversible Hard delete
 // (see DeleteSetting), so the tab name needs to advertise both.
 const LIFECYCLE_TAB = 'Delete or Archive';
+// Next to Sign-on options: the account-safety settings sit together.
+const TRUST_SAFETY_TAB = 'Trust & Safety';
 
 const tabs = [
   'AI Widget',
@@ -55,6 +60,7 @@ const tabs = [
   'Mobile App',
   'Appearance',
   'Sign-on options',
+  TRUST_SAFETY_TAB,
   'Home screen',
   'Menu',
   'Chats',
@@ -72,7 +78,7 @@ const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
 
 const tabsNew = {
   Publish: ['AI Widget', 'Web App', 'Mobile App'],
-  UI: ['Appearance', 'Sign-on options', 'Home screen', 'Menu'],
+  UI: ['Appearance', 'Sign-on options', TRUST_SAFETY_TAB, 'Home screen', 'Menu'],
   System: ['Chats', 'Visibility & Privacy', 'API', 'Webhooks', LIFECYCLE_TAB],
 };
 
@@ -86,6 +92,7 @@ const TAB_LABEL_KEYS: Record<string, string> = {
   'Mobile App': 'appSettings.tab.mobileApp',
   Appearance: 'appSettings.tab.appearance',
   'Sign-on options': 'appSettings.tab.signOnOptions',
+  [TRUST_SAFETY_TAB]: 'trustSafetyApp.tab',
   'Home screen': 'appSettings.tab.homeScreen',
   Menu: 'appSettings.tab.menu',
   Chats: 'appSettings.tab.chats',
@@ -217,6 +224,11 @@ export default function AppSettings() {
   // the blocked sign-up email domains, edited as one pattern per line.
   const [supportContact, setSupportContact] = useState('');
   const [signupBlockedDomainsText, setSignupBlockedDomainsText] = useState('');
+  // Trust & Safety overrides ('' = follow the server value), and the policy
+  // of this App (server and effective values) they are checked against.
+  const [tsDraft, setTsDraft] = useState<TsOverrideDraft>(() => overridesToDraft(null));
+  const [tsInfo, setTsInfo] = useState<AppTrustSafetyInfo | null>(null);
+  const [tsLoadError, setTsLoadError] = useState<string | null>(null);
 
   // chats
   const [allowUsersToCreateRooms, setAllowUsersToCreateRooms] = useState(false);
@@ -261,6 +273,7 @@ export default function AppSettings() {
       requireMfaForAdmins,
       supportContact,
       signupBlockedDomainsText,
+      tsDraft,
       domainName,
       firebaseWebConfigString,
       bundleId,
@@ -299,6 +312,7 @@ export default function AppSettings() {
     requireMfaForAdmins,
     supportContact,
     signupBlockedDomainsText,
+    tsDraft,
     domainName,
     firebaseWebConfigString,
     bundleId,
@@ -334,6 +348,7 @@ export default function AppSettings() {
         requireMfaForAdmins: Boolean(app.requireMfaForAdmins),
         supportContact: app.supportContact || '',
         signupBlockedDomainsText: (app.signupBlockedEmailDomains || []).join('\n'),
+        tsDraft: overridesToDraft(app.trustSafety),
         domainName: app.domainName,
         firebaseWebConfigString: app.firebaseWebConfigString || '',
         bundleId: app.bundleId,
@@ -429,6 +444,17 @@ export default function AppSettings() {
     body.supportContact = trimmedSupportContact;
     body.signupBlockedEmailDomains = blockedDomains.patterns;
 
+    // Trust & Safety overrides: only when edited, so an App saved before the
+    // API knew the field is not touched. Looser values stop the save.
+    const tsInitial = (initialState as { tsDraft?: TsOverrideDraft }).tsDraft;
+    if (!isEqual(tsInitial, tsDraft)) {
+      if (invalidOverrides(tsDraft, tsInfo?.install).length) {
+        toast.error(t('trustSafetyApp.invalidToast'));
+        return;
+      }
+      body.trustSafety = draftToOverrides(tsDraft, tsInitial);
+    }
+
     // web app
     if (domainName) {
       body.domainName = domainName;
@@ -515,6 +541,7 @@ export default function AppSettings() {
           requireMfaForAdmins,
           supportContact,
           signupBlockedDomainsText,
+          tsDraft,
           domainName,
           firebaseWebConfigString,
           bundleId,
@@ -596,6 +623,35 @@ export default function AppSettings() {
     }
   }, [apps, appId]);
 
+  // Server and effective Trust & Safety values of this App. An apps list that
+  // does not carry trustSafety yet takes the App values from this answer.
+  useEffect(() => {
+    if (!appId) return;
+    let cancelled = false;
+    setTsLoadError(null);
+    httpGetAppTrustSafety(appId)
+      .then((r) => {
+        if (cancelled) return;
+        setTsInfo(r.data);
+        const stored = apps.find((a) => a._id === appId)?.trustSafety;
+        if (stored === undefined && r.data.app) {
+          const fromApi = overridesToDraft(r.data.app);
+          setTsDraft(fromApi);
+          setInitialState((s) => ({ ...s, tsDraft: fromApi }));
+        }
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        // An API without Trust & Safety: the section shows the plain form.
+        if ((e as { response?: { status?: number } })?.response?.status === 404) return;
+        setTsLoadError(apiError(e, '').message);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId]);
+
   const handleDelete = async () => {
     if (!app) {
       return;
@@ -652,6 +708,7 @@ export default function AppSettings() {
     setRequireMfaForAdmins(Boolean(app.requireMfaForAdmins));
     setSupportContact(app.supportContact || '');
     setSignupBlockedDomainsText((app.signupBlockedEmailDomains || []).join('\n'));
+    setTsDraft(overridesToDraft(app.trustSafety));
     setDomainName(app.domainName);
     setFirebaseWebConfigString(
       app.firebaseWebConfigString ? app.firebaseWebConfigString : ''
@@ -841,6 +898,13 @@ export default function AppSettings() {
               setEnableMetamask={setEnableMetamask}
               firebaseWebConfigString={firebaseWebConfigString}
             />
+          </TabPanel>
+
+          <TabPanel
+            key={TRUST_SAFETY_TAB}
+            className="grid grid-rows-1 lg:ml-4 h-full overflow-hidden"
+          >
+            <TrustSafety info={tsInfo} loadError={tsLoadError} draft={tsDraft} setDraft={setTsDraft} />
           </TabPanel>
 
           <TabPanel

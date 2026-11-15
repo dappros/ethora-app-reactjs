@@ -4,6 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isBaseAppHost } from '../utils/appHost';
+import { TS_HUB_PATH } from '../utils/tsHub';
 import { IconAccount } from './Icons/IconAccount';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconAgents } from './Icons/IconAgents';
@@ -13,6 +14,7 @@ import { IconHelp } from './Icons/IconHelp';
 import { IconLicense } from './Icons/IconLicense';
 import { IconMenuBurger } from './Icons/IconMenuBurger';
 import { IconSettings } from './Icons/IconSettings';
+import { IconTrustSafety } from './Icons/IconTrustSafety';
 import { MobileMenuModal } from './modal/MobileMenuModal';
 import { ProfilePageUserIcon } from './ProfilePageUserIcon';
 import { ThemeToggle } from './ThemeToggle';
@@ -134,6 +136,15 @@ export function AppMenu() {
               </NavLink>
             </div>
           )}
+        {/* T&S hub (Trust & Safety): superadmins with write access. */}
+        {isBaseApp && currentUser?.isSuperAdmin?.write && (
+          <div className={ITEM_WRAP_CLASS}>
+            <NavLink to={TS_HUB_PATH} className={ITEM_CLASS} title={t('nav.trustSafetyTitle')}>
+              <IconTrustSafety />
+              <div className={LABEL_CLASS}>{t('nav.trustSafety')}</div>
+            </NavLink>
+          </div>
+        )}
         {isBaseApp && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink to="/app/help" className={ITEM_CLASS}>

@@ -9,6 +9,7 @@ import { authFlows } from './authFlows';
 import { authShared } from './authShared';
 import { callJoin } from './callJoin';
 import { common } from './common';
+import { evidence } from './evidence';
 import { license } from './license';
 import { miscComponents } from './miscComponents';
 import { miscPages } from './miscPages';
@@ -17,6 +18,8 @@ import { modalsB } from './modalsB';
 import { modalsC } from './modalsC';
 import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
+import { trustSafety } from './trustSafety';
+import { tsHub } from './tsHub';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
 import { userSuspension } from './userSuspension';
@@ -55,6 +58,9 @@ const dictionaries = [
   sharedComponents,
   userSettings,
   userSuspension,
+  trustSafety,
+  evidence,
+  tsHub,
 ] as const;
 
 function mergeLocale(locale: UiLanguageCode): Record<string, string> {

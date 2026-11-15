@@ -4,10 +4,20 @@
 // user, optional admin-only note, and the tenant scope (same email in the
 // child apps + sign-up block). Suspension is not archive: the accounts and
 // their data stay; only sign-in and API access are refused until lifted.
+// Optionally the account's content is hidden, quarantined or deleted, and its
+// name masked (docs/TRUST_AND_SAFETY.md section 8); every option defaults to
+// keep.
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
-import { ModelAppUser, SuspendUserBody, SuspensionReasonCode } from '../../models';
+import {
+  ModelAppUser,
+  SuspendUserBody,
+  SuspensionContentMode,
+  SuspensionNameMode,
+  SuspensionReasonCode,
+} from '../../models';
+import { SUSPENSION_CONTENT_MODES, SUSPENSION_NAME_MODES } from '../../utils/trustSafety';
 import {
   SUSPENSION_MESSAGE_MAX,
   SUSPENSION_NOTE_MAX,
@@ -29,6 +39,10 @@ export function SuspendUserModal({ users, busy, onClose, onSubmit }: Props) {
   const [message, setMessage] = useState('');
   const [internalNote, setInternalNote] = useState('');
   const [tenant, setTenant] = useState(false);
+  const [messagesMode, setMessagesMode] = useState<SuspensionContentMode>('keep');
+  const [mediaMode, setMediaMode] = useState<SuspensionContentMode>('keep');
+  const [nameMode, setNameMode] = useState<SuspensionNameMode>('keep');
+  const deleting = messagesMode === 'delete' || mediaMode === 'delete';
 
   const one = users.length === 1 ? users[0] : null;
   const name = one ? `${one.firstName || ''} ${one.lastName || ''}`.trim() || one.email || one._id : '';
@@ -45,6 +59,11 @@ export function SuspendUserModal({ users, busy, onClose, onSubmit }: Props) {
     const body: SuspendUserBody = { reasonCode, scope: tenant ? 'tenant' : 'app' };
     if (message.trim()) body.message = message.trim();
     if (internalNote.trim()) body.internalNote = internalNote.trim();
+    // Only what differs from the default, so an API without these options
+    // gets the body it always had.
+    if (messagesMode !== 'keep') body.messagesMode = messagesMode;
+    if (mediaMode !== 'keep') body.mediaMode = mediaMode;
+    if (nameMode !== 'keep') body.nameMode = nameMode;
     onSubmit(body);
   };
 
@@ -132,6 +151,54 @@ export function SuspendUserModal({ users, busy, onClose, onSubmit }: Props) {
                 </div>
               )}
             </label>
+            <fieldset className="flex flex-col gap-3 rounded-xl border border-gray-200 p-3">
+              <legend className="px-1 font-sans text-sm font-semibold">{t('trustSafetySuspend.contentHeading')}</legend>
+              {(
+                [
+                  ['messages', messagesMode, setMessagesMode],
+                  ['media', mediaMode, setMediaMode],
+                ] as const
+              ).map(([kind, value, setValue]) => (
+                <label key={kind} className="block">
+                  <div className="text-gray-500 text-[12px] font-sans mb-1">{t(`trustSafetySuspend.${kind}Label`)}</div>
+                  <select
+                    className={inputClass}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value as SuspensionContentMode)}
+                  >
+                    {SUSPENSION_CONTENT_MODES.map((m) => (
+                      <option key={m} value={m}>
+                        {t(`trustSafetySuspend.mode.${m}`)}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="font-sans text-[12px] text-gray-500 mt-1">{t(`trustSafetySuspend.${kind}Help`)}</div>
+                </label>
+              ))}
+              <label className="block">
+                <div className="text-gray-500 text-[12px] font-sans mb-1">{t('trustSafetySuspend.nameLabel')}</div>
+                <select
+                  className={inputClass}
+                  value={nameMode}
+                  onChange={(e) => setNameMode(e.target.value as SuspensionNameMode)}
+                >
+                  {SUSPENSION_NAME_MODES.map((m) => (
+                    <option key={m} value={m}>
+                      {t(`trustSafetySuspend.name.${m}`)}
+                    </option>
+                  ))}
+                </select>
+                <div className="font-sans text-[12px] text-gray-500 mt-1">{t('trustSafetySuspend.nameHelp')}</div>
+              </label>
+              {deleting && (
+                <div
+                  role="alert"
+                  className="rounded-xl border border-red-200 bg-red-50 text-red-800 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 p-3 font-sans text-[12px]"
+                >
+                  {t('trustSafetySuspend.deleteWarning')}
+                </div>
+              )}
+            </fieldset>
             <div>
               <label className="flex items-start gap-2 cursor-pointer font-sans text-sm">
                 <input

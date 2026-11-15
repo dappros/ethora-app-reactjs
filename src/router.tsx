@@ -21,9 +21,17 @@ const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
 const AdminServerSettings = lazy(() => import('./pages/AdminServerSettings'));
+const AdminTrustSafety = lazy(() => import('./pages/AdminTrustSafety'));
+const LegacyEvidenceRedirect = lazy(() =>
+  import('./pages/AdminTrustSafety').then((m) => ({ default: m.LegacyEvidenceRedirect }))
+);
+const QuarantineIndexRedirect = lazy(() =>
+  import('./pages/AdminTrustSafety').then((m) => ({ default: m.QuarantineIndexRedirect }))
+);
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
+const AppModeration = lazy(() => import('./pages/AppModeration'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserSettings = lazy(() => import('./pages/UserSettings/UserSettings'));
 const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
@@ -143,6 +151,30 @@ export const router = createBrowserRouter(
                           path: 'server',
                           Component: AdminServerSettings,
                         },
+                        // T&S hub (Trust & Safety): superadmins with write
+                        // access; the page shows "not allowed" to others.
+                        // Tabs in ?tab=, a quarantine case at quarantine/:caseId.
+                        {
+                          path: 'trust-safety',
+                          Component: AdminTrustSafety,
+                        },
+                        {
+                          path: 'trust-safety/quarantine',
+                          Component: QuarantineIndexRedirect,
+                        },
+                        {
+                          path: 'trust-safety/quarantine/:caseId',
+                          Component: AdminTrustSafety,
+                        },
+                        // The former Evidence page and its case links.
+                        {
+                          path: 'evidence',
+                          Component: LegacyEvidenceRedirect,
+                        },
+                        {
+                          path: 'evidence/:caseId',
+                          Component: LegacyEvidenceRedirect,
+                        },
                         {
                           path: 'agents',
                           Component: AdminAgents,
@@ -170,6 +202,10 @@ export const router = createBrowserRouter(
                             {
                               path: 'statistics',
                               Component: AppStatistics,
+                            },
+                            {
+                              path: 'moderation',
+                              Component: AppModeration,
                             },
                           ],
                         },

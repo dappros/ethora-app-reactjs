@@ -79,27 +79,33 @@ export default function AdminApp() {
             than after a hydration round-trip on Chat.tsx mount. */}
         <div className="flex items-center md:justify-end md:flex-1 md:mr-[32px]">
           <ThemeToggle className="hidden md:flex" />
-          <div className="grid justify-center content-center grid-cols-4 w-full md:max-w-[520px] px-4">
+          <div className="flex md:grid justify-center content-center md:grid-cols-5 w-full md:max-w-[660px] px-4 overflow-x-auto hide-scroll">
             <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center rounded-l-xl items-center py-2 px-4"
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center rounded-l-xl items-center py-2 px-3 md:px-4"
               to={`/app/admin/apps/${appId}/users`}
             >
               {t('adminApp.tabUsers')}
             </NavLink>
             <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center items-center py-2 px-3 md:px-4"
               to={`/app/admin/apps/${appId}/settings`}
             >
               {t('adminApp.tabSettings')}
             </NavLink>
             <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block text-center items-center py-2 px-4"
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center items-center py-2 px-3 md:px-4"
               to={`/app/admin/apps/${appId}/statistics`}
             >
               {t('adminApp.tabStatistics')}
             </NavLink>
             <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block text-center rounded-r-xl items-center py-2 px-4"
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center items-center py-2 px-3 md:px-4"
+              to={`/app/admin/apps/${appId}/moderation`}
+            >
+              {t('trustSafetyModeration.tab')}
+            </NavLink>
+            <NavLink
+              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center rounded-r-xl items-center py-2 px-3 md:px-4"
               to="/app/chat"
               onClick={() => {
                 if (!appId) return;

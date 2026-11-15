@@ -1,6 +1,22 @@
 import axios, { AxiosInstance } from 'axios';
 import { actionLogout } from './actions';
 import {
+  AppTrustSafetyInfo,
+  EvidenceCase,
+  EvidenceCaseAction,
+  EvidenceCasesResponse,
+  EvidenceBulkBody,
+  EvidenceBulkResponse,
+  TsBlockedDomainsResponse,
+  TsHubModerationItem,
+  TsOverview,
+  TsRule,
+  TsRulesResponse,
+  TsSuspendedUsersResponse,
+  ModerationAction,
+  ModerationItem,
+  ModerationItemsResponse,
+  MyAge,
   ModelUserACL,
   OrderByType,
   SuspendUserBody,
@@ -1704,6 +1720,136 @@ export function httpSuspendUsers(appId: string, userIds: string[], body: Suspend
     ...body,
     userIds,
   });
+}
+
+// Trust & Safety (docs/TRUST_AND_SAFETY.md). Policy of an App (install and
+// App values for admins), the own declared age, the admin age reset, and the
+// moderation queue.
+export function httpGetAppTrustSafety(appId: string) {
+  return httpV2.get<AppTrustSafetyInfo>(`/apps/${encodeURIComponent(appId)}/trust-safety`);
+}
+
+export function httpGetMyAge() {
+  return httpV2.get<MyAge>('/users/me/age');
+}
+
+// `dateOfBirth` is YYYY-MM-DD; only the birth year is stored. 409 AGE_LOCKED
+// when a user who declared under 18 tries to declare 18+.
+export function httpSetMyAge(dateOfBirth: string) {
+  return httpV2.put<MyAge>('/users/me/age', { dateOfBirth });
+}
+
+export function httpResetUserAge(appId: string, userId: string) {
+  return httpV2.delete(`/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/age`);
+}
+
+export interface ModerationItemsQuery {
+  status?: string;
+  kind?: string;
+  category?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export function httpGetModerationItems(appId: string, query: ModerationItemsQuery = {}) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(query)) {
+    if (v !== undefined && v !== null && v !== '') params.set(k, String(v));
+  }
+  const qs = params.toString();
+  return httpV2.get<ModerationItemsResponse>(
+    `/apps/${encodeURIComponent(appId)}/moderation/items${qs ? `?${qs}` : ''}`
+  );
+}
+
+export function httpModerationItemAction(appId: string, itemId: string, action: ModerationAction) {
+  return httpV2.post<{ ok?: boolean; item?: ModerationItem }>(
+    `/apps/${encodeURIComponent(appId)}/moderation/items/${encodeURIComponent(itemId)}/action`,
+    { action }
+  );
+}
+
+// Evidence review (superadmins with write access, docs/TRUST_AND_SAFETY.md
+// section 11). Every call is written to the audit log by the API. Media and
+// the export need the Authorization header, so they come back as blobs that
+// the page turns into object URLs or a saved file.
+export function httpGetEvidenceCases(queryString: string) {
+  return httpV2.get<EvidenceCasesResponse>(`/admin/evidence/cases${queryString ? `?${queryString}` : ''}`);
+}
+
+export function httpGetEvidenceCase(caseId: string) {
+  return httpV2.get<EvidenceCase>(`/admin/evidence/cases/${encodeURIComponent(caseId)}`);
+}
+
+export function httpEvidenceCaseAction(caseId: string, body: EvidenceCaseAction) {
+  return httpV2.post<{ ok?: boolean; case?: EvidenceCase }>(
+    `/admin/evidence/cases/${encodeURIComponent(caseId)}/action`,
+    body
+  );
+}
+
+export function httpGetEvidenceMedia(evidenceId: string, preview = false) {
+  return httpV2.get<Blob>(`/admin/evidence/${encodeURIComponent(evidenceId)}/media${preview ? '?preview=1' : ''}`, {
+    responseType: 'blob',
+    timeout: 120000,
+  });
+}
+
+export function httpExportEvidenceCase(caseId: string, includeMedia: boolean) {
+  return httpV2.get<Blob>(`/admin/evidence/cases/${encodeURIComponent(caseId)}/export?includeMedia=${includeMedia}`, {
+    responseType: 'blob',
+    // A case with media can be large; the default 30 s is too short.
+    timeout: 10 * 60 * 1000,
+  });
+}
+
+// Quarantine bulk actions (1..200 cases); per-case failures come back in
+// `results`, one audit row per case.
+export function httpEvidenceBulkAction(body: EvidenceBulkBody) {
+  return httpV2.post<EvidenceBulkResponse>('/admin/evidence/cases/bulk-action', body);
+}
+
+// T&S hub (superadmins with write access, docs/TRUST_AND_SAFETY.md section
+// 13). Item actions, unsuspend and blocked domain edits use the per-App
+// endpoints above.
+export function httpGetTsOverview() {
+  return httpV2.get<TsOverview>('/admin/trust-safety/overview');
+}
+
+export function httpGetTsModerationItems(queryString: string) {
+  return httpV2.get<{ items: TsHubModerationItem[]; total?: number }>(
+    `/admin/trust-safety/moderation-items${queryString ? `?${queryString}` : ''}`
+  );
+}
+
+export function httpGetTsSuspendedUsers(queryString: string) {
+  return httpV2.get<TsSuspendedUsersResponse>(`/admin/trust-safety/suspended-users${queryString ? `?${queryString}` : ''}`);
+}
+
+export function httpGetTsRules() {
+  return httpV2.get<TsRulesResponse>('/admin/trust-safety/rules');
+}
+
+export function httpCreateTsRule(body: Partial<TsRule>) {
+  return httpV2.post<TsRule | { rule: TsRule }>('/admin/trust-safety/rules', body);
+}
+
+export function httpUpdateTsRule(id: string, body: Partial<TsRule>) {
+  return httpV2.put<TsRule | { rule: TsRule }>(`/admin/trust-safety/rules/${encodeURIComponent(id)}`, body);
+}
+
+export function httpDeleteTsRule(id: string) {
+  return httpV2.delete(`/admin/trust-safety/rules/${encodeURIComponent(id)}`);
+}
+
+// `rule` = the draft of the dialog, tested alongside the saved rules (it
+// replaces the saved rule with the same _id).
+export function httpTestTsRules(text: string, rule?: Partial<TsRule> & { _id?: string }) {
+  return httpV2.post<unknown>('/admin/trust-safety/rules/test', rule ? { text, rule } : { text });
+}
+
+export function httpGetTsBlockedDomains() {
+  return httpV2.get<TsBlockedDomainsResponse>('/admin/trust-safety/blocked-domains');
 }
 
 // Agents: export / import.

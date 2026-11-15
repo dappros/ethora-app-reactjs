@@ -1,3 +1,4 @@
+import { AgeSection } from './AgeSection';
 import { BlockedUsers } from './BlockedUsers';
 import { ManageData } from './ManageData';
 import { ProfileShares } from './ProfileShares';
@@ -5,7 +6,8 @@ import { useVisibilitySetting } from './useVisibilitySetting';
 import { ProfileVisibility } from './Visibility';
 
 // Who can see the profile, the share links that matter only while it is
-// restricted, then the account-level data actions (export / delete).
+// restricted, the declared age, then the account-level data actions
+// (export / delete).
 export function PrivacyData() {
   const [isProfileOpen, setIsProfileOpen] =
     useVisibilitySetting('isProfileOpen');
@@ -23,6 +25,8 @@ export function PrivacyData() {
           <ProfileShares />
         </section>
       )}
+      {/* Hidden (renders nothing) on an API without the age endpoints. */}
+      <AgeSection />
       <section className="border-t border-gray-200 pt-8">
         <BlockedUsers />
       </section>

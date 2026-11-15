@@ -214,6 +214,9 @@ export interface ModelApp {
   // `example.org` also matches its subdomains; `*` matches one DNS label.
   // Applies to this app only, not its child apps.
   signupBlockedEmailDomains?: string[];
+  // Trust & Safety overrides; each can only make the install policy stricter.
+  // Absent / null keys follow the install value.
+  trustSafety?: TrustSafetyOverrides | null;
 }
 
 export interface ModelAiWidgetValues {
@@ -305,6 +308,8 @@ export interface ModelAppUser {
   // as they are, only login and API access are refused). null / absent = not
   // suspended.
   suspension?: ModelUserSuspension | null;
+  // Self-declared age (Trust & Safety). Absent / null = not declared.
+  age?: ModelUserAge | null;
 }
 
 export type SuspensionReasonCode = 'child_safety' | 'terms_violation' | 'spam' | 'security' | 'other';
@@ -321,6 +326,8 @@ export interface ModelUserSuspension {
   suspendedByRole?: 'member' | 'admin' | 'owner' | 'superadmin' | null;
   until?: string | null;
   scope?: SuspensionScope | null;
+  // What happened to the account's content (older APIs omit it).
+  content?: SuspensionContent | null;
 }
 
 // What a suspended user is told: `details.suspension` of a 403 USER_SUSPENDED.
@@ -338,6 +345,362 @@ export interface SuspendUserBody {
   internalNote?: string;
   scope?: SuspensionScope;
   until?: string;
+  // Content options; the API defaults each to 'keep'.
+  messagesMode?: SuspensionContentMode;
+  mediaMode?: SuspensionContentMode;
+  nameMode?: SuspensionNameMode;
+}
+
+export type SuspensionContentMode = 'keep' | 'hide' | 'delete' | 'quarantine';
+export type SuspensionNameMode = 'keep' | 'suspended';
+export interface SuspensionContent {
+  messagesMode?: SuspensionContentMode;
+  mediaMode?: SuspensionContentMode;
+  nameMode?: SuspensionNameMode;
+}
+
+// ---- Trust & Safety (docs/TRUST_AND_SAFETY.md) ----
+
+export type TsImageAction = 'allow' | 'blur' | 'hold' | 'block';
+export type TsTextAction = 'allow' | 'flag' | 'blur' | 'hide';
+export type TsProfile = 'business' | 'education' | 'community' | 'adult' | 'custom';
+// Image policy level (section 12). `custom` is an install choice only.
+export type TsImageLevel = 'custom' | 'off' | 'relaxed' | 'standard' | 'strict';
+
+// App.trustSafety: per-App overrides, stricter only.
+export interface TrustSafetyOverrides {
+  // A named level; applies only when stricter than the install level.
+  imageLevel?: Exclude<TsImageLevel, 'custom'> | null;
+  imageNudityAction?: TsImageAction | null;
+  imageNudityThreshold?: number | null;
+  textToxicityAction?: TsTextAction | null;
+  textToxicityThreshold?: number | null;
+  textSevereAction?: TsTextAction | null;
+  textSevereThreshold?: number | null;
+  piiAction?: TsTextAction | null;
+  phiAction?: TsTextAction | null;
+  phiThreshold?: number | null;
+}
+
+// The install policy (and the effective one, install tightened by the App).
+export interface TrustSafetyPolicy {
+  enabled: boolean;
+  profile?: TsProfile | string;
+  // Older APIs omit the image level fields.
+  imageLevel?: TsImageLevel;
+  // Install only: the percent thresholds of the named levels.
+  imageExplicitNudenet?: number;
+  imageExplicitFalconsai?: number;
+  imageRevealingFlag?: number;
+  imageRevealingBlur?: number;
+  imageNudityAction: TsImageAction;
+  imageNudityThreshold: number;
+  ageGate: boolean;
+  textToxicityAction: TsTextAction;
+  textToxicityThreshold: number;
+  textSevereAction: TsTextAction;
+  textSevereThreshold: number;
+  piiAction: TsTextAction;
+  piiTypes?: string[];
+  phiAction: TsTextAction;
+  phiThreshold: number;
+  evidenceRetentionDays?: number;
+}
+
+// GET /v2/apps/:appId/trust-safety. `install` and `app` only for admins.
+export interface AppTrustSafetyInfo {
+  enabled: boolean;
+  ageGate: boolean;
+  imageNudityAction: TsImageAction;
+  // The effective image level (admins; older APIs omit it).
+  imageLevel?: TsImageLevel;
+  install?: TrustSafetyPolicy;
+  app?: TrustSafetyOverrides | null;
+  effective?: TrustSafetyPolicy;
+  // Whether the moderation service answers (optional; older APIs omit it).
+  service?: { configured?: boolean; ok?: boolean | null; models?: Record<string, string> | null } | null;
+}
+
+// User.age as the users list carries it.
+export interface ModelUserAge {
+  birthYear?: number | null;
+  isAdult?: boolean | null;
+  declaredAt?: string | null;
+  source?: 'self' | 'admin' | null;
+}
+
+// GET / PUT /v2/users/me/age.
+export interface MyAge {
+  birthYear: number | null;
+  isAdult: boolean | null;
+  declaredAt: string | null;
+  canDeclareAdult: boolean;
+}
+
+export type ModerationItemKind = 'message' | 'media';
+export type ModerationItemStatus = 'open' | 'approved' | 'removed' | 'dismissed';
+export type ModerationAction = 'dismiss' | 'approve' | 'blur' | 'hide' | 'delete' | 'restore';
+
+// The moderation result of a media file (File.moderation; on quarantine
+// case media also kept on the evidence row). `score` and `signals` in
+// percent, `labels[].score` 0..1 (NudeNet body-part labels); `description`
+// is a neutral AI caption of the visible content (section 14), when one was
+// made.
+export interface MediaModeration {
+  status?: string | null;
+  category?: string | null;
+  score?: number | null;
+  labels?: Array<{ label: string; score?: number | null }> | null;
+  signals?: { nudenet?: number | null; falconsai?: number | null; adamcodd?: number | null } | null;
+  description?: string | null;
+  describedAt?: string | null;
+  descriptionModel?: string | null;
+}
+
+// One row of GET /v2/apps/:appId/moderation/items.
+export interface ModerationItem {
+  _id: string;
+  id?: string;
+  appId: string;
+  kind: ModerationItemKind;
+  room?: string | null;
+  // Room title, when the API resolves it.
+  roomTitle?: string | null;
+  stanzaId?: string | null;
+  originId?: string | null;
+  fileId?: string | null;
+  senderUserId?: string | null;
+  // Sender details, when the API resolves them.
+  sender?: { _id?: string; firstName?: string; lastName?: string; email?: string; profileImage?: string } | null;
+  category?: string | null;
+  scores?: Record<string, number | string | string[] | null> | null;
+  // What was applied automatically: flag | blur | hold | hide | block.
+  action?: string | null;
+  status: ModerationItemStatus;
+  text?: string | null;
+  source?: 'auto' | 'moderator' | 'report' | null;
+  // Media items: the (server-side blurred) preview and file details.
+  previewUrl?: string | null;
+  file?: {
+    locationPreview?: string | null;
+    location?: string | null;
+    mimetype?: string | null;
+    originalname?: string | null;
+    // File.moderation; `signals` = NudeNet / Falconsai / AdamCodd in percent (null = not run).
+    moderation?: MediaModeration | null;
+  } | null;
+  // Category `custom`: the rule that matched (name kept on the item).
+  ruleName?: string | null;
+  rule?: { _id?: string; name?: string } | null;
+  createdAt: string;
+  resolvedBy?: string | null;
+  resolvedAt?: string | null;
+}
+
+export interface ModerationItemsResponse {
+  items: ModerationItem[];
+  total?: number;
+  limit?: number;
+  offset?: number;
+}
+
+// Trust & Safety evidence review, superadmins (docs/TRUST_AND_SAFETY.md
+// section 11). A case groups the moderation_evidence rows of one deleted or
+// moderated message, or of one suspension.
+export type EvidenceReason = 'deleted' | 'auto' | 'moderator' | 'suspension';
+export type EvidenceMode = 'hide' | 'quarantine';
+export type EvidenceStatusFilter = 'active' | 'held' | 'expiring';
+export type EvidenceReportTarget = 'ncmec' | 'law_enforcement' | 'hr' | 'internal' | 'other';
+
+export interface EvidencePerson {
+  _id?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface EvidenceReport {
+  target: EvidenceReportTarget | string;
+  reference?: string | null;
+  note?: string | null;
+  // A user id, or the user when the API resolves it.
+  by?: string | EvidencePerson | null;
+  at?: string | null;
+}
+
+export interface EvidenceMessage {
+  evidenceId: string;
+  stanzaId?: string | null;
+  sentAt?: string | null;
+  text?: string | null;
+  // The sender's JID or name, or the user when the API resolves it.
+  sender?: string | EvidencePerson | null;
+}
+
+export interface EvidenceMedia {
+  evidenceId: string;
+  fileId?: string | null;
+  mimetype?: string | null;
+  size?: number | null;
+  sha256?: string | null;
+  md5?: string | null;
+  hasPreview?: boolean;
+  originalName?: string | null;
+  purgedAt?: string | null;
+  available?: boolean;
+  // The file's moderation result; null when no check ran.
+  moderation?: MediaModeration | null;
+}
+
+// A reviewer who opened the case or one of its media files.
+export interface EvidenceView {
+  userId: string;
+  email?: string | null;
+  kind?: 'case' | 'media' | string;
+  at: string;
+}
+
+export interface EvidenceCase {
+  caseId: string;
+  reason: EvidenceReason | string;
+  mode?: EvidenceMode | string | null;
+  appId?: string | null;
+  appName?: string | null;
+  room?: string | null;
+  roomTitle?: string | null;
+  stanzaIds?: string[];
+  user?: EvidencePerson | null;
+  createdAt?: string | null;
+  expiresAt?: string | null;
+  hold?: boolean;
+  holdSetBy?: string | EvidencePerson | null;
+  holdSetAt?: string | null;
+  purgedAt?: string | null;
+  // The list may leave out the rows themselves and send only the counts.
+  messages?: EvidenceMessage[];
+  media?: EvidenceMedia[];
+  reports?: EvidenceReport[];
+  // The last 20 views of the case and its media, newest first.
+  viewedBy?: EvidenceView[];
+  counts?: { messages?: number; media?: number };
+}
+
+export interface EvidenceCasesResponse {
+  items: EvidenceCase[];
+  total?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export type EvidenceCaseAction =
+  | { action: 'extend'; days: number }
+  | { action: 'hold' }
+  | { action: 'release_hold'; days?: number }
+  | { action: 'purge' }
+  | { action: 'report'; target: EvidenceReportTarget; reference?: string; note?: string };
+
+// ---- T&S hub (docs/TRUST_AND_SAFETY.md section 13), superadmins ----
+
+// GET /v2/admin/trust-safety/overview.
+export interface TsOverview {
+  enabled: boolean;
+  profile?: TsProfile | string | null;
+  imageLevel?: TsImageLevel | string | null;
+  service?: {
+    configured?: boolean;
+    ok?: boolean | null;
+    // Loaded models: a name -> version map or a list of names.
+    models?: Record<string, string | boolean | null> | string[] | null;
+  } | null;
+  counts?: {
+    quarantineCases?: number;
+    quarantineExpiringSoon?: number;
+    quarantineOnHold?: number;
+    moderationOpen?: number;
+    suspendedUsers?: number;
+    rules?: number;
+  } | null;
+}
+
+export type EvidenceBulkAction = 'purge' | 'extend' | 'hold' | 'release_hold';
+
+export interface EvidenceBulkBody {
+  caseIds: string[];
+  action: EvidenceBulkAction;
+  days?: number;
+}
+
+export interface EvidenceBulkResponse {
+  ok: boolean;
+  results: Array<{ caseId: string; ok: boolean; code?: string | null; error?: string | null }>;
+}
+
+// GET /v2/admin/trust-safety/moderation-items: the per-App item plus its App.
+export interface TsHubModerationItem extends ModerationItem {
+  appName?: string | null;
+}
+
+// GET /v2/admin/trust-safety/suspended-users.
+export interface TsSuspendedUser {
+  _id: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  appId: string;
+  appName?: string | null;
+  suspension: ModelUserSuspension;
+  // Present when the API sends them; used to hide actions the server refuses.
+  role?: 'superadmin' | 'owner' | 'admin' | 'member' | null;
+  isSuperAdmin?: { read?: boolean; write?: boolean } | null;
+}
+
+export interface TsSuspendedUsersResponse {
+  items: TsSuspendedUser[];
+  total?: number;
+}
+
+// Custom rules (collection ts_rules, install-wide).
+export type TsRuleKind = 'words' | 'regex';
+export type TsRuleAction = 'flag' | 'blur' | 'hide';
+
+export interface TsRule {
+  _id: string;
+  name: string;
+  enabled: boolean;
+  kind: TsRuleKind;
+  patterns: string[];
+  wholeWords?: boolean;
+  caseSensitive?: boolean;
+  action: TsRuleAction;
+  category?: 'custom';
+  // Empty = all Apps.
+  appIds: string[];
+  createdBy?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface TsRulesResponse {
+  items: TsRule[];
+  total?: number;
+}
+
+// One matching rule of POST /v2/admin/trust-safety/rules/test (the draft
+// rule of the dialog has `draft: true`). Field names vary by API version;
+// utils/tsHub.ts normalizeRuleTest() reads them.
+export interface TsRuleTestMatch {
+  ruleId?: string;
+  _id?: string;
+  id?: string;
+  name?: string;
+  action?: string;
+  matched?: string[];
+  terms?: string[];
+  draft?: boolean;
+}
+
+// GET /v2/admin/trust-safety/blocked-domains.
+export interface TsBlockedDomainsResponse {
+  items: Array<{ appId: string; appName?: string | null; patterns: string[] }>;
 }
 
 // One row of the results array returned by suspend / unsuspend (single and
@@ -552,7 +915,7 @@ export interface ServerSetting {
   tab?: ServerSettingsTab;
   advanced?: boolean;
 }
-export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'ai' | 'email' | 'system';
+export type ServerSettingsTab = 'api' | 'chats' | 'users' | 'safety' | 'ai' | 'email' | 'system';
 // Read-only health of the install (GET /v2/server-settings/status, super admins).
 export interface ServerStatus {
   version: { build: string | null; commit: string | null; line: string | null; installKind: string | null };
@@ -643,7 +1006,7 @@ export interface ServerUpdateInfo {
 // An Enterprise module as the API sees it: installed = its service is part of
 // this install (null: the API cannot tell), running = it answered just now.
 export interface ServerModule {
-  key: 'ai' | 'push' | 'playground' | 'mcp' | 'uptime';
+  key: 'ai' | 'push' | 'playground' | 'mcp' | 'uptime' | 'moderation';
   tab: ServerSettingsTab;
   installed: boolean | null;
   running: boolean | null;
