@@ -3,8 +3,8 @@ interface Props {
   height?: number;
 }
 
-// Shield with a check: Trust & Safety evidence review.
-export function IconEvidence({ width = 24, height = 24 }: Props) {
+// Shield with a check: the T&S hub (Trust & Safety) in the left menu.
+export function IconTrustSafety({ width = 24, height = 24 }: Props) {
   return (
     <svg
       className="text-gray-500"

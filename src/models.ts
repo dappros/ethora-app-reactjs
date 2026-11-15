@@ -477,6 +477,9 @@ export interface ModerationItem {
       signals?: { nudenet?: number | null; falconsai?: number | null; adamcodd?: number | null } | null;
     } | null;
   } | null;
+  // Category `custom`: the rule that matched (name kept on the item).
+  ruleName?: string | null;
+  rule?: { _id?: string; name?: string } | null;
   createdAt: string;
   resolvedBy?: string | null;
   resolvedAt?: string | null;
@@ -569,6 +572,110 @@ export type EvidenceCaseAction =
   | { action: 'release_hold'; days?: number }
   | { action: 'purge' }
   | { action: 'report'; target: EvidenceReportTarget; reference?: string; note?: string };
+
+// ---- T&S hub (docs/TRUST_AND_SAFETY.md section 13), superadmins ----
+
+// GET /v2/admin/trust-safety/overview.
+export interface TsOverview {
+  enabled: boolean;
+  profile?: TsProfile | string | null;
+  imageLevel?: TsImageLevel | string | null;
+  service?: {
+    configured?: boolean;
+    ok?: boolean | null;
+    // Loaded models: a name -> version map or a list of names.
+    models?: Record<string, string | boolean | null> | string[] | null;
+  } | null;
+  counts?: {
+    quarantineCases?: number;
+    quarantineExpiringSoon?: number;
+    quarantineOnHold?: number;
+    moderationOpen?: number;
+    suspendedUsers?: number;
+    rules?: number;
+  } | null;
+}
+
+export type EvidenceBulkAction = 'purge' | 'extend' | 'hold' | 'release_hold';
+
+export interface EvidenceBulkBody {
+  caseIds: string[];
+  action: EvidenceBulkAction;
+  days?: number;
+}
+
+export interface EvidenceBulkResponse {
+  ok: boolean;
+  results: Array<{ caseId: string; ok: boolean; code?: string | null; error?: string | null }>;
+}
+
+// GET /v2/admin/trust-safety/moderation-items: the per-App item plus its App.
+export interface TsHubModerationItem extends ModerationItem {
+  appName?: string | null;
+}
+
+// GET /v2/admin/trust-safety/suspended-users.
+export interface TsSuspendedUser {
+  _id: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  appId: string;
+  appName?: string | null;
+  suspension: ModelUserSuspension;
+  // Present when the API sends them; used to hide actions the server refuses.
+  role?: 'superadmin' | 'owner' | 'admin' | 'member' | null;
+  isSuperAdmin?: { read?: boolean; write?: boolean } | null;
+}
+
+export interface TsSuspendedUsersResponse {
+  items: TsSuspendedUser[];
+  total?: number;
+}
+
+// Custom rules (collection ts_rules, install-wide).
+export type TsRuleKind = 'words' | 'regex';
+export type TsRuleAction = 'flag' | 'blur' | 'hide';
+
+export interface TsRule {
+  _id: string;
+  name: string;
+  enabled: boolean;
+  kind: TsRuleKind;
+  patterns: string[];
+  wholeWords?: boolean;
+  caseSensitive?: boolean;
+  action: TsRuleAction;
+  category?: 'custom';
+  // Empty = all Apps.
+  appIds: string[];
+  createdBy?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface TsRulesResponse {
+  items: TsRule[];
+  total?: number;
+}
+
+// One matching rule of POST /v2/admin/trust-safety/rules/test (the draft
+// rule of the dialog has `draft: true`). Field names vary by API version;
+// utils/tsHub.ts normalizeRuleTest() reads them.
+export interface TsRuleTestMatch {
+  ruleId?: string;
+  _id?: string;
+  id?: string;
+  name?: string;
+  action?: string;
+  matched?: string[];
+  terms?: string[];
+  draft?: boolean;
+}
+
+// GET /v2/admin/trust-safety/blocked-domains.
+export interface TsBlockedDomainsResponse {
+  items: Array<{ appId: string; appName?: string | null; patterns: string[] }>;
+}
 
 // One row of the results array returned by suspend / unsuspend (single and
 // bulk). Bulk per-user failures come back as status 'error' with code/error.

@@ -94,7 +94,7 @@ const en: Record<string, string> = {
   ...textActionOptions('TS_PHI_ACTION'),
   'serverSettings.key.TS_PHI_THRESHOLD': 'Health information threshold',
   'serverSettings.desc.TS_PHI_THRESHOLD': 'Percent. Lower catches more.',
-  'serverSettings.key.TS_EVIDENCE_RETENTION_DAYS': 'Keep evidence for (days)',
+  'serverSettings.key.TS_EVIDENCE_RETENTION_DAYS': 'Keep quarantined content for (days)',
   'serverSettings.desc.TS_EVIDENCE_RETENTION_DAYS':
     'Quarantined content and the originals of hidden messages are deleted after this many days.',
   // Messages their authors delete (applies whether or not automatic
@@ -236,7 +236,7 @@ const en: Record<string, string> = {
     'Others see "Suspended account" with no avatar instead of the name, until the suspension is lifted.',
   'trustSafetySuspend.mode.keep': 'Keep as is',
   'trustSafetySuspend.mode.hide': 'Hide (restored when unsuspended)',
-  'trustSafetySuspend.mode.quarantine': 'Quarantine (hidden, kept as evidence, deleted after the retention period)',
+  'trustSafetySuspend.mode.quarantine': 'Quarantine (hidden, kept in quarantine, deleted after the retention period)',
   'trustSafetySuspend.mode.delete': 'Delete',
   'trustSafetySuspend.name.keep': 'Keep',
   'trustSafetySuspend.name.suspended': 'Show as "Suspended account"',
@@ -297,7 +297,7 @@ const en: Record<string, string> = {
   'trustSafetyModeration.action.blur': 'Blur',
   'trustSafetyModeration.action.blurTitle': 'Show it collapsed; readers tap to view',
   'trustSafetyModeration.action.hide': 'Hide',
-  'trustSafetyModeration.action.hideTitle': 'Hide it from everyone; the original is kept as evidence',
+  'trustSafetyModeration.action.hideTitle': 'Hide it from everyone; the original is kept in quarantine',
   'trustSafetyModeration.action.delete': 'Delete',
   'trustSafetyModeration.action.deleteTitle': 'Delete it for everyone; cannot be undone',
   'trustSafetyModeration.action.restore': 'Restore',

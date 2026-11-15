@@ -1,6 +1,6 @@
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 //
-// Admin > Evidence > case (docs/TRUST_AND_SAFETY.md section 11): the
+// T&S > Quarantine > case (docs/TRUST_AND_SAFETY.md section 11): the
 // transcript, the kept media (blurred, fetched only after Show and a
 // warning), hashes, reports, and the case actions: extend, legal hold and
 // release, record a report, export and purge. Every view and action is
@@ -22,7 +22,7 @@ import {
   ReportInput,
 } from '../components/evidence/EvidenceDialogs';
 import { EvidenceMediaTile } from '../components/evidence/EvidenceMediaTile';
-import { evidenceListPath, formatEvidenceSecond, formatEvidenceTime } from '../components/evidence/format';
+import { formatEvidenceSecond, formatEvidenceTime } from '../components/evidence/format';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { httpEvidenceCaseAction, httpExportEvidenceCase, httpGetEvidenceCase, httpV2, saveBlobAs } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
@@ -30,6 +30,7 @@ import type { EvidenceCase, EvidenceCaseAction, ServerSettingsResponse } from '.
 import { accessErrorMessage } from '../utils/accessError';
 import { apiError } from '../utils/apiError';
 import { caseRoomLabel, exportFilename, personName, retentionSettingKey } from '../utils/evidence';
+import { quarantineListPath } from '../utils/tsHub';
 
 type DialogKind = 'extend' | 'release' | 'report' | 'export' | 'purge' | null;
 
@@ -62,7 +63,7 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function EvidenceCaseView({ caseId }: { caseId: string }) {
+function QuarantineCaseView({ caseId }: { caseId: string }) {
   const { t } = useTranslation();
   const label = useEvidenceLabel();
   const location = useLocation();
@@ -159,14 +160,14 @@ function EvidenceCaseView({ caseId }: { caseId: string }) {
   if (denied) return <EvidenceNotAllowed />;
 
   const back = (
-    <Link to={evidenceListPath(listSearch)} className="text-sm text-brand-500 underline">
+    <Link to={quarantineListPath(listSearch)} className="text-sm text-brand-500 underline">
       {t('evidence.case.back')}
     </Link>
   );
 
   if (!item) {
     return (
-      <div className="h-full overflow-y-auto">
+      <div className="min-w-0">
         <div className="mb-3">{back}</div>
         <div className="font-varela text-[24px] mb-2">{t('evidence.case.title')}</div>
         <EvidenceLoggedNotice />
@@ -194,7 +195,7 @@ function EvidenceCaseView({ caseId }: { caseId: string }) {
     : '';
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="min-w-0">
       <div className="mb-3">{back}</div>
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
         <div className="min-w-0">
@@ -497,10 +498,12 @@ function EvidenceCaseView({ caseId }: { caseId: string }) {
   );
 }
 
-export default function AdminEvidenceCase() {
+// Rendered by the T&S hub (pages/AdminTrustSafety.tsx) under its Quarantine
+// tab, at /app/admin/trust-safety/quarantine/:caseId.
+export default function AdminQuarantineCase() {
   const allowed = useCanReviewEvidence();
   const { caseId } = useParams();
   if (!allowed) return <EvidenceNotAllowed />;
-  if (!caseId) return <Navigate to={evidenceListPath()} replace />;
-  return <EvidenceCaseView key={caseId} caseId={caseId} />;
+  if (!caseId) return <Navigate to={quarantineListPath()} replace />;
+  return <QuarantineCaseView key={caseId} caseId={caseId} />;
 }

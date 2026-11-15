@@ -271,7 +271,15 @@ export const SUSPENSION_NAME_MODES: SuspensionNameMode[] = ['keep', 'suspended']
 
 // ---- Moderation queue ----
 
-export const MODERATION_CATEGORIES = ['nudity', 'revealing', 'toxicity', 'severe', 'pii', 'phi', 'suspension'];
+// `custom` = an install rule matched (T&S > Rules); the item keeps the rule's name.
+export const MODERATION_CATEGORIES = ['nudity', 'revealing', 'toxicity', 'severe', 'pii', 'phi', 'custom', 'suspension'];
+
+/** The name of the rule behind a `custom` item, when the API sends it. */
+export function ruleNameOf(item: Pick<ModerationItem, 'category' | 'ruleName' | 'rule' | 'scores'>): string {
+  if (item.category !== 'custom') return '';
+  const fromScores = item.scores && typeof item.scores.rule === 'string' ? item.scores.rule : '';
+  return String(item.ruleName || item.rule?.name || fromScores || '').trim();
+}
 
 /**
  * The image signals of a media item, in percent: from its scores, else from

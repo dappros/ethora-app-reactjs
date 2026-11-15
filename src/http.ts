@@ -5,6 +5,14 @@ import {
   EvidenceCase,
   EvidenceCaseAction,
   EvidenceCasesResponse,
+  EvidenceBulkBody,
+  EvidenceBulkResponse,
+  TsBlockedDomainsResponse,
+  TsHubModerationItem,
+  TsOverview,
+  TsRule,
+  TsRulesResponse,
+  TsSuspendedUsersResponse,
   ModerationAction,
   ModerationItem,
   ModerationItemsResponse,
@@ -1793,6 +1801,55 @@ export function httpExportEvidenceCase(caseId: string, includeMedia: boolean) {
     // A case with media can be large; the default 30 s is too short.
     timeout: 10 * 60 * 1000,
   });
+}
+
+// Quarantine bulk actions (1..200 cases); per-case failures come back in
+// `results`, one audit row per case.
+export function httpEvidenceBulkAction(body: EvidenceBulkBody) {
+  return httpV2.post<EvidenceBulkResponse>('/admin/evidence/cases/bulk-action', body);
+}
+
+// T&S hub (superadmins with write access, docs/TRUST_AND_SAFETY.md section
+// 13). Item actions, unsuspend and blocked domain edits use the per-App
+// endpoints above.
+export function httpGetTsOverview() {
+  return httpV2.get<TsOverview>('/admin/trust-safety/overview');
+}
+
+export function httpGetTsModerationItems(queryString: string) {
+  return httpV2.get<{ items: TsHubModerationItem[]; total?: number }>(
+    `/admin/trust-safety/moderation-items${queryString ? `?${queryString}` : ''}`
+  );
+}
+
+export function httpGetTsSuspendedUsers(queryString: string) {
+  return httpV2.get<TsSuspendedUsersResponse>(`/admin/trust-safety/suspended-users${queryString ? `?${queryString}` : ''}`);
+}
+
+export function httpGetTsRules() {
+  return httpV2.get<TsRulesResponse>('/admin/trust-safety/rules');
+}
+
+export function httpCreateTsRule(body: Partial<TsRule>) {
+  return httpV2.post<TsRule | { rule: TsRule }>('/admin/trust-safety/rules', body);
+}
+
+export function httpUpdateTsRule(id: string, body: Partial<TsRule>) {
+  return httpV2.put<TsRule | { rule: TsRule }>(`/admin/trust-safety/rules/${encodeURIComponent(id)}`, body);
+}
+
+export function httpDeleteTsRule(id: string) {
+  return httpV2.delete(`/admin/trust-safety/rules/${encodeURIComponent(id)}`);
+}
+
+// `rule` = the draft of the dialog, tested alongside the saved rules (it
+// replaces the saved rule with the same _id).
+export function httpTestTsRules(text: string, rule?: Partial<TsRule> & { _id?: string }) {
+  return httpV2.post<unknown>('/admin/trust-safety/rules/test', rule ? { text, rule } : { text });
+}
+
+export function httpGetTsBlockedDomains() {
+  return httpV2.get<TsBlockedDomainsResponse>('/admin/trust-safety/blocked-domains');
 }
 
 // Agents: export / import.

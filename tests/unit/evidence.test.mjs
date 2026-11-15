@@ -95,7 +95,7 @@ test('counts, sizes and export file names', () => {
   assert.equal(formatBytes(1536), '1.5 KB');
   assert.equal(formatBytes(25 * 1024 * 1024), '25 MB');
   assert.equal(formatBytes(undefined), '');
-  assert.equal(exportFilename('deleted:a_b@conference.x:123'), 'evidence-deleted_a_b_conference.x_123.zip');
+  assert.equal(exportFilename('deleted:a_b@conference.x:123'), 'quarantine-deleted_a_b_conference.x_123.zip');
   assert.equal(exportFilename('c1', 'attachment; filename="case-c1.zip"'), 'case-c1.zip');
   assert.equal(exportFilename('c1', "attachment; filename*=UTF-8''case%20c1.zip"), 'case c1.zip');
 });

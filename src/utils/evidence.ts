@@ -200,7 +200,7 @@ export function mediaKind(mimetype?: string | null): MediaKind {
 
 /**
  * File name of a downloaded export: the server's Content-Disposition name
- * when there is one, else evidence-<case id>.zip with unsafe characters
+ * when there is one, else quarantine-<case id>.zip with unsafe characters
  * replaced.
  */
 export function exportFilename(caseId: string, contentDisposition?: string | null): string {
@@ -217,5 +217,5 @@ export function exportFilename(caseId: string, contentDisposition?: string | nul
   const plain = /filename\s*=\s*"?([^";]+)"?/i.exec(cd);
   if (plain && plain[1].trim()) return plain[1].trim();
   const safe = caseId.replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 120);
-  return `evidence-${safe || 'case'}.zip`;
+  return `quarantine-${safe || 'case'}.zip`;
 }

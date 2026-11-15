@@ -1,24 +1,21 @@
 import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 
-// Trust & Safety evidence review (docs/TRUST_AND_SAFETY.md section 11): the
-// superadmin "Evidence" page, its case view, media viewer and the case
-// actions. English only for now; the other locales fall back to it.
+// Trust & Safety quarantine review (docs/TRUST_AND_SAFETY.md section 11):
+// the Quarantine tab of the superadmin T&S hub (was the "Evidence" page), its
+// case view, media viewer and the case actions. Keys keep the evidence.*
+// prefix of the API (/v2/admin/evidence); the visible wording is Quarantine.
+// English only for now; the other locales fall back to it.
 // Placeholders ({days}, {count}, ...) are filled with String.prototype.replace.
 
 const en: Record<string, string> = {
-  'nav.evidence': 'Evidence',
-
   // ---- Access ----
-  'evidence.logged': 'Access to evidence is logged.',
+  'evidence.logged': 'Access to quarantined content is logged.',
   'evidence.notAllowed.title': 'Not allowed',
-  'evidence.notAllowed.body': 'Evidence review is open to server superadmins with write access only.',
-  'evidence.unavailable': 'Evidence review is not available on this server yet.',
-  // Server settings > Trust & Safety: "Review kept content on the Evidence page."
-  'evidence.serverSettingsLink.before': 'Review kept and quarantined content on the ',
-  'evidence.serverSettingsLink.after': ' page.',
+  'evidence.notAllowed.body': 'Trust & Safety is open to server superadmins with write access only.',
+  'evidence.unavailable': 'The quarantine is not available on this server yet.',
 
   // ---- Case list ----
-  'evidence.title': 'Evidence',
+  'evidence.title': 'Quarantine',
   'evidence.intro':
     'Content kept from deleted messages, moderator and automatic actions, and suspensions. Each case is kept until its retention ends, unless it is extended or put on legal hold.',
   'evidence.filter.reason': 'Reason',
@@ -57,8 +54,8 @@ const en: Record<string, string> = {
   'evidence.reportedTitle': 'Recorded as reported: {targets}',
   'evidence.unknownUser': 'Unknown user',
   'evidence.openCase': 'Open case',
-  'evidence.empty': 'No evidence matches these filters.',
-  'evidence.loadFailed': 'Could not load evidence: {error}',
+  'evidence.empty': 'No quarantine case matches these filters.',
+  'evidence.loadFailed': 'Could not load the quarantine: {error}',
   'evidence.loading': 'Loading...',
   'evidence.refresh': 'Refresh',
   'evidence.previous': 'Previous',
@@ -75,8 +72,8 @@ const en: Record<string, string> = {
   'evidence.retention.expiresOne': 'Expires in 1 day',
 
   // ---- Case view ----
-  'evidence.case.back': 'Back to evidence',
-  'evidence.case.title': 'Case',
+  'evidence.case.back': 'Back to quarantine',
+  'evidence.case.title': 'Quarantine case',
   'evidence.case.id': 'Case id',
   'evidence.case.reason': 'Reason',
   'evidence.case.mode': 'Mode',
@@ -195,7 +192,7 @@ const en: Record<string, string> = {
 
   'evidence.purge.title': 'Purge this case now?',
   'evidence.purge.body':
-    'The kept files, their file records and the evidence rows are deleted now and cannot be recovered. The hashes, the reports and the audit trail are kept.',
+    'The quarantined files, their file records and the kept messages are deleted now and cannot be recovered. The hashes, the reports and the audit trail are kept.',
   'evidence.purge.type': 'Type {reason} or DELETE to confirm',
   'evidence.purge.typeDelete': 'Type DELETE to confirm',
   'evidence.purge.submit': 'Purge now',

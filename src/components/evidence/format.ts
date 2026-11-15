@@ -17,8 +17,3 @@ export const formatEvidenceSecond = (iso?: string | null) => {
   if (!d.isValid) return { local: '', utc: '' };
   return { local: d.toFormat('dd LLL yyyy HH:mm:ss'), utc: `${d.toUTC().toFormat('yyyy-LL-dd HH:mm:ss')} UTC` };
 };
-
-export const evidenceListPath = (listSearch?: string | null) => `/app/admin/evidence${listSearch ? `?${listSearch}` : ''}`;
-
-export const evidenceCasePath = (caseId: string, listSearch?: string | null) =>
-  `/app/admin/evidence/${encodeURIComponent(caseId)}${listSearch ? `?${listSearch}` : ''}`;

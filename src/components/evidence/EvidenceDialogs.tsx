@@ -28,7 +28,7 @@ interface ShellProps {
   children: ReactNode;
 }
 
-function EvidenceDialog({ title, busy, submitLabel, busyLabel, canSubmit, danger, onClose, onSubmit, children }: ShellProps) {
+export function EvidenceDialog({ title, busy, submitLabel, busyLabel, canSubmit, danger, onClose, onSubmit, children }: ShellProps) {
   const { t } = useTranslation();
   const submit = (e: FormEvent) => {
     e.preventDefault();
