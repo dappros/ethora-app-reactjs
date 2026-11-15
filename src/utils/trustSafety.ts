@@ -14,6 +14,7 @@ import type {
   TrustSafetyOverrides,
   TrustSafetyPolicy,
   TsImageAction,
+  TsImageLevel,
   TsTextAction,
 } from '../models';
 
@@ -30,8 +31,43 @@ export const actionRank = (a?: string | null) => {
   return i < 0 ? 0 : i;
 };
 
+// ---- Image policy levels (section 12) ----
+
+// Picker order on the Server settings page. `custom` = the nudity action and
+// threshold on the NudeNet score; the named levels combine the three image
+// signals.
+export const TS_IMAGE_LEVELS: TsImageLevel[] = ['off', 'relaxed', 'standard', 'strict', 'custom'];
+// Strictness of the named levels, loosest first (an App may only go up).
+export const TS_IMAGE_LEVEL_ORDER: TsImageLevel[] = ['off', 'relaxed', 'standard', 'strict'];
+export const levelRank = (l?: string | null) => TS_IMAGE_LEVEL_ORDER.indexOf(String(l || '') as TsImageLevel);
+export const TS_IMAGE_LEVEL_KEY = 'TS_IMAGE_LEVEL';
+// The percent thresholds of the named levels ("Advanced thresholds").
+export const TS_IMAGE_LEVEL_THRESHOLD_KEYS = [
+  'TS_IMAGE_EXPLICIT_NUDENET',
+  'TS_IMAGE_EXPLICIT_FALCONSAI',
+  'TS_IMAGE_REVEALING_FLAG',
+  'TS_IMAGE_REVEALING_BLUR',
+];
+// The custom-level fields, shown only while the level is Custom.
+export const TS_IMAGE_CUSTOM_KEYS = ['TS_IMAGE_NUDITY_ACTION', 'TS_IMAGE_NUDITY_THRESHOLD'];
+
+// What each level does with explicit and with revealing images (the rule
+// table under the picker): translation suffixes of trustSafety.levelRule.*.
+export const TS_IMAGE_LEVEL_RULES: Record<Exclude<TsImageLevel, 'custom'>, { explicit: string; revealing: string }> = {
+  off: { explicit: 'allow', revealing: 'allow' },
+  relaxed: { explicit: 'blurAge', revealing: 'allow' },
+  standard: { explicit: 'blurAge', revealing: 'flag' },
+  strict: { explicit: 'block', revealing: 'blur' },
+};
+
+// The three image signals the moderation service reports (percent on the
+// API side; null = the model did not run).
+export const TS_IMAGE_SIGNALS = ['nudenet', 'falconsai', 'adamcodd'] as const;
+export type TsImageSignal = (typeof TS_IMAGE_SIGNALS)[number];
+
 // Server settings keys whose value is a percentage (1..100).
 export const TS_PERCENT_KEYS = [
+  ...TS_IMAGE_LEVEL_THRESHOLD_KEYS,
   'TS_IMAGE_NUDITY_THRESHOLD',
   'TS_TEXT_TOXICITY_THRESHOLD',
   'TS_TEXT_SEVERE_THRESHOLD',
@@ -48,6 +84,7 @@ const CONTACT_PII = `${BASIC_PII},PHONE_NUMBER,EMAIL_ADDRESS`;
 // the default threshold so applying a preset always gives the same values.
 export const TS_PRESET_VALUES: Record<TsPresetName, Record<string, string>> = {
   business: {
+    TS_IMAGE_LEVEL: 'strict',
     TS_IMAGE_NUDITY_ACTION: 'block',
     TS_IMAGE_NUDITY_THRESHOLD: '50',
     TS_AGE_GATE: 'true',
@@ -61,6 +98,7 @@ export const TS_PRESET_VALUES: Record<TsPresetName, Record<string, string>> = {
     TS_PHI_THRESHOLD: '70',
   },
   education: {
+    TS_IMAGE_LEVEL: 'strict',
     TS_IMAGE_NUDITY_ACTION: 'block',
     TS_IMAGE_NUDITY_THRESHOLD: '40',
     TS_AGE_GATE: 'true',
@@ -74,6 +112,7 @@ export const TS_PRESET_VALUES: Record<TsPresetName, Record<string, string>> = {
     TS_PHI_THRESHOLD: '70',
   },
   community: {
+    TS_IMAGE_LEVEL: 'standard',
     TS_IMAGE_NUDITY_ACTION: 'blur',
     TS_IMAGE_NUDITY_THRESHOLD: '60',
     TS_AGE_GATE: 'true',
@@ -87,6 +126,7 @@ export const TS_PRESET_VALUES: Record<TsPresetName, Record<string, string>> = {
     TS_PHI_THRESHOLD: '70',
   },
   adult: {
+    TS_IMAGE_LEVEL: 'relaxed',
     TS_IMAGE_NUDITY_ACTION: 'allow',
     TS_IMAGE_NUDITY_THRESHOLD: '60',
     TS_AGE_GATE: 'true',
@@ -112,11 +152,16 @@ const normPii = (v: string) =>
     .sort()
     .join(',');
 
-/** The preset whose values all equal `values` (current or drafted), else null. */
-export function matchingPreset(values: Record<string, string | undefined>): TsPresetName | null {
+/**
+ * The preset whose values all equal `values` (current or drafted), else null.
+ * `known` limits the comparison to the keys the server has (an API without
+ * TS_IMAGE_LEVEL still matches its presets).
+ */
+export function matchingPreset(values: Record<string, string | undefined>, known?: (key: string) => boolean): TsPresetName | null {
+  const keys = known ? TS_PRESET_KEYS.filter(known) : TS_PRESET_KEYS;
   for (const name of TS_PRESETS) {
     const preset = TS_PRESET_VALUES[name];
-    const same = TS_PRESET_KEYS.every((k) => {
+    const same = keys.every((k) => {
       const a = String(values[k] ?? '');
       const b = preset[k];
       return k === 'TS_PII_TYPES' ? normPii(a) === normPii(b) : a.trim().toLowerCase() === b.toLowerCase();
@@ -142,6 +187,7 @@ export const TS_OVERRIDE_ROWS: Array<{ id: string; action: TsActionKey; threshol
 ];
 
 export const TS_OVERRIDE_KEYS: Array<keyof TrustSafetyOverrides> = [
+  'imageLevel',
   'imageNudityAction',
   'imageNudityThreshold',
   'textToxicityAction',
@@ -165,11 +211,19 @@ export function overridesToDraft(o?: TrustSafetyOverrides | null): TsOverrideDra
   return out;
 }
 
-/** The API body of the overrides (null = follow the install value). */
-export function draftToOverrides(d: TsOverrideDraft): TrustSafetyOverrides {
+// Overrides an older API does not know: sent only when set now or before,
+// so saving an App there does not fail on an unknown key.
+const NEWER_OVERRIDE_KEYS: Array<keyof TrustSafetyOverrides> = ['imageLevel'];
+
+/**
+ * The API body of the overrides (null = follow the install value). `initial`
+ * is the draft the form started from.
+ */
+export function draftToOverrides(d: TsOverrideDraft, initial?: TsOverrideDraft | null): TrustSafetyOverrides {
   const out: Record<string, string | number | null> = {};
   for (const k of TS_OVERRIDE_KEYS) {
     const v = (d[k] || '').trim();
+    if (!v && NEWER_OVERRIDE_KEYS.includes(k) && !(initial?.[k] || '').trim()) continue;
     if (!v) out[k] = null;
     else if (k.endsWith('Threshold')) out[k] = Number.parseInt(v, 10);
     else out[k] = v;
@@ -183,6 +237,10 @@ export function draftToOverrides(d: TsOverrideDraft): TrustSafetyOverrides {
  */
 export function invalidOverrides(d: TsOverrideDraft, install?: TrustSafetyPolicy | null): string[] {
   const bad: string[] = [];
+  // An image level below a named install level would loosen it; with the
+  // install on custom any level only adds rules.
+  const lvl = (d.imageLevel || '').trim();
+  if (lvl && (levelRank(lvl) < 0 || (install?.imageLevel && levelRank(install.imageLevel) > levelRank(lvl)))) bad.push('imageLevel');
   for (const row of TS_OVERRIDE_ROWS) {
     const a = d[row.action];
     if (a && install && actionRank(a) < actionRank(install[row.action])) bad.push(row.action);
@@ -213,7 +271,26 @@ export const SUSPENSION_NAME_MODES: SuspensionNameMode[] = ['keep', 'suspended']
 
 // ---- Moderation queue ----
 
-export const MODERATION_CATEGORIES = ['nudity', 'toxicity', 'severe', 'pii', 'phi', 'suspension'];
+export const MODERATION_CATEGORIES = ['nudity', 'revealing', 'toxicity', 'severe', 'pii', 'phi', 'suspension'];
+
+/**
+ * The image signals of a media item, in percent: from its scores, else from
+ * the file's moderation record. Null when the item has none (messages, or
+ * media checked before the image levels).
+ */
+export function mediaSignalsOf(item: ModerationItem): Record<TsImageSignal, number | null> | null {
+  const fromScores = item.scores || {};
+  const fromFile = item.file?.moderation?.signals || null;
+  const has = (o: Record<string, unknown> | null) => Boolean(o) && TS_IMAGE_SIGNALS.some((k) => k in (o as object));
+  const src = has(fromScores) ? fromScores : has(fromFile) ? fromFile : null;
+  if (item.kind !== 'media' || !src) return null;
+  const out = {} as Record<TsImageSignal, number | null>;
+  for (const k of TS_IMAGE_SIGNALS) {
+    const v = (src as Record<string, unknown>)[k];
+    out[k] = typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : null;
+  }
+  return out;
+}
 
 const itemIsHidden = (i: ModerationItem) => ['hide', 'hidden', 'hold', 'block', 'delete', 'deleted'].includes(String(i.action || ''));
 

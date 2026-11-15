@@ -20,7 +20,18 @@ import type {
 import { canCancelJob, fill, formatCountdown, isJobActive } from '../utils/serverNotice';
 import { useAppStore } from '../store/useAppStore';
 import { PresetBar } from '../components/TrustSafety/PresetBar';
-import { TS_GROUP, TS_PERCENT_KEYS, TS_PRESET_KEYS, TS_PRESET_VALUES, TsPresetName, matchingPreset } from '../utils/trustSafety';
+import { ImageLevelPicker } from '../components/TrustSafety/ImageLevelPicker';
+import {
+  TS_GROUP,
+  TS_IMAGE_CUSTOM_KEYS,
+  TS_IMAGE_LEVEL_KEY,
+  TS_IMAGE_LEVEL_THRESHOLD_KEYS,
+  TS_PERCENT_KEYS,
+  TS_PRESET_KEYS,
+  TS_PRESET_VALUES,
+  TsPresetName,
+  matchingPreset,
+} from '../utils/trustSafety';
 
 // Server settings page (super admins): install-wide values with their source
 // (saved here, the deployment configuration, or the default), saved per group.
@@ -430,10 +441,14 @@ export default function AdminServerSettings() {
     for (const k of TS_PRESET_KEYS) out[k] = d[k] !== undefined ? d[k] : settingByKey[k]?.value ?? '';
     return out;
   };
-  const tsCurrentPreset = matchingPreset(tsValues(drafts));
+  // Presets are compared on the keys this server has (an API without
+  // TS_IMAGE_LEVEL still recognises them).
+  const tsKnown = (k: string) => Boolean(settingByKey[k]);
+  const tsCurrentPreset = matchingPreset(tsValues(drafts), tsKnown);
   const applyPreset = (preset: TsPresetName) => {
     setDrafts((d) => {
-      const next = { ...d, ...TS_PRESET_VALUES[preset] };
+      const next = { ...d };
+      for (const [k, v] of Object.entries(TS_PRESET_VALUES[preset])) if (tsKnown(k)) next[k] = v;
       if (settingByKey.TS_PROFILE) next.TS_PROFILE = preset;
       return next;
     });
@@ -521,6 +536,17 @@ export default function AdminServerSettings() {
   // Encryption cannot be allowed beyond what the install itself was set up for.
   const e2eeLocked = data?.info?.e2eeInstall === false;
 
+  const updateDraft = (key: string, v: string) =>
+    setDrafts((d) => {
+      const next = { ...d, [key]: v };
+      // A value changed by hand: the profile follows (a preset or Custom).
+      if (TS_PRESET_KEYS.includes(key) && settingByKey.TS_PROFILE) {
+        const preset = matchingPreset(tsValues(next), tsKnown);
+        next.TS_PROFILE = preset || 'custom';
+      }
+      return next;
+    });
+
   const renderInput = (s: ServerSetting) => {
     const locked = s.key === 'E2EE_ALLOWED' && e2eeLocked;
     const disabled = !canEdit || busyGroup === s.group || locked;
@@ -528,16 +554,7 @@ export default function AdminServerSettings() {
       'w-full rounded-xl border border-gray-300 p-3 text-sm disabled:opacity-60',
       locked && 'bg-gray-100 text-gray-500 cursor-not-allowed',
     );
-    const set = (v: string) =>
-      setDrafts((d) => {
-        const next = { ...d, [s.key]: v };
-        // A value changed by hand: the profile follows (a preset or Custom).
-        if (TS_PRESET_KEYS.includes(s.key) && settingByKey.TS_PROFILE) {
-          const preset = matchingPreset(tsValues(next));
-          next.TS_PROFILE = preset || 'custom';
-        }
-        return next;
-      });
+    const set = (v: string) => updateDraft(s.key, v);
     if (s.type === 'boolean') {
       return (
         <select value={draftOf(s)} onChange={(e) => set(e.target.value)} disabled={disabled} className={base}>
@@ -608,6 +625,37 @@ export default function AdminServerSettings() {
     return '';
   };
 
+  // One setting: label, source and kind on the left, the input, its error,
+  // description and reset link on the right.
+  const renderSettingRow = (s: ServerSetting) => (
+    <div key={s.key} className="grid grid-cols-1 md:grid-cols-[260px,_1fr] gap-x-4 gap-y-1 min-w-0">
+      <div className="min-w-0">
+        <div className="text-sm font-semibold">{tr(`serverSettings.key.${s.key}`, s.key)}</div>
+        <div className="text-xs text-gray-500">
+          {t(`serverSettings.source.${s.source}`)}
+          {' | '}
+          {s.kind === 'live' ? t('serverSettings.kind.live') : t('serverSettings.kind.restart').replace('{scope}', scopeName(s.scope))}
+          {s.restartPending && (
+            <span className="ml-2 inline-block rounded-full bg-amber-100 text-amber-900 px-2 py-0.5 text-[11px] font-semibold">{t('serverSettings.restartPending')}</span>
+          )}
+        </div>
+      </div>
+      <div className="min-w-0">
+        {renderInput(s)}
+        {fieldErrors[s.key] && <div className="mt-1 text-xs text-red-700">{fieldErrors[s.key]}</div>}
+        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+          {tr(`serverSettings.desc.${s.key}`) && <span>{tr(`serverSettings.desc.${s.key}`)}</span>}
+          {s.source === 'panel' && canEdit && (
+            <button type="button" onClick={() => reset(s)} disabled={busyGroup === s.group} className="text-brand-500 underline disabled:opacity-50">
+              {t('serverSettings.reset')}
+              {s.envValue !== null ? ` (${s.envValue})` : s.default ? ` (${s.default})` : ''}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   // The settings of a group and its Save button; `embedded` drops the card
   // (used inside a module card).
   const renderGroupBody = (group: string) => (
@@ -615,34 +663,27 @@ export default function AdminServerSettings() {
       {groupNote(group) && <p className="mb-4 text-sm text-gray-600">{groupNote(group)}</p>}
       {group === TS_GROUP && <PresetBar current={tsCurrentPreset} disabled={!canEdit || busyGroup === group} onApply={applyPreset} />}
       <div className="grid grid-cols-1 gap-5">
-        {(byGroup[group] || []).map((s) => (
-          <div key={s.key} className="grid grid-cols-1 md:grid-cols-[260px,_1fr] gap-x-4 gap-y-1 min-w-0">
-            <div className="min-w-0">
-              <div className="text-sm font-semibold">{tr(`serverSettings.key.${s.key}`, s.key)}</div>
-              <div className="text-xs text-gray-500">
-                {t(`serverSettings.source.${s.source}`)}
-                {' | '}
-                {s.kind === 'live' ? t('serverSettings.kind.live') : t('serverSettings.kind.restart').replace('{scope}', scopeName(s.scope))}
-                {s.restartPending && (
-                  <span className="ml-2 inline-block rounded-full bg-amber-100 text-amber-900 px-2 py-0.5 text-[11px] font-semibold">{t('serverSettings.restartPending')}</span>
-                )}
-              </div>
-            </div>
-            <div className="min-w-0">
-              {renderInput(s)}
-              {fieldErrors[s.key] && <div className="mt-1 text-xs text-red-700">{fieldErrors[s.key]}</div>}
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                {tr(`serverSettings.desc.${s.key}`) && <span>{tr(`serverSettings.desc.${s.key}`)}</span>}
-                {s.source === 'panel' && canEdit && (
-                  <button type="button" onClick={() => reset(s)} disabled={busyGroup === s.group} className="text-brand-500 underline disabled:opacity-50">
-                    {t('serverSettings.reset')}
-                    {s.envValue !== null ? ` (${s.envValue})` : s.default ? ` (${s.default})` : ''}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+        {(byGroup[group] || []).map((s) => {
+          if (group !== TS_GROUP || !settingByKey[TS_IMAGE_LEVEL_KEY]) return renderSettingRow(s);
+          // Trust & Safety with image levels: the picker stands in for the
+          // level, its thresholds and the custom nudity fields.
+          if (s.key === TS_IMAGE_LEVEL_KEY) {
+            const rowsOf = (keys: string[]) => keys.map((k) => settingByKey[k]).filter(Boolean).map((x) => renderSettingRow(x));
+            return (
+              <ImageLevelPicker
+                key={s.key}
+                value={draftOf(s)}
+                disabled={!canEdit || busyGroup === group}
+                error={fieldErrors[s.key]}
+                onChange={(level) => updateDraft(s.key, level)}
+                customRows={rowsOf(TS_IMAGE_CUSTOM_KEYS)}
+                thresholdRows={rowsOf(TS_IMAGE_LEVEL_THRESHOLD_KEYS)}
+              />
+            );
+          }
+          if (TS_IMAGE_CUSTOM_KEYS.includes(s.key) || TS_IMAGE_LEVEL_THRESHOLD_KEYS.includes(s.key)) return null;
+          return renderSettingRow(s);
+        })}
       </div>
       {!(group === LOCKABLE_GROUP && e2eeLocked) && (
       <div className="mt-5 flex flex-wrap items-center gap-3">

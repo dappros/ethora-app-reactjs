@@ -24,17 +24,19 @@ import { useTranslation } from '../i18n/useTranslation';
 import { ModelAppUser, ModerationAction, ModerationItem, SuspendUserBody } from '../models';
 import { accessErrorMessage } from '../utils/accessError';
 import { apiError } from '../utils/apiError';
-import { MODERATION_CATEGORIES, formatScore, moderationActionsFor } from '../utils/trustSafety';
+import { MODERATION_CATEGORIES, TS_IMAGE_SIGNALS, formatScore, mediaSignalsOf, moderationActionsFor } from '../utils/trustSafety';
 
 const PAGE_SIZE = 25;
 
 type StatusFilter = 'open' | 'resolved';
 
 // Scores of the item as "label 93%" chips; arrays (PII types) as one line.
-function scoreEntries(scores: ModerationItem['scores']) {
+// The image signals of media items are shown on their own line.
+function scoreEntries(item: ModerationItem) {
   const chips: Array<{ key: string; value: string }> = [];
   const lists: Array<{ key: string; value: string }> = [];
-  for (const [key, raw] of Object.entries(scores || {})) {
+  for (const [key, raw] of Object.entries(item.scores || {})) {
+    if (item.kind === 'media' && (TS_IMAGE_SIGNALS as readonly string[]).includes(key)) continue;
     if (Array.isArray(raw)) {
       if (raw.length) lists.push({ key, value: raw.join(', ') });
       continue;
@@ -314,7 +316,8 @@ export default function AppModeration() {
       <ul className="flex flex-col gap-3">
         {items.map((item) => {
           const id = idOf(item);
-          const { chips, lists } = scoreEntries(item.scores);
+          const { chips, lists } = scoreEntries(item);
+          const signals = mediaSignalsOf(item);
           const actions = moderationActionsFor(item);
           const busy = busyId === id;
           const categoryKey = `trustSafetyModeration.category.${item.category}`;
@@ -337,6 +340,21 @@ export default function AppModeration() {
                     ))}
                     {statusChip(item)}
                   </div>
+                  {signals && (
+                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600" title={t('trustSafetyModeration.signalsHelp')}>
+                      <span className="text-gray-500">{t('trustSafetyModeration.signals')}:</span>
+                      {TS_IMAGE_SIGNALS.map((k) => (
+                        <span key={k} className="tabular-nums">
+                          {t(`trustSafetyModeration.signal.${k}`)}{' '}
+                          {signals[k] === null ? (
+                            <span className="text-gray-400">{t('trustSafetyModeration.signalNotRun')}</span>
+                          ) : (
+                            <span className="font-semibold">{signals[k]}%</span>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {lists.map((l) => (
                     <div key={l.key} className="mb-2 text-xs text-gray-500">
                       {t('trustSafetyModeration.piiTypes').replace('{types}', l.value)}

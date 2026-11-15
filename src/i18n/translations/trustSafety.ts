@@ -47,6 +47,27 @@ const en: Record<string, string> = {
   'serverSettings.key.TS_IMAGE_NUDITY_THRESHOLD': 'Nudity threshold',
   'serverSettings.desc.TS_IMAGE_NUDITY_THRESHOLD':
     'Detection score (percent) from which the action applies. Lower catches more, with more false positives.',
+  // Image policy levels (section 12): the picker labels are under
+  // trustSafety.level.*; these are the setting rows it renders.
+  'serverSettings.key.TS_IMAGE_LEVEL': 'Image policy level',
+  'serverSettings.desc.TS_IMAGE_LEVEL':
+    'Custom uses the nudity action and threshold. The other levels combine three detectors.',
+  'serverSettings.option.TS_IMAGE_LEVEL.custom': 'Custom',
+  'serverSettings.option.TS_IMAGE_LEVEL.off': 'Off',
+  'serverSettings.option.TS_IMAGE_LEVEL.relaxed': 'Relaxed',
+  'serverSettings.option.TS_IMAGE_LEVEL.standard': 'Standard',
+  'serverSettings.option.TS_IMAGE_LEVEL.strict': 'Strict',
+  'serverSettings.key.TS_IMAGE_EXPLICIT_NUDENET': 'Explicit: NudeNet score',
+  'serverSettings.desc.TS_IMAGE_EXPLICIT_NUDENET':
+    'Percent. NudeNet looks for exposed body parts. An image counts as explicit when this and the Falconsai score are both reached.',
+  'serverSettings.key.TS_IMAGE_EXPLICIT_FALCONSAI': 'Explicit: Falconsai score',
+  'serverSettings.desc.TS_IMAGE_EXPLICIT_FALCONSAI':
+    'Percent. Falconsai rates the whole image. Requiring both scores keeps swimwear and lingerie photos from counting as explicit.',
+  'serverSettings.key.TS_IMAGE_REVEALING_FLAG': 'Revealing: flag from (Standard)',
+  'serverSettings.desc.TS_IMAGE_REVEALING_FLAG':
+    'Percent of the AdamCodd score from which Standard sends a revealing image to the moderation queue.',
+  'serverSettings.key.TS_IMAGE_REVEALING_BLUR': 'Revealing: blur from (Strict)',
+  'serverSettings.desc.TS_IMAGE_REVEALING_BLUR': 'Percent of the AdamCodd score from which Strict blurs a revealing image.',
   'serverSettings.key.TS_AGE_GATE': 'Age gate',
   'serverSettings.desc.TS_AGE_GATE':
     'Blurred media opens only for users who declared they are 18 or older. The sender always sees their own file.',
@@ -106,6 +127,34 @@ const en: Record<string, string> = {
     'Adult platforms: nudity allowed behind the age gate, offensive text only flagged.',
   'trustSafety.presets.adultNote':
     'The Adult preset is meant for self-hosted adult platforms whose users are verified adults.',
+  'trustSafety.level.title': 'Images and videos',
+  'trustSafety.level.intro':
+    'How chat uploads are treated. The levels combine three detectors that run on this server: NudeNet, Falconsai and AdamCodd.',
+  'trustSafety.level.off': 'Off',
+  'trustSafety.level.off.desc': 'Images and videos are not filtered.',
+  'trustSafety.level.relaxed': 'Relaxed',
+  'trustSafety.level.relaxed.desc': 'Explicit nudity is blurred; viewers must confirm they are 18+.',
+  'trustSafety.level.standard': 'Standard',
+  'trustSafety.level.standard.desc': 'Explicit nudity is blurred; revealing images are sent to the moderation queue.',
+  'trustSafety.level.strict': 'Strict',
+  'trustSafety.level.strict.desc': 'Explicit nudity is refused; revealing images are blurred.',
+  'trustSafety.level.custom': 'Custom',
+  'trustSafety.level.custom.desc': 'Choose the action and the nudity threshold yourself.',
+  'trustSafety.level.col.level': 'Level',
+  'trustSafety.level.col.explicit': 'Explicit nudity',
+  'trustSafety.level.col.revealing': 'Revealing images',
+  'trustSafety.levelRule.allow': 'Allowed',
+  'trustSafety.levelRule.blurAge': 'Blurred, 18+ to view',
+  'trustSafety.levelRule.flag': 'Shown, sent to the moderation queue',
+  'trustSafety.levelRule.block': 'Upload refused',
+  'trustSafety.levelRule.blur': 'Blurred',
+  'trustSafety.level.ruleNote':
+    'Explicit: both NudeNet and Falconsai reach their thresholds. Revealing: swimwear, lingerie and similar photos, rated by AdamCodd.',
+  'trustSafety.level.customNote':
+    'Custom applies the action below to images whose NudeNet nudity score reaches the threshold. Revealing images are not checked.',
+  'trustSafety.level.advanced': 'Advanced thresholds',
+  'trustSafety.level.advancedIntro':
+    'The scores the levels use, in percent. The defaults come from tests on everyday, swimwear and lingerie photos; lower values catch more and misfire more.',
   'trustSafety.service.note':
     'Detection needs the moderation service, enabled in deploy.yml (services.moderation) or with the "ts" profile of the compose bundle. Until it runs, uploads and messages are not checked.',
 
@@ -126,6 +175,11 @@ const en: Record<string, string> = {
   'trustSafetyApp.loadFailed': 'Could not load the server policy: {error}',
   'trustSafetyApp.noInstall':
     'The server values are not available, so looser options are not marked here. The server still refuses them.',
+  'trustSafetyApp.row.imageLevel': 'Image policy level',
+  'trustSafetyApp.row.imageLevel.desc': 'Uploads to the chats of this app. Only a stricter level than the server one can be picked.',
+  'trustSafetyApp.levelLabel': 'Level',
+  'trustSafetyApp.levelOverCustom':
+    'The server uses a custom nudity rule. A level picked here applies as well, and the stricter outcome wins.',
   'trustSafetyApp.row.nudity': 'Images and videos with nudity',
   'trustSafetyApp.row.nudity.desc': 'Uploads to the chats of this app.',
   'trustSafetyApp.row.toxicity': 'Offensive messages',
@@ -204,6 +258,14 @@ const en: Record<string, string> = {
   'trustSafetyModeration.kind.media': 'Media',
   'trustSafetyModeration.category.all': 'All categories',
   'trustSafetyModeration.category.nudity': 'Nudity',
+  'trustSafetyModeration.category.revealing': 'Revealing',
+  'trustSafetyModeration.signals': 'Signals',
+  'trustSafetyModeration.signal.nudenet': 'NudeNet',
+  'trustSafetyModeration.signal.falconsai': 'Falconsai',
+  'trustSafetyModeration.signal.adamcodd': 'AdamCodd',
+  'trustSafetyModeration.signalNotRun': 'not run',
+  'trustSafetyModeration.signalsHelp':
+    'NudeNet: exposed body parts. Falconsai: explicit image. AdamCodd: revealing image. Percent.',
   'trustSafetyModeration.category.toxicity': 'Offensive',
   'trustSafetyModeration.category.severe': 'Severe',
   'trustSafetyModeration.category.pii': 'Personal data',

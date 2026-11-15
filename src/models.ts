@@ -364,9 +364,13 @@ export interface SuspensionContent {
 export type TsImageAction = 'allow' | 'blur' | 'hold' | 'block';
 export type TsTextAction = 'allow' | 'flag' | 'blur' | 'hide';
 export type TsProfile = 'business' | 'education' | 'community' | 'adult' | 'custom';
+// Image policy level (section 12). `custom` is an install choice only.
+export type TsImageLevel = 'custom' | 'off' | 'relaxed' | 'standard' | 'strict';
 
 // App.trustSafety: per-App overrides, stricter only.
 export interface TrustSafetyOverrides {
+  // A named level; applies only when stricter than the install level.
+  imageLevel?: Exclude<TsImageLevel, 'custom'> | null;
   imageNudityAction?: TsImageAction | null;
   imageNudityThreshold?: number | null;
   textToxicityAction?: TsTextAction | null;
@@ -382,6 +386,13 @@ export interface TrustSafetyOverrides {
 export interface TrustSafetyPolicy {
   enabled: boolean;
   profile?: TsProfile | string;
+  // Older APIs omit the image level fields.
+  imageLevel?: TsImageLevel;
+  // Install only: the percent thresholds of the named levels.
+  imageExplicitNudenet?: number;
+  imageExplicitFalconsai?: number;
+  imageRevealingFlag?: number;
+  imageRevealingBlur?: number;
   imageNudityAction: TsImageAction;
   imageNudityThreshold: number;
   ageGate: boolean;
@@ -401,6 +412,8 @@ export interface AppTrustSafetyInfo {
   enabled: boolean;
   ageGate: boolean;
   imageNudityAction: TsImageAction;
+  // The effective image level (admins; older APIs omit it).
+  imageLevel?: TsImageLevel;
   install?: TrustSafetyPolicy;
   app?: TrustSafetyOverrides | null;
   effective?: TrustSafetyPolicy;
@@ -452,7 +465,18 @@ export interface ModerationItem {
   source?: 'auto' | 'moderator' | 'report' | null;
   // Media items: the (server-side blurred) preview and file details.
   previewUrl?: string | null;
-  file?: { locationPreview?: string | null; mimetype?: string | null; originalname?: string | null } | null;
+  file?: {
+    locationPreview?: string | null;
+    mimetype?: string | null;
+    originalname?: string | null;
+    // File.moderation; `signals` = NudeNet / Falconsai / AdamCodd in percent (null = not run).
+    moderation?: {
+      status?: string | null;
+      category?: string | null;
+      score?: number | null;
+      signals?: { nudenet?: number | null; falconsai?: number | null; adamcodd?: number | null } | null;
+    } | null;
+  } | null;
   createdAt: string;
   resolvedBy?: string | null;
   resolvedAt?: string | null;

@@ -6,6 +6,7 @@ import {
   draftToOverrides,
   invalidOverrides,
   matchingPreset,
+  mediaSignalsOf,
   moderationActionsFor,
   overridesToDraft,
 } from '../../src/utils/trustSafety.ts';
@@ -74,4 +75,51 @@ test('moderation actions per item', () => {
   assert.deepEqual(moderationActionsFor({ ...base, kind: 'media', status: 'open', action: 'blur' }), ['dismiss', 'hide', 'restore', 'delete']);
   assert.deepEqual(moderationActionsFor({ ...base, kind: 'message', status: 'removed', action: 'hide' }), ['restore']);
   assert.deepEqual(moderationActionsFor({ ...base, kind: 'message', status: 'dismissed', action: 'flag' }), []);
+});
+
+test('presets set the image level; a server without TS_IMAGE_LEVEL still matches them', () => {
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(TS_PRESET_VALUES).map(([n, v]) => [n, v.TS_IMAGE_LEVEL])),
+    { business: 'strict', education: 'strict', community: 'standard', adult: 'relaxed' }
+  );
+  const { TS_IMAGE_LEVEL: _level, ...olderServer } = TS_PRESET_VALUES.community;
+  assert.equal(matchingPreset(olderServer), null);
+  assert.equal(matchingPreset(olderServer, (k) => k !== 'TS_IMAGE_LEVEL'), 'community');
+  assert.equal(matchingPreset({ ...TS_PRESET_VALUES.community, TS_IMAGE_LEVEL: 'strict' }), null);
+});
+
+test('App image level: stricter only, any level over a custom server', () => {
+  const d = overridesToDraft({});
+  const standard = { ...install, imageLevel: 'standard' };
+  assert.deepEqual(invalidOverrides({ ...d, imageLevel: 'strict' }, standard), []);
+  assert.deepEqual(invalidOverrides({ ...d, imageLevel: 'standard' }, standard), []);
+  assert.deepEqual(invalidOverrides({ ...d, imageLevel: 'relaxed' }, standard), ['imageLevel']);
+  assert.deepEqual(invalidOverrides({ ...d, imageLevel: 'off' }, standard), ['imageLevel']);
+  assert.deepEqual(invalidOverrides({ ...d, imageLevel: 'custom' }, standard), ['imageLevel']);
+  assert.deepEqual(invalidOverrides({ ...d, imageLevel: 'off' }, { ...install, imageLevel: 'custom' }), []);
+});
+
+test('App image level: sent when set or cleared, left out otherwise (older APIs)', () => {
+  const empty = overridesToDraft({});
+  assert.equal('imageLevel' in draftToOverrides(empty, empty), false);
+  assert.equal(draftToOverrides({ ...empty, imageLevel: 'strict' }, empty).imageLevel, 'strict');
+  const was = overridesToDraft({ imageLevel: 'strict' });
+  assert.equal(was.imageLevel, 'strict');
+  assert.equal(draftToOverrides({ ...was, imageLevel: '' }, was).imageLevel, null);
+});
+
+test('media signals: from the item scores, else the file record; null when not run', () => {
+  const media = { _id: '1', appId: 'a', kind: 'media', status: 'open', createdAt: '' };
+  assert.deepEqual(mediaSignalsOf({ ...media, scores: { revealing: 93, nudenet: 12, falconsai: null, adamcodd: 93 } }), { nudenet: 12, falconsai: null, adamcodd: 93 });
+  assert.deepEqual(
+    mediaSignalsOf({ ...media, scores: { nudity: 91 }, file: { moderation: { signals: { nudenet: 91, falconsai: 80, adamcodd: 40 } } } }),
+    { nudenet: 91, falconsai: 80, adamcodd: 40 }
+  );
+  assert.equal(mediaSignalsOf({ ...media, scores: { nudity: 91 } }), null);
+  assert.equal(mediaSignalsOf({ ...media, kind: 'message', scores: { nudenet: 1 } }), null);
+});
+
+test('flagged media: dismiss, hide or delete; no approve', () => {
+  const item = { _id: '1', appId: 'a', kind: 'media', action: 'flag', category: 'revealing', status: 'open', createdAt: '' };
+  assert.deepEqual(moderationActionsFor(item), ['dismiss', 'hide', 'delete']);
 });

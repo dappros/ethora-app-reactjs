@@ -452,7 +452,7 @@ export default function AppSettings() {
         toast.error(t('trustSafetyApp.invalidToast'));
         return;
       }
-      body.trustSafety = draftToOverrides(tsDraft);
+      body.trustSafety = draftToOverrides(tsDraft, tsInitial);
     }
 
     // web app
