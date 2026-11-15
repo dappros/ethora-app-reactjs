@@ -9,10 +9,14 @@ import {
   EvidenceBulkResponse,
   TsBlockedDomainsResponse,
   TsHubModerationItem,
+  TsIpBlock,
+  TsIpBlockBody,
+  TsIpBlocksResponse,
   TsOverview,
   TsRule,
   TsRulesResponse,
   TsSuspendedUsersResponse,
+  TsUserIpsResponse,
   ModerationAction,
   ModerationItem,
   ModerationItemsResponse,
@@ -603,6 +607,8 @@ export type AppCollaborator = {
   role: AppCollaboratorRole | 'owner' | 'custom';
   isOwner: boolean;
   isAppUser: boolean;
+  // Set while the account is suspended (docs/TRUST_AND_SAFETY.md section 16).
+  suspended?: boolean;
 };
 export type AppCollaboratorInvite = {
   userId: string;
@@ -1044,6 +1050,8 @@ export interface ModelChatMember {
   profileImage?: string;
   profilePicture?: string;
   xmppUsername?: string;
+  // Set while the account is suspended (docs/TRUST_AND_SAFETY.md section 16).
+  suspended?: boolean;
 }
 
 export async function httpGetAppChatMembersV2(
@@ -1850,6 +1858,26 @@ export function httpTestTsRules(text: string, rule?: Partial<TsRule> & { _id?: s
 
 export function httpGetTsBlockedDomains() {
   return httpV2.get<TsBlockedDomainsResponse>('/admin/trust-safety/blocked-domains');
+}
+
+// Sign-up IP blocks (section 15). Create answers with the item; posting an
+// existing cidr + appId updates that row. Errors: INVALID_IP,
+// IP_RANGE_TOO_WIDE, IP_BLOCK_LIMIT.
+export function httpGetTsIpBlocks(queryString: string) {
+  return httpV2.get<TsIpBlocksResponse>(`/admin/trust-safety/ip-blocks${queryString ? `?${queryString}` : ''}`);
+}
+
+export function httpCreateTsIpBlock(body: TsIpBlockBody) {
+  return httpV2.post<TsIpBlock | { item: TsIpBlock }>('/admin/trust-safety/ip-blocks', body);
+}
+
+export function httpDeleteTsIpBlock(id: string) {
+  return httpV2.delete(`/admin/trust-safety/ip-blocks/${encodeURIComponent(id)}`);
+}
+
+// The addresses an account was seen from, with other accounts on each.
+export function httpGetTsUserIps(userId: string) {
+  return httpV2.get<TsUserIpsResponse>(`/admin/trust-safety/users/${encodeURIComponent(userId)}/ips`);
 }
 
 // Agents: export / import.

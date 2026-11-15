@@ -7,10 +7,16 @@ import {
   bulkPurgePhrase,
   canLiftSuspension,
   capSelection,
+  checkIpInput,
   draftToRuleBody,
   hubListQuery,
   hubTabFromParams,
   hubTabPath,
+  ipBlockBody,
+  ipBlockErrorKey,
+  ipBlockFromResponse,
+  ipBlockIsActive,
+  ipBlockLabel,
   legacyEvidenceRedirect,
   nextListParams,
   normalizeRuleTest,
@@ -191,4 +197,59 @@ test('lifting a suspension follows access levels', () => {
   assert.equal(canLiftSuspension('me', 3, { _id: 'u', suspension: { suspendedByRole: 'superadmin' } }), false);
   assert.equal(canLiftSuspension('me', 3, { _id: 'u', role: 'owner' }), false);
   assert.equal(canLiftSuspension('me', 3, { _id: 'u', suspension: { suspendedByRole: 'admin' } }), true);
+});
+
+test('the Blocked IPs tab has a URL', () => {
+  assert.equal(hubTabFromParams(new URLSearchParams('tab=ipBlocks')), 'ipBlocks');
+  assert.equal(hubTabPath('ipBlocks', { includeExpired: 'true' }), '/app/admin/trust-safety?tab=ipBlocks&includeExpired=true');
+});
+
+test('IP or CIDR input of the block form', () => {
+  assert.equal(checkIpInput(''), 'required');
+  assert.equal(checkIpInput('  '), 'required');
+  assert.equal(checkIpInput('203.0.113.7'), null);
+  assert.equal(checkIpInput(' 203.0.113.0/24 '), null);
+  assert.equal(checkIpInput('203.0.0.0/16'), null);
+  assert.equal(checkIpInput('203.0.0.0/15'), 'tooWide');
+  assert.equal(checkIpInput('203.0.113.256'), 'invalid');
+  assert.equal(checkIpInput('203.0.113'), 'invalid');
+  assert.equal(checkIpInput('203.0.113.7/33'), 'invalid');
+  assert.equal(checkIpInput('203.0.113.7/24/1'), 'invalid');
+  assert.equal(checkIpInput('example.org'), 'invalid');
+  assert.equal(checkIpInput('2001:db8::1'), null);
+  assert.equal(checkIpInput('2001:db8::/48'), null);
+  assert.equal(checkIpInput('2001:db8::/32'), 'tooWide');
+  assert.equal(checkIpInput('2001:0db8:0000:0000:0000:0000:0000:0001'), null);
+  assert.equal(checkIpInput('2001:db8::1::2'), 'invalid');
+  assert.equal(checkIpInput('2001:db8:0:0:0:0:0:0:1'), 'invalid');
+  assert.equal(checkIpInput('::ffff:203.0.113.7'), null);
+  assert.equal(checkIpInput('::ffff:203.0.0.0/112'), null);
+  assert.equal(checkIpInput('::ffff:203.0.0.0/104'), 'tooWide');
+});
+
+test('IP block API body, answer and state', () => {
+  assert.deepEqual(ipBlockBody({ ip: ' 203.0.113.7 ', appId: '', days: 0, reason: '  ' }), { ip: '203.0.113.7' });
+  assert.deepEqual(ipBlockBody({ ip: '203.0.113.7', appId: 'a1', days: 30, reason: ' spam ', sourceUserId: 'u1' }), {
+    ip: '203.0.113.7',
+    appId: 'a1',
+    days: 30,
+    reason: 'spam',
+    sourceUserId: 'u1',
+  });
+  assert.equal(ipBlockBody({ ip: '203.0.113.7', appId: '', days: 7, reason: 'x'.repeat(600) }).reason.length, 500);
+  assert.equal(ipBlockErrorKey('IP_RANGE_TOO_WIDE'), 'tsHub.ipBlocks.error.IP_RANGE_TOO_WIDE');
+  assert.equal(ipBlockErrorKey('SOMETHING_ELSE'), null);
+  assert.equal(ipBlockErrorKey(undefined), null);
+  assert.equal(ipBlockFromResponse({ item: { _id: 'b', cidr: '203.0.113.7/32' } })._id, 'b');
+  assert.equal(ipBlockFromResponse({ _id: 'b', cidr: '203.0.113.7/32' })._id, 'b');
+  assert.equal(ipBlockFromResponse({ ok: true }), null);
+  const now = Date.parse('2026-11-15T12:00:00Z');
+  assert.equal(ipBlockIsActive({ active: false, until: null }, now), false);
+  assert.equal(ipBlockIsActive({ until: null }, now), true);
+  assert.equal(ipBlockIsActive({ until: '2026-11-16T00:00:00Z' }, now), true);
+  assert.equal(ipBlockIsActive({ until: '2026-11-14T00:00:00Z' }, now), false);
+  assert.equal(ipBlockLabel('203.0.113.7/32'), '203.0.113.7');
+  assert.equal(ipBlockLabel('203.0.113.0/24'), '203.0.113.0/24');
+  assert.equal(ipBlockLabel('2001:db8::1/128'), '2001:db8::1');
+  assert.equal(ipBlockLabel('2001:db8::/48'), '2001:db8::/48');
 });

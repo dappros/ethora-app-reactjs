@@ -3,13 +3,14 @@
 // T&S hub (docs/TRUST_AND_SAFETY.md section 13), client side: the tabs and
 // their URLs, the row selection of the Quarantine list and its bulk
 // confirmation, the rule form (validation, API body, server errors per
-// pattern, test results) and the filters of the cross-App lists. Pure
-// functions, unit tested in tests/unit/tsHub.test.mjs.
-import type { TsRule, TsRuleAction, TsRuleKind, TsRuleTestMatch } from '../models';
+// pattern, test results), the filters of the cross-App lists and the
+// sign-up IP block form (section 15). Pure functions, unit tested in
+// tests/unit/tsHub.test.mjs.
+import type { TsIpBlock, TsIpBlockBody, TsRule, TsRuleAction, TsRuleKind, TsRuleTestMatch } from '../models';
 
 // ---- Tabs and paths ----
 
-export const TS_HUB_TABS = ['overview', 'quarantine', 'moderation', 'suspended', 'rules', 'domains', 'settings'] as const;
+export const TS_HUB_TABS = ['overview', 'quarantine', 'moderation', 'suspended', 'rules', 'domains', 'ipBlocks', 'settings'] as const;
 export type TsHubTab = (typeof TS_HUB_TABS)[number];
 
 export const TS_HUB_PATH = '/app/admin/trust-safety';
@@ -424,4 +425,117 @@ export function nextListParams(
     else next.set(k, v);
   }
   return next;
+}
+
+// ---- Sign-up IP blocks (section 15) ----
+
+// Durations of the add form, in days; 0 = permanent (no `days` sent).
+export const IP_BLOCK_DURATIONS = [7, 30, 90, 0] as const;
+export type IpBlockDuration = (typeof IP_BLOCK_DURATIONS)[number];
+
+// Days of the "Block sign-ups" action of the IPs panel.
+export const IP_BLOCK_QUICK_DAYS = 30;
+
+export const IP_BLOCK_REASON_MAX = 500;
+
+// The widest prefixes the server accepts (IP_RANGE_TOO_WIDE beyond them).
+export const IP_BLOCK_MIN_PREFIX = { v4: 16, v6: 48 } as const;
+
+// API error codes the add form explains in plain words.
+export const IP_BLOCK_ERROR_CODES = ['INVALID_IP', 'IP_RANGE_TOO_WIDE', 'IP_BLOCK_LIMIT'] as const;
+
+/** The translation key of a known IP block error code, else null. */
+export function ipBlockErrorKey(code?: string | null): string | null {
+  return code && (IP_BLOCK_ERROR_CODES as readonly string[]).includes(code) ? `tsHub.ipBlocks.error.${code}` : null;
+}
+
+function isIPv4(s: string): boolean {
+  const parts = s.split('.');
+  return parts.length === 4 && parts.every((p) => /^\d{1,3}$/.test(p) && Number(p) <= 255);
+}
+
+function isIPv6(s: string): boolean {
+  if (!s.includes(':') || !/^[0-9a-fA-F:.]+$/.test(s)) return false;
+  let str = s;
+  if (s.includes('.')) {
+    // An IPv4 tail (::ffff:192.0.2.1) counts as two groups.
+    const last = s.lastIndexOf(':');
+    if (!isIPv4(s.slice(last + 1))) return false;
+    str = `${s.slice(0, last + 1)}0:0`;
+  }
+  const halves = str.split('::');
+  if (halves.length > 2) return false;
+  const groups = (h: string) => (h === '' ? [] : h.split(':'));
+  const all = [...groups(halves[0]), ...(halves.length === 2 ? groups(halves[1]) : [])];
+  if (!all.every((g) => /^[0-9a-fA-F]{1,4}$/.test(g))) return false;
+  return halves.length === 2 ? all.length <= 7 : all.length === 8;
+}
+
+export type IpInputProblem = 'required' | 'invalid' | 'tooWide';
+
+/**
+ * A quick look at the IP or CIDR of the add form, to save a round trip:
+ * empty, not an address, or a prefix wider than /16 (IPv4) or /48 (IPv6).
+ * The server's check is the one that counts.
+ */
+export function checkIpInput(text: string): IpInputProblem | null {
+  const value = String(text || '').trim();
+  if (!value) return 'required';
+  const [addr, prefix, ...rest] = value.split('/');
+  if (rest.length) return 'invalid';
+  const v4 = isIPv4(addr);
+  if (!v4 && !isIPv6(addr)) return 'invalid';
+  if (prefix === undefined) return null;
+  if (!/^\d{1,3}$/.test(prefix)) return 'invalid';
+  const n = Number(prefix);
+  if (n > (v4 ? 32 : 128)) return 'invalid';
+  if (v4) return n < IP_BLOCK_MIN_PREFIX.v4 ? 'tooWide' : null;
+  // An IPv4-mapped IPv6 range is stored as IPv4: /112 here is /16 there.
+  if (addr.includes('.') && /^::ffff:/i.test(addr)) return n - 96 < IP_BLOCK_MIN_PREFIX.v4 ? 'tooWide' : null;
+  return n < IP_BLOCK_MIN_PREFIX.v6 ? 'tooWide' : null;
+}
+
+export interface IpBlockDraft {
+  ip: string;
+  // '' = every App.
+  appId: string;
+  days: IpBlockDuration;
+  reason: string;
+  sourceUserId?: string;
+}
+
+/** The API body of POST /ip-blocks: empty fields left out, the note capped. */
+export function ipBlockBody(d: IpBlockDraft): TsIpBlockBody {
+  const body: TsIpBlockBody = { ip: d.ip.trim() };
+  const appId = d.appId.trim();
+  if (appId) body.appId = appId;
+  if (d.days > 0) body.days = d.days;
+  const reason = d.reason.trim().slice(0, IP_BLOCK_REASON_MAX);
+  if (reason) body.reason = reason;
+  if (d.sourceUserId) body.sourceUserId = d.sourceUserId;
+  return body;
+}
+
+/** The item of a POST /ip-blocks answer (the item itself or `{ item }`). */
+export function ipBlockFromResponse(data: unknown): TsIpBlock | null {
+  if (!data || typeof data !== 'object') return null;
+  const d = data as Record<string, unknown>;
+  const item = (d.item && typeof d.item === 'object' ? d.item : d) as TsIpBlock;
+  return item && typeof item.cidr === 'string' ? item : null;
+}
+
+/** Whether a block applies now: the API's `active`, else from `until`. */
+export function ipBlockIsActive(b: Pick<TsIpBlock, 'active' | 'until'>, now = Date.now()): boolean {
+  if (typeof b.active === 'boolean') return b.active;
+  if (!b.until) return true;
+  const t = Date.parse(b.until);
+  return Number.isFinite(t) ? t > now : true;
+}
+
+/** "203.0.113.7" for a single-address block (/32, /128), the range otherwise. */
+export function ipBlockLabel(cidr: string): string {
+  const v = String(cidr || '');
+  if (!v.includes(':') && v.endsWith('/32')) return v.slice(0, -3);
+  if (v.includes(':') && v.endsWith('/128')) return v.slice(0, -4);
+  return v;
 }

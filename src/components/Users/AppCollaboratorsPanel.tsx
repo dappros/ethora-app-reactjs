@@ -6,6 +6,7 @@ import { AppCollaborator, httpListAppCollaborators, httpRemoveAppCollaborator } 
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 import { accessErrorMessage } from '../../utils/accessError';
+import { SuspendedPeerBadge } from './SuspendedPeerBadge';
 
 interface Props {
   appId: string;
@@ -74,6 +75,7 @@ export function AppCollaboratorsPanel({ appId, onInvite, refreshKey }: Props) {
                 <span className="block text-sm font-medium">
                   {displayName(c)}
                   {c.userId === currentUserId && <span className="text-gray-500 font-normal"> ({t('appCollaborators.you')})</span>}
+                  {c.suspended && <SuspendedPeerBadge className="ml-2 align-middle" />}
                 </span>
                 <span className="block text-xs text-gray-500">{c.email}</span>
               </span>

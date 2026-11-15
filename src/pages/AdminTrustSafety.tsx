@@ -3,7 +3,7 @@
 // T&S hub (docs/TRUST_AND_SAFETY.md section 13): one superadmin area for
 // Trust & Safety at /app/admin/trust-safety, with the tab in the URL
 // (?tab=overview | quarantine | moderation | suspended | rules | domains |
-// settings). A quarantine case opens under the Quarantine tab at
+// ipBlocks | settings). A quarantine case opens under the Quarantine tab at
 // /app/admin/trust-safety/quarantine/:caseId. Old /app/admin/evidence URLs
 // redirect here (see LegacyEvidenceRedirect). Superadmins with write access
 // only; the APIs enforce the same rule and audit every call.
@@ -13,6 +13,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from '
 import { EvidenceNotAllowed } from '../components/evidence/EvidenceAccess';
 import { useCanReviewEvidence } from '../components/evidence/hooks';
 import { BlockedDomainsTab } from '../components/TrustSafety/hub/BlockedDomainsTab';
+import { IpBlocksTab } from '../components/TrustSafety/hub/IpBlocksTab';
 import { ModerationTab } from '../components/TrustSafety/hub/ModerationTab';
 import { OverviewTab } from '../components/TrustSafety/hub/OverviewTab';
 import { QuarantineTab } from '../components/TrustSafety/hub/QuarantineTab';
@@ -90,6 +91,7 @@ export default function AdminTrustSafety() {
       {tab === 'suspended' && <SuspendedUsersTab />}
       {tab === 'rules' && <RulesTab />}
       {tab === 'domains' && <BlockedDomainsTab />}
+      {tab === 'ipBlocks' && <IpBlocksTab />}
       {tab === 'settings' && (
         <>
           <TabHeader title={t('tsHub.tab.settings')} intro={t('tsHub.settings.intro')} />

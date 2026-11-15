@@ -5,7 +5,8 @@
 // with the reason, the message the user sees, the dates, the scope and what
 // happened to their content. Unsuspend goes to the App's own endpoint, with
 // the access-level rule the server enforces; each row links to the App's
-// Users page with its Suspended view.
+// Users page with its Suspended view. The IPs action (section 15) opens the
+// addresses the account was seen from, to block sign-ups from them.
 import { DateTime } from 'luxon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -29,6 +30,7 @@ import {
 import { ConfirmModal } from '../../modal/ConfirmModal';
 import { AppFilter, BUTTON_PLAIN, Pager, SELECT, TabHeader } from './common';
 import { useAppOptions } from './useAppOptions';
+import { UserIpsDialog } from './UserIpsDialog';
 
 const formatDate = (iso?: string | null) => {
   if (!iso) return '';
@@ -56,6 +58,7 @@ export function SuspendedUsersTab() {
   const [target, setTarget] = useState<TsSuspendedUser | null>(null);
   const [tenant, setTenant] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [ipsOf, setIpsOf] = useState<TsSuspendedUser | null>(null);
 
   // The hub is for superadmins: their level is the top one.
   const myLevel = currentUser?.isSuperAdmin?.write || currentUser?.isSuperAdmin?.read ? ACCESS_RANK.superadmin : ACCESS_RANK.admin;
@@ -241,23 +244,33 @@ export function SuspendedUsersTab() {
                       )}
                     </td>
                     <td className="py-2 px-3 text-right">
-                      {canLift ? (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         <button
                           type="button"
                           className={BUTTON_PLAIN}
-                          title={t('userSuspension.action.unsuspendTitle')}
-                          onClick={() => {
-                            setTenant(s.scope === 'tenant');
-                            setTarget(u);
-                          }}
+                          title={t('tsHub.userIps.actionTitle')}
+                          onClick={() => setIpsOf(u)}
                         >
-                          {t('userSuspension.action.unsuspend')}
+                          {t('tsHub.userIps.action')}
                         </button>
-                      ) : (
-                        <span className="text-xs text-gray-500" title={t('tsHub.suspended.cannotLiftTitle')}>
-                          {t('tsHub.suspended.cannotLift')}
-                        </span>
-                      )}
+                        {canLift ? (
+                          <button
+                            type="button"
+                            className={BUTTON_PLAIN}
+                            title={t('userSuspension.action.unsuspendTitle')}
+                            onClick={() => {
+                              setTenant(s.scope === 'tenant');
+                              setTarget(u);
+                            }}
+                          >
+                            {t('userSuspension.action.unsuspend')}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-500" title={t('tsHub.suspended.cannotLiftTitle')}>
+                            {t('tsHub.suspended.cannotLift')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -268,6 +281,8 @@ export function SuspendedUsersTab() {
       )}
 
       <Pager offset={offset} count={items.length} total={total} pageSize={TS_HUB_PAGE_SIZE} loading={loading} onOffset={(o) => update({ offset: o })} />
+
+      {ipsOf && <UserIpsDialog user={ipsOf} onClose={() => setIpsOf(null)} />}
 
       {target && (
         <ConfirmModal
