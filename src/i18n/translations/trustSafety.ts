@@ -76,6 +76,16 @@ const en: Record<string, string> = {
   'serverSettings.key.TS_EVIDENCE_RETENTION_DAYS': 'Keep evidence for (days)',
   'serverSettings.desc.TS_EVIDENCE_RETENTION_DAYS':
     'Quarantined content and the originals of hidden messages are deleted after this many days.',
+  // Messages their authors delete (applies whether or not automatic
+  // moderation is on).
+  'serverSettings.key.TS_DELETED_CONTENT_MODE': 'When a user deletes a message',
+  'serverSettings.desc.TS_DELETED_CONTENT_MODE':
+    'Delete: the message and its files are removed at once. Quarantine: deleted messages and their files are hidden from everyone but kept for the number of days set below, for compliance or investigations, then removed.',
+  'serverSettings.option.TS_DELETED_CONTENT_MODE.delete': 'Delete',
+  'serverSettings.option.TS_DELETED_CONTENT_MODE.quarantine': 'Quarantine',
+  'serverSettings.key.TS_DELETED_CONTENT_RETENTION_DAYS': 'Keep deleted messages for (days)',
+  'serverSettings.desc.TS_DELETED_CONTENT_RETENTION_DAYS':
+    'Quarantine only. Deleted messages and their files are hidden from everyone but kept for this many days for compliance or investigations, then removed.',
 
   'trustSafety.percent': '%',
   'trustSafety.presets.title': 'Start from a preset',
