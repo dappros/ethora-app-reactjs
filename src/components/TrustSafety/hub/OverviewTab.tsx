@@ -2,7 +2,8 @@
 //
 // T&S > Overview (docs/TRUST_AND_SAFETY.md section 13): whether Trust &
 // Safety is on, the moderation service state and its loaded models, the
-// image level and the profile, and count tiles that open the other tabs.
+// image level and the profile, and count tiles that open the other tabs
+// (with the active sign-up IP blocks of section 15).
 import cn from 'classnames';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -136,7 +137,7 @@ export function OverviewTab() {
             </StatusCard>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
             <CountTile label={t('tsHub.overview.count.quarantine')} value={n(counts.quarantineCases)} to={hubTabPath('quarantine')} />
             <CountTile
               label={t('tsHub.overview.count.expiring')}
@@ -147,6 +148,7 @@ export function OverviewTab() {
             <CountTile label={t('tsHub.overview.count.moderation')} value={n(counts.moderationOpen)} to={hubTabPath('moderation')} />
             <CountTile label={t('tsHub.overview.count.suspended')} value={n(counts.suspendedUsers)} to={hubTabPath('suspended')} />
             <CountTile label={t('tsHub.overview.count.rules')} value={n(counts.rules)} to={hubTabPath('rules')} />
+            <CountTile label={t('tsHub.overview.count.ipBlocks')} value={n(counts.ipBlocks)} to={hubTabPath('ipBlocks')} />
           </div>
         </>
       )}

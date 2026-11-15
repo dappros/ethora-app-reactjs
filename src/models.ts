@@ -619,6 +619,8 @@ export interface TsOverview {
     moderationOpen?: number;
     suspendedUsers?: number;
     rules?: number;
+    // Active sign-up IP blocks (section 15).
+    ipBlocks?: number;
   } | null;
 }
 
@@ -701,6 +703,62 @@ export interface TsRuleTestMatch {
 // GET /v2/admin/trust-safety/blocked-domains.
 export interface TsBlockedDomainsResponse {
   items: Array<{ appId: string; appName?: string | null; patterns: string[] }>;
+}
+
+// Sign-up IP blocks (docs/TRUST_AND_SAFETY.md section 15), collection
+// signup_ip_blocks. `cidr` is normalised (a single address is /32 or /128),
+// `appId` null = every App, `until` null = permanent.
+export interface TsIpBlock {
+  _id: string;
+  cidr: string;
+  appId?: string | null;
+  appName?: string | null;
+  until?: string | null;
+  reason?: string | null;
+  sourceUserId?: string | null;
+  sourceEmail?: string | null;
+  createdBy?: string | null;
+  createdAt?: string | null;
+  hits?: number;
+  lastHitAt?: string | null;
+  active?: boolean;
+}
+
+export interface TsIpBlocksResponse {
+  items: TsIpBlock[];
+  total?: number;
+}
+
+// POST /v2/admin/trust-safety/ip-blocks. `ip` is an address or a CIDR;
+// no `appId` = every App, no `days` = permanent.
+export interface TsIpBlockBody {
+  ip: string;
+  appId?: string;
+  days?: number;
+  reason?: string;
+  sourceUserId?: string;
+}
+
+// GET /v2/admin/trust-safety/users/:userId/ips.
+export interface TsUserIpOtherAccount {
+  _id: string;
+  email?: string | null;
+  appId?: string | null;
+  suspended?: boolean;
+}
+
+export interface TsUserIp {
+  ip: string;
+  firstSeen?: string | null;
+  lastSeen?: string | null;
+  count?: number;
+  sources?: Array<'registration' | 'session' | string>;
+  blocked?: TsIpBlock | null;
+  otherAccounts?: TsUserIpOtherAccount[];
+}
+
+export interface TsUserIpsResponse {
+  items: TsUserIp[];
 }
 
 // One row of the results array returned by suspend / unsuspend (single and

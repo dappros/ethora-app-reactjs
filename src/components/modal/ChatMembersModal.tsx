@@ -9,6 +9,7 @@ import {
 } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
+import { SuspendedPeerBadge } from '../Users/SuspendedPeerBadge';
 
 interface Props {
   appId: string;
@@ -316,15 +317,18 @@ export function ChatMembersModal({
                       <img
                         src={avatar}
                         alt=""
-                        className="w-[36px] h-[36px] rounded-full object-cover shrink-0"
+                        className={`w-[36px] h-[36px] rounded-full object-cover shrink-0${m.suspended ? ' grayscale opacity-60' : ''}`}
                       />
                     ) : (
-                      <div className="w-[36px] h-[36px] rounded-full bg-brand-150 text-brand-500 flex items-center justify-center font-sans text-sm shrink-0">
+                      <div
+                        className={`w-[36px] h-[36px] rounded-full bg-brand-150 text-brand-500 flex items-center justify-center font-sans text-sm shrink-0${m.suspended ? ' grayscale opacity-60' : ''}`}
+                      >
                         {name.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 flex items-center gap-2">
                       <div className="font-sans text-sm truncate">{name}</div>
+                      {m.suspended && <SuspendedPeerBadge />}
                     </div>
                     {isConfirming ? (
                       <div className="flex gap-2 shrink-0">

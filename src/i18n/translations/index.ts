@@ -20,6 +20,7 @@ import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
 import { trustSafety } from './trustSafety';
 import { tsHub } from './tsHub';
+import { tsIpBlocks } from './tsIpBlocks';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
 import { userSuspension } from './userSuspension';
@@ -61,6 +62,7 @@ const dictionaries = [
   trustSafety,
   evidence,
   tsHub,
+  tsIpBlocks,
 ] as const;
 
 function mergeLocale(locale: UiLanguageCode): Record<string, string> {
