@@ -6,7 +6,9 @@
 // room, applied action) with the moderator actions, the delete confirmation
 // and "Suspend sender". Actions always go to the item's own App
 // (POST /v2/apps/:appId/moderation/items/:id/action); superadmins may act on
-// any App. Media previews are blurred until "Show" is pressed.
+// any App. Media (section 14) starts as a signal summary and the AI
+// description with no image: "Show" loads it greyscale and heavily blurred,
+// "Show clearly" shows it in full colour; video stays muted and paused.
 import cn from 'classnames';
 import { DateTime } from 'luxon';
 import { ReactNode, useState } from 'react';
@@ -14,9 +16,11 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { httpModerationItemAction, httpSuspendUser } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-import type { ModelAppUser, ModerationAction, ModerationItem, SuspendUserBody } from '../../models';
+import type { MediaModeration, ModelAppUser, ModerationAction, ModerationItem, SuspendUserBody } from '../../models';
 import { accessErrorMessage } from '../../utils/accessError';
 import { apiError } from '../../utils/apiError';
+import { mediaKind } from '../../utils/evidence';
+import type { RevealStep } from '../../utils/mediaSignals';
 import {
   MODERATION_CATEGORIES,
   TS_IMAGE_SIGNALS,
@@ -28,6 +32,7 @@ import {
 import { Segmented } from '../AIWidget/appearance/Fields';
 import { ConfirmModal } from '../modal/ConfirmModal';
 import { SuspendUserModal } from '../modal/SuspendUserModal';
+import { MediaSignalSummary, RevealControls, SaferMediaElement } from './SaferMedia';
 
 // Scores of the item as "label 93%" chips; arrays (PII types) as one line.
 // The image signals of media items are shown on their own line.
@@ -60,7 +65,21 @@ const formatTime = (iso?: string | null) => {
   return d.isValid ? d.toFormat('dd LLL yyyy t') : '';
 };
 
-const previewOf = (item: ModerationItem) => item.previewUrl || item.file?.locationPreview || null;
+// The preview image, else a video file itself (shown muted and paused).
+function mediaSourceOf(item: ModerationItem): { src: string; kind: 'image' | 'video' } | null {
+  const preview = item.previewUrl || item.file?.locationPreview || null;
+  if (preview) return { src: preview, kind: 'image' };
+  if (item.file?.location && mediaKind(item.file.mimetype) === 'video') return { src: item.file.location, kind: 'video' };
+  return null;
+}
+
+// The file's moderation result for the signal summary; the item's own image
+// signals win (they are what the decision used).
+function summaryModerationOf(item: ModerationItem, signals: ReturnType<typeof mediaSignalsOf>): MediaModeration | null {
+  const m = item.file?.moderation || null;
+  if (!m && !signals) return null;
+  return { ...(m || {}), ...(signals ? { signals } : {}), category: m?.category || item.category || null };
+}
 
 interface CardProps {
   item: ModerationItem & { appName?: string | null };
@@ -73,7 +92,7 @@ interface CardProps {
 
 export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }: CardProps) {
   const { t } = useTranslation();
-  const [revealed, setRevealed] = useState(false);
+  const [step, setStep] = useState<RevealStep>('hidden');
   const [brokenPreview, setBrokenPreview] = useState(false);
   const { chips, lists } = scoreEntries(item);
   const signals = mediaSignalsOf(item);
@@ -100,28 +119,39 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
 
   const renderContent = () => {
     if (item.kind === 'media') {
-      const src = previewOf(item);
-      if (!src || brokenPreview) {
-        return (
-          <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-500 text-center p-2">
-            {t('trustSafetyModeration.noPreview')}
-          </div>
-        );
-      }
+      const source = mediaSourceOf(item);
       return (
-        <div className="flex items-end gap-2">
-          <div className="h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
-            <img
-              src={src}
-              alt={item.file?.originalname || ''}
-              loading="lazy"
-              onError={() => setBrokenPreview(true)}
-              className={cn('h-full w-full object-cover transition', !revealed && 'blur-xl scale-110')}
-            />
-          </div>
-          <button type="button" className="text-xs text-brand-500 underline" onClick={() => setRevealed((r) => !r)}>
-            {revealed ? t('trustSafetyModeration.hidePreview') : t('trustSafetyModeration.showPreview')}
-          </button>
+        <div className="flex flex-col gap-2 min-w-0">
+          <MediaSignalSummary moderation={summaryModerationOf(item, signals)} />
+          {!source || brokenPreview ? (
+            <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-500 text-center p-2">
+              {t('trustSafetyModeration.noPreview')}
+            </div>
+          ) : (
+            <div className="flex items-end gap-3">
+              {step !== 'hidden' && (
+                <div className="h-32 w-32 overflow-hidden rounded-xl bg-gray-100">
+                  <SaferMediaElement
+                    src={source.src}
+                    kind={source.kind}
+                    step={step}
+                    name={item.file?.originalname || ''}
+                    fill
+                    onError={() => setBrokenPreview(true)}
+                  />
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 text-xs">
+                <RevealControls
+                  step={step}
+                  onShow={() => setStep('muted')}
+                  onShowClearly={() => setStep('clear')}
+                  onBlurAgain={() => setStep('muted')}
+                  onHide={() => setStep('hidden')}
+                />
+              </div>
+            </div>
+          )}
         </div>
       );
     }

@@ -320,8 +320,6 @@ const en: Record<string, string> = {
   'trustSafetyModeration.rangeOpen': '{from} to {to}',
   'trustSafetyModeration.noText': 'No text kept',
   'trustSafetyModeration.noPreview': 'No preview',
-  'trustSafetyModeration.showPreview': 'Show',
-  'trustSafetyModeration.hidePreview': 'Blur',
   'trustSafetyModeration.unknownSender': 'Unknown sender',
   'trustSafetyModeration.resolvedAt': 'Resolved {date}',
   'trustSafetyModeration.piiTypes': 'Types: {types}',
@@ -342,6 +340,39 @@ const en: Record<string, string> = {
     'The declared age is cleared. The user is asked again the next time age matters, and can then declare 18 or older.',
   'trustSafetyUsers.resetDone': 'Age reset.',
   'trustSafetyUsers.resetFailedPrefix': 'Age reset failed:',
+
+  // ---- Reviewer protection (section 14): signal summary and safer reveal ----
+  // Shared by T&S > Quarantine (case media) and the Moderation queues.
+  'tsSignals.explicitLikely': 'Likely explicit nudity ({labels})',
+  'tsSignals.explicitPossible': 'Possible explicit nudity ({labels})',
+  'tsSignals.nudenet': 'Explicit nudity detector {score}%',
+  'tsSignals.suggestive': 'Suggestive or partly covered ({labels})',
+  'tsSignals.revealing': 'Revealing or erotic content {score}%',
+  'tsSignals.falconsai': 'Explicit classifier {score}%',
+  'tsSignals.category': 'Flagged as {category} {score}%',
+  'tsSignals.low': 'No sensitive signals',
+  'tsSignals.none': 'No automatic check on record',
+  'tsSignals.error': 'The automatic check failed',
+  'tsSignals.description': 'AI description (may be wrong): {text}',
+  'tsSignals.summaryLabel': 'Signal summary',
+  // NudeNet body-part labels in plain words.
+  'tsSignals.label.FEMALE_GENITALIA_EXPOSED': 'exposed female genitals',
+  'tsSignals.label.MALE_GENITALIA_EXPOSED': 'exposed male genitals',
+  'tsSignals.label.FEMALE_BREAST_EXPOSED': 'exposed breast',
+  'tsSignals.label.BUTTOCKS_EXPOSED': 'exposed buttocks',
+  'tsSignals.label.ANUS_EXPOSED': 'exposed anus',
+  'tsSignals.label.FEMALE_GENITALIA_COVERED': 'covered genitals',
+  'tsSignals.label.FEMALE_BREAST_COVERED': 'covered breast',
+  'tsSignals.label.BUTTOCKS_COVERED': 'covered buttocks',
+  'tsSignals.label.ANUS_COVERED': 'covered anus',
+  'tsSignals.label.BELLY_EXPOSED': 'bare belly',
+  'tsSignals.label.MALE_BREAST_EXPOSED': 'bare male chest',
+  'tsReveal.show': 'Show',
+  'tsReveal.showClearly': 'Show clearly',
+  'tsReveal.blurAgain': 'Blur again',
+  'tsReveal.hide': 'Hide',
+  'tsReveal.notShown': 'Not shown',
+  'tsReveal.mutedHint': 'Shown greyscale and blurred.',
 };
 
 export const trustSafety = {

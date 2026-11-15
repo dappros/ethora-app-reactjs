@@ -1,10 +1,12 @@
 // Ethora.com platform, copyright: Dappros Ltd (c) 2026, all rights reserved
 //
 // T&S > Quarantine > case (docs/TRUST_AND_SAFETY.md section 11): the
-// transcript, the kept media (blurred, fetched only after Show and a
-// warning), hashes, reports, and the case actions: extend, legal hold and
-// release, record a report, export and purge. Every view and action is
-// audited by the API; the page says so above the case.
+// transcript, the kept media, hashes, reports, who viewed the case, and the
+// case actions: extend, legal hold and release, record a report, export and
+// purge. Every view and action is audited by the API; the page says so above
+// the case. Media (section 14) starts as a signal summary and the AI
+// description with no image; Show (after a warning) fetches it greyscale and
+// blurred, Show clearly is a second step.
 import { DateTime } from 'luxon';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
@@ -22,14 +24,16 @@ import {
   ReportInput,
 } from '../components/evidence/EvidenceDialogs';
 import { EvidenceMediaTile } from '../components/evidence/EvidenceMediaTile';
+import { MediaSignalSummary } from '../components/TrustSafety/SaferMedia';
 import { formatEvidenceSecond, formatEvidenceTime } from '../components/evidence/format';
 import { ConfirmModal } from '../components/modal/ConfirmModal';
 import { httpEvidenceCaseAction, httpExportEvidenceCase, httpGetEvidenceCase, httpV2, saveBlobAs } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
-import type { EvidenceCase, EvidenceCaseAction, ServerSettingsResponse } from '../models';
+import type { EvidenceCase, EvidenceCaseAction, EvidenceView, ServerSettingsResponse } from '../models';
 import { accessErrorMessage } from '../utils/accessError';
 import { apiError } from '../utils/apiError';
 import { caseRoomLabel, exportFilename, personName, retentionSettingKey } from '../utils/evidence';
+import type { RevealStep } from '../utils/mediaSignals';
 import { quarantineListPath } from '../utils/tsHub';
 
 type DialogKind = 'extend' | 'release' | 'report' | 'export' | 'purge' | null;
@@ -63,6 +67,25 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+// Who opened the case or its media (the last 20, newest first).
+function ViewedBy({ views }: { views: EvidenceView[] }) {
+  const { t } = useTranslation();
+  if (!views.length) return <p className="text-sm text-gray-500">{t('evidence.viewedBy.empty')}</p>;
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {views.map((v, i) => (
+        <li key={`${v.userId}-${v.at}-${i}`} className="text-xs min-w-0">
+          <div className="text-gray-800 break-all">{v.email || v.userId || t('evidence.viewedBy.unknown')}</div>
+          <div className="text-gray-500">
+            {formatEvidenceTime(v.at)}
+            {v.kind === 'media' ? `, ${t('evidence.viewedBy.media')}` : v.kind === 'case' ? `, ${t('evidence.viewedBy.case')}` : ''}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function QuarantineCaseView({ caseId }: { caseId: string }) {
   const { t } = useTranslation();
   const label = useEvidenceLabel();
@@ -76,7 +99,9 @@ function QuarantineCaseView({ caseId }: { caseId: string }) {
   const [denied, setDenied] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [dialog, setDialog] = useState<DialogKind>(null);
-  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  // Reveal step per media file; missing = hidden.
+  const [revealed, setRevealed] = useState<Record<string, RevealStep>>({});
+  const setStep = (id: string, step: RevealStep) => setRevealed((r) => ({ ...r, [id]: step }));
   const [confirmShow, setConfirmShow] = useState<string[] | null>(null);
   // Release hold: the retention setting, once read from Server settings.
   const [retentionDays, setRetentionDays] = useState<number | null>(null);
@@ -186,7 +211,7 @@ function QuarantineCaseView({ caseId }: { caseId: string }) {
   const reports = item.reports || [];
   const user = personName(item.user);
   const room = caseRoomLabel(item);
-  const hidden = media.filter((m) => !revealed[m.evidenceId]).map((m) => m.evidenceId);
+  const hidden = media.filter((m) => (revealed[m.evidenceId] || 'hidden') === 'hidden').map((m) => m.evidenceId);
   const anyBusy = Boolean(busy);
   const holdLine = item.hold && item.holdSetAt
     ? personName(item.holdSetBy)
@@ -280,16 +305,28 @@ function QuarantineCaseView({ caseId }: { caseId: string }) {
             {media.length === 0 ? (
               <p className="text-sm text-gray-500">{t('evidence.media.empty')}</p>
             ) : purged ? (
-              <p className="text-sm text-gray-500">{t('evidence.purgedActions')}</p>
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-gray-500">{t('evidence.media.purgedFiles')}</p>
+                <ul className="flex flex-col gap-3">
+                  {media.map((m) => (
+                    <li key={m.evidenceId} className="min-w-0">
+                      <div className="text-xs text-gray-500 break-all mb-1">{m.originalName || m.fileId || m.evidenceId}</div>
+                      <MediaSignalSummary moderation={m.moderation} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : (
               <div className="flex flex-wrap gap-4">
                 {media.map((m) => (
                   <EvidenceMediaTile
                     key={m.evidenceId}
                     item={m}
-                    revealed={Boolean(revealed[m.evidenceId])}
+                    step={revealed[m.evidenceId] || 'hidden'}
                     onShow={() => setConfirmShow([m.evidenceId])}
-                    onBlur={() => setRevealed((r) => ({ ...r, [m.evidenceId]: false }))}
+                    onShowClearly={() => setStep(m.evidenceId, 'clear')}
+                    onBlurAgain={() => setStep(m.evidenceId, 'muted')}
+                    onHide={() => setStep(m.evidenceId, 'hidden')}
                   />
                 ))}
               </div>
@@ -418,6 +455,11 @@ function QuarantineCaseView({ caseId }: { caseId: string }) {
           </section>
 
           <section className={SECTION}>
+            <div className={SECTION_TITLE}>{t('evidence.viewedBy.title')}</div>
+            <ViewedBy views={item.viewedBy || []} />
+          </section>
+
+          <section className={SECTION}>
             <div className={SECTION_TITLE}>{t('evidence.reports.title')}</div>
             {reports.length === 0 ? (
               <p className="text-sm text-gray-500">{t('evidence.reports.empty')}</p>
@@ -456,7 +498,7 @@ function QuarantineCaseView({ caseId }: { caseId: string }) {
           danger
           onConfirm={() => {
             const ids = confirmShow;
-            setRevealed((r) => ({ ...r, ...Object.fromEntries(ids.map((id) => [id, true])) }));
+            setRevealed((r) => ({ ...r, ...Object.fromEntries(ids.map((id) => [id, 'muted' as RevealStep])) }));
             setConfirmShow(null);
           }}
           onCancel={() => setConfirmShow(null)}

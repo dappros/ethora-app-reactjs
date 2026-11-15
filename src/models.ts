@@ -441,6 +441,22 @@ export type ModerationItemKind = 'message' | 'media';
 export type ModerationItemStatus = 'open' | 'approved' | 'removed' | 'dismissed';
 export type ModerationAction = 'dismiss' | 'approve' | 'blur' | 'hide' | 'delete' | 'restore';
 
+// The moderation result of a media file (File.moderation; on quarantine
+// case media also kept on the evidence row). `score` and `signals` in
+// percent, `labels[].score` 0..1 (NudeNet body-part labels); `description`
+// is a neutral AI caption of the visible content (section 14), when one was
+// made.
+export interface MediaModeration {
+  status?: string | null;
+  category?: string | null;
+  score?: number | null;
+  labels?: Array<{ label: string; score?: number | null }> | null;
+  signals?: { nudenet?: number | null; falconsai?: number | null; adamcodd?: number | null } | null;
+  description?: string | null;
+  describedAt?: string | null;
+  descriptionModel?: string | null;
+}
+
 // One row of GET /v2/apps/:appId/moderation/items.
 export interface ModerationItem {
   _id: string;
@@ -467,15 +483,11 @@ export interface ModerationItem {
   previewUrl?: string | null;
   file?: {
     locationPreview?: string | null;
+    location?: string | null;
     mimetype?: string | null;
     originalname?: string | null;
     // File.moderation; `signals` = NudeNet / Falconsai / AdamCodd in percent (null = not run).
-    moderation?: {
-      status?: string | null;
-      category?: string | null;
-      score?: number | null;
-      signals?: { nudenet?: number | null; falconsai?: number | null; adamcodd?: number | null } | null;
-    } | null;
+    moderation?: MediaModeration | null;
   } | null;
   // Category `custom`: the rule that matched (name kept on the item).
   ruleName?: string | null;
@@ -534,6 +546,18 @@ export interface EvidenceMedia {
   md5?: string | null;
   hasPreview?: boolean;
   originalName?: string | null;
+  purgedAt?: string | null;
+  available?: boolean;
+  // The file's moderation result; null when no check ran.
+  moderation?: MediaModeration | null;
+}
+
+// A reviewer who opened the case or one of its media files.
+export interface EvidenceView {
+  userId: string;
+  email?: string | null;
+  kind?: 'case' | 'media' | string;
+  at: string;
 }
 
 export interface EvidenceCase {
@@ -556,6 +580,8 @@ export interface EvidenceCase {
   messages?: EvidenceMessage[];
   media?: EvidenceMedia[];
   reports?: EvidenceReport[];
+  // The last 20 views of the case and its media, newest first.
+  viewedBy?: EvidenceView[];
   counts?: { messages?: number; media?: number };
 }
 

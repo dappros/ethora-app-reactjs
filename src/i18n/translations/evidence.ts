@@ -98,9 +98,6 @@ const en: Record<string, string> = {
 
   'evidence.media.title': 'Media',
   'evidence.media.empty': 'No media in this case.',
-  'evidence.media.hidden': 'Hidden',
-  'evidence.media.show': 'Show',
-  'evidence.media.blur': 'Blur',
   'evidence.media.showAll': 'Show all media',
   'evidence.media.confirmTitle': 'Show this file?',
   'evidence.media.confirmAllTitle': 'Show all media of this case?',
@@ -113,6 +110,12 @@ const en: Record<string, string> = {
   'evidence.media.download': 'Download',
   'evidence.media.noInline': 'This type cannot be shown here. Download it to inspect it.',
   'evidence.media.close': 'Close',
+  'evidence.viewedBy.title': 'Viewed by',
+  'evidence.viewedBy.empty': 'No views recorded yet.',
+  'evidence.viewedBy.case': 'Opened the case',
+  'evidence.viewedBy.media': 'Opened media',
+  'evidence.viewedBy.unknown': 'Unknown reviewer',
+  'evidence.media.purgedFiles': 'The files were purged. What the automatic checks recorded:',
 
   'evidence.hashes.title': 'Hashes',
   'evidence.hashes.sha256': 'SHA-256',
