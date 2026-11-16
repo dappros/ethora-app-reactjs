@@ -6,7 +6,6 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom';
-import { actionSwitchChatApp } from '../actions';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { httpGetApp } from '../http';
@@ -73,10 +72,14 @@ export default function AdminApp() {
     { to: `${base}/statistics`, label: t('adminApp.tabStatistics') },
     { to: `${base}/moderation`, label: t('trustSafetyModeration.tab') },
     { to: `${base}/settings`, label: t('adminApp.tabSettings') },
+    { to: `${base}/chats`, label: t('appTabs.testChats') },
   ];
+  // The chat fills the height under the header; every other tab scrolls
+  // with the page.
+  const isChats = /\/chats\/?$/.test(location.pathname);
 
   return (
-    <div className="h-full grid grid-rows-[auto,_1fr]">
+    <div className={`h-full grid ${isChats ? 'grid-rows-[auto,_minmax(0,1fr)]' : 'grid-rows-[auto,_1fr]'}`}>
       <div className="mb-3 px-4 pt-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -108,24 +111,11 @@ export default function AdminApp() {
               {tab.label}
             </NavLink>
           ))}
-          {/* Opens the sidebar Chats page in this app's owner context. The
-              onClick switches chatAppId eagerly so the destination renders
-              the right context at once (Chat.tsx retries on mount). */}
-          <NavLink
-            to="/app/chat"
-            className={tabClass}
-            onClick={() => {
-              if (!appId) return;
-              actionSwitchChatApp(appId).catch(() => {});
-            }}
-          >
-            {t('adminApp.tabChats')} ↗
-          </NavLink>
         </nav>
       </div>
       {/* No overflow here: the page scrolls in AdminLayout, which keeps the
           AI assistant's test column sticky. */}
-      <div className="bg-white rounded-2xl p-4">
+      <div className={isChats ? 'min-h-0 overflow-hidden bg-white md:rounded-2xl' : 'bg-white rounded-2xl p-4'}>
         <Outlet />
       </div>
     </div>

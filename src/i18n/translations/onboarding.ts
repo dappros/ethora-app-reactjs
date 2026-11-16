@@ -89,6 +89,7 @@ export const onboarding = {
     'appTabs.home': 'Home',
     'appTabs.assistant': 'AI assistant',
     'appTabs.conversations': 'Conversations',
+    'appTabs.testChats': 'Test Chats',
     'appTabs.apps': 'Apps',
     'appTabs.app': 'the app',
     'appTabs.breadcrumb': 'Breadcrumb',

@@ -27,6 +27,7 @@ const ROUTE_TABS: RouteEntry[] = [
   { pattern: '/app/admin/apps/:appId/assistant', tab: 'AI assistant' },
   { pattern: '/app/admin/apps/:appId/conversations', tab: 'Conversations' },
   { pattern: '/app/admin/apps/:appId/moderation', tab: 'Moderation' },
+  { pattern: '/app/admin/apps/:appId/chats', tab: 'Test Chats' },
   { pattern: '/app/admin/apps/:appId', tab: 'Home' },
   // Tenant-level admin: show "{tab} - {brand}"
   { pattern: '/app/admin/apps', tab: 'Apps' },

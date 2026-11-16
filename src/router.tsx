@@ -34,6 +34,7 @@ const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
 const AppHome = lazy(() => import('./pages/AppHome'));
 const AppAssistant = lazy(() => import('./pages/AppAssistant'));
 const AppConversations = lazy(() => import('./pages/AppConversations'));
+const AppChats = lazy(() => import('./pages/AppChats'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
 const AppModeration = lazy(() => import('./pages/AppModeration'));
@@ -208,6 +209,12 @@ export const router = createBrowserRouter(
                             {
                               path: 'conversations',
                               Component: AppConversations,
+                            },
+                            {
+                              // This App's chats under its header and tabs
+                              // (switches the chat context to the App).
+                              path: 'chats',
+                              Component: AppChats,
                             },
                             {
                               path: 'settings',
