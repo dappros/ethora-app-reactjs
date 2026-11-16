@@ -112,6 +112,8 @@ export default function AppHome() {
     const knows = has('knowledge_added') || pages + docs > 0;
     const failed = Boolean(crawlError) && !knows && !crawling;
     const host = (m.widget_installed?.meta?.host as string) || '';
+    const testHost = (m.widget_test_page?.meta?.host as string) || '';
+    const seen = has('widget_installed') || has('widget_test_page');
     const steps: StepDef[] = [
       {
         done: knows,
@@ -147,10 +149,15 @@ export default function AppHome() {
         action: { to: `${base}/assistant#test`, label: t('appHome.web.testAction') },
       },
       {
-        done: has('widget_installed'),
-        title: has('widget_installed') ? t('appHome.web.installedDone').replace('{host}', host) : t('appHome.web.install'),
-        text: t('appHome.web.installText'),
-        action: { to: `${base}/assistant#install`, label: has('widget_installed') ? t('appHome.manage') : t('appHome.web.installAction') },
+        // One rule: the widget seen on any page but this install's own.
+        done: seen,
+        title: has('widget_installed')
+          ? t('appHome.web.installedDone').replace('{host}', host)
+          : has('widget_test_page')
+            ? t('appHome.web.testPage').replace('{host}', testHost)
+            : t('appHome.web.install'),
+        text: has('widget_installed') || !has('widget_test_page') ? t('appHome.web.installText') : t('appHome.web.testPageText'),
+        action: { to: `${base}/assistant#install`, label: seen ? t('appHome.manage') : t('appHome.web.installAction') },
       },
       {
         done: has('widget_answered_visitor'),

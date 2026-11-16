@@ -3,6 +3,7 @@ import { AgentTryTurn, httpTryAgent } from '../../../http';
 import { markAgentTried } from '../../../utils/agentSetupChecklist';
 import { useTranslation } from '../../../i18n/useTranslation';
 import { ModelAgent } from '../../../models';
+import { SimpleMarkdown } from '../../SimpleMarkdown';
 
 type Turn = AgentTryTurn & { sources?: string[]; ragDocsUsed?: number; error?: boolean };
 
@@ -13,7 +14,9 @@ const MAX_HISTORY = 20;
 // and knowledge, without deploying it to an app first. Nothing is stored and
 // the agent's memory is not changed. Scripted flows, buttons and reactions
 // only run in real chats.
-export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
+// `compact`: inside an App's AI assistant tab, which has its own one-line
+// intro, so the panel's own intro is left out.
+export const TryItPanel: React.FC<{ agent: ModelAgent; compact?: boolean }> = ({ agent, compact = false }) => {
   const { t } = useTranslation();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState('');
@@ -54,8 +57,8 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
 
   return (
     <div className="space-y-3 max-w-3xl">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm text-gray-600">{t('agentPanels.tryIntro')}</p>
+      <div className={compact ? 'flex justify-end' : 'flex items-start justify-between gap-2'}>
+        {!compact && <p className="text-sm text-gray-600">{t('agentPanels.tryIntro')}</p>}
         {turns.length > 0 && (
           <button onClick={() => setTurns([])} disabled={busy} className="text-xs text-brand-500 hover:underline whitespace-nowrap disabled:opacity-50">
             {t('agentPanels.tryNewConversation')}
@@ -73,10 +76,10 @@ export const TryItPanel: React.FC<{ agent: ModelAgent }> = ({ agent }) => {
                   ? 'max-w-[80%] rounded-2xl rounded-br-sm bg-brand-500 text-white px-3 py-2 text-sm whitespace-pre-wrap'
                   : turn.error
                   ? 'max-w-[80%] rounded-2xl rounded-bl-sm bg-red-50 text-red-700 border border-red-200 px-3 py-2 text-sm'
-                  : 'max-w-[80%] rounded-2xl rounded-bl-sm bg-white border px-3 py-2 text-sm whitespace-pre-wrap'
+                  : 'max-w-[80%] rounded-2xl rounded-bl-sm bg-white border px-3 py-2 text-sm'
               }
             >
-              {turn.content}
+              {turn.role === 'assistant' && !turn.error ? <SimpleMarkdown text={turn.content} /> : turn.content}
               {turn.role === 'assistant' && !turn.error && (turn.ragDocsUsed || 0) > 0 && (
                 <div className="mt-2 pt-2 border-t text-[11px] text-gray-500 space-y-0.5">
                   <div>{t('agentPanels.tryUsedKnowledge').replace('{n}', String(turn.ragDocsUsed))}</div>

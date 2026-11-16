@@ -27,6 +27,7 @@ import {
   defaultAiWidgetAppearance,
   getAppearanceAttributeRecord,
 } from '../lib/aiWidgetAppearance';
+import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
 import { countLabel } from '../utils/countLabel';
 import { resolveWidgetUrl } from '../utils/widgetUrl';
@@ -69,7 +70,7 @@ export default function AppAssistant() {
     if (!id || !agent) return;
     if (id === 'knows' && health && health.pages + health.docs === 0) setKnows('web');
     if (id === 'docs') setKnows('docs');
-    const target = id === 'docs' ? 'knows' : id;
+    const target = id === 'docs' ? 'knows' : id === 'test' && window.innerWidth < 1024 ? 'test-narrow' : id;
     window.setTimeout(() => document.getElementById(`assistant-${target}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }, [location.hash, agent, health]);
 
@@ -114,6 +115,7 @@ export default function AppAssistant() {
   };
 
   const installedHost = (app.milestones?.widget_installed?.meta?.host as string) || '';
+  const testHost = (app.milestones?.widget_test_page?.meta?.host as string) || '';
   const pages = health?.pages ?? 0;
   const docs = health?.docs ?? 0;
   const widgetUrl = resolveWidgetUrl();
@@ -126,12 +128,18 @@ export default function AppAssistant() {
   const toggleAdvanced = (next: Advanced) => setAdvanced((cur) => (cur === next ? null : next));
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]" data-testid="app-assistant">
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,1fr)]" data-testid="app-assistant">
       <div className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold">{agent.displayName}</h2>
-            <p className="text-sm text-gray-600">{on ? t('appAssistant.statusOn') : t('appAssistant.statusOff')}</p>
+            <p className="text-sm text-gray-600">
+              {!on
+                ? t('appAssistant.statusOff')
+                : installedHost
+                  ? t('appAssistant.statusLive').replace('{host}', installedHost)
+                  : t('appAssistant.statusReady')}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
@@ -152,6 +160,12 @@ export default function AppAssistant() {
           {knows === 'web' && <Panel><WebIndexPanel agent={agent} appId={appId} isDisabled={readOnly} /></Panel>}
           {knows === 'docs' && <Panel><DocsIndexPanel agent={agent} appId={appId} isDisabled={readOnly} /></Panel>}
         </Section>
+
+        {/* Below lg the test chat follows "What it knows" instead of sitting
+            under everything else. */}
+        <div className="lg:hidden">
+          <TestBox agent={agent} appId={appId} id="assistant-test-narrow" />
+        </div>
 
         <Section id="answers" num={2} title={t('appAssistant.answers.title')}>
           <p className="text-sm text-gray-600">{t('appAssistant.answers.text')}</p>
@@ -188,8 +202,14 @@ export default function AppAssistant() {
           id="install"
           num={4}
           title={t('appAssistant.install.title')}
-          badge={installedHost ? t('appAssistant.install.liveOn').replace('{host}', installedHost) : t('appAssistant.install.notDetected')}
-          badgeOk={Boolean(installedHost)}
+          badge={
+            installedHost
+              ? t('appAssistant.install.liveOn').replace('{host}', installedHost)
+              : testHost
+                ? t('appAssistant.install.testPage').replace('{host}', testHost)
+                : t('appAssistant.install.notDetected')
+          }
+          badgeOk={Boolean(installedHost || testHost)}
         >
           <p className="text-sm text-gray-600">{t('appAssistant.install.text')}</p>
           <div className="mt-3 overflow-x-auto rounded-lg border border-gray-100">
@@ -224,13 +244,22 @@ export default function AppAssistant() {
         </details>
       </div>
 
-      <aside id="assistant-test" className="rounded-xl border border-gray-200 bg-white p-4 xl:sticky xl:top-2" data-testid="assistant-test">
-        <h3 className="mb-1 font-semibold">{t('appAssistant.test.title')}</h3>
-        <p className="mb-3 text-sm text-gray-600">{t('appAssistant.test.text')}</p>
-        <TryItPanel agent={agent} />
-        <TestedRefresher appId={appId} />
+      <aside className="hidden lg:sticky lg:top-0 lg:block lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+        <TestBox agent={agent} appId={appId} id="assistant-test" />
       </aside>
     </div>
+  );
+}
+
+function TestBox({ agent, appId, id }: { agent: ModelAgent; appId: string; id: string }) {
+  const { t } = useTranslation();
+  return (
+    <section id={id} className="scroll-mt-4 rounded-xl border border-gray-200 bg-white p-4" data-testid={id}>
+      <h3 className="mb-1 font-semibold">{t('appAssistant.test.title')}</h3>
+      <p className="mb-2 text-sm text-gray-600">{t('appAssistant.test.text')}</p>
+      <TryItPanel agent={agent} compact />
+      <TestedRefresher appId={appId} />
+    </section>
   );
 }
 

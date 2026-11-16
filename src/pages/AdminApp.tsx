@@ -60,6 +60,7 @@ export default function AdminApp() {
 
   const goal = app?.onboardingGoal;
   const installed = Boolean(app?.milestones?.widget_installed?.firstAt);
+  const onTestPage = !installed && Boolean(app?.milestones?.widget_test_page?.firstAt);
   const showWebsiteStatus = goal === 'website';
   const base = `/app/admin/apps/${appId}`;
   const tabClass = ({ isActive }: { isActive: boolean }) =>
@@ -92,9 +93,9 @@ export default function AdminApp() {
               {app && showWebsiteStatus && (
                 <span
                   data-testid="app-status-pill"
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${installed ? 'bg-green-100 text-green-800 dark:bg-green-950/70 dark:text-green-300' : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200'}`}
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${installed || onTestPage ? 'bg-green-100 text-green-800 dark:bg-green-950/70 dark:text-green-300' : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200'}`}
                 >
-                  {installed ? t('appTabs.live') : t('appTabs.notLive')}
+                  {installed ? t('appTabs.live') : onTestPage ? t('appTabs.testPage') : t('appTabs.notLive')}
                 </span>
               )}
             </div>
@@ -122,7 +123,9 @@ export default function AdminApp() {
           </NavLink>
         </nav>
       </div>
-      <div className="bg-white rounded-2xl p-4 overflow-y-auto">
+      {/* No overflow here: the page scrolls in AdminLayout, which keeps the
+          AI assistant's test column sticky. */}
+      <div className="bg-white rounded-2xl p-4">
         <Outlet />
       </div>
     </div>

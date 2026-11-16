@@ -50,6 +50,7 @@ export type AppMilestoneKind =
   | 'knowledge_added'
   | 'agent_tested'
   | 'widget_installed'
+  | 'widget_test_page'
   | 'widget_visitor'
   | 'widget_answered_visitor';
 
