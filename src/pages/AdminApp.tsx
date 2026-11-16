@@ -114,7 +114,7 @@ export default function AdminApp() {
           </div>
           <ThemeToggle className="hidden md:flex" />
         </div>
-        <nav data-app-tabs aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto border-b border-gray-200 hide-scroll">
+        <nav data-app-tabs aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-200 hide-scroll">
           {tabs.map((tab) => (
             <NavLink key={tab.to} to={tab.to} end={tab.end} className={tabClass}>
               {tab.label}

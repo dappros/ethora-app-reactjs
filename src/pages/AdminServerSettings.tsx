@@ -1116,7 +1116,7 @@ export default function AdminServerSettings() {
 
           {data && activeTab && (
             <>
-              <div role="tablist" className="mb-6 -mx-1 flex gap-1 overflow-x-auto border-b border-gray-200">
+              <div role="tablist" className="mb-6 -mx-1 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-200">
                 {tabs.map((tab) => (
                   <button
                     key={tab}
