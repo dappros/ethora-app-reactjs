@@ -3,6 +3,7 @@ import { actionPostFile } from '../../actions';
 import type { ModelApp } from '../../models';
 import { Segmented } from '../../components/AIWidget/appearance/Fields';
 import { WelcomeArtwork } from '../../components/Appearance/WelcomeArtwork';
+import { useTranslation } from '../../i18n/useTranslation';
 import { isWebImageUrl } from '../../utils/welcomeImage';
 
 export type WelcomeOptions = {
@@ -34,11 +35,12 @@ export function WelcomePageEditor({ value, onChange }: {
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   async function uploadArtwork(file: File) {
     setError('');
     if (!imageTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
-      setError('Choose a JPG, PNG or WebP image up to 5 MB.');
+      setError(t('welcomeScreen.invalidFile'));
       return;
     }
     setUploading(true);
@@ -48,7 +50,7 @@ export function WelcomePageEditor({ value, onChange }: {
       if (!isWebImageUrl(location)) throw new Error('Missing image URL');
       onChange({ welcomeImage: location });
     } catch {
-      setError('Could not upload the image. Try again.');
+      setError(t('welcomeScreen.uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -56,16 +58,16 @@ export function WelcomePageEditor({ value, onChange }: {
 
   return <section className="space-y-5 rounded-2xl border border-gray-200 bg-white p-4 md:p-5">
     <header>
-      <h3 className="text-base font-semibold">Welcome screen</h3>
-      <p className="mt-1 text-sm text-gray-600">Make the sign-in page feel like your app. Preview your changes as you edit, then use Save app settings to apply them.</p>
+      <h3 className="text-base font-semibold">{t('welcomeScreen.title')}</h3>
+      <p className="mt-1 text-sm text-gray-600">{t('welcomeScreen.intro')}</p>
     </header>
     <div className="space-y-3">
       <div>
-        <h4 className="text-sm font-semibold">Welcome image</h4>
-        <p className="mt-1 text-xs text-gray-600">Optional. A landscape photo works best. JPG, PNG or WebP, up to 5 MB.</p>
+        <h4 className="text-sm font-semibold">{t('welcomeScreen.imageHeading')}</h4>
+        <p className="mt-1 text-xs text-gray-600">{t('welcomeScreen.imageHint')}</p>
       </div>
       {value.welcomeImage && <WelcomeArtwork key={value.welcomeImage} src={value.welcomeImage} fit={value.welcomeImageFit} className="max-h-32" />}
-      <input ref={fileInput} type="file" accept={imageTypes.join(',')} aria-label="Welcome image" className="hidden"
+      <input ref={fileInput} type="file" accept={imageTypes.join(',')} aria-label={t('welcomeScreen.imageInputLabel')} className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = '';
@@ -73,41 +75,41 @@ export function WelcomePageEditor({ value, onChange }: {
         }} />
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" className={actionClass} disabled={uploading} onClick={() => fileInput.current?.click()}>
-          {uploading ? 'Uploading…' : value.welcomeImage ? 'Replace image' : 'Upload image'}
+          {uploading ? t('welcomeScreen.uploading') : value.welcomeImage ? t('welcomeScreen.replaceImage') : t('welcomeScreen.uploadImage')}
         </button>
         {value.welcomeImage && <button type="button" className={actionClass} disabled={uploading} onClick={() => {
           setError('');
           onChange({ welcomeImage: '' });
-        }}>Remove image</button>}
+        }}>{t('welcomeScreen.removeImage')}</button>}
       </div>
       {value.welcomeImage && <div className="space-y-2">
-        <p className="text-sm font-medium">Image fit</p>
+        <p className="text-sm font-medium">{t('welcomeScreen.imageFit')}</p>
         <Segmented
-          ariaLabel="Image fit"
+          ariaLabel={t('welcomeScreen.imageFit')}
           size="sm"
           value={value.welcomeImageFit}
           onChange={(welcomeImageFit) => onChange({ welcomeImageFit })}
           options={[
-            { value: 'cover', label: 'Fill frame' },
-            { value: 'contain', label: 'Full image' },
+            { value: 'cover', label: t('welcomeScreen.fitCover') },
+            { value: 'contain', label: t('welcomeScreen.fitContain') },
           ]}
         />
       </div>}
       {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
     </div>
-    <label className="block text-sm font-medium">Welcome heading
-      <input className={inputClass} maxLength={100} value={value.welcomeTitle} placeholder="Welcome to your community"
+    <label className="block text-sm font-medium">{t('welcomeScreen.headingLabel')}
+      <input className={inputClass} maxLength={100} value={value.welcomeTitle} placeholder={t('welcomeScreen.headingPlaceholder')}
         onChange={(event) => onChange({ welcomeTitle: event.target.value })} />
     </label>
-    <label className="block text-sm font-medium">Welcome message
+    <label className="block text-sm font-medium">{t('welcomeScreen.messageLabel')}
       <textarea className={inputClass} maxLength={320} rows={3} value={value.welcomeDescription}
-        placeholder="Tell people what they can do here"
+        placeholder={t('welcomeScreen.messagePlaceholder')}
         onChange={(event) => onChange({ welcomeDescription: event.target.value })} />
     </label>
     <fieldset>
-      <legend className="mb-2 text-sm font-medium">Desktop layout</legend>
+      <legend className="mb-2 text-sm font-medium">{t('welcomeScreen.layoutLabel')}</legend>
       <div className="grid grid-cols-2 gap-2">
-        {([{ key: 'split', label: 'Side by side' }, { key: 'centered', label: 'Centered' }] as const).map(({ key, label }) => (
+        {([{ key: 'split', label: t('welcomeScreen.layoutSplit') }, { key: 'centered', label: t('welcomeScreen.layoutCentered') }] as const).map(({ key, label }) => (
           <label key={key} className="cursor-pointer">
             <input type="radio" name="welcome-layout" value={key} checked={value.welcomeLayout === key} className="peer sr-only"
               onChange={() => onChange({ welcomeLayout: key })} />

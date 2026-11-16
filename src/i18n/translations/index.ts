@@ -26,6 +26,7 @@ import { tsIpBlocks } from './tsIpBlocks';
 import { sharedComponents } from './sharedComponents';
 import { userSettings } from './userSettings';
 import { userSuspension } from './userSuspension';
+import { welcomeScreen } from './welcomeScreen';
 
 // Merges every per-area dictionary into one flat lookup table keyed by
 // locale. Keys are globally unique and namespaced by component/page (e.g.
@@ -67,6 +68,7 @@ const dictionaries = [
   evidence,
   tsHub,
   tsIpBlocks,
+  welcomeScreen,
 ] as const;
 
 function mergeLocale(locale: UiLanguageCode): Record<string, string> {
