@@ -6,6 +6,11 @@ export const onboarding = {
     'appSettings.unsaved': 'Unsaved changes',
     'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
 
+    // Web Index search
+    'agentPanels.searchPages': 'Find a page',
+    'agentPanels.searchPagesPlaceholder': 'Search by page URL',
+    'agentPanels.noSearchResults': 'No pages match your search.',
+
     // Try it (agent panels)
     'agentPanels.tryNoKnowledge': 'This assistant has no websites or documents yet, so it can only answer from its instructions. Add knowledge first for a real test.',
 
