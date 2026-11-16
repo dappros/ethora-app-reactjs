@@ -886,6 +886,7 @@ export default function AppSettings() {
               welcome={welcome}
               updateWelcome={(patch) => setWelcome((previous) => ({ ...previous, ...patch }))}
               brandColor={app.primaryColor}
+              isBaseApp={app.isBaseApp}
               previewUrl={`${domainName || app.domainName || 'app'}.${env.VITE_HOSTED_APPS_ROOT_DOMAIN || env.VITE_ROOT_DOMAIN || 'ethora.com'}`}
               displayName={displayName}
               setDisplayName={setDisplayName}

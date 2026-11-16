@@ -8,12 +8,27 @@ import { hexToRGBA } from './hetToRgba';
 
 interface WrapperProps {
   children: ReactNode;
+  // Overrides for the sign-in screen preview in Settings > Appearance, which
+  // draws this page inside a device frame: the frame's layout instead of the
+  // viewport's, the unsaved brand colour, frame-sized styles and no footer.
+  isMobile?: boolean;
+  primaryColor?: string;
+  style?: React.CSSProperties;
+  footer?: boolean;
 }
 
-const Wrapper: React.FC<WrapperProps> = ({ children }) => {
+const Wrapper: React.FC<WrapperProps> = ({
+  children,
+  isMobile,
+  primaryColor,
+  style,
+  footer = true,
+}) => {
   const theme: Theme = useTheme();
-  const isMobileDevice = useMediaQuery(theme.breakpoints.down(1024));
+  const isMobileViewport = useMediaQuery(theme.breakpoints.down(1024));
+  const isMobileDevice = isMobile ?? isMobileViewport;
   const config = useAppStore((s) => s.currentApp);
+  const brandColor = primaryColor !== undefined ? primaryColor : config?.primaryColor;
 
   return (
     <Box
@@ -23,12 +38,13 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
         padding: isMobileDevice ? '24px 0px' : '5.5% 10%',
         backgroundImage: isMobileDevice ? 'none !important' : '',
         backgroundColor: !isMobileDevice
-          ? config?.primaryColor
-            ? hexToRGBA(config.primaryColor)
+          ? brandColor
+            ? hexToRGBA(brandColor)
             : hexToRGBA('#0052CD')
           : 'rgb(var(--c-surface))',
       }}
       className="responsiveWrapper"
+      style={style}
     >
       <Box
         sx={{
@@ -47,7 +63,7 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
         {children}
         {/* Tiny build/version line at the bottom of every auth screen so QA / ops can
             tell at a glance what's deployed. Falls back to nothing if no info is set. */}
-        <BuildVersionFooter />
+        {footer && <BuildVersionFooter />}
       </Box>
     </Box>
   );

@@ -21,6 +21,7 @@ interface Props {
   welcome: WelcomeOptions;
   updateWelcome: (patch: Partial<WelcomeOptions>) => void;
   brandColor?: string | null;
+  isBaseApp?: boolean;
   previewUrl: string;
   displayName: string;
   setDisplayName: (s: string) => void;
@@ -40,6 +41,7 @@ export function Appearance({
   welcome,
   updateWelcome,
   brandColor,
+  isBaseApp,
   previewUrl,
   displayName,
   setDisplayName,
@@ -165,6 +167,7 @@ export function Appearance({
           </div>
           <LoginScreensPreview
             {...welcome}
+            isBaseApp={isBaseApp}
             displayName={displayName}
             tagline={tagline}
             color={color}
