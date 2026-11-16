@@ -39,6 +39,7 @@ const THEME_TOKENS: Record<PreviewTheme, Record<string, string>> = {
     '--c-gray-100': '245 247 249',
     '--c-gray-500': '140 140 140',
     '--c-gray-950': '20 20 20',
+    '--c-brand-50': '243 244 252',
   },
   dark: {
     '--c-page': '15 17 21',
@@ -47,6 +48,7 @@ const THEME_TOKENS: Record<PreviewTheme, Record<string, string>> = {
     '--c-gray-100': '21 23 28',
     '--c-gray-500': '148 155 165',
     '--c-gray-950': '245 246 248',
+    '--c-brand-50': '30 35 50',
   },
 };
 
@@ -172,9 +174,11 @@ function SignInScreen({
   );
 }
 
-function themeStyle(dark: boolean): React.CSSProperties {
+function themeStyle(dark: boolean, color: string): React.CSSProperties {
   return {
     ...THEME_TOKENS[dark ? 'dark' : 'light'],
+    // The App's brand colour, as App.tsx sets it on the live page.
+    '--bg-brand-primary': brandColor(color),
     backgroundColor: 'rgb(var(--c-page))',
     color: 'rgb(var(--c-fg))',
   } as React.CSSProperties;
@@ -212,7 +216,7 @@ export function LoginScreensPreview(props: Props) {
             // A picture of the page: nothing in it can take focus.
             {...{ inert: '' }}
             className="pointer-events-none select-none flex flex-col"
-            style={{ ...DESKTOP_SCREEN, ...themeStyle(dark) }}
+            style={{ ...DESKTOP_SCREEN, ...themeStyle(dark, props.color) }}
           >
             <SignInScreen props={props} dark={dark} isMobile={false} />
           </div>
@@ -224,7 +228,7 @@ export function LoginScreensPreview(props: Props) {
             // A picture of the page: nothing in it can take focus.
             {...{ inert: '' }}
             className="pointer-events-none select-none flex flex-col"
-            style={{ ...PHONE_SCREEN, ...themeStyle(dark), backgroundColor: 'rgb(var(--c-surface))' }}
+            style={{ ...PHONE_SCREEN, ...themeStyle(dark, props.color), backgroundColor: 'rgb(var(--c-surface))' }}
           >
             <PhoneStatusBar color={dark ? '#ffffff' : '#121219'} />
             <SignInScreen props={props} dark={dark} isMobile />
