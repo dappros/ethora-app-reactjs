@@ -271,3 +271,22 @@ test('app chats: Join automatically is on for existing chats and saves when chan
   await expect.poll(() => patches).toEqual([{ autoJoin: false }]);
   await expect(box).not.toBeChecked();
 });
+
+test('creating an app chat closes the dialog and offers to activate an assistant', async ({ page }) => {
+  const room = { jid: `${APP_ID}_c2`, chatId: 'c2', title: 'Front desk', pinned: true, creator: 'application' };
+  await fakeBackend(page, { ...baseApp, defaultRooms: [] });
+  let created = false;
+  await page.route(`**/v1/apps/create-app-chat/${APP_ID}`, (route) => {
+    created = true;
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ result: room }) });
+  });
+  await page.route(`**/v1/apps/get-default-rooms/app-id/${APP_ID}`, (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify(created ? [room] : []) }),
+  );
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Chats`);
+  await page.getByRole('button', { name: /Add New Chat/ }).first().click();
+  await page.getByPlaceholder('Chat Title').fill('Front desk');
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText('Activate an assistant?')).toBeVisible();
+  await expect(page.getByPlaceholder('Chat Title')).toHaveCount(0);
+});

@@ -34,7 +34,6 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>,
   setDefaultChatRooms: (value: Array<ModelAppDefaulRooom>) => void,
   appId: string,
-  domainName?: string,
   // Per-app default broadcast sender (Save Settings persists; per-broadcast
   // override below is a separate, session-only toggle).
   broadcastSenderName: string,
@@ -57,7 +56,6 @@ export function Chats({
   defaultChatRooms,
   setDefaultChatRooms,
   appId,
-  domainName,
   broadcastSenderName,
   setBroadcastSenderName,
   broadcastSenderPhotoUrl,
@@ -244,9 +242,10 @@ export function Chats({
         is_private: false,
       })
       
-      // Refresh app config to update defaultRooms in the store
-      const { actionGetConfig } = await import('../../actions')
-      await actionGetConfig(domainName)
+      // No global config reload here: actionGetConfig(<this App's domain>)
+      // replaced the admin's own app config with this App's, which changed
+      // the admin shell under the open dialog (it never finished). The chat
+      // list above is local to this page and already refreshed.
       
       setShowLoading(false)
       reset()
