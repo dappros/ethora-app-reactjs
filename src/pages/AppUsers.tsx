@@ -1064,8 +1064,8 @@ export default function AppUsers() {
 
   return (
     // overflow-hidden
-    <div className="admin-app-users h-full w-full  grid lg:grid-rows-[57px,_1fr] grid-rows-[97px,_1fr] gap-y-[16px]">
-      <div className="md:row-start-1 flex w-full md:justify-between items-center border-b border-b-gray-200">
+    <div className="admin-app-users h-full w-full grid grid-rows-[minmax(97px,auto),_1fr] lg:grid-rows-[minmax(57px,auto),_1fr] gap-y-[16px]">
+      <div className="md:row-start-1 flex flex-wrap gap-y-2 w-full md:justify-between items-center border-b border-b-gray-200">
         <div className="ml-4 hidden md:flex items-center gap-4">
           <div className="font-varela text-[24px]">{t('appUsers.title')}</div>
           {/* Active / Archived filter, mirrors the Apps page. */}
