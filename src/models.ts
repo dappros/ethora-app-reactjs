@@ -44,6 +44,22 @@ export interface ModelCurrentApp {
   domainName: string;
 }
 
+export type AppMilestoneKind =
+  | 'app_created'
+  | 'agent_created'
+  | 'knowledge_added'
+  | 'agent_tested'
+  | 'widget_installed'
+  | 'widget_visitor'
+  | 'widget_answered_visitor';
+
+export interface AppMilestone {
+  firstAt: string | null;
+  lastAt: string | null;
+  count: number;
+  meta?: Record<string, unknown>;
+}
+
 export interface ModelAppDefaulRooom {
   jid: string;
   pinned: boolean;
@@ -117,6 +133,10 @@ export interface ModelApp {
   logoImage: string;
   sublogoImage: string;
   appTagline: string;
+  // Start-screen goal (website | sdk | messenger | selfHost); App Home follows it.
+  onboardingGoal?: 'website' | 'sdk' | 'messenger' | 'selfHost';
+  // Server-side onboarding progress (GET /v1/apps/:id), App Home checklist.
+  milestones?: Partial<Record<AppMilestoneKind, AppMilestone>>;
   firebaseWebConfigString?: string;
   firebaseConfigParsed?: {
     apiKey: string;

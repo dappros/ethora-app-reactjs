@@ -31,6 +31,9 @@ const QuarantineIndexRedirect = lazy(() =>
   import('./pages/AdminTrustSafety').then((m) => ({ default: m.QuarantineIndexRedirect }))
 );
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
+const AppHome = lazy(() => import('./pages/AppHome'));
+const AppAssistant = lazy(() => import('./pages/AppAssistant'));
+const AppConversations = lazy(() => import('./pages/AppConversations'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
 const AppModeration = lazy(() => import('./pages/AppModeration'));
@@ -194,8 +197,17 @@ export const router = createBrowserRouter(
                           Component: AdminApp,
                           children: [
                             {
+                              // App Home: the next step of the App's goal.
                               index: true,
-                              element: <Navigate to="settings" replace />,
+                              Component: AppHome,
+                            },
+                            {
+                              path: 'assistant',
+                              Component: AppAssistant,
+                            },
+                            {
+                              path: 'conversations',
+                              Component: AppConversations,
                             },
                             {
                               path: 'settings',

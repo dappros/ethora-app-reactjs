@@ -21,7 +21,6 @@ import { deleteApp, httpGetAppTrustSafety, httpUpdateOneUser } from '../../http'
 import { useTranslation } from '../../i18n/useTranslation';
 import { AppTrustSafetyInfo, ModelAIbot, ModelApp, ModelAppDefaulRooom } from '../../models';
 import { useAppStore } from '../../store/useAppStore';
-import { AIWidget } from './AIWidget';
 import { Api } from './Api';
 import { APPEARANCE_SECTION_PARAM, Appearance } from './Appearance';
 import { Chats } from './Chats';
@@ -54,8 +53,11 @@ const LIFECYCLE_TAB = 'Delete or Archive';
 // Next to Sign-on options: the account-safety settings sit together.
 const TRUST_SAFETY_TAB = 'Trust & Safety';
 
+// 'AI Widget' moved to the App's AI assistant tab (/app/admin/apps/:id/assistant);
+// old ?tab=AI+Widget links are redirected there below.
+const LEGACY_AI_WIDGET_TAB = 'AI Widget';
+
 const tabs = [
-  'AI Widget',
   'Web App',
   'Mobile App',
   'Appearance',
@@ -77,7 +79,7 @@ const tabs = [
 const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
 
 const tabsNew = {
-  Publish: ['AI Widget', 'Web App', 'Mobile App'],
+  Publish: ['Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', TRUST_SAFETY_TAB, 'Home screen', 'Menu'],
   System: ['Chats', 'Visibility & Privacy', 'API', 'Webhooks', LIFECYCLE_TAB],
 };
@@ -87,7 +89,6 @@ const tabsNew = {
 // English/untranslated. These maps translate only the label actually shown
 // to the user in the tab list.
 const TAB_LABEL_KEYS: Record<string, string> = {
-  'AI Widget': 'appSettings.tab.aiWidget',
   'Web App': 'appSettings.tab.webApp',
   'Mobile App': 'appSettings.tab.mobileApp',
   Appearance: 'appSettings.tab.appearance',
@@ -125,6 +126,13 @@ export default function AppSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tabFromUrl = searchParams.get('tab');
+
+  // The AI Widget tab is now the App's AI assistant tab.
+  useEffect(() => {
+    if (tabFromUrl === LEGACY_AI_WIDGET_TAB && appId) {
+      navigate(`/app/admin/apps/${appId}/assistant`, { replace: true });
+    }
+  }, [tabFromUrl, appId, navigate]);
 
   // The Chat component tab now lives in Appearance > Chat; keep old links working.
   useEffect(() => {
@@ -248,13 +256,6 @@ export default function AppSettings() {
   const [defaultChatRooms, setDefaultChatRooms] = useState<
     Array<ModelAppDefaulRooom>
   >([]);
-
-  const handleRagChange = () => {
-    setAiBot({
-      ...aiBot,
-      isRAG: !aiBot.isRAG,
-    });
-  };
 
   const checkIfModified = () => {
     const currentState = {
@@ -597,7 +598,7 @@ export default function AppSettings() {
           return null;
         }
 
-        const tabDisabled = tab === 'AI Widget' && !aiEnabled;
+        const tabDisabled = false;
         return (
           <TabApp
             key={`${tab}_${index}`}
@@ -801,22 +802,6 @@ export default function AppSettings() {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" />
         </div>
         <TabPanels className="h-full overflow-hidden">
-          <TabPanel
-            key="AI bot"
-            className="grid grid-rows-1 lg:ml-4 h-full min-h-0 overflow-x-auto overflow-y-hidden"
-          >
-            <AIWidget
-              appId={appId as string}
-              app={app}
-              aiBot={aiBot}
-              setAiBot={setAiBot}
-              defaultChatRooms={defaultChatRooms}
-              primaryColor={app.primaryColor}
-              isDisabled={app?.creatorId !== currentUser?._id}
-              aiFeatureDisabled={!aiEnabled}
-              handleRagChange={handleRagChange}
-            />
-          </TabPanel>
 
           <TabPanel
             key="Web App"

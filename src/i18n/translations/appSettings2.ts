@@ -97,7 +97,7 @@ export const appSettings2 = {
       'For quick no code integration, please check our',
     'appSettingsMobileApp.webAppLinkText': 'Web app',
     'appSettingsMobileApp.and': 'and',
-    'appSettingsMobileApp.aiWidgetLinkText': 'AI Widget',
+    'appSettingsMobileApp.aiWidgetLinkText': 'AI assistant',
     'appSettingsMobileApp.quickNoCodeSuffix':
       'sections. Our web app is responsive and you can try using it on your mobile devices before you commit to building a native app.',
     'appSettingsMobileApp.reactNativeComponentDesc':
@@ -285,7 +285,7 @@ export const appSettings2 = {
       "Any messages addressed to the bot or with '/bot' prefix",
     'appSettingsWebApp.additionalSettingsHeading': 'Additional settings',
     'appSettingsWebApp.additionalSettingsPrefix': 'Use',
-    'appSettingsWebApp.aiWidgetLinkText': 'AI Widget',
+    'appSettingsWebApp.aiWidgetLinkText': 'AI assistant',
     'appSettingsWebApp.additionalSettingsSuffix':
       'tab for additional settings such as prompt and documents upload.',
 

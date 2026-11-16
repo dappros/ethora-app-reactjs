@@ -58,71 +58,71 @@ export default function AdminApp() {
     );
   }
 
-  return (
-    // overflow-hidden
-    <div className="h-full  grid grid-rows-[auto,_1fr]">
-      <div className="mb-4 flex md:flex-row flex-col md:justify-between">
-        <div className="pl-4 pt-2 flex mb-4 md:mb-0">
-          <button className="ml-[5px] md:mb-0 mr-[13px]" onClick={goBack}>
-            <IconArrowLeft />
-          </button>
+  const goal = app?.onboardingGoal;
+  const installed = Boolean(app?.milestones?.widget_installed?.firstAt);
+  const showWebsiteStatus = goal === 'website' || Boolean((app as { defaultBotInstanceId?: string } | undefined)?.defaultBotInstanceId);
+  const base = `/app/admin/apps/${appId}`;
+  const tabClass = ({ isActive }: { isActive: boolean }) =>
+    `shrink-0 whitespace-nowrap rounded-t-lg px-3 py-2 text-sm font-semibold ${isActive ? 'bg-brand-50 text-brand-600 shadow-[inset_0_-2px_0] shadow-brand-500' : 'text-gray-600 hover:text-gray-900'}`;
+  const tabs: { to: string; label: string; end?: boolean }[] = [
+    { to: base, label: t('appTabs.home'), end: true },
+    { to: `${base}/assistant`, label: t('appTabs.assistant') },
+    { to: `${base}/conversations`, label: t('appTabs.conversations') },
+    { to: `${base}/users`, label: t('adminApp.tabUsers') },
+    { to: `${base}/statistics`, label: t('adminApp.tabStatistics') },
+    { to: `${base}/moderation`, label: t('trustSafetyModeration.tab') },
+    { to: `${base}/settings`, label: t('adminApp.tabSettings') },
+  ];
 
-          <div className="font-varela  text-[24px] md:text-[34px]">
-            {app?.displayName}
+  return (
+    <div className="h-full grid grid-rows-[auto,_1fr]">
+      <div className="mb-3 px-4 pt-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <nav aria-label={t('appTabs.breadcrumb')} className="flex items-center gap-1 text-sm text-gray-600">
+              <button type="button" className="flex items-center gap-1 text-brand-500 hover:underline" onClick={goBack}>
+                <IconArrowLeft />
+                {t('appTabs.apps')}
+              </button>
+              <span aria-hidden="true">/</span>
+              <span className="truncate">{app?.displayName}</span>
+            </nav>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <h1 className="font-varela text-[24px] md:text-[30px] truncate">{app?.displayName}</h1>
+              {app && showWebsiteStatus && (
+                <span
+                  data-testid="app-status-pill"
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${installed ? 'bg-green-100 text-green-800 dark:bg-green-950/70 dark:text-green-300' : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200'}`}
+                >
+                  {installed ? t('appTabs.live') : t('appTabs.notLive')}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        {/* Per-App segmented nav. The Chats segment (Option A) opens the
-            sidebar Chats page in this app's owner context, so admins can
-            jump straight into testing without manually picking the app
-            from the switcher. The onClick eagerly switches chatAppId so
-            the destination renders the right context immediately rather
-            than after a hydration round-trip on Chat.tsx mount. */}
-        <div className="flex items-center md:justify-end md:flex-1 md:mr-[32px]">
           <ThemeToggle className="hidden md:flex" />
-          <div className="flex md:grid justify-center content-center md:grid-cols-5 w-full md:max-w-[660px] px-4 overflow-x-auto hide-scroll">
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center rounded-l-xl items-center py-2 px-3 md:px-4"
-              to={`/app/admin/apps/${appId}/users`}
-            >
-              {t('adminApp.tabUsers')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center items-center py-2 px-3 md:px-4"
-              to={`/app/admin/apps/${appId}/settings`}
-            >
-              {t('adminApp.tabSettings')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center items-center py-2 px-3 md:px-4"
-              to={`/app/admin/apps/${appId}/statistics`}
-            >
-              {t('adminApp.tabStatistics')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-r-0 border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center items-center py-2 px-3 md:px-4"
-              to={`/app/admin/apps/${appId}/moderation`}
-            >
-              {t('trustSafetyModeration.tab')}
-            </NavLink>
-            <NavLink
-              className="aria-[current=page]:bg-brand-500 hover:bg-brand-hover aria-[current=page]:text-white border border-brand-500 block flex-1 shrink-0 whitespace-nowrap text-center rounded-r-xl items-center py-2 px-3 md:px-4"
-              to="/app/chat"
-              onClick={() => {
-                if (!appId) return;
-                // Fire-and-forget: the destination page will retry on
-                // mount if this fails. We intentionally don't await so
-                // the navigation feels instant; any error toast surfaces
-                // from Chat.tsx's hydration effect.
-                actionSwitchChatApp(appId).catch(() => {});
-              }}
-            >
-              {t('adminApp.tabChats')}
-            </NavLink>
-          </div>
         </div>
+        <nav aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto border-b border-gray-200 hide-scroll">
+          {tabs.map((tab) => (
+            <NavLink key={tab.to} to={tab.to} end={tab.end} className={tabClass}>
+              {tab.label}
+            </NavLink>
+          ))}
+          {/* Opens the sidebar Chats page in this app's owner context. The
+              onClick switches chatAppId eagerly so the destination renders
+              the right context at once (Chat.tsx retries on mount). */}
+          <NavLink
+            to="/app/chat"
+            className={tabClass}
+            onClick={() => {
+              if (!appId) return;
+              actionSwitchChatApp(appId).catch(() => {});
+            }}
+          >
+            {t('adminApp.tabChats')} ↗
+          </NavLink>
+        </nav>
       </div>
-      {/* overflow-hidden */}
-      <div className="bg-white rounded-2xl p-4">
+      <div className="bg-white rounded-2xl p-4 overflow-y-auto">
         <Outlet />
       </div>
     </div>
