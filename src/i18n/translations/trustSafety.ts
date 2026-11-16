@@ -323,6 +323,11 @@ const en: Record<string, string> = {
   'trustSafetyModeration.rangeOpen': '{from} to {to}',
   'trustSafetyModeration.noText': 'No text kept',
   'trustSafetyModeration.noPreview': 'No preview',
+  // Media outside a chat (section 17): where it came from, and refused uploads.
+  'trustSafetyModeration.surface.profile': 'Profile picture',
+  'trustSafetyModeration.surface.upload': 'Uploaded file',
+  'trustSafetyModeration.surface.chat-media': 'Chat media (API upload)',
+  'trustSafetyModeration.refusedNotStored': 'Refused at upload - nothing was stored',
   'trustSafetyModeration.unknownSender': 'Unknown sender',
   'trustSafetyModeration.resolvedAt': 'Resolved {date}',
   'trustSafetyModeration.piiTypes': 'Types: {types}',

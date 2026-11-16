@@ -463,6 +463,8 @@ export interface ModerationItem {
   id?: string;
   appId: string;
   kind: ModerationItemKind;
+  // Media outside a chat (section 17): 'profile' | 'upload' | 'chat-media'.
+  surface?: string | null;
   room?: string | null;
   // Room title, when the API resolves it.
   roomTitle?: string | null;
