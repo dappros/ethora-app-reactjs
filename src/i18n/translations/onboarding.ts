@@ -6,6 +6,13 @@ export const onboarding = {
     'appSettings.unsaved': 'Unsaved changes',
     'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
 
+    // Conversations list
+    'aiWidgetConversations.simpleView': 'Simple view',
+    'aiWidgetConversations.detailedView': 'Show technical details',
+    'aiWidgetConversations.tableView': 'Table and bulk actions',
+    'aiWidgetConversations.simpleList': 'Simple list',
+    'aiWidgetConversations.pageUnknown': 'Website page unavailable',
+
     // Web Index search
     'agentPanels.searchPages': 'Find a page',
     'agentPanels.searchPagesPlaceholder': 'Search by page URL',

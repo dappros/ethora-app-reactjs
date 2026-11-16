@@ -28,6 +28,7 @@ export function WidgetConversationDialog({
   const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
   const [messagesError, setMessagesError] = useState<string | null>(null);
   const [mamUnavailable, setMamUnavailable] = useState<boolean>(false);
+  const [detailed, setDetailed] = useState(false);
 
   const handleCopy = useCallback((value: string) => {
     try {
@@ -42,6 +43,7 @@ export function WidgetConversationDialog({
   // race the previous fetch into the new modal.
   useEffect(() => {
     if (!selectedRow) {
+      setDetailed(false);
       setMessages([]);
       setMessagesError(null);
       setMamUnavailable(false);
@@ -118,6 +120,13 @@ export function WidgetConversationDialog({
         <DialogContent dividers>
           {selectedRow && (
             <div className="font-sans text-sm space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium">{formatVisitor(selectedRow)}</span>
+                <button type="button" onClick={() => setDetailed((v) => !v)} className="text-brand-500 hover:underline">
+                  {t(detailed ? 'aiWidgetConversations.simpleView' : 'aiWidgetConversations.detailedView')}
+                </button>
+              </div>
+              {detailed && <>
               <div>
                 <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.visitorLabel')}</div>
                 <div className="font-medium">{formatVisitor(selectedRow)}</div>
@@ -127,6 +136,7 @@ export function WidgetConversationDialog({
                   </div>
                 )}
               </div>
+              </>}
               <div>
                 <div className="text-xs uppercase text-gray-500 mb-1">{t('aiWidgetConversations.startedLabel')}</div>
                 <div>{formatDate(selectedRow.createdAt)}</div>
@@ -190,14 +200,14 @@ export function WidgetConversationDialog({
                 {!messagesLoading &&
                   !messagesError &&
                   !mamUnavailable &&
-                  messages.length === 0 && (
+                  (detailed ? messages.length === 0 : !messages.some((m) => m.body?.trim())) && (
                     <div className="text-xs text-gray-500 italic px-1">
                       {t('aiWidgetConversations.noMessagesYet')}
                     </div>
                   )}
                 {messages.length > 0 && (
                   <div className="rounded-md border border-gray-200 bg-gray-50 max-h-[420px] overflow-y-auto p-2 space-y-2">
-                    {messages.map((m) => {
+                    {messages.filter((m) => detailed || Boolean(m.body?.trim())).map((m) => {
                       const visitor = isVisitorMessage(m);
                       return (
                         <div
