@@ -67,7 +67,9 @@ export default function AppAssistant() {
     const id = location.hash.replace('#', '');
     if (!id || !agent) return;
     if (id === 'knows' && health && health.pages + health.docs === 0) setKnows('web');
-    window.setTimeout(() => document.getElementById(`assistant-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    if (id === 'docs') setKnows('docs');
+    const target = id === 'docs' ? 'knows' : id;
+    window.setTimeout(() => document.getElementById(`assistant-${target}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }, [location.hash, agent, health]);
 
   if (!app || !appId) return null;

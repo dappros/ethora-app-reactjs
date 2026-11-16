@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { CopyButton } from '../components/CopyButton';
+import { GoalIllustration } from '../components/GoalIllustration';
 import { Secret } from '../components/Secret';
 import { env } from '../config/env';
 import { AgentKnowledgeHealth, httpGetAgentKnowledge, httpGetApp, httpGetSiteCrawlJob, httpUpdateApp } from '../http';
@@ -8,9 +9,10 @@ import { useAppAssistant } from '../hooks/useAppAssistant';
 import { useTranslation } from '../i18n/useTranslation';
 import { AppMilestoneKind, ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
+import { crawlErrorMessage, startCrawl } from '../utils/createWebsiteAssistant';
 
 type Goal = NonNullable<ModelApp['onboardingGoal']>;
-type Crawl = { status: string; savedPages?: number };
+type Crawl = { status: string; savedPages?: number; error?: string | { message?: string } };
 
 // App Home: the next step of the goal the owner picked at the start, from
 // the server milestones (they survive a new browser or device), then the
@@ -24,7 +26,12 @@ export default function AppHome() {
   const { agent } = useAppAssistant(app);
   const [health, setHealth] = useState<AgentKnowledgeHealth | null>(null);
   const [crawl, setCrawl] = useState<Crawl | null>(null);
-  const jobId: string = location.state?.jobId || '';
+  const [jobId, setJobId] = useState<string>(location.state?.jobId || '');
+  // A website the one-step setup could not start reading: the assistant is
+  // kept, step 1 says why and offers Retry and Upload documents.
+  const [crawlError, setCrawlError] = useState<string>(location.state?.crawlError || '');
+  const [retrying, setRetrying] = useState(false);
+  const website: string | null = location.state?.website || null;
 
   // Progress changes outside this page (a visitor, a crawl): fetch fresh on
   // every visit rather than trusting the copy AdminApp loaded.
@@ -51,7 +58,13 @@ export default function AppHome() {
         if (!job) return;
         setCrawl(job);
         if (!['completed', 'failed', 'cancelled'].includes(job.status)) timer = window.setTimeout(poll, 3000);
-        else httpGetApp(appId).then((r) => doSetApp(r.data.result)).catch(() => {});
+        else {
+          if (job.status === 'failed' || (job.status === 'completed' && !job.savedPages)) {
+            const e = typeof job.error === 'string' ? job.error : job.error?.message;
+            setCrawlError(e || (job.status === 'failed' ? 'the crawl failed' : 'no pages could be read'));
+          }
+          httpGetApp(appId).then((r) => doSetApp(r.data.result)).catch(() => {});
+        }
       } catch {
         /* The checklist still shows the server state. */
       }
@@ -70,6 +83,21 @@ export default function AppHome() {
   const goal: Goal | null = app.onboardingGoal || (agent ? 'website' : null);
   const base = `/app/admin/apps/${app._id}`;
 
+  const retryCrawl = async () => {
+    if (!agent?.id || !website || retrying) return;
+    setRetrying(true);
+    try {
+      const id = await startCrawl(app._id, agent.id, website);
+      setCrawlError('');
+      setCrawl(null);
+      setJobId(id);
+    } catch (e) {
+      setCrawlError(crawlErrorMessage(e));
+    } finally {
+      setRetrying(false);
+    }
+  };
+
   if (!goal || goal === 'selfHost') {
     return <ChooseGoal app={app} onChosen={(next) => doSetApp({ ...app, onboardingGoal: next })} />;
   }
@@ -79,17 +107,35 @@ export default function AppHome() {
     const pages = health?.pages ?? app.aiBot?.siteUrlsV2?.length ?? 0;
     const docs = health?.docs ?? app.aiBot?.files?.length ?? 0;
     const knows = has('knowledge_added') || pages + docs > 0;
+    const failed = Boolean(crawlError) && !knows && !crawling;
     const host = (m.widget_installed?.meta?.host as string) || '';
     const steps: StepDef[] = [
       {
         done: knows,
-        title: knows ? t('appHome.web.knowsDone') : crawling ? t('appHome.web.crawling') : t('appHome.web.knows'),
-        text: knows
+        title: knows ? t('appHome.web.knowsDone') : crawling ? t('appHome.web.crawling') : failed ? t('appHome.web.crawlFailed') : t('appHome.web.knows'),
+        text: failed
+          ? t('appHome.web.crawlFailedText').replace('{reason}', crawlError)
+          : knows
           ? t('appHome.web.knowsDoneText').replace('{pages}', String(pages)).replace('{docs}', String(docs))
           : crawling
             ? t('appHome.web.crawlingText').replace('{pages}', String(crawl?.savedPages ?? 0))
             : t('appHome.web.knowsText'),
-        action: { to: `${base}/assistant#knows`, label: knows ? t('appHome.manage') : t('appHome.web.addKnowledge') },
+        action: failed ? undefined : { to: `${base}/assistant#knows`, label: knows ? t('appHome.manage') : t('appHome.web.addKnowledge') },
+        body: failed ? (
+          <div className="flex flex-wrap gap-2" data-testid="crawl-failed-actions">
+            {website && (
+              <button type="button" onClick={() => void retryCrawl()} disabled={retrying} className="min-h-9 rounded-lg bg-brand-500 px-3 text-sm font-semibold text-white hover:bg-brand-darker disabled:opacity-50">
+                {retrying ? t('appHome.web.retrying') : t('appHome.web.retry')}
+              </button>
+            )}
+            <Link to={`${base}/assistant#docs`} className="inline-flex min-h-9 items-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-800">
+              {t('appAssistant.knows.uploadDocs')}
+            </Link>
+            <Link to={`${base}/assistant#knows`} className="inline-flex min-h-9 items-center px-1 text-sm text-brand-500 underline">
+              {t('appHome.web.otherAddress')}
+            </Link>
+          </div>
+        ) : undefined,
       },
       {
         done: has('agent_tested'),
@@ -365,7 +411,8 @@ function ChooseGoal({ app, onChosen }: { app: ModelApp; onChosen: (goal: Goal) =
       <p className="mt-1 text-sm text-gray-600">{t('appHome.choose.text')}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {(['website', 'sdk', 'messenger'] as Goal[]).map((g) => (
-          <button key={g} type="button" disabled={busy} onClick={() => void pick(g)} className="rounded-xl border border-gray-200 bg-white p-4 text-left hover:border-brand-500 disabled:opacity-50">
+          <button key={g} type="button" disabled={busy} onClick={() => void pick(g)} className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 text-left hover:border-brand-500 disabled:opacity-50">
+            <GoalIllustration goal={g} />
             <span className="block font-semibold">{t(`onboarding.goal.${g}`)}</span>
             <span className="mt-1 block text-sm text-gray-600">{t(`onboarding.goal.${g}Desc`)}</span>
           </button>

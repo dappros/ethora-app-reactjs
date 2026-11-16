@@ -33,13 +33,13 @@ export function CreateWidgetModal({ onClose, existingApp }: { onClose: () => voi
     setBusy(true);
     setError('');
     try {
-      const { app, jobId } = await createWebsiteAssistant(
+      const { app, jobId, crawlError } = await createWebsiteAssistant(
         { name: existingApp.displayName, website: useDocs ? null : url, files: useDocs ? files : undefined, existingApp, prompt: t('onboarding.website.defaultPrompt') },
         progress.current,
         setStage
       );
       onClose();
-      navigate(`/app/admin/apps/${app._id}`, { state: { justCreated: true, jobId } });
+      navigate(`/app/admin/apps/${app._id}`, { state: { justCreated: true, jobId, crawlError, website: useDocs ? null : url } });
     } catch (e) {
       const err = e as WebsiteAssistantError;
       if (err.uncertain) setUncertain(true);

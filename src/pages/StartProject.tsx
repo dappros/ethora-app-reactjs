@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { actionCreateApp } from '../actions';
+import { GoalIllustration } from '../components/GoalIllustration';
 import { BookACallModal } from '../components/modal/BookACallModal';
 import { env } from '../config/env';
 import { httpRecordOnboarding, httpUpdateApp } from '../http';
@@ -109,7 +110,7 @@ export default function StartProject() {
     setBusy(true);
     setError('');
     try {
-      const { app, jobId } = await createWebsiteAssistant(
+      const { app, jobId, crawlError } = await createWebsiteAssistant(
         {
           name: name.trim(),
           website: useDocs ? null : websiteUrl,
@@ -120,7 +121,7 @@ export default function StartProject() {
         setStage
       );
       finishOnboarding();
-      navigate(`/app/admin/apps/${app._id}`, { state: { justCreated: true, jobId } });
+      navigate(`/app/admin/apps/${app._id}`, { state: { justCreated: true, jobId, crawlError, website: useDocs ? null : websiteUrl } });
     } catch (e) {
       const err = e as WebsiteAssistantError;
       if (err.uncertain) setUncertain(true);
@@ -307,8 +308,9 @@ export default function StartProject() {
               onClick={() => choose(goal)}
               disabled={disabled}
               data-testid={`onboarding-goal-${goal}`}
-              className={`min-h-36 rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-50 ${preselected === goal ? 'border-brand-500 ring-2 ring-brand-100' : 'border-gray-200'}`}
+              className={`flex h-full min-h-36 flex-col rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-50 ${preselected === goal ? 'border-brand-500 ring-2 ring-brand-100' : 'border-gray-200'}`}
             >
+              <GoalIllustration goal={goal} />
               <span className="block text-base font-semibold">{t(`onboarding.goal.${goal}`)}</span>
               <span className="mt-2 block text-sm leading-6 text-gray-600">{disabled ? t('onboarding.goal.websiteDisabled') : t(`onboarding.goal.${goal}Desc`)}</span>
             </button>

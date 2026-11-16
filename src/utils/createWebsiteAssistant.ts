@@ -41,7 +41,7 @@ export async function createWebsiteAssistant(
   input: WebsiteAssistantInput,
   progress: WebsiteAssistantProgress,
   onStage: (stage: WebsiteAssistantStage) => void
-): Promise<{ app: ModelApp; agent: ModelAgent; jobId: string }> {
+): Promise<{ app: ModelApp; agent: ModelAgent; jobId: string; crawlError?: string }> {
   let step: 'app' | 'agent' | 'other' = 'other';
   try {
     if (!progress.app) {
@@ -86,16 +86,16 @@ export async function createWebsiteAssistant(
       progress.connected = true;
     }
     let jobId = '';
+    let crawlError: string | undefined;
     if (input.website) {
       onStage('addingWebsite');
       try {
-        const crawl = await httpAgentSiteCrawl(app._id, agent.id, input.website, true);
-        jobId = crawl.data?.jobId || '';
-        if (jobId) phCapture('onboarding_crawl_started', { intent: 'website' });
+        jobId = await startCrawl(app._id, agent.id, input.website);
       } catch (e) {
-        const code = (e as { response?: { data?: { code?: string } } }).response?.data?.code;
-        // A retry after a lost response can find the page already indexed.
-        if (code !== 'SITE_SOURCE_ALREADY_INDEXED') throw e;
+        // The assistant exists and is on: App Home shows why the website
+        // could not be read, with Retry and Upload documents.
+        crawlError = crawlErrorMessage(e);
+        phCapture('onboarding_crawl_failed', { intent: 'website', reason: crawlError });
       }
     } else if (input.files?.length) {
       onStage('uploadingDocs');
@@ -103,10 +103,34 @@ export async function createWebsiteAssistant(
       phCapture('onboarding_docs_uploaded', { intent: 'website', files: input.files.length });
     }
     phCapture('onboarding_project_created', { intent: 'website', has_website: Boolean(input.website), has_docs: Boolean(input.files?.length) });
-    return { app: progress.app as ModelApp, agent, jobId };
+    return { app: progress.app as ModelApp, agent, jobId, crawlError };
   } catch (e) {
     if (e instanceof WebsiteAssistantError) throw e;
     const err = e as { message?: string; response?: { data?: { error?: string } } };
     throw new WebsiteAssistantError(err.response?.data?.error || err.message || 'failed', step !== 'other' && !err.response);
   }
+}
+
+// Starts reading a website for the agent; '' when it is already indexed.
+export async function startCrawl(appId: string, agentId: string, website: string): Promise<string> {
+  try {
+    const crawl = await httpAgentSiteCrawl(appId, agentId, website, true);
+    const jobId = crawl.data?.jobId || '';
+    if (jobId) phCapture('onboarding_crawl_started', { intent: 'website' });
+    return jobId;
+  } catch (e) {
+    const code = (e as { response?: { data?: { code?: string } } }).response?.data?.code;
+    // A retry after a lost response can find the page already indexed.
+    if (code === 'SITE_SOURCE_ALREADY_INDEXED') return '';
+    throw e;
+  }
+}
+
+// The API's reason when it gives one (message, then code), else the
+// transport error. Never empty.
+export function crawlErrorMessage(e: unknown): string {
+  const err = e as { message?: string; response?: { status?: number; data?: { error?: string; message?: string; code?: string; details?: { reason?: string } } } };
+  const d = err.response?.data;
+  const reason = d?.details?.reason || d?.message || d?.error || d?.code || err.message || 'unknown error';
+  return err.response?.status ? `${reason} (HTTP ${err.response.status})` : reason;
 }
