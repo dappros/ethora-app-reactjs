@@ -60,7 +60,7 @@ export default function AdminApp() {
 
   const goal = app?.onboardingGoal;
   const installed = Boolean(app?.milestones?.widget_installed?.firstAt);
-  const showWebsiteStatus = goal === 'website' || Boolean((app as { defaultBotInstanceId?: string } | undefined)?.defaultBotInstanceId);
+  const showWebsiteStatus = goal === 'website';
   const base = `/app/admin/apps/${appId}`;
   const tabClass = ({ isActive }: { isActive: boolean }) =>
     `shrink-0 whitespace-nowrap rounded-t-lg px-3 py-2 text-sm font-semibold ${isActive ? 'bg-brand-50 text-brand-600 shadow-[inset_0_-2px_0] shadow-brand-500' : 'text-gray-600 hover:text-gray-900'}`;

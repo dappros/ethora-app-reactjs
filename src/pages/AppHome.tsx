@@ -80,7 +80,9 @@ export default function AppHome() {
 
   const m = app.milestones || {};
   const has = (k: AppMilestoneKind) => Boolean(m[k]?.firstAt);
-  const goal: Goal | null = app.onboardingGoal || (agent ? 'website' : null);
+  // Not inferred from the default agent: on an AI-enabled install every new
+  // App gets the system Support Agent, whatever it is for.
+  const goal: Goal | null = app.onboardingGoal || null;
   const base = `/app/admin/apps/${app._id}`;
 
   const retryCrawl = async () => {
