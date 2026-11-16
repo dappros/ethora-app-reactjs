@@ -617,9 +617,9 @@ test.describe('Agent Settings: renamed tabs, Try it, knowledge health', () => {
     const list = page.getByTestId('website-widget-apps');
     await expect(list.getByRole('listitem')).toHaveCount(1);
     await expect(list).toContainText(OWNED_APP.displayName);
-    await expect(list.getByRole('link', { name: 'Open AI Widget settings' })).toHaveAttribute(
+    await expect(list.getByRole('link', { name: 'Open the AI assistant' })).toHaveAttribute(
       'href',
-      `/app/admin/apps/${OWNED_APP._id}/settings?tab=AI+Widget`,
+      `/app/admin/apps/${OWNED_APP._id}/assistant`,
     );
   });
 

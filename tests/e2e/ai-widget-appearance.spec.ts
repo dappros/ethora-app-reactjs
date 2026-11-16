@@ -19,9 +19,17 @@ const app = {
   availableMenuItems: { chats: true, profile: true, settings: true },
   aiBot: { status: 'on', userId: 'e2e-bot' },
   defaultChatRooms: [],
+  defaultBotInstanceId: 'e2e-bi',
+  onboardingGoal: 'website',
+  milestones: {},
 };
 
-async function fakeBackend(page: Page, stored: Record<string, string>) {
+const agent = { id: 'e2e-agent', displayName: 'E2E Assistant', ownerId: USER_ID, visibility: 'private', ownerAppId: APP_ID };
+const botInstance = { id: 'e2e-bi', agentId: 'e2e-agent', appId: APP_ID, status: 'on' };
+
+async function fakeBackend(page: Page, stored: Record<string, string>, opts: { withAgent?: boolean } = {}) {
+  const withAgent = opts.withAgent !== false;
+  const theApp = withAgent ? app : { ...app, defaultBotInstanceId: undefined };
   const puts: Array<Record<string, string>> = [];
   const json = (route: Route, body: unknown, status = 200) =>
     route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
@@ -42,8 +50,10 @@ async function fakeBackend(page: Page, stored: Record<string, string>) {
       const method = req.method();
       if (pathname === '/v1/apps/get-config') return json(route, appConfig);
       if (pathname === '/v1/users/me') return json(route, me);
-      if (pathname === '/v1/apps') return json(route, { apps: [app], total: 1 });
-      if (pathname === `/v1/apps/${APP_ID}`) return json(route, { result: app });
+      if (pathname === '/v1/apps') return json(route, { apps: [theApp], total: 1 });
+      if (pathname === `/v1/apps/${APP_ID}`) return json(route, { result: theApp });
+      if (pathname === '/v2/agents') return json(route, { items: withAgent ? [agent] : [], total: withAgent ? 1 : 0 });
+      if (pathname === '/v2/bot-instances') return json(route, { items: withAgent ? [botInstance] : [], total: withAgent ? 1 : 0 });
       if (pathname === `/v2/apps/${APP_ID}/widget/appearance` && method === 'GET') {
         return json(route, { ok: true, appearance: stored });
       }
@@ -96,8 +106,9 @@ const me = {
   },
 };
 
-const openTab = (page: Page) => page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI+Widget`);
-const openAppearance = (page: Page) => page.getByRole('tab', { name: /Customize appearance/ }).click();
+// The App's AI assistant tab (was Settings > AI Widget).
+const openTab = (page: Page) => page.goto(`/app/admin/apps/${APP_ID}/assistant`);
+const openAppearance = (page: Page) => page.getByRole('button', { name: 'Customize' }).click();
 
 test('loads the saved appearance from the App and saves changes back to it', async ({ page }) => {
   const { puts } = await fakeBackend(page, { 'data-title': 'Help desk' });
@@ -110,7 +121,7 @@ test('loads the saved appearance from the App and saves changes back to it', asy
   await page.getByRole('button', { name: 'Save appearance' }).click();
   await expect(page.getByText('Widget appearance saved')).toBeVisible();
   expect(puts).toEqual([{ 'data-title': 'Ask us' }]);
-  await expect(page.getByText('Unsaved changes')).toHaveCount(0);
+  await expect(page.getByTestId('assistant-section-looks').getByText('Unsaved changes')).toHaveCount(0);
 });
 
 test('the snippet stays minimal unless the appearance is pinned', async ({ page }) => {
@@ -151,31 +162,22 @@ test('does not offer the browser copy when the App already has an appearance', a
   await expect(page.getByText('earlier version of this page')).toHaveCount(0);
 });
 
-test('layout: Test widget on top, one agent card, code first, appearance on its own tab', async ({ page }) => {
+test('layout: four sections, the test chat in view, appearance and advanced folded', async ({ page }) => {
   await fakeBackend(page, {});
   await openTab(page);
-  const agentCard = page.getByTestId('ai-agent-card');
-  await expect(agentCard).toBeVisible();
-  await expect(agentCard.getByLabel('Agent:')).toBeVisible();
-  await expect(agentCard.getByRole('checkbox')).toBeChecked();
-  await expect(agentCard).toContainText('Answering website visitors');
-  // Test widget sits above the agent card, outside it.
-  const testButton = page.getByRole('button', { name: 'Test widget' });
-  await expect(testButton).toBeVisible();
-  expect(await agentCard.getByRole('button', { name: 'Test widget' }).count()).toBe(0);
-  const [tb, ac] = await Promise.all([testButton.boundingBox(), agentCard.boundingBox()]);
-  expect(tb!.y).toBeLessThan(ac!.y);
-  // Code is the default tab and the snippet is short.
-  const card = page.getByTestId('website-widget-card');
-  await expect(card.getByRole('tab', { name: 'Code' })).toHaveAttribute('aria-selected', 'true');
-  const code = card.locator('pre').filter({ hasText: 'data-app-id' });
-  await expect(code).not.toContainText('Optional.');
-  await expect(card.getByTestId('widget-attributes-reference')).not.toHaveAttribute('open', '');
+  for (const id of ['knows', 'answers', 'looks', 'install']) {
+    await expect(page.getByTestId(`assistant-section-${id}`)).toBeVisible();
+  }
+  await expect(page.getByTestId('assistant-test')).toBeVisible();
+  await expect(page.getByTestId('assistant-test').getByRole('heading', { name: 'Test it' })).toBeVisible();
+  // Appearance editor and advanced panels only on request.
   await expect(page.getByLabel('Popup title')).toHaveCount(0);
-  await card.getByRole('tab', { name: 'Customize appearance' }).click();
+  await expect(page.getByTestId('assistant-advanced')).not.toHaveAttribute('open', '');
+  await openAppearance(page);
   await expect(page.getByLabel('Popup title')).toBeVisible();
-  await expect(card.getByTestId('appearance-agent-note')).toBeVisible();
-  await expect(page.getByText('Conversations history')).toBeVisible();
+  // Not seen on any site yet.
+  await expect(page.getByTestId('assistant-section-install')).toContainText('Not detected yet');
+  await expect(page.getByTestId('app-assistant')).toContainText('Ready to answer visitors');
 });
 
 test('selecting the snippet text copies it as written, not one token per line', async ({ page }) => {
@@ -197,4 +199,18 @@ test('selecting the snippet text copies it as written, not one token per line', 
   expect(lines).toContain(`  data-app-id="${APP_ID}"`);
   expect(lines[lines.length - 1]).toBe('></script>');
   expect(lines.length).toBeLessThanOrEqual(7);
+});
+
+test('old Settings > AI Widget links open the AI assistant tab', async ({ page }) => {
+  await fakeBackend(page, {});
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=AI+Widget`);
+  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}/assistant$`));
+  await expect(page.getByTestId('app-assistant')).toBeVisible();
+});
+
+test('an App without an assistant offers to create one', async ({ page }) => {
+  await fakeBackend(page, {}, { withAgent: false });
+  await openTab(page);
+  await expect(page.getByTestId('assistant-empty')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create an AI assistant' })).toBeEnabled();
 });

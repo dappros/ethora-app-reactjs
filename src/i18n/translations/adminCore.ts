@@ -499,7 +499,7 @@ export const adminCore = {
       "Its look (colors, launcher, texts) is set per App, under App settings > AI Widget, since one agent can answer on several Apps' sites with a different look on each. Apps of yours whose website widget this agent answers in:",
     'agentSettings.websiteWidgetBotOn': 'Bot running',
     'agentSettings.websiteWidgetBotOff': 'Bot stopped',
-    'agentSettings.websiteWidgetOpen': 'Open AI Widget settings',
+    'agentSettings.websiteWidgetOpen': 'Open the AI assistant',
     'agentSettings.websiteWidgetEmpty':
       "No App of yours uses {name} for its website widget yet. To use it, open an App's settings, AI Widget tab, and choose it as the active agent.",
     'agentSettings.tabWebIndex': 'Web Index',
