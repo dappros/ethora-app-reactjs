@@ -185,3 +185,70 @@ test('Requests under Conversations lists only this App\'s flow submissions; Home
   await list.getByRole('button', { name: /appointment/ }).click();
   await expect(list).toContainText('Your name');
 });
+
+test('website path: the assistant is created; a website that cannot be read lands on Home with the reason', async ({ page }) => {
+  const app = { ...baseApp, onboardingGoal: 'website', aiBot: { ...baseApp.aiBot, chatId: '' } };
+  await fakeBackend(page, app);
+  const json = (body: unknown, status = 200) => ({ status, contentType: 'application/json', body: JSON.stringify(body) });
+  await page.route('**/v1/apps', (route) =>
+    route.request().method() === 'POST' ? route.fulfill(json({ app })) : route.fallback(),
+  );
+  await page.route('**/v2/agents', (route) =>
+    route.request().method() === 'POST' ? route.fulfill(json({ agent: { id: 'ag1', displayName: 'Yourbusiness assistant', ownerId: USER_ID } })) : route.fallback(),
+  );
+  await page.route(`**/v2/apps/${APP_ID}/agents/ag1/widget-instance`, (route) => route.fulfill(json({ ok: true, botInstance: { id: 'bi1' } })));
+  await page.route(`**/v1/apps/${APP_ID}`, (route) =>
+    route.request().method() === 'PUT'
+      ? route.fulfill(json({ result: { ...app, defaultBotInstanceId: 'bi1', aiBot: { ...app.aiBot, status: 'on' } } }))
+      : route.fallback(),
+  );
+  await page.route(`**/v2/apps/${APP_ID}/sources/site-crawl`, (route) =>
+    route.fulfill(json({ success: false, error: 'getaddrinfo ENOTFOUND yourbusiness.example', code: 'CRAWL_FAILED' }, 422)),
+  );
+  await page.goto('/app/admin/start?intent=widget');
+  await page.getByTestId('onboarding-website').fill('yourbusiness.example');
+  await page.getByTestId('onboarding-create-assistant').click();
+  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}$`));
+  await expect(page.getByTestId('home-step-1')).toContainText('Your website could not be read yet');
+  await expect(page.getByTestId('home-step-1')).toContainText('ENOTFOUND');
+  await expect(page.getByTestId('crawl-failed-actions').getByRole('button', { name: 'Retry' })).toBeVisible();
+});
+
+test('SDK home shows the App ID and a paste-ready snippet; messenger home shows its steps', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'sdk', appSecret: 'secret-value' });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-step-1')).toContainText('Keys and code');
+  await expect(page.getByTestId('home-step-1').locator('pre')).toContainText(`appId: '${APP_ID}'`);
+  await expect(page.getByTestId('home-step-1')).not.toContainText('secret-value');
+
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'messenger' });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-step-1')).toContainText('Name and logo');
+  await expect(page.getByTestId('home-step-2')).toContainText('Invite people');
+  await expect(page.getByText('Trust & Safety settings')).toBeVisible();
+});
+
+test('Test Chats opens the App\'s chats under its header', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'messenger' });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' }).click();
+  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}/chats$`));
+  await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' })).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveTitle(/Test Chats - E2E Onboarding App/);
+});
+
+test('Conversations shows a simple list by default; the table is one click away', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'website' });
+  await page.route(`**/v2/apps/${APP_ID}/widget/conversations**`, (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({
+      results: [{ _id: 'c1', name: `${APP_ID}_room1`, updatedAt: '2026-11-16T10:00:00Z', createdAt: '2026-11-16T09:00:00Z',
+        visitor: { xmppUsername: `${APP_ID}_widget-v1`, metadata: { pageUrl: 'https://shop.example/pricing' } } }],
+      pagination: { total: 1 } }) }),
+  );
+  await page.goto(`/app/admin/apps/${APP_ID}/conversations`);
+  await expect(page.getByText('https://shop.example/pricing')).toBeVisible();
+  await expect(page.locator('table')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Table and bulk actions' }).click();
+  await expect(page.locator('table')).toHaveCount(1);
+});
