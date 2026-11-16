@@ -454,7 +454,7 @@ export function IpBlocksTab() {
       )}
 
       {items.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border border-gray-200">
+        <div className="relative overflow-x-auto rounded-2xl border border-gray-200">
           <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="text-left text-[12px] text-gray-500 border-b border-gray-200">

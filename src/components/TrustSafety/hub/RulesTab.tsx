@@ -468,7 +468,7 @@ export function RulesTab() {
       )}
 
       {rules.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 mb-6">
+        <div className="relative overflow-x-auto rounded-2xl border border-gray-200 mb-6">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="text-left text-[12px] text-gray-500 border-b border-gray-200">
