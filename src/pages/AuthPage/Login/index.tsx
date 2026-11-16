@@ -1,4 +1,4 @@
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { useMediaQuery, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { httpLoginHandoff } from '../../../http';
@@ -6,6 +6,8 @@ import { useAppStore } from '../../../store/useAppStore';
 import { finishLogin } from '../../../utils/finishLogin';
 import { showSuspendedLogin } from '../../../utils/suspension';
 import { takeHandoffCode } from '../../../utils/loginHandoff';
+import AuthScreenBody from '../AuthScreenBody';
+import { isStackedAuthLayout } from '../authLayout';
 import EthoraSplitLayout, { isEthoraDomain } from '../EthoraSplitLayout';
 import SignInForm from '../Forms/LoginForm';
 import { FullPageSpinner } from '../FullPageSpinner';
@@ -52,38 +54,14 @@ export default function LoginComponent() {
     );
   }
 
-  const centered = isMobileDevice || config.welcomeLayout === 'centered';
+  const stacked = isStackedAuthLayout(config, isMobileDevice);
 
   return (
     <Wrapper>
-      <Box
-        sx={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flex: 1,
-          flexDirection: 'column',
-        }}
-      >
-        {/* margin:'auto 0' (not justifyContent:'center') centers the logo +
-            form pair vertically while staying safe on short viewports: when
-            the content is taller than the available space the auto margins
-            resolve to 0, so the top stays reachable instead of being clipped
-            above the scroll origin. Same idiom as EthoraSplitLayout. */}
-        <Box
-          sx={{
-            margin: 'auto 0',
-            width: '100%',
-            display: 'flex',
-            flexDirection: centered ? 'column' : 'row',
-            gap: isMobileDevice ? '20px' : '16px',
-            alignItems: 'center',
-          }}
-        >
-          <LogoContent isMobile={centered} welcome />
-          <SignInForm isMobile={isMobileDevice} />
-        </Box>
-      </Box>
+      <AuthScreenBody stacked={stacked} isMobile={isMobileDevice}>
+        <LogoContent isMobile={isMobileDevice} centered={stacked} welcome />
+        <SignInForm isMobile={isMobileDevice} hug={stacked} />
+      </AuthScreenBody>
     </Wrapper>
   );
 }
