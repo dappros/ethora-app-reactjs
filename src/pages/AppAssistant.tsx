@@ -24,8 +24,10 @@ import { useTranslation } from '../i18n/useTranslation';
 import {
   AiWidgetAppearance,
   appearanceFromAttributes,
+  clearLegacyBrowserAppearance,
   defaultAiWidgetAppearance,
   getAppearanceAttributeRecord,
+  loadLegacyBrowserAppearance,
 } from '../lib/aiWidgetAppearance';
 import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -176,6 +178,14 @@ export default function AppAssistant() {
           {showPersona && <Panel><PersonaPanel agent={agent} isDisabled={readOnly} /></Panel>}
         </Section>
 
+        {appearanceEditor.legacy && (
+          <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm dark:border-blue-900 dark:bg-blue-950/40">
+            <span className="min-w-[16rem] flex-1">{t('aiWidgetAppearance.legacyFound')}</span>
+            <button type="button" onClick={appearanceEditor.keepLegacy} className="rounded-lg bg-brand-500 px-3 py-1.5 font-semibold text-white">{t('aiWidgetAppearance.legacySave')}</button>
+            <button type="button" onClick={appearanceEditor.discardLegacy} className="rounded-lg px-3 py-1.5">{t('aiWidgetAppearance.legacyDiscard')}</button>
+          </div>
+        )}
+
         <Section id="looks" num={3} title={t('appAssistant.looks.title')} badge={appearanceEditor.dirty ? t('appAssistant.looks.unsaved') : undefined}>
           <p className="text-sm text-gray-600">{t('appAssistant.looks.text')}</p>
           <div className="mt-3">
@@ -213,7 +223,7 @@ export default function AppAssistant() {
         >
           <p className="text-sm text-gray-600">{t('appAssistant.install.text')}</p>
           <div className="mt-3 overflow-x-auto rounded-lg border border-gray-100">
-            <InstallCode appId={appId} />
+            <InstallCode appId={appId} appearance={appearanceEditor.saved} />
           </div>
           <p className="mt-3 text-sm">
             <a className="text-brand-500 underline" href={mailto}>{t('appAssistant.install.email')}</a>
@@ -296,10 +306,11 @@ function Panel({ children }: { children: ReactNode }) {
   return <div className="mt-3 rounded-lg border border-gray-100 p-2">{children}</div>;
 }
 
-function InstallCode({ appId }: { appId: string }) {
+// `appearance`: the saved one, written into the snippet when it is pinned.
+function InstallCode({ appId, appearance }: { appId: string; appearance: AiWidgetAppearance }) {
   const [value, setValue] = useState('1');
   const app = useAppStore((s) => s.apps.find((a) => a._id === appId));
-  return <TabAIWidgetCode value={value} appId={appId} app={app} userId={app?.aiBot?.userId} handleChange={(_, v) => setValue(v)} />;
+  return <TabAIWidgetCode value={value} appId={appId} app={app} userId={app?.aiBot?.userId} appearance={appearance} handleChange={(_, v) => setValue(v)} />;
 }
 
 // Try it records the agent_tested milestone server-side; pick it up for the
@@ -320,6 +331,9 @@ function useWidgetAppearance(appId?: string) {
   const [saved, setSaved] = useState<AiWidgetAppearance>(defaultAiWidgetAppearance);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Settings an older build of the AI Widget tab kept in this browser only,
+  // offered once for saving to the server when the server holds none.
+  const [legacy, setLegacy] = useState<AiWidgetAppearance | null>(null);
 
   useEffect(() => {
     if (!appId) return;
@@ -328,9 +342,11 @@ function useWidgetAppearance(appId?: string) {
     httpGetWidgetAppearance(appId)
       .then((resp) => {
         if (cancelled) return;
-        const next = appearanceFromAttributes(resp?.data?.appearance || {});
+        const attrs = resp?.data?.appearance || {};
+        const next = appearanceFromAttributes(attrs);
         setAppearance(next);
         setSaved(next);
+        setLegacy(Object.keys(attrs).length ? null : loadLegacyBrowserAppearance(appId));
       })
       .catch(() => !cancelled && toast.error(t('aiWidgetAppearance.loadFailed')))
       .finally(() => !cancelled && setLoaded(true));
@@ -339,28 +355,44 @@ function useWidgetAppearance(appId?: string) {
     };
   }, [appId, t]);
 
-  const save = useCallback(async () => {
-    if (!appId || saving) return;
+  const persist = useCallback(async (value: AiWidgetAppearance): Promise<boolean> => {
+    if (!appId || saving) return false;
     setSaving(true);
     try {
-      const resp = await httpSaveWidgetAppearance(appId, getAppearanceAttributeRecord(appearance));
+      const resp = await httpSaveWidgetAppearance(appId, getAppearanceAttributeRecord(value));
       const stored = appearanceFromAttributes(resp?.data?.appearance || {});
       setAppearance(stored);
       setSaved(stored);
       toast.success(t('aiWidgetAppearance.saved'));
+      return true;
     } catch (error) {
       toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || t('aiWidgetAppearance.saveFailed'));
+      return false;
     } finally {
       setSaving(false);
     }
-  }, [appId, appearance, saving, t]);
+  }, [appId, saving, t]);
 
   return {
     appearance,
+    saved,
     loaded,
     dirty: loaded && !isEqual(appearance, saved),
     change: (updates: Partial<AiWidgetAppearance>) => setAppearance((prev) => ({ ...prev, ...updates })),
     reset: () => setAppearance(defaultAiWidgetAppearance),
-    save: () => void save(),
+    save: () => void persist(appearance),
+    legacy,
+    keepLegacy: () => {
+      if (!legacy || !appId) return;
+      void persist(legacy).then((ok) => {
+        if (!ok) return;
+        clearLegacyBrowserAppearance(appId);
+        setLegacy(null);
+      });
+    },
+    discardLegacy: () => {
+      if (appId) clearLegacyBrowserAppearance(appId);
+      setLegacy(null);
+    },
   };
 }
