@@ -3,6 +3,7 @@ import { actionPostFile } from '../../actions';
 import type { ModelApp } from '../../models';
 import { Segmented } from '../../components/AIWidget/appearance/Fields';
 import { WelcomeArtwork } from '../../components/Appearance/WelcomeArtwork';
+import { isWebImageUrl } from '../../utils/welcomeImage';
 
 export type WelcomeOptions = {
   welcomeTitle: string;
@@ -44,7 +45,7 @@ export function WelcomePageEditor({ value, onChange }: {
     try {
       const { data } = await actionPostFile(file);
       const location = data.results?.[0]?.location;
-      if (!location || new URL(location).protocol !== 'https:') throw new Error('Missing image URL');
+      if (!isWebImageUrl(location)) throw new Error('Missing image URL');
       onChange({ welcomeImage: location });
     } catch {
       setError('Could not upload the image. Try again.');
