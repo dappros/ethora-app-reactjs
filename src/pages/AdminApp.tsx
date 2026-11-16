@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import {
+  Navigate,
   NavLink,
   Outlet,
   useLocation,
@@ -14,6 +15,7 @@ import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isForbidden } from '../utils/accessError';
+import { isSectionRestore } from '../utils/sectionMemory';
 import { Error403Page } from './ErrorPage/Error403Page';
 import { Error404Page } from './ErrorPage/Error404Page';
 
@@ -53,6 +55,12 @@ export default function AdminApp() {
   useEffect(() => {
     document.querySelector('[data-app-tabs] a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [location.pathname]);
+
+  // Reopened from the sidebar (section memory) but gone or forbidden now:
+  // back to the list, no error screen.
+  if (loadError && isSectionRestore(location.state)) {
+    return <Navigate to="/app/admin/apps" replace />;
+  }
 
   if (loadError === 'forbidden') {
     return <Error403Page forApp navigateUrl="/app/admin/apps" />;
@@ -114,7 +122,7 @@ export default function AdminApp() {
           </div>
           <ThemeToggle className="hidden md:flex" />
         </div>
-        <nav data-app-tabs aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto border-b border-gray-200 hide-scroll">
+        <nav data-app-tabs aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-200 hide-scroll">
           {tabs.map((tab) => (
             <NavLink key={tab.to} to={tab.to} end={tab.end} className={tabClass}>
               {tab.label}

@@ -2,6 +2,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 
 import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSectionLink } from '../../hooks/useSectionMemory';
 import classNames from 'classnames';
 import { IconAccount } from '../Icons/IconAccount';
 import { IconAdmin } from '../Icons/IconAdmin';
@@ -25,6 +26,8 @@ interface Props {
 
 
 export function MobileMenuModal({ onClose, isAdmin }: Props) {
+  const appsLink = useSectionLink('apps');
+  const agentsLink = useSectionLink('agents');
   const { t } = useTranslation();
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
   // The server's admin can turn agents off for everyone (Server settings > AI).
@@ -61,7 +64,7 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
         </button>
         <div className="mt-[72px]">
           {isAdmin && (
-            <NavLink to="/app/admin/apps" onClick={onClose} className={itemBase}>
+            <NavLink to={appsLink.to} state={appsLink.state} onClick={onClose} className={itemBase}>
               <IconAdmin />
               <span className={labelBase}>{t('nav.apps')}</span>
             </NavLink>
@@ -73,7 +76,8 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
           </NavLink>
           {isAdmin && !agentsOff && (
             <NavLink
-              to="/app/admin/agents"
+              to={agentsLink.to}
+              state={agentsLink.state}
               onClick={onClose}
               title={
                 aiEnabled

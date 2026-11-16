@@ -395,7 +395,7 @@ export function MobileApp({
           {t('appSettingsMobileApp.firebase.heading')}
         </div>
         <p className="font-sans text-sm leading-relaxed mb-4">
-        {t('appSettingsMobileApp.followPrefix')} <a href="https://forum.ethora.com/topic/75-setting-up-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{t('appSettingsMobileApp.thisManualLinkText')}</a> {t('appSettingsMobileApp.followMiddle')} <strong>service-account.json</strong>. {t('appSettingsMobileApp.followSuffix')}
+        {t('appSettingsMobileApp.followPrefix')} <a href="https://ethora.com/community/topic/75-setting-up-ios-android-react-native-push-notifications-for-your-ethora-chats/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{t('appSettingsMobileApp.thisManualLinkText')}</a> {t('appSettingsMobileApp.followMiddle')} <strong>service-account.json</strong>. {t('appSettingsMobileApp.followSuffix')}
         </p>
         <input
           type="file"
