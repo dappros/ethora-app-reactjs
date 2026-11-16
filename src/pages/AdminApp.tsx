@@ -47,6 +47,11 @@ export default function AdminApp() {
     getApp();
   }, [appId, doSetApp]);
 
+  // On a phone the tab row scrolls sideways: keep the active tab in view.
+  useEffect(() => {
+    document.querySelector('[data-app-tabs] a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [location.pathname]);
+
   if (loadError === 'forbidden') {
     return <Error403Page forApp navigateUrl="/app/admin/apps" />;
   }
@@ -79,7 +84,9 @@ export default function AdminApp() {
   const isChats = /\/chats\/?$/.test(location.pathname);
 
   return (
-    <div className={`h-full grid ${isChats ? 'grid-rows-[auto,_minmax(0,1fr)]' : 'grid-rows-[auto,_1fr]'}`}>
+    // grid-cols minmax(0,1fr) + min-w-0: the tab row scrolls sideways on a
+    // phone instead of widening the whole page.
+    <div className={`h-full min-w-0 grid grid-cols-[minmax(0,1fr)] ${isChats ? 'grid-rows-[auto,_minmax(0,1fr)]' : 'grid-rows-[auto,_1fr]'}`}>
       <div className="mb-3 px-4 pt-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -105,7 +112,7 @@ export default function AdminApp() {
           </div>
           <ThemeToggle className="hidden md:flex" />
         </div>
-        <nav aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto border-b border-gray-200 hide-scroll">
+        <nav data-app-tabs aria-label={t('appTabs.navigation')} className="mt-3 flex gap-1 overflow-x-auto border-b border-gray-200 hide-scroll">
           {tabs.map((tab) => (
             <NavLink key={tab.to} to={tab.to} end={tab.end} className={tabClass}>
               {tab.label}
