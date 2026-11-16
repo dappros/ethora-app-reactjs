@@ -6,6 +6,7 @@ import { Secret } from '../components/Secret';
 import { env } from '../config/env';
 import { AgentKnowledgeHealth, httpGetAgentKnowledge, httpGetApp, httpGetSiteCrawlJob, httpUpdateApp } from '../http';
 import { useAppAssistant } from '../hooks/useAppAssistant';
+import { countLabel } from '../utils/countLabel';
 import { useTranslation } from '../i18n/useTranslation';
 import { AppMilestoneKind, ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
@@ -118,7 +119,7 @@ export default function AppHome() {
         text: failed
           ? t('appHome.web.crawlFailedText').replace('{reason}', crawlError)
           : knows
-          ? t('appHome.web.knowsDoneText').replace('{pages}', String(pages)).replace('{docs}', String(docs))
+          ? t('appHome.web.knowsDoneText').replace('{pages}', countLabel(t, 'pages', pages)).replace('{docs}', countLabel(t, 'docs', docs))
           : crawling
             ? t('appHome.web.crawlingText').replace('{pages}', String(crawl?.savedPages ?? 0))
             : t('appHome.web.knowsText'),

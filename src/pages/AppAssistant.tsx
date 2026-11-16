@@ -28,6 +28,7 @@ import {
   getAppearanceAttributeRecord,
 } from '../lib/aiWidgetAppearance';
 import { useAppStore } from '../store/useAppStore';
+import { countLabel } from '../utils/countLabel';
 import { resolveWidgetUrl } from '../utils/widgetUrl';
 
 type Knows = 'web' | 'docs' | null;
@@ -141,7 +142,7 @@ export default function AppAssistant() {
         </div>
         {readOnly && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{t('appAssistant.readOnly')}</p>}
 
-        <Section id="knows" num={1} title={t('appAssistant.knows.title')} badge={`${t('appAssistant.knows.pages').replace('{n}', String(pages))} · ${t('appAssistant.knows.docs').replace('{n}', String(docs))}`} badgeOk={pages + docs > 0}>
+        <Section id="knows" num={1} title={t('appAssistant.knows.title')} badge={`${countLabel(t, 'pages', pages)} · ${countLabel(t, 'docs', docs)}`} badgeOk={pages + docs > 0}>
           <p className="text-sm text-gray-600">{t('appAssistant.knows.text')}</p>
           {health?.rebuilding && <p className="mt-1 text-sm text-gray-600">{t('appAssistant.knows.rebuilding')}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
