@@ -1,28 +1,10 @@
 import { useRef, useState } from 'react';
 import { actionPostFile } from '../../actions';
-import type { ModelApp } from '../../models';
+import type { WelcomeOptions } from './welcomeOptions';
 import { Segmented } from '../../components/AIWidget/appearance/Fields';
 import { WelcomeArtwork } from '../../components/Appearance/WelcomeArtwork';
 import { useTranslation } from '../../i18n/useTranslation';
 import { isWebImageUrl } from '../../utils/welcomeImage';
-
-export type WelcomeOptions = {
-  welcomeTitle: string;
-  welcomeDescription: string;
-  welcomeLayout: 'split' | 'centered';
-  welcomeImage: string;
-  welcomeImageFit: 'cover' | 'contain';
-};
-
-export function getWelcomeOptions(app?: ModelApp): WelcomeOptions {
-  return {
-    welcomeTitle: app?.welcomeTitle || '',
-    welcomeDescription: app?.welcomeDescription || '',
-    welcomeLayout: app?.welcomeLayout || 'split',
-    welcomeImage: app?.welcomeImage || '',
-    welcomeImageFit: app?.welcomeImageFit || 'cover',
-  };
-}
 
 const imageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const inputClass = 'mt-1 block w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-gray-950';

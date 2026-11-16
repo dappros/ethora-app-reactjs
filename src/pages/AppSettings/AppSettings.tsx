@@ -28,7 +28,7 @@ import { Chats } from './Chats';
 import { DeleteSetting } from './DeleteSetting';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
-import { getWelcomeOptions, type WelcomeOptions } from './WelcomePageEditor';
+import { getWelcomeOptions, type WelcomeOptions } from './welcomeOptions';
 import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { TrustSafety } from './TrustSafety';

@@ -10,7 +10,8 @@ import { LoginScreensPreview } from '../../components/Appearance/LoginScreensPre
 import { PopoverColorPicker } from '../../components/PopoverColorPicker';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ChatComponent } from './ChatComponent';
-import { WelcomePageEditor, type WelcomeOptions } from './WelcomePageEditor';
+import { WelcomePageEditor } from './WelcomePageEditor';
+import type { WelcomeOptions } from './welcomeOptions';
 
 export type AppearanceSection = 'signin' | 'chat';
 
