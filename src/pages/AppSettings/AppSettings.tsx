@@ -3,8 +3,9 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { cloneDeep, isEqual } from 'lodash';
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  useBlocker,
   useLocation,
   useNavigate,
   useParams,
@@ -30,6 +31,7 @@ import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { TrustSafety } from './TrustSafety';
+import { AppCallsSettings } from './AppCallsSettings';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { Webhooks } from './Webhooks';
@@ -37,14 +39,6 @@ import { env } from '../../config/env';
 import { isValidSupportContact, parseBlockedDomains } from '../../utils/suspension';
 import { TsOverrideDraft, draftToOverrides, invalidOverrides, overridesToDraft } from '../../utils/trustSafety';
 import { apiError } from '../../utils/apiError';
-// Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
-// step content - we only want that chunk over the wire when firstAdd is
-// true, not on every Settings visit.
-const SettingTutorialModal = lazy(() =>
-  import('../../components/modal/SettingsTutorialModal/SettingTutorialModal').then(
-    (m) => ({ default: m.SettingTutorialModal })
-  )
-);
 
 // Lifecycle tab name: "Delete or Archive" replaces the old "Delete" label.
 // The page now exposes both reversible Archive and irreversible Hard delete
@@ -120,7 +114,6 @@ export default function AppSettings() {
   const { t, language } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
-  const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -149,13 +142,6 @@ export default function AppSettings() {
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
 
-  const firstAdd = localStorage.getItem('firstAdd') === 'true';
-
-  useEffect(() => {
-    if (firstAdd) {
-      setIsInfo(true);
-    }
-  }, [firstAdd]);
 
   useEffect(() => {
     if (
@@ -176,6 +162,25 @@ export default function AppSettings() {
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
+  // Unsaved changes: confirm before leaving the page, in the app and on a
+  // reload or tab close.
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    isModified && currentLocation.pathname !== nextLocation.pathname
+  );
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    if (window.confirm(t('appSettings.unsavedLeave'))) blocker.proceed();
+    else blocker.reset();
+  }, [blocker, t]);
+  useEffect(() => {
+    if (!isModified) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [isModified]);
   const [initialState, setInitialState] = useState({});
 
   // appearance tab
@@ -245,6 +250,9 @@ export default function AppSettings() {
   // VITE_E2EE_ENABLED gate is checked in the Chats tab, which hides the row
   // entirely on deployments that do not support e2ee.
   const [e2eeEnabled, setE2eeEnabled] = useState(false);
+  // Per-App voice/video calls and scheduled calls (unset on the App = on).
+  const [callsEnabled, setCallsEnabled] = useState(true);
+  const [scheduledCallsEnabled, setScheduledCallsEnabled] = useState(true);
 
   // Default identity stamped on broadcast announcements (per-app default; can
   // still be overridden per-broadcast in the Chats tab). Without this the
@@ -287,6 +295,8 @@ export default function AppSettings() {
       usersCanFree,
       allowUsersToCreateRooms,
       e2eeEnabled,
+      callsEnabled,
+      scheduledCallsEnabled,
       broadcastSenderName,
       broadcastSenderPhotoUrl,
       aiBot: cloneDeep(aiBot),
@@ -326,6 +336,8 @@ export default function AppSettings() {
     usersCanFree,
     allowUsersToCreateRooms,
     e2eeEnabled,
+    callsEnabled,
+    scheduledCallsEnabled,
     broadcastSenderName,
     broadcastSenderPhotoUrl,
     aiBot,
@@ -362,6 +374,8 @@ export default function AppSettings() {
         usersCanFree: app.usersCanFree,
         allowUsersToCreateRooms: app.allowUsersToCreateRooms,
         e2eeEnabled: Boolean(app.e2eeEnabled),
+        callsEnabled: app.callsEnabled !== false,
+        scheduledCallsEnabled: app.scheduledCallsEnabled !== false,
         // Pre-fill the broadcast sender fields if previously saved; otherwise
         // leave blank and rely on the server-side fallback to app.displayName.
         broadcastSenderName: app.broadcastSender?.name || '',
@@ -513,6 +527,9 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
     body.e2eeEnabled = e2eeEnabled;
+    // Calls switches (Trust & Safety tab): sent only when changed.
+    if (callsEnabled !== (app?.callsEnabled !== false)) body.callsEnabled = callsEnabled;
+    if (scheduledCallsEnabled !== (app?.scheduledCallsEnabled !== false)) body.scheduledCallsEnabled = scheduledCallsEnabled;
 
     // Default broadcast sender (per-app). Always send both fields so an
     // operator can blank either of them from the UI; the backend's
@@ -555,6 +572,8 @@ export default function AppSettings() {
           usersCanFree,
           allowUsersToCreateRooms,
           e2eeEnabled,
+          callsEnabled,
+          scheduledCallsEnabled,
           broadcastSenderName,
           broadcastSenderPhotoUrl,
           aiBot,
@@ -724,12 +743,13 @@ export default function AppSettings() {
     setUsersCanFree(app.usersCanFree);
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
     setE2eeEnabled(Boolean(app.e2eeEnabled));
+    setCallsEnabled(app.callsEnabled !== false);
+    setScheduledCallsEnabled(app.scheduledCallsEnabled !== false);
     setDefaultChatRooms(app.defaultRooms);
   }, [app]);
 
   useEffect(() => {
     if (isNew) {
-      setIsInfo(true);
       navigate(location.pathname, {
         replace: true,
         state: { from: location.pathname + location.search, isNew: false },
@@ -762,12 +782,19 @@ export default function AppSettings() {
             size="small"
             sx={{ marginLeft: 1, verticalAlign: 'middle' }}
             aria-label={t('appSettings.infoAriaLabel')}
-            onClick={() => setIsInfo(true)}
+            // The old "Choose your path" guide is retired: next steps live on
+            // the App's Home, and new Apps start from the start screen.
+            onClick={() => navigate(`/app/admin/apps/${appId}`)}
           >
             <InfoOutlinedIcon fontSize="small" />
           </IconButton>
         </div>
         <div className="flex w-full lg:w-auto items-center">
+          {isModified && (
+            <span role="status" data-testid="settings-unsaved" className="mr-3 whitespace-nowrap text-sm text-amber-700 dark:text-amber-300">
+              {t('appSettings.unsaved')}
+            </span>
+          )}
           <button
             onClick={onExternalClick}
             className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover"
@@ -777,8 +804,11 @@ export default function AppSettings() {
           <button
             onClick={onSave}
             className={classNames(
-              'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white px-4',
-              isModified ? '' : 'opacity-50 cursor-not-allowed'
+              'border w-full lg:w-[184px] p-2 rounded-xl px-4',
+              // Disabled: a muted button that stays readable in the dark theme.
+              isModified
+                ? 'bg-brand-500 hover:bg-brand-400 text-white'
+                : 'cursor-not-allowed border-gray-300 bg-gray-200 text-gray-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300'
             )}
             disabled={!isModified}
           >
@@ -890,6 +920,12 @@ export default function AppSettings() {
             className="grid grid-rows-1 lg:ml-4 h-full overflow-hidden"
           >
             <TrustSafety info={tsInfo} loadError={tsLoadError} draft={tsDraft} setDraft={setTsDraft} />
+            <AppCallsSettings
+              callsEnabled={callsEnabled}
+              scheduledCallsEnabled={scheduledCallsEnabled}
+              setCallsEnabled={setCallsEnabled}
+              setScheduledCallsEnabled={setScheduledCallsEnabled}
+            />
           </TabPanel>
 
           <TabPanel
@@ -994,17 +1030,6 @@ export default function AppSettings() {
           navigate={navigate}
         />
       )} */}
-      {isInfo && (
-        <Suspense fallback={null}>
-          <SettingTutorialModal
-            show={isInfo}
-            onClose={() => {
-              setIsInfo(false);
-              localStorage.removeItem('firstAdd');
-            }}
-          />
-        </Suspense>
-      )}
 
       {loading && <Loading />}
     </div>

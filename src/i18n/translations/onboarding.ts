@@ -2,6 +2,53 @@
 // only for now: fr and es fall back to it (useTranslation).
 export const onboarding = {
   en: {
+    // App settings: calls switches (Trust & Safety tab)
+    'appCalls.title': 'Calls in this app',
+    'appCalls.intro': 'Whether members can call each other here. Saved with the page.',
+    'appCalls.unavailable': 'Calls are not enabled on this server, so these switches have no effect.',
+    'appCalls.calls': 'Voice and video calls',
+    'appCalls.callsHint': 'Members can start a call from a chat.',
+    'appCalls.scheduled': 'Scheduled calls',
+    'appCalls.scheduledHint': 'Members can pick a time and send a meeting invitation.',
+
+    // App settings: unsaved changes
+    'appSettings.unsaved': 'Unsaved changes',
+    'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
+
+    // App chats: offer an assistant after creating a chat
+    'appSettingsChats.offerAgentTitle': 'Activate an assistant?',
+    'appSettingsChats.offerAgentText': '{title} is ready. Add an assistant if you want it to answer in this chat.',
+    'appSettingsChats.offerAgentLater': 'Not now',
+    'appSettingsChats.offerAgentAction': 'Activate assistant',
+    'aiWidgetInviteAgent.activateOff': 'The assistant was added, but it is switched off. Turn it on in its settings to let it answer.',
+    'aiWidgetInviteAgent.activateOffline': 'The assistant was added, but it could not be reached to answer every message yet. It will pick the room up shortly.',
+
+    // Conversations list
+    'aiWidgetConversations.simpleView': 'Simple view',
+    'aiWidgetConversations.detailedView': 'Show technical details',
+    'aiWidgetConversations.tableView': 'Table and bulk actions',
+    'aiWidgetConversations.simpleList': 'Simple list',
+    'aiWidgetConversations.pageUnknown': 'Website page unavailable',
+
+    // Agent: advanced reply settings
+    'agentPanels.advancedReplies': 'Advanced',
+    'agentPanels.respondToBots': 'Respond to other bots',
+    'agentPanels.respondToBotsHint': 'Off: this agent ignores messages from other agents and bots, which stops two agents answering each other in a loop.',
+
+    // Web Index search
+    'agentPanels.searchPages': 'Find a page',
+    'agentPanels.searchPagesPlaceholder': 'Search by page URL',
+    'agentPanels.noSearchResults': 'No pages match your search.',
+
+    // Try it (agent panels)
+    'agentPanels.tryNoKnowledge': 'This assistant has no websites or documents yet, so it can only answer from its instructions. Add knowledge first for a real test.',
+
+    // Startup failure (App.tsx)
+    'appBootstrap.loadFailed': 'Could not load the app',
+    'appBootstrap.tryAgainHint': 'The server did not answer. Check your connection and try again.',
+    'appBootstrap.retry': 'Retry',
+    'appBootstrap.loadingPage': 'Loading…',
+
     // Start screen
     'onboarding.choose.subtitle': 'Pick one to start. You can add the others to the same app later.',
     'onboarding.goal.website': 'AI assistant for my website',

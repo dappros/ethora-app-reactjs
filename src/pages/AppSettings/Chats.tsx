@@ -77,6 +77,9 @@ export function Chats({
   const [showDelete, setShowDelete] = useState(false);
   // Phase 1 (Agents): modal for inviting an Agent into a specific chat row.
   const [inviteForChat, setInviteForChat] = useState<ModelAppDefaulRooom | null>(null);
+  // Offered right after a chat is created: let an assistant answer in it.
+  const [offerAgentFor, setOfferAgentFor] = useState<ModelAppDefaulRooom | null>(null);
+  const [activateInRoom, setActivateInRoom] = useState(false);
   const [membersForChat, setMembersForChat] = useState<ModelAppDefaulRooom | null>(null);
   // Phase 1 (Agents): bot-instances + agents loaded for this app, used to render the
   // "bots in this room" inline list per chat row + the Remove buttons.
@@ -230,6 +233,7 @@ export function Chats({
       reset()
       setShowCreate(false)
       toast.success(t('appSettingsChats.chatCreatedToast'))
+      if (createdRoom && env.VITE_AI_FEATURE_ENABLED === 'true') setOfferAgentFor(createdRoom)
     } catch (error: any) {
       setShowLoading(false)
       console.error('Failed to create chat:', error)
@@ -860,12 +864,36 @@ export function Chats({
           onClose={() => setMembersForChat(null)}
         />
       )}
+      {offerAgentFor && !inviteForChat && (
+        <SubmitModal onClose={() => setOfferAgentFor(null)}>
+          <h2 className="mb-2 text-xl font-semibold">{t('appSettingsChats.offerAgentTitle')}</h2>
+          <p className="mb-5 text-sm text-gray-600">{t('appSettingsChats.offerAgentText').replace('{title}', offerAgentFor.title)}</p>
+          <div className="flex flex-wrap justify-end gap-3">
+            <button type="button" className="rounded-xl border border-gray-300 px-4 py-2" onClick={() => setOfferAgentFor(null)}>
+              {t('appSettingsChats.offerAgentLater')}
+            </button>
+            <button
+              type="button"
+              className="rounded-xl bg-brand-500 px-4 py-2 text-white"
+              onClick={() => {
+                setActivateInRoom(true);
+                setInviteForChat(offerAgentFor);
+                setOfferAgentFor(null);
+              }}
+            >
+              {t('appSettingsChats.offerAgentAction')}
+            </button>
+          </div>
+        </SubmitModal>
+      )}
       {inviteForChat && (
         <InviteAgentToChatModal
           appId={appId}
           chat={inviteForChat}
+          activate={activateInRoom}
           onClose={() => {
             setInviteForChat(null);
+            setActivateInRoom(false);
             // Refresh chips so a freshly-invited bot appears in the row immediately.
             reloadBotInstances();
           }}

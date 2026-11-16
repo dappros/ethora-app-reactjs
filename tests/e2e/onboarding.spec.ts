@@ -140,3 +140,17 @@ test('App Home follows the server milestones', async ({ page }) => {
   await expect(page.getByTestId('app-status-pill')).toHaveText('On a test page');
   await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' })).toBeVisible();
 });
+
+test('sign-up attribution keeps utm_source, utm_medium and utm_campaign', async ({ page }) => {
+  await page.route('**/config.js', (route) =>
+    route.fulfill({ contentType: 'application/javascript', body: 'window.__ETHORA_CONFIG__ = {};' }),
+  );
+  await page.route(
+    (url) => /^\/v[12]\//.test(url.pathname),
+    (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(new URL(route.request().url()).pathname === '/v1/apps/get-config' ? appConfig : {}) }),
+  );
+  await page.goto('/register?utm_source=newsletter&utm_medium=email&utm_campaign=nov&first_page=%2Fai-widget%2F');
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('urlParams'))).not.toBeNull();
+  const params = JSON.parse((await page.evaluate(() => localStorage.getItem('urlParams'))) || '{}');
+  expect(params).toMatchObject({ utm_source: 'newsletter', utm_medium: 'email', utm_campaign: 'nov', first_page: '/ai-widget/' });
+});

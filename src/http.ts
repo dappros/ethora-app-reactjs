@@ -306,7 +306,9 @@ export function httpGetConfig(domainName?: string) {
     path += `?domainName=${domainName}`;
   }
 
-  return http.get(path);
+  // Bounded so a dead API shows the startup failure screen (App.tsx) instead
+  // of an endless spinner.
+  return http.get(path, { timeout: 15000 });
 }
 
 export function httpLoginWithEmail(email: string, password: string) {

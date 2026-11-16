@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import {
   NavLink,
   Outlet,
@@ -7,6 +7,7 @@ import {
   useParams,
 } from 'react-router-dom';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
+import { PanelSkeleton } from '../components/PanelSkeleton';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
@@ -123,7 +124,9 @@ export default function AdminApp() {
       {/* No overflow here: the page scrolls in AdminLayout, which keeps the
           AI assistant's test column sticky. */}
       <div className={isChats ? 'min-h-0 overflow-hidden bg-white md:rounded-2xl' : 'bg-white rounded-2xl p-4'}>
-        <Outlet />
+        <Suspense fallback={<PanelSkeleton label={t('appBootstrap.loadingPage')} />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   );

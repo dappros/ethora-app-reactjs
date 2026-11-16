@@ -542,6 +542,12 @@ export function createChatConfig({
     resolvedTheme,
   });
 
+  // The App on screen can switch its calls (and scheduled calls) off; the
+  // install's VITE_VIDEO_CALLS_ENABLED still decides whether calls exist.
+  const callsOn = Boolean(videoCallsConfig.enabled && app?.callsEnabled !== false);
+  baseConfig.videoCalls = { ...videoCallsConfig, enabled: callsOn };
+  baseConfig.scheduledCalls = { ...(baseConfig.scheduledCalls || {}), enabled: callsOn && app?.scheduledCallsEnabled !== false };
+
   if (ownerOverride) {
     baseConfig.refreshTokens = {
       enabled: true,

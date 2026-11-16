@@ -5,7 +5,15 @@ interface Params {
   utm_ref?: string;
   first_page?: string;
   device_type?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
+
+// Campaign tags sent with the sign-up (RegisterForm reads `urlParams`). Added
+// after the referrer / first_page fallback below is decided, so that fallback
+// behaves exactly as before whether a link carries them or not.
+const CAMPAIGN_KEYS = ['utm_source', 'utm_medium', 'utm_campaign'] as const;
 
 export const useCaptureParams = () => {
   useEffect(() => {
@@ -63,6 +71,11 @@ export const useCaptureParams = () => {
       }
 
       params.device_type = fallbackDeviceType;
+    }
+
+    for (const key of CAMPAIGN_KEYS) {
+      const value = urlParams.get(key);
+      if (value) params[key] = value.slice(0, 200);
     }
 
     if (Object.keys(params).length > 0) {

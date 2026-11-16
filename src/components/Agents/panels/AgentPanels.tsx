@@ -69,6 +69,8 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   const [responseMode, setResponseMode] = useState(agent.responseMode);
   const [responseProbability, setResponseProbability] = useState(agent.responseProbability);
   const [cooldownSec, setCooldownSec] = useState(agent.cooldownSec);
+  // Unset on the agent = answers bots (the API default).
+  const [respondToBots, setRespondToBots] = useState(agent.respondToBots !== false);
   const [llmModel, setLlmModel] = useState(agent.llmModel || '');
   const [categories, setCategories] = useState<AgentCategory[]>((agent.categories || []).filter(isAgentCategory));
 
@@ -79,6 +81,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
     setResponseMode(agent.responseMode);
     setResponseProbability(agent.responseProbability);
     setCooldownSec(agent.cooldownSec);
+    setRespondToBots(agent.respondToBots !== false);
     setLlmModel(agent.llmModel || '');
     setCategories((agent.categories || []).filter(isAgentCategory));
   }, [agent.id]);
@@ -92,6 +95,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         responseMode,
         responseProbability,
         cooldownSec,
+        respondToBots,
         llmModel: llmModel.trim(),
         categories,
       });
@@ -225,6 +229,22 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
           onChange={(e) => setCooldownSec(parseInt(e.target.value || '0', 10))}
         />
       </Field>
+      <details className="rounded-lg border border-gray-200 p-3" data-testid="agent-advanced-replies">
+        <summary className="cursor-pointer text-sm font-semibold">{t('agentPanels.advancedReplies')}</summary>
+        <label className="mt-3 flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1"
+            disabled={isDisabled}
+            checked={respondToBots}
+            onChange={(e) => setRespondToBots(e.target.checked)}
+          />
+          <span>
+            <span className="block font-medium">{t('agentPanels.respondToBots')}</span>
+            <span className="block text-gray-600">{t('agentPanels.respondToBotsHint')}</span>
+          </span>
+        </label>
+      </details>
       {/* Per-agent model override. Free text with suggestions: the model list moves
           faster than releases, and the provider validates the ID anyway. Empty means
           the platform default (AI_CHAT_MODEL on the AI service). */}
@@ -489,6 +509,13 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   const [followLink, setFollowLink] = useState(true);
   const [busy, setBusy] = useState(false);
   const [rows, setRows] = useState<SiteSourceRow[]>([]);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const listRequest = useRef(0);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
   const [loadingList, setLoadingList] = useState(false);
   const [offset, setOffset] = useState(0);
   // Server-side total, not rows.length - a crawl can leave far more rows than one page.
@@ -541,6 +568,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   // no "Loading..." placeholder, no error toast, and the table is left alone if
   // the server came back with what is already on screen.
   const loadList = async (nextOffset = offset, opts: { silent?: boolean } = {}) => {
+    const request = ++listRequest.current;
     if (!appId) {
       setRows([]);
       setTotal(0);
@@ -548,7 +576,8 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     }
     if (!opts.silent) setLoadingList(true);
     try {
-      const r = await httpListSiteSourcesV2(appId, { limit: SITE_SOURCES_PAGE_SIZE, offset: nextOffset, agentId: agent.id });
+      const r = await httpListSiteSourcesV2(appId, { limit: SITE_SOURCES_PAGE_SIZE, offset: nextOffset, agentId: agent.id, ...(search ? { search } : {}) });
+      if (request !== listRequest.current) return;
       // Endpoint returns { result: SiteSourceRow[], pagination: { total, limit, offset, hasMore } } in v2.
       const items: SiteSourceRow[] = r.data?.result || r.data?.items || [];
       // Handing React a fresh array on every poll repaints every row, which is
@@ -559,6 +588,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       setTotal(Number(r.data?.pagination?.total ?? items.length));
       setOffset(nextOffset);
     } catch (e: any) {
+      if (request !== listRequest.current) return;
       // A background refetch that fails changes nothing on screen. The operator
       // did not ask for it, and blanking a list they are reading (or toasting
       // once a second for a blip) is worse than showing slightly stale rows.
@@ -567,7 +597,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
       setRows([]);
       setTotal(0);
     } finally {
-      if (!opts.silent) setLoadingList(false);
+      if (request === listRequest.current) setLoadingList(false);
     }
   };
   // Switching app scope invalidates the current page position, and a selection
@@ -580,8 +610,9 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
     setSelected(new Set());
     setLiveJobs({});
     loadList(0);
+    return () => { listRequest.current += 1; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appId, agent.id]);
+  }, [appId, agent.id, search]);
 
   // Live progress ------------------------------------------------------------
   //
@@ -624,6 +655,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
   // the count changes. A row that is already on screen was re-crawled: its size
   // and timestamp are replaced in place, which is what a reindex looks like.
   const mergeEventRows = (incoming: SiteSourceRow[]) => {
+    if (search) { scheduleReload(); return; }
     if (!incoming?.length) return;
     const fresh = incoming.filter((row) => row.id && !knownRowIds.current.has(row.id));
     const updates = new Map(incoming.filter((row) => knownRowIds.current.has(row.id)).map((row) => [row.id, row]));
@@ -960,6 +992,16 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
         />
       )}
 
+      <label className="flex max-w-md flex-col gap-2 text-sm font-medium">
+        <span>{t('agentPanels.searchPages')}</span>
+        <input
+          type="search"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder={t('agentPanels.searchPagesPlaceholder')}
+          className="w-full rounded border px-3 py-2"
+        />
+      </label>
       <div className="flex items-center justify-between gap-2 text-xs text-gray-500 min-h-[28px]">
         <span>
           {t('agentPanels.indexedBytesPrefix')} {agent.totalSiteSourceSize?.toLocaleString() || 0}
@@ -1014,7 +1056,7 @@ export const WebIndexPanel: React.FC<{ agent: ModelAgent; appId: string; isDisab
               <tr><td colSpan={5} className="p-3 text-gray-500">{t('agentPanels.loading')}</td></tr>
             )}
             {!loadingList && rows.length === 0 && (
-              <tr><td colSpan={5} className="p-3 text-gray-500">{t('agentPanels.noUrlsIndexed')}</td></tr>
+              <tr><td colSpan={5} className="p-3 text-gray-500">{t(search ? 'agentPanels.noSearchResults' : 'agentPanels.noUrlsIndexed')}</td></tr>
             )}
             {!loadingList && rows.map((row) => (
               <tr key={row.id} className={`border-t align-top ${selected.has(row.id) ? 'bg-brand-50' : ''}`}>
