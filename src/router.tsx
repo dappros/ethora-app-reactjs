@@ -17,6 +17,8 @@ const Help = lazy(() => import('./pages/Help'));
 const WhatsNew = lazy(() => import('./pages/WhatsNew'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
+const StartProject = lazy(() => import('./pages/StartProject'));
+const SelfHostedStart = lazy(() => import('./pages/SelfHostedStart'));
 const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
@@ -139,6 +141,10 @@ export const router = createBrowserRouter(
                           path: 'apps',
                           Component: AdminApps,
                         },
+                        // Onboarding: what the owner wants to build, before
+                        // any App exists. New accounts land here after sign-up.
+                        { path: 'start', Component: StartProject },
+                        { path: 'self-hosted', Component: SelfHostedStart },
                         {
                           path: 'billing',
                           Component: AdminBilling,
