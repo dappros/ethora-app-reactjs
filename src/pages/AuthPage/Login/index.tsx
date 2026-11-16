@@ -52,6 +52,8 @@ export default function LoginComponent() {
     );
   }
 
+  const centered = isMobileDevice || config.welcomeLayout === 'centered';
+
   return (
     <Wrapper>
       <Box
@@ -73,12 +75,12 @@ export default function LoginComponent() {
             margin: 'auto 0',
             width: '100%',
             display: 'flex',
-            flexDirection: isMobileDevice ? 'column' : 'row',
+            flexDirection: centered ? 'column' : 'row',
             gap: isMobileDevice ? '20px' : '16px',
             alignItems: 'center',
           }}
         >
-          <LogoContent isMobile={isMobileDevice} />
+          <LogoContent isMobile={centered} welcome />
           <SignInForm isMobile={isMobileDevice} />
         </Box>
       </Box>
