@@ -162,3 +162,26 @@ test('an App made before goals existed is a website App when its assistant has w
   await expect(page.getByTestId('app-home-choose')).toHaveCount(0);
   await expect(page.getByTestId('home-step-1')).toContainText('Website added');
 });
+
+test('Requests under Conversations lists only this App\'s flow submissions; Home counts them', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'website' });
+  const sub = (id: string, room: string, name: string) => ({
+    id, flow: 'appointment', room, completedAt: '2026-11-16T10:00:00Z',
+    answers: [{ id: 'name', question: 'Your name', type: 'text', value: name }, { id: 'date', question: 'Date', type: 'date', value: '2026-11-20' }],
+    data: {}, delivery: { status: 'none', attempts: 0, deliveredAt: null, lastAttemptAt: null, lastStatus: null, lastError: '' },
+  });
+  await page.route('**/v2/bot-instances**', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [{ id: 'bi', agentId: 'ag1', appId: APP_ID }], total: 1 }) }),
+  );
+  await page.route('**/v2/agents/ag1/flow-submissions**', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, total: 2, items: [sub('s1', `${APP_ID}_room1`, 'Alice'), sub('s2', 'otherapp_room9', 'Bob')] }) }),
+  );
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-requests')).toContainText('1');
+  await page.getByTestId('home-requests').click();
+  const list = page.getByTestId('app-requests');
+  await expect(list).toContainText('Alice');
+  await expect(list).not.toContainText('Bob');
+  await list.getByRole('button', { name: /appointment/ }).click();
+  await expect(list).toContainText('Your name');
+});
