@@ -2,6 +2,15 @@
 // only for now: fr and es fall back to it (useTranslation).
 export const onboarding = {
   en: {
+    // App settings: calls switches (Trust & Safety tab)
+    'appCalls.title': 'Calls in this app',
+    'appCalls.intro': 'Whether members can call each other here. Saved with the page.',
+    'appCalls.unavailable': 'Calls are not enabled on this server, so these switches have no effect.',
+    'appCalls.calls': 'Voice and video calls',
+    'appCalls.callsHint': 'Members can start a call from a chat.',
+    'appCalls.scheduled': 'Scheduled calls',
+    'appCalls.scheduledHint': 'Members can pick a time and send a meeting invitation.',
+
     // App settings: unsaved changes
     'appSettings.unsaved': 'Unsaved changes',
     'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',

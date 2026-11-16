@@ -134,6 +134,9 @@ export interface ModelApp {
   logoImage: string;
   sublogoImage: string;
   appTagline: string;
+  // Per-App voice/video calls and scheduled calls (unset = on).
+  callsEnabled?: boolean;
+  scheduledCallsEnabled?: boolean;
   // Start-screen goal (website | sdk | messenger | selfHost); App Home follows it.
   onboardingGoal?: 'website' | 'sdk' | 'messenger' | 'selfHost';
   // Server-side onboarding progress (GET /v1/apps/:id), App Home checklist.

@@ -104,6 +104,9 @@ export async function actionGetConfig(domainName?: string) {
     // the safe direction: no app gains an encrypted-chat button it never
     // asked for.
     e2eeEnabled: result.e2eeEnabled ?? false,
+    // Per-App calls switches; unset = on.
+    callsEnabled: result.callsEnabled,
+    scheduledCallsEnabled: result.scheduledCallsEnabled,
     aiBot: result.aiBot,
   };
 

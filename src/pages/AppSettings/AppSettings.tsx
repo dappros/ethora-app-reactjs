@@ -31,6 +31,7 @@ import { Menu } from './Menu';
 import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { TrustSafety } from './TrustSafety';
+import { AppCallsSettings } from './AppCallsSettings';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { Webhooks } from './Webhooks';
@@ -249,6 +250,9 @@ export default function AppSettings() {
   // VITE_E2EE_ENABLED gate is checked in the Chats tab, which hides the row
   // entirely on deployments that do not support e2ee.
   const [e2eeEnabled, setE2eeEnabled] = useState(false);
+  // Per-App voice/video calls and scheduled calls (unset on the App = on).
+  const [callsEnabled, setCallsEnabled] = useState(true);
+  const [scheduledCallsEnabled, setScheduledCallsEnabled] = useState(true);
 
   // Default identity stamped on broadcast announcements (per-app default; can
   // still be overridden per-broadcast in the Chats tab). Without this the
@@ -291,6 +295,8 @@ export default function AppSettings() {
       usersCanFree,
       allowUsersToCreateRooms,
       e2eeEnabled,
+      callsEnabled,
+      scheduledCallsEnabled,
       broadcastSenderName,
       broadcastSenderPhotoUrl,
       aiBot: cloneDeep(aiBot),
@@ -330,6 +336,8 @@ export default function AppSettings() {
     usersCanFree,
     allowUsersToCreateRooms,
     e2eeEnabled,
+    callsEnabled,
+    scheduledCallsEnabled,
     broadcastSenderName,
     broadcastSenderPhotoUrl,
     aiBot,
@@ -366,6 +374,8 @@ export default function AppSettings() {
         usersCanFree: app.usersCanFree,
         allowUsersToCreateRooms: app.allowUsersToCreateRooms,
         e2eeEnabled: Boolean(app.e2eeEnabled),
+        callsEnabled: app.callsEnabled !== false,
+        scheduledCallsEnabled: app.scheduledCallsEnabled !== false,
         // Pre-fill the broadcast sender fields if previously saved; otherwise
         // leave blank and rely on the server-side fallback to app.displayName.
         broadcastSenderName: app.broadcastSender?.name || '',
@@ -517,6 +527,9 @@ export default function AppSettings() {
 
     body.allowUsersToCreateRooms = allowUsersToCreateRooms;
     body.e2eeEnabled = e2eeEnabled;
+    // Calls switches (Trust & Safety tab): sent only when changed.
+    if (callsEnabled !== (app?.callsEnabled !== false)) body.callsEnabled = callsEnabled;
+    if (scheduledCallsEnabled !== (app?.scheduledCallsEnabled !== false)) body.scheduledCallsEnabled = scheduledCallsEnabled;
 
     // Default broadcast sender (per-app). Always send both fields so an
     // operator can blank either of them from the UI; the backend's
@@ -559,6 +572,8 @@ export default function AppSettings() {
           usersCanFree,
           allowUsersToCreateRooms,
           e2eeEnabled,
+          callsEnabled,
+          scheduledCallsEnabled,
           broadcastSenderName,
           broadcastSenderPhotoUrl,
           aiBot,
@@ -728,6 +743,8 @@ export default function AppSettings() {
     setUsersCanFree(app.usersCanFree);
     setAllowUsersToCreateRooms(app.allowUsersToCreateRooms);
     setE2eeEnabled(Boolean(app.e2eeEnabled));
+    setCallsEnabled(app.callsEnabled !== false);
+    setScheduledCallsEnabled(app.scheduledCallsEnabled !== false);
     setDefaultChatRooms(app.defaultRooms);
   }, [app]);
 
@@ -903,6 +920,12 @@ export default function AppSettings() {
             className="grid grid-rows-1 lg:ml-4 h-full overflow-hidden"
           >
             <TrustSafety info={tsInfo} loadError={tsLoadError} draft={tsDraft} setDraft={setTsDraft} />
+            <AppCallsSettings
+              callsEnabled={callsEnabled}
+              scheduledCallsEnabled={scheduledCallsEnabled}
+              setCallsEnabled={setCallsEnabled}
+              setScheduledCallsEnabled={setScheduledCallsEnabled}
+            />
           </TabPanel>
 
           <TabPanel
