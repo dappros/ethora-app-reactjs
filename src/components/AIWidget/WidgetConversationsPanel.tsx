@@ -403,7 +403,10 @@ export function WidgetConversationsPanel({
             <button key={row._id} type="button" onClick={() => setSelectedRow(row)} className="flex w-full items-center justify-between gap-3 p-4 text-left hover:bg-gray-50">
               <span className="min-w-0">
                 <span className="block font-medium">{formatVisitor(row)}</span>
-                <span className="block break-all text-sm text-gray-500">{row.visitor?.metadata?.lastPageUrl || row.visitor?.metadata?.pageUrl || t('aiWidgetConversations.pageUnknown')}</span>
+                {/* The page the visitor was on, when the widget reported one. */}
+                {(row.visitor?.metadata?.lastPageUrl || row.visitor?.metadata?.pageUrl) && (
+                  <span className="block break-all text-sm text-gray-500">{row.visitor?.metadata?.lastPageUrl || row.visitor?.metadata?.pageUrl}</span>
+                )}
                 <span className="block text-xs text-gray-500">{t('aiWidgetConversations.lastActivityLabel')}: {formatDate(row.updatedAt)}</span>
               </span>
               <span className="shrink-0 text-sm text-brand-500">{t('aiWidgetConversations.open')}</span>

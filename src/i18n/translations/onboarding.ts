@@ -33,7 +33,6 @@ export const onboarding = {
     'aiWidgetConversations.detailedView': 'Show technical details',
     'aiWidgetConversations.tableView': 'Table and bulk actions',
     'aiWidgetConversations.simpleList': 'Simple list',
-    'aiWidgetConversations.pageUnknown': 'Website page unavailable',
 
     // Agent: advanced reply settings
     'agentPanels.advancedReplies': 'Advanced',

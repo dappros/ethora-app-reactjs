@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlowSubmission, httpListBotInstances, httpListFlowSubmissions } from '../http';
+import { FlowSubmission, httpGetAgent, httpListBotInstances, httpListFlowSubmissions } from '../http';
 
 const PER_AGENT_LIMIT = 50;
 
@@ -10,7 +10,10 @@ export interface AppRequest extends FlowSubmission {
 // Completed flow submissions ("requests": bookings, contact forms) of the
 // App's assistants, limited to this App's rooms. Read through each agent's
 // own submissions endpoint, so who may see them is exactly what the agent's
-// Flows panel allows: an agent the viewer may not read is skipped.
+// Flows panel allows: an agent the viewer may not read is skipped, and
+// counted in `skipped` only when it has flows (or cannot be looked at), so
+// the platform's default assistant, which every App gets and which has no
+// flows, does not raise the note.
 export function useAppRequests(appId?: string) {
   const [items, setItems] = useState<AppRequest[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,14 +31,21 @@ export function useAppRequests(appId?: string) {
         const agentIds = [...new Set(((data?.items || []) as { agentId?: string }[]).map((b) => b.agentId).filter(Boolean) as string[])];
         const results = await Promise.allSettled(agentIds.map((id) => httpListFlowSubmissions(id, { limit: PER_AGENT_LIMIT })));
         if (cancelled) return;
-        let denied = 0;
+        const deniedIds = agentIds.filter((_, i) => results[i].status !== 'fulfilled');
+        const withFlows = await Promise.all(
+          deniedIds.map((id) =>
+            httpGetAgent(id).then(
+              ({ data }) => ((data?.agent?.flows || []) as unknown[]).length > 0,
+              () => true
+            )
+          )
+        );
+        if (cancelled) return;
+        const denied = withFlows.filter(Boolean).length;
         let hitCap = false;
         const all: AppRequest[] = [];
         results.forEach((r, i) => {
-          if (r.status !== 'fulfilled') {
-            denied += 1;
-            return;
-          }
+          if (r.status !== 'fulfilled') return;
           const list = r.value.data?.items || [];
           if ((r.value.data?.total || 0) > list.length) hitCap = true;
           for (const s of list) if (String(s.room || '').startsWith(`${appId}_`)) all.push({ ...s, agentId: agentIds[i] });

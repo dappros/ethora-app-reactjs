@@ -170,12 +170,23 @@ test('Requests under Conversations lists only this App\'s flow submissions; Home
     answers: [{ id: 'name', question: 'Your name', type: 'text', value: name }, { id: 'date', question: 'Date', type: 'date', value: '2026-11-20' }],
     data: {}, delivery: { status: 'none', attempts: 0, deliveredAt: null, lastAttemptAt: null, lastStatus: null, lastError: '' },
   });
+  // ag2 and ag3 are assistants whose submissions the viewer may not read;
+  // ag2 has no flows (like the platform's default assistant) so only ag3
+  // counts in the note.
   await page.route('**/v2/bot-instances**', (route) =>
-    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [{ id: 'bi', agentId: 'ag1', appId: APP_ID }], total: 1 }) }),
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: ['ag1', 'ag2', 'ag3'].map((agentId) => ({ id: `bi-${agentId}`, agentId, appId: APP_ID })), total: 3 }) }),
   );
   await page.route('**/v2/agents/ag1/flow-submissions**', (route) =>
     route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, total: 2, items: [sub('s1', `${APP_ID}_room1`, 'Alice'), sub('s2', 'otherapp_room9', 'Bob')] }) }),
   );
+  for (const id of ['ag2', 'ag3']) {
+    await page.route(`**/v2/agents/${id}/flow-submissions**`, (route) =>
+      route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ code: 'FORBIDDEN' }) }),
+    );
+    await page.route(`**/v2/agents/${id}`, (route) =>
+      route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, agent: { id, flows: id === 'ag3' ? [{ key: 'contact' }] : [] } }) }),
+    );
+  }
   await page.goto(`/app/admin/apps/${APP_ID}`);
   await expect(page.getByTestId('home-requests')).toContainText('1');
   await page.getByTestId('home-requests').click();
@@ -184,6 +195,7 @@ test('Requests under Conversations lists only this App\'s flow submissions; Home
   await expect(list).not.toContainText('Bob');
   await list.getByRole('button', { name: /appointment/ }).click();
   await expect(list).toContainText('Your name');
+  await expect(page.getByText('1 assistant(s) you cannot read were left out.')).toBeVisible();
 });
 
 test('website path: the assistant is created; a website that cannot be read lands on Home with the reason', async ({ page }) => {
@@ -243,11 +255,16 @@ test('Conversations shows a simple list by default; the table is one click away'
   await page.route(`**/v2/apps/${APP_ID}/widget/conversations**`, (route) =>
     route.fulfill({ contentType: 'application/json', body: JSON.stringify({
       results: [{ _id: 'c1', name: `${APP_ID}_room1`, updatedAt: '2026-11-16T10:00:00Z', createdAt: '2026-11-16T09:00:00Z',
-        visitor: { xmppUsername: `${APP_ID}_widget-v1`, metadata: { pageUrl: 'https://shop.example/pricing' } } }],
-      pagination: { total: 1 } }) }),
+        visitor: { xmppUsername: `${APP_ID}_widget-v1`, metadata: { pageUrl: 'https://shop.example/pricing' } } },
+      { _id: 'c2', name: `${APP_ID}_room2`, updatedAt: '2026-11-16T11:00:00Z', createdAt: '2026-11-16T11:00:00Z',
+        visitor: { xmppUsername: `${APP_ID}_widget-v2`, metadata: {} } }],
+      pagination: { total: 2 } }) }),
   );
   await page.goto(`/app/admin/apps/${APP_ID}/conversations`);
   await expect(page.getByText('https://shop.example/pricing')).toBeVisible();
+  // A conversation without a known page has no page line at all.
+  await expect(page.getByRole('button', { name: /Open/ })).toHaveCount(2);
+  await expect(page.getByText('Website page unavailable')).toHaveCount(0);
   await expect(page.locator('table')).toHaveCount(0);
   await page.getByRole('button', { name: 'Table and bulk actions' }).click();
   await expect(page.locator('table')).toHaveCount(1);
