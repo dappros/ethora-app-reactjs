@@ -551,6 +551,13 @@ export const userSettings = {
 
     // src/pages/UserSettings/BlockedUsers.tsx
     'userSettingsBlockedUsers.title': 'Utilisateurs que vous avez bloqués',
+    'userSettingsBlockedUsers.description':
+      'Les utilisateurs bloqués restent masqués dans vos discussions et ne peuvent pas vous joindre en temps réel. Débloquez-les pour rétablir la conversation.',
+    'userSettingsBlockedUsers.empty': 'Vous n’avez bloqué personne.',
+    'userSettingsBlockedUsers.unblock': 'Débloquer',
+    'userSettingsBlockedUsers.loadError': 'Impossible de charger vos utilisateurs bloqués.',
+    'userSettingsBlockedUsers.unblockError': 'Impossible de débloquer cet utilisateur. Veuillez réessayer.',
+    'userSettingsBlockedUsers.unblockSuccess': 'Utilisateur débloqué. La conversation est de retour dans votre liste de discussions.',
 
     // src/pages/UserSettings/ManageData.tsx
     'userSettingsManageData.downloadHeading': 'Télécharger vos données',
@@ -898,6 +905,13 @@ export const userSettings = {
 
     // src/pages/UserSettings/BlockedUsers.tsx
     'userSettingsBlockedUsers.title': 'Usuarios que has bloqueado',
+    'userSettingsBlockedUsers.description':
+      'Los usuarios bloqueados permanecen ocultos en tus chats y no pueden comunicarse contigo en tiempo real. Desbloquéalos para restaurar la conversación.',
+    'userSettingsBlockedUsers.empty': 'No has bloqueado a nadie.',
+    'userSettingsBlockedUsers.unblock': 'Desbloquear',
+    'userSettingsBlockedUsers.loadError': 'No se pudieron cargar tus usuarios bloqueados.',
+    'userSettingsBlockedUsers.unblockError': 'No se pudo desbloquear a este usuario. Inténtalo de nuevo.',
+    'userSettingsBlockedUsers.unblockSuccess': 'Usuario desbloqueado. La conversación volvió a tu lista de chats.',
 
     // src/pages/UserSettings/ManageData.tsx
     'userSettingsManageData.downloadHeading': 'Descarga tus datos',
