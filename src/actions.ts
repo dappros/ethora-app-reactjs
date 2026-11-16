@@ -115,6 +115,8 @@ export async function actionGetConfig(domainName?: string) {
     ? result.translateLanguages
     : [];
   state.doSetTranslateLanguages(translateLanguages);
+  // Install-wide too: the API sells hosted plans. Absent on older APIs = off.
+  state.doSetBillingEnabled(result.billingEnabled === true);
   // get-config is now the ONLY place a language list arrives - the session
   // bootstrap stopped carrying a `languages` block. The same list feeds both
   // pickers with different narrowings: the interface can only offer locales the

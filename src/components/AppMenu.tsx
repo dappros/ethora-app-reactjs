@@ -22,19 +22,15 @@ import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
 import { useLicenseStatus } from '../hooks/useLicenseStatus';
-import { isEthoraHostedEnv } from '../utils/hostedEnv';
 const ITEM_CLASS =
   'flex group hover:bg-gray-100 flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
 const LABEL_CLASS =
   'text-center font-sans text-xs max-w-full truncate group-aria-[current=page]:text-brand-500';
 const ITEM_WRAP_CLASS = 'py-[3px] first:pt-0 last:pb-0';
 
-// Billing surfaces a "You're on a Free plan" copy that's specific to our
-// hosted SaaS (chat.ethora.com and chat-qa.ethora.com). Enterprise / self-
-// hosted customers shouldn't see it - it would imply an Ethora-Inc billing
-// relationship that doesn't apply to their install. Hide the icon and link
-// in the sidebar unless the host is one of ours; the route itself stays so
-// internal tooling that deep-links keeps working. See utils/hostedEnv.ts.
+// Billing sells hosted plans, so it shows only where the API says it does
+// (get-config billingEnabled: Stripe configured). Self-hosted installs never
+// see it; the route itself stays for deep links.
 export function AppMenu() {
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
@@ -48,7 +44,8 @@ export function AppMenu() {
   // Apps / Agents / Billing / Help belong to the base app (app.<root>). An app
   // created inside it is served from its own subdomain and shows chat only.
   const isBaseApp = isBaseAppHost();
-  const showBilling = isBaseApp && isEthoraHostedEnv();
+  const billingEnabled = useAppStore((s) => s.billingEnabled);
+  const showBilling = isBaseApp && billingEnabled;
 
   const getPageTitle = useMemo(() => {
     const parts = location.pathname.split('/').filter(Boolean);

@@ -930,6 +930,9 @@ export interface ModelState {
   // no translation server is configured - the chat language picker is hidden
   // entirely in that case.
   translateLanguages: string[];
+  // This server sells hosted plans (`billingEnabled` of GET /apps/get-config:
+  // Stripe is configured on the API). The Billing menu item shows only then.
+  billingEnabled: boolean;
 }
 
 export type OrderByType =
