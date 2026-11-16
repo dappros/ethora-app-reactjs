@@ -6,6 +6,14 @@ export const onboarding = {
     'appSettings.unsaved': 'Unsaved changes',
     'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
 
+    // App chats: offer an assistant after creating a chat
+    'appSettingsChats.offerAgentTitle': 'Activate an assistant?',
+    'appSettingsChats.offerAgentText': '{title} is ready. Add an assistant if you want it to answer in this chat.',
+    'appSettingsChats.offerAgentLater': 'Not now',
+    'appSettingsChats.offerAgentAction': 'Activate assistant',
+    'aiWidgetInviteAgent.activateOff': 'The assistant was added, but it is switched off. Turn it on in its settings to let it answer.',
+    'aiWidgetInviteAgent.activateOffline': 'The assistant was added, but it could not be reached to answer every message yet. It will pick the room up shortly.',
+
     // Conversations list
     'aiWidgetConversations.simpleView': 'Simple view',
     'aiWidgetConversations.detailedView': 'Show technical details',
