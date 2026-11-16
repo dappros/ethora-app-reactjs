@@ -144,12 +144,12 @@ export const settingsTutorial = {
     'stepStartTutorial.mcp.cta': 'Connecter votre IA',
 
     'dataTutorial.chat.one.title': 'Nouvelle application web',
-    'dataTutorial.chat.one.time': '(no code, 5 min)',
+    'dataTutorial.chat.one.time': '(sans code, 5 min)',
     'dataTutorial.chat.one.description':
       "Lancez votre propre application web avec une URL, un logo et des couleurs uniques, sans quitter le panneau d'administration. Gérez les salons de discussion, intégrez des utilisateurs et des agents IA si nécessaire.",
     'dataTutorial.chat.two.title':
       'Nouvelle application iOS/Android React Native',
-    'dataTutorial.chat.two.time': '(low code, 30 min)',
+    'dataTutorial.chat.two.time': '(peu de code, 30 min)',
     'dataTutorial.chat.two.description':
       'Créez votre propre application iOS ou Android grâce à notre moteur open source. Gérez les salons de discussion, intégrez des utilisateurs et des agents IA si nécessaire.',
     'dataTutorial.chat.three.title':
@@ -159,19 +159,19 @@ export const settingsTutorial = {
       'Ajoutez le chat à vos applications existantes grâce au SDK Ethora : composant chat NPM, bibliothèque Swift SPM, widget Javascript en iframe, API, protocole de chat et framework de bots.',
 
     'dataTutorial.ai.one.title': 'Widget IA (copier-coller)',
-    'dataTutorial.ai.one.time': '(low code, 10 min)',
+    'dataTutorial.ai.one.time': '(peu de code, 10 min)',
     'dataTutorial.ai.one.description':
       "Obtenez un script Javascript pour ajouter un agent IA à votre site web, ou testez-le directement dans le panneau d'administration. Indexez votre site ou téléversez des documents pour entraîner votre agent IA sur mesure.",
     'dataTutorial.ai.one.answerDescription':
       "Profitez-en pour donner à votre widget IA une image de marque : indiquez un nom pratique et facile à retenir, puis définissez le chemin d'un avatar local afin que le widget s'intègre parfaitement au design de votre projet. Une fois la configuration terminée, il vous suffit de copier le code généré et de le coller juste avant la fermeture de la balise <body> : votre assistant IA personnalisé sera alors pleinement opérationnel dans votre application ou sur votre site web. Rapide, simple, et sans étape superflue.",
     'dataTutorial.ai.two.title': 'Widget IA (plugin WordPress)',
-    'dataTutorial.ai.two.time': '(low code, 15 min)',
+    'dataTutorial.ai.two.time': '(peu de code, 15 min)',
     'dataTutorial.ai.two.description':
       "Téléchargez et installez notre plugin WordPress pour lancer un agent IA sur votre site web. Indexez votre site ou téléversez des documents via le panneau d'administration pour gérer le contexte.",
     'dataTutorial.ai.two.answerDescription':
       "Utilisez cette section pour définir la personnalité et le style d'interaction de votre bot. Vous pouvez y décrire en détail comment l'assistant doit répondre aux utilisateurs, quelles tâches il doit accomplir et quel ton de communication il doit adopter. Si besoin, ajoutez également des informations importantes sur votre activité afin que le bot comprenne les spécificités de vos produits et travaille de la manière la plus précise et efficace possible.",
     'dataTutorial.ai.three.title': 'Application web IA',
-    'dataTutorial.ai.three.time': '(no code, 15 min)',
+    'dataTutorial.ai.three.time': '(sans code, 15 min)',
     'dataTutorial.ai.three.description':
       "Lancez votre propre application d'agent IA avec une URL, un logo et une identité de marque uniques. Indexez votre site ou téléversez des documents pour rendre votre agent IA efficace pour votre cas d'usage.",
     'dataTutorial.ai.three.answerTakeUserTo':
@@ -257,7 +257,7 @@ export const settingsTutorial = {
       'Lanza tu propia aplicación web con una URL, un logotipo y unos colores únicos, sin salir del panel de administración. Gestiona salas de chat e incorpora usuarios y agentes de IA si es necesario.',
     'dataTutorial.chat.two.title':
       'Nueva aplicación iOS/Android con React Native',
-    'dataTutorial.chat.two.time': '(low code, 30 min)',
+    'dataTutorial.chat.two.time': '(poco código, 30 min)',
     'dataTutorial.chat.two.description':
       'Crea tu propia aplicación iOS o Android con nuestro motor de código abierto. Gestiona salas de chat e incorpora usuarios y agentes de IA si es necesario.',
     'dataTutorial.chat.three.title': 'Integración en una aplicación existente',
@@ -266,19 +266,19 @@ export const settingsTutorial = {
       'Añade chat a tus aplicaciones existentes con el SDK de Ethora: componente de chat NPM, biblioteca Swift SPM, widget de Javascript en iframe, API, protocolo de chat y framework de bots.',
 
     'dataTutorial.ai.one.title': 'Widget de IA (copiar y pegar)',
-    'dataTutorial.ai.one.time': '(low code, 10 min)',
+    'dataTutorial.ai.one.time': '(poco código, 10 min)',
     'dataTutorial.ai.one.description':
       'Obtén un script de Javascript para añadir un agente de IA a tu sitio web, o pruébalo directamente en el panel de administración. Indexa tu sitio o sube documentos para entrenar tu agente de IA a medida.',
     'dataTutorial.ai.one.answerDescription':
       'Aprovecha la ocasión para dar a tu widget de IA una imagen de marca: indica un nombre práctico y fácil de recordar, y define la ruta a un avatar local para que el widget encaje perfectamente con el diseño de tu proyecto. Una vez configurado todo, simplemente copia el código generado y pégalo justo antes del cierre de la etiqueta <body>: tu asistente de IA personalizado estará entonces totalmente listo para funcionar en tu aplicación o en tu sitio web. Rápido, sencillo y sin pasos adicionales.',
     'dataTutorial.ai.two.title': 'Widget de IA (plugin de WordPress)',
-    'dataTutorial.ai.two.time': '(low code, 15 min)',
+    'dataTutorial.ai.two.time': '(poco código, 15 min)',
     'dataTutorial.ai.two.description':
       'Descarga e instala nuestro plugin de WordPress para lanzar un agente de IA en tu sitio web. Indexa tu sitio o sube documentos a través del panel de administración para gestionar el contexto.',
     'dataTutorial.ai.two.answerDescription':
       'Utiliza esta sección para definir la personalidad y el estilo de interacción de tu bot. Aquí puedes describir con detalle cómo debe responder el asistente a los usuarios, qué tareas debe realizar y qué tono de comunicación debe mantener. Si lo necesitas, añade también información importante sobre tu negocio para que el bot entienda las particularidades de tus productos y trabaje de la forma más precisa y eficaz posible.',
     'dataTutorial.ai.three.title': 'Aplicación web de IA',
-    'dataTutorial.ai.three.time': '(no code, 15 min)',
+    'dataTutorial.ai.three.time': '(sin código, 15 min)',
     'dataTutorial.ai.three.description':
       'Lanza tu propia aplicación de agente de IA con una URL, un logotipo y una identidad de marca únicos. Indexa tu sitio o sube documentos para que tu agente de IA sea eficaz en tu caso de uso.',
     'dataTutorial.ai.three.answerTakeUserTo': 'Llevar al usuario a la pestaña',
