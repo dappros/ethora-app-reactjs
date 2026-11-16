@@ -9,6 +9,16 @@ interface LogoContentProps {
   isMobile?: boolean;
 }
 
+// Bounded so a large logo never overflows the screen (phones included).
+const logoStyle: React.CSSProperties = {
+  display: 'block',
+  width: 'auto',
+  height: 'auto',
+  maxWidth: '100%',
+  maxHeight: 'min(30vh, 240px)',
+  objectFit: 'contain',
+};
+
 const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
   const config = useAppStore((s) => s.currentApp);
   const [imageError, setImageError] = useState(false);
@@ -29,7 +39,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
           alt={t('authLogoContent.logoAlt')}
           src={YouLogo}
           onError={() => setImageError(true)}
-          style={{ maxWidth: '100%' }}
+          style={logoStyle}
         />
       );
     }
@@ -41,7 +51,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
             alt={t('authLogoContent.logoAlt')}
             src={config.logoImage}
             onError={() => setImageError(true)}
-            style={{ maxWidth: '100%' }}
+            style={logoStyle}
           />
         </a>
       );
@@ -52,7 +62,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
         alt={t('authLogoContent.logoAlt')}
         src={config.logoImage}
         onError={() => setImageError(true)}
-        style={{ maxWidth: '100%' }}
+        style={logoStyle}
       />
     );
     // `t` is a dep: the memo renders translated alt text, so it must
@@ -68,7 +78,7 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        minWidth: 221,
+        minWidth: 0,
         textAlign: 'left',
         justifyContent: 'center',
         gap: 5,
@@ -88,12 +98,11 @@ const LogoContent: React.FC<LogoContentProps> = ({ isMobile = false }) => {
       {!isMobile && (
         <Typography
           sx={{
-            fontFamily: 'Varela Round',
+            fontFamily: '"Varela Round", system-ui, sans-serif',
             fontWeight: 400,
-            fontSize: 48,
+            fontSize: 'clamp(18px, 2vw, 24px)',
             color: 'rgb(var(--c-gray-950))',
-            lineHeight: '56px',
-            height: '112px',
+            lineHeight: 1.4,
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
             textAlign: 'left',
