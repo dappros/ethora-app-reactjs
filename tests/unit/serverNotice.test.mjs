@@ -8,6 +8,7 @@ import {
   isNoticeShown,
   noticeMessage,
   noticePollDelay,
+  NOTICE_POLL_MS,
 } from '../../src/utils/serverNotice.ts';
 
 const NOW = Date.parse('2026-11-13T23:00:00Z');
@@ -46,7 +47,7 @@ test('a notice hides once dismissed or expired', () => {
 });
 
 test('polls faster while a notice exists', () => {
-  assert.equal(noticePollDelay(null), 60_000);
+  assert.equal(noticePollDelay(null), NOTICE_POLL_MS);
   assert.equal(noticePollDelay(notice()), 10_000);
 });
 
