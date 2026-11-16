@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { actionCreateApp } from '../actions';
 import { BookACallModal } from '../components/modal/BookACallModal';
 import { env } from '../config/env';
@@ -15,6 +15,7 @@ import {
   WebsiteAssistantStage,
 } from '../utils/createWebsiteAssistant';
 import {
+  explicitOnboardingIntent,
   getOnboardingIntent,
   isOnboardingIntentExplicit,
   normaliseWebsite,
@@ -50,7 +51,11 @@ export default function StartProject() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const aiEnabled = env.VITE_AI_FEATURE_ENABLED === 'true';
-  const preselected = useMemo(getOnboardingIntent, []);
+  const [searchParams] = useSearchParams();
+  // ?intent= on this page itself (a link from the website for a signed-in
+  // owner) counts like one carried through sign-up.
+  const urlIntent = useMemo(() => explicitOnboardingIntent(searchParams), [searchParams]);
+  const preselected = useMemo(() => urlIntent || getOnboardingIntent(), [urlIntent]);
   const [step, setStep] = useState<Step>('choose');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -84,7 +89,7 @@ export default function StartProject() {
 
   // An explicit ?intent= from the website skips the chooser.
   useEffect(() => {
-    if (!isOnboardingIntentExplicit() || !preselected) return;
+    if (!preselected || !(urlIntent || isOnboardingIntentExplicit())) return;
     if (preselected === 'website' && !aiEnabled) return;
     choose(preselected, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
