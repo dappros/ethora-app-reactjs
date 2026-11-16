@@ -15,6 +15,7 @@ const SignInCard: React.FC<SignInCardProps> = ({ isMobile = false, hug = false, 
   const fitContent = isMobile || hug;
   return (
     <Box
+      data-testid="signin-card"
       sx={{
         padding: '16px',
         borderRadius: '24px',
