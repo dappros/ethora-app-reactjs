@@ -10,6 +10,8 @@ import { LoginScreensPreview } from '../../components/Appearance/LoginScreensPre
 import { PopoverColorPicker } from '../../components/PopoverColorPicker';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ChatComponent } from './ChatComponent';
+import { WelcomePageEditor } from './WelcomePageEditor';
+import type { WelcomeOptions } from './welcomeOptions';
 
 export type AppearanceSection = 'signin' | 'chat';
 
@@ -17,7 +19,10 @@ export const APPEARANCE_SECTION_PARAM = 'section';
 
 interface Props {
   appId: string;
+  welcome: WelcomeOptions;
+  updateWelcome: (patch: Partial<WelcomeOptions>) => void;
   brandColor?: string | null;
+  isBaseApp?: boolean;
   previewUrl: string;
   displayName: string;
   setDisplayName: (s: string) => void;
@@ -34,7 +39,10 @@ interface Props {
 // (the chat component config - saved on its own, see ChatComponent).
 export function Appearance({
   appId,
+  welcome,
+  updateWelcome,
   brandColor,
+  isBaseApp,
   previewUrl,
   displayName,
   setDisplayName,
@@ -156,8 +164,11 @@ export function Appearance({
             >
               {t('appSettingsAppearance.addLogoButton')}
             </button>
+            <WelcomePageEditor value={welcome} onChange={updateWelcome} />
           </div>
           <LoginScreensPreview
+            {...welcome}
+            isBaseApp={isBaseApp}
             displayName={displayName}
             tagline={tagline}
             color={color}

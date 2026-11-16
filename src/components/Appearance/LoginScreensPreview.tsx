@@ -1,6 +1,12 @@
-import { useState } from 'react';
-import YouLogo from '../../assets/YouLogo.svg';
+import { Box, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
+import AuthScreenBody from '../../pages/AuthPage/AuthScreenBody';
+import { authCardTitleSx, isStackedAuthLayout } from '../../pages/AuthPage/authLayout';
+import CustomButton from '../../pages/AuthPage/Button';
+import SignInCard from '../../pages/AuthPage/Forms/SignInCard';
+import LogoContent, { type LogoContentApp } from '../../pages/AuthPage/LogoContent';
+import Wrapper from '../../pages/AuthPage/Wrapper';
 import { Segmented } from '../AIWidget/appearance/Fields';
 import { DevicePreviewStage, PhoneStatusBar } from './DeviceFrames';
 import { DESKTOP_SCREEN, PHONE_SCREEN } from './deviceScreens';
@@ -13,34 +19,51 @@ interface Props {
   color: string;
   logoImage: string;
   url: string;
+  isBaseApp?: boolean;
+  welcomeTitle?: string;
+  welcomeDescription?: string;
+  welcomeImage?: string;
+  welcomeImageFit?: 'cover' | 'contain';
+  welcomeLayout?: 'split' | 'centered';
 }
 
-function palette(dark: boolean) {
-  return dark
-    ? {
-        page: '#0f1117',
-        card: '#1c1d22',
-        input: '#16171b',
-        text: '#ffffff',
-        muted: '#9aa1b2',
-      }
-    : {
-        page: '#f5f7f9',
-        card: '#ffffff',
-        input: '#f5f7f9',
-        text: '#121219',
-        muted: '#6b7280',
-      };
+const DEFAULT_BRAND = '#0052CD';
+
+// The theme tokens the sign-in page reads (see index.css), set on the preview
+// root so its light / dark switch works whatever theme the admin panel uses.
+const THEME_TOKENS: Record<PreviewTheme, Record<string, string>> = {
+  light: {
+    '--c-page': '245 247 249',
+    '--c-surface': '255 255 255',
+    '--c-fg': '18 18 25',
+    '--c-gray-100': '245 247 249',
+    '--c-gray-500': '140 140 140',
+    '--c-gray-950': '20 20 20',
+    '--c-brand-50': '243 244 252',
+  },
+  dark: {
+    '--c-page': '15 17 21',
+    '--c-surface': '26 28 33',
+    '--c-fg': '236 238 241',
+    '--c-gray-100': '21 23 28',
+    '--c-gray-500': '148 155 165',
+    '--c-gray-950': '245 246 248',
+    '--c-brand-50': '30 35 50',
+  },
+};
+
+function brandColor(color: string): string {
+  return /^#[0-9a-f]{6}$/i.test(color) ? color : DEFAULT_BRAND;
 }
 
-function EyeOffIcon({ color }: { color: string }) {
+function EyeOffIcon() {
   return (
     <svg
       width="24"
       height="24"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color}
+      stroke="rgb(var(--c-gray-950))"
       strokeWidth="2"
       strokeLinecap="round"
       aria-hidden="true"
@@ -50,168 +73,115 @@ function EyeOffIcon({ color }: { color: string }) {
   );
 }
 
-function SignInForm({
-  color,
-  dark,
-  compact,
-}: {
-  color: string;
-  dark: boolean;
-  compact?: boolean;
-}) {
+// Static stand-in for the sign-in card's contents (Forms/LoginForm.tsx and
+// Login/Steps/LoginForm.tsx): same title, field, link and button styles,
+// without the live form's state and sign-in buttons.
+function SignInCardContent({ color }: { color: string }) {
   const { t } = useTranslation();
-  const p = palette(dark);
   const field = (label: string, eye?: boolean) => (
-    <div
-      className="flex items-center justify-between rounded-2xl font-sans"
-      style={{
-        background: p.input,
-        color: p.muted,
-        height: compact ? 60 : 64,
-        padding: '0 20px',
-        fontSize: 18,
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderRadius: '16px',
+        backgroundColor: 'rgb(var(--c-gray-100))',
+        color: 'rgb(var(--c-gray-500))',
+        fontSize: 16,
+        minHeight: 48,
+        padding: '0 16px',
       }}
     >
       {label}
-      {eye && <EyeOffIcon color={p.text} />}
-    </div>
+      {eye && <EyeOffIcon />}
+    </Box>
   );
   return (
-    <div className="flex flex-col" style={{ gap: 32 }}>
-      {field(t('authLoginStep.emailPlaceholder'))}
-      {field(t('authLoginStep.passwordPlaceholder'), true)}
-      <span
-        className="font-sans underline"
-        style={{ color, fontSize: 16, marginTop: -8 }}
-      >
-        {t('authLoginStep.forgotPassword')}
-      </span>
-      <div
-        className="grid place-items-center rounded-2xl font-varela text-white"
-        style={{ background: color, height: compact ? 60 : 64, fontSize: 20 }}
-      >
-        {t('authLoginStep.submit')}
-      </div>
-    </div>
+    <>
+      <Box sx={{ display: 'flex', gap: '24px', flexDirection: 'column' }}>
+        <Typography variant="h4" align="center" sx={authCardTitleSx}>
+          {t('authLoginForm.title')}
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {field(t('authLoginStep.emailPlaceholder'))}
+          {field(t('authLoginStep.passwordPlaceholder'), true)}
+          <span
+            className="self-start text-sm font-medium underline underline-offset-2"
+            style={{ color }}
+          >
+            {t('authLoginStep.forgotPassword')}
+          </span>
+          <CustomButton fullWidth tabIndex={-1} style={{ backgroundColor: color }}>
+            {t('authLoginStep.submit')}
+          </CustomButton>
+        </Box>
+      </Box>
+      <Typography align="center" component="span" fontSize="14px" sx={{ color: 'rgb(var(--c-fg))' }}>
+        {t('authLoginForm.noAccount')}{' '}
+        <span className="font-medium underline underline-offset-2" style={{ color }}>
+          {t('authLoginForm.signUp')}
+        </span>
+      </Typography>
+    </>
   );
 }
 
-function SignUpLine({ color, dark }: { color: string; dark: boolean }) {
-  const { t } = useTranslation();
-  return (
-    <div
-      className="text-center font-sans"
-      style={{ fontSize: 16, color: palette(dark).text }}
-    >
-      {t('authLoginForm.noAccount')}{' '}
-      <span className="underline" style={{ color }}>
-        {t('authLoginForm.signUp')}
-      </span>
-    </div>
-  );
-}
-
-function Logo({
-  src,
-  height,
-  width = 320,
-}: {
-  src: string;
-  height: number;
-  width?: number;
-}) {
-  return (
-    <img
-      src={src || YouLogo}
-      alt=""
-      className="object-contain"
-      style={{ maxHeight: height, maxWidth: width }}
-    />
-  );
-}
-
-function DesktopLogin({
-  displayName,
-  tagline,
-  color,
-  logoImage,
+// One sign-in screen, built from the same components as the live login page
+// (Wrapper, AuthScreenBody, LogoContent, SignInCard) at the frame's size.
+function SignInScreen({
+  props,
   dark,
-}: Props & { dark: boolean }) {
-  const { t } = useTranslation();
-  const p = palette(dark);
+  isMobile,
+}: {
+  props: Props;
+  dark: boolean;
+  isMobile: boolean;
+}) {
+  const color = brandColor(props.color);
+  const app: LogoContentApp = {
+    displayName: props.displayName,
+    logoImage: props.logoImage,
+    appTagline: props.tagline,
+    isBaseApp: props.isBaseApp,
+    welcomeTitle: props.welcomeTitle,
+    welcomeDescription: props.welcomeDescription,
+    welcomeImage: props.welcomeImage,
+    welcomeImageFit: props.welcomeImageFit,
+    welcomeLayout: props.welcomeLayout,
+  };
+  const stacked = isStackedAuthLayout(app, isMobile);
   return (
-    <div
-      className="grid grid-cols-2 items-center"
+    <Wrapper
+      isMobile={isMobile}
+      primaryColor={color}
+      footer={false}
       style={{
-        ...DESKTOP_SCREEN,
-        background: p.page,
-        padding: '0 80px',
-        gap: 80,
+        width: '100%',
+        minHeight: 0,
+        flex: 1,
+        overflow: 'hidden',
+        // The rings are dropped in dark mode on the live page too.
+        ...(dark ? { backgroundImage: 'none' } : {}),
       }}
     >
-      <div className="flex flex-col items-center" style={{ gap: 40 }}>
-        <Logo src={logoImage} height={180} width={420} />
-        <div
-          className="font-varela break-words text-center"
-          style={{ fontSize: 48, lineHeight: '56px', color: p.text }}
-        >
-          {tagline ||
-            `${displayName || ''}${t('authLogoContent.taglineSuffix')}`}
-        </div>
-      </div>
-      <div
-        className="flex flex-col rounded-3xl"
-        style={{
-          background: p.card,
-          padding: '32px 48px',
-          gap: 32,
-          height: 600,
-        }}
-      >
-        <div
-          className="text-center font-varela"
-          style={{ fontSize: 30, color: p.text }}
-        >
-          {t('authLoginForm.title')}
-        </div>
-        <SignInForm color={color} dark={dark} />
-        <div className="mt-auto">
-          <SignUpLine color={color} dark={dark} />
-        </div>
-      </div>
-    </div>
+      <AuthScreenBody stacked={stacked} isMobile={isMobile}>
+        <LogoContent app={app} isMobile={isMobile} centered={stacked} welcome />
+        <SignInCard isMobile={isMobile} hug={stacked}>
+          <SignInCardContent color={color} />
+        </SignInCard>
+      </AuthScreenBody>
+    </Wrapper>
   );
 }
 
-function MobileLogin({ color, logoImage, dark }: Props & { dark: boolean }) {
-  const { t } = useTranslation();
-  const p = palette(dark);
-  return (
-    <div
-      className="flex flex-col"
-      style={{ ...PHONE_SCREEN, background: p.card }}
-    >
-      <PhoneStatusBar color={p.text} />
-      <div
-        className="flex-1 flex flex-col justify-center"
-        style={{ padding: '0 24px', gap: 32 }}
-      >
-        <div className="flex justify-center">
-          <Logo src={logoImage} height={84} />
-        </div>
-        <div
-          className="text-center font-varela"
-          style={{ fontSize: 30, color: p.text }}
-        >
-          {t('authLoginForm.title')}
-        </div>
-        <SignInForm color={color} dark={dark} compact />
-        <div style={{ marginTop: 24 }}>
-          <SignUpLine color={color} dark={dark} />
-        </div>
-      </div>
-    </div>
-  );
+function themeStyle(dark: boolean, color: string): React.CSSProperties {
+  return {
+    ...THEME_TOKENS[dark ? 'dark' : 'light'],
+    // The App's brand colour, as App.tsx sets it on the live page.
+    '--bg-brand-primary': brandColor(color),
+    backgroundColor: 'rgb(var(--c-page))',
+    color: 'rgb(var(--c-fg))',
+  } as React.CSSProperties;
 }
 
 export function LoginScreensPreview(props: Props) {
@@ -239,8 +209,31 @@ export function LoginScreensPreview(props: Props) {
       <DevicePreviewStage
         url={props.url}
         dark={dark}
-        desktop={<DesktopLogin {...props} dark={dark} />}
-        phone={<MobileLogin {...props} dark={dark} />}
+        desktop={
+          <div
+            data-testid="signin-preview-desktop"
+            aria-hidden="true"
+            // A picture of the page: nothing in it can take focus.
+            {...{ inert: '' }}
+            className="pointer-events-none select-none flex flex-col"
+            style={{ ...DESKTOP_SCREEN, ...themeStyle(dark, props.color) }}
+          >
+            <SignInScreen props={props} dark={dark} isMobile={false} />
+          </div>
+        }
+        phone={
+          <div
+            data-testid="signin-preview-phone"
+            aria-hidden="true"
+            // A picture of the page: nothing in it can take focus.
+            {...{ inert: '' }}
+            className="pointer-events-none select-none flex flex-col"
+            style={{ ...PHONE_SCREEN, ...themeStyle(dark, props.color), backgroundColor: 'rgb(var(--c-surface))' }}
+          >
+            <PhoneStatusBar color={dark ? '#ffffff' : '#121219'} />
+            <SignInScreen props={props} dark={dark} isMobile />
+          </div>
+        }
       />
     </div>
   );

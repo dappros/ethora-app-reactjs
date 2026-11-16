@@ -28,6 +28,7 @@ import { Chats } from './Chats';
 import { DeleteSetting } from './DeleteSetting';
 import { HomeScreen } from './HomeScreen';
 import { Menu } from './Menu';
+import { getWelcomeOptions, type WelcomeOptions } from './welcomeOptions';
 import { MobileApp } from './MobileApp';
 import { SignonOptions } from './SignonOptions';
 import { TrustSafety } from './TrustSafety';
@@ -188,6 +189,7 @@ export default function AppSettings() {
   const [tagline, setTagline] = useState('');
   const [coinName, setCoinName] = useState('');
   const [color, setColor] = useState('');
+  const [welcome, setWelcome] = useState<WelcomeOptions>(() => getWelcomeOptions());
   const [logoImage, setLogoImage] = useState('');
   const [sublogoImage, setSublogoImage] = useState('');
 
@@ -269,6 +271,7 @@ export default function AppSettings() {
     const currentState = {
       displayName,
       tagline,
+      welcome,
       coinName,
       color,
       logoImage,
@@ -310,6 +313,7 @@ export default function AppSettings() {
   }, [
     displayName,
     tagline,
+    welcome,
     coinName,
     color,
     logoImage,
@@ -348,6 +352,7 @@ export default function AppSettings() {
       const initialData = {
         displayName: app.displayName || '',
         tagline: app.appTagline || '',
+        welcome: getWelcomeOptions(app),
         coinName: app.coinName || '',
         color: app.primaryColor || '',
         logoImage: app.logoImage,
@@ -394,6 +399,7 @@ export default function AppSettings() {
     const body: any = {};
 
     // appearance
+    if (!isEqual(welcome, getWelcomeOptions(app))) Object.assign(body, welcome);
     if (displayName) {
       body.displayName = displayName;
     }
@@ -546,6 +552,7 @@ export default function AppSettings() {
         setInitialState({
           displayName,
           tagline,
+          welcome,
           coinName,
           color,
           logoImage,
@@ -713,6 +720,7 @@ export default function AppSettings() {
 
     setDisplayName(app.displayName || '');
     setTagline(app.appTagline || '');
+    setWelcome(getWelcomeOptions(app));
     setCoinName(app.coinName || '');
     setColor(app.primaryColor || '');
     setLogoImage(app.logoImage);
@@ -875,7 +883,10 @@ export default function AppSettings() {
           >
             <Appearance
               appId={appId as string}
+              welcome={welcome}
+              updateWelcome={(patch) => setWelcome((previous) => ({ ...previous, ...patch }))}
               brandColor={app.primaryColor}
+              isBaseApp={app.isBaseApp}
               previewUrl={`${domainName || app.domainName || 'app'}.${env.VITE_HOSTED_APPS_ROOT_DOMAIN || env.VITE_ROOT_DOMAIN || 'ethora.com'}`}
               displayName={displayName}
               setDisplayName={setDisplayName}

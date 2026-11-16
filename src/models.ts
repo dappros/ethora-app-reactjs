@@ -136,6 +136,11 @@ export interface ModelApp {
   logoImage: string;
   sublogoImage: string;
   appTagline: string;
+  welcomeTitle?: string;
+  welcomeDescription?: string;
+  welcomeImage?: string;
+  welcomeImageFit?: 'cover' | 'contain';
+  welcomeLayout?: 'split' | 'centered';
   // Per-App voice/video calls and scheduled calls (unset = on).
   callsEnabled?: boolean;
   scheduledCallsEnabled?: boolean;

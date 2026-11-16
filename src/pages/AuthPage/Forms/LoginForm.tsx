@@ -8,12 +8,16 @@ import { ModelSuspensionNotice } from '../../../models';
 import { useAppStore } from '../../../store/useAppStore';
 import LoginStep, { MfaPending } from '../Login/Steps/LoginForm';
 import MfaStep from '../Login/Steps/MfaStep';
+import { authCardTitleSx } from '../authLayout';
+import SignInCard from './SignInCard';
 
 interface SignInFormProps {
   isMobile?: boolean;
+  // Card hugs its content (centered welcome layout).
+  hug?: boolean;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
+const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false, hug = false }) => {
   const { t } = useTranslation();
 
   const config = useAppStore((s) => s.currentApp);
@@ -40,30 +44,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
   }
 
   return (
-    <Box
-      sx={{
-        padding: '16px',
-        borderRadius: '24px',
-        backgroundColor: 'rgb(var(--c-surface))',
-        boxShadow: isMobile ? 'none' : '0px 4px 35px 0px #00000014',
-        p: isMobile ? '0px 16px' : '24px 40px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-        minWidth: 0,
-        width: '100%',
-        maxWidth: isMobile ? '486px' : '600px',
-        // On mobile the card must hug its content: stretching it to the full
-        // column height is what pushed the "Don't have an account?" line to
-        // the bottom of the screen (space-between over ~200px of dead space)
-        // and left the fields pinned to the top. Desktop keeps the fixed
-        // 588px card so the split/branded layouts are unchanged.
-        maxHeight: isMobile ? 'none' : '588px',
-        minHeight: isMobile ? 'auto' : '588px',
-        height: isMobile ? 'auto' : '100%',
-        justifyContent: 'space-between',
-      }}
-    >
+    <SignInCard isMobile={isMobile} hug={hug}>
       <Box sx={{ display: 'flex', gap: '24px', flexDirection: 'column' }}>
         <Box
           sx={{
@@ -75,14 +56,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
             variant="h4"
             align="center"
             gutterBottom
-            sx={{
-              fontFamily: '"Varela Round", system-ui, sans-serif',
-              fontWeight: 400,
-              fontSize: '24px',
-              height: '32px',
-              color: 'rgb(var(--c-gray-950))',
-              m: 0,
-            }}
+            sx={authCardTitleSx}
           >
             {mfaPending ? t('authMfaStep.title') : t('authLoginForm.title')}
           </Typography>
@@ -104,7 +78,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isMobile = false }) => {
           </Link>
         </Typography>
       )}
-    </Box>
+    </SignInCard>
   );
 };
 
