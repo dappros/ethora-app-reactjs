@@ -241,28 +241,30 @@ export default function AdminAgents() {
 
   return (
     <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
-      {/* Page-level header outside the white card - same shape as Apps. */}
-      <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
-        <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
+      {/* Page-level header outside the white card - same shape as Apps. On a
+          phone the title is the top bar's, but the filter, Import and New
+          Agent stay reachable. */}
+      <div className="px-4 pt-2 md:px-8 md:pt-0 flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-3 md:gap-4">
+        <div className="hidden md:block font-varela text-[24px] md:text-[34px] leading-none">
           {t('adminAgents.title')}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap" data-testid="agents-toolbar">
           <input
             placeholder={t('adminAgents.filterPlaceholder')}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="border rounded px-3 h-[40px] text-sm w-64"
+            className="border rounded px-3 h-[40px] text-sm w-full sm:w-64"
           />
           <button
             onClick={() => setShowImport(true)}
-            className="flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4"
+            className="flex-1 sm:flex-none flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4"
             title={t('adminAgents.importAgentTitle')}
           >
             {t('adminAgents.importAgent')}
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
+            className="flex-1 sm:flex-none flex items-center justify-center h-[40px] bg-brand-500 rounded-xl hover:bg-brand-darker text-white text-sm font-varela px-4"
           >
             <IconAdd color="white" className="mr-2" />
             <span>{t('adminAgents.newAgent')}</span>
