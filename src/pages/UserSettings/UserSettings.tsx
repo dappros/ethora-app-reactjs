@@ -1,7 +1,6 @@
 import { logoutService } from '@ethora/chat-component';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import cn from 'classnames';
-import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { actionLogout } from '../../actions';
 import TabApp from '../../components/TabApp';
@@ -52,14 +51,19 @@ export default function UserSettings() {
     ? tabs.indexOf(tabFromUrl)
     : 0;
 
-  const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
-
-  useEffect(() => {
+  const selectedIndex = initialTabIndex;
+  const labels = [
+    t('userSettingsPage.tabAppearance'), t('userSettingsPage.tabSecurity'),
+    t('userSettingsPage.tabAiAssistants'), t('userSettingsPage.tabDocuments'),
+    t('userSettingsPage.tabPrivacyData'),
+  ];
+  const selectTab = (index: number) => {
     setSearchParams((params) => {
-      params.set('tab', tabs[selectedIndex]);
-      return params;
+      const next = new URLSearchParams(params);
+      next.set('tab', tabs[index]);
+      return next;
     });
-  }, [selectedIndex, setSearchParams]);
+  };
 
   const onLogout = async () => {
     try {
@@ -76,19 +80,33 @@ export default function UserSettings() {
   };
 
   return (
-    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full">
+    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full min-h-0 min-w-0">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px]">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           {t('userSettingsPage.heading')}
         </div>
       </div>
-      <div className="rounded-2xl bg-white px-4 py-4 h-full">
+      <div className="rounded-2xl bg-white px-4 py-4 h-full min-h-0 min-w-0">
         <TabGroup
-          className="grid here h-full overflow-hidden grid-rows-[46px,_1fr] gap-y-[16px] md:grid-rows-1 md:grid-cols-[308px,_1fr]"
+          className="grid h-full min-h-0 min-w-0 grid-rows-[auto,minmax(0,1fr)] gap-4 md:grid-rows-[minmax(0,1fr)] md:grid-cols-[minmax(160px,240px),minmax(0,1fr)]"
           selectedIndex={selectedIndex}
-          onChange={setSelectedIndex}
+          onChange={selectTab}
         >
-          <div className="flex flex-row md:flex-col md:h-full md:border-r md:border-gray-200 md:pr-4">
+          <div className="flex min-w-0 items-center gap-3 border-b border-gray-200 pb-3 md:hidden">
+            <div className="relative min-w-0 flex-1">
+            <select aria-label={t('userSettingsPage.heading')} value={selectedIndex} onChange={(e) => selectTab(Number(e.target.value))}
+              className="min-h-11 w-full appearance-none rounded-xl border border-gray-300 bg-gray-100 pl-3 pr-9 text-sm font-semibold text-gray-950">
+              {labels.map((label, index) => <option key={tabs[index]} value={index}>{label}</option>)}
+            </select>
+            <svg aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-600" fill="none" viewBox="0 0 16 16">
+              <path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            </div>
+            <button type="button" onClick={onLogout} className="min-h-11 shrink-0 rounded-xl px-3 text-sm font-semibold text-red-500">
+              {t('userSettingsPage.logoutButton')}
+            </button>
+          </div>
+          <div className="hidden min-h-0 md:flex md:flex-col md:border-r md:border-gray-200 md:pr-4">
             <TabList className="flex flex-row md:flex-col hide-scroll md:mb-0 border-b border-gray-200 md:border-b-0 overflow-auto md:flex-1">
               <TabApp text={t('userSettingsPage.tabAppearance')} />
               <TabApp text={t('userSettingsPage.tabSecurity')} />
@@ -112,7 +130,7 @@ export default function UserSettings() {
               {t('userSettingsPage.logoutButton')}
             </button>
           </div>
-          <TabPanels className="h-full overflow-hidden">
+          <TabPanels className="h-full min-h-0 min-w-0 overflow-hidden">
             <TabPanel key="Appearance" className="h-full overflow-auto">
               <Appearance />
             </TabPanel>
