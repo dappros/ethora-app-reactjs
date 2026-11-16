@@ -8,6 +8,8 @@ import { expect, Page, Route, test } from '@playwright/test';
 const USER_ID = 'e2e-user';
 const APP_ID = 'e2eapp000000000000000001';
 const LEGACY_KEY = `ethora_ai_widget_appearance_${APP_ID}`;
+const APP_ID_2 = 'e2eapp000000000000000009';
+const draftKey = (id: string) => `widget-appearance-draft:${id}`;
 
 const app = {
   _id: APP_ID,
@@ -52,6 +54,9 @@ async function fakeBackend(page: Page, stored: Record<string, string>, opts: { w
       if (pathname === '/v1/users/me') return json(route, me);
       if (pathname === '/v1/apps') return json(route, { apps: [theApp], total: 1 });
       if (pathname === `/v1/apps/${APP_ID}`) return json(route, { result: theApp });
+      // A second App, for switching between Apps.
+      if (pathname === `/v1/apps/${APP_ID_2}`) return json(route, { result: { ...theApp, _id: APP_ID_2, displayName: 'E2E Second App' } });
+      if (pathname === `/v2/apps/${APP_ID_2}/widget/appearance` && method === 'GET') return json(route, { ok: true, appearance: {} });
       if (pathname === '/v2/agents') return json(route, { items: withAgent ? [agent] : [], total: withAgent ? 1 : 0 });
       if (pathname === '/v2/bot-instances') return json(route, { items: withAgent ? [botInstance] : [], total: withAgent ? 1 : 0 });
       if (pathname === `/v2/apps/${APP_ID}/widget/appearance` && method === 'GET') {
@@ -213,4 +218,31 @@ test('an App without an assistant offers to create one', async ({ page }) => {
   await openTab(page);
   await expect(page.getByTestId('assistant-empty')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Create an AI assistant' })).toBeEnabled();
+});
+
+test('an unsaved appearance survives a reload of the tab', async ({ page }) => {
+  await fakeBackend(page, { 'data-title': 'Help desk' });
+  await openTab(page);
+  await openAppearance(page);
+  await page.getByLabel('Popup title').fill('Draft title');
+  await expect.poll(() => page.evaluate((k) => sessionStorage.getItem(k), draftKey(APP_ID))).toContain('Draft title');
+  await page.reload();
+  await openAppearance(page);
+  await expect(page.getByLabel('Popup title')).toHaveValue('Draft title');
+});
+
+test('switching App never writes or deletes a draft under the other App', async ({ page }) => {
+  await fakeBackend(page, { 'data-title': 'Help desk' });
+  await openTab(page);
+  await openAppearance(page);
+  await page.getByLabel('Popup title').fill('Draft for app one');
+  await expect.poll(() => page.evaluate((k) => sessionStorage.getItem(k), draftKey(APP_ID))).toContain('Draft for app one');
+  // In-app navigation to the second App's AI assistant tab.
+  await page.evaluate((id) => {
+    window.history.pushState({}, '', `/app/admin/apps/${id}/assistant`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, APP_ID_2);
+  await page.waitForTimeout(1500);
+  expect(await page.evaluate((k) => sessionStorage.getItem(k), draftKey(APP_ID_2))).toBeNull();
+  expect(await page.evaluate((k) => sessionStorage.getItem(k), draftKey(APP_ID))).toContain('Draft for app one');
 });

@@ -154,3 +154,139 @@ test('sign-up attribution keeps utm_source, utm_medium and utm_campaign', async 
   const params = JSON.parse((await page.evaluate(() => localStorage.getItem('urlParams'))) || '{}');
   expect(params).toMatchObject({ utm_source: 'newsletter', utm_medium: 'email', utm_campaign: 'nov', first_page: '/ai-widget/' });
 });
+
+test('an App made before goals existed is a website App when its assistant has website knowledge', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, aiBot: { ...baseApp.aiBot, status: 'on', siteUrlsV2: [{ url: 'https://example.com/' }] } });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('app-home')).toBeVisible();
+  await expect(page.getByTestId('app-home-choose')).toHaveCount(0);
+  await expect(page.getByTestId('home-step-1')).toContainText('Website added');
+});
+
+test('Requests under Conversations lists only this App\'s flow submissions; Home counts them', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'website' });
+  const sub = (id: string, room: string, name: string) => ({
+    id, flow: 'appointment', room, completedAt: '2026-11-16T10:00:00Z',
+    answers: [{ id: 'name', question: 'Your name', type: 'text', value: name }, { id: 'date', question: 'Date', type: 'date', value: '2026-11-20' }],
+    data: {}, delivery: { status: 'none', attempts: 0, deliveredAt: null, lastAttemptAt: null, lastStatus: null, lastError: '' },
+  });
+  await page.route('**/v2/bot-instances**', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [{ id: 'bi', agentId: 'ag1', appId: APP_ID }], total: 1 }) }),
+  );
+  await page.route('**/v2/agents/ag1/flow-submissions**', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, total: 2, items: [sub('s1', `${APP_ID}_room1`, 'Alice'), sub('s2', 'otherapp_room9', 'Bob')] }) }),
+  );
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-requests')).toContainText('1');
+  await page.getByTestId('home-requests').click();
+  const list = page.getByTestId('app-requests');
+  await expect(list).toContainText('Alice');
+  await expect(list).not.toContainText('Bob');
+  await list.getByRole('button', { name: /appointment/ }).click();
+  await expect(list).toContainText('Your name');
+});
+
+test('website path: the assistant is created; a website that cannot be read lands on Home with the reason', async ({ page }) => {
+  const app = { ...baseApp, onboardingGoal: 'website', aiBot: { ...baseApp.aiBot, chatId: '' } };
+  await fakeBackend(page, app);
+  const json = (body: unknown, status = 200) => ({ status, contentType: 'application/json', body: JSON.stringify(body) });
+  await page.route('**/v1/apps', (route) =>
+    route.request().method() === 'POST' ? route.fulfill(json({ app })) : route.fallback(),
+  );
+  await page.route('**/v2/agents', (route) =>
+    route.request().method() === 'POST' ? route.fulfill(json({ agent: { id: 'ag1', displayName: 'Yourbusiness assistant', ownerId: USER_ID } })) : route.fallback(),
+  );
+  await page.route(`**/v2/apps/${APP_ID}/agents/ag1/widget-instance`, (route) => route.fulfill(json({ ok: true, botInstance: { id: 'bi1' } })));
+  await page.route(`**/v1/apps/${APP_ID}`, (route) =>
+    route.request().method() === 'PUT'
+      ? route.fulfill(json({ result: { ...app, defaultBotInstanceId: 'bi1', aiBot: { ...app.aiBot, status: 'on' } } }))
+      : route.fallback(),
+  );
+  await page.route(`**/v2/apps/${APP_ID}/sources/site-crawl`, (route) =>
+    route.fulfill(json({ success: false, error: 'getaddrinfo ENOTFOUND yourbusiness.example', code: 'CRAWL_FAILED' }, 422)),
+  );
+  await page.goto('/app/admin/start?intent=widget');
+  await page.getByTestId('onboarding-website').fill('yourbusiness.example');
+  await page.getByTestId('onboarding-create-assistant').click();
+  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}$`));
+  await expect(page.getByTestId('home-step-1')).toContainText('Your website could not be read yet');
+  await expect(page.getByTestId('home-step-1')).toContainText('ENOTFOUND');
+  await expect(page.getByTestId('crawl-failed-actions').getByRole('button', { name: 'Retry' })).toBeVisible();
+});
+
+test('SDK home shows the App ID and a paste-ready snippet; messenger home shows its steps', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'sdk', appSecret: 'secret-value' });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-step-1')).toContainText('Keys and code');
+  await expect(page.getByTestId('home-step-1').locator('pre')).toContainText(`appId: '${APP_ID}'`);
+  await expect(page.getByTestId('home-step-1')).not.toContainText('secret-value');
+
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'messenger' });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-step-1')).toContainText('Name and logo');
+  await expect(page.getByTestId('home-step-2')).toContainText('Invite people');
+  await expect(page.getByText('Trust & Safety settings')).toBeVisible();
+});
+
+test('Test Chats opens the App\'s chats under its header', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'messenger' });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' }).click();
+  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}/chats$`));
+  await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' })).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveTitle(/Test Chats - E2E Onboarding App/);
+});
+
+test('Conversations shows a simple list by default; the table is one click away', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, onboardingGoal: 'website' });
+  await page.route(`**/v2/apps/${APP_ID}/widget/conversations**`, (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({
+      results: [{ _id: 'c1', name: `${APP_ID}_room1`, updatedAt: '2026-11-16T10:00:00Z', createdAt: '2026-11-16T09:00:00Z',
+        visitor: { xmppUsername: `${APP_ID}_widget-v1`, metadata: { pageUrl: 'https://shop.example/pricing' } } }],
+      pagination: { total: 1 } }) }),
+  );
+  await page.goto(`/app/admin/apps/${APP_ID}/conversations`);
+  await expect(page.getByText('https://shop.example/pricing')).toBeVisible();
+  await expect(page.locator('table')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Table and bulk actions' }).click();
+  await expect(page.locator('table')).toHaveCount(1);
+});
+
+test('app chats: Join automatically is on for existing chats and saves when changed', async ({ page }) => {
+  const room = { jid: `${APP_ID}_c1`, chatId: 'c1', title: 'Lobby', pinned: true, creator: 'application' };
+  await fakeBackend(page, { ...baseApp, defaultRooms: [room] });
+  const patches: unknown[] = [];
+  await page.route(`**/v1/apps/get-default-rooms/app-id/${APP_ID}`, (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify([room]) }),
+  );
+  await page.route(`**/v1/apps/${APP_ID}/chats/*/defaults`, (route) => {
+    patches.push(route.request().postDataJSON());
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ result: { ...room, autoJoin: false } }) });
+  });
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Chats`);
+  const box = page.getByTestId('chat-autojoin').first();
+  await expect(box).toBeChecked();
+  await box.uncheck();
+  await expect.poll(() => patches).toEqual([{ autoJoin: false }]);
+  await expect(box).not.toBeChecked();
+});
+
+test('creating an app chat closes the dialog and offers to activate an assistant', async ({ page }) => {
+  const room = { jid: `${APP_ID}_c2`, chatId: 'c2', title: 'Front desk', pinned: true, creator: 'application' };
+  await fakeBackend(page, { ...baseApp, defaultRooms: [] });
+  let created = false;
+  await page.route(`**/v1/apps/create-app-chat/${APP_ID}`, (route) => {
+    created = true;
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ result: room }) });
+  });
+  await page.route(`**/v1/apps/get-default-rooms/app-id/${APP_ID}`, (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify(created ? [room] : []) }),
+  );
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Chats`);
+  await page.getByRole('button', { name: /Add New Chat/ }).first().click();
+  await page.getByPlaceholder('Chat Title').fill('Front desk');
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText('Activate an assistant?')).toBeVisible();
+  await expect(page.getByPlaceholder('Chat Title')).toHaveCount(0);
+});

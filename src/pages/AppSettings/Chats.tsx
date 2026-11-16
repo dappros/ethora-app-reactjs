@@ -5,7 +5,7 @@ import { IconCheckbox } from '../../components/Icons/IconCheckbox';
 import { ModelAppDefaulRooom } from '../../models';
 import { IconClose } from '../../components/Icons/IconClose';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { createAppChat, deleteDefaultRooms, getDefaultRooms, httpBroadcastChatsV2, httpGetBroadcastChatsJobV2 } from '../../http';
+import { createAppChat, updateAppChatDefaults, deleteDefaultRooms, getDefaultRooms, httpBroadcastChatsV2, httpGetBroadcastChatsJobV2 } from '../../http';
 import { Loading } from '../../components/Loading';
 import { IconDelete } from '../../components/Icons/IconDelete';
 import { SubmitModal } from '../../components/modal/SubmitModal';
@@ -34,7 +34,6 @@ interface Props {
   defaultChatRooms: Array<ModelAppDefaulRooom>,
   setDefaultChatRooms: (value: Array<ModelAppDefaulRooom>) => void,
   appId: string,
-  domainName?: string,
   // Per-app default broadcast sender (Save Settings persists; per-broadcast
   // override below is a separate, session-only toggle).
   broadcastSenderName: string,
@@ -46,6 +45,7 @@ interface Props {
 interface Inputs {
   chatTitle: string;
   pinned: false;
+  autoJoin: boolean;
 }
 
 export function Chats({
@@ -56,7 +56,6 @@ export function Chats({
   defaultChatRooms,
   setDefaultChatRooms,
   appId,
-  domainName,
   broadcastSenderName,
   setBroadcastSenderName,
   broadcastSenderPhotoUrl,
@@ -137,7 +136,7 @@ export function Chats({
     register,
     handleSubmit,
     reset
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({ defaultValues: { autoJoin: true } });
 
   const setSelect = (select: boolean, index: number) => {
     const newRowsSelected = rowsSelected.concat([]);
@@ -210,10 +209,28 @@ export function Chats({
     return indexes;
   };
 
-  const onSubmit: SubmitHandler<Inputs> = async ({ chatTitle }) => {
+  // "Join automatically" per chat: saved at once (PATCH), like the other
+  // per-row actions here.
+  const [savingAutoJoin, setSavingAutoJoin] = useState<string | null>(null)
+  const saveAutoJoin = async (room: ModelAppDefaulRooom, autoJoin: boolean) => {
+    setSavingAutoJoin(room.jid)
+    // Optimistic: the box flips at once and flips back if the save fails.
+    const before = defaultChatRooms
+    setDefaultChatRooms(before.map((r) => (r.jid === room.jid ? { ...r, autoJoin } : r)))
+    try {
+      await updateAppChatDefaults(appId, room.jid, { autoJoin })
+    } catch (error: any) {
+      setDefaultChatRooms(before)
+      toast.error(error?.response?.data?.error || t('appSettingsChats.autoJoinSaveFailed'))
+    } finally {
+      setSavingAutoJoin(null)
+    }
+  }
+
+  const onSubmit: SubmitHandler<Inputs> = async ({ chatTitle, autoJoin }) => {
     setShowLoading(true)
     try {
-      await createAppChat(appId, chatTitle, true)
+      await createAppChat(appId, chatTitle, true, autoJoin !== false)
       const { data } = await getDefaultRooms(appId)
       setDefaultChatRooms(data)
 
@@ -225,9 +242,10 @@ export function Chats({
         is_private: false,
       })
       
-      // Refresh app config to update defaultRooms in the store
-      const { actionGetConfig } = await import('../../actions')
-      await actionGetConfig(domainName)
+      // No global config reload here: actionGetConfig(<this App's domain>)
+      // replaced the admin's own app config with this App's, which changed
+      // the admin shell under the open dialog (it never finished). The chat
+      // list above is local to this page and already refreshed.
       
       setShowLoading(false)
       reset()
@@ -486,6 +504,9 @@ export function Chats({
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                     {t('appSettingsChats.createdByColumn')}
                   </th>
+                  <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
+                    {t('appSettingsChats.autoJoin')}
+                  </th>
                   {/* Phase 1 (Agents): per-row action to invite an Agent into the chat. */}
                   <th className="px-4 text-gray-500 font-normal font-inter text-xs text-center whitespace-nowrap">
                     {t('appSettingsChats.botsColumn')}
@@ -519,6 +540,16 @@ export function Chats({
                       </td>
                       <td className="px-4 font-sans font-normal text-sm text-center  whitespace-nowrap">
                         {el.creator}
+                      </td>
+                      <td className="px-4 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`${t('appSettingsChats.autoJoin')}: ${el.title}`}
+                          data-testid="chat-autojoin"
+                          checked={el.autoJoin !== false}
+                          aria-busy={savingAutoJoin === el.jid || undefined}
+                          onChange={(e) => void saveAutoJoin(el, e.target.checked)}
+                        />
                       </td>
                       <td className="px-4 font-sans font-normal text-sm text-left">
                         <RoomBotsCell
@@ -810,8 +841,15 @@ export function Chats({
                 type="text"
                 placeholder={t('appSettingsChats.chatTitlePlaceholder')}
                 {...register('chatTitle', { required: true })}
-                className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-[24px] md:mb-8 outline-none"
+                className="rounded-2xl bg-gray-100 py-3 px-6 w-full mb-4 outline-none"
               />
+              <label className="mb-[24px] md:mb-8 flex items-start gap-2 text-sm">
+                <input type="checkbox" className="mt-1" {...register('autoJoin')} data-testid="create-chat-autojoin" />
+                <span>
+                  <span className="block font-medium">{t('appSettingsChats.autoJoin')}</span>
+                  <span className="block text-gray-600">{t('appSettingsChats.autoJoinHint')}</span>
+                </span>
+              </label>
               <div className="flex flex-col md:flex-row gap-[16px] md:gap-8 items-start">
                 <button
                   type="button"

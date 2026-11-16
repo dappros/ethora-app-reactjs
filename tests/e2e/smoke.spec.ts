@@ -114,7 +114,23 @@ test('register page renders public auth form', async ({ page }) => {
   await expect(page.getByText('Playwright smoke environment')).toBeVisible();
 });
 
-test('unknown route renders 404 page', async ({ page }) => {
+// Signed out, an unknown address leads to sign-in (links from emails must
+// reach the sign-in page; a 404 for signed-out visitors was declined).
+test('unknown route sends a signed-out visitor to sign in', async ({ page }) => {
+  await page.goto('/does-not-exist');
+
+  await expect(page).toHaveURL(/\/login/);
+  await expect(page.getByRole('heading', { name: 'Sign In' })).toBeVisible();
+});
+
+test('unknown route renders the 404 page when signed in', async ({ page }) => {
+  await page.route('**/v1/users/me', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ user: { _id: 'u1', appId: 'playwright-app', firstName: 'E2E', lastName: 'User', email: 'e2e@example.com', isAgreeWithTerms: true } }) }),
+  );
+  await page.addInitScript(() => {
+    localStorage.setItem('token-538', 'e2e-token');
+    localStorage.setItem('refreshToken-538', 'e2e-refresh');
+  });
   await page.goto('/does-not-exist');
 
   await expect(page.getByText(/We can.t find that page/i)).toBeVisible();

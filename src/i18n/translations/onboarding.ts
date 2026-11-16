@@ -15,6 +15,11 @@ export const onboarding = {
     'appSettings.unsaved': 'Unsaved changes',
     'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
 
+    // App chats: auto-join
+    'appSettingsChats.autoJoin': 'Join automatically',
+    'appSettingsChats.autoJoinHint': 'New members of the app are added to this chat. Turn off for chats people should be added to by hand.',
+    'appSettingsChats.autoJoinSaveFailed': 'Could not change Join automatically. Please try again.',
+
     // App chats: offer an assistant after creating a chat
     'appSettingsChats.offerAgentTitle': 'Activate an assistant?',
     'appSettingsChats.offerAgentText': '{title} is ready. Add an assistant if you want it to answer in this chat.',
@@ -181,6 +186,15 @@ export const onboarding = {
     'appHome.live.answered': 'conversations answered',
     'appHome.live.pages': 'pages it knows',
     'appHome.live.docs': 'documents it knows',
+    'appHome.live.requests': 'requests (bookings, forms)',
+    'appConversations.chats': 'Visitor chats',
+    'appConversations.requests': 'Requests',
+    'appConversations.loading': 'Loading…',
+    'appConversations.requestsIntro': 'What visitors and members sent through your assistant\'s flows: bookings, contact forms and other requests.',
+    'appConversations.noRequests': 'No requests yet. They appear here when someone completes one of your assistant\'s flows.',
+    'appConversations.manageInFlows': 'Manage in the assistant\'s Flows (export, webhook, delete)',
+    'appConversations.capped': 'Showing the latest 50 per assistant.',
+    'appConversations.skipped': '{n} assistant(s) you cannot read were left out.',
     'appHome.add.title': 'Add to this app',
     'appHome.add.assistant': 'AI assistant',
     'appHome.add.chat': 'Chat for your team or clients',

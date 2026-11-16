@@ -6,6 +6,8 @@ import { Secret } from '../components/Secret';
 import { env } from '../config/env';
 import { AgentKnowledgeHealth, httpGetAgentKnowledge, httpGetApp, httpGetSiteCrawlJob, httpUpdateApp } from '../http';
 import { useAppAssistant } from '../hooks/useAppAssistant';
+import { useAppRequests } from '../hooks/useAppRequests';
+import { appGoal } from '../utils/appGoal';
 import { countLabel } from '../utils/countLabel';
 import { useTranslation } from '../i18n/useTranslation';
 import { AppMilestoneKind, ModelApp } from '../models';
@@ -25,6 +27,7 @@ export default function AppHome() {
   const app = useAppStore((s) => s.apps.find((a) => a._id === appId));
   const doSetApp = useAppStore((s) => s.doSetApp);
   const { agent } = useAppAssistant(app);
+  const requests = useAppRequests(appId);
   const [health, setHealth] = useState<AgentKnowledgeHealth | null>(null);
   const [crawl, setCrawl] = useState<Crawl | null>(null);
   const [jobId, setJobId] = useState<string>(location.state?.jobId || '');
@@ -83,7 +86,7 @@ export default function AppHome() {
   const has = (k: AppMilestoneKind) => Boolean(m[k]?.firstAt);
   // Not inferred from the default agent: on an AI-enabled install every new
   // App gets the system Support Agent, whatever it is for.
-  const goal: Goal | null = app.onboardingGoal || null;
+  const goal: Goal | null = appGoal(app);
   const base = `/app/admin/apps/${app._id}`;
 
   const retryCrawl = async () => {
@@ -185,6 +188,9 @@ export default function AppHome() {
                 <Stat value={m.widget_answered_visitor?.count ?? 0} label={t('appHome.live.answered')} />
                 <Stat value={pages} label={t('appHome.live.pages')} />
                 <Stat value={docs} label={t('appHome.live.docs')} />
+                <Link to={`${base}/conversations?view=requests`} className="hover:underline" data-testid="home-requests">
+                  <Stat value={requests.items.length} label={t('appHome.live.requests')} />
+                </Link>
               </div>
             </SideBox>
             <AddToApp base={base} />
