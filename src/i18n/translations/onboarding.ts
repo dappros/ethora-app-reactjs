@@ -2,6 +2,9 @@
 // only for now: fr and es fall back to it (useTranslation).
 export const onboarding = {
   en: {
+    // Try it (agent panels)
+    'agentPanels.tryNoKnowledge': 'This assistant has no websites or documents yet, so it can only answer from its instructions. Add knowledge first for a real test.',
+
     // Startup failure (App.tsx)
     'appBootstrap.loadFailed': 'Could not load the app',
     'appBootstrap.tryAgainHint': 'The server did not answer. Check your connection and try again.',
