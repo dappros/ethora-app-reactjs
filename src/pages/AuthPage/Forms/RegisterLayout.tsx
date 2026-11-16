@@ -6,7 +6,7 @@ import { useTranslation } from '../../../i18n/useTranslation';
 import { useAppStore } from '../../../store/useAppStore';
 import RegisterForm from '../Register/RegisterForm';
 import ThirdStep from '../Register/Steps/ThirdStep';
-import { inferOnboardingIntent, setOnboardingIntent } from '../../../utils/onboardingIntent';
+import { explicitOnboardingIntent, inferOnboardingIntent, setOnboardingIntent } from '../../../utils/onboardingIntent';
 
 interface SignUpFormProps {
   isMobile?: boolean;
@@ -26,11 +26,15 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ isMobile = false }) => {
   // used to switch to that step by index; the single-page form that replaced
   // it never did, so this route showed a plain Sign Up form.
   const isTempPassword = location.pathname.includes('tempPassword');
-  const intent = inferOnboardingIntent(new URLSearchParams(location.search));
+  const params = new URLSearchParams(location.search);
+  const intent = inferOnboardingIntent(params);
+  // ?intent= is what the visitor clicked on the website: the start screen
+  // then skips its chooser. The entry page only preselects a goal.
+  const explicit = Boolean(explicitOnboardingIntent(params));
 
   useEffect(() => {
-    if (!isTempPassword) setOnboardingIntent(intent);
-  }, [intent, isTempPassword]);
+    if (!isTempPassword) setOnboardingIntent(intent, explicit);
+  }, [intent, explicit, isTempPassword]);
 
   return (
     <Box

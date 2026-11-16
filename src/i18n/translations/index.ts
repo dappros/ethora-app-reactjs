@@ -18,6 +18,7 @@ import { modalsB } from './modalsB';
 import { modalsC } from './modalsC';
 import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
+import { onboarding } from './onboarding';
 import { startProject } from './startProject';
 import { trustSafety } from './trustSafety';
 import { tsHub } from './tsHub';
@@ -58,6 +59,7 @@ const dictionaries = [
   serverSettings,
   settingsTutorial,
   startProject,
+  onboarding,
   sharedComponents,
   userSettings,
   userSuspension,

@@ -343,12 +343,18 @@ export function httpGetOneUserWallet(wallet: string) {
   return http.get(`/users/profile/${wallet}`);
 }
 
-export function httpCreateNewApp(displayName: string) {
+export function httpCreateNewApp(displayName: string, extra?: { onboardingGoal?: string }) {
   // createDefaultChat: true preserves the admin-panel first-run UX (the
   // operator lands in a "Main chat" room after creation). The backend
   // default is OFF so external API callers get an empty app, but the
   // panel explicitly opts in here.
-  return http.post(`/apps`, { displayName, createDefaultChat: true });
+  return http.post(`/apps`, { displayName, createDefaultChat: true, ...(extra || {}) });
+}
+
+// Start screen: the goal picked, and the self-hosted page's "Talk to us"
+// (lands in the signup report as a lead).
+export function httpRecordOnboarding(body: { goal?: string; talkToUs?: boolean }) {
+  return httpV2.post('/users/me/onboarding', body);
 }
 
 export interface GetAppsPaginator {
