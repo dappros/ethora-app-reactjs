@@ -33,7 +33,7 @@ export function ApplicationPreview({ app, primaryColor, onChanged }: Props) {
   const { t } = useTranslation();
   const numberFormatter = new Intl.NumberFormat('en-US');
   const onClick = () => {
-    navigate(`/app/admin/apps/${app._id}/settings`, {
+    navigate(`/app/admin/apps/${app._id}`, {
       state: { from: location.pathname + location.search },
     });
   };
