@@ -3,8 +3,9 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // Trust & Safety (docs/TRUST_AND_SAFETY.md): the Server settings tab (TS_*
 // keys, presets, moderation service), the App's stricter-only overrides, the
 // Account > Age section, the content options of the Suspend dialog, the
-// Moderation queue and the age column of the Users page. English only for
-// now; the other locales fall back to it.
+// Moderation queue and the age column of the Users page. Complete in
+// English, French and Spanish; tests/unit/i18nCoverage.test.mjs keeps it that
+// way.
 //
 // The Server settings page looks its labels up generically
 // (serverSettings.key.<KEY>, serverSettings.desc.<KEY>,
@@ -12,12 +13,23 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // namespace. Placeholders ({name}, {value}, ...) are filled with
 // String.prototype.replace.
 
-const textActionOptions = (key: string) => ({
-  [`serverSettings.option.${key}.allow`]: 'Allow',
-  [`serverSettings.option.${key}.flag`]: 'Flag for review',
-  [`serverSettings.option.${key}.blur`]: 'Blur (tap to view)',
-  [`serverSettings.option.${key}.hide`]: 'Hide',
-});
+// The four actions of the text checks (offensive, severe, personal data,
+// health information), per language.
+const TEXT_ACTION_LABELS: Record<UiLanguageCode, Record<'allow' | 'flag' | 'blur' | 'hide', string>> = {
+  en: { allow: 'Allow', flag: 'Flag for review', blur: 'Blur (tap to view)', hide: 'Hide' },
+  fr: { allow: 'Autoriser', flag: 'Marquer pour examen', blur: 'Flouter (toucher pour voir)', hide: 'Masquer' },
+  es: { allow: 'Permitir', flag: 'Marcar para revisión', blur: 'Difuminar (tocar para ver)', hide: 'Ocultar' },
+};
+
+const textActionOptions = (key: string, lang: UiLanguageCode) => {
+  const l = TEXT_ACTION_LABELS[lang];
+  return {
+    [`serverSettings.option.${key}.allow`]: l.allow,
+    [`serverSettings.option.${key}.flag`]: l.flag,
+    [`serverSettings.option.${key}.blur`]: l.blur,
+    [`serverSettings.option.${key}.hide`]: l.hide,
+  };
+};
 
 const en: Record<string, string> = {
   // ---- Server settings ----
@@ -73,25 +85,25 @@ const en: Record<string, string> = {
     'Blurred media opens only for users who declared they are 18 or older. The sender always sees their own file.',
   'serverSettings.key.TS_TEXT_TOXICITY_ACTION': 'Offensive messages',
   'serverSettings.desc.TS_TEXT_TOXICITY_ACTION': 'Insults, obscene and toxic language.',
-  ...textActionOptions('TS_TEXT_TOXICITY_ACTION'),
+  ...textActionOptions('TS_TEXT_TOXICITY_ACTION', 'en'),
   'serverSettings.key.TS_TEXT_TOXICITY_THRESHOLD': 'Offensive threshold',
   'serverSettings.desc.TS_TEXT_TOXICITY_THRESHOLD':
     'Percent. The highest of the toxicity, obscenity and insult scores is compared with it.',
   'serverSettings.key.TS_TEXT_SEVERE_ACTION': 'Severe messages',
   'serverSettings.desc.TS_TEXT_SEVERE_ACTION':
     'Threats, attacks on identity, severe toxicity and sexually explicit text.',
-  ...textActionOptions('TS_TEXT_SEVERE_ACTION'),
+  ...textActionOptions('TS_TEXT_SEVERE_ACTION', 'en'),
   'serverSettings.key.TS_TEXT_SEVERE_THRESHOLD': 'Severe threshold',
   'serverSettings.desc.TS_TEXT_SEVERE_THRESHOLD': 'Percent. Lower catches more.',
   'serverSettings.key.TS_PII_ACTION': 'Personal data in messages',
   'serverSettings.desc.TS_PII_ACTION': 'Card numbers, bank accounts, ID numbers and the other types listed below.',
-  ...textActionOptions('TS_PII_ACTION'),
+  ...textActionOptions('TS_PII_ACTION', 'en'),
   'serverSettings.key.TS_PII_TYPES': 'Personal data types',
   'serverSettings.desc.TS_PII_TYPES':
     'Comma-separated. For example CREDIT_CARD, US_SSN, IBAN_CODE, PHONE_NUMBER, EMAIL_ADDRESS, IP_ADDRESS, LOCATION.',
   'serverSettings.key.TS_PHI_ACTION': 'Health information',
   'serverSettings.desc.TS_PHI_ACTION': 'A person named or identified next to a health term.',
-  ...textActionOptions('TS_PHI_ACTION'),
+  ...textActionOptions('TS_PHI_ACTION', 'en'),
   'serverSettings.key.TS_PHI_THRESHOLD': 'Health information threshold',
   'serverSettings.desc.TS_PHI_THRESHOLD': 'Percent. Lower catches more.',
   'serverSettings.key.TS_EVIDENCE_RETENTION_DAYS': 'Keep quarantined content for (days)',
@@ -383,8 +395,737 @@ const en: Record<string, string> = {
   'tsReveal.mutedHint': 'Shown greyscale and blurred.',
 };
 
+
+const fr: Record<string, string> = {
+  // ---- Server settings ----
+  'serverSettings.tab.safety': 'Trust & Safety',
+  'serverSettings.group.trustSafety': 'Trust & Safety',
+  'serverSettings.module.moderation': 'Service de modération',
+  'serverSettings.module.moderation.desc':
+    'Détecte la nudité, les textes offensants, les données personnelles et les informations de santé sur ce serveur. Aucun message ni aucune image ne quitte l’installation.',
+
+  'serverSettings.key.TS_ENABLED': 'Modération automatique',
+  'serverSettings.desc.TS_ENABLED':
+    'Vérifie les images, vidéos et messages des discussions avec le service de modération. Désactivée : rien n’est vérifié.',
+  'serverSettings.key.TS_PROFILE': 'Profil',
+  'serverSettings.desc.TS_PROFILE': 'Le dernier préréglage appliqué. Modifier une valeur manuellement le fait passer à Personnalisé.',
+  'serverSettings.option.TS_PROFILE.custom': 'Personnalisé',
+  'serverSettings.option.TS_PROFILE.business': 'Entreprise',
+  'serverSettings.option.TS_PROFILE.education': 'Éducation',
+  'serverSettings.option.TS_PROFILE.community': 'Communauté',
+  'serverSettings.option.TS_PROFILE.adult': 'Adultes',
+  'serverSettings.key.TS_IMAGE_NUDITY_ACTION': 'Images et vidéos contenant de la nudité',
+  'serverSettings.desc.TS_IMAGE_NUDITY_ACTION':
+    'Flouter : affiché flouté, s’ouvre au toucher. Retenir : seuls l’expéditeur et les modérateurs le voient jusqu’à ce qu’un modérateur l’approuve. Bloquer : l’envoi est refusé.',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.allow': 'Autoriser',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.blur': 'Flouter (toucher pour voir)',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.hold': 'Retenir pour examen',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.block': 'Refuser l’envoi',
+  'serverSettings.key.TS_IMAGE_NUDITY_THRESHOLD': 'Seuil de nudité',
+  'serverSettings.desc.TS_IMAGE_NUDITY_THRESHOLD':
+    'Score de détection (en pourcentage) à partir duquel l’action s’applique. Plus il est bas, plus le filtre détecte, avec davantage de faux positifs.',
+  // Image policy levels (section 12): the picker labels are under
+  // trustSafety.level.*; these are the setting rows it renders.
+  'serverSettings.key.TS_IMAGE_LEVEL': 'Niveau de la politique d’images',
+  'serverSettings.desc.TS_IMAGE_LEVEL':
+    'Personnalisé utilise l’action et le seuil de nudité. Les autres niveaux combinent trois détecteurs.',
+  'serverSettings.option.TS_IMAGE_LEVEL.custom': 'Personnalisé',
+  'serverSettings.option.TS_IMAGE_LEVEL.off': 'Désactivé',
+  'serverSettings.option.TS_IMAGE_LEVEL.relaxed': 'Souple',
+  'serverSettings.option.TS_IMAGE_LEVEL.standard': 'Standard',
+  'serverSettings.option.TS_IMAGE_LEVEL.strict': 'Strict',
+  'serverSettings.key.TS_IMAGE_EXPLICIT_NUDENET': 'Explicite : score NudeNet',
+  'serverSettings.desc.TS_IMAGE_EXPLICIT_NUDENET':
+    'Pourcentage. NudeNet recherche les parties du corps exposées. Une image est considérée comme explicite lorsque ce score et le score Falconsai sont tous deux atteints.',
+  'serverSettings.key.TS_IMAGE_EXPLICIT_FALCONSAI': 'Explicite : score Falconsai',
+  'serverSettings.desc.TS_IMAGE_EXPLICIT_FALCONSAI':
+    'Pourcentage. Falconsai évalue l’image entière. Exiger les deux scores évite que des photos de maillots de bain et de lingerie soient considérées comme explicites.',
+  'serverSettings.key.TS_IMAGE_REVEALING_FLAG': 'Suggestif : marquer à partir de (Standard)',
+  'serverSettings.desc.TS_IMAGE_REVEALING_FLAG':
+    'Pourcentage du score AdamCodd à partir duquel Standard envoie une image suggestive à la file de modération.',
+  'serverSettings.key.TS_IMAGE_REVEALING_BLUR': 'Suggestif : flouter à partir de (Strict)',
+  'serverSettings.desc.TS_IMAGE_REVEALING_BLUR': 'Pourcentage du score AdamCodd à partir duquel Strict floute une image suggestive.',
+  'serverSettings.key.TS_AGE_GATE': 'Contrôle de l’âge',
+  'serverSettings.desc.TS_AGE_GATE':
+    'Les médias floutés ne s’ouvrent que pour les utilisateurs ayant déclaré avoir 18 ans ou plus. L’expéditeur voit toujours son propre fichier.',
+  'serverSettings.key.TS_TEXT_TOXICITY_ACTION': 'Messages offensants',
+  'serverSettings.desc.TS_TEXT_TOXICITY_ACTION': 'Insultes, propos obscènes et toxiques.',
+  ...textActionOptions('TS_TEXT_TOXICITY_ACTION', 'fr'),
+  'serverSettings.key.TS_TEXT_TOXICITY_THRESHOLD': 'Seuil des messages offensants',
+  'serverSettings.desc.TS_TEXT_TOXICITY_THRESHOLD':
+    'Pourcentage. Le plus élevé des scores de toxicité, d’obscénité et d’insulte lui est comparé.',
+  'serverSettings.key.TS_TEXT_SEVERE_ACTION': 'Messages graves',
+  'serverSettings.desc.TS_TEXT_SEVERE_ACTION':
+    'Menaces, attaques identitaires, toxicité grave et textes sexuellement explicites.',
+  ...textActionOptions('TS_TEXT_SEVERE_ACTION', 'fr'),
+  'serverSettings.key.TS_TEXT_SEVERE_THRESHOLD': 'Seuil des messages graves',
+  'serverSettings.desc.TS_TEXT_SEVERE_THRESHOLD': 'Pourcentage. Plus il est bas, plus le filtre détecte.',
+  'serverSettings.key.TS_PII_ACTION': 'Données personnelles dans les messages',
+  'serverSettings.desc.TS_PII_ACTION': 'Numéros de carte, comptes bancaires, numéros d’identité et les autres types indiqués ci-dessous.',
+  ...textActionOptions('TS_PII_ACTION', 'fr'),
+  'serverSettings.key.TS_PII_TYPES': 'Types de données personnelles',
+  'serverSettings.desc.TS_PII_TYPES':
+    'Séparés par des virgules. Par exemple CREDIT_CARD, US_SSN, IBAN_CODE, PHONE_NUMBER, EMAIL_ADDRESS, IP_ADDRESS, LOCATION.',
+  'serverSettings.key.TS_PHI_ACTION': 'Informations de santé',
+  'serverSettings.desc.TS_PHI_ACTION': 'Une personne nommée ou identifiée à côté d’un terme lié à la santé.',
+  ...textActionOptions('TS_PHI_ACTION', 'fr'),
+  'serverSettings.key.TS_PHI_THRESHOLD': 'Seuil des informations de santé',
+  'serverSettings.desc.TS_PHI_THRESHOLD': 'Pourcentage. Plus il est bas, plus le filtre détecte.',
+  'serverSettings.key.TS_EVIDENCE_RETENTION_DAYS': 'Conserver le contenu en quarantaine pendant (jours)',
+  'serverSettings.desc.TS_EVIDENCE_RETENTION_DAYS':
+    'Le contenu en quarantaine et les originaux des messages masqués sont supprimés après ce nombre de jours.',
+  // Messages their authors delete (applies whether or not automatic
+  // moderation is on).
+  'serverSettings.key.TS_DELETED_CONTENT_MODE': 'Quand un utilisateur supprime un message',
+  'serverSettings.desc.TS_DELETED_CONTENT_MODE':
+    'Supprimer : le message et ses fichiers sont retirés immédiatement. Quarantaine : les messages supprimés et leurs fichiers sont masqués pour tous, mais conservés pendant le nombre de jours défini ci-dessous, à des fins de conformité ou d’enquête, puis retirés.',
+  'serverSettings.option.TS_DELETED_CONTENT_MODE.delete': 'Supprimer',
+  'serverSettings.option.TS_DELETED_CONTENT_MODE.quarantine': 'Quarantaine',
+  'serverSettings.key.TS_DELETED_CONTENT_RETENTION_DAYS': 'Conserver les messages supprimés pendant (jours)',
+  'serverSettings.desc.TS_DELETED_CONTENT_RETENTION_DAYS':
+    'Quarantaine seulement. Les messages supprimés et leurs fichiers sont masqués pour tous, mais conservés pendant ce nombre de jours à des fins de conformité ou d’enquête, puis retirés.',
+  'serverSettings.key.TS_DESCRIBE_MEDIA': 'Décrire les médias marqués pour les examinateurs',
+  'serverSettings.desc.TS_DESCRIBE_MEDIA':
+    'Une courte description générée par IA des médias floutés, retenus, marqués pour examen, masqués ou en quarantaine, pour que les examinateurs puissent les trier avant de les ouvrir. S’exécute sur ce serveur et nécessite un modèle de description dans le service de modération. Jamais utilisée pour les fichiers chiffrés de bout en bout.',
+
+  'trustSafety.percent': '%',
+  'trustSafety.presets.title': 'Partir d’un préréglage',
+  'trustSafety.presets.intro': 'Un préréglage remplit les valeurs ci-dessous. Vérifiez-les, puis enregistrez.',
+  'trustSafety.presets.current': 'Actuel',
+  'trustSafety.presets.applied': 'Valeurs du préréglage {preset} remplies. Enregistrez pour les appliquer.',
+  'trustSafety.preset.business': 'Entreprise',
+  'trustSafety.preset.business.desc':
+    'Discussions professionnelles : nudité bloquée, textes offensants floutés, coordonnées et informations de santé floutées.',
+  'trustSafety.preset.education': 'Éducation',
+  'trustSafety.preset.education.desc':
+    'Écoles et jeunes utilisateurs : les filtres les plus stricts, avec les textes offensants et les données personnelles masqués.',
+  'trustSafety.preset.community': 'Communauté',
+  'trustSafety.preset.community.desc':
+    'Communautés publiques : nudité et textes offensants floutés, textes graves masqués, données personnelles marquées pour examen.',
+  'trustSafety.preset.adult': 'Adultes',
+  'trustSafety.preset.adult.desc':
+    'Plateformes pour adultes : nudité autorisée derrière le contrôle de l’âge, textes offensants seulement marqués pour examen.',
+  'trustSafety.presets.adultNote':
+    'Le préréglage Adultes est destiné aux plateformes pour adultes autohébergées dont les utilisateurs sont des adultes vérifiés.',
+  'trustSafety.level.title': 'Images et vidéos',
+  'trustSafety.level.intro':
+    'Le traitement des fichiers téléversés dans les discussions. Les niveaux combinent trois détecteurs qui s’exécutent sur ce serveur : NudeNet, Falconsai et AdamCodd.',
+  'trustSafety.level.off': 'Désactivé',
+  'trustSafety.level.off.desc': 'Les images et vidéos ne sont pas filtrées.',
+  'trustSafety.level.relaxed': 'Souple',
+  'trustSafety.level.relaxed.desc': 'La nudité explicite est floutée; les spectateurs doivent confirmer qu’ils ont 18 ans ou plus.',
+  'trustSafety.level.standard': 'Standard',
+  'trustSafety.level.standard.desc': 'La nudité explicite est floutée; les images suggestives sont envoyées à la file de modération.',
+  'trustSafety.level.strict': 'Strict',
+  'trustSafety.level.strict.desc': 'La nudité explicite est refusée; les images suggestives sont floutées.',
+  'trustSafety.level.custom': 'Personnalisé',
+  'trustSafety.level.custom.desc': 'Choisissez vous-même l’action et le seuil de nudité.',
+  'trustSafety.level.col.level': 'Niveau',
+  'trustSafety.level.col.explicit': 'Nudité explicite',
+  'trustSafety.level.col.revealing': 'Images suggestives',
+  'trustSafety.levelRule.allow': 'Autorisé',
+  'trustSafety.levelRule.blurAge': 'Flouté, réservé aux 18 ans et plus',
+  'trustSafety.levelRule.flag': 'Affiché, envoyé à la file de modération',
+  'trustSafety.levelRule.block': 'Envoi refusé',
+  'trustSafety.levelRule.blur': 'Flouté',
+  'trustSafety.level.ruleNote':
+    'Explicite : NudeNet et Falconsai atteignent tous deux leur seuil. Suggestif : maillots de bain, lingerie et photos semblables, évalués par AdamCodd.',
+  'trustSafety.level.customNote':
+    'Personnalisé applique l’action ci-dessous aux images dont le score de nudité NudeNet atteint le seuil. Les images suggestives ne sont pas vérifiées.',
+  'trustSafety.level.advanced': 'Seuils avancés',
+  'trustSafety.level.advancedIntro':
+    'Les scores utilisés par les niveaux, en pourcentage. Les valeurs par défaut proviennent de tests sur des photos du quotidien, de maillots de bain et de lingerie; des valeurs plus basses détectent davantage et se trompent plus souvent.',
+  'trustSafety.service.note':
+    'La détection nécessite le service de modération, activé dans deploy.yml (services.moderation) ou avec le profil « ts » du bundle compose. Tant qu’il ne fonctionne pas, les fichiers téléversés et les messages ne sont pas vérifiés.',
+
+  'trustSafety.action.allow': 'Autoriser',
+  'trustSafety.action.flag': 'Marquer pour examen',
+  'trustSafety.action.blur': 'Flouter',
+  'trustSafety.action.hold': 'Retenir pour examen',
+  'trustSafety.action.hide': 'Masquer',
+  'trustSafety.action.block': 'Bloquer',
+
+  // ---- App settings ----
+  'trustSafetyApp.tab': 'Trust & Safety',
+  'trustSafetyApp.heading': 'Trust & Safety',
+  'trustSafetyApp.description':
+    'Rendez la politique du serveur plus stricte pour cette application. Rien ici ne peut la rendre plus permissive que le paramètre du serveur; les options qui le feraient sont désactivées.',
+  'trustSafetyApp.disabledNote':
+    'La modération automatique est désactivée sur ce serveur. Les valeurs enregistrées ici s’appliqueront dès qu’un administrateur du serveur l’activera.',
+  'trustSafetyApp.loadFailed': 'Impossible de charger la politique du serveur : {error}',
+  'trustSafetyApp.noInstall':
+    'Les valeurs du serveur ne sont pas disponibles, donc les options plus permissives ne sont pas signalées ici. Le serveur les refuse quand même.',
+  'trustSafetyApp.row.imageLevel': 'Niveau de la politique d’images',
+  'trustSafetyApp.row.imageLevel.desc': 'Fichiers téléversés dans les discussions de cette application. Seul un niveau plus strict que celui du serveur peut être choisi.',
+  'trustSafetyApp.levelLabel': 'Niveau',
+  'trustSafetyApp.levelOverCustom':
+    'Le serveur utilise une règle de nudité personnalisée. Un niveau choisi ici s’applique aussi, et le résultat le plus strict l’emporte.',
+  'trustSafetyApp.row.nudity': 'Images et vidéos contenant de la nudité',
+  'trustSafetyApp.row.nudity.desc': 'Fichiers téléversés dans les discussions de cette application.',
+  'trustSafetyApp.row.toxicity': 'Messages offensants',
+  'trustSafetyApp.row.toxicity.desc': 'Insultes, propos obscènes et toxiques.',
+  'trustSafetyApp.row.severe': 'Messages graves',
+  'trustSafetyApp.row.severe.desc': 'Menaces, attaques identitaires, toxicité grave et textes sexuellement explicites.',
+  'trustSafetyApp.row.pii': 'Données personnelles dans les messages',
+  'trustSafetyApp.row.pii.desc': 'Les types de données personnelles choisis dans les paramètres du serveur.',
+  'trustSafetyApp.row.phi': 'Informations de santé',
+  'trustSafetyApp.row.phi.desc': 'Une personne nommée ou identifiée à côté d’un terme lié à la santé.',
+  'trustSafetyApp.actionLabel': 'Action',
+  'trustSafetyApp.thresholdLabel': 'Seuil (%)',
+  'trustSafetyApp.followServer': 'Comme le serveur ({value})',
+  'trustSafetyApp.followServerUnknown': 'Comme le serveur',
+  'trustSafetyApp.serverValue': 'Serveur : {value}',
+  'trustSafetyApp.thresholdHelp': 'Plus il est bas, plus c’est strict. Laissez vide pour utiliser la valeur du serveur ({value}).',
+  'trustSafetyApp.thresholdTooHigh': 'Au plus {max}, la valeur du serveur.',
+  'trustSafetyApp.thresholdInvalid': 'Un nombre entier de 1 à 100.',
+  'trustSafetyApp.looser': 'Plus permissif que le paramètre du serveur',
+  'trustSafetyApp.inEffect': 'En vigueur : {value}',
+  'trustSafetyApp.invalidToast': 'Corrigez les valeurs Trust & Safety indiquées en rouge avant d’enregistrer.',
+
+  // ---- Account > Age ----
+  'trustSafetyAge.heading': 'Âge',
+  'trustSafetyAge.intro':
+    'Les médias marqués comme sensibles ne s’ouvrent que pour les personnes ayant déclaré avoir 18 ans ou plus.',
+  'trustSafetyAge.privacy': 'Seule votre année de naissance est conservée, pas votre date de naissance complète.',
+  'trustSafetyAge.notDeclared': 'Vous n’avez pas déclaré votre âge.',
+  'trustSafetyAge.adult': '18 ans ou plus',
+  'trustSafetyAge.minor': 'Moins de 18 ans',
+  'trustSafetyAge.birthYear': 'Année de naissance {year}',
+  'trustSafetyAge.declaredAt': 'Déclaré le {date}',
+  'trustSafetyAge.dobLabel': 'Date de naissance',
+  'trustSafetyAge.save': 'Enregistrer',
+  'trustSafetyAge.change': 'Modifier',
+  'trustSafetyAge.cancel': 'Annuler',
+  'trustSafetyAge.saving': 'Enregistrement...',
+  'trustSafetyAge.saved': 'Âge enregistré.',
+  'trustSafetyAge.failed': 'Impossible d’enregistrer votre âge : {error}',
+  'trustSafetyAge.loadFailed': 'Impossible de charger votre âge : {error}',
+  'trustSafetyAge.invalidDate': 'Entrez une date de naissance valide dans le passé.',
+  'trustSafetyAge.locked':
+    'Vous avez déclaré avoir moins de 18 ans, vous ne pouvez donc pas modifier ce renseignement vous-même. En cas d’erreur, contactez le soutien.',
+  'trustSafetyAge.contact': 'Contacter le soutien',
+
+  // ---- Suspend dialog ----
+  'trustSafetySuspend.contentHeading': 'Contenu de ce compte',
+  'trustSafetySuspend.messagesLabel': 'Messages',
+  'trustSafetySuspend.messagesHelp': 'Messages envoyés par ce compte dans les discussions de l’application.',
+  'trustSafetySuspend.mediaLabel': 'Médias',
+  'trustSafetySuspend.mediaHelp': 'Images, vidéos et fichiers téléversés par ce compte dans les discussions.',
+  'trustSafetySuspend.nameLabel': 'Nom',
+  'trustSafetySuspend.nameHelp':
+    'Les autres voient « Compte suspendu » sans avatar au lieu du nom, jusqu’à la levée de la suspension.',
+  'trustSafetySuspend.mode.keep': 'Conserver tel quel',
+  'trustSafetySuspend.mode.hide': 'Masquer (restauré à la levée de la suspension)',
+  'trustSafetySuspend.mode.quarantine': 'Quarantaine (masqué, conservé en quarantaine, supprimé après la période de conservation)',
+  'trustSafetySuspend.mode.delete': 'Supprimer',
+  'trustSafetySuspend.name.keep': 'Conserver',
+  'trustSafetySuspend.name.suspended': 'Afficher « Compte suspendu »',
+  'trustSafetySuspend.deleteWarning':
+    'La suppression est irréversible. Le contenu reste supprimé même si la suspension est levée.',
+
+  // ---- Moderation queue ----
+  'trustSafetyModeration.tab': 'Modération',
+  'trustSafetyModeration.title': 'Modération',
+  'trustSafetyModeration.intro':
+    'Messages et médias marqués par les vérifications automatiques ou par les modérateurs. Le texte marqué n’est montré qu’aux modérateurs.',
+  'trustSafetyModeration.filter.status': 'Statut',
+  'trustSafetyModeration.filter.kind': 'Type',
+  'trustSafetyModeration.filter.category': 'Catégorie',
+  'trustSafetyModeration.status.open': 'Ouvert',
+  'trustSafetyModeration.status.resolved': 'Résolu',
+  'trustSafetyModeration.kind.all': 'Tous les types',
+  'trustSafetyModeration.kind.message': 'Message',
+  'trustSafetyModeration.kind.media': 'Média',
+  'trustSafetyModeration.category.all': 'Toutes les catégories',
+  'trustSafetyModeration.category.nudity': 'Nudité',
+  'trustSafetyModeration.category.revealing': 'Suggestif',
+  'trustSafetyModeration.signals': 'Signaux',
+  'trustSafetyModeration.signal.nudenet': 'NudeNet',
+  'trustSafetyModeration.signal.falconsai': 'Falconsai',
+  'trustSafetyModeration.signal.adamcodd': 'AdamCodd',
+  'trustSafetyModeration.signalNotRun': 'non exécuté',
+  'trustSafetyModeration.signalsHelp':
+    'NudeNet : parties du corps exposées. Falconsai : image explicite. AdamCodd : image suggestive. En pourcentage.',
+  'trustSafetyModeration.category.toxicity': 'Offensant',
+  'trustSafetyModeration.category.severe': 'Grave',
+  'trustSafetyModeration.category.pii': 'Données personnelles',
+  'trustSafetyModeration.category.phi': 'Informations de santé',
+  'trustSafetyModeration.category.suspension': 'Suspension',
+  'trustSafetyModeration.col.sender': 'Expéditeur',
+  'trustSafetyModeration.col.room': 'Discussion',
+  'trustSafetyModeration.col.time': 'Heure',
+  'trustSafetyModeration.col.autoAction': 'Appliqué',
+  'trustSafetyModeration.applied.flag': 'Marqué pour examen',
+  'trustSafetyModeration.applied.blur': 'Flouté',
+  'trustSafetyModeration.applied.hold': 'Retenu',
+  'trustSafetyModeration.applied.hide': 'Masqué',
+  'trustSafetyModeration.applied.hidden': 'Masqué',
+  'trustSafetyModeration.applied.block': 'Bloqué',
+  'trustSafetyModeration.applied.delete': 'Supprimé',
+  'trustSafetyModeration.applied.deleted': 'Supprimé',
+  'trustSafetyModeration.source.auto': 'automatique',
+  'trustSafetyModeration.source.moderator': 'par un modérateur',
+  'trustSafetyModeration.source.report': 'signalé',
+  'trustSafetyModeration.itemStatus.open': 'Ouvert',
+  'trustSafetyModeration.itemStatus.approved': 'Approuvé',
+  'trustSafetyModeration.itemStatus.removed': 'Retiré',
+  'trustSafetyModeration.itemStatus.dismissed': 'Classé sans suite',
+  'trustSafetyModeration.action.approve': 'Approuver',
+  'trustSafetyModeration.action.approveTitle': 'Publier le fichier retenu dans la discussion',
+  'trustSafetyModeration.action.dismiss': 'Classer sans suite',
+  'trustSafetyModeration.action.dismissTitle': 'Fermer l’élément et laisser le contenu tel quel',
+  'trustSafetyModeration.action.blur': 'Flouter',
+  'trustSafetyModeration.action.blurTitle': 'L’afficher replié; les lecteurs touchent pour voir',
+  'trustSafetyModeration.action.hide': 'Masquer',
+  'trustSafetyModeration.action.hideTitle': 'Le masquer pour tous; l’original est conservé en quarantaine',
+  'trustSafetyModeration.action.delete': 'Supprimer',
+  'trustSafetyModeration.action.deleteTitle': 'Le supprimer pour tous; action irréversible',
+  'trustSafetyModeration.action.restore': 'Restaurer',
+  'trustSafetyModeration.action.restoreTitle': 'Afficher de nouveau le contenu original',
+  'trustSafetyModeration.suspendSender': 'Suspendre l’expéditeur',
+  'trustSafetyModeration.deleteConfirmTitle': 'Supprimer ce contenu?',
+  'trustSafetyModeration.deleteConfirmMessage':
+    'Le message ou le fichier est retiré pour tous. Cette action est irréversible.',
+  'trustSafetyModeration.actionDone': 'Action effectuée : {action}.',
+  'trustSafetyModeration.actionFailed': 'Échec de l’action : {error}',
+  'trustSafetyModeration.empty': 'Rien à examiner.',
+  'trustSafetyModeration.emptyResolved': 'Aucun élément résolu pour l’instant.',
+  'trustSafetyModeration.loadFailed': 'Impossible de charger la file : {error}',
+  'trustSafetyModeration.unavailable': 'La file de modération n’est pas encore disponible sur ce serveur.',
+  'trustSafetyModeration.loading': 'Chargement...',
+  'trustSafetyModeration.refresh': 'Actualiser',
+  'trustSafetyModeration.previous': 'Précédent',
+  'trustSafetyModeration.next': 'Suivant',
+  'trustSafetyModeration.range': '{from} à {to} sur {total}',
+  'trustSafetyModeration.rangeOpen': '{from} à {to}',
+  'trustSafetyModeration.noText': 'Aucun texte conservé',
+  'trustSafetyModeration.noPreview': 'Aucun aperçu',
+  // Media outside a chat (section 17): where it came from, and refused uploads.
+  'trustSafetyModeration.surface.profile': 'Photo de profil',
+  'trustSafetyModeration.surface.upload': 'Fichier téléversé',
+  'trustSafetyModeration.surface.chat-media': 'Média de discussion (téléversé par l’API)',
+  'trustSafetyModeration.refusedNotStored': 'Refusé au téléversement - rien n’a été stocké',
+  'trustSafetyModeration.unknownSender': 'Expéditeur inconnu',
+  'trustSafetyModeration.resolvedAt': 'Résolu le {date}',
+  'trustSafetyModeration.piiTypes': 'Types : {types}',
+  'trustSafetyModeration.serviceOff':
+    'La modération automatique est désactivée sur ce serveur : seuls les éléments ajoutés par les modérateurs ou par des vérifications antérieures apparaissent ici.',
+
+  // ---- Users page ----
+  'trustSafetyUsers.col': 'Âge',
+  'trustSafetyUsers.adult': '18+',
+  'trustSafetyUsers.minor': 'Moins de 18 ans',
+  'trustSafetyUsers.unknown': 'Inconnu',
+  'trustSafetyUsers.tooltip': 'Année de naissance {year}. Déclaré le {date}.',
+  'trustSafetyUsers.tooltipAdmin': 'Défini par un administrateur.',
+  'trustSafetyUsers.reset': 'Réinitialiser l’âge',
+  'trustSafetyUsers.resetTitle': 'Effacer l’âge déclaré pour que l’utilisateur le déclare de nouveau',
+  'trustSafetyUsers.resetConfirmTitle': 'Réinitialiser l’âge de {name}?',
+  'trustSafetyUsers.resetConfirmMessage':
+    'L’âge déclaré est effacé. L’utilisateur devra le déclarer de nouveau la prochaine fois que l’âge sera nécessaire, et pourra alors déclarer 18 ans ou plus.',
+  'trustSafetyUsers.resetDone': 'Âge réinitialisé.',
+  'trustSafetyUsers.resetFailedPrefix': 'Échec de la réinitialisation de l’âge :',
+
+  // ---- Reviewer protection (section 14): signal summary and safer reveal ----
+  // Shared by T&S > Quarantine (case media) and the Moderation queues.
+  'tsSignals.explicitLikely': 'Nudité explicite probable ({labels})',
+  'tsSignals.explicitPossible': 'Nudité explicite possible ({labels})',
+  'tsSignals.nudenet': 'Détecteur de nudité explicite {score} %',
+  'tsSignals.suggestive': 'Suggestif ou partiellement couvert ({labels})',
+  'tsSignals.revealing': 'Contenu suggestif ou érotique {score} %',
+  'tsSignals.falconsai': 'Classificateur de contenu explicite {score} %',
+  'tsSignals.category': 'Marqué comme {category} {score} %',
+  'tsSignals.low': 'Aucun signal sensible',
+  'tsSignals.none': 'Aucune vérification automatique enregistrée',
+  'tsSignals.error': 'La vérification automatique a échoué',
+  'tsSignals.description': 'Description par IA (peut être erronée) : {text}',
+  'tsSignals.summaryLabel': 'Résumé des signaux',
+  // NudeNet body-part labels in plain words.
+  'tsSignals.label.FEMALE_GENITALIA_EXPOSED': 'organes génitaux féminins exposés',
+  'tsSignals.label.MALE_GENITALIA_EXPOSED': 'organes génitaux masculins exposés',
+  'tsSignals.label.FEMALE_BREAST_EXPOSED': 'poitrine exposée',
+  'tsSignals.label.BUTTOCKS_EXPOSED': 'fesses exposées',
+  'tsSignals.label.ANUS_EXPOSED': 'anus exposé',
+  'tsSignals.label.FEMALE_GENITALIA_COVERED': 'organes génitaux couverts',
+  'tsSignals.label.FEMALE_BREAST_COVERED': 'poitrine couverte',
+  'tsSignals.label.BUTTOCKS_COVERED': 'fesses couvertes',
+  'tsSignals.label.ANUS_COVERED': 'anus couvert',
+  'tsSignals.label.BELLY_EXPOSED': 'ventre nu',
+  'tsSignals.label.MALE_BREAST_EXPOSED': 'torse masculin nu',
+  'tsReveal.show': 'Afficher',
+  'tsReveal.showClearly': 'Afficher en clair',
+  'tsReveal.blurAgain': 'Flouter de nouveau',
+  'tsReveal.hide': 'Masquer',
+  'tsReveal.notShown': 'Non affiché',
+  'tsReveal.mutedHint': 'Affiché en niveaux de gris et flouté.',
+};
+
+const es: Record<string, string> = {
+  // ---- Server settings ----
+  'serverSettings.tab.safety': 'Trust & Safety',
+  'serverSettings.group.trustSafety': 'Trust & Safety',
+  'serverSettings.module.moderation': 'Servicio de moderación',
+  'serverSettings.module.moderation.desc':
+    'Detecta desnudez, texto ofensivo, datos personales e información de salud en este servidor. Ningún mensaje ni imagen sale de la instalación.',
+
+  'serverSettings.key.TS_ENABLED': 'Moderación automática',
+  'serverSettings.desc.TS_ENABLED':
+    'Revisa las imágenes, los videos y los mensajes de los chats con el servicio de moderación. Desactivada: no se revisa nada.',
+  'serverSettings.key.TS_PROFILE': 'Perfil',
+  'serverSettings.desc.TS_PROFILE': 'El último ajuste predefinido aplicado. Cambiar un valor a mano lo convierte en Personalizado.',
+  'serverSettings.option.TS_PROFILE.custom': 'Personalizado',
+  'serverSettings.option.TS_PROFILE.business': 'Empresa',
+  'serverSettings.option.TS_PROFILE.education': 'Educación',
+  'serverSettings.option.TS_PROFILE.community': 'Comunidad',
+  'serverSettings.option.TS_PROFILE.adult': 'Adultos',
+  'serverSettings.key.TS_IMAGE_NUDITY_ACTION': 'Imágenes y videos con desnudez',
+  'serverSettings.desc.TS_IMAGE_NUDITY_ACTION':
+    'Difuminar: se muestra difuminado y se abre al tocarlo. Retener: solo el remitente y los moderadores lo ven hasta que un moderador lo aprueba. Bloquear: la subida se rechaza.',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.allow': 'Permitir',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.blur': 'Difuminar (tocar para ver)',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.hold': 'Retener para revisión',
+  'serverSettings.option.TS_IMAGE_NUDITY_ACTION.block': 'Rechazar la subida',
+  'serverSettings.key.TS_IMAGE_NUDITY_THRESHOLD': 'Umbral de desnudez',
+  'serverSettings.desc.TS_IMAGE_NUDITY_THRESHOLD':
+    'Puntuación de detección (en porcentaje) a partir de la cual se aplica la acción. Cuanto más bajo, más detecta, con más falsos positivos.',
+  // Image policy levels (section 12): the picker labels are under
+  // trustSafety.level.*; these are the setting rows it renders.
+  'serverSettings.key.TS_IMAGE_LEVEL': 'Nivel de la política de imágenes',
+  'serverSettings.desc.TS_IMAGE_LEVEL':
+    'Personalizado usa la acción y el umbral de desnudez. Los demás niveles combinan tres detectores.',
+  'serverSettings.option.TS_IMAGE_LEVEL.custom': 'Personalizado',
+  'serverSettings.option.TS_IMAGE_LEVEL.off': 'Desactivado',
+  'serverSettings.option.TS_IMAGE_LEVEL.relaxed': 'Flexible',
+  'serverSettings.option.TS_IMAGE_LEVEL.standard': 'Estándar',
+  'serverSettings.option.TS_IMAGE_LEVEL.strict': 'Estricto',
+  'serverSettings.key.TS_IMAGE_EXPLICIT_NUDENET': 'Explícito: puntuación de NudeNet',
+  'serverSettings.desc.TS_IMAGE_EXPLICIT_NUDENET':
+    'Porcentaje. NudeNet busca partes del cuerpo expuestas. Una imagen se considera explícita cuando se alcanzan tanto esta puntuación como la de Falconsai.',
+  'serverSettings.key.TS_IMAGE_EXPLICIT_FALCONSAI': 'Explícito: puntuación de Falconsai',
+  'serverSettings.desc.TS_IMAGE_EXPLICIT_FALCONSAI':
+    'Porcentaje. Falconsai evalúa la imagen completa. Exigir ambas puntuaciones evita que las fotos en traje de baño o lencería se consideren explícitas.',
+  'serverSettings.key.TS_IMAGE_REVEALING_FLAG': 'Sugerente: marcar desde (Estándar)',
+  'serverSettings.desc.TS_IMAGE_REVEALING_FLAG':
+    'Porcentaje de la puntuación de AdamCodd a partir del cual Estándar envía una imagen sugerente a la cola de moderación.',
+  'serverSettings.key.TS_IMAGE_REVEALING_BLUR': 'Sugerente: difuminar desde (Estricto)',
+  'serverSettings.desc.TS_IMAGE_REVEALING_BLUR': 'Porcentaje de la puntuación de AdamCodd a partir del cual Estricto difumina una imagen sugerente.',
+  'serverSettings.key.TS_AGE_GATE': 'Verificación de edad',
+  'serverSettings.desc.TS_AGE_GATE':
+    'El contenido multimedia difuminado solo se abre para usuarios que declararon tener 18 años o más. El remitente siempre ve su propio archivo.',
+  'serverSettings.key.TS_TEXT_TOXICITY_ACTION': 'Mensajes ofensivos',
+  'serverSettings.desc.TS_TEXT_TOXICITY_ACTION': 'Insultos, lenguaje obsceno y tóxico.',
+  ...textActionOptions('TS_TEXT_TOXICITY_ACTION', 'es'),
+  'serverSettings.key.TS_TEXT_TOXICITY_THRESHOLD': 'Umbral de mensajes ofensivos',
+  'serverSettings.desc.TS_TEXT_TOXICITY_THRESHOLD':
+    'Porcentaje. Se compara con la más alta de las puntuaciones de toxicidad, obscenidad e insulto.',
+  'serverSettings.key.TS_TEXT_SEVERE_ACTION': 'Mensajes graves',
+  'serverSettings.desc.TS_TEXT_SEVERE_ACTION':
+    'Amenazas, ataques a la identidad, toxicidad grave y texto sexualmente explícito.',
+  ...textActionOptions('TS_TEXT_SEVERE_ACTION', 'es'),
+  'serverSettings.key.TS_TEXT_SEVERE_THRESHOLD': 'Umbral de mensajes graves',
+  'serverSettings.desc.TS_TEXT_SEVERE_THRESHOLD': 'Porcentaje. Cuanto más bajo, más detecta.',
+  'serverSettings.key.TS_PII_ACTION': 'Datos personales en los mensajes',
+  'serverSettings.desc.TS_PII_ACTION': 'Números de tarjeta, cuentas bancarias, números de identificación y los demás tipos que se indican abajo.',
+  ...textActionOptions('TS_PII_ACTION', 'es'),
+  'serverSettings.key.TS_PII_TYPES': 'Tipos de datos personales',
+  'serverSettings.desc.TS_PII_TYPES':
+    'Separados por comas. Por ejemplo CREDIT_CARD, US_SSN, IBAN_CODE, PHONE_NUMBER, EMAIL_ADDRESS, IP_ADDRESS, LOCATION.',
+  'serverSettings.key.TS_PHI_ACTION': 'Información de salud',
+  'serverSettings.desc.TS_PHI_ACTION': 'Una persona nombrada o identificada junto a un término de salud.',
+  ...textActionOptions('TS_PHI_ACTION', 'es'),
+  'serverSettings.key.TS_PHI_THRESHOLD': 'Umbral de información de salud',
+  'serverSettings.desc.TS_PHI_THRESHOLD': 'Porcentaje. Cuanto más bajo, más detecta.',
+  'serverSettings.key.TS_EVIDENCE_RETENTION_DAYS': 'Conservar el contenido en cuarentena durante (días)',
+  'serverSettings.desc.TS_EVIDENCE_RETENTION_DAYS':
+    'El contenido en cuarentena y los originales de los mensajes ocultos se eliminan después de esta cantidad de días.',
+  // Messages their authors delete (applies whether or not automatic
+  // moderation is on).
+  'serverSettings.key.TS_DELETED_CONTENT_MODE': 'Cuando un usuario elimina un mensaje',
+  'serverSettings.desc.TS_DELETED_CONTENT_MODE':
+    'Eliminar: el mensaje y sus archivos se borran de inmediato. Cuarentena: los mensajes eliminados y sus archivos se ocultan para todos, pero se conservan durante la cantidad de días indicada abajo, por cumplimiento normativo o investigaciones, y luego se borran.',
+  'serverSettings.option.TS_DELETED_CONTENT_MODE.delete': 'Eliminar',
+  'serverSettings.option.TS_DELETED_CONTENT_MODE.quarantine': 'Cuarentena',
+  'serverSettings.key.TS_DELETED_CONTENT_RETENTION_DAYS': 'Conservar los mensajes eliminados durante (días)',
+  'serverSettings.desc.TS_DELETED_CONTENT_RETENTION_DAYS':
+    'Solo con Cuarentena. Los mensajes eliminados y sus archivos se ocultan para todos, pero se conservan durante esta cantidad de días por cumplimiento normativo o investigaciones, y luego se borran.',
+  'serverSettings.key.TS_DESCRIBE_MEDIA': 'Describir el contenido multimedia marcado para los revisores',
+  'serverSettings.desc.TS_DESCRIBE_MEDIA':
+    'Una breve descripción generada por IA del contenido multimedia difuminado, retenido, marcado, oculto o en cuarentena, para que los revisores puedan clasificarlo antes de abrirlo. Se ejecuta en este servidor y requiere un modelo de descripción en el servicio de moderación. Nunca se usa con archivos cifrados de extremo a extremo.',
+
+  'trustSafety.percent': '%',
+  'trustSafety.presets.title': 'Empezar desde un ajuste predefinido',
+  'trustSafety.presets.intro': 'Un ajuste predefinido completa los valores de abajo. Revísalos y luego guarda.',
+  'trustSafety.presets.current': 'Actual',
+  'trustSafety.presets.applied': 'Valores de {preset} completados. Guarda para aplicarlos.',
+  'trustSafety.preset.business': 'Empresa',
+  'trustSafety.preset.business.desc':
+    'Chat de trabajo: desnudez bloqueada, texto ofensivo difuminado, datos de contacto e información de salud difuminados.',
+  'trustSafety.preset.education': 'Educación',
+  'trustSafety.preset.education.desc':
+    'Escuelas y usuarios jóvenes: los filtros más estrictos, con texto ofensivo y datos personales ocultos.',
+  'trustSafety.preset.community': 'Comunidad',
+  'trustSafety.preset.community.desc':
+    'Comunidades públicas: desnudez y texto ofensivo difuminados, texto grave oculto, datos personales marcados para revisión.',
+  'trustSafety.preset.adult': 'Adultos',
+  'trustSafety.preset.adult.desc':
+    'Plataformas para adultos: desnudez permitida tras la verificación de edad, texto ofensivo solo marcado para revisión.',
+  'trustSafety.presets.adultNote':
+    'El ajuste Adultos está pensado para plataformas para adultos autoalojadas cuyos usuarios son adultos verificados.',
+  'trustSafety.level.title': 'Imágenes y videos',
+  'trustSafety.level.intro':
+    'Cómo se tratan las subidas a los chats. Los niveles combinan tres detectores que se ejecutan en este servidor: NudeNet, Falconsai y AdamCodd.',
+  'trustSafety.level.off': 'Desactivado',
+  'trustSafety.level.off.desc': 'Las imágenes y los videos no se filtran.',
+  'trustSafety.level.relaxed': 'Flexible',
+  'trustSafety.level.relaxed.desc': 'La desnudez explícita se difumina; quienes la vean deben confirmar que tienen 18 años o más.',
+  'trustSafety.level.standard': 'Estándar',
+  'trustSafety.level.standard.desc': 'La desnudez explícita se difumina; las imágenes sugerentes se envían a la cola de moderación.',
+  'trustSafety.level.strict': 'Estricto',
+  'trustSafety.level.strict.desc': 'La desnudez explícita se rechaza; las imágenes sugerentes se difuminan.',
+  'trustSafety.level.custom': 'Personalizado',
+  'trustSafety.level.custom.desc': 'Elige tú mismo la acción y el umbral de desnudez.',
+  'trustSafety.level.col.level': 'Nivel',
+  'trustSafety.level.col.explicit': 'Desnudez explícita',
+  'trustSafety.level.col.revealing': 'Imágenes sugerentes',
+  'trustSafety.levelRule.allow': 'Permitido',
+  'trustSafety.levelRule.blurAge': 'Difuminado, solo mayores de 18',
+  'trustSafety.levelRule.flag': 'Visible, enviado a la cola de moderación',
+  'trustSafety.levelRule.block': 'Subida rechazada',
+  'trustSafety.levelRule.blur': 'Difuminado',
+  'trustSafety.level.ruleNote':
+    'Explícito: NudeNet y Falconsai alcanzan ambos sus umbrales. Sugerente: fotos en traje de baño, lencería y similares, evaluadas por AdamCodd.',
+  'trustSafety.level.customNote':
+    'Personalizado aplica la acción de abajo a las imágenes cuya puntuación de desnudez de NudeNet alcanza el umbral. Las imágenes sugerentes no se revisan.',
+  'trustSafety.level.advanced': 'Umbrales avanzados',
+  'trustSafety.level.advancedIntro':
+    'Las puntuaciones que usan los niveles, en porcentaje. Los valores predeterminados provienen de pruebas con fotos cotidianas, en traje de baño y de lencería; los valores más bajos detectan más y fallan más.',
+  'trustSafety.service.note':
+    'La detección requiere el servicio de moderación, activado en deploy.yml (services.moderation) o con el perfil "ts" del paquete compose. Mientras no esté en ejecución, las subidas y los mensajes no se revisan.',
+
+  'trustSafety.action.allow': 'Permitir',
+  'trustSafety.action.flag': 'Marcar para revisión',
+  'trustSafety.action.blur': 'Difuminar',
+  'trustSafety.action.hold': 'Retener para revisión',
+  'trustSafety.action.hide': 'Ocultar',
+  'trustSafety.action.block': 'Bloquear',
+
+  // ---- App settings ----
+  'trustSafetyApp.tab': 'Trust & Safety',
+  'trustSafetyApp.heading': 'Trust & Safety',
+  'trustSafetyApp.description':
+    'Haz que la política del servidor sea más estricta para esta aplicación. Nada de lo que hay aquí puede hacerla más permisiva que la configuración del servidor; las opciones que lo harían están desactivadas.',
+  'trustSafetyApp.disabledNote':
+    'La moderación automática está desactivada en este servidor. Los valores guardados aquí se aplicarán cuando un administrador del servidor la active.',
+  'trustSafetyApp.loadFailed': 'No se pudo cargar la política del servidor: {error}',
+  'trustSafetyApp.noInstall':
+    'Los valores del servidor no están disponibles, así que las opciones más permisivas no se marcan aquí. El servidor las rechaza de todos modos.',
+  'trustSafetyApp.row.imageLevel': 'Nivel de la política de imágenes',
+  'trustSafetyApp.row.imageLevel.desc': 'Subidas a los chats de esta aplicación. Solo se puede elegir un nivel más estricto que el del servidor.',
+  'trustSafetyApp.levelLabel': 'Nivel',
+  'trustSafetyApp.levelOverCustom':
+    'El servidor usa una regla de desnudez personalizada. Un nivel elegido aquí también se aplica, y prevalece el resultado más estricto.',
+  'trustSafetyApp.row.nudity': 'Imágenes y videos con desnudez',
+  'trustSafetyApp.row.nudity.desc': 'Subidas a los chats de esta aplicación.',
+  'trustSafetyApp.row.toxicity': 'Mensajes ofensivos',
+  'trustSafetyApp.row.toxicity.desc': 'Insultos, lenguaje obsceno y tóxico.',
+  'trustSafetyApp.row.severe': 'Mensajes graves',
+  'trustSafetyApp.row.severe.desc': 'Amenazas, ataques a la identidad, toxicidad grave y texto sexualmente explícito.',
+  'trustSafetyApp.row.pii': 'Datos personales en los mensajes',
+  'trustSafetyApp.row.pii.desc': 'Los tipos de datos personales elegidos en la configuración del servidor.',
+  'trustSafetyApp.row.phi': 'Información de salud',
+  'trustSafetyApp.row.phi.desc': 'Una persona nombrada o identificada junto a un término de salud.',
+  'trustSafetyApp.actionLabel': 'Acción',
+  'trustSafetyApp.thresholdLabel': 'Umbral (%)',
+  'trustSafetyApp.followServer': 'Igual que el servidor ({value})',
+  'trustSafetyApp.followServerUnknown': 'Igual que el servidor',
+  'trustSafetyApp.serverValue': 'Servidor: {value}',
+  'trustSafetyApp.thresholdHelp': 'Cuanto más bajo, más estricto. Déjalo vacío para usar el valor del servidor ({value}).',
+  'trustSafetyApp.thresholdTooHigh': 'Como máximo {max}, el valor del servidor.',
+  'trustSafetyApp.thresholdInvalid': 'Un número entero del 1 al 100.',
+  'trustSafetyApp.looser': 'Más permisivo que la configuración del servidor',
+  'trustSafetyApp.inEffect': 'En vigor: {value}',
+  'trustSafetyApp.invalidToast': 'Corrige los valores de Trust & Safety marcados en rojo antes de guardar.',
+
+  // ---- Account > Age ----
+  'trustSafetyAge.heading': 'Edad',
+  'trustSafetyAge.intro':
+    'El contenido multimedia marcado como sensible solo se abre para las personas que declararon tener 18 años o más.',
+  'trustSafetyAge.privacy': 'Solo se guarda tu año de nacimiento, no tu fecha de nacimiento completa.',
+  'trustSafetyAge.notDeclared': 'No has declarado tu edad.',
+  'trustSafetyAge.adult': '18 años o más',
+  'trustSafetyAge.minor': 'Menor de 18 años',
+  'trustSafetyAge.birthYear': 'Año de nacimiento {year}',
+  'trustSafetyAge.declaredAt': 'Declarada el {date}',
+  'trustSafetyAge.dobLabel': 'Fecha de nacimiento',
+  'trustSafetyAge.save': 'Guardar',
+  'trustSafetyAge.change': 'Cambiar',
+  'trustSafetyAge.cancel': 'Cancelar',
+  'trustSafetyAge.saving': 'Guardando...',
+  'trustSafetyAge.saved': 'Edad guardada.',
+  'trustSafetyAge.failed': 'No se pudo guardar tu edad: {error}',
+  'trustSafetyAge.loadFailed': 'No se pudo cargar tu edad: {error}',
+  'trustSafetyAge.invalidDate': 'Ingresa una fecha de nacimiento válida en el pasado.',
+  'trustSafetyAge.locked':
+    'Declaraste que eres menor de 18 años, así que no puedes cambiar esto tú mismo. Si es un error, comunícate con soporte.',
+  'trustSafetyAge.contact': 'Contactar a soporte',
+
+  // ---- Suspend dialog ----
+  'trustSafetySuspend.contentHeading': 'Contenido de esta cuenta',
+  'trustSafetySuspend.messagesLabel': 'Mensajes',
+  'trustSafetySuspend.messagesHelp': 'Mensajes que esta cuenta envió en los chats de la aplicación.',
+  'trustSafetySuspend.mediaLabel': 'Multimedia',
+  'trustSafetySuspend.mediaHelp': 'Imágenes, videos y archivos que esta cuenta subió a los chats.',
+  'trustSafetySuspend.nameLabel': 'Nombre',
+  'trustSafetySuspend.nameHelp':
+    'Los demás ven "Cuenta suspendida" sin avatar en lugar del nombre, hasta que se levante la suspensión.',
+  'trustSafetySuspend.mode.keep': 'Mantener tal cual',
+  'trustSafetySuspend.mode.hide': 'Ocultar (se restaura al levantar la suspensión)',
+  'trustSafetySuspend.mode.quarantine': 'Cuarentena (oculto, conservado en cuarentena, eliminado tras el período de retención)',
+  'trustSafetySuspend.mode.delete': 'Eliminar',
+  'trustSafetySuspend.name.keep': 'Mantener',
+  'trustSafetySuspend.name.suspended': 'Mostrar como "Cuenta suspendida"',
+  'trustSafetySuspend.deleteWarning':
+    'La eliminación no se puede deshacer. El contenido sigue eliminado aunque se levante la suspensión.',
+
+  // ---- Moderation queue ----
+  'trustSafetyModeration.tab': 'Moderación',
+  'trustSafetyModeration.title': 'Moderación',
+  'trustSafetyModeration.intro':
+    'Mensajes y contenido multimedia marcados por las revisiones automáticas o por los moderadores. El texto marcado solo se muestra a los moderadores.',
+  'trustSafetyModeration.filter.status': 'Estado',
+  'trustSafetyModeration.filter.kind': 'Tipo',
+  'trustSafetyModeration.filter.category': 'Categoría',
+  'trustSafetyModeration.status.open': 'Abierto',
+  'trustSafetyModeration.status.resolved': 'Resuelto',
+  'trustSafetyModeration.kind.all': 'Todos los tipos',
+  'trustSafetyModeration.kind.message': 'Mensaje',
+  'trustSafetyModeration.kind.media': 'Multimedia',
+  'trustSafetyModeration.category.all': 'Todas las categorías',
+  'trustSafetyModeration.category.nudity': 'Desnudez',
+  'trustSafetyModeration.category.revealing': 'Sugerente',
+  'trustSafetyModeration.signals': 'Señales',
+  'trustSafetyModeration.signal.nudenet': 'NudeNet',
+  'trustSafetyModeration.signal.falconsai': 'Falconsai',
+  'trustSafetyModeration.signal.adamcodd': 'AdamCodd',
+  'trustSafetyModeration.signalNotRun': 'no ejecutado',
+  'trustSafetyModeration.signalsHelp':
+    'NudeNet: partes del cuerpo expuestas. Falconsai: imagen explícita. AdamCodd: imagen sugerente. En porcentaje.',
+  'trustSafetyModeration.category.toxicity': 'Ofensivo',
+  'trustSafetyModeration.category.severe': 'Grave',
+  'trustSafetyModeration.category.pii': 'Datos personales',
+  'trustSafetyModeration.category.phi': 'Información de salud',
+  'trustSafetyModeration.category.suspension': 'Suspensión',
+  'trustSafetyModeration.col.sender': 'Remitente',
+  'trustSafetyModeration.col.room': 'Chat',
+  'trustSafetyModeration.col.time': 'Hora',
+  'trustSafetyModeration.col.autoAction': 'Aplicado',
+  'trustSafetyModeration.applied.flag': 'Marcado para revisión',
+  'trustSafetyModeration.applied.blur': 'Difuminado',
+  'trustSafetyModeration.applied.hold': 'Retenido',
+  'trustSafetyModeration.applied.hide': 'Oculto',
+  'trustSafetyModeration.applied.hidden': 'Oculto',
+  'trustSafetyModeration.applied.block': 'Bloqueado',
+  'trustSafetyModeration.applied.delete': 'Eliminado',
+  'trustSafetyModeration.applied.deleted': 'Eliminado',
+  'trustSafetyModeration.source.auto': 'automático',
+  'trustSafetyModeration.source.moderator': 'por un moderador',
+  'trustSafetyModeration.source.report': 'reportado',
+  'trustSafetyModeration.itemStatus.open': 'Abierto',
+  'trustSafetyModeration.itemStatus.approved': 'Aprobado',
+  'trustSafetyModeration.itemStatus.removed': 'Retirado',
+  'trustSafetyModeration.itemStatus.dismissed': 'Descartado',
+  'trustSafetyModeration.action.approve': 'Aprobar',
+  'trustSafetyModeration.action.approveTitle': 'Liberar el archivo retenido en el chat',
+  'trustSafetyModeration.action.dismiss': 'Descartar',
+  'trustSafetyModeration.action.dismissTitle': 'Cerrar el elemento y dejar el contenido como está',
+  'trustSafetyModeration.action.blur': 'Difuminar',
+  'trustSafetyModeration.action.blurTitle': 'Mostrarlo contraído; los lectores tocan para verlo',
+  'trustSafetyModeration.action.hide': 'Ocultar',
+  'trustSafetyModeration.action.hideTitle': 'Ocultarlo para todos; el original se conserva en cuarentena',
+  'trustSafetyModeration.action.delete': 'Eliminar',
+  'trustSafetyModeration.action.deleteTitle': 'Eliminarlo para todos; no se puede deshacer',
+  'trustSafetyModeration.action.restore': 'Restaurar',
+  'trustSafetyModeration.action.restoreTitle': 'Volver a mostrar el contenido original',
+  'trustSafetyModeration.suspendSender': 'Suspender al remitente',
+  'trustSafetyModeration.deleteConfirmTitle': '¿Eliminar este contenido?',
+  'trustSafetyModeration.deleteConfirmMessage':
+    'El mensaje o archivo se elimina para todos. Esta acción no se puede deshacer.',
+  'trustSafetyModeration.actionDone': 'Acción realizada: {action}.',
+  'trustSafetyModeration.actionFailed': 'La acción falló: {error}',
+  'trustSafetyModeration.empty': 'No hay nada que revisar.',
+  'trustSafetyModeration.emptyResolved': 'Todavía no hay elementos resueltos.',
+  'trustSafetyModeration.loadFailed': 'No se pudo cargar la cola: {error}',
+  'trustSafetyModeration.unavailable': 'La cola de moderación aún no está disponible en este servidor.',
+  'trustSafetyModeration.loading': 'Cargando...',
+  'trustSafetyModeration.refresh': 'Actualizar',
+  'trustSafetyModeration.previous': 'Anterior',
+  'trustSafetyModeration.next': 'Siguiente',
+  'trustSafetyModeration.range': '{from} a {to} de {total}',
+  'trustSafetyModeration.rangeOpen': '{from} a {to}',
+  'trustSafetyModeration.noText': 'No se conservó texto',
+  'trustSafetyModeration.noPreview': 'Sin vista previa',
+  // Media outside a chat (section 17): where it came from, and refused uploads.
+  'trustSafetyModeration.surface.profile': 'Foto de perfil',
+  'trustSafetyModeration.surface.upload': 'Archivo subido',
+  'trustSafetyModeration.surface.chat-media': 'Multimedia del chat (subida por API)',
+  'trustSafetyModeration.refusedNotStored': 'Rechazado al subir - no se guardó nada',
+  'trustSafetyModeration.unknownSender': 'Remitente desconocido',
+  'trustSafetyModeration.resolvedAt': 'Resuelto el {date}',
+  'trustSafetyModeration.piiTypes': 'Tipos: {types}',
+  'trustSafetyModeration.serviceOff':
+    'La moderación automática está desactivada en este servidor, así que aquí solo aparecen los elementos agregados por moderadores o por revisiones anteriores.',
+
+  // ---- Users page ----
+  'trustSafetyUsers.col': 'Edad',
+  'trustSafetyUsers.adult': '18+',
+  'trustSafetyUsers.minor': 'Menor de 18',
+  'trustSafetyUsers.unknown': 'Desconocida',
+  'trustSafetyUsers.tooltip': 'Año de nacimiento {year}. Declarada el {date}.',
+  'trustSafetyUsers.tooltipAdmin': 'Establecida por un administrador.',
+  'trustSafetyUsers.reset': 'Restablecer edad',
+  'trustSafetyUsers.resetTitle': 'Borrar la edad declarada para que el usuario la vuelva a declarar',
+  'trustSafetyUsers.resetConfirmTitle': '¿Restablecer la edad de {name}?',
+  'trustSafetyUsers.resetConfirmMessage':
+    'La edad declarada se borra. Se le volverá a preguntar al usuario la próxima vez que la edad sea necesaria, y entonces podrá declarar que tiene 18 años o más.',
+  'trustSafetyUsers.resetDone': 'Edad restablecida.',
+  'trustSafetyUsers.resetFailedPrefix': 'No se pudo restablecer la edad:',
+
+  // ---- Reviewer protection (section 14): signal summary and safer reveal ----
+  // Shared by T&S > Quarantine (case media) and the Moderation queues.
+  'tsSignals.explicitLikely': 'Desnudez explícita probable ({labels})',
+  'tsSignals.explicitPossible': 'Desnudez explícita posible ({labels})',
+  'tsSignals.nudenet': 'Detector de desnudez explícita {score}%',
+  'tsSignals.suggestive': 'Sugerente o parcialmente cubierto ({labels})',
+  'tsSignals.revealing': 'Contenido sugerente o erótico {score}%',
+  'tsSignals.falconsai': 'Clasificador de contenido explícito {score}%',
+  'tsSignals.category': 'Marcado como {category} {score}%',
+  'tsSignals.low': 'Sin señales sensibles',
+  'tsSignals.none': 'No hay revisión automática registrada',
+  'tsSignals.error': 'La revisión automática falló',
+  'tsSignals.description': 'Descripción por IA (puede ser incorrecta): {text}',
+  'tsSignals.summaryLabel': 'Resumen de señales',
+  // NudeNet body-part labels in plain words.
+  'tsSignals.label.FEMALE_GENITALIA_EXPOSED': 'genitales femeninos expuestos',
+  'tsSignals.label.MALE_GENITALIA_EXPOSED': 'genitales masculinos expuestos',
+  'tsSignals.label.FEMALE_BREAST_EXPOSED': 'pecho expuesto',
+  'tsSignals.label.BUTTOCKS_EXPOSED': 'glúteos expuestos',
+  'tsSignals.label.ANUS_EXPOSED': 'ano expuesto',
+  'tsSignals.label.FEMALE_GENITALIA_COVERED': 'genitales cubiertos',
+  'tsSignals.label.FEMALE_BREAST_COVERED': 'pecho cubierto',
+  'tsSignals.label.BUTTOCKS_COVERED': 'glúteos cubiertos',
+  'tsSignals.label.ANUS_COVERED': 'ano cubierto',
+  'tsSignals.label.BELLY_EXPOSED': 'vientre descubierto',
+  'tsSignals.label.MALE_BREAST_EXPOSED': 'torso masculino descubierto',
+  'tsReveal.show': 'Mostrar',
+  'tsReveal.showClearly': 'Mostrar con nitidez',
+  'tsReveal.blurAgain': 'Volver a difuminar',
+  'tsReveal.hide': 'Ocultar',
+  'tsReveal.notShown': 'No se muestra',
+  'tsReveal.mutedHint': 'Se muestra en escala de grises y difuminado.',
+};
+
 export const trustSafety = {
   en,
-  fr: {},
-  es: {},
+  fr,
+  es,
 } satisfies Record<UiLanguageCode, Record<string, string>>;
