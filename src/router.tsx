@@ -14,7 +14,6 @@ import Chat from './pages/Chat';
 import { Error404Page } from './pages/ErrorPage/Error404Page';
 const Admin = lazy(() => import('./pages/Admin'));
 const Help = lazy(() => import('./pages/Help'));
-const WhatsNew = lazy(() => import('./pages/WhatsNew'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
 const StartProject = lazy(() => import('./pages/StartProject'));
@@ -238,8 +237,10 @@ export const router = createBrowserRouter(
                     },
 
                     {
+                      // The hand-written What's new page is gone; the weekly
+                      // release notes are on the Help page.
                       path: 'help/whats-new',
-                      Component: WhatsNew,
+                      element: <Navigate to="/app/help" replace />,
                     },
                     {
                       path: 'help',

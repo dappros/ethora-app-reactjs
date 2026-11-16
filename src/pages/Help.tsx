@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconExternalLink } from '../components/Icons/IconExternalLink';
 import { BookACallModal } from '../components/modal/BookACallModal';
-import { useWhatsNew } from '../hooks/useWhatsNew';
+import { SimpleMarkdown } from '../components/SimpleMarkdown';
+import { httpGetReleaseNotes, ReleaseNotesEntry } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
-import { LATEST_VERSION } from '../whatsNew/releases';
 
 // Derive the uptime/status page URL from the current hostname.
 // Convention: the uptime service is hosted on a sibling subdomain to the
@@ -95,7 +95,6 @@ export default function Help() {
   const [showBookACall, setShowBookACall] = useState(false);
   const statusUrl = useMemo(deriveStatusUrl, []);
   const navigate = useNavigate();
-  const { hasUnseen } = useWhatsNew();
   const { t } = useTranslation();
 
   return (
@@ -109,20 +108,8 @@ export default function Help() {
         <div className="font-sans text-base text-gray-700 mb-6 max-w-3xl">
           {t('help.subtitle')}
         </div>
+        <ReleaseNotes />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl">
-          <ResourceCard
-            title={
-              hasUnseen
-                ? t('help.whatsNew.titleWithVersion').replace(
-                    '{version}',
-                    LATEST_VERSION
-                  )
-                : t('help.whatsNew.title')
-            }
-            description={t('help.whatsNew.description')}
-            onClick={() => navigate('/app/help/whats-new')}
-            ctaLabel={t('help.whatsNew.cta')}
-          />
           <ResourceCard
             title={t('help.sdk.title')}
             description={t('help.sdk.description')}
@@ -165,5 +152,47 @@ export default function Help() {
         <BookACallModal onClose={() => setShowBookACall(false)} />
       )}
     </div>
+  );
+}
+
+// The latest three weekly release notes, from the API (which fetches the
+// public RELEASE-NOTES.md). Hidden while loading and when there are none:
+// an install that makes no outbound calls, or GitHub unreachable.
+function ReleaseNotes() {
+  const { t } = useTranslation();
+  const [notes, setNotes] = useState<{ entries: ReleaseNotesEntry[]; url: string } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    httpGetReleaseNotes()
+      .then(({ data }) => {
+        if (!cancelled) setNotes(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  if (!notes?.entries?.length) return null;
+  return (
+    <section className="mb-6 max-w-5xl rounded-2xl border border-gray-200 bg-white p-4 md:p-6" data-testid="release-notes">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-varela text-xl">{t('help.releaseNotes.title')}</h2>
+        <a href={notes.url} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-500 underline">
+          {t('help.releaseNotes.all')}
+        </a>
+      </div>
+      <p className="mt-1 text-sm text-gray-600">{t('help.releaseNotes.intro')}</p>
+      <div className="mt-3 divide-y divide-gray-200">
+        {notes.entries.map((e, i) => (
+          <details key={e.title} open={i === 0} className="group py-2">
+            <summary className="cursor-pointer list-inside font-semibold text-gray-900">{e.title}</summary>
+            <div className="mt-2 min-w-0 break-words text-sm text-gray-800">
+              {/* Blockquote markers ("> [repo](...)") read as plain lines here. */}
+              <SimpleMarkdown text={e.body.replace(/^>\s?/gm, '')} />
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -2,15 +2,13 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 
 // Static UI text for a handful of standalone pages that don't share traffic
 // with the main app shell: the 403/404/429 error pages, Help & Support,
-// What's New, the Cloudflare Turnstile bridge page, the WordPress-embed
+// the Cloudflare Turnstile bridge page, the WordPress-embed
 // setup wizard, and the Chat page's own chrome (heading, app-switcher,
 // yellow context banners). Namespaced per page/area, e.g. 'error404.title',
 // 'wpSetup.heading', 'chat.switcherLabel'. Keys ending in a punctuation
 // character (e.g. 'chat.toastRestoreFailed', 'chat.toastSwitchFailed')
 // are string prefixes meant to be concatenated with a dynamic suffix at the
-// call site - see Chat.tsx. 'help.whatsNew.titleWithVersion' contains a
-// literal `{version}` placeholder that the call site replaces manually
-// (this dictionary has no ICU/interpolation engine).
+// call site - see Chat.tsx.
 export const miscPages = {
   en: {
     'error403.appTitle': "You don't have access to this app",
@@ -42,11 +40,9 @@ export const miscPages = {
     'help.title': 'Help & Support',
     'help.subtitle':
       'Resources to help you get started and get the most out of Ethora.',
-    'help.whatsNew.title': "What's new",
-    'help.whatsNew.titleWithVersion': "What's new in {version}",
-    'help.whatsNew.description':
-      'See what we shipped recently - features, improvements, and quick links to try each one.',
-    'help.whatsNew.cta': "See what's new",
+    'help.releaseNotes.title': "What's new",
+    'help.releaseNotes.intro': 'The latest weekly release notes.',
+    'help.releaseNotes.all': 'All release notes on GitHub',
     'help.sdk.title': 'SDK',
     'help.sdk.description':
       'Integrating Ethora into your existing apps or building a new web/mobile app? Check out our SDK monorepo on GitHub - it contains the chat component, backend integration helpers, and ready-to-run examples.',
@@ -72,17 +68,6 @@ export const miscPages = {
     // --- TurnstileBridge.tsx ---
     'turnstileBridge.heading': 'Confirm that you are not a robot',
     'turnstileBridge.subtext': 'Complete the verification to continue',
-
-    // --- WhatsNew.tsx ---
-    'whatsNew.title': "What's new",
-    'whatsNew.backToHelp': 'Back to Help & Support',
-    'whatsNew.subtitle':
-      'See what shipped in the latest releases. Each item links into the app or to the deeper story.',
-    'whatsNew.cardOpen': 'Open',
-    'whatsNew.cardBookACall': 'Book a call',
-    'whatsNew.cardLearnMore': 'Learn more',
-    'whatsNew.releaseNotesLink': 'Full release notes on GitHub',
-    'whatsNew.blogLink': 'Read more on the blog',
 
     // --- WpSetup/index.tsx ---
     'wpSetup.errorTurnstile': 'Please complete the verification challenge below.',
@@ -187,11 +172,9 @@ export const miscPages = {
     'help.title': 'Aide et assistance',
     'help.subtitle':
       "Des ressources pour bien démarrer et tirer le meilleur parti d'Ethora.",
-    'help.whatsNew.title': 'Nouveautés',
-    'help.whatsNew.titleWithVersion': 'Nouveautés de la version {version}',
-    'help.whatsNew.description':
-      'Découvrez ce que nous avons publié récemment : fonctionnalités, améliorations et liens rapides pour les essayer.',
-    'help.whatsNew.cta': 'Voir les nouveautés',
+    'help.releaseNotes.title': 'Nouveautés',
+    'help.releaseNotes.intro': 'Les dernières notes de version hebdomadaires.',
+    'help.releaseNotes.all': 'Toutes les notes de version sur GitHub',
     'help.sdk.title': 'SDK',
     'help.sdk.description':
       "Vous intégrez Ethora à vos applications existantes ou créez une nouvelle application web/mobile ? Consultez notre monorepo SDK sur GitHub : il contient le composant de chat, des aides à l'intégration back-end et des exemples prêts à l'emploi.",
@@ -217,17 +200,6 @@ export const miscPages = {
     // --- TurnstileBridge.tsx ---
     'turnstileBridge.heading': "Confirmez que vous n'êtes pas un robot",
     'turnstileBridge.subtext': 'Terminez la vérification pour continuer',
-
-    // --- WhatsNew.tsx ---
-    'whatsNew.title': 'Nouveautés',
-    'whatsNew.backToHelp': 'Retour à Aide et assistance',
-    'whatsNew.subtitle':
-      "Découvrez le contenu des dernières versions. Chaque élément renvoie vers l'application ou vers plus de détails.",
-    'whatsNew.cardOpen': 'Ouvrir',
-    'whatsNew.cardBookACall': 'Réserver un appel',
-    'whatsNew.cardLearnMore': 'En savoir plus',
-    'whatsNew.releaseNotesLink': 'Notes de version complètes sur GitHub',
-    'whatsNew.blogLink': 'Lire la suite sur le blog',
 
     // --- WpSetup/index.tsx ---
     'wpSetup.errorTurnstile':
@@ -337,11 +309,9 @@ export const miscPages = {
     'help.title': 'Ayuda y soporte',
     'help.subtitle':
       'Recursos para empezar y sacar el máximo partido a Ethora.',
-    'help.whatsNew.title': 'Novedades',
-    'help.whatsNew.titleWithVersion': 'Novedades de la versión {version}',
-    'help.whatsNew.description':
-      'Descubre lo que hemos lanzado recientemente: funciones, mejoras y enlaces rápidos para probarlas.',
-    'help.whatsNew.cta': 'Ver novedades',
+    'help.releaseNotes.title': 'Novedades',
+    'help.releaseNotes.intro': 'Las últimas notas de versión semanales.',
+    'help.releaseNotes.all': 'Todas las notas de versión en GitHub',
     'help.sdk.title': 'SDK',
     'help.sdk.description':
       '¿Estás integrando Ethora en tus aplicaciones existentes o creando una nueva app web/móvil? Consulta nuestro monorepo del SDK en GitHub: incluye el componente de chat, ayudantes de integración backend y ejemplos listos para usar.',
@@ -367,17 +337,6 @@ export const miscPages = {
     // --- TurnstileBridge.tsx ---
     'turnstileBridge.heading': 'Confirma que no eres un robot',
     'turnstileBridge.subtext': 'Completa la verificación para continuar',
-
-    // --- WhatsNew.tsx ---
-    'whatsNew.title': 'Novedades',
-    'whatsNew.backToHelp': 'Volver a Ayuda y soporte',
-    'whatsNew.subtitle':
-      'Descubre lo que se lanzó en las últimas versiones. Cada elemento enlaza a la aplicación o a más información.',
-    'whatsNew.cardOpen': 'Abrir',
-    'whatsNew.cardBookACall': 'Reservar una llamada',
-    'whatsNew.cardLearnMore': 'Saber más',
-    'whatsNew.releaseNotesLink': 'Notas de la versión completas en GitHub',
-    'whatsNew.blogLink': 'Leer más en el blog',
 
     // --- WpSetup/index.tsx ---
     'wpSetup.errorTurnstile': 'Completa el desafío de verificación a continuación.',

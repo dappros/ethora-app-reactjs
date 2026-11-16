@@ -2282,3 +2282,11 @@ export function httpResetUserMfa(appId: string, userId: string) {
     `/apps/${encodeURIComponent(appId)}/users/${encodeURIComponent(userId)}/mfa`
   );
 }
+
+// The latest weekly release notes (public RELEASE-NOTES.md, fetched and
+// cached by the API). entries is empty when the install makes no outbound
+// calls or the notes cannot be fetched.
+export interface ReleaseNotesEntry { title: string; body: string }
+export function httpGetReleaseNotes() {
+  return httpV2.get<{ entries: ReleaseNotesEntry[]; url: string }>('/release-notes');
+}
