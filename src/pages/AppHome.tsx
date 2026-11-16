@@ -162,7 +162,13 @@ export default function AppHome() {
     ];
     return (
       <HomeLayout
-        intro={location.state?.justCreated ? t('appHome.web.justCreated') : undefined}
+        intro={
+          !location.state?.justCreated || failed
+            ? undefined
+            : jobId
+              ? t('appHome.web.justCreated')
+              : t('appHome.web.justCreatedNoCrawl')
+        }
         steps={steps}
         side={
           <>

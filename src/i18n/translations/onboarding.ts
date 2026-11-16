@@ -102,6 +102,7 @@ export const onboarding = {
     'appHome.waiting': 'Waiting',
     'appHome.manage': 'Manage',
     'appHome.web.justCreated': 'Your assistant is on. It is reading your website now; you can test it while it does.',
+    'appHome.web.justCreatedNoCrawl': 'Your assistant is on and answers from what you gave it. Test it next.',
     'appHome.web.knows': 'Add your website or documents',
     'appHome.web.knowsText': 'The assistant answers only from what you give it.',
     'appHome.web.crawling': 'Reading your website',
