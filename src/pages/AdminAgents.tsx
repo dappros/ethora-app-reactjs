@@ -619,7 +619,9 @@ const CreateAgentModal: React.FC<{
   const [prompt, setPrompt] = useState('You are a helpful assistant.');
   const [visibility, setVisibility] = useState<'private' | 'unlisted' | 'public'>('private');
   const [ownerAppId, setOwnerAppId] = useState('');
-  const [includeKnowledge, setIncludeKnowledge] = useState(true);
+  // Off by default: a new agent should not start with the template's
+  // (someone else's) website and documents. The owner can tick it.
+  const [includeKnowledge, setIncludeKnowledge] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
