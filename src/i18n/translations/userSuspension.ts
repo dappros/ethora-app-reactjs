@@ -3,9 +3,8 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // Account suspension: the "Account suspended" screen (login page and
 // /account-suspended), the sign-up refusal for blocked emails, the Suspend /
 // Unsuspend actions on the Users page and the two related App settings
-// (support contact, blocked sign-up email domains). The end-user strings are
-// translated; the admin-panel strings exist in English and the other locales
-// fall back to them.
+// (support contact, blocked sign-up email domains). All strings, end-user
+// and admin-panel, are translated into every locale.
 //
 // Placeholders ({name}, {count}, {date}, ...) are filled with
 // String.prototype.replace.
@@ -110,6 +109,71 @@ export const userSuspension = {
     'userSuspension.screen.back': 'Retour à la connexion',
 
     'userSuspension.signupBlocked': "L'inscription avec cette adresse e-mail n'est pas autorisée.",
+
+    'userSuspension.tab': 'Suspendus',
+    'userSuspension.badge': 'Suspendu',
+    'userSuspension.badgeTooltip.reason': 'Motif : {reason}',
+    'userSuspension.badgeTooltip.since': 'Depuis le {date}',
+    'userSuspension.badgeTooltip.until': 'Jusqu’au {date}',
+    'userSuspension.badgeTooltip.tenant': 'S’applique aussi aux applications enfants; inscription bloquée',
+    'userSuspension.badgeTooltip.note': 'Note interne : {note}',
+    'userSuspension.action.suspend': 'Suspendre',
+    'userSuspension.action.suspendTitle':
+      'Bloque la connexion et l’accès à l’API; le compte et ses données sont conservés',
+    'userSuspension.action.unsuspend': 'Lever la suspension',
+    'userSuspension.action.unsuspendTitle': 'Lever la suspension',
+
+    'userSuspension.modal.titleOne': 'Suspendre {name} ?',
+    'userSuspension.modal.titleMany': 'Suspendre {count} utilisateurs ?',
+    'userSuspension.modal.intro':
+      'Un utilisateur suspendu ne peut pas se connecter et ses sessions ouvertes sont fermées. Le compte et ses données sont conservés et vous pouvez lever la suspension à tout moment. Ce n’est pas la même chose que l’archivage.',
+    'userSuspension.modal.reasonLabel': 'Motif',
+    'userSuspension.modal.reasonPlaceholder': 'Choisissez un motif',
+    'userSuspension.modal.messageLabel': 'Message affiché à l’utilisateur (facultatif)',
+    'userSuspension.modal.messagePlaceholder': 'Affiché sur l’écran « Compte suspendu »',
+    'userSuspension.modal.noteLabel': 'Note interne, réservée aux administrateurs (facultatif)',
+    'userSuspension.modal.notePlaceholder': 'Jamais affichée à l’utilisateur',
+    'userSuspension.modal.tooLong': '{max} caractères au maximum.',
+    'userSuspension.modal.tenantLabel':
+      'Suspendre aussi cette adresse e-mail dans toutes les applications enfants et l’empêcher de s’inscrire à nouveau',
+    'userSuspension.modal.tenantHelp':
+      'Les comptes ayant la même adresse e-mail dans les applications enfants de cette application sont aussi suspendus, et cette adresse ne peut plus servir à s’inscrire dans cette application ni dans ses applications enfants. Laissez cette option désactivée pour suspendre uniquement le compte dans cette application.',
+    'userSuspension.modal.confirm': 'Suspendre',
+    'userSuspension.modal.cancel': 'Annuler',
+    'userSuspension.modal.close': 'Fermer',
+    'userSuspension.modal.working': 'Traitement en cours...',
+
+    'userSuspension.unsuspend.title': 'Lever la suspension de {name} ?',
+    'userSuspension.unsuspend.message': 'L’utilisateur pourra de nouveau se connecter et utiliser l’application.',
+    'userSuspension.unsuspend.tenantLabel':
+      'La lever aussi dans les applications enfants et autoriser de nouveau cette adresse e-mail à s’inscrire',
+
+    'userSuspension.toast.suspended': 'Suspendus : {count}',
+    'userSuspension.toast.alreadySuspended': 'Déjà suspendus : {count}',
+    'userSuspension.toast.childApps': 'Aussi suspendus dans les applications enfants : {count}',
+    'userSuspension.toast.failed': 'Non suspendus : {count}. {details}',
+    'userSuspension.toast.suspendFailedPrefix': 'Échec de la suspension :',
+    'userSuspension.toast.unsuspended': 'Suspension levée.',
+    'userSuspension.toast.notSuspended': 'Cet utilisateur n’était pas suspendu.',
+    'userSuspension.toast.unsuspendFailedPrefix': 'Échec de la levée de la suspension :',
+    'userSuspension.error.CANNOT_SUSPEND_SELF': 'Vous ne pouvez pas suspendre votre propre compte.',
+    'userSuspension.error.CANNOT_SUSPEND_OWNER': 'Le propriétaire de l’application ne peut pas être suspendu.',
+    'userSuspension.error.CANNOT_SUSPEND_PRIVILEGED': 'Vous pouvez suspendre uniquement les utilisateurs dont le niveau d’accès est inférieur au vôtre.',
+    'userSuspension.error.CANNOT_UNSUSPEND_PRIVILEGED': 'Cette suspension a été imposée à partir d’un niveau d’accès supérieur et ne peut être levée qu’à ce niveau.',
+    'userSuspension.error.USER_INVALID_STATE': 'Les utilisateurs archivés ou supprimés ne peuvent pas être suspendus.',
+    'userSuspension.error.USER_NOT_FOUND': 'Utilisateur introuvable.',
+
+    'userSuspension.settings.supportHeading': 'Contact du support',
+    'userSuspension.settings.supportDescription':
+      'Affiché aux utilisateurs de cette application dont le compte est suspendu. Une adresse e-mail ou un lien https://. Laissez vide pour utiliser le contact de l’application parente ou celui du serveur par défaut.',
+    'userSuspension.settings.supportPlaceholder': 'support@example.com ou https://example.com/help',
+    'userSuspension.settings.supportInvalid': 'Saisissez une adresse e-mail ou un lien https://.',
+    'userSuspension.settings.blockedHeading': 'Domaines e-mail bloqués à l’inscription',
+    'userSuspension.settings.blockedDescription':
+      'Les nouvelles inscriptions (par e-mail et première connexion par réseau social) avec une adresse e-mail de l’un de ces domaines sont refusées. Un motif par ligne. Un domaine couvre aussi ses sous-domaines (example.org couvre mail.example.org), et * correspond à exactement une partie du nom. S’applique uniquement à cette application, pas à ses applications enfants. Les comptes existants ne sont pas touchés.',
+    'userSuspension.settings.blockedExamples': 'Exemples : *.sch.uk, *.k12.*.us, example.org',
+    'userSuspension.settings.blockedInvalid': 'Motif de domaine non valide : {lines}',
+    'userSuspension.settings.invalidToast': 'Corrigez les champs en rouge dans Options de connexion avant d’enregistrer.',
   },
   es: {
     'userSuspension.reason.child_safety': 'Protección de menores',
@@ -124,9 +188,74 @@ export const userSuspension = {
     'userSuspension.screen.reasonLabel': 'Motivo:',
     'userSuspension.screen.messageLabel': 'Mensaje del administrador:',
     'userSuspension.screen.until': 'Suspendida hasta el {date}.',
-    'userSuspension.screen.contact': 'Si crees que es un error, contacta con soporte:',
+    'userSuspension.screen.contact': 'Si crees que es un error, comunícate con soporte:',
     'userSuspension.screen.back': 'Volver a iniciar sesión',
 
     'userSuspension.signupBlocked': 'No se permite el registro con esta dirección de correo electrónico.',
+
+    'userSuspension.tab': 'Suspendidos',
+    'userSuspension.badge': 'Suspendido',
+    'userSuspension.badgeTooltip.reason': 'Motivo: {reason}',
+    'userSuspension.badgeTooltip.since': 'Desde: {date}',
+    'userSuspension.badgeTooltip.until': 'Hasta: {date}',
+    'userSuspension.badgeTooltip.tenant': 'También se aplica en las aplicaciones hijas; registro bloqueado',
+    'userSuspension.badgeTooltip.note': 'Nota interna: {note}',
+    'userSuspension.action.suspend': 'Suspender',
+    'userSuspension.action.suspendTitle':
+      'Bloquea el inicio de sesión y el acceso a la API; la cuenta y sus datos se conservan',
+    'userSuspension.action.unsuspend': 'Levantar suspensión',
+    'userSuspension.action.unsuspendTitle': 'Levantar la suspensión',
+
+    'userSuspension.modal.titleOne': '¿Suspender a {name}?',
+    'userSuspension.modal.titleMany': '¿Suspender a {count} usuarios?',
+    'userSuspension.modal.intro':
+      'Un usuario suspendido no puede iniciar sesión y sus sesiones abiertas se cierran. La cuenta y sus datos se conservan y puedes levantar la suspensión en cualquier momento. No es lo mismo que archivar.',
+    'userSuspension.modal.reasonLabel': 'Motivo',
+    'userSuspension.modal.reasonPlaceholder': 'Elige un motivo',
+    'userSuspension.modal.messageLabel': 'Mensaje que se muestra al usuario (opcional)',
+    'userSuspension.modal.messagePlaceholder': 'Se muestra en la pantalla "Cuenta suspendida"',
+    'userSuspension.modal.noteLabel': 'Nota interna, solo para administradores (opcional)',
+    'userSuspension.modal.notePlaceholder': 'Nunca se muestra al usuario',
+    'userSuspension.modal.tooLong': 'Máximo {max} caracteres.',
+    'userSuspension.modal.tenantLabel':
+      'Suspender también este correo electrónico en todas las aplicaciones hijas e impedir que vuelva a registrarse',
+    'userSuspension.modal.tenantHelp':
+      'Las cuentas con la misma dirección de correo electrónico en las aplicaciones hijas de esta aplicación también se suspenden, y la dirección ya no puede registrarse en esta aplicación ni en sus aplicaciones hijas. Déjalo desactivado para suspender solo la cuenta en esta aplicación.',
+    'userSuspension.modal.confirm': 'Suspender',
+    'userSuspension.modal.cancel': 'Cancelar',
+    'userSuspension.modal.close': 'Cerrar',
+    'userSuspension.modal.working': 'Procesando...',
+
+    'userSuspension.unsuspend.title': '¿Levantar la suspensión de {name}?',
+    'userSuspension.unsuspend.message': 'El usuario podrá volver a iniciar sesión y usar la aplicación.',
+    'userSuspension.unsuspend.tenantLabel':
+      'Levantarla también en las aplicaciones hijas y permitir que este correo electrónico vuelva a registrarse',
+
+    'userSuspension.toast.suspended': 'Suspendidos: {count}',
+    'userSuspension.toast.alreadySuspended': 'Ya estaban suspendidos: {count}',
+    'userSuspension.toast.childApps': 'También suspendidos en aplicaciones hijas: {count}',
+    'userSuspension.toast.failed': 'No suspendidos: {count}. {details}',
+    'userSuspension.toast.suspendFailedPrefix': 'Error al suspender:',
+    'userSuspension.toast.unsuspended': 'Suspensión levantada.',
+    'userSuspension.toast.notSuspended': 'Este usuario no estaba suspendido.',
+    'userSuspension.toast.unsuspendFailedPrefix': 'Error al levantar la suspensión:',
+    'userSuspension.error.CANNOT_SUSPEND_SELF': 'No puedes suspender tu propia cuenta.',
+    'userSuspension.error.CANNOT_SUSPEND_OWNER': 'No se puede suspender al propietario de la aplicación.',
+    'userSuspension.error.CANNOT_SUSPEND_PRIVILEGED': 'Solo puedes suspender a usuarios con un nivel de acceso inferior al tuyo.',
+    'userSuspension.error.CANNOT_UNSUSPEND_PRIVILEGED': 'Esta suspensión se impuso desde un nivel de acceso superior y solo se puede levantar desde ese nivel.',
+    'userSuspension.error.USER_INVALID_STATE': 'No se puede suspender a usuarios archivados o eliminados.',
+    'userSuspension.error.USER_NOT_FOUND': 'Usuario no encontrado.',
+
+    'userSuspension.settings.supportHeading': 'Contacto de soporte',
+    'userSuspension.settings.supportDescription':
+      'Se muestra a los usuarios de esta aplicación cuya cuenta está suspendida. Una dirección de correo electrónico o un enlace https://. Déjalo vacío para usar el contacto de la aplicación principal o el predeterminado del servidor.',
+    'userSuspension.settings.supportPlaceholder': 'support@example.com o https://example.com/help',
+    'userSuspension.settings.supportInvalid': 'Introduce una dirección de correo electrónico o un enlace https://.',
+    'userSuspension.settings.blockedHeading': 'Dominios de correo bloqueados para el registro',
+    'userSuspension.settings.blockedDescription':
+      'Se rechazan los nuevos registros (por correo electrónico y primer inicio de sesión con redes sociales) con una dirección de correo de uno de estos dominios. Un patrón por línea. Un dominio también abarca sus subdominios (example.org abarca mail.example.org), y * coincide con exactamente una parte del nombre. Se aplica solo a esta aplicación, no a sus aplicaciones hijas. Las cuentas existentes no se ven afectadas.',
+    'userSuspension.settings.blockedExamples': 'Ejemplos: *.sch.uk, *.k12.*.us, example.org',
+    'userSuspension.settings.blockedInvalid': 'No es un patrón de dominio: {lines}',
+    'userSuspension.settings.invalidToast': 'Corrige los campos marcados en rojo en Opciones de acceso antes de guardar.',
   },
 } satisfies Record<UiLanguageCode, Record<string, string>>;

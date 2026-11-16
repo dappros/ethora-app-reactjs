@@ -335,14 +335,14 @@ export const ContextPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
       </label>
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-sm text-gray-500">{t('agentPanels.templatesLabel')}</span>
-        {agentPromptTemplates.map((t) => (
+        {agentPromptTemplates.map((tpl) => (
           <button
-            key={t.id}
+            key={tpl.id}
             disabled={isDisabled}
-            onClick={() => setPrompt(t.prompt)}
+            onClick={() => setPrompt(tpl.prompt)}
             className="text-xs border rounded px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
           >
-            {t.label}
+            {t(`agentPanels.template.${tpl.id}`)}
           </button>
         ))}
       </div>

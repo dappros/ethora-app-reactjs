@@ -29,7 +29,7 @@ function HubShell({ active, children }: { active: TsHubTab | null; children: Rea
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="grid grid-rows-[auto,_1fr] gap-4 h-full min-w-0">
+    <div className="grid grid-cols-[minmax(0,1fr)] grid-rows-[auto,_1fr] gap-4 h-full min-w-0">
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">{t('tsHub.title')}</div>
       </div>

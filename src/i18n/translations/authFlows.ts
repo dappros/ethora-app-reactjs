@@ -237,6 +237,16 @@ export const authFlows = {
     'authForgetPasswordThirdStep.repeatPasswordPlaceholder':
       'Répéter le nouveau mot de passe',
     'authForgetPasswordThirdStep.submit': 'Réinitialiser le mot de passe',
+    'authForgetPasswordThirdStep.passwordMismatch': 'Les mots de passe ne correspondent pas',
+    'authForgetPasswordThirdStep.requestFailed': 'Impossible de réinitialiser votre mot de passe. Veuillez réessayer.',
+    'authForgetPasswordThirdStep.mfaEither': 'Saisissez un code de votre application d’authentification ou un code de secours.',
+    'authForgetPasswordThirdStep.mfaBackup': 'Saisissez un code de secours.',
+    'authForgetPasswordThirdStep.mfaAuthenticator': 'Saisissez un code de votre application d’authentification.',
+    'authForgetPasswordThirdStep.mfaLabel': 'Code de vérification',
+    'authForgetPasswordThirdStep.mfaInvalid': 'Ce code n’est pas valide. Réessayez.',
+    'authForgetPasswordThirdStep.attemptsLeft': 'Tentatives restantes : {count}',
+    'authForgetPasswordThirdStep.tokenInvalid': 'Ce lien de réinitialisation est invalide ou expiré, ou trop de codes incorrects ont été saisis.',
+    'authForgetPasswordThirdStep.requestNewLink': 'Demander un nouveau lien de réinitialisation.',
 
     // Forms/ForgetPasswordForm.tsx
     'authForgetPasswordForm.stepNotFound': 'Étape introuvable',
@@ -409,6 +419,16 @@ export const authFlows = {
     'authForgetPasswordThirdStep.repeatPasswordPlaceholder':
       'Repite la nueva contraseña',
     'authForgetPasswordThirdStep.submit': 'Restablecer contraseña',
+    'authForgetPasswordThirdStep.passwordMismatch': 'Las contraseñas no coinciden',
+    'authForgetPasswordThirdStep.requestFailed': 'No se pudo restablecer tu contraseña. Inténtalo de nuevo.',
+    'authForgetPasswordThirdStep.mfaEither': 'Introduce un código de tu aplicación de autenticación o un código de respaldo.',
+    'authForgetPasswordThirdStep.mfaBackup': 'Introduce un código de respaldo.',
+    'authForgetPasswordThirdStep.mfaAuthenticator': 'Introduce un código de tu aplicación de autenticación.',
+    'authForgetPasswordThirdStep.mfaLabel': 'Código de verificación',
+    'authForgetPasswordThirdStep.mfaInvalid': 'Ese código no es válido. Inténtalo de nuevo.',
+    'authForgetPasswordThirdStep.attemptsLeft': 'Intentos restantes: {count}',
+    'authForgetPasswordThirdStep.tokenInvalid': 'Este enlace de restablecimiento no es válido o venció, o se introdujeron demasiados códigos incorrectos.',
+    'authForgetPasswordThirdStep.requestNewLink': 'Solicitar un nuevo enlace de restablecimiento.',
 
     // Forms/ForgetPasswordForm.tsx
     'authForgetPasswordForm.stepNotFound': 'Paso no encontrado',
