@@ -2,6 +2,10 @@
 // only for now: fr and es fall back to it (useTranslation).
 export const onboarding = {
   en: {
+    // App settings: unsaved changes
+    'appSettings.unsaved': 'Unsaved changes',
+    'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
+
     // Try it (agent panels)
     'agentPanels.tryNoKnowledge': 'This assistant has no websites or documents yet, so it can only answer from its instructions. Add knowledge first for a real test.',
 

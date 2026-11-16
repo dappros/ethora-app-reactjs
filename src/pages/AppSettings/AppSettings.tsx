@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { cloneDeep, isEqual } from 'lodash';
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import {
+  useBlocker,
   useLocation,
   useNavigate,
   useParams,
@@ -176,6 +177,25 @@ export default function AppSettings() {
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isModified, setIsModified] = useState(false);
+  // Unsaved changes: confirm before leaving the page, in the app and on a
+  // reload or tab close.
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    isModified && currentLocation.pathname !== nextLocation.pathname
+  );
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    if (window.confirm(t('appSettings.unsavedLeave'))) blocker.proceed();
+    else blocker.reset();
+  }, [blocker, t]);
+  useEffect(() => {
+    if (!isModified) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [isModified]);
   const [initialState, setInitialState] = useState({});
 
   // appearance tab
@@ -768,6 +788,11 @@ export default function AppSettings() {
           </IconButton>
         </div>
         <div className="flex w-full lg:w-auto items-center">
+          {isModified && (
+            <span role="status" data-testid="settings-unsaved" className="mr-3 whitespace-nowrap text-sm text-amber-700 dark:text-amber-300">
+              {t('appSettings.unsaved')}
+            </span>
+          )}
           <button
             onClick={onExternalClick}
             className="mr-4 w-[40px] h-[40px] flex items-center justify-center rounded-xl hover:bg-brand-hover"
@@ -777,8 +802,11 @@ export default function AppSettings() {
           <button
             onClick={onSave}
             className={classNames(
-              'border bg-brand-500 hover:bg-brand-400 w-full lg:w-[184px] p-2 rounded-xl text-white px-4',
-              isModified ? '' : 'opacity-50 cursor-not-allowed'
+              'border w-full lg:w-[184px] p-2 rounded-xl px-4',
+              // Disabled: a muted button that stays readable in the dark theme.
+              isModified
+                ? 'bg-brand-500 hover:bg-brand-400 text-white'
+                : 'cursor-not-allowed border-gray-300 bg-gray-200 text-gray-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300'
             )}
             disabled={!isModified}
           >
