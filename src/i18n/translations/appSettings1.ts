@@ -16,7 +16,7 @@ export const appSettings1 = {
   en: {
     // appSettings.* - AppSettings.tsx
     'appSettings.heading': 'Settings',
-    'appSettings.infoAriaLabel': 'Info',
+    'appSettings.infoAriaLabel': 'Next steps for this app',
     'appSettings.saveButton': 'Save',
     'appSettings.tab.aiWidget': 'AI Widget',
     'appSettings.tab.webApp': 'Web App',

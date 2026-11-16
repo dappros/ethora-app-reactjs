@@ -1,7 +1,7 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { IconClose } from '../Icons/IconClose';
-import { HubspotForm } from './SettingsTutorialModal/components/HubspotForm';
+import { HubspotForm } from './HubspotForm';
 
 interface Props {
   onClose: () => void;

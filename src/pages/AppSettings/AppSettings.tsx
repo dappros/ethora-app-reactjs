@@ -3,7 +3,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconButton } from '@mui/material';
 import classNames from 'classnames';
 import { cloneDeep, isEqual } from 'lodash';
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   useBlocker,
   useLocation,
@@ -38,14 +38,6 @@ import { env } from '../../config/env';
 import { isValidSupportContact, parseBlockedDomains } from '../../utils/suspension';
 import { TsOverrideDraft, draftToOverrides, invalidOverrides, overridesToDraft } from '../../utils/trustSafety';
 import { apiError } from '../../utils/apiError';
-// Lazy: the tutorial modal pulls in ~3MB of onboarding images and ~1MB of
-// step content - we only want that chunk over the wire when firstAdd is
-// true, not on every Settings visit.
-const SettingTutorialModal = lazy(() =>
-  import('../../components/modal/SettingsTutorialModal/SettingTutorialModal').then(
-    (m) => ({ default: m.SettingTutorialModal })
-  )
-);
 
 // Lifecycle tab name: "Delete or Archive" replaces the old "Delete" label.
 // The page now exposes both reversible Archive and irreversible Hard delete
@@ -121,7 +113,6 @@ export default function AppSettings() {
   const { t, language } = useTranslation();
   const apps = useAppStore((s) => s.apps);
   const currentUser = useAppStore((s) => s.currentUser);
-  const [isInfo, setIsInfo] = useState(false);
   const [app, setApp] = useState<ModelApp | undefined>(undefined);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -150,13 +141,6 @@ export default function AppSettings() {
     : 0;
   const [selectedIndex, setSelectedIndex] = useState(initialTabIndex);
 
-  const firstAdd = localStorage.getItem('firstAdd') === 'true';
-
-  useEffect(() => {
-    if (firstAdd) {
-      setIsInfo(true);
-    }
-  }, [firstAdd]);
 
   useEffect(() => {
     if (
@@ -749,7 +733,6 @@ export default function AppSettings() {
 
   useEffect(() => {
     if (isNew) {
-      setIsInfo(true);
       navigate(location.pathname, {
         replace: true,
         state: { from: location.pathname + location.search, isNew: false },
@@ -782,7 +765,9 @@ export default function AppSettings() {
             size="small"
             sx={{ marginLeft: 1, verticalAlign: 'middle' }}
             aria-label={t('appSettings.infoAriaLabel')}
-            onClick={() => setIsInfo(true)}
+            // The old "Choose your path" guide is retired: next steps live on
+            // the App's Home, and new Apps start from the start screen.
+            onClick={() => navigate(`/app/admin/apps/${appId}`)}
           >
             <InfoOutlinedIcon fontSize="small" />
           </IconButton>
@@ -1022,17 +1007,6 @@ export default function AppSettings() {
           navigate={navigate}
         />
       )} */}
-      {isInfo && (
-        <Suspense fallback={null}>
-          <SettingTutorialModal
-            show={isInfo}
-            onClose={() => {
-              setIsInfo(false);
-              localStorage.removeItem('firstAdd');
-            }}
-          />
-        </Suspense>
-      )}
 
       {loading && <Loading />}
     </div>

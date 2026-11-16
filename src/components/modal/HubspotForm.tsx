@@ -17,10 +17,10 @@
 
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useAppStore } from '../../../../store/useAppStore';
-import { useTranslation } from '../../../../i18n/useTranslation';
+import { useAppStore } from '../../store/useAppStore';
+import { useTranslation } from '../../i18n/useTranslation';
 
-import { env } from '../../../../config/env';
+import { env } from '../../config/env';
 interface FormInputs {
   firstname: string;
   lastname: string;
