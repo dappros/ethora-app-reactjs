@@ -33,6 +33,7 @@ import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
 import { countLabel } from '../utils/countLabel';
 import { resolveWidgetUrl } from '../utils/widgetUrl';
+import { readWidgetAppearanceDraft, writeWidgetAppearanceDraft } from '../utils/widgetAppearanceDraft';
 
 type Knows = 'web' | 'docs' | null;
 type Advanced = 'memory' | 'heartbeat' | 'flows' | 'model' | 'chats' | 'agent' | null;
@@ -334,19 +335,27 @@ function useWidgetAppearance(appId?: string) {
   // Settings an older build of the AI Widget tab kept in this browser only,
   // offered once for saving to the server when the server holds none.
   const [legacy, setLegacy] = useState<AiWidgetAppearance | null>(null);
+  // The App the appearance state belongs to. Draft reads and writes only
+  // happen while it equals appId: right after switching App the state still
+  // holds the previous App's values, which must never be written (or a
+  // draft deleted) under the new App's key.
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!appId) return;
     let cancelled = false;
     setLoaded(false);
+    setLoadedFor(null);
     httpGetWidgetAppearance(appId)
       .then((resp) => {
         if (cancelled) return;
         const attrs = resp?.data?.appearance || {};
         const next = appearanceFromAttributes(attrs);
-        setAppearance(next);
+        const draft = readWidgetAppearanceDraft(appId, getAppearanceAttributeRecord(next));
+        setAppearance(draft ? appearanceFromAttributes(draft) : next);
         setSaved(next);
         setLegacy(Object.keys(attrs).length ? null : loadLegacyBrowserAppearance(appId));
+        setLoadedFor(appId);
       })
       .catch(() => !cancelled && toast.error(t('aiWidgetAppearance.loadFailed')))
       .finally(() => !cancelled && setLoaded(true));
@@ -354,6 +363,14 @@ function useWidgetAppearance(appId?: string) {
       cancelled = true;
     };
   }, [appId, t]);
+
+  // Keep the unsaved draft for this App in the tab (survives a reload).
+  useEffect(() => {
+    if (!appId || !loaded || loadedFor !== appId) return;
+    const base = getAppearanceAttributeRecord(saved);
+    const values = getAppearanceAttributeRecord(appearance);
+    writeWidgetAppearanceDraft(appId, base, isEqual(appearance, saved) ? null : values);
+  }, [appId, loaded, loadedFor, appearance, saved]);
 
   const persist = useCallback(async (value: AiWidgetAppearance): Promise<boolean> => {
     if (!appId || saving) return false;
