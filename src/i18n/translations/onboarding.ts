@@ -2,6 +2,11 @@
 // only for now: fr and es fall back to it (useTranslation).
 export const onboarding = {
   en: {
+    // Startup failure (App.tsx)
+    'appBootstrap.loadFailed': 'Could not load the app',
+    'appBootstrap.tryAgainHint': 'The server did not answer. Check your connection and try again.',
+    'appBootstrap.retry': 'Retry',
+
     // Start screen
     'onboarding.choose.subtitle': 'Pick one to start. You can add the others to the same app later.',
     'onboarding.goal.website': 'AI assistant for my website',
