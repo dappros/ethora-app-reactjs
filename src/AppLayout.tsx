@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
 import { LicenseBanner } from './components/LicenseBanner';
+import { PanelSkeleton } from './components/PanelSkeleton';
+import { useTranslation } from './i18n/useTranslation';
 import { Loading } from './components/Loading';
 import { ServerNoticeBanner } from './components/ServerNoticeBanner';
 import { useAppStore } from './store/useAppStore';
@@ -10,6 +12,7 @@ import { isReturnablePath, rememberReturnPath, signedOutEntryPath } from './util
 export default function AppLayout() {
   const location = useLocation();
   const user = useAppStore((s) => s.currentUser);
+  const { t } = useTranslation();
 
   if (!user) {
     // On a reload the app config and the session restore (useTrackUrl's
@@ -41,27 +44,29 @@ export default function AppLayout() {
   }
 
   return (
-    <Suspense fallback={null}>
-      <div className="bg-page w-full flex justify-center">
-        <div className="h-screen max-w-[1920px] w-full md:p-4">
-          {/* app content */}
-          <div className="h-full grid grid-rows-[72px,_1fr] md:grid-rows-1 md:grid-cols-[96px,_1fr] md:gap-4">
-            {/* menu */}
-            <div className="h-full overflow-hidden">
-              <AppMenu />
-            </div>
-            {/* router content — edge-to-edge on mobile (no grey inset between
-                the top bar and the chat panel); padded card on desktop. */}
-            <div className="min-h-[calc(100vh-72px)] md:p-0 flex flex-col">
-              <ServerNoticeBanner />
-              <LicenseBanner />
-              <div className="flex-1 min-h-0">
+    <div className="bg-page w-full flex justify-center">
+      <div className="h-screen max-w-[1920px] w-full md:p-4">
+        {/* app content */}
+        <div className="h-full grid grid-rows-[72px,_1fr] md:grid-rows-1 md:grid-cols-[96px,_1fr] md:gap-4">
+          {/* menu */}
+          <div className="h-full overflow-hidden">
+            <AppMenu />
+          </div>
+          {/* router content - edge-to-edge on mobile (no grey inset between
+              the top bar and the chat panel); padded card on desktop. While a
+              page's code loads the menu stays and the page area shows a
+              skeleton instead of a blank screen. */}
+          <div className="min-h-[calc(100vh-72px)] md:p-0 flex flex-col">
+            <ServerNoticeBanner />
+            <LicenseBanner />
+            <div className="flex-1 min-h-0">
+              <Suspense fallback={<div className="h-full rounded-2xl bg-white p-4 md:p-6"><PanelSkeleton label={t('appBootstrap.loadingPage')} /></div>}>
                 <Outlet />
-              </div>
+              </Suspense>
             </div>
           </div>
         </div>
       </div>
-    </Suspense>
+    </div>
   );
 }

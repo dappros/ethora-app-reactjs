@@ -9,6 +9,7 @@ export const onboarding = {
     'appBootstrap.loadFailed': 'Could not load the app',
     'appBootstrap.tryAgainHint': 'The server did not answer. Check your connection and try again.',
     'appBootstrap.retry': 'Retry',
+    'appBootstrap.loadingPage': 'Loading…',
 
     // Start screen
     'onboarding.choose.subtitle': 'Pick one to start. You can add the others to the same app later.',
