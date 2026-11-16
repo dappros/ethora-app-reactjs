@@ -90,6 +90,19 @@ export default function StartProject() {
     setStep(goal);
   };
 
+  // A new account is sent here once after sign-up (navigateToUserPage reads
+  // the newUser flag). Clear it as soon as the screen is shown, so whichever
+  // way the owner leaves (a goal, a link, the menu, the back button) the next
+  // login lands where it normally would.
+  useEffect(() => {
+    try {
+      localStorage.removeItem('newUser');
+    } catch {
+      /* Storage may be unavailable. */
+    }
+    clearAgentsOnboarding();
+  }, []);
+
   // An explicit ?intent= from the website skips the chooser.
   useEffect(() => {
     if (!preselected || !(urlIntent || isOnboardingIntentExplicit())) return;
