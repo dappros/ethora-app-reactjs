@@ -198,6 +198,9 @@ export default function AgentSettings() {
   const currentUser = useAppStore((s) => s.currentUser);
   const isOwned = !!(agent && currentUser?._id && agent.ownerId === currentUser._id);
   const readOnly = !isOwned;
+  // Opened from an App's AI assistant tab: the way back goes to that App.
+  const fromAppId = searchParams.get('fromApp');
+  const fromApp = fromAppId ? apps.find((a) => a._id === fromAppId) || { _id: fromAppId, displayName: t('appTabs.app') } : null;
 
   if (loading && !agent) return <div className="p-4 text-gray-500">{t('agentSettings.loadingAgent')}</div>;
   if (!agent) return <div className="p-4 text-gray-500">{t('agentSettings.agentNotFound')}</div>;
@@ -207,7 +210,8 @@ export default function AgentSettings() {
       <Header
         agent={agent}
         defaultBotInstance={defaultBotInstance}
-        onBack={() => navigate('/app/admin/agents')}
+        onBack={() => navigate(fromApp ? `/app/admin/apps/${fromApp._id}/assistant` : '/app/admin/agents')}
+        backLabel={fromApp ? t('appAssistant.backToApp').replace('{name}', fromApp.displayName) : undefined}
         onVisibilityChanged={(updated) => setAgent(updated)}
         onInstancesChanged={reloadInstances}
         readOnly={readOnly}
@@ -449,11 +453,12 @@ const Header: React.FC<{
   agent: ModelAgent;
   defaultBotInstance: (ModelBotInstance & { appName?: string }) | null;
   onBack: () => void;
+  backLabel?: string;
   onVisibilityChanged: (a: ModelAgent) => void;
   onInstancesChanged: () => void;
   readOnly: boolean;
   showUsage?: boolean;
-}> = ({ agent, defaultBotInstance, onBack, onInstancesChanged, readOnly, showUsage }) => {
+}> = ({ agent, defaultBotInstance, onBack, backLabel, onInstancesChanged, readOnly, showUsage }) => {
   const { t } = useTranslation();
   // This month's AI tokens for the agent, across every App it answers in.
   // Owner only (the endpoint refuses anyone else).
@@ -478,7 +483,7 @@ const Header: React.FC<{
   return (
     <div className="px-4 pt-2 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-3">
       <button onClick={onBack} className="text-sm text-brand-500 hover:underline">
-        &larr; {t('agentSettings.backToAgents')}
+        &larr; {backLabel || t('agentSettings.backToAgents')}
       </button>
       <div className="flex items-center gap-2 flex-1 min-w-[240px]">
         {agent.avatarUrl ? (

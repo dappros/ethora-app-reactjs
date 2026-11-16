@@ -283,9 +283,14 @@ function ChatAppSwitcher({
 interface ChatPageProps {
   scheduledCallSlug?: string;
   roomJID?: string;
+  // Rendered inside an App's page (/app/admin/apps/:appId/chats): the App
+  // header replaces this page's title and switcher, and the chat context is
+  // switched to that App on mount, the same switch the App's Chats tab
+  // used to do before opening /app/chat.
+  embeddedAppId?: string;
 }
 
-export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps = {}) {
+export default function ChatPage({ scheduledCallSlug, roomJID, embeddedAppId }: ChatPageProps = {}) {
   const { t } = useTranslation();
   const config = useAppStore((s) => s.currentApp);
   // Use the dedicated ownedApps slot, not the paginated `apps` slot. The
@@ -382,6 +387,16 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
   // base app is the operator's own.
   const hostedSuffix = isEthoraHostedEnv() ? '' : '.selfHosted';
 
+  // Embedded in an App's page: make sure the chat context is that App.
+  // chatAppId is global (persisted), so it stays on this App afterwards:
+  // the sidebar Chats item then opens this App's chats until the switcher
+  // there is changed, exactly as after the old tab link.
+  useEffect(() => {
+    if (!embeddedAppId || chatAppId === embeddedAppId) return;
+    void handleSwitch(embeddedAppId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embeddedAppId]);
+
   const handleSwitch = async (nextAppId: string | null) => {
     setSwitching(true);
     try {
@@ -397,8 +412,14 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
     }
   };
 
+  const embeddedEmpty =
+    embeddedAppId && chatAppId === embeddedAppId && apps.some((a) => a._id === embeddedAppId && !(a.defaultRooms?.length || 0));
+
   return (
-    <div className="grid grid-rows-[auto,_1fr] gap-0 md:gap-4 h-full abc">
+    <div className={embeddedAppId ? 'grid h-full grid-rows-[auto,_minmax(0,1fr)]' : 'grid grid-rows-[auto,_1fr] gap-0 md:gap-4 h-full abc'}>
+      {embeddedAppId ? (
+        <div className={embeddedEmpty ? 'p-3' : ''}>{embeddedEmpty && <OwnerEmptyChatNextStep appId={embeddedAppId} />}</div>
+      ) : (
       <div className="md:px-8 hidden md:flex flex-col justify-between items-stretch md:items-center md:flex-row md:min-h-[40px] gap-4">
         <div className="font-varela mb-4 text-[24px] md:mb-0 md:text-[34px] leading-none">
           {t('chat.heading')}
@@ -457,6 +478,7 @@ export default function ChatPage({ scheduledCallSlug, roomJID }: ChatPageProps =
         })()}
         <div />
       </div>
+      )}
       <div className="row-start-2 min-h-0 md:m-0 rounded-none md:rounded-2xl bg-white px-0 overflow-hidden">
         {/* Keyed remount: when chatAppId changes we want a fresh XMPP
             socket and fresh chat-component state. React's reconciliation

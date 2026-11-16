@@ -136,7 +136,7 @@ export const getQuestionsAi = (
       time: t('dataTutorial.ai.one.time'),
       description: t('dataTutorial.ai.one.description'),
       image: AiTutorialOne,
-      link: `/app/admin/apps/${query}/settings?tab=AI+Widget`
+      link: `/app/admin/apps/${query}/assistant`
     },
     answer: {
       time: t('dataTutorial.answerTimeDefault'),
@@ -172,7 +172,7 @@ export const getQuestionsAi = (
       time: t('dataTutorial.ai.three.time'),
       description: t('dataTutorial.ai.three.description'),
       image: AiTutorialThree,
-      link: `/app/admin/apps/${query}/settings?tab=AI+Widget`
+      link: `/app/admin/apps/${query}/assistant`
     },
     answer: {
       time: t('dataTutorial.answerTimeDefault'),

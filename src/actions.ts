@@ -299,9 +299,9 @@ export async function actionLoadOwnedApps() {
   state.doSetOwnedApps(apps);
 }
 
-export async function actionCreateApp(displayName: string) {
+export async function actionCreateApp(displayName: string, extra?: { onboardingGoal?: string }) {
   const state = getState();
-  const { data } = await httpCreateNewApp(displayName);
+  const { data } = await httpCreateNewApp(displayName, extra);
   state.doAddApp(data.app);
 
   return data.app;

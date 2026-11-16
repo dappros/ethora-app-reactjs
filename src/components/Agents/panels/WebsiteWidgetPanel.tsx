@@ -44,7 +44,7 @@ export const WebsiteWidgetPanel: React.FC<{ agent: ModelAgent; instances: AgentB
                 </div>
               </div>
               <Link
-                to={`/app/admin/apps/${bi.appId}/settings?tab=AI+Widget`}
+                to={`/app/admin/apps/${bi.appId}/assistant`}
                 className="text-brand-500 hover:underline text-sm"
               >
                 {t('agentSettings.websiteWidgetOpen')}

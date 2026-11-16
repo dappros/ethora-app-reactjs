@@ -17,6 +17,8 @@ const Help = lazy(() => import('./pages/Help'));
 const WhatsNew = lazy(() => import('./pages/WhatsNew'));
 const AdminApp = lazy(() => import('./pages/AdminApp'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
+const StartProject = lazy(() => import('./pages/StartProject'));
+const SelfHostedStart = lazy(() => import('./pages/SelfHostedStart'));
 const AdminAgents = lazy(() => import('./pages/AdminAgents'));
 const AdminBilling = lazy(() => import('./pages/AdminBilling'));
 const AdminLicense = lazy(() => import('./pages/AdminLicense'));
@@ -29,6 +31,10 @@ const QuarantineIndexRedirect = lazy(() =>
   import('./pages/AdminTrustSafety').then((m) => ({ default: m.QuarantineIndexRedirect }))
 );
 const AppSettings = lazy(() => import('./pages/AppSettings/AppSettings'));
+const AppHome = lazy(() => import('./pages/AppHome'));
+const AppAssistant = lazy(() => import('./pages/AppAssistant'));
+const AppConversations = lazy(() => import('./pages/AppConversations'));
+const AppChats = lazy(() => import('./pages/AppChats'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
 const AppModeration = lazy(() => import('./pages/AppModeration'));
@@ -139,6 +145,10 @@ export const router = createBrowserRouter(
                           path: 'apps',
                           Component: AdminApps,
                         },
+                        // Onboarding: what the owner wants to build, before
+                        // any App exists. New accounts land here after sign-up.
+                        { path: 'start', Component: StartProject },
+                        { path: 'self-hosted', Component: SelfHostedStart },
                         {
                           path: 'billing',
                           Component: AdminBilling,
@@ -188,8 +198,23 @@ export const router = createBrowserRouter(
                           Component: AdminApp,
                           children: [
                             {
+                              // App Home: the next step of the App's goal.
                               index: true,
-                              element: <Navigate to="settings" replace />,
+                              Component: AppHome,
+                            },
+                            {
+                              path: 'assistant',
+                              Component: AppAssistant,
+                            },
+                            {
+                              path: 'conversations',
+                              Component: AppConversations,
+                            },
+                            {
+                              // This App's chats under its header and tabs
+                              // (switches the chat context to the App).
+                              path: 'chats',
+                              Component: AppChats,
                             },
                             {
                               path: 'settings',

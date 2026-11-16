@@ -1,9 +1,5 @@
 import { NavigateFunction } from 'react-router-dom';
-import {
-  AGENTS_ONBOARDING_PATH,
-  clearAgentsOnboarding,
-  isAgentsOnboarding,
-} from './agentsOnboarding';
+import { clearAgentsOnboarding } from './agentsOnboarding';
 import { defaultLandingPath, isBaseAppHost } from './appHost';
 import { consumeReturnPath } from './returnPath';
 
@@ -22,11 +18,11 @@ export function navigateToUserPage(
     return navigate(returnPath, { replace: true });
   }
 
-  if (isAgentsOnboarding()) {
-    if (isBaseAppHost()) {
-      return navigate(AGENTS_ONBOARDING_PATH, { replace: true });
-    }
+  // A new owner chooses what to build before creating an App. Tenant users
+  // retain their configured landing page.
+  if (isBaseAppHost() && localStorage.getItem('newUser') === 'true') {
     clearAgentsOnboarding();
+    return navigate('/app/admin/start', { replace: true });
   }
 
   switch (page) {

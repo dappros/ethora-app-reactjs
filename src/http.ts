@@ -343,12 +343,18 @@ export function httpGetOneUserWallet(wallet: string) {
   return http.get(`/users/profile/${wallet}`);
 }
 
-export function httpCreateNewApp(displayName: string) {
+export function httpCreateNewApp(displayName: string, extra?: { onboardingGoal?: string }) {
   // createDefaultChat: true preserves the admin-panel first-run UX (the
   // operator lands in a "Main chat" room after creation). The backend
   // default is OFF so external API callers get an empty app, but the
   // panel explicitly opts in here.
-  return http.post(`/apps`, { displayName, createDefaultChat: true });
+  return http.post(`/apps`, { displayName, createDefaultChat: true, ...(extra || {}) });
+}
+
+// Start screen: the goal picked, and the self-hosted page's "Talk to us"
+// (lands in the signup report as a lead).
+export function httpRecordOnboarding(body: { goal?: string; talkToUs?: boolean }) {
+  return httpV2.post('/users/me/onboarding', body);
 }
 
 export interface GetAppsPaginator {
@@ -1359,6 +1365,12 @@ export function httpListBotInstances(params?: { appId?: string; agentId?: string
   return httpV2.get('/bot-instances', { params });
 }
 
+// A website widget creates its visitor rooms itself, so connecting its agent
+// needs only the App's BotInstance, not an invite to an existing room.
+export function httpPrepareWidgetAgent(appId: string, agentId: string) {
+  return httpV2.post(`/apps/${encodeURIComponent(appId)}/agents/${encodeURIComponent(agentId)}/widget-instance`);
+}
+
 // Remove a BotInstance from a single chat (does NOT stop the bot or destroy the
 // instance). Used by the admin Chats "remove bot from this room" button.
 export function httpLeaveChatAgentBotInstance(idOrAddress: string, botInstanceId: string, chatJid: string) {
@@ -1403,7 +1415,7 @@ export function httpTestMessageAgentBotInstance(idOrAddress: string, botInstance
 //
 // `agentId` narrows the list to one agent's rows. Omitting it lists the whole
 // app, which is what the legacy LinksTable wants — it has no agent to scope to.
-export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number; agentId?: string }) {
+export function httpListSiteSourcesV2(appId?: string, params?: { limit?: number; offset?: number; agentId?: string; search?: string }) {
   const config = params ? { params } : undefined;
   if (appId) return httpV2.get(`/apps/${appId}/sources/site-crawl`, config);
   return httpV2.get('/sources/site-crawl', config);
