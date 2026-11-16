@@ -65,8 +65,10 @@ export default function ProfileEdit() {
         toast.success(t('profileEdit.toastSuccess'));
         navigate('/app/profile');
       })
-      .catch((_) => {
-        toast.error(t('profileEdit.toastError'));
+      .catch((err) => {
+        // Trust & Safety refuses pictures that may break the content policy.
+        const refused = err?.response?.data?.code === 'UPLOAD_BLOCKED_SENSITIVE';
+        toast.error(t(refused ? 'profileEdit.toastImageRefused' : 'profileEdit.toastError'));
       });
   };
 

@@ -354,6 +354,7 @@ export const userSettings = {
     'profileEdit.aboutPlaceholder': 'About',
     'profileEdit.toastSuccess': 'Profile updated successfully',
     'profileEdit.toastError': 'An error occurred while saving the profile',
+    'profileEdit.toastImageRefused': 'This picture cannot be used. Please choose another one.',
   },
   fr: {
     // src/pages/UserSettings/Security.tsx
@@ -700,6 +701,7 @@ export const userSettings = {
     'profileEdit.toastSuccess': 'Profil mis à jour avec succès',
     'profileEdit.toastError':
       "Une erreur s'est produite lors de l'enregistrement du profil",
+    'profileEdit.toastImageRefused': 'Cette image ne peut pas être utilisée. Veuillez en choisir une autre.',
   },
   es: {
     // src/pages/UserSettings/Security.tsx
@@ -1046,5 +1048,6 @@ export const userSettings = {
     'profileEdit.aboutPlaceholder': 'Acerca de',
     'profileEdit.toastSuccess': 'Perfil actualizado correctamente',
     'profileEdit.toastError': 'Se produjo un error al guardar el perfil',
+    'profileEdit.toastImageRefused': 'No se puede usar esta imagen. Elige otra.',
   },
 } satisfies Record<UiLanguageCode, Record<string, string>>;
