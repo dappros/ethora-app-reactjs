@@ -456,7 +456,7 @@ export const appSettings2 = {
       'Pour une intégration rapide sans code, consultez nos sections',
     'appSettingsMobileApp.webAppLinkText': 'Application web',
     'appSettingsMobileApp.and': 'et',
-    'appSettingsMobileApp.aiWidgetLinkText': 'Widget IA',
+    'appSettingsMobileApp.aiWidgetLinkText': 'Assistant IA',
     'appSettingsMobileApp.quickNoCodeSuffix':
       "sections. Notre application web est responsive et vous pouvez l'essayer sur vos appareils mobiles avant de vous engager à développer une application native.",
     'appSettingsMobileApp.reactNativeComponentDesc':
@@ -651,7 +651,7 @@ export const appSettings2 = {
     'appSettingsWebApp.additionalSettingsHeading':
       'Paramètres supplémentaires',
     'appSettingsWebApp.additionalSettingsPrefix': 'Utilisez le',
-    'appSettingsWebApp.aiWidgetLinkText': 'Widget IA',
+    'appSettingsWebApp.aiWidgetLinkText': 'Assistant IA',
     'appSettingsWebApp.additionalSettingsSuffix':
       'pour les paramètres supplémentaires tels que le prompt et l’envoi de documents.',
 
@@ -824,7 +824,7 @@ export const appSettings2 = {
       'Para una integración rápida sin código, consulta nuestras secciones',
     'appSettingsMobileApp.webAppLinkText': 'Aplicación web',
     'appSettingsMobileApp.and': 'y',
-    'appSettingsMobileApp.aiWidgetLinkText': 'Widget de IA',
+    'appSettingsMobileApp.aiWidgetLinkText': 'Asistente de IA',
     'appSettingsMobileApp.quickNoCodeSuffix':
       'secciones. Nuestra aplicación web es responsiva y puedes probarla en tus dispositivos móviles antes de comprometerte a crear una aplicación nativa.',
     'appSettingsMobileApp.reactNativeComponentDesc':
@@ -1023,7 +1023,7 @@ export const appSettings2 = {
     'appSettingsWebApp.additionalSettingsHeading':
       'Configuración adicional',
     'appSettingsWebApp.additionalSettingsPrefix': 'Usa la pestaña',
-    'appSettingsWebApp.aiWidgetLinkText': 'Widget de IA',
+    'appSettingsWebApp.aiWidgetLinkText': 'Asistente de IA',
     'appSettingsWebApp.additionalSettingsSuffix':
       'para configuración adicional como el prompt y la carga de documentos.',
 

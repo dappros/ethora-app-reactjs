@@ -34,6 +34,8 @@ export const startProject = {
     'startProject.signup.selfHost': 'Installez votre propre serveur Ethora',
     'startProject.signupHint': 'Après inscription, vous accéderez directement aux bonnes étapes.',
     'selfHosted.title': 'Installer Ethora sur votre serveur',
+    'startProject.signup.sdk': 'Ajoutez le chat et les appels à votre application',
+    'startProject.signup.messenger': 'Créez votre propre messagerie',
   },
   es: {
     'startProject.title': '¿Qué quieres crear?',
@@ -50,5 +52,7 @@ export const startProject = {
     'startProject.signup.selfHost': 'Configura tu propio servidor Ethora',
     'startProject.signupHint': 'Después de registrarte, irás directamente a la configuración adecuada.',
     'selfHosted.title': 'Instala Ethora en tu servidor',
+    'startProject.signup.sdk': 'Añade chat y llamadas a tu aplicación',
+    'startProject.signup.messenger': 'Crea tu propia app de mensajería',
   },
 } satisfies Record<UiLanguageCode, Record<string, string>>;

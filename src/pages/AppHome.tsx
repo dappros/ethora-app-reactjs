@@ -12,7 +12,7 @@ import { countLabel } from '../utils/countLabel';
 import { useTranslation } from '../i18n/useTranslation';
 import { AppMilestoneKind, ModelApp } from '../models';
 import { useAppStore } from '../store/useAppStore';
-import { crawlErrorMessage, startCrawl } from '../utils/createWebsiteAssistant';
+import { CRAWL_REASON_FAILED, CRAWL_REASON_NO_PAGES, CRAWL_REASON_UNKNOWN, crawlErrorMessage, startCrawl } from '../utils/createWebsiteAssistant';
 
 type Goal = NonNullable<ModelApp['onboardingGoal']>;
 type Crawl = { status: string; savedPages?: number; error?: string | { message?: string } };
@@ -65,7 +65,7 @@ export default function AppHome() {
         else {
           if (job.status === 'failed' || (job.status === 'completed' && !job.savedPages)) {
             const e = typeof job.error === 'string' ? job.error : job.error?.message;
-            setCrawlError(e || (job.status === 'failed' ? 'the crawl failed' : 'no pages could be read'));
+            setCrawlError(e || (job.status === 'failed' ? CRAWL_REASON_FAILED : CRAWL_REASON_NO_PAGES));
           }
           httpGetApp(appId).then((r) => doSetApp(r.data.result)).catch(() => {});
         }
@@ -122,7 +122,7 @@ export default function AppHome() {
         done: knows,
         title: knows ? t('appHome.web.knowsDone') : crawling ? t('appHome.web.crawling') : failed ? t('appHome.web.crawlFailed') : t('appHome.web.knows'),
         text: failed
-          ? t('appHome.web.crawlFailedText').replace('{reason}', crawlError)
+          ? t('appHome.web.crawlFailedText').replace('{reason}', crawlReasonLabel(t, crawlError))
           : knows
           ? t('appHome.web.knowsDoneText').replace('{pages}', countLabel(t, 'pages', pages)).replace('{docs}', countLabel(t, 'docs', docs))
           : crawling
@@ -285,7 +285,9 @@ function HomeLayout({ steps, side, intro }: { steps: StepDef[]; side: ReactNode;
   const { t } = useTranslation();
   const next = steps.findIndex((s) => !s.done);
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]" data-testid="app-home">
+    // minmax(0, …): the code snippet and the long App ID must not widen the
+    // column past the phone screen.
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" data-testid="app-home">
       <div>
         {intro && <p className="mb-3 rounded-xl bg-brand-50 p-3 text-sm text-gray-800">{intro}</p>}
         <ol className="space-y-2">
@@ -449,4 +451,13 @@ function ChooseGoal({ app, onChosen }: { app: ModelApp; onChosen: (goal: Goal) =
       </div>
     </section>
   );
+}
+
+// The stand-in reasons are stored in English (analytics, navigation state);
+// the API's own reasons are shown as they come.
+function crawlReasonLabel(t: (key: string) => string, reason: string): string {
+  if (reason === CRAWL_REASON_FAILED) return t('appHome.web.reasonFailed');
+  if (reason === CRAWL_REASON_NO_PAGES) return t('appHome.web.reasonNoPages');
+  if (reason === CRAWL_REASON_UNKNOWN) return t('appHome.web.reasonUnknown');
+  return reason;
 }

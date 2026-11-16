@@ -113,7 +113,7 @@ export default function StartProject() {
 
   const onWebsiteChange = (value: string) => {
     setWebsite(value);
-    if (!nameEdited) setName(suggestAssistantName(value, t('onboarding.website.nameSuffix')));
+    if (!nameEdited) setName(suggestAssistantName(value, t('onboarding.website.nameTemplate')));
   };
 
   const websiteUrl = normaliseWebsite(website);
