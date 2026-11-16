@@ -142,7 +142,7 @@ export default function Help() {
           <ResourceCard
             title={t('help.forum.title')}
             description={t('help.forum.description')}
-            href="https://forum.ethora.com/"
+            href="https://ethora.com/community/"
             ctaLabel={t('help.forum.cta')}
           />
           <ResourceCard
