@@ -104,6 +104,7 @@ export interface AppSliceInterface extends ModelState {
   // What the install's translation server can translate into, learned from
   // GET /apps/get-config (see ModelState.translateLanguages).
   doSetTranslateLanguages: (languages: readonly string[]) => void;
+  doSetBillingEnabled: (enabled: boolean) => void;
 }
 
 export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
@@ -141,6 +142,7 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
   // that really has none keeps it empty, which is both the "hide the chat
   // language picker" and the "translates.enabled: false" signal.
   translateLanguages: [...getCachedTranslateLanguages()],
+  billingEnabled: false,
   doSetUiLanguage: (language) => {
     setPreferredUiLanguage(language);
     set((s) => {
@@ -164,6 +166,11 @@ export const createAppSlice: ImmerStateCreator<AppSliceInterface> = (
     // hand us a readonly slice of the config response.
     set((s) => {
       s.translateLanguages = [...languages];
+    });
+  },
+  doSetBillingEnabled: (enabled) => {
+    set((s) => {
+      s.billingEnabled = enabled;
     });
   },
   doSetAvailableLanguages: (languages) => {

@@ -441,6 +441,55 @@ export function httpSetAppAiBudget(appId: string, caps: { dailyTokenCap?: number
   return httpV2.patch<{ ok: boolean; result: AppAiBudget }>(`/apps/${appId}/ai-budget`, caps);
 }
 
+// Hosted plans (backend modules/billing). `enabled` is false on self-hosted
+// installs, which never sell plans.
+export type BillingPlanId = 'free' | 'ai_assistant' | 'small_business' | 'enterprise';
+export type BillingInterval = 'month' | 'year';
+export interface BillingLimits {
+  mau: number | null; // null = unlimited
+  concurrentConnections: number | null;
+}
+export interface BillingPlan {
+  id: BillingPlanId;
+  selfServe: boolean;
+  trialDays: number;
+  limits: BillingLimits;
+  prices: Partial<Record<BillingInterval, { amount: number; currency: string }>>; // amount in cents
+}
+export interface BillingApp {
+  appId: string;
+  displayName: string;
+  plan: BillingPlanId;
+  interval: BillingInterval | null;
+  status: string | null;
+  currentPeriodEnd: string | null;
+  trialEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  lastPaymentFailedAt: string | null;
+  limits: BillingLimits;
+  mau: number | null;
+}
+export interface BillingOverview {
+  enabled: boolean;
+  plans: BillingPlan[];
+  apps: BillingApp[];
+  trialAvailable: boolean;
+}
+
+export function httpGetBilling() {
+  return httpV2.get<{ ok: boolean; result: BillingOverview }>('/billing');
+}
+
+// Returns the Stripe Checkout URL to send the browser to.
+export function httpStartBillingCheckout(appId: string, plan: BillingPlanId, interval: BillingInterval) {
+  return httpV2.post<{ ok: boolean; result: { url: string; trial: boolean } }>(`/apps/${appId}/billing/checkout`, { plan, interval });
+}
+
+// Returns the Stripe Customer Portal URL (change plan, cancel, card, invoices).
+export function httpOpenBillingPortal() {
+  return httpV2.post<{ ok: boolean; result: { url: string } }>('/billing/portal');
+}
+
 // One agent's tokens this UTC month across every App it answers in (owner only).
 export interface AgentAiUsage {
   month: string;

@@ -12,12 +12,12 @@ import { IconClose } from '../Icons/IconClose';
 import { IconHelp } from '../Icons/IconHelp';
 import { useTranslation } from '../../i18n/useTranslation';
 import { isBaseAppHost } from '../../utils/appHost';
+import { useAppStore } from '../../store/useAppStore';
 import { UnreadBadge } from '../UnreadBadge';
 import './MobileMenuModal.scss';
 
 import { env } from '../../config/env';
 import { useLicenseStatus } from '../../hooks/useLicenseStatus';
-import { isEthoraHostedEnv } from '../../utils/hostedEnv';
 interface Props {
   isAdmin?: boolean;
   onClose: () => void;
@@ -31,7 +31,8 @@ export function MobileMenuModal({ onClose, isAdmin }: Props) {
   const { status: licenseStatus } = useLicenseStatus();
   const agentsOff = licenseStatus?.operator?.aiAgents === false;
   const isBaseApp = isBaseAppHost();
-  const showBilling = isBaseApp && isEthoraHostedEnv();
+  const billingEnabled = useAppStore((s) => s.billingEnabled);
+  const showBilling = isBaseApp && billingEnabled;
 
   useEffect(() => {
     function onResize() {
