@@ -826,6 +826,9 @@ export interface ModelAgent {
   responseMode: 'always' | 'mentioned' | 'smart' | 'probability';
   responseProbability: number;
   cooldownSec: number;
+  // Answers messages written by other bots (default true; false stops
+  // agent-to-agent loops).
+  respondToBots?: boolean;
   greetingMessage: string;
   isRAG: boolean;
   ragTags: string[];

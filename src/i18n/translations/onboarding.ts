@@ -30,6 +30,11 @@ export const onboarding = {
     'aiWidgetConversations.simpleList': 'Simple list',
     'aiWidgetConversations.pageUnknown': 'Website page unavailable',
 
+    // Agent: advanced reply settings
+    'agentPanels.advancedReplies': 'Advanced',
+    'agentPanels.respondToBots': 'Respond to other bots',
+    'agentPanels.respondToBotsHint': 'Off: this agent ignores messages from other agents and bots, which stops two agents answering each other in a loop.',
+
     // Web Index search
     'agentPanels.searchPages': 'Find a page',
     'agentPanels.searchPagesPlaceholder': 'Search by page URL',

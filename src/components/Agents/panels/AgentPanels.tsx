@@ -69,6 +69,8 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
   const [responseMode, setResponseMode] = useState(agent.responseMode);
   const [responseProbability, setResponseProbability] = useState(agent.responseProbability);
   const [cooldownSec, setCooldownSec] = useState(agent.cooldownSec);
+  // Unset on the agent = answers bots (the API default).
+  const [respondToBots, setRespondToBots] = useState(agent.respondToBots !== false);
   const [llmModel, setLlmModel] = useState(agent.llmModel || '');
   const [categories, setCategories] = useState<AgentCategory[]>((agent.categories || []).filter(isAgentCategory));
 
@@ -79,6 +81,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
     setResponseMode(agent.responseMode);
     setResponseProbability(agent.responseProbability);
     setCooldownSec(agent.cooldownSec);
+    setRespondToBots(agent.respondToBots !== false);
     setLlmModel(agent.llmModel || '');
     setCategories((agent.categories || []).filter(isAgentCategory));
   }, [agent.id]);
@@ -92,6 +95,7 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
         responseMode,
         responseProbability,
         cooldownSec,
+        respondToBots,
         llmModel: llmModel.trim(),
         categories,
       });
@@ -225,6 +229,22 @@ export const PersonaPanel: React.FC<{ agent: ModelAgent; isDisabled?: boolean }>
           onChange={(e) => setCooldownSec(parseInt(e.target.value || '0', 10))}
         />
       </Field>
+      <details className="rounded-lg border border-gray-200 p-3" data-testid="agent-advanced-replies">
+        <summary className="cursor-pointer text-sm font-semibold">{t('agentPanels.advancedReplies')}</summary>
+        <label className="mt-3 flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1"
+            disabled={isDisabled}
+            checked={respondToBots}
+            onChange={(e) => setRespondToBots(e.target.checked)}
+          />
+          <span>
+            <span className="block font-medium">{t('agentPanels.respondToBots')}</span>
+            <span className="block text-gray-600">{t('agentPanels.respondToBotsHint')}</span>
+          </span>
+        </label>
+      </details>
       {/* Per-agent model override. Free text with suggestions: the model list moves
           faster than releases, and the provider validates the ID anyway. Empty means
           the platform default (AI_CHAT_MODEL on the AI service). */}
