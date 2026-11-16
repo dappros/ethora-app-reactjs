@@ -141,6 +141,29 @@ test('App Home follows the server milestones', async ({ page }) => {
   await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' })).toBeVisible();
 });
 
+test('an App whose widget ran before milestones: Home is live with the real conversation count', async ({ page }) => {
+  // What the API derives from existing visitor conversations (meta.derived):
+  // no host known, how many were answered not known.
+  await fakeBackend(page, {
+    ...baseApp,
+    onboardingGoal: 'website',
+    aiBot: { ...baseApp.aiBot, status: 'on', siteUrlsV2: [{ url: 'https://example.com/' }] },
+    milestones: {
+      widget_visitor: { firstAt: '2026-03-01T09:00:00Z', lastAt: '2026-10-20T18:00:00Z', count: 15, meta: { derived: true } },
+      widget_installed: { firstAt: '2026-03-01T09:00:00Z', lastAt: '2026-10-20T18:00:00Z', count: 1, meta: { host: '', derived: true } },
+      widget_answered_visitor: { firstAt: '2026-03-01T09:00:00Z', lastAt: '2026-10-20T18:00:00Z', count: null, meta: { derived: true } },
+    },
+  });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('home-step-3')).toHaveAttribute('data-done', 'true');
+  await expect(page.getByTestId('home-step-3')).toContainText('Live on your site');
+  await expect(page.getByTestId('home-step-4')).toHaveAttribute('data-done', 'true');
+  await expect(page.getByTestId('app-status-pill')).toHaveText('Live on your site');
+  await expect(page.getByText('visitors who opened the chat')).toBeVisible();
+  await expect(page.getByText('15', { exact: true })).toBeVisible();
+  await expect(page.getByText('conversations answered')).toHaveCount(0);
+});
+
 test('sign-up attribution keeps utm_source, utm_medium and utm_campaign', async ({ page }) => {
   await page.route('**/config.js', (route) =>
     route.fulfill({ contentType: 'application/javascript', body: 'window.__ETHORA_CONFIG__ = {};' }),

@@ -175,6 +175,7 @@ export const onboarding = {
     'appHome.web.installText': 'Copy one line of code, or send the instructions to your developer.',
     'appHome.web.installAction': 'Install',
     'appHome.web.installedDone': 'Live on {host}',
+    'appHome.web.installedDoneNoHost': 'Live on your site',
     'appHome.web.testPage': 'Seen on a test page ({host})',
     'appHome.web.testPageText': 'It works. Put the same code on your public site to go live.',
     'appHome.web.firstConversation': 'First visitor conversation',

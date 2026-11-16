@@ -154,8 +154,12 @@ export default function AppHome() {
       {
         // One rule: the widget seen on any page but this install's own.
         done: seen,
+        // No host when the install was worked out from visitor conversations
+        // that predate page capture (the API marks it meta.derived).
         title: has('widget_installed')
-          ? t('appHome.web.installedDone').replace('{host}', host)
+          ? host
+            ? t('appHome.web.installedDone').replace('{host}', host)
+            : t('appHome.web.installedDoneNoHost')
           : has('widget_test_page')
             ? t('appHome.web.testPage').replace('{host}', testHost)
             : t('appHome.web.install'),
@@ -185,7 +189,10 @@ export default function AppHome() {
             <SideBox title={t('appHome.live.title')}>
               <div className="grid grid-cols-2 gap-3">
                 <Stat value={m.widget_visitor?.count ?? 0} label={t('appHome.live.visitors')} />
-                <Stat value={m.widget_answered_visitor?.count ?? 0} label={t('appHome.live.answered')} />
+                {/* null: answered before answers were counted, number unknown. */}
+                {m.widget_answered_visitor?.count !== null && (
+                  <Stat value={m.widget_answered_visitor?.count ?? 0} label={t('appHome.live.answered')} />
+                )}
                 <Stat value={pages} label={t('appHome.live.pages')} />
                 <Stat value={docs} label={t('appHome.live.docs')} />
                 <Link to={`${base}/conversations?view=requests`} className="hover:underline" data-testid="home-requests">

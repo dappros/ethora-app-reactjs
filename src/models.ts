@@ -57,7 +57,8 @@ export type AppMilestoneKind =
 export interface AppMilestone {
   firstAt: string | null;
   lastAt: string | null;
-  count: number;
+  // null: reached before it was counted (worked out from existing data, meta.derived).
+  count: number | null;
   meta?: Record<string, unknown>;
 }
 
