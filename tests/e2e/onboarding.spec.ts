@@ -154,3 +154,11 @@ test('sign-up attribution keeps utm_source, utm_medium and utm_campaign', async 
   const params = JSON.parse((await page.evaluate(() => localStorage.getItem('urlParams'))) || '{}');
   expect(params).toMatchObject({ utm_source: 'newsletter', utm_medium: 'email', utm_campaign: 'nov', first_page: '/ai-widget/' });
 });
+
+test('an App made before goals existed is a website App when its assistant has website knowledge', async ({ page }) => {
+  await fakeBackend(page, { ...baseApp, aiBot: { ...baseApp.aiBot, status: 'on', siteUrlsV2: [{ url: 'https://example.com/' }] } });
+  await page.goto(`/app/admin/apps/${APP_ID}`);
+  await expect(page.getByTestId('app-home')).toBeVisible();
+  await expect(page.getByTestId('app-home-choose')).toHaveCount(0);
+  await expect(page.getByTestId('home-step-1')).toContainText('Website added');
+});

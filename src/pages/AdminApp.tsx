@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { PanelSkeleton } from '../components/PanelSkeleton';
+import { appGoal } from '../utils/appGoal';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
@@ -63,7 +64,7 @@ export default function AdminApp() {
     );
   }
 
-  const goal = app?.onboardingGoal;
+  const goal = appGoal(app);
   const installed = Boolean(app?.milestones?.widget_installed?.firstAt);
   const onTestPage = !installed && Boolean(app?.milestones?.widget_test_page?.firstAt);
   const showWebsiteStatus = goal === 'website';

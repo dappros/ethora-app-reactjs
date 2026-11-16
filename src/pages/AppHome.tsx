@@ -6,6 +6,7 @@ import { Secret } from '../components/Secret';
 import { env } from '../config/env';
 import { AgentKnowledgeHealth, httpGetAgentKnowledge, httpGetApp, httpGetSiteCrawlJob, httpUpdateApp } from '../http';
 import { useAppAssistant } from '../hooks/useAppAssistant';
+import { appGoal } from '../utils/appGoal';
 import { countLabel } from '../utils/countLabel';
 import { useTranslation } from '../i18n/useTranslation';
 import { AppMilestoneKind, ModelApp } from '../models';
@@ -83,7 +84,7 @@ export default function AppHome() {
   const has = (k: AppMilestoneKind) => Boolean(m[k]?.firstAt);
   // Not inferred from the default agent: on an AI-enabled install every new
   // App gets the system Support Agent, whatever it is for.
-  const goal: Goal | null = app.onboardingGoal || null;
+  const goal: Goal | null = appGoal(app);
   const base = `/app/admin/apps/${app._id}`;
 
   const retryCrawl = async () => {
