@@ -120,10 +120,21 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
   const renderContent = () => {
     if (item.kind === 'media') {
       const source = mediaSourceOf(item);
+      // Section 17: refused pictures were never stored, so there is nothing to show.
+      const refused = Boolean(item.surface) && !item.fileId;
       return (
         <div className="flex flex-col gap-2 min-w-0">
+          {item.surface && (
+            <span className="w-fit rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+              {t(`trustSafetyModeration.surface.${item.surface}`)}
+            </span>
+          )}
           <MediaSignalSummary moderation={summaryModerationOf(item, signals)} />
-          {!source || brokenPreview ? (
+          {refused ? (
+            <div className="rounded-xl bg-gray-100 px-3 py-2 text-xs text-gray-600">
+              {t('trustSafetyModeration.refusedNotStored')}
+            </div>
+          ) : !source || brokenPreview ? (
             <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-500 text-center p-2">
               {t('trustSafetyModeration.noPreview')}
             </div>
