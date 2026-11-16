@@ -1,3 +1,4 @@
+import { clearSectionMemory } from './utils/sectionMemory';
 import { markSessionKilled, refreshWithLogoutOnFatal } from './authRefresh';
 import {
   getExportCsv,
@@ -427,6 +428,9 @@ export function actionLogout(suspension?: ModelSuspensionNotice) {
   markSessionKilled();
   phReset();
   localStorage.clear();
+  // The next sign-in in this tab starts every sidebar section at its list
+  // (a new tab starts empty anyway: the memory is in sessionStorage).
+  clearSectionMemory();
   if (suspension) {
     rememberSuspension(suspension);
     window.location.replace(ACCOUNT_SUSPENDED_PATH);

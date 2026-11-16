@@ -4,7 +4,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isBaseAppHost } from '../utils/appHost';
-import { TS_HUB_PATH } from '../utils/tsHub';
 import { IconAccount } from './Icons/IconAccount';
 import { IconAdmin } from './Icons/IconAdmin';
 import { IconAgents } from './Icons/IconAgents';
@@ -22,6 +21,7 @@ import { UnreadBadge } from './UnreadBadge';
 
 import { env } from '../config/env';
 import { useLicenseStatus } from '../hooks/useLicenseStatus';
+import { useSectionLink } from '../hooks/useSectionMemory';
 const ITEM_CLASS =
   'flex group hover:bg-gray-100 flex-col items-center justify-center w-[80px] h-[64px] px-1 rounded-xl aria-[current=page]:bg-brand-150';
 const LABEL_CLASS =
@@ -32,6 +32,11 @@ const ITEM_WRAP_CLASS = 'py-[3px] first:pt-0 last:pb-0';
 // (get-config billingEnabled: Stripe configured). Self-hosted installs never
 // see it; the route itself stays for deep links.
 export function AppMenu() {
+  // Sidebar targets that bring back the last place in each section.
+  const appsLink = useSectionLink('apps');
+  const agentsLink = useSectionLink('agents');
+  const serverLink = useSectionLink('server');
+  const hubLink = useSectionLink('trustSafety');
   const location = useLocation();
   const [isMobileMenuVisible, setMobileMenuVisible] = useState(false);
   const { t } = useTranslation();
@@ -74,7 +79,7 @@ export function AppMenu() {
       <div className="hidden md:flex flex-col divide-y divide-gray-100">
         {isAdmin && isBaseApp && (
           <div className={ITEM_WRAP_CLASS}>
-            <NavLink to="/app/admin/apps" className={ITEM_CLASS}>
+            <NavLink to={appsLink.to} state={appsLink.state} className={ITEM_CLASS}>
               <IconAdmin />
               <div className={LABEL_CLASS}>{t('nav.apps')}</div>
             </NavLink>
@@ -92,7 +97,8 @@ export function AppMenu() {
         {isAdmin && isBaseApp && !agentsOff && (
           <div className={ITEM_WRAP_CLASS}>
             <NavLink
-              to="/app/admin/agents"
+              to={agentsLink.to}
+              state={agentsLink.state}
               title={
                 aiEnabled
                   ? undefined
@@ -127,7 +133,7 @@ export function AppMenu() {
           (currentUser?.isSuperAdmin?.read ||
             currentUser?.isSuperAdmin?.write) && (
             <div className={ITEM_WRAP_CLASS}>
-              <NavLink to="/app/admin/server" className={ITEM_CLASS}>
+              <NavLink to={serverLink.to} state={serverLink.state} className={ITEM_CLASS}>
                 <IconSettings />
                 <div className={LABEL_CLASS}>{t('nav.serverSettings')}</div>
               </NavLink>
@@ -136,7 +142,7 @@ export function AppMenu() {
         {/* T&S hub (Trust & Safety): superadmins with write access. */}
         {isBaseApp && currentUser?.isSuperAdmin?.write && (
           <div className={ITEM_WRAP_CLASS}>
-            <NavLink to={TS_HUB_PATH} className={ITEM_CLASS} title={t('nav.trustSafetyTitle')}>
+            <NavLink to={hubLink.to} state={hubLink.state} className={ITEM_CLASS} title={t('nav.trustSafetyTitle')}>
               <IconTrustSafety />
               <div className={LABEL_CLASS}>{t('nav.trustSafety')}</div>
             </NavLink>

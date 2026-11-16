@@ -1,3 +1,4 @@
+import { useRememberSection } from './hooks/useSectionMemory';
 import { Suspense } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppMenu } from './components/AppMenu';
@@ -10,6 +11,7 @@ import { useAppStore } from './store/useAppStore';
 import { isReturnablePath, rememberReturnPath, signedOutEntryPath } from './utils/returnPath';
 
 export default function AppLayout() {
+  useRememberSection();
   const location = useLocation();
   const user = useAppStore((s) => s.currentUser);
   const { t } = useTranslation();

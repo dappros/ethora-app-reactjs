@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import {
+  Navigate,
   NavLink,
   Outlet,
   useLocation,
@@ -14,6 +15,7 @@ import { httpGetApp } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isForbidden } from '../utils/accessError';
+import { isSectionRestore } from '../utils/sectionMemory';
 import { Error403Page } from './ErrorPage/Error403Page';
 import { Error404Page } from './ErrorPage/Error404Page';
 
@@ -53,6 +55,12 @@ export default function AdminApp() {
   useEffect(() => {
     document.querySelector('[data-app-tabs] a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [location.pathname]);
+
+  // Reopened from the sidebar (section memory) but gone or forbidden now:
+  // back to the list, no error screen.
+  if (loadError && isSectionRestore(location.state)) {
+    return <Navigate to="/app/admin/apps" replace />;
+  }
 
   if (loadError === 'forbidden') {
     return <Error403Page forApp navigateUrl="/app/admin/apps" />;

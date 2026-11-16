@@ -10,7 +10,8 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import classNames from 'classnames';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { isSectionRestore } from '../utils/sectionMemory';
 import { toast } from 'react-toastify';
 import {
   actionGetAgent,
@@ -100,6 +101,7 @@ export default function AgentSettings() {
   const { t } = useTranslation();
   const { agentId } = useParams<{ agentId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tabFromUrl = searchParams.get('tab');
@@ -130,7 +132,15 @@ export default function AgentSettings() {
     setLoading(true);
     actionGetAgent(agentId)
       .then((a) => setAgent(a))
-      .catch((e) => toast.error(`${t('agentSettings.loadAgentFailedPrefix')} ${e?.response?.data?.error || e.message}`))
+      .catch((e) => {
+        // Reopened from the sidebar (section memory) but gone or forbidden
+        // now: back to the list without an error.
+        if (isSectionRestore(location.state)) {
+          navigate('/app/admin/agents', { replace: true });
+          return;
+        }
+        toast.error(`${t('agentSettings.loadAgentFailedPrefix')} ${e?.response?.data?.error || e.message}`);
+      })
       .finally(() => setLoading(false));
     reloadInstances();
     actionListAgents({ visibility: 'mine' }).catch(() => {});
