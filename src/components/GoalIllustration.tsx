@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n/useTranslation';
 import { OnboardingIntent } from '../utils/onboardingIntent';
 
 // Schematic drawings for the onboarding goals (start screen, "What is this
@@ -9,13 +10,6 @@ const s = 'fill-brand-50';
 const a = 'fill-brand-500';
 const al = 'fill-none stroke-brand-500 [stroke-width:2.2] [stroke-linecap:round] [stroke-linejoin:round]';
 const w = 'fill-surface';
-
-const LABELS: Record<OnboardingIntent, string> = {
-  website: 'A website with a chat assistant in the corner',
-  sdk: 'A phone app with chat messages and a call button, next to code',
-  messenger: 'A messenger on a laptop and a phone, with people in a group',
-  selfHost: 'Your own server with a lock',
-};
 
 function Drawing({ goal }: { goal: OnboardingIntent }) {
   switch (goal) {
@@ -94,8 +88,9 @@ function Drawing({ goal }: { goal: OnboardingIntent }) {
 }
 
 export function GoalIllustration({ goal, className = '' }: { goal: OnboardingIntent; className?: string }) {
+  const { t } = useTranslation();
   return (
-    <svg viewBox="0 0 160 96" role="img" aria-label={LABELS[goal]} className={`mb-3 block h-auto max-h-[108px] w-full ${className}`}>
+    <svg viewBox="0 0 160 96" role="img" aria-label={t(`goalIllustration.${goal}`)} className={`mb-3 block h-auto max-h-[108px] w-full ${className}`}>
       <Drawing goal={goal} />
     </svg>
   );

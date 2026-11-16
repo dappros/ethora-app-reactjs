@@ -1047,7 +1047,7 @@ export const adminCore = {
       "Son apparence (couleurs, bouton, textes) se règle par App, dans Paramètres de l'App > AI Widget, car un agent peut répondre sur les sites de plusieurs Apps avec une apparence différente sur chacun. Vos Apps dont le widget utilise cet agent :",
     'agentSettings.websiteWidgetBotOn': 'Bot actif',
     'agentSettings.websiteWidgetBotOff': 'Bot arrêté',
-    'agentSettings.websiteWidgetOpen': 'Ouvrir les réglages AI Widget',
+    'agentSettings.websiteWidgetOpen': 'Ouvrir l’assistant IA',
     'agentSettings.websiteWidgetEmpty':
       "Aucune de vos Apps n'utilise encore {name} pour son widget. Pour l'utiliser, ouvrez les paramètres d'une App, onglet AI Widget, et choisissez-le comme agent actif.",
     'agentSettings.tabWebIndex': 'Index Web',
@@ -1530,7 +1530,7 @@ export const adminCore = {
       'Su apariencia (colores, botón, textos) se configura por App, en Ajustes de la App > AI Widget, porque un agente puede responder en los sitios de varias Apps con una apariencia distinta en cada uno. Tus Apps cuyo widget usa este agente:',
     'agentSettings.websiteWidgetBotOn': 'Bot activo',
     'agentSettings.websiteWidgetBotOff': 'Bot detenido',
-    'agentSettings.websiteWidgetOpen': 'Abrir ajustes de AI Widget',
+    'agentSettings.websiteWidgetOpen': 'Abrir el asistente de IA',
     'agentSettings.websiteWidgetEmpty':
       'Ninguna de tus Apps usa todavía {name} en su widget. Para usarlo, abre los ajustes de una App, pestaña AI Widget, y elígelo como agente activo.',
     'agentSettings.tabWebIndex': 'Índice web',

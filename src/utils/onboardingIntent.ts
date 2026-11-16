@@ -68,12 +68,15 @@ export function setOnboardingIntent(intent: OnboardingIntent | null, explicit = 
 
 // "Yourbusiness assistant" from https://www.yourbusiness.com/about. Used until
 // the crawl reads the real page title.
-export function suggestAssistantName(website: string, suffix: string): string {
+// `template` holds {name} ("{name} assistant", "Assistant {name}"); a
+// template without it is appended after the name.
+export function suggestAssistantName(website: string, template: string): string {
   try {
     const host = new URL(/^https?:\/\//i.test(website.trim()) ? website.trim() : `https://${website.trim()}`).hostname;
     const label = host.replace(/^www\./i, '').split('.')[0] || '';
     if (label.length < 2) return '';
-    return `${label.charAt(0).toUpperCase()}${label.slice(1)} ${suffix}`.slice(0, 100);
+    const name = `${label.charAt(0).toUpperCase()}${label.slice(1)}`;
+    return (template.includes('{name}') ? template.replace('{name}', name) : `${name} ${template}`).slice(0, 100);
   } catch {
     return '';
   }

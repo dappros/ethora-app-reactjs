@@ -799,7 +799,7 @@ export default function AppSettings() {
         </div>
         <div className="flex w-full lg:w-auto items-center">
           {isModified && (
-            <span role="status" data-testid="settings-unsaved" className="mr-3 whitespace-nowrap text-sm text-amber-700 dark:text-amber-300">
+            <span role="status" data-testid="settings-unsaved" className="mr-3 min-w-0 text-sm text-amber-700 lg:whitespace-nowrap dark:text-amber-300">
               {t('appSettings.unsaved')}
             </span>
           )}

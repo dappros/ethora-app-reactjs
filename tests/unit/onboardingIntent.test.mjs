@@ -26,4 +26,6 @@ test('website helpers', () => {
   assert.equal(normaliseWebsite('ftp://x.com'), null);
   assert.equal(normaliseWebsite('nonsense'), null);
   assert.equal(suggestAssistantName('https://www.yourbusiness.com/about', 'assistant'), 'Yourbusiness assistant');
+  assert.equal(suggestAssistantName('https://www.yourbusiness.com/about', '{name} assistant'), 'Yourbusiness assistant');
+  assert.equal(suggestAssistantName('yourbusiness.com', 'Asistente de {name}'), 'Asistente de Yourbusiness');
 });

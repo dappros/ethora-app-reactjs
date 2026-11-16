@@ -334,12 +334,14 @@ export function WidgetConversationsPanel({
 
   return (
     <div className="w-full px-4 py-6">
-      <div className="flex items-center justify-between mb-3">
+      {/* Wraps on phones: the heading, view switch, total and two buttons do
+          not fit in one 390 px row (and are longer in fr / es). */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-semibold font-sans text-[16px] flex items-center gap-2">
           <ChatBubbleOutlineIcon fontSize="small" />
           {t('aiWidgetConversations.heading')}
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => { setSimpleView((v) => !v); setSelected(new Set()); }} className="text-sm text-brand-500 hover:underline">
             {t(simpleView ? 'aiWidgetConversations.tableView' : 'aiWidgetConversations.simpleList')}
           </button>

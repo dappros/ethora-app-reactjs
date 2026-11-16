@@ -126,11 +126,18 @@ export async function startCrawl(appId: string, agentId: string, website: string
   }
 }
 
+// Stand-in reasons for a crawl that failed without one from the API. Kept in
+// English here (they also go to analytics); App Home shows them translated
+// (appHome.web.reason*).
+export const CRAWL_REASON_UNKNOWN = 'unknown error';
+export const CRAWL_REASON_FAILED = 'the crawl failed';
+export const CRAWL_REASON_NO_PAGES = 'no pages could be read';
+
 // The API's reason when it gives one (message, then code), else the
 // transport error. Never empty.
 export function crawlErrorMessage(e: unknown): string {
   const err = e as { message?: string; response?: { status?: number; data?: { error?: string; message?: string; code?: string; details?: { reason?: string } } } };
   const d = err.response?.data;
-  const reason = d?.details?.reason || d?.message || d?.error || d?.code || err.message || 'unknown error';
+  const reason = d?.details?.reason || d?.message || d?.error || d?.code || err.message || CRAWL_REASON_UNKNOWN;
   return err.response?.status ? `${reason} (HTTP ${err.response.status})` : reason;
 }

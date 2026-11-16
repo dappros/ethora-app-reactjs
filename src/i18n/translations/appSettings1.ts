@@ -305,7 +305,7 @@ export const appSettings1 = {
   fr: {
     // appSettings.* - AppSettings.tsx
     'appSettings.heading': 'Paramètres',
-    'appSettings.infoAriaLabel': 'Informations',
+    'appSettings.infoAriaLabel': 'Prochaines étapes pour cette application',
     'appSettings.saveButton': 'Enregistrer',
     'appSettings.tab.aiWidget': 'Widget IA',
     'appSettings.tab.webApp': 'Application Web',
@@ -615,7 +615,7 @@ export const appSettings1 = {
   es: {
     // appSettings.* - AppSettings.tsx
     'appSettings.heading': 'Configuración',
-    'appSettings.infoAriaLabel': 'Información',
+    'appSettings.infoAriaLabel': 'Próximos pasos para esta aplicación',
     'appSettings.saveButton': 'Guardar',
     'appSettings.tab.aiWidget': 'Widget de IA',
     'appSettings.tab.webApp': 'Aplicación web',
