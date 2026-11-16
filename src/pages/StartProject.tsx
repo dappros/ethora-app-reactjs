@@ -77,7 +77,9 @@ export default function StartProject() {
   const [showCall, setShowCall] = useState(false);
 
   const choose = (goal: OnboardingIntent, explicit = false) => {
-    setOnboardingIntent(goal, explicit);
+    // Stored without the explicit flag: it is consumed by this one skip, so
+    // a later visit to the start screen shows the chooser again.
+    setOnboardingIntent(goal, false);
     setError('');
     phCapture('onboarding_intent_selected', { intent: goal, explicit });
     httpRecordOnboarding({ goal }).catch(() => {});
