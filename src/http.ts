@@ -26,6 +26,7 @@ import {
   SuspendUserBody,
   SuspensionResponse,
   SuspensionScope,
+  ModelAppDefaulRooom,
 } from './models';
 import {
   isRefreshFatalError,
@@ -1038,11 +1039,18 @@ export function setPermanentPassword(tempPassword: string, password: string) {
   });
 }
 
-export function createAppChat(appId: string, title: string, pinned: boolean) {
+export function createAppChat(appId: string, title: string, pinned: boolean, autoJoin = true) {
   return http.post(`/apps/create-app-chat/${appId}`, {
     title,
     pinned,
+    autoJoin,
   });
+}
+
+// Per-chat defaults of an app chat; only autoJoin (new members join it).
+// `jid` is the room name <appId>_<chatId> from the default rooms list.
+export function updateAppChatDefaults(appId: string, jid: string, settings: { autoJoin: boolean }) {
+  return http.patch<{ result: ModelAppDefaulRooom }>(`/apps/${appId}/chats/${encodeURIComponent(jid)}/defaults`, settings);
 }
 
 export function getDefaultRooms(appId: string) {

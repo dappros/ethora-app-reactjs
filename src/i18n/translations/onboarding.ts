@@ -15,6 +15,11 @@ export const onboarding = {
     'appSettings.unsaved': 'Unsaved changes',
     'appSettings.unsavedLeave': 'You have unsaved app settings. Leave without saving?',
 
+    // App chats: auto-join
+    'appSettingsChats.autoJoin': 'Join automatically',
+    'appSettingsChats.autoJoinHint': 'New members of the app are added to this chat. Turn off for chats people should be added to by hand.',
+    'appSettingsChats.autoJoinSaveFailed': 'Could not change Join automatically. Please try again.',
+
     // App chats: offer an assistant after creating a chat
     'appSettingsChats.offerAgentTitle': 'Activate an assistant?',
     'appSettingsChats.offerAgentText': '{title} is ready. Add an assistant if you want it to answer in this chat.',

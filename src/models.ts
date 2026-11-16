@@ -63,6 +63,8 @@ export interface AppMilestone {
 
 export interface ModelAppDefaulRooom {
   jid: string;
+  // New members join this chat automatically (unset = yes).
+  autoJoin?: boolean;
   pinned: boolean;
   title: string;
   creator: string;

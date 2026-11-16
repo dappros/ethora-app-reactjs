@@ -252,3 +252,22 @@ test('Conversations shows a simple list by default; the table is one click away'
   await page.getByRole('button', { name: 'Table and bulk actions' }).click();
   await expect(page.locator('table')).toHaveCount(1);
 });
+
+test('app chats: Join automatically is on for existing chats and saves when changed', async ({ page }) => {
+  const room = { jid: `${APP_ID}_c1`, chatId: 'c1', title: 'Lobby', pinned: true, creator: 'application' };
+  await fakeBackend(page, { ...baseApp, defaultRooms: [room] });
+  const patches: unknown[] = [];
+  await page.route(`**/v1/apps/get-default-rooms/app-id/${APP_ID}`, (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify([room]) }),
+  );
+  await page.route(`**/v1/apps/${APP_ID}/chats/*/defaults`, (route) => {
+    patches.push(route.request().postDataJSON());
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ result: { ...room, autoJoin: false } }) });
+  });
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Chats`);
+  const box = page.getByTestId('chat-autojoin').first();
+  await expect(box).toBeChecked();
+  await box.uncheck();
+  await expect.poll(() => patches).toEqual([{ autoJoin: false }]);
+  await expect(box).not.toBeChecked();
+});
