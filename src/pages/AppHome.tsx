@@ -35,6 +35,8 @@ export default function AppHome() {
   // kept, step 1 says why and offers Retry and Upload documents.
   const [crawlError, setCrawlError] = useState<string>(location.state?.crawlError || '');
   const [retrying, setRetrying] = useState(false);
+  // The owner reopened the goal choice from Home (only an explicit pick is saved).
+  const [changing, setChanging] = useState(false);
   const website: string | null = location.state?.website || null;
 
   // Progress changes outside this page (a visitor, a crawl): fetch fresh on
@@ -104,9 +106,21 @@ export default function AppHome() {
     }
   };
 
-  if (!goal || goal === 'selfHost') {
-    return <ChooseGoal app={app} onChosen={(next) => doSetApp({ ...app, onboardingGoal: next })} />;
+  if (!goal || goal === 'selfHost' || changing) {
+    return (
+      <ChooseGoal
+        app={app}
+        current={changing ? goal : null}
+        onCancel={changing ? () => setChanging(false) : undefined}
+        onChosen={(next) => {
+          setChanging(false);
+          doSetApp({ ...app, onboardingGoal: next });
+        }}
+      />
+    );
   }
+  // Stored goals and inferred ones alike can be changed from here.
+  const goalBar = <GoalBar goal={goal} inferred={!app.onboardingGoal} onChange={() => setChanging(true)} />;
 
   if (goal === 'website') {
     const crawling = Boolean(crawl && !['completed', 'failed', 'cancelled'].includes(crawl.status));
@@ -175,7 +189,7 @@ export default function AppHome() {
       },
     ];
     return (
-      <HomeLayout
+      <HomeLayout goalBar={goalBar}
         intro={
           !location.state?.justCreated || failed
             ? undefined
@@ -229,7 +243,7 @@ export default function AppHome() {
         waiting: true,
       },
     ];
-    return <HomeLayout steps={steps} side={<AddToApp base={base} assistant />} />;
+    return <HomeLayout goalBar={goalBar} steps={steps} side={<AddToApp base={base} assistant />} />;
   }
 
   // messenger
@@ -254,7 +268,7 @@ export default function AppHome() {
     },
   ];
   return (
-    <HomeLayout
+    <HomeLayout goalBar={goalBar}
       steps={steps}
       side={
         <>
@@ -281,7 +295,7 @@ interface StepDef {
   body?: ReactNode;
 }
 
-function HomeLayout({ steps, side, intro }: { steps: StepDef[]; side: ReactNode; intro?: string }) {
+function HomeLayout({ steps, side, intro, goalBar }: { steps: StepDef[]; side: ReactNode; intro?: string; goalBar?: ReactNode }) {
   const { t } = useTranslation();
   const next = steps.findIndex((s) => !s.done);
   return (
@@ -289,6 +303,7 @@ function HomeLayout({ steps, side, intro }: { steps: StepDef[]; side: ReactNode;
     // column past the phone screen.
     <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" data-testid="app-home">
       <div>
+        {goalBar}
         {intro && <p className="mb-3 rounded-xl bg-brand-50 p-3 text-sm text-gray-800">{intro}</p>}
         <ol className="space-y-2">
           {steps.map((s, i) => {
@@ -424,7 +439,32 @@ export function Messenger() {
   );
 }
 
-function ChooseGoal({ app, onChosen }: { app: ModelApp; onChosen: (goal: Goal) => void }) {
+function GoalBar({ goal, inferred, onChange }: { goal: Goal; inferred: boolean; onChange: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <p className="mb-3 flex flex-wrap items-baseline gap-x-2 text-sm text-gray-600" data-testid="home-goal" data-inferred={inferred || undefined}>
+      <span>
+        {t('appHome.goal.current').replace('{goal}', t(`onboarding.goal.${goal}`))}
+        {inferred ? ` ${t('appHome.goal.inferred')}` : ''}
+      </span>
+      <button type="button" onClick={onChange} className="font-semibold text-brand-500 underline" data-testid="home-goal-change">
+        {t('appHome.goal.change')}
+      </button>
+    </p>
+  );
+}
+
+function ChooseGoal({
+  app,
+  onChosen,
+  current = null,
+  onCancel,
+}: {
+  app: ModelApp;
+  onChosen: (goal: Goal) => void;
+  current?: Goal | null;
+  onCancel?: () => void;
+}) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const pick = async (goal: Goal) => {
@@ -442,13 +482,18 @@ function ChooseGoal({ app, onChosen }: { app: ModelApp; onChosen: (goal: Goal) =
       <p className="mt-1 text-sm text-gray-600">{t('appHome.choose.text')}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {(['website', 'sdk', 'messenger'] as Goal[]).map((g) => (
-          <button key={g} type="button" disabled={busy} onClick={() => void pick(g)} className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 text-left hover:border-brand-500 disabled:opacity-50">
+          <button key={g} type="button" disabled={busy} aria-pressed={current === g} onClick={() => void pick(g)} className={`flex h-full flex-col rounded-xl border bg-white p-4 text-left hover:border-brand-500 disabled:opacity-50 ${current === g ? 'border-brand-500 ring-2 ring-brand-100' : 'border-gray-200'}`}>
             <GoalIllustration goal={g} />
             <span className="block font-semibold">{t(`onboarding.goal.${g}`)}</span>
             <span className="mt-1 block text-sm text-gray-600">{t(`onboarding.goal.${g}Desc`)}</span>
           </button>
         ))}
       </div>
+      {onCancel && (
+        <button type="button" onClick={onCancel} className="mt-3 text-sm text-gray-600 underline" data-testid="home-goal-cancel">
+          {t('appHome.choose.cancel')}
+        </button>
+      )}
     </section>
   );
 }
