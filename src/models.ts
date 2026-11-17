@@ -147,6 +147,9 @@ export interface ModelApp {
   scheduledCallsEnabled?: boolean;
   // Start-screen goal (website | sdk | messenger | selfHost); App Home follows it.
   onboardingGoal?: 'website' | 'sdk' | 'messenger' | 'selfHost';
+  // Worked out by the API from what an App without onboardingGoal already has
+  // (GET /v1/apps/:id); never stored. null: nothing to go on.
+  inferredGoal?: 'website' | 'sdk' | 'messenger' | null;
   // Server-side onboarding progress (GET /v1/apps/:id), App Home checklist.
   milestones?: Partial<Record<AppMilestoneKind, AppMilestone>>;
   firebaseWebConfigString?: string;
