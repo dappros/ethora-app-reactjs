@@ -63,6 +63,7 @@ if (pkg.version === '0.0.0-deploy-stub') {
 // so no widget bundle is shipped and the admin embed is not offered.
 export const BUNDLED_WIDGET_VERSION = '';
 export const BUNDLED_WIDGET_PATH = '';
+export const BUNDLED_WIDGET_HASHED_PATH = '';
 `
   );
   console.log(`[copy-widget] ${PKG}@${pkg.version}: AI features disabled, skipping widget embed`);
@@ -96,17 +97,30 @@ for (const marker of ['chat-content-assistant', 'data-app-id', 'widget/sessions'
   }
 }
 
-// Content hash, so a changed bundle is always a new URL (no stale copy served
-// out of a visitor's cache) and an unchanged one is always the same URL.
+// Two copies of the same bundle:
+//
+// - widget/assistant.js, the STABLE name. This is what the embed snippet hands
+//   out. A snippet pasted into somebody else's site lives for years, so its
+//   URL must survive every later build. The web server sends it with a short
+//   cache lifetime, so a new build reaches visitors within minutes.
+// - widget/assistant-<hash>.js, a content-hashed copy, kept for the admin's
+//   own preview and for diagnosis (which build is live).
+//
+// Earlier builds handed out the hashed name in the snippet and wiped the old
+// file on the next build, so every admin build broke the widget on the sites
+// that had embedded it. The web servers now answer any
+// /widget/assistant-<hash>.js that no longer exists with the stable file
+// (deploy/nginx/web.conf.template and docker/nginx.conf), so those embeds
+// keep working; new embeds use the stable name.
 const hash = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
 const fileName = `assistant-${hash}.js`;
+const STABLE_NAME = 'assistant.js';
 const outDir = resolve(root, 'public/widget');
 
-// Wiped first: leftovers would ship as dead multi-megabyte files still
-// answering requests from embeds we would rather see fail loudly.
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 copyFileSync(src, resolve(outDir, fileName));
+copyFileSync(src, resolve(outDir, STABLE_NAME));
 
 // The version the bundle REPORTS on window.EthoraAssistant.version, which is
 // not always the version in its package.json - a bundle built one commit
@@ -122,11 +136,14 @@ writeFileSync(
 // Committed so \`npm run typecheck\` works on a fresh clone; every build
 // overwrites it from whatever ${PKG} the lockfile pins.
 export const BUNDLED_WIDGET_VERSION = '${version}';
-export const BUNDLED_WIDGET_PATH = '/widget/${fileName}';
+// Stable: handed out in embed snippets, never changes between builds.
+export const BUNDLED_WIDGET_PATH = '/widget/${STABLE_NAME}';
+// This build's content-hashed copy of the same file.
+export const BUNDLED_WIDGET_HASHED_PATH = '/widget/${fileName}';
 `
 );
 
 const kb = Math.round(statSync(src).size / 1024);
 console.log(
-  `[copy-widget] ${PKG}@${pkg.version} (reports ${version}) -> public/widget/${fileName} (${kb} KB)`
+  `[copy-widget] ${PKG}@${pkg.version} (reports ${version}) -> public/widget/${STABLE_NAME} and ${fileName} (${kb} KB)`
 );

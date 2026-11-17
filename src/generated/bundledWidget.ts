@@ -3,4 +3,7 @@
 // Committed so `npm run typecheck` works on a fresh clone; every build
 // overwrites it from whatever @ethora/ai-chat-widget the lockfile pins.
 export const BUNDLED_WIDGET_VERSION = '25.10.17';
-export const BUNDLED_WIDGET_PATH = '/widget/assistant-7eb71873.js';
+// Stable: handed out in embed snippets, never changes between builds.
+export const BUNDLED_WIDGET_PATH = '/widget/assistant.js';
+// This build's content-hashed copy of the same file.
+export const BUNDLED_WIDGET_HASHED_PATH = '/widget/assistant-7eb71873.js';
