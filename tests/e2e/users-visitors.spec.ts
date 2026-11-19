@@ -119,3 +119,12 @@ test('Visitors is disabled when the App has none', async ({ page }) => {
   const visitors = page.getByTestId('users-access-switch').getByRole('button', { name: 'Visitors' });
   await expect(visitors).toBeDisabled();
 });
+
+test('Users opens on the first sub-tab with entries; one named in the address is kept', async ({ page }) => {
+  await fakeBackend(page, [conversation(1)]);
+  await page.goto(`/app/admin/apps/${APP_ID}/users`);
+  await expect(page.getByTestId('visitors-table')).toBeVisible();
+  await page.goto(`/app/admin/apps/${APP_ID}/users?access=all`);
+  await expect(page.getByTestId('users-access-switch')).toBeVisible();
+  await expect(page.getByTestId('visitors-table')).toHaveCount(0);
+});
