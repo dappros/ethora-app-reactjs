@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { env } from '../../config/env';
 import { httpTryList, httpTryView, TryDemo, TryDemoView } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
-import { resolveWidgetUrl } from '../../utils/widgetUrl';
+import { TrySiteView } from './TrySiteView';
+import { useNoIndexNoReferrer } from './useNoIndexNoReferrer';
 
-// Public demo page /try/<site>/<token>: the named website (in a frame when it
-// allows it, else a full-page picture) with the App's assistant widget on top.
-// Nothing of the site is copied or served from here: a frame or a picture.
-// The frame cannot navigate this page away (no allow-top-navigation) and gets
-// no referrer; the page itself is noindex and sends no referrer either.
+// Public demo page /try/<site>/<token>: the named website with the App's
+// assistant widget on top (TrySiteView), under a bar. The page is noindex and
+// sends no referrer.
 export default function TryDemoPage() {
   const { site = '', token = '' } = useParams();
   const { t } = useTranslation();
@@ -18,15 +16,7 @@ export default function TryDemoPage() {
   const [mine, setMine] = useState<TryDemo | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Not for search engines, and no referrer (the address carries the token).
-  useEffect(() => {
-    const metas = [
-      Object.assign(document.createElement('meta'), { name: 'robots', content: 'noindex, nofollow' }),
-      Object.assign(document.createElement('meta'), { name: 'referrer', content: 'no-referrer' }),
-    ];
-    metas.forEach((m) => document.head.appendChild(m));
-    return () => metas.forEach((m) => m.remove());
-  }, []);
+  useNoIndexNoReferrer();
 
   useEffect(() => {
     let cancelled = false;
@@ -58,22 +48,6 @@ export default function TryDemoPage() {
       .then(({ data }) => setMine((data.items || []).find((d) => d.id === view.demoId) || null))
       .catch(() => {});
   }, [view?.demoId, view?.appId]);
-
-  // The App's live assistant widget, the same script operators embed.
-  useEffect(() => {
-    if (!view?.appId) return;
-    const s = document.createElement('script');
-    s.src = resolveWidgetUrl();
-    s.id = 'chat-content-assistant';
-    s.async = true;
-    s.setAttribute('data-app-id', view.appId);
-    if (env.VITE_API) s.setAttribute('data-api-base', env.VITE_API as string);
-    document.body.appendChild(s);
-    return () => {
-      s.remove();
-      document.getElementById('chat-widget')?.remove();
-    };
-  }, [view?.appId]);
 
   if (state === 'ended') {
     return (
@@ -118,27 +92,7 @@ export default function TryDemoPage() {
           <a className="text-gray-300 underline" href="https://ethora.com/" target="_blank" rel="noopener">{t('tryDemo.bar.madeWith')}</a>
         </span>
       </header>
-      <div className="relative min-h-0 flex-1">
-        {view.frameable ? (
-          <iframe
-            title={view.site}
-            src={view.url}
-            className="h-full w-full border-0"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-            referrerPolicy="no-referrer"
-            data-testid="try-frame"
-          />
-        ) : view.screenshotUrl ? (
-          <div className="h-full overflow-y-auto bg-gray-100" data-testid="try-picture">
-            <p className="bg-amber-50 px-3 py-1 text-xs text-amber-900">{t('tryDemo.pictureNote').replace('{site}', view.site)}</p>
-            <img src={view.screenshotUrl} alt={view.site} className="mx-auto block w-full max-w-[1280px]" referrerPolicy="no-referrer" />
-          </div>
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-gray-600" data-testid="try-preparing">
-            {t('tryDemo.preparing').replace('{site}', view.site)}
-          </div>
-        )}
-      </div>
+      <TrySiteView appId={view.appId} site={view.site} url={view.url} frameable={view.frameable} screenshotUrl={view.screenshotUrl} />
     </main>
   );
 }

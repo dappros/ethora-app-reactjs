@@ -179,6 +179,12 @@ export default function AppHome() {
             : t('appHome.web.install'),
         text: has('widget_installed') || !has('widget_test_page') ? t('appHome.web.installText') : t('appHome.web.testPageText'),
         action: { to: `${base}/assistant#install`, label: seen ? t('appHome.manage') : t('appHome.web.installAction') },
+        // The owner's own preview (the "Try on Website" tab) once a page is indexed.
+        body: pages > 0 ? (
+          <Link to={`${base}/try`} className="text-sm text-brand-500 underline" data-testid="home-try-website">
+            {t('tryPreview.seeFirst')}
+          </Link>
+        ) : undefined,
       },
       {
         done: has('widget_answered_visitor'),

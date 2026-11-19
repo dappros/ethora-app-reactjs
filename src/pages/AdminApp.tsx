@@ -11,7 +11,7 @@ import { IconArrowLeft } from '../components/Icons/IconArrowLeft';
 import { PanelSkeleton } from '../components/PanelSkeleton';
 import { appGoal } from '../utils/appGoal';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { httpGetApp } from '../http';
+import { httpGetApp, httpTryPreview } from '../http';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../store/useAppStore';
 import { isForbidden } from '../utils/accessError';
@@ -28,6 +28,8 @@ export default function AdminApp() {
   const app = apps.find((app) => app._id === appId);
   const navigate = useNavigate();
   const [loadError, setLoadError] = useState<'notFound' | 'forbidden' | null>(null);
+  // "Try on Website" only when the App has a website with indexed pages.
+  const [canPreview, setCanPreview] = useState(false);
 
   const goBack = useCallback(() => {
     const backUrl = location.state?.from;
@@ -50,6 +52,19 @@ export default function AdminApp() {
 
     getApp();
   }, [appId, doSetApp]);
+
+  useEffect(() => {
+    if (!appId) return;
+    let cancelled = false;
+    setCanPreview(false);
+    httpTryPreview(appId, { check: true })
+      .then(({ data }) => !cancelled && setCanPreview(Boolean(data.available)))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // Checked again when the App changes (a crawl finishing updates it).
+  }, [appId, app?.milestones?.knowledge_added?.firstAt, app?.aiBot?.siteUrlsV2?.length]);
 
   // On a phone the tab row scrolls sideways: keep the active tab in view.
   useEffect(() => {
@@ -87,11 +102,12 @@ export default function AdminApp() {
     { to: `${base}/statistics`, label: t('adminApp.tabStatistics') },
     { to: `${base}/moderation`, label: t('trustSafetyModeration.tab') },
     { to: `${base}/settings`, label: t('adminApp.tabSettings') },
+    ...(canPreview ? [{ to: `${base}/try`, label: t('appTabs.tryWebsite') }] : []),
     { to: `${base}/chats`, label: t('appTabs.testChats') },
   ];
-  // The chat fills the height under the header; every other tab scrolls
-  // with the page.
-  const isChats = /\/chats\/?$/.test(location.pathname);
+  // The chat and the website preview fill the height under the header;
+  // every other tab scrolls with the page.
+  const isChats = /\/(chats|try)\/?$/.test(location.pathname);
 
   return (
     // grid-cols minmax(0,1fr) + min-w-0: the tab row scrolls sideways on a

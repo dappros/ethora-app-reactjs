@@ -34,6 +34,7 @@ const AppHome = lazy(() => import('./pages/AppHome'));
 const AppAssistant = lazy(() => import('./pages/AppAssistant'));
 const AppConversations = lazy(() => import('./pages/AppConversations'));
 const AppChats = lazy(() => import('./pages/AppChats'));
+const AppTryWebsite = lazy(() => import('./pages/AppTryWebsite'));
 const AgentSettings = lazy(() => import('./pages/AgentSettings'));
 const AppUsers = lazy(() => import('./pages/AppUsers'));
 const AppModeration = lazy(() => import('./pages/AppModeration'));
@@ -53,6 +54,7 @@ import TurnstileBridge from './pages/TurnstileBridge';
 import WpSetup from './pages/WpSetup';
 import TryStart from './pages/Try/TryStart';
 import TryDemoPage from './pages/Try/TryDemoPage';
+import TryPreviewPage from './pages/Try/TryPreviewPage';
 import { defaultLandingPath } from './utils/appHost';
 
 export const router = createBrowserRouter(
@@ -105,6 +107,12 @@ export const router = createBrowserRouter(
               // create a demo) and the public demo link (no sign-in).
               path: '/try/:site?',
               Component: TryStart,
+            },
+            {
+              // The owner's own preview (signed in, no token); framed by the
+              // App's "Try on Website" tab. Ranks above /try/:site/:token.
+              path: '/try/preview/:appId',
+              Component: TryPreviewPage,
             },
             {
               path: '/try/:site/:token',
@@ -220,6 +228,11 @@ export const router = createBrowserRouter(
                             {
                               path: 'conversations',
                               Component: AppConversations,
+                            },
+                            {
+                              // The owner's website with the App's widget.
+                              path: 'try',
+                              Component: AppTryWebsite,
                             },
                             {
                               // This App's chats under its header and tabs
