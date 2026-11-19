@@ -1,3 +1,5 @@
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Plugin } from 'vite';
 
 const THIRD_PARTY = {
@@ -123,10 +125,32 @@ export function buildCspPolicy(env: Record<string, string>): string {
     .join('; ');
 }
 
+// The "Try it on your site" demo page (/try/<site>/<token>) frames the named
+// website, which can be any https site. Only that page may do so: the build
+// writes try.html, the entry document with `https:` added to frame-src, and the
+// web server serves it for /try/ alone. Every other page keeps the list above.
+export function tryPageHtml(html: string): string {
+  let changed = false;
+  const out = html.replace(/(frame-src)([^;"]*)/, (_m, name: string, values: string) => {
+    changed = true;
+    return values.split(/\s+/).includes('https:') ? `${name}${values}` : `${name}${values} https:`;
+  });
+  if (!changed) throw new Error('[csp] no frame-src in index.html: cannot write try.html');
+  return out;
+}
+
 export function cspPlugin(env: Record<string, string>): Plugin {
+  let outDir = 'dist';
   return {
     name: 'ethora-csp',
     apply: 'build',
+    configResolved(config) {
+      outDir = join(config.root, config.build.outDir);
+    },
+    writeBundle() {
+      const index = join(outDir, 'index.html');
+      if (existsSync(index)) writeFileSync(join(outDir, 'try.html'), tryPageHtml(readFileSync(index, 'utf8')));
+    },
     transformIndexHtml() {
       return [
         {

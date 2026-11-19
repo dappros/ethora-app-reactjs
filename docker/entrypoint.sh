@@ -84,10 +84,13 @@ csp_origins() {
 fill_csp() {
   dir="$1"
   origins="$(csp_origins)"
-  if grep -q "$PLACEHOLDER" "$dir/index.html"; then
-    # '|' is safe as a delimiter: origins contain only [A-Za-z0-9.:/*-].
-    sed -i "s|$PLACEHOLDER|$origins|" "$dir/index.html"
-  fi
+  # try.html is the /try/ demo page's copy of index.html (vite-plugin-csp.ts).
+  for f in "$dir/index.html" "$dir/try.html"; do
+    if [ -f "$f" ] && grep -q "$PLACEHOLDER" "$f"; then
+      # '|' is safe as a delimiter: origins contain only [A-Za-z0-9.:/*-].
+      sed -i "s|$PLACEHOLDER|$origins|" "$f"
+    fi
+  done
 }
 
 # --- Universal links / app links (mirrors vite-plugin-well-known.ts) -------
