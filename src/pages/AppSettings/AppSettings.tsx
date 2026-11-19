@@ -36,6 +36,7 @@ import { AppCallsSettings } from './AppCallsSettings';
 import { Visibility } from './Visibility';
 import { WebApp } from './WebApp';
 import { Webhooks } from './Webhooks';
+import { EmailReportsEntry } from './EmailReportsEntry';
 import { env } from '../../config/env';
 import { isValidSupportContact, parseBlockedDomains } from '../../utils/suspension';
 import { TsOverrideDraft, draftToOverrides, invalidOverrides, overridesToDraft } from '../../utils/trustSafety';
@@ -67,6 +68,7 @@ const tabs = [
   'Visibility & Privacy',
   'API',
   'Webhooks',
+  'Email reports',
   LIFECYCLE_TAB,
 ];
 
@@ -76,7 +78,7 @@ const LEGACY_CHAT_COMPONENT_TAB = 'Chat component';
 const tabsNew = {
   Publish: ['Web App', 'Mobile App'],
   UI: ['Appearance', 'Sign-on options', TRUST_SAFETY_TAB, 'Home screen', 'Menu'],
-  System: ['Chats', 'Visibility & Privacy', 'API', 'Webhooks', LIFECYCLE_TAB],
+  System: ['Chats', 'Visibility & Privacy', 'API', 'Webhooks', 'Email reports', LIFECYCLE_TAB],
 };
 
 // `tabs` / `tabsNew` above are internal identifiers (compared against the
@@ -95,6 +97,7 @@ const TAB_LABEL_KEYS: Record<string, string> = {
   'Visibility & Privacy': 'appSettings.tab.visibilityPrivacy',
   API: 'appSettings.tab.api',
   Webhooks: 'appSettings.tab.webhooks',
+  'Email reports': 'appSettings.tab.emailReports',
   [LIFECYCLE_TAB]: 'appSettings.tab.deleteOrArchive',
 };
 
@@ -1005,6 +1008,10 @@ export default function AppSettings() {
 
           <TabPanel key="Webhooks" className="grid grid-rows-1 lg:ml-4 h-full overflow-y-auto">
             <Webhooks app={app} />
+          </TabPanel>
+
+          <TabPanel key="Email reports" className="grid grid-rows-1 lg:ml-4 h-full overflow-y-auto">
+            <EmailReportsEntry />
           </TabPanel>
 
           {domainName !== DOMAIN_NAME && (

@@ -34,6 +34,7 @@ function digest(over: Record<string, unknown> = {}) {
 
 async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>; csvStatus?: number } = {}) {
   const puts: Record<string, unknown>[] = [];
+  const appsQueries: Record<string, string>[] = [];
   let state = digest(opts.digest);
   const json = (route: Route, body: unknown, status = 200) =>
     route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
@@ -46,7 +47,10 @@ async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>;
       const method = req.method();
       if (pathname === '/v1/apps/get-config') return json(route, appConfig);
       if (pathname === '/v1/users/me') return json(route, me);
-      if (pathname === '/v1/apps') return json(route, { apps: [app], total: 1 });
+      if (pathname === '/v1/apps') {
+        appsQueries.push(Object.fromEntries(url.searchParams));
+        return json(route, { apps: [app], total: 1 });
+      }
       if (pathname === `/v1/apps/${APP_ID}`) return json(route, { result: app });
       if (pathname === '/v2/owner-digest/settings' && method === 'GET') return json(route, state);
       if (pathname === '/v2/owner-digest/settings' && method === 'PUT') {
@@ -74,7 +78,14 @@ async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>;
         return json(route, { results: rows, total: rows.length, pagination: { limit: 20, offset: 0, total: rows.length } });
       }
       if (pathname === `/v2/apps/${APP_ID}/chats/chat7/messages`) {
-        return json(route, { results: [{ id: 'm1', originId: null, ts: 1795000000000, from: `${APP_ID}_widget-1`, nick: '', body: 'Linked from an email' }], total: 1, nextBefore: null, mamUnavailable: false });
+        return json(route, {
+          results: [
+            { id: 'm0', originId: null, ts: 1794999990000, from: `${APP_ID}_bot1-bot`, nick: `${APP_ID}_bot1-bot`, body: 'E2E App has joined the chat', joinNotice: true },
+            { id: 'm1', originId: null, ts: 1795000000000, from: `${APP_ID}_widget-1`, nick: '', body: 'Linked from an email' },
+            { id: 'm2', originId: null, ts: 1795000005000, from: `${APP_ID}_bot1-bot`, nick: `${APP_ID}_bot1-bot`, body: 'Here is the answer' },
+          ],
+          total: 3, nextBefore: null, mamUnavailable: false,
+        });
       }
       return json(route, { ok: true, items: [], total: 0 });
     },
@@ -83,7 +94,7 @@ async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>;
     localStorage.setItem('token-538', 'e2e-token');
     localStorage.setItem('refreshToken-538', 'e2e-refresh');
   });
-  return { puts };
+  return { puts, appsQueries };
 }
 
 test('Email reports: all off at first; a switch saves with the browser time zone', async ({ page }) => {
@@ -139,8 +150,90 @@ test('Conversations: ?room= opens that conversation; Notifications links', async
   await fakeBackend(page);
   await page.goto(`/app/admin/apps/${APP_ID}/conversations?room=${APP_ID}_room7`);
   await expect(page.getByText('Linked from an email')).toBeVisible();
+  // One count everywhere: the agent's join notice is not a message of the conversation.
+  await expect(page.getByText('Here is the answer')).toBeVisible();
+  await expect(page.getByText('E2E App has joined the chat')).toHaveCount(0);
+  await expect(page.getByRole('dialog')).toContainText('Messages (2)');
   await page.keyboard.press('Escape');
   await page.getByTestId('conversations-notifications').click();
   await expect(page.getByRole('link', { name: 'Email me when a conversation is completed' })).toHaveAttribute('href', '/app/account?tab=Email%20reports');
   await expect(page.getByRole('link', { name: 'Webhook (conversation.completed)' })).toHaveAttribute('href', `/app/admin/apps/${APP_ID}/settings?tab=Webhooks`);
+});
+
+test('Apps list: newest first at first; a chosen sorting is kept when coming back', async ({ page }) => {
+  const { appsQueries } = await fakeBackend(page);
+  await page.goto('/app/admin/apps');
+  await expect.poll(() => appsQueries.length).toBeGreaterThan(0);
+  expect(appsQueries[0]).toMatchObject({ orderBy: 'createdAt', order: 'desc' });
+  // A sorting named in the address wins, and is remembered.
+  await page.goto('/app/admin/apps?orderBy=displayName&order=asc');
+  await expect.poll(() => appsQueries.some((q) => q.orderBy === 'displayName' && q.order === 'asc')).toBe(true);
+  appsQueries.length = 0;
+  await page.goto(`/app/admin/apps/${APP_ID}/statistics`);
+  await page.goto('/app/admin/apps');
+  await expect.poll(() => appsQueries.length).toBeGreaterThan(0);
+  expect(appsQueries[0]).toMatchObject({ orderBy: 'displayName', order: 'asc' });
+  appsQueries.length = 0;
+  await page.reload();
+  await expect.poll(() => appsQueries.length).toBeGreaterThan(0);
+  expect(appsQueries[0]).toMatchObject({ orderBy: 'displayName', order: 'asc' });
+});
+
+async function boxes(page: Page) {
+  const controls = page.getByTestId('stat-controls');
+  await expect(page.getByTestId('stat-email-reports')).toBeVisible();
+  const period = await controls.locator('button').first().boundingBox();
+  const csv = await page.getByTestId('stat-export-csv').boundingBox();
+  const mail = await page.getByTestId('stat-email-reports').boundingBox();
+  return [period!, csv!, mail!];
+}
+const overlap = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+test('Statistics: period, Export CSV and Email reports on one line, same height and top', async ({ page }) => {
+  await fakeBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/statistics`);
+  const [period, csv, mail] = await boxes(page);
+  for (const b of [csv, mail]) {
+    expect(Math.abs(b.y - period.y)).toBeLessThan(1);
+    expect(Math.abs(b.height - period.height)).toBeLessThan(1);
+  }
+  expect(mail.x).toBeGreaterThan(csv.x);
+});
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 375, height: 800 } });
+  test('Statistics controls wrap without overlapping', async ({ page }) => {
+    await fakeBackend(page);
+    await page.goto(`/app/admin/apps/${APP_ID}/statistics`);
+    const [period, csv, mail] = await boxes(page);
+    expect(overlap(period, csv)).toBe(false);
+    expect(overlap(period, mail)).toBe(false);
+    expect(overlap(csv, mail)).toBe(false);
+    for (const b of [period, csv, mail]) expect(b.x + b.width).toBeLessThanOrEqual(375);
+  });
+});
+
+test('Settings: Email reports under Webhooks opens Account > Email reports', async ({ page }) => {
+  await fakeBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Email%20reports`);
+  const entry = page.getByTestId('app-email-reports');
+  await expect(entry).toContainText('set per person');
+  // (Not clicked: the fake App leaves the settings form "unsaved", which holds navigation.)
+  await expect(entry.getByTestId('app-email-reports-open')).toHaveAttribute('href', '/app/account?tab=Email%20reports');
+  await page.goto('/app/account?tab=Email%20reports');
+  await expect(page.getByTestId('email-reports-personal')).toContainText('yours only');
+});
+
+test.describe('Settings entry in French and Spanish', () => {
+  for (const [locale, text] of [['fr-FR', 'Ils se règlent par personne'], ['es-ES', 'Se configuran por persona']] as const) {
+    test.describe(locale, () => {
+      test.use({ locale });
+      test(`Email reports entry (${locale})`, async ({ page }) => {
+        await fakeBackend(page);
+        await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Email%20reports`);
+        await expect(page.getByTestId('app-email-reports')).toContainText(text);
+      });
+    });
+  }
 });

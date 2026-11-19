@@ -22,6 +22,7 @@ import downloadIcon from '../assets/icons/Download.svg';
 import './AppStatistics.scss';
 import { Loading } from '../components/Loading';
 import { useTranslation } from '../i18n/useTranslation';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 
 // Data
 // `name` stays a fixed English identifier - it's compared against itself
@@ -58,6 +59,9 @@ const tabTotal = (value: string, counts: Record<string, number>) =>
   (LINES[value] || [{ key: value }]).reduce((sum, l) => sum + (Number(counts[l.key]) || 0), 0);
 
 const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
+// Export CSV and Email reports: one look, the period button's height.
+const STAT_BUTTON =
+  'flex h-10 flex-auto sm:flex-none items-center justify-center gap-2 rounded-xl border border-gray-300 bg-gray-100 px-4 text-gray-950 hover:bg-gray-200 disabled:opacity-60';
 // Time-period display labels. `timePeriod` itself stays the canonical
 // English string - it's switched on in calculateDates() and persisted in
 // the URL - only the rendered text is looked up through this map.
@@ -321,11 +325,14 @@ export const AppStatistics = (): ReactElement => {
 
   return (
     <div className="h-full w-full overflow-x-hidden overflow-y-auto">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold hidden md:block">{t('appStatistics.heading')}</h2>
+      <div className="flex items-start justify-between gap-4">
+        <h2 className="text-lg font-semibold hidden md:block md:leading-10">{t('appStatistics.heading')}</h2>
 
-        <div className="flex items-center gap-4 justify-between md:justify-end w-full">
-          <div className="relative w-64">
+        {/* The period, Export CSV and Email reports: one row, all 40px high
+            with the same top edge; on a phone they wrap onto lines of their
+            own instead of overlapping. */}
+        <div className="flex flex-wrap items-center gap-3 justify-end w-full md:w-auto" data-testid="stat-controls">
+          <div className="relative w-full sm:w-64">
             <button
               onClick={handleOpenDateRange}
               className={`w-full h-10 px-4 flex justify-between items-center bg-gray-100 text-gray-950 border border-brand-500 rounded-xl focus:outline-none`}
@@ -403,26 +410,23 @@ export const AppStatistics = (): ReactElement => {
             )}
           </div>
 
-          <div className="flex flex-col items-end">
-            <button
-              type="button"
-              disabled={exporting}
-              onClick={() => void onExportCsv()}
-              className="flex h-10 items-center rounded-xl border border-gray-300 bg-gray-100 px-3 text-gray-950 hover:bg-gray-200 disabled:opacity-60 sm:px-4"
-              data-testid="stat-export-csv"
-            >
-              <img src={downloadIcon} alt={t('appStatistics.downloadAlt')} />
-              <span className="hidden whitespace-nowrap pl-2 xs:block">
-                {t('appStatistics.exportCsv')}
-              </span>
-            </button>
-            {exportError && <p className="mt-1 text-xs text-red-700" role="alert" data-testid="stat-export-error">{exportError}</p>}
-            <Link className="mt-1 text-xs text-brand-500 underline" to={`/app/account?tab=${encodeURIComponent('Email reports')}`} data-testid="stat-email-reports">
-              {t('appStatistics.emailReportsLink')}
-            </Link>
-          </div>
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={() => void onExportCsv()}
+            className={STAT_BUTTON}
+            data-testid="stat-export-csv"
+          >
+            <img src={downloadIcon} alt="" aria-hidden="true" className="h-5 w-5" />
+            <span className="whitespace-nowrap">{t('appStatistics.exportCsv')}</span>
+          </button>
+          <Link className={STAT_BUTTON} to={`/app/account?tab=${encodeURIComponent('Email reports')}`} data-testid="stat-email-reports">
+            <MailOutlineIcon sx={{ fontSize: 20 }} aria-hidden="true" />
+            <span className="whitespace-nowrap">{t('appStatistics.emailReportsLink')}</span>
+          </Link>
         </div>
       </div>
+      {exportError && <p className="mt-2 text-right text-xs text-red-700" role="alert" data-testid="stat-export-error">{exportError}</p>}
 
       <div className="flex flex-col md:flex-row mt-4 ">
         <div className="md:w-1/4 mb-4 pr-4 md:mb-0 border-b md:border-b-0 md:border-r border-gray-200">

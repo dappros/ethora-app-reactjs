@@ -117,6 +117,7 @@ export function EmailReports() {
       <div>
         <h2 className="text-lg font-semibold">{t('emailReports.title')}</h2>
         <p className="mt-1 text-sm text-gray-600">{t('emailReports.intro')}</p>
+        <p className="mt-1 text-sm text-gray-600" data-testid="email-reports-personal">{t('emailReports.personal')}</p>
       </div>
 
       {!data.mailConfigured && (

@@ -5,6 +5,7 @@ import { ApplicationPreview } from '../components/ApplicationPreview';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { Loading } from '../components/Loading.tsx';
 import { Sorting } from '../components/Sorting';
+import { readAppsSort, resolveAppsSort, saveAppsSort } from '../utils/appsListSort';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useEthoraEvents, useXmppReconnected } from '../hooks/useEthoraEvents.ts';
@@ -61,14 +62,17 @@ export default function AdminApps() {
     const p = Number(searchParams.get('page')) || 1;
     return Math.max(0, p - 1);
   }, [searchParams]);
-  const order = useMemo(
-    () => (searchParams.get('order') as 'asc' | 'desc') || 'desc',
-    [searchParams]
+  // Newest first until the user picks another sorting; the pick is
+  // remembered in this browser, and an address naming one wins
+  // (utils/appsListSort).
+  const sort = useMemo(
+    () => resolveAppsSort(searchParams, readAppsSort(currentUser?._id)),
+    [searchParams, currentUser?._id]
   );
-  const orderBy = useMemo(
-    () => (searchParams.get('orderBy') as OrderByType) || 'totalRegistered',
-    [searchParams]
-  );
+  const { order, orderBy } = sort;
+  useEffect(() => {
+    if (sort.fromUrl) saveAppsSort(currentUser?._id, { orderBy, order });
+  }, [sort.fromUrl, orderBy, order, currentUser?._id]);
 
   // Search term kept in the URL as ?q= so a refresh or a shared link keeps it.
   const urlQuery = searchParams.get('q') ?? '';

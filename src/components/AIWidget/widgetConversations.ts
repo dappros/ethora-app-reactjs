@@ -28,8 +28,8 @@ export interface WidgetConversationRow {
   type: string;
   createdAt: string;
   updatedAt: string;
-  // Messages with text in the conversation (visitor and assistant); null
-  // when the message archive cannot be read.
+  // Messages with text in the conversation (visitor and assistant), an
+  // agent's join notice left out; null when the message archive cannot be read.
   messageCount?: number | null;
   visitor: {
     _id: string;
@@ -57,6 +57,9 @@ export interface ChatMessageRow {
   from: string; // bare JID of sender
   nick: string;
   body: string;
+  // An agent's "<name> has joined the chat" notice: shown only in the
+  // detailed view, and not counted.
+  joinNotice?: boolean;
 }
 
 export interface ChatMessagesResponse {

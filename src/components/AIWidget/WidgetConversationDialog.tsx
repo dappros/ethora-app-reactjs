@@ -29,6 +29,10 @@ export function WidgetConversationDialog({
   const [messagesError, setMessagesError] = useState<string | null>(null);
   const [mamUnavailable, setMamUnavailable] = useState<boolean>(false);
   const [detailed, setDetailed] = useState(false);
+  // The simple view shows the conversation: messages with text, without an
+  // agent's "has joined the chat" notice. Its count matches the list's
+  // "View (n messages)", the owner digest and the conversation.completed event.
+  const shown = messages.filter((m) => detailed || (Boolean(m.body?.trim()) && !m.joinNotice));
 
   const handleCopy = useCallback((value: string) => {
     try {
@@ -162,7 +166,10 @@ export function WidgetConversationDialog({
               </div>
               <div>
                 <div className="text-xs uppercase text-gray-500 mb-1 flex items-center justify-between">
-                  <span>{t('aiWidgetConversations.messagesLabel')}</span>
+                  <span>
+                    {t('aiWidgetConversations.messagesLabel')}
+                    {!detailed && !messagesLoading && !messagesError && !mamUnavailable && messages.length < 100 ? ` (${shown.length})` : ''}
+                  </span>
                   {messagesLoading && <CircularProgress size={12} />}
                 </div>
                 {mamUnavailable && (
@@ -200,14 +207,14 @@ export function WidgetConversationDialog({
                 {!messagesLoading &&
                   !messagesError &&
                   !mamUnavailable &&
-                  (detailed ? messages.length === 0 : !messages.some((m) => m.body?.trim())) && (
+                  shown.length === 0 && (
                     <div className="text-xs text-gray-500 italic px-1">
                       {t('aiWidgetConversations.noMessagesYet')}
                     </div>
                   )}
-                {messages.length > 0 && (
+                {shown.length > 0 && (
                   <div className="rounded-md border border-gray-200 bg-gray-50 max-h-[420px] overflow-y-auto p-2 space-y-2">
-                    {messages.filter((m) => detailed || Boolean(m.body?.trim())).map((m) => {
+                    {shown.map((m) => {
                       const visitor = isVisitorMessage(m);
                       return (
                         <div
