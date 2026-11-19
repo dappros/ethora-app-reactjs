@@ -138,7 +138,7 @@ test('App Home follows the server milestones', async ({ page }) => {
   await expect(page.getByTestId('home-step-3')).toContainText('Seen on a test page (127.0.0.1)');
   await expect(page.getByTestId('home-step-4')).not.toHaveAttribute('data-done', 'true');
   await expect(page.getByTestId('app-status-pill')).toHaveText('On a test page');
-  await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Try In-App' })).toBeVisible();
 });
 
 test('an App whose widget ran before milestones: Home is live with the real conversation count', async ({ page }) => {
@@ -264,13 +264,13 @@ test('SDK home shows the App ID and a paste-ready snippet; messenger home shows 
   await expect(page.getByText('Trust & Safety settings')).toBeVisible();
 });
 
-test('Test Chats opens the App\'s chats under its header', async ({ page }) => {
+test('Try In-App opens the App\'s chats under its header', async ({ page }) => {
   await fakeBackend(page, { ...baseApp, onboardingGoal: 'messenger' });
   await page.goto(`/app/admin/apps/${APP_ID}`);
-  await page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' }).click();
+  await page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Try In-App' }).click();
   await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}/chats$`));
-  await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Test Chats' })).toHaveAttribute('aria-current', 'page');
-  await expect(page).toHaveTitle(/Test Chats - E2E Onboarding App/);
+  await expect(page.getByRole('navigation', { name: 'App sections' }).getByRole('link', { name: 'Try In-App' })).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveTitle(/Try In-App - E2E Onboarding App/);
 });
 
 test('Conversations shows a simple list by default; the table is one click away', async ({ page }) => {

@@ -44,7 +44,7 @@ type Advanced = 'memory' | 'heartbeat' | 'flows' | 'model' | 'chats' | 'agent' |
 // agent's other panels sit under Advanced; they are the same components as
 // the Agents library, which stays the place for agents shared across Apps.
 export default function AppAssistant() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { appId } = useParams();
   const location = useLocation();
   const app = useAppStore((s) => s.apps.find((a) => a._id === appId));
@@ -67,6 +67,13 @@ export default function AppAssistant() {
     httpGetAgentKnowledge(agent.id).then(({ data }) => setHealth(data)).catch(() => {});
   }, [agent?.id]);
   useEffect(refreshHealth, [refreshHealth, knows]);
+  // The counts on "Websites and pages" and "Upload documents" follow a crawl
+  // or an upload while one of the two is open.
+  useEffect(() => {
+    if (!knows) return;
+    const timer = window.setInterval(refreshHealth, 5000);
+    return () => window.clearInterval(timer);
+  }, [knows, refreshHealth]);
 
   // Links from App Home land on a section: #knows, #test, #install.
   useEffect(() => {
@@ -158,8 +165,8 @@ export default function AppAssistant() {
           <p className="text-sm text-gray-600">{t('appAssistant.knows.text')}</p>
           {health?.rebuilding && <p className="mt-1 text-sm text-gray-600">{t('appAssistant.knows.rebuilding')}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Toggle active={knows === 'web'} onClick={() => toggleKnows('web')}>{pages ? t('appAssistant.knows.seePages') : t('appAssistant.knows.addWebsite')}</Toggle>
-            <Toggle active={knows === 'docs'} onClick={() => toggleKnows('docs')}>{t('appAssistant.knows.uploadDocs')}</Toggle>
+            <Toggle active={knows === 'web'} onClick={() => toggleKnows('web')} testId="assistant-toggle-web">{t('appAssistant.knows.pagesButton').replace('{n}', pages.toLocaleString(locale))}</Toggle>
+            <Toggle active={knows === 'docs'} onClick={() => toggleKnows('docs')} testId="assistant-toggle-docs">{t('appAssistant.knows.docsButton').replace('{n}', docs.toLocaleString(locale))}</Toggle>
           </div>
           {knows === 'web' && <Panel><WebIndexPanel agent={agent} appId={appId} isDisabled={readOnly} /></Panel>}
           {knows === 'docs' && <Panel><DocsIndexPanel agent={agent} appId={appId} isDisabled={readOnly} /></Panel>}
@@ -230,6 +237,13 @@ export default function AppAssistant() {
           <p className="mt-3 text-sm">
             <a className="text-brand-500 underline" href={mailto}>{t('appAssistant.install.email')}</a>
           </p>
+          {pages > 0 && (
+            <p className="mt-4 text-sm">
+              <Link className="text-brand-500 underline" to={`/app/admin/apps/${appId}/try`} data-testid="assistant-try-website">
+                {t('tryPreview.tryLink')}
+              </Link>
+            </p>
+          )}
           <TryDemoCard app={app} />
         </Section>
 
@@ -292,14 +306,20 @@ function Section({ id, num, title, badge, badgeOk, children }: { id: string; num
   );
 }
 
-function Toggle({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+// A button that opens a part of the page: a chevron pointing right when
+// closed, down when open, and a pressed look while open.
+function Toggle({ active, onClick, children, testId }: { active: boolean; onClick: () => void; children: ReactNode; testId?: string }) {
   return (
     <button
       type="button"
       aria-expanded={active}
       onClick={onClick}
-      className={`min-h-9 rounded-lg border px-3 text-sm font-semibold ${active ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-gray-300 bg-white text-gray-800 hover:border-brand-500'}`}
+      data-testid={testId}
+      className={`inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-semibold ${active ? 'border-brand-500 bg-brand-50 text-brand-600 shadow-inner' : 'border-gray-300 bg-white text-gray-800 shadow-sm hover:border-brand-500'}`}
     >
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className={`size-4 shrink-0 transition-transform ${active ? 'rotate-90' : ''}`}>
+        <path fillRule="evenodd" d="M7.2 14.8a.75.75 0 0 1 0-1.06L10.94 10 7.2 6.26a.75.75 0 1 1 1.06-1.06l4.27 4.27a.75.75 0 0 1 0 1.06L8.26 14.8a.75.75 0 0 1-1.06 0Z" clipRule="evenodd" />
+      </svg>
       {children}
     </button>
   );

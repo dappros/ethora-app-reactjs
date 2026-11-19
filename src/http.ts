@@ -1579,6 +1579,24 @@ export interface TryDemoView {
   pending: boolean;
   expiresAt: string;
 }
+// The owner's "Try on Website" tab: the App's website and how it is shown
+// (the same frame decision and picture as share links). `check`: only
+// whether there is a website with indexed pages, nothing prepared.
+export interface TryPreview {
+  available: boolean;
+  appId: string;
+  site?: string;
+  homeUrl?: string;
+  url?: string;
+  frameable?: boolean | null;
+  screenshotUrl?: string;
+  pending?: boolean;
+}
+export function httpTryPreview(appId: string, opts: { page?: string; check?: boolean } = {}) {
+  return httpV2.get<TryPreview>(`/try/preview/${encodeURIComponent(appId)}`, {
+    params: { ...(opts.page ? { page: opts.page } : {}), ...(opts.check ? { check: '1' } : {}) },
+  });
+}
 // The public demo page: no session, no refresh or logout on errors.
 const httpPublicV2 = axios.create({ baseURL: getBaseURL(env.VITE_API_V2, '/v2') });
 export function httpTryView(site: string, token: string, count = true) {

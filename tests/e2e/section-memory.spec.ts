@@ -83,14 +83,16 @@ async function remember(page: Page, memory: Record<string, string>) {
   );
 }
 
+// A page without a form: Settings can show "Unsaved changes" under load and
+// then holds the click on Apps with its leave confirmation.
 test('Apps reopens the App and tab left for Agents; Apps again goes to the list', async ({ page }) => {
   await fakeBackend(page);
-  await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Appearance`);
-  await expect(page).toHaveURL(/tab=Appearance/);
+  await page.goto(`/app/admin/apps/${APP_ID}/users?access=admin`);
+  await expect(page).toHaveURL(/access=admin/);
   await page.getByRole('link', { name: 'Agents', exact: true }).first().click();
   await expect(page).toHaveURL(/\/app\/admin\/agents$/);
   await page.getByRole('link', { name: 'Apps', exact: true }).first().click();
-  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}/settings\\?tab=Appearance$`));
+  await expect(page).toHaveURL(new RegExp(`/app/admin/apps/${APP_ID}/users\\?access=admin$`));
   await page.getByRole('link', { name: 'Apps', exact: true }).first().click();
   await expect(page).toHaveURL(/\/app\/admin\/apps$/);
 });
