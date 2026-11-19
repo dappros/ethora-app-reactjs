@@ -39,6 +39,24 @@ const tabs: Record<string, string>[] = [
   { name: 'Transactions', value: 'transactions', labelKey: 'appStatistics.tabTransactions' },
   { name: 'Files', value: 'files', labelKey: 'appStatistics.tabFiles' },
 ];
+// Tabs that chart two lines; the tab's total is their sum.
+const LINES: Record<string, { key: string; labelKey: string }[]> = {
+  users: [
+    { key: 'users', labelKey: 'appStatistics.lineRegistered' },
+    { key: 'visitors', labelKey: 'appStatistics.lineVisitors' },
+  ],
+  sessions: [
+    { key: 'sessions', labelKey: 'appStatistics.lineSignIns' },
+    { key: 'widgetSessions', labelKey: 'appStatistics.lineWidgetSessions' },
+  ],
+  apiCalls: [
+    { key: 'apiCalls', labelKey: 'appStatistics.lineApiCalls' },
+    { key: 'widgetCalls', labelKey: 'appStatistics.lineWidgetCalls' },
+  ],
+};
+const tabTotal = (value: string, counts: Record<string, number>) =>
+  (LINES[value] || [{ key: value }]).reduce((sum, l) => sum + (Number(counts[l.key]) || 0), 0);
+
 const timePeriods = ['24 hours', '7 days', '30 days', 'Select period'];
 // Time-period display labels. `timePeriod` itself stays the canonical
 // English string - it's switched on in calculateDates() and persisted in
@@ -51,7 +69,7 @@ const PERIOD_LABEL_KEYS: Record<string, string> = {
 };
 
 export const AppStatistics = (): ReactElement => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { appId } = useParams<string>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -61,6 +79,8 @@ export const AppStatistics = (): ReactElement => {
   const [graphStatisticsCont, setGraphStatisticsCount] = useState<
     Record<string, number>
   >({});
+  // First day widget sessions were counted on this install (none before).
+  const [widgetSince, setWidgetSince] = useState<string | null>(null);
   
   const tabFromUrl = searchParams.get('tab');
   const periodFromUrl = searchParams.get('period');
@@ -137,6 +157,11 @@ export const AppStatistics = (): ReactElement => {
   ) => {
     const result: Record<string, { value: number; name: string }[]> = {};
     for (const d in data) {
+      if (d === 'widgetCountedSince') {
+        setWidgetSince(typeof data[d] === 'string' ? (data[d] as unknown as string) : null);
+        continue;
+      }
+      if (!data[d] || (typeof data[d] !== 'number' && !Array.isArray((data[d] as { y?: unknown }).y))) continue;
       if (typeof data[d] === 'number') {
         if (d === 'apiCallCount') {
           setGraphStatisticsCount((count) => {
@@ -207,7 +232,7 @@ export const AppStatistics = (): ReactElement => {
 
     return {
       title: t(selectedTab.labelKey),
-      value: graphStatisticsCont[selectedTab.value],
+      value: tabTotal(selectedTab.value, graphStatisticsCont),
       period: formattedPeriod,
     };
   }, [
@@ -222,8 +247,8 @@ export const AppStatistics = (): ReactElement => {
   ]);
 
   const statisticValue = useMemo(() => {
-    return statistics.value && statistics.value.toLocaleString("en-US")
-  }, [statistics.value]);
+    return (statistics.value || 0).toLocaleString(locale || 'en');
+  }, [statistics.value, locale]);
 
   const handleOptionClick = (option: string) => {
     setTimePeriod(option);
@@ -408,7 +433,8 @@ export const AppStatistics = (): ReactElement => {
                       tab.disabled ? 'text-gray-400 md:text-gray-400' : ''
                     )}
                   >
-                    {t(tab.labelKey)}
+                    {t(tab.labelKey)}{' '}
+                    <span className="font-normal" data-testid={`stat-total-${tab.value}`}>({tabTotal(tab.value, graphStatisticsCont).toLocaleString(locale || 'en')})</span>
                   </span>
                 </div>
               </li>
@@ -436,12 +462,22 @@ export const AppStatistics = (): ReactElement => {
               <p className="text-gray-500 text-sm">{t('appStatistics.forPrefix')} {statistics.period}</p>
             </div>
           </div>
+          {/* What the number counts. */}
+          <p className="mt-2 text-sm text-gray-600" data-testid="stat-explain">{t(`appStatistics.explain.${selectedTab.value}`)}</p>
+          {(selectedTab.value === 'sessions' || selectedTab.value === 'apiCalls') && (
+            <p className="mt-1 text-xs text-gray-500" data-testid="stat-widget-since">
+              {widgetSince
+                ? t('appStatistics.widgetSince').replace('{date}', DateTime.fromISO(widgetSince).setLocale(locale || 'en').toLocaleString(DateTime.DATE_MED))
+                : t('appStatistics.widgetSinceNow')}
+            </p>
+          )}
           <div className="mt-6 rounded-lg h-48 xs:h-[415px] flex items-center justify-center relative">
             {isLoading
               ? <Loading style='absolute'/>
               : <LineChartLocal
               data={graphStatistics[selectedTab.value]}
               name={selectedTab.name}
+              series={LINES[selectedTab.value]?.map((l) => ({ key: l.key, label: t(l.labelKey), data: graphStatistics[l.key] || [] }))}
             />}
           </div>
           {selectedTab.value === 'aitokens' && appId && (
