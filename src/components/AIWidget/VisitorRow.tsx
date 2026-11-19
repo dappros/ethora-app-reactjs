@@ -77,7 +77,7 @@ function Country({ row }: { row: WidgetConversationRow }) {
   const cc = row.visitor?.metadata?.country || '';
   if (!cc) return <span className="text-xs text-gray-500">{t('appUsers.unknownCountry')}</span>;
   return (
-    <span className="text-xs text-gray-500" data-testid="visitor-country">
+    <span className="block whitespace-nowrap text-xs text-gray-500" data-testid="visitor-country">
       <span aria-hidden="true" className="mr-1" style={{ fontFamily: EMOJI_FONT }}>{flagFor(cc)}</span>
       {countryName(cc)}
     </span>

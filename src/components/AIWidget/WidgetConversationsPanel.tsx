@@ -38,6 +38,8 @@ interface WidgetConversationsPanelProps {
   // N" readout in the header strip stays in sync with what the panel shows.
   // Called whenever a fresh list is fetched.
   onTotalChange?: (total: number) => void;
+  // A room name to open on arrival (the links in owner emails, ?room=).
+  openRoom?: string;
 }
 
 const PAGE_SIZE = 20;
@@ -45,6 +47,7 @@ const PAGE_SIZE = 20;
 export function WidgetConversationsPanel({
   appId,
   onTotalChange,
+  openRoom,
 }: WidgetConversationsPanelProps): ReactElement | null {
   const [simpleView, setSimpleView] = useState(false);
   const { t } = useTranslation();
@@ -119,6 +122,24 @@ export function WidgetConversationsPanel({
   useEffect(() => {
     void fetchPage(0);
   }, [fetchPage]);
+
+  // Open the conversation an email linked to, wherever it is in the list.
+  useEffect(() => {
+    if (!openRoom) return;
+    let cancelled = false;
+    httpV2
+      .get<WidgetConversationsResponse>(`/apps/${appId}/widget/conversations`, { params: { room: openRoom, limit: 1, offset: 0 } })
+      .then((resp) => {
+        const row = resp?.data?.results?.[0];
+        if (!cancelled && row) setSelectedRow(row);
+      })
+      .catch(() => {
+        /* the list still shows; the room may have been deleted */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appId, openRoom]);
 
   // Reset selection on page change — see selected-state comment above.
   useEffect(() => {

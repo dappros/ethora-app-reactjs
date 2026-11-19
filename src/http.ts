@@ -534,10 +534,10 @@ export function httpGetGraphStatistic(
   return http.get(`/apps/graph-statistic/${appId}?${params}`);
 }
 
-export function httpWithAuth(startDate: string, endDate: string) {
-  return http.get(
-    `/analysis/apis-csv?startDate=${startDate}&endDate=${endDate}`
-  );
+// The Statistics page of one App as a CSV file (owner or admin of the App).
+export function httpStatisticsCsv(appId: string, startDate: string, endDate: string) {
+  const params = new URLSearchParams({ startDate, endDate });
+  return http.get<Blob>(`/apps/graph-statistic/${appId}/csv?${params}`, { responseType: 'blob' });
 }
 
 export function httpUploadFirebaseServiceAccount(appId: string, file: File) {
@@ -2355,4 +2355,25 @@ export function httpResetUserMfa(appId: string, userId: string) {
 export interface ReleaseNotesEntry { title: string; body: string }
 export function httpGetReleaseNotes() {
   return httpV2.get<{ entries: ReleaseNotesEntry[]; url: string }>('/release-notes');
+}
+
+// Email reports of the signed-in account (backend modules/ownerDigest).
+export interface OwnerDigestSettings {
+  available: boolean;
+  mailConfigured: boolean;
+  enabled: boolean;
+  email: string;
+  emailVerified: boolean;
+  settings: { daily: boolean; weekly: boolean; monthly: boolean; includeQuestions: boolean; timeZone: string };
+  apps: { appId: string; name: string; completedEmail: boolean }[];
+}
+export type OwnerDigestUpdate = Partial<OwnerDigestSettings['settings']> & { completedApps?: Record<string, boolean> };
+export function httpGetOwnerDigest() {
+  return httpV2.get<OwnerDigestSettings>('/owner-digest/settings');
+}
+export function httpPutOwnerDigest(body: OwnerDigestUpdate) {
+  return httpV2.put<OwnerDigestSettings>('/owner-digest/settings', body);
+}
+export function httpOwnerDigestTest() {
+  return httpV2.post<{ sent: boolean; to: string }>('/owner-digest/test');
 }

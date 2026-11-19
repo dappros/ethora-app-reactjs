@@ -89,7 +89,7 @@ export const settingsTutorial = {
     'questionsStepDefault.description': 'I want to..',
 
     'stepChooseTutorial.noQuestions': 'No questions available',
-    'stepChooseTutorial.goStart': 'GO START',
+    'stepChooseTutorial.goStart': 'Get started',
     'stepChooseTutorial.imageAlt': 'Demo animation',
 
     'hubspotForm.notConfiguredError':
@@ -197,7 +197,7 @@ export const settingsTutorial = {
     'questionsStepDefault.description': 'Je veux..',
 
     'stepChooseTutorial.noQuestions': 'Aucune question disponible',
-    'stepChooseTutorial.goStart': 'COMMENCER',
+    'stepChooseTutorial.goStart': 'Commencer',
     'stepChooseTutorial.imageAlt': 'Animation de démonstration',
 
     'hubspotForm.notConfiguredError':
@@ -303,7 +303,7 @@ export const settingsTutorial = {
     'questionsStepDefault.description': 'Quiero..',
 
     'stepChooseTutorial.noQuestions': 'No hay preguntas disponibles',
-    'stepChooseTutorial.goStart': 'EMPEZAR',
+    'stepChooseTutorial.goStart': 'Empezar',
     'stepChooseTutorial.imageAlt': 'Animación de demostración',
 
     'hubspotForm.notConfiguredError':
