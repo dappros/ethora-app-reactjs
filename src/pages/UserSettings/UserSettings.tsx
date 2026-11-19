@@ -10,6 +10,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { AiAssistants } from './AiAssistants';
 import { Appearance } from './Appearance';
 import { Documents } from './Documents';
+import { EmailReports } from './EmailReports';
 import { PrivacyData } from './PrivacyData';
 import { Security } from './Security';
 // Referrals and BlockedUsers intentionally kept in source; their tabs are
@@ -25,6 +26,7 @@ const tabs = [
   'Security',
   'AI Assistants',
   'Documents',
+  'Email reports',
   'Privacy & Data',
 ];
 
@@ -55,7 +57,7 @@ export default function UserSettings() {
   const labels = [
     t('userSettingsPage.tabAppearance'), t('userSettingsPage.tabSecurity'),
     t('userSettingsPage.tabAiAssistants'), t('userSettingsPage.tabDocuments'),
-    t('userSettingsPage.tabPrivacyData'),
+    t('userSettingsPage.tabEmailReports'), t('userSettingsPage.tabPrivacyData'),
   ];
   const selectTab = (index: number) => {
     setSearchParams((params) => {
@@ -112,6 +114,7 @@ export default function UserSettings() {
               <TabApp text={t('userSettingsPage.tabSecurity')} />
               <TabApp text={t('userSettingsPage.tabAiAssistants')} />
               <TabApp text={t('userSettingsPage.tabDocuments')} />
+              <TabApp text={t('userSettingsPage.tabEmailReports')} />
               <TabApp text={t('userSettingsPage.tabPrivacyData')} />
             </TabList>
             {/* Logout sits where Referrals used to live (bottom of the left
@@ -142,6 +145,9 @@ export default function UserSettings() {
             </TabPanel>
             <TabPanel key="Documents" className="h-full overflow-auto">
               <Documents />
+            </TabPanel>
+            <TabPanel key="Email reports" className="h-full overflow-auto">
+              <EmailReports />
             </TabPanel>
             <TabPanel key="Privacy & Data" className="h-full overflow-auto">
               <PrivacyData />

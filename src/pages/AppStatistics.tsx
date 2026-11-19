@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { DateTime, Duration } from 'luxon';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-date-range';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -13,7 +13,7 @@ import { AiUsageBreakdown } from '../components/Statistics/AiUsageBreakdown';
 import { AiBudgetCard } from '../components/Statistics/AiBudgetCard';
 
 // Http
-import { httpGetGraphStatistic, httpWithAuth } from '../http';
+import { httpGetGraphStatistic, httpStatisticsCsv } from '../http';
 
 // Icons
 import downloadIcon from '../assets/icons/Download.svg';
@@ -286,16 +286,32 @@ export const AppStatistics = (): ReactElement => {
     }
   };
 
-  const onUploadCsv = async () => {
-    const response = await httpWithAuth(dates.startDate, dates.endDate);
-
-    const dataUrl = 'data:text/csv,' + response.data;
-    const filename = 'api.csv';
-
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = filename;
-    link.click();
+  // What the page shows, for this App and period, as a CSV file (one row per
+  // day). Only the App's owner or an admin of it gets the file.
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const onExportCsv = async () => {
+    if (!appId) return;
+    setExporting(true);
+    setExportError('');
+    try {
+      const from = DateTime.fromISO(dates.startDate).toISODate() || dates.startDate;
+      const to = DateTime.fromISO(dates.endDate).toISODate() || dates.endDate;
+      const response = await httpStatisticsCsv(appId, from, to);
+      const disposition = String(response.headers?.['content-disposition'] || '');
+      const name = /filename="?([^";]+)"?/.exec(disposition)?.[1] || `statistics-${from}-${to}.csv`;
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      setExportError(status === 403 ? t('appStatistics.exportForbidden') : t('appStatistics.exportFailed'));
+    } finally {
+      setExporting(false);
+    }
   };
 
   useEffect(() => {
@@ -387,17 +403,23 @@ export const AppStatistics = (): ReactElement => {
             )}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-col items-end">
             <button
-              disabled
-              onClick={onUploadCsv}
-              className="flex items-center px-2 sm:px-7 py-2 bg-gray-100 border border-gray-300 rounded-xl"
+              type="button"
+              disabled={exporting}
+              onClick={() => void onExportCsv()}
+              className="flex h-10 items-center rounded-xl border border-gray-300 bg-gray-100 px-3 text-gray-950 hover:bg-gray-200 disabled:opacity-60 sm:px-4"
+              data-testid="stat-export-csv"
             >
               <img src={downloadIcon} alt={t('appStatistics.downloadAlt')} />
-              <span className="text-gray-300 dark:text-gray-500 pl-3 hidden xs:block">
+              <span className="hidden whitespace-nowrap pl-2 xs:block">
                 {t('appStatistics.exportCsv')}
               </span>
             </button>
+            {exportError && <p className="mt-1 text-xs text-red-700" role="alert" data-testid="stat-export-error">{exportError}</p>}
+            <Link className="mt-1 text-xs text-brand-500 underline" to={`/app/account?tab=${encodeURIComponent('Email reports')}`} data-testid="stat-email-reports">
+              {t('appStatistics.emailReportsLink')}
+            </Link>
           </div>
         </div>
       </div>

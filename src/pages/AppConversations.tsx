@@ -11,6 +11,7 @@ export default function AppConversations() {
   const { appId } = useParams();
   const [params, setParams] = useSearchParams();
   const view = params.get('view') === 'requests' ? 'requests' : 'chats';
+  const openRoom = params.get('room') || undefined;
   if (!appId) return null;
   const tab = (key: 'chats' | 'requests', label: string) => (
     <button
@@ -25,11 +26,44 @@ export default function AppConversations() {
   );
   return (
     <div>
-      <div role="tablist" className="mb-3 flex gap-1" data-testid="conversations-views">
-        {tab('chats', t('appConversations.chats'))}
-        {tab('requests', t('appConversations.requests'))}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div role="tablist" className="flex gap-1" data-testid="conversations-views">
+          {tab('chats', t('appConversations.chats'))}
+          {tab('requests', t('appConversations.requests'))}
+        </div>
+        <NotificationsMenu appId={appId} />
       </div>
-      {view === 'requests' ? <AppRequestsList appId={appId} /> : <WidgetConversationsPanel appId={appId} />}
+      {view === 'requests' ? <AppRequestsList appId={appId} /> : <WidgetConversationsPanel appId={appId} openRoom={openRoom} />}
+    </div>
+  );
+}
+
+// Where to be told about completed conversations: the owner's email switch
+// (Account > Email reports) and the App's webhook.
+function NotificationsMenu({ appId }: { appId: string }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        data-testid="conversations-notifications"
+      >
+        {t('appConversations.notifications')}
+      </button>
+      {open && (
+        <div className="absolute right-0 z-20 mt-1 w-72 rounded-xl border border-gray-200 bg-white p-2 text-sm shadow-lg">
+          <Link className="block rounded-lg px-3 py-2 hover:bg-gray-50" to={`/app/account?tab=${encodeURIComponent('Email reports')}`}>
+            {t('appConversations.notifyEmail')}
+          </Link>
+          <Link className="block rounded-lg px-3 py-2 hover:bg-gray-50" to={`/app/admin/apps/${appId}/settings?tab=Webhooks`}>
+            {t('appConversations.notifyWebhook')}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
