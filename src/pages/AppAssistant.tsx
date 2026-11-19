@@ -33,6 +33,7 @@ import { ModelAgent } from '../models';
 import { useAppStore } from '../store/useAppStore';
 import { countLabel } from '../utils/countLabel';
 import { resolveWidgetUrl } from '../utils/widgetUrl';
+import { TryDemoCard } from '../components/TryDemoCard';
 import { readWidgetAppearanceDraft, writeWidgetAppearanceDraft } from '../utils/widgetAppearanceDraft';
 
 type Knows = 'web' | 'docs' | null;
@@ -229,6 +230,7 @@ export default function AppAssistant() {
           <p className="mt-3 text-sm">
             <a className="text-brand-500 underline" href={mailto}>{t('appAssistant.install.email')}</a>
           </p>
+          <TryDemoCard app={app} />
         </Section>
 
         <details className="rounded-xl border border-dashed border-gray-300 bg-white p-4" data-testid="assistant-advanced">

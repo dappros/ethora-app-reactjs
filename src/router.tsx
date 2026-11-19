@@ -51,6 +51,8 @@ import { BaseAppOnly } from './components/BaseAppOnly';
 import AdminLayout from './pages/AdminLayout';
 import TurnstileBridge from './pages/TurnstileBridge';
 import WpSetup from './pages/WpSetup';
+import TryStart from './pages/Try/TryStart';
+import TryDemoPage from './pages/Try/TryDemoPage';
 import { defaultLandingPath } from './utils/appHost';
 
 export const router = createBrowserRouter(
@@ -97,6 +99,16 @@ export const router = createBrowserRouter(
             {
               path: '/wp-setup',
               Component: WpSetup,
+            },
+            {
+              // "Try it on your site": the front door (sign-in needed to
+              // create a demo) and the public demo link (no sign-in).
+              path: '/try/:site?',
+              Component: TryStart,
+            },
+            {
+              path: '/try/:site/:token',
+              Component: TryDemoPage,
             },
             {
               // Join link of a scheduled call (calendar event, invite card,

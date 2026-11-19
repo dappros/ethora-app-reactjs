@@ -1552,6 +1552,54 @@ export function httpReindexSiteSourceV2(appId: string, urlId: string) {
 // those are unacknowledged and unreplayable - a client that reloaded or briefly
 // lost the socket never learns the crawl ended. This is the reconcilable copy of
 // the same state; poll it for any job the UI still believes is running.
+// "Try it on your site" demo links (backend modules/tryDemo).
+export interface TryDemo {
+  id: string;
+  appId: string;
+  site: string;
+  url: string;
+  link: string;
+  source: 'try' | 'install';
+  createdAt: string;
+  expiresAt: string;
+  endedAt: string | null;
+  active: boolean;
+  frameable: boolean | null;
+  screenshotUrl: string;
+  views: number;
+  questions?: number;
+}
+export interface TryDemoView {
+  demoId: string;
+  appId: string;
+  site: string;
+  url: string;
+  frameable: boolean | null;
+  screenshotUrl: string;
+  pending: boolean;
+  expiresAt: string;
+}
+// The public demo page: no session, no refresh or logout on errors.
+const httpPublicV2 = axios.create({ baseURL: getBaseURL(env.VITE_API_V2, '/v2') });
+export function httpTryView(site: string, token: string, count = true) {
+  return httpPublicV2.post<TryDemoView>('/try/view', { site, token, count });
+}
+export function httpTryPrepare(site: string) {
+  return httpV2.post<{ ok: boolean; site: string; url: string; existing: TryDemo | null; maxPages?: number }>('/try/prepare', { site });
+}
+export function httpTryCreate(body: { appId: string; site: string; source?: 'try' | 'install' }) {
+  return httpV2.post<{ ok: boolean; reused: boolean; demo: TryDemo }>('/try/demos', body);
+}
+export function httpTryList(appId?: string) {
+  return httpV2.get<{ ok: boolean; items: TryDemo[] }>('/try/demos', appId ? { params: { appId } } : undefined);
+}
+export function httpTryExtend(id: string) {
+  return httpV2.post<{ ok: boolean; demo: TryDemo }>(`/try/demos/${encodeURIComponent(id)}/extend`);
+}
+export function httpTryEnd(id: string) {
+  return httpV2.post<{ ok: boolean; demo: TryDemo }>(`/try/demos/${encodeURIComponent(id)}/end`);
+}
+
 export function httpGetSiteCrawlJob(appId: string, jobId: string) {
   return httpV2.get(`/apps/${appId}/sources/site-crawl-jobs/${jobId}`);
 }

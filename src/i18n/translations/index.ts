@@ -19,6 +19,7 @@ import { modalsC } from './modalsC';
 import { serverSettings } from './serverSettings';
 import { settingsTutorial } from './settingsTutorial';
 import { onboarding } from './onboarding';
+import { tryDemo } from './tryDemo';
 import { startProject } from './startProject';
 import { trustSafety } from './trustSafety';
 import { tsHub } from './tsHub';
@@ -61,6 +62,7 @@ const dictionaries = [
   settingsTutorial,
   startProject,
   onboarding,
+  tryDemo,
   sharedComponents,
   userSettings,
   userSuspension,
