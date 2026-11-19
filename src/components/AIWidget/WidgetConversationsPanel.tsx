@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Tooltip,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
@@ -24,13 +23,12 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { httpV2 } from '../../http';
 import { downloadCsv } from '../../utils/csv';
 import { WidgetConversationDialog } from './WidgetConversationDialog';
+import { ViewMessagesButton, VisitorCells, VisitorHeaderCells, VisitorStackedRow } from './VisitorRow';
 import {
   ChatMessagesResponse,
   WidgetConversationRow,
   WidgetConversationsResponse,
   deleteWidgetConversation,
-  flagFor,
-  formatDate,
   formatVisitor,
 } from './widgetConversations';
 
@@ -44,69 +42,11 @@ interface WidgetConversationsPanelProps {
 
 const PAGE_SIZE = 20;
 
-// Rich tooltip body for the visitor row. Renders a small key/value
-// table; missing fields are shown as `—` so the operator can tell
-// "we don't know" apart from "we knew it was Chrome on macOS".
-function VisitorMetadataPopover({
-  row,
-}: {
-  row: WidgetConversationRow;
-}) {
-  const { t } = useTranslation();
-  const m = row.visitor?.metadata;
-  const def = (v?: string) => (v && v.length ? v : '—');
-  const browserLabel = m
-    ? [m.browser, m.browserVersion].filter(Boolean).join(' ')
-    : '';
-  const osLabel = m ? [m.os, m.osVersion].filter(Boolean).join(' ') : '';
-  return (
-    <div className="text-xs leading-relaxed">
-      <div className="font-semibold mb-1">
-        {formatVisitor(row)}
-      </div>
-      <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-x-2 gap-y-0.5">
-        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.jidLabel')}</div>
-        <div className="font-mono break-all">
-          {row.visitor?.xmppUsername || '—'}
-        </div>
-        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.countryLabel')}</div>
-        <div>
-          {m?.country
-            ? `${flagFor(m.country)} ${m.country}`.trim()
-            : '—'}
-        </div>
-        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.browserLabel')}</div>
-        <div>{def(browserLabel)}</div>
-        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.osLabel')}</div>
-        <div>{def(osLabel)}</div>
-        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.deviceLabel')}</div>
-        <div>{m?.deviceType ? m.deviceType : t('aiWidgetConversations.desktopDefault')}</div>
-        {/* IP is captured (drives the country lookup) but not shown by
-            default — visitor IP is sensitive and showing it routinely
-            puts operators in a tricky data-protection posture. A future
-            "enterprise" flag will gate its visibility for installs that
-            have a specific contract permitting it. */}
-        <div className="text-[#D9D9D9]">{t('aiWidgetConversations.firstSeenLabel')}</div>
-        <div>
-          {row.visitor?.firstSeenAt
-            ? new Date(row.visitor.firstSeenAt).toLocaleString()
-            : '—'}
-        </div>
-      </div>
-      {!m && (
-        <div className="mt-2 text-[11px] italic text-[#D9D9D9]">
-          {t('aiWidgetConversations.metadataUnavailable')}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function WidgetConversationsPanel({
   appId,
   onTotalChange,
 }: WidgetConversationsPanelProps): ReactElement | null {
-  const [simpleView, setSimpleView] = useState(true);
+  const [simpleView, setSimpleView] = useState(false);
   const { t } = useTranslation();
   const [rows, setRows] = useState<WidgetConversationRow[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -133,6 +73,8 @@ export function WidgetConversationsPanel({
   // different feature (Select All Across Pages) we don't ship yet.
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
+  // A row's own Delete: that one conversation, through the same dialog.
+  const [single, setSingle] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -301,7 +243,7 @@ export function WidgetConversationsPanel({
   async function runBulkDelete() {
     setDeleting(true);
     setDeleteError(null);
-    const targets = rows.filter((r) => selected.has(r._id));
+    const targets = single ? rows.filter((r) => r._id === single) : rows.filter((r) => selected.has(r._id));
     let okCount = 0;
     const errors: string[] = [];
     for (const row of targets) {
@@ -311,7 +253,8 @@ export function WidgetConversationsPanel({
     }
     setDeleting(false);
     setConfirmOpen(false);
-    setSelected(new Set());
+    if (single) setSingle(null);
+    else setSelected(new Set());
     if (errors.length) {
       setDeleteError(`${okCount}/${targets.length} deleted. ${errors.length} failed: ${errors.slice(0, 3).join('; ')}`);
     }
@@ -323,6 +266,11 @@ export function WidgetConversationsPanel({
     void fetchPage(stillHasRowsOnPage ? offset : Math.max(0, offset - PAGE_SIZE));
   }
 
+  const deleteCount = single ? 1 : selected.size;
+  const deleteOne = (row: WidgetConversationRow) => {
+    setSingle(row._id);
+    setConfirmOpen(true);
+  };
   const pageStart = offset + (rows.length ? 1 : 0);
   const pageEnd = offset + rows.length;
   const hasPrev = offset > 0;
@@ -402,17 +350,7 @@ export function WidgetConversationsPanel({
       {!error && rows.length > 0 && simpleView && (
         <div className="divide-y rounded-xl border border-gray-200">
           {rows.map((row) => (
-            <button key={row._id} type="button" onClick={() => setSelectedRow(row)} className="flex w-full items-center justify-between gap-3 p-4 text-left hover:bg-gray-50">
-              <span className="min-w-0">
-                <span className="block font-medium">{formatVisitor(row)}</span>
-                {/* The page the visitor was on, when the widget reported one. */}
-                {(row.visitor?.metadata?.lastPageUrl || row.visitor?.metadata?.pageUrl) && (
-                  <span className="block break-all text-sm text-gray-500">{row.visitor?.metadata?.lastPageUrl || row.visitor?.metadata?.pageUrl}</span>
-                )}
-                <span className="block text-xs text-gray-500">{t('aiWidgetConversations.lastActivityLabel')}: {formatDate(row.updatedAt)}</span>
-              </span>
-              <span className="shrink-0 text-sm text-brand-500">{t('aiWidgetConversations.open')}</span>
-            </button>
+            <VisitorStackedRow key={row._id} row={row} onOpen={() => setSelectedRow(row)} />
           ))}
         </div>
       )}
@@ -455,7 +393,7 @@ export function WidgetConversationsPanel({
               {deleteError}
             </div>
           )}
-          <table className="min-w-full text-sm font-sans">
+          <table className="hidden min-w-[900px] w-full text-sm font-sans sm:table">
             <thead className="bg-gray-50 text-left text-gray-700">
               <tr>
                 <th className="px-2 py-2 font-semibold w-1">
@@ -469,15 +407,13 @@ export function WidgetConversationsPanel({
                     }}
                   />
                 </th>
-                <th className="px-4 py-2 font-semibold">{t('aiWidgetConversations.visitorHeader')}</th>
-                <th className="px-4 py-2 font-semibold">{t('aiWidgetConversations.startedHeader')}</th>
-                <th className="px-4 py-2 font-semibold">{t('aiWidgetConversations.lastActivityHeader')}</th>
+                <VisitorHeaderCells />
                 <th className="px-4 py-2 font-semibold w-1"></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row._id} className="border-t border-gray-100">
+                <tr key={row._id} className="border-t border-gray-100 align-top">
                   <td className="px-2 py-2 w-1">
                     <Checkbox
                       size="small"
@@ -488,58 +424,42 @@ export function WidgetConversationsPanel({
                       }}
                     />
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
-                    <Tooltip
-                      title={<VisitorMetadataPopover row={row} />}
-                      arrow
-                      placement="right"
-                      enterDelay={150}
-                      // Allow the operator to mouse over the popover
-                      // body itself (e.g. to copy the IP) without it
-                      // dismissing.
-                      slotProps={{
-                        tooltip: {
-                          sx: {
-                            maxWidth: 360,
-                            bgcolor: 'rgba(17,24,39,0.95)',
-                          },
-                        },
-                      }}
-                    >
-                      {/* Dotted underline = "this label has more
-                          information on hover", standard convention. */}
-                      <span
-                        className="cursor-help"
-                        style={{ borderBottom: '1px dotted rgb(var(--c-gray-950) / 0.3)' }}
-                      >
-                        {row.visitor?.metadata?.country && (
-                          <span className="mr-1" aria-hidden="true">
-                            {flagFor(row.visitor.metadata.country)}
-                          </span>
-                        )}
-                        {formatVisitor(row)}
-                      </span>
-                    </Tooltip>
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
-                    {formatDate(row.createdAt)}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
-                    {formatDate(row.updatedAt)}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-right">
-                    <button
-                      type="button"
-                      className="text-brand-500 hover:underline"
-                      onClick={() => setSelectedRow(row)}
-                    >
-                      {t('aiWidgetConversations.open')}
-                    </button>
+                  <VisitorCells row={row} />
+                  <td className="px-4 py-3 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <ViewMessagesButton row={row} onClick={() => setSelectedRow(row)} />
+                      <Button size="small" color="error" onClick={() => deleteOne(row)} disabled={deleting} data-testid="conversation-delete">
+                        {t('aiWidgetConversations.delete')}
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {/* Phone width: stacked rows with the same controls. */}
+          <div className="divide-y sm:hidden">
+            {rows.map((row) => (
+              <VisitorStackedRow
+                key={row._id}
+                row={row}
+                onOpen={() => setSelectedRow(row)}
+                leading={
+                  <Checkbox
+                    size="small"
+                    checked={selected.has(row._id)}
+                    onChange={() => toggleOne(row._id)}
+                    inputProps={{ 'aria-label': `${t('aiWidgetConversations.selectConversationPrefix')} ${formatVisitor(row)}` }}
+                  />
+                }
+                trailing={
+                  <Button size="small" color="error" onClick={() => deleteOne(row)} disabled={deleting}>
+                    {t('aiWidgetConversations.delete')}
+                  </Button>
+                }
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -578,18 +498,22 @@ export function WidgetConversationsPanel({
           the MUC room) so we name what's about to disappear. */}
       <Dialog
         open={confirmOpen}
-        onClose={() => !deleting && setConfirmOpen(false)}
+        onClose={() => {
+          if (deleting) return;
+          setConfirmOpen(false);
+          setSingle(null);
+        }}
         maxWidth="xs"
         fullWidth
       >
         <DialogTitle>
-          {selected.size === 1
-            ? t('aiWidgetConversations.confirmDeleteTitleOne').replace('{count}', String(selected.size))
-            : t('aiWidgetConversations.confirmDeleteTitleOther').replace('{count}', String(selected.size))}
+          {deleteCount === 1
+            ? t('aiWidgetConversations.confirmDeleteTitleOne').replace('{count}', String(deleteCount))
+            : t('aiWidgetConversations.confirmDeleteTitleOther').replace('{count}', String(deleteCount))}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {selected.size === 1
+            {deleteCount === 1
               ? t('aiWidgetConversations.confirmDeleteBodyOne')
               : t('aiWidgetConversations.confirmDeleteBodyOther')}
           </DialogContentText>
@@ -601,7 +525,7 @@ export function WidgetConversationsPanel({
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>
+          <Button onClick={() => { setConfirmOpen(false); setSingle(null); }} disabled={deleting}>
             {t('aiWidgetConversations.cancel')}
           </Button>
           <Button

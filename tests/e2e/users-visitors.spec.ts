@@ -13,6 +13,7 @@ const conversation = (n: number, extra: Record<string, unknown> = {}) => ({
   type: 'widget',
   createdAt: '2026-10-07T12:00:00.000Z',
   updatedAt: '2026-10-07T12:30:00.000Z',
+  messageCount: 1,
   visitor: {
     _id: `visitor${n}`,
     uuid: `4f2a9c1${n}aaaa`,
@@ -99,7 +100,7 @@ test('Visitors lists country, device, website page and opens the conversation', 
   await expect(table.getByRole('link', { name: 'shop.example.com/pricing' })).toHaveAttribute('href', 'https://shop.example.com/pricing');
   await expect(table).toContainText('Last: shop.example.com/contact');
   await expect(table).not.toContainText('203.0.113.7');
-  await table.getByRole('button', { name: 'Conversation' }).click();
+  await table.getByRole('button', { name: 'View (1 message)' }).click();
   await expect(page.getByText('Do you ship to Canada?')).toBeVisible();
   await page.keyboard.press('Escape');
   await table.getByRole('button', { name: 'Delete' }).click();
