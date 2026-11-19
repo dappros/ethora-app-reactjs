@@ -48,7 +48,7 @@ export default function AppTryWebsite() {
   return (
     <div className="flex h-full min-h-0 flex-col" data-testid="try-website">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-sm">
-        <form className="flex min-w-0 flex-1 items-center gap-2" onSubmit={go}>
+        <form className="flex min-w-0 basis-full items-center gap-2 sm:basis-0 sm:flex-1" onSubmit={go}>
           <label className="sr-only" htmlFor="try-website-page">{t('tryPreview.pageLabel')}</label>
           <input
             id="try-website-page"
