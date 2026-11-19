@@ -273,24 +273,34 @@ test('Try In-App opens the App\'s chats under its header', async ({ page }) => {
   await expect(page).toHaveTitle(/Try In-App - E2E Onboarding App/);
 });
 
-test('Conversations shows a simple list by default; the table is one click away', async ({ page }) => {
+test('Conversations shows the visitor columns and message counts; a simple list is one click away', async ({ page }) => {
   await fakeBackend(page, { ...baseApp, onboardingGoal: 'website' });
   await page.route(`**/v2/apps/${APP_ID}/widget/conversations**`, (route) =>
     route.fulfill({ contentType: 'application/json', body: JSON.stringify({
-      results: [{ _id: 'c1', name: `${APP_ID}_room1`, updatedAt: '2026-11-16T10:00:00Z', createdAt: '2026-11-16T09:00:00Z',
-        visitor: { xmppUsername: `${APP_ID}_widget-v1`, metadata: { pageUrl: 'https://shop.example/pricing' } } },
-      { _id: 'c2', name: `${APP_ID}_room2`, updatedAt: '2026-11-16T11:00:00Z', createdAt: '2026-11-16T11:00:00Z',
+      results: [{ _id: 'c1', name: `${APP_ID}_room1`, updatedAt: '2026-11-16T10:00:00Z', createdAt: '2026-11-16T09:00:00Z', messageCount: 12,
+        visitor: { xmppUsername: `${APP_ID}_widget-v1`, metadata: { pageUrl: 'https://shop.example/pricing', country: 'GB', browser: 'Chrome', os: 'macOS' } } },
+      { _id: 'c2', name: `${APP_ID}_room2`, updatedAt: '2026-11-16T11:00:00Z', createdAt: '2026-11-16T11:00:00Z', messageCount: 1,
         visitor: { xmppUsername: `${APP_ID}_widget-v2`, metadata: {} } }],
       pagination: { total: 2 } }) }),
   );
   await page.goto(`/app/admin/apps/${APP_ID}/conversations`);
-  await expect(page.getByText('https://shop.example/pricing')).toBeVisible();
-  // A conversation without a known page has no page line at all.
-  await expect(page.getByRole('button', { name: /Open/ })).toHaveCount(2);
-  await expect(page.getByText('Website page unavailable')).toHaveCount(0);
+  const table = page.locator('table');
+  await expect(table).toBeVisible();
+  for (const col of ['Visitor', 'Device', 'Website page', 'First seen', 'Last active']) {
+    await expect(table.getByRole('columnheader', { name: col })).toBeVisible();
+  }
+  await expect(table.getByRole('link', { name: 'shop.example/pricing' })).toBeVisible();
+  await expect(table).toContainText('United Kingdom');
+  await expect(table.getByRole('button', { name: 'View (12 messages)' })).toBeVisible();
+  await expect(table.getByRole('button', { name: 'View (1 message)' })).toBeVisible();
+  await expect(table.getByRole('button', { name: 'Delete' })).toHaveCount(2);
+  // A row's Delete asks first, through the same confirmation as the bulk one.
+  await table.getByRole('button', { name: 'Delete' }).first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: 'Simple list' }).click();
   await expect(page.locator('table')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Table and bulk actions' }).click();
-  await expect(page.locator('table')).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'View (12 messages)' })).toBeVisible();
 });
 
 test('app chats: Join automatically is on for existing chats and saves when changed', async ({ page }) => {

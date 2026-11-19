@@ -7,10 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import DesktopWindowsOutlinedIcon from '@mui/icons-material/DesktopWindowsOutlined';
-import PhoneIphoneOutlinedIcon from '@mui/icons-material/PhoneIphoneOutlined';
-import TabletMacOutlinedIcon from '@mui/icons-material/TabletMacOutlined';
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { httpHardDeleteUsers, httpV2 } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -19,10 +16,8 @@ import {
   WidgetConversationRow,
   WidgetConversationsResponse,
   deleteWidgetConversation,
-  flagFor,
-  formatDate,
-  formatVisitor,
 } from '../AIWidget/widgetConversations';
+import { ViewMessagesButton, VisitorCells, VisitorHeaderCells, VisitorStackedRow } from '../AIWidget/VisitorRow';
 
 const PAGE_SIZE = 20;
 
@@ -33,7 +28,7 @@ const errorText = (e: unknown) => (e as ApiError)?.response?.data?.error || (e a
 // list comes from the widget conversations endpoint (same data and transcript
 // as AI Widget > Conversations history), shown as people.
 export function VisitorsTable({ appId, onTotalChange }: { appId: string; onTotalChange?: (n: number) => void }): ReactElement {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const [rows, setRows] = useState<WidgetConversationRow[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -41,15 +36,6 @@ export function VisitorsTable({ appId, onTotalChange }: { appId: string; onTotal
   const [open, setOpen] = useState<WidgetConversationRow | null>(null);
   const [toDelete, setToDelete] = useState<WidgetConversationRow | null>(null);
   const [deleting, setDeleting] = useState(false);
-
-  const countryName = useMemo(() => {
-    try {
-      const names = new Intl.DisplayNames([locale || 'en'], { type: 'region' });
-      return (cc: string) => (cc ? names.of(cc.toUpperCase()) || cc : '');
-    } catch {
-      return (cc: string) => cc;
-    }
-  }, [locale]);
 
   const load = useCallback(
     async (nextOffset: number) => {
@@ -97,23 +83,6 @@ export function VisitorsTable({ appId, onTotalChange }: { appId: string; onTotal
     void load(stay ? offset : Math.max(0, offset - PAGE_SIZE));
   };
 
-  const deviceIcon = (type: string) => {
-    const v = (type || '').toLowerCase();
-    if (v === 'mobile') return <PhoneIphoneOutlinedIcon fontSize="small" titleAccess={t('appUsers.deviceMobile')} />;
-    if (v === 'tablet') return <TabletMacOutlinedIcon fontSize="small" titleAccess={t('appUsers.deviceTablet')} />;
-    return <DesktopWindowsOutlinedIcon fontSize="small" titleAccess={t('appUsers.deviceDesktop')} />;
-  };
-
-  const pageLabel = (url?: string) => {
-    if (!url) return '';
-    try {
-      const u = new URL(url);
-      return `${u.host}${u.pathname === '/' ? '' : u.pathname}`;
-    } catch {
-      return url;
-    }
-  };
-
   if (!loading && rows.length === 0) {
     return (
       <div className="bg-brand-150 p-4 text-sm font-sans rounded-xl mb-4" data-testid="visitors-empty">
@@ -125,70 +94,45 @@ export function VisitorsTable({ appId, onTotalChange }: { appId: string; onTotal
   return (
     <div data-testid="visitors-table">
       <p className="font-sans text-xs text-gray-500 mb-3">{t('appUsers.visitorsIntro')}</p>
-      <div className="overflow-x-auto mb-4">
+      <div className="hidden overflow-x-auto mb-4 sm:block">
         <table className="border-collapse w-full min-w-[900px] table-auto text-sm font-sans">
           <thead>
             <tr className="bg-gray-50 text-left text-gray-700">
-              <th className="px-4 py-2 font-semibold">{t('appUsers.visitorColVisitor')}</th>
-              <th className="px-4 py-2 font-semibold">{t('appUsers.visitorColDevice')}</th>
-              <th className="px-4 py-2 font-semibold">{t('appUsers.visitorColWebsite')}</th>
-              <th className="px-4 py-2 font-semibold">{t('appUsers.visitorColFirstSeen')}</th>
-              <th className="px-4 py-2 font-semibold">{t('appUsers.visitorColLastActive')}</th>
+              <VisitorHeaderCells />
               <th className="px-4 py-2 font-semibold w-1"></th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
-              const m = row.visitor?.metadata;
-              const browser = m ? [m.browser, m.browserVersion?.split('.')[0]].filter(Boolean).join(' ') : '';
-              const os = m ? [m.os, m.osVersion].filter(Boolean).join(' ') : '';
-              const first = m?.pageUrl || '';
-              const last = m?.lastPageUrl && m.lastPageUrl !== first ? m.lastPageUrl : '';
-              return (
-                <tr key={row._id} className="border-t border-gray-200 align-top">
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{formatVisitor(row)}</div>
-                    <div className="text-xs text-gray-500">
-                      {m?.country ? `${flagFor(m.country)} ${countryName(m.country)}` : t('appUsers.unknownCountry')}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 text-gray-700">
-                      {deviceIcon(m?.deviceType || '')}
-                      <span>{[browser, os].filter(Boolean).join(' · ') || '-'}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 max-w-[22rem]">
-                    {first ? (
-                      <a href={first} target="_blank" rel="noreferrer noopener" className="text-brand-500 hover:underline break-all" title={first}>
-                        {pageLabel(first)}
-                      </a>
-                    ) : (
-                      <span className="text-gray-400">{t('appUsers.unknownPage')}</span>
-                    )}
-                    {last && (
-                      <div className="text-xs text-gray-500 break-all" title={last}>
-                        {t('appUsers.lastPagePrefix')} {pageLabel(last)}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.visitor?.firstSeenAt || row.createdAt)}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.updatedAt)}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <Button size="small" variant="outlined" onClick={() => setOpen(row)}>
-                        {t('appUsers.openConversation')}
-                      </Button>
-                      <Button size="small" color="error" onClick={() => setToDelete(row)}>
-                        {t('appUsers.deleteVisitor')}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {rows.map((row) => (
+              <tr key={row._id} className="border-t border-gray-200 align-top">
+                <VisitorCells row={row} />
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <ViewMessagesButton row={row} onClick={() => setOpen(row)} />
+                    <Button size="small" color="error" onClick={() => setToDelete(row)}>
+                      {t('appUsers.deleteVisitor')}
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+      </div>
+      {/* Phone width: stacked rows. */}
+      <div className="mb-4 divide-y rounded-xl border border-gray-200 sm:hidden">
+        {rows.map((row) => (
+          <VisitorStackedRow
+            key={row._id}
+            row={row}
+            onOpen={() => setOpen(row)}
+            trailing={
+              <Button size="small" color="error" onClick={() => setToDelete(row)}>
+                {t('appUsers.deleteVisitor')}
+              </Button>
+            }
+          />
+        ))}
       </div>
       <div className="flex items-center justify-between text-sm text-gray-600 font-sans">
         <span>

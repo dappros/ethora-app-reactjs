@@ -128,7 +128,14 @@ export default function AppUsers() {
   );
   // Users, only those with admin-panel access (?access=admin), or anonymous
   // website visitors (?access=visitors), which the users list never includes.
-  const accessTab = (searchParams.get('access') as 'all' | 'admin' | 'visitors') || 'all';
+  // No sub-tab in the address: the first one with entries (All, Admins,
+  // Visitors), decided once the counts are known so no empty table flashes
+  // first. A sub-tab named in the address (or clicked) is kept even when
+  // empty.
+  const accessNamed = searchParams.has('access');
+  const [autoTab, setAutoTab] = useState<'all' | 'admin' | 'visitors' | null>(null);
+  const accessTab = (searchParams.get('access') as 'all' | 'admin' | 'visitors') || autoTab || 'all';
+  const deciding = !accessNamed && autoTab === null;
   const visitorsTab = accessTab === 'visitors';
   // Visitor count for the switcher; null until known. 0 disables it.
   const [visitorsTotal, setVisitorsTotal] = useState<number | null>(null);
@@ -340,8 +347,31 @@ export default function AppUsers() {
     };
   }, [appId]);
 
+  useEffect(() => {
+    setAutoTab(null);
+  }, [appId]);
+  useEffect(() => {
+    if (!appId || accessNamed || autoTab !== null) return;
+    let cancelled = false;
+    const count = (access?: 'admin') =>
+      httpGetUsers(appId, 5, 0, 'lastName', 'asc', undefined, access)
+        .then((r) => Number(r.data?.total) || 0)
+        .catch(() => 0);
+    const visitors = httpV2
+      .get(`/apps/${appId}/widget/conversations`, { params: { limit: 1, offset: 0 } })
+      .then((r) => Number(r.data?.total ?? r.data?.pagination?.total ?? 0))
+      .catch(() => 0);
+    Promise.all([count(), count('admin'), visitors]).then(([all, admin, vis]) => {
+      if (cancelled) return;
+      setAutoTab(all > 0 ? 'all' : admin > 0 ? 'admin' : vis > 0 ? 'visitors' : 'all');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [appId, accessNamed, autoTab]);
+
   const fetchUsers = useCallback(() => {
-    if (!appId || visitorsTab) return;
+    if (!appId || visitorsTab || deciding) return;
 
     httpGetUsers(appId, limit, page * limit, orderBy, order, lifecycleFilter, accessParam, tagFilter).then(
       (response) => {
@@ -351,7 +381,7 @@ export default function AppUsers() {
         setPageCount(Math.ceil(total / limit));
       }
     );
-  }, [appId, limit, page, orderBy, order, lifecycleFilter, accessParam, tagFilter, visitorsTab]);
+  }, [appId, limit, page, orderBy, order, lifecycleFilter, accessParam, tagFilter, visitorsTab, deciding]);
 
   const loadAppTags = useCallback(() => {
     if (!appId) return;
@@ -1182,12 +1212,13 @@ export default function AppUsers() {
           </div>
         </div>}
       </div>
-      {visitorsTab && appId && (
+      {deciding && <div className="pt-4 text-sm text-gray-500" data-testid="users-deciding">{t('aiWidgetConversations.loading')}</div>}
+      {visitorsTab && appId && !deciding && (
         <div className="overflow-hidden pt-4">
           <VisitorsTable appId={appId} onTotalChange={setVisitorsTotal} />
         </div>
       )}
-      <div className={visitorsTab ? 'hidden' : 'overflow-hidden'}>
+      <div className={visitorsTab || deciding ? 'hidden' : 'overflow-hidden'}>
         {accessTab === 'admin' && lifecycleTab === 'active' && appId && (
           <AppCollaboratorsPanel appId={appId} onInvite={() => setShowInviteModal(true)} refreshKey={collaboratorsKey} />
         )}

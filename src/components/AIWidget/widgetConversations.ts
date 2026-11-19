@@ -28,6 +28,9 @@ export interface WidgetConversationRow {
   type: string;
   createdAt: string;
   updatedAt: string;
+  // Messages with text in the conversation (visitor and assistant); null
+  // when the message archive cannot be read.
+  messageCount?: number | null;
   visitor: {
     _id: string;
     uuid: string;
