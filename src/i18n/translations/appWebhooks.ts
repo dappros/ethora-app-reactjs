@@ -4,6 +4,10 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 export const appWebhooks = {
   en: {
     'appSettings.tab.webhooks': 'Webhooks',
+    'appSettings.tab.emailReports': 'Email reports',
+    'appEmailReports.title': 'Email reports',
+    'appEmailReports.text': 'A summary of your Apps by email (daily, weekly or monthly) and an email when a website conversation is completed. They are set per person: each admin turns on their own in Account > Email reports, and they go only to that person\'s own address.',
+    'appEmailReports.open': 'Open Email reports',
     'appWebhooks.heading': 'Webhooks',
     'appWebhooks.intro':
       'Ethora POSTs a JSON event to each webhook below when something happens in this app, e.g. a new chat message. Failed deliveries are retried for about an hour.',
@@ -67,6 +71,10 @@ export const appWebhooks = {
   },
   fr: {
     'appSettings.tab.webhooks': 'Webhooks',
+    'appSettings.tab.emailReports': 'Rapports par e-mail',
+    'appEmailReports.title': 'Rapports par e-mail',
+    'appEmailReports.text': 'Un résumé de vos applications par e-mail (quotidien, hebdomadaire ou mensuel) et un e-mail quand une conversation sur le site est terminée. Ils se règlent par personne : chaque administrateur active les siens dans Compte > Rapports par e-mail, et ils ne sont envoyés qu’à sa propre adresse.',
+    'appEmailReports.open': 'Ouvrir les rapports par e-mail',
     'appWebhooks.heading': 'Webhooks',
     'appWebhooks.intro':
       "Ethora envoie un événement JSON (POST) à chaque webhook ci-dessous lorsqu'il se passe quelque chose dans cette application, par ex. un nouveau message. Les envois échoués sont réessayés pendant environ une heure.",
@@ -130,6 +138,10 @@ export const appWebhooks = {
   },
   es: {
     'appSettings.tab.webhooks': 'Webhooks',
+    'appSettings.tab.emailReports': 'Informes por correo',
+    'appEmailReports.title': 'Informes por correo',
+    'appEmailReports.text': 'Un resumen de sus aplicaciones por correo (diario, semanal o mensual) y un correo cuando se completa una conversación en el sitio. Se configuran por persona: cada administrador activa los suyos en Cuenta > Informes por correo, y solo se envían a su propia dirección.',
+    'appEmailReports.open': 'Abrir informes por correo',
     'appWebhooks.heading': 'Webhooks',
     'appWebhooks.intro':
       'Ethora envía un evento JSON (POST) a cada webhook de abajo cuando ocurre algo en esta aplicación, p. ej. un mensaje nuevo en un chat. Los envíos fallidos se reintentan durante aproximadamente una hora.',
