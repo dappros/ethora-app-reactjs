@@ -75,7 +75,9 @@ export default function AppHelmet() {
         location.pathname === '/register' ||
         location.pathname === '/turnstile' ||
         location.pathname === ACCOUNT_SUSPENDED_PATH ||
-        location.pathname === '/wp-setup'
+        location.pathname === '/wp-setup' ||
+        location.pathname === '/try' ||
+        location.pathname.startsWith('/try/')
       ) {
         return;
       } else {

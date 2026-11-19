@@ -7,7 +7,8 @@ import { defaultLandingPath } from '../utils/appHost.ts';
 import { rememberReturnPath, signedOutEntryPath } from '../utils/returnPath.ts';
 
 // /account-suspended: shown after a 403 USER_SUSPENDED ended the session.
-const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup', '/account-suspended'];
+// /try: the "Try it on your site" front door and demo links (pages/Try).
+const publicPaths = ['/register', '/resetPassword', '/tempPassword', '/turnstile', '/wp-setup', '/account-suspended', '/try'];
 
 export const useTrackUrl = () => {
   const navigate = useNavigate();
