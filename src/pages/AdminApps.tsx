@@ -5,7 +5,7 @@ import { ApplicationPreview } from '../components/ApplicationPreview';
 import { IconAdd } from '../components/Icons/IconAdd';
 import { Loading } from '../components/Loading.tsx';
 import { Sorting } from '../components/Sorting';
-import { readAppsSort, resolveAppsSort, saveAppsSort } from '../utils/appsListSort';
+import { readAppsSort, resolveAppsSort, saveAppsSort, showAppsSorting } from '../utils/appsListSort';
 import CsvButton from '../components/UI/Buttons/CSVButton.tsx';
 import { Pagination } from '../components/UI/Pagination/Pagination.tsx';
 import { useEthoraEvents, useXmppReconnected } from '../hooks/useEthoraEvents.ts';
@@ -208,33 +208,38 @@ export default function AdminApps() {
     [updateSearchParams]
   );
 
+  // Every account sorts its list (the backend sorts a normal account's Apps by
+  // each of these fields too); hidden only while the open tab has one App or
+  // none and nothing is searched (utils/appsListSort).
+  const sortingShown = showAppsSorting({
+    isSuperAdmin: Boolean(currentUser?.isSuperAdmin?.read || currentUser?.isSuperAdmin?.write),
+    listTotal: lifecycleTab === 'archived' ? archivedCount : activeCount,
+    searching: Boolean(urlQuery),
+  });
   const renderSorting = useCallback(() => {
-    if (currentUser?.isSuperAdmin) {
-      return (
-        <Sorting<OrderByType>
-          className=""
-          order={order}
-          setOrder={(newOrder) => handleSortChange(orderBy, newOrder)}
-          orderBy={orderBy}
-          setOrderBy={(newOrderBy) => handleSortChange(newOrderBy, order)}
-          orderByList={[
-            { key: 'displayName', title: t('adminApps.sortDisplayName') },
-            { key: 'totalRegistered', title: t('adminApps.sortUsers') },
-            { key: 'totalSessions', title: t('adminApps.sortSessions') },
-            { key: 'totalApiCalls', title: t('adminApps.sortApi') },
-            { key: 'totalTokens', title: t('adminApps.sortAi') },
-            { key: 'totalFiles', title: t('adminApps.sortFiles') },
-            { key: 'totalTransactions', title: t('adminApps.sortTransactions') },
-            { key: 'createdAt', title: t('adminApps.sortDate') },
-            { key: 'totalChats', title: t('adminApps.sortChats') },
-            { key: 'lastActivityAt', title: t('adminApps.sortLastActivity') },
-          ]}
-        />
-      );
-    } else {
-      return null;
-    }
-  }, [currentUser?.isSuperAdmin, order, orderBy, handleSortChange, t]);
+    if (!sortingShown) return null;
+    return (
+      <Sorting<OrderByType>
+        className=""
+        order={order}
+        setOrder={(newOrder) => handleSortChange(orderBy, newOrder)}
+        orderBy={orderBy}
+        setOrderBy={(newOrderBy) => handleSortChange(newOrderBy, order)}
+        orderByList={[
+          { key: 'displayName', title: t('adminApps.sortDisplayName') },
+          { key: 'totalRegistered', title: t('adminApps.sortUsers') },
+          { key: 'totalSessions', title: t('adminApps.sortSessions') },
+          { key: 'totalApiCalls', title: t('adminApps.sortApi') },
+          { key: 'totalTokens', title: t('adminApps.sortAi') },
+          { key: 'totalFiles', title: t('adminApps.sortFiles') },
+          { key: 'totalTransactions', title: t('adminApps.sortTransactions') },
+          { key: 'createdAt', title: t('adminApps.sortDate') },
+          { key: 'totalChats', title: t('adminApps.sortChats') },
+          { key: 'lastActivityAt', title: t('adminApps.sortLastActivity') },
+        ]}
+      />
+    );
+  }, [sortingShown, order, orderBy, handleSortChange, t]);
 
   const getCsvFile = async () => {
     try {
@@ -405,8 +410,8 @@ export default function AdminApps() {
             })}
           </div>
 
-          {currentUser?.isSuperAdmin && (
-            <div className="order-5 md:order-4 w-full md:w-auto min-h-[40px] flex items-center">
+          {sortingShown && (
+            <div className="order-5 md:order-4 w-full md:w-auto min-h-[40px] flex items-center" data-testid="apps-sorting">
               {renderSorting()}
             </div>
           )}
