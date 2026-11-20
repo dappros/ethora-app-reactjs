@@ -47,7 +47,11 @@ ENV VITE_RUNTIME_CONFIG=true \
     VITE_BUILD_BRANCH=${VITE_BUILD_BRANCH}
 RUN npm run build
 
-FROM nginx:1.27-alpine AS runtime
+# nginx stable line; 1.27 stopped getting builds in April 2025. Keep this on a
+# supported stable tag: the November 2026 HTTP/2 RCEs (CVE-2026-123007,
+# CVE-2026-123633) are fixed from 1.30.7. This server is plain HTTP/1.1 on
+# 8080 behind the proxy, so it was not reachable through them.
+FROM nginx:1.30-alpine AS runtime
 # Pick up base-image security fixes (the scan blocks fixable CRITICALs in openssl etc.).
 # Set to the build date by CI (release-images), so the upgrade below runs
 # again each day instead of coming back from an old layer cache.
