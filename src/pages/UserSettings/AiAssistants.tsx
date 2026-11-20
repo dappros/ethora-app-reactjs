@@ -84,6 +84,17 @@ function prettyClient(value?: string | null) {
   return agent.replace('/', ' ');
 }
 
+// OAuth entry of the hosted server: a client given this URL discovers the
+// authorization server and has the user sign in, so no key is involved.
+const CONNECTOR_URL = MCP_URL ? `${MCP_URL}/oauth` : '';
+
+// Clients whose steps say "sign in"; for the rest a key is the way in.
+const SIGN_IN_CLIENTS: ClientId[] = ['claudeAi', 'chatgpt', 'claudeDesktop', 'cursor', 'vscode', 'claudeCode'];
+
+// Keys younger than this are "not connected yet"; older and still silent,
+// "never used", with a pointer to the steps.
+const NEVER_USED_AFTER_MS = 60 * 60 * 1000;
+
 function personalUrl(token: string) {
   return `${MCP_BASE}/mcp/k/${token}`;
 }
@@ -123,14 +134,20 @@ function vscodeConfigSnippet(token: string) {
 // personal URL (a credential) travels through the vendor's redirector; that
 // is the same exposure as pasting it into the client's settings file.
 function cursorInstallLink(token: string) {
-  const config = btoa(JSON.stringify({ url: personalUrl(token) }));
-  return `https://cursor.com/en/install-mcp?name=ethora&config=${encodeURIComponent(config)}`;
+  return cursorInstallLinkFor(personalUrl(token));
 }
 
 function vscodeInstallLink(token: string) {
-  const config = encodeURIComponent(
-    JSON.stringify({ name: 'ethora', type: 'http', url: personalUrl(token) })
-  );
+  return vscodeInstallLinkFor(personalUrl(token));
+}
+
+function cursorInstallLinkFor(url: string) {
+  const config = btoa(JSON.stringify({ url }));
+  return `https://cursor.com/en/install-mcp?name=ethora&config=${encodeURIComponent(config)}`;
+}
+
+function vscodeInstallLinkFor(url: string) {
+  const config = encodeURIComponent(JSON.stringify({ name: 'ethora', type: 'http', url }));
   return `https://insiders.vscode.dev/redirect?url=${encodeURIComponent(`vscode:mcp/install?${config}`)}`;
 }
 
@@ -204,29 +221,147 @@ function InstallButton({ href, label }: { href: string; label: string }) {
   );
 }
 
+function ClientPicker({
+  value,
+  onChange,
+  t,
+}: {
+  value: ClientId;
+  onChange: (c: ClientId) => void;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {CLIENTS.map((c) => (
+        <button
+          key={c}
+          type="button"
+          onClick={() => onChange(c)}
+          className={
+            c === value
+              ? 'py-[8px] px-4 rounded-xl bg-brand-500 text-white text-[13px]'
+              : 'py-[8px] px-4 rounded-xl bg-gray-100 text-[13px] hover:bg-brand-hover'
+          }
+        >
+          {t(`userSettingsAi.client.${c}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PlanNote({ text }: { text: string }) {
+  return (
+    <div className="font-sans text-[12px] mb-4 rounded-xl px-[12px] py-[10px] bg-amber-50 text-amber-800 border border-amber-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-900">
+      {text}
+    </div>
+  );
+}
+
+// No-key path: the client signs the person in through OAuth. Added because
+// every API key real people created on the hosted platform from September to
+// November 2026 went unused, while Claude, ChatGPT, Cursor, VS Code and
+// Claude Code can all connect by signing in, with nothing to copy.
+function SignInSteps({ client, t }: { client: ClientId; t: (key: string) => string }) {
+  const url = CONNECTOR_URL;
+  const steps = (
+    <div className="font-sans text-[13px] mb-4 whitespace-pre-line">
+      {t(`userSettingsAi.signin.${client}`)}
+    </div>
+  );
+  const urlSnippet = <Snippet label={t('userSettingsAi.connectorUrlLabel')} value={url} />;
+  switch (client) {
+    case 'claudeAi':
+    case 'claudeDesktop':
+      return (
+        <>
+          {steps}
+          <PlanNote text={t('userSettingsAi.plan.claude')} />
+          {urlSnippet}
+        </>
+      );
+    case 'chatgpt':
+      return (
+        <>
+          {steps}
+          <PlanNote text={t('userSettingsAi.plan.chatgpt')} />
+          {urlSnippet}
+        </>
+      );
+    case 'cursor':
+      return (
+        <>
+          {steps}
+          <InstallButton href={cursorInstallLinkFor(url)} label={t('userSettingsAi.installCursor')} />
+          <Snippet
+            label={t('userSettingsAi.snippetJson')}
+            value={JSON.stringify({ mcpServers: { ethora: { url } } }, null, 2)}
+            multiline
+          />
+        </>
+      );
+    case 'vscode':
+      return (
+        <>
+          {steps}
+          <InstallButton href={vscodeInstallLinkFor(url)} label={t('userSettingsAi.installVscode')} />
+          <Snippet
+            label={t('userSettingsAi.snippetVscodeJson')}
+            value={JSON.stringify({ servers: { ethora: { type: 'http', url } } }, null, 2)}
+            multiline
+          />
+        </>
+      );
+    case 'claudeCode':
+      return (
+        <>
+          {steps}
+          <Snippet
+            label={t('userSettingsAi.claudeCodeLabel')}
+            value={`claude mcp add --transport http ethora ${url}`}
+          />
+        </>
+      );
+    default:
+      return (
+        <>
+          {steps}
+          {urlSnippet}
+        </>
+      );
+  }
+}
+
 // Per-client instructions for a freshly created key. The plan notes exist
 // because two users in the first week created a key and never used it: a
 // free Claude.ai or ChatGPT account has nowhere to paste a custom connector.
 function ClientSteps({
   client,
   token,
+  signInAvailable,
   t,
 }: {
   client: ClientId;
   token: string;
+  signInAvailable: boolean;
   t: (key: string) => string;
 }) {
   const url = personalUrl(token);
+  const noKeyNeeded =
+    signInAvailable && SIGN_IN_CLIENTS.includes(client) ? (
+      <div className="font-sans text-[12px] mb-4 rounded-xl px-[12px] py-[10px] bg-gray-100">
+        {t('userSettingsAi.noKeyNeeded').replace('{client}', t(`userSettingsAi.client.${client}`))}
+      </div>
+    ) : null;
   const steps = (
-    <div className="font-sans text-[13px] mb-4 whitespace-pre-line">
-      {t(`userSettingsAi.steps.${client}`)}
-    </div>
+    <>
+      {noKeyNeeded}
+      <div className="font-sans text-[13px] mb-4 whitespace-pre-line">
+        {t(`userSettingsAi.steps.${client}`)}
+      </div>
+    </>
   );
-  const planNote = (key: string) => (
-    <div className="font-sans text-[12px] mb-4 rounded-xl px-[12px] py-[10px] bg-amber-50 text-amber-800 border border-amber-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-900">
-      {t(key)}
-    </div>
-  );
+  const planNote = (key: string) => <PlanNote text={t(key)} />;
   switch (client) {
     case 'claudeAi':
     case 'claudeDesktop':
@@ -309,16 +444,44 @@ function UsageStatus({
   lastUsedAt,
   lastUsedBy,
   fresh,
+  createdAt,
+  onHowToConnect,
   t,
 }: {
   lastUsedAt?: string | null;
   lastUsedBy?: string | null;
+  // API key rows: a key older than an hour with no request is "never used"
+  // and gets a link to the steps (the key itself is never shown again).
+  createdAt?: string | null;
+  onHowToConnect?: () => void;
   // The key the user just created: "not connected yet" is the honest state.
   // For older rows the same null means only "no requests recorded", which
   // an OAuth grant that connected months ago should not be called.
   fresh?: boolean;
   t: (key: string) => string;
 }) {
+  const neverUsed =
+    !lastUsedAt &&
+    !fresh &&
+    !!createdAt &&
+    Date.now() - new Date(createdAt).getTime() > NEVER_USED_AFTER_MS;
+  if (neverUsed) {
+    return (
+      <span className="inline-flex items-center gap-2 whitespace-nowrap text-gray-500">
+        <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
+        {t('userSettingsAi.statusNeverUsed')}
+        {onHowToConnect && (
+          <button
+            type="button"
+            onClick={onHowToConnect}
+            className="text-brand-500 hover:underline"
+          >
+            {t('userSettingsAi.howToConnect')}
+          </button>
+        )}
+      </span>
+    );
+  }
   if (!lastUsedAt) {
     return (
       <span
@@ -364,6 +527,7 @@ export function AiAssistants() {
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<UserApiKeyCreated | null>(null);
   const [client, setClient] = useState<ClientId>('claudeAi');
+  const [connectClient, setConnectClient] = useState<ClientId>('claudeAi');
   const [revokeKey, setRevokeKey] = useState<UserApiKey | null>(null);
   const [regenKey, setRegenKey] = useState<UserApiKey | null>(null);
   const [revokeGrant, setRevokeGrant] = useState<UserOauthGrant | null>(null);
@@ -477,6 +641,19 @@ export function AiAssistants() {
   };
 
   const createdRow = created ? keys.find((k) => k.id === created.id) : undefined;
+  // The sign-in path needs both the hosted server and the OAuth server; the
+  // grants endpoint answering is how the page knows the latter is there.
+  const signInAvailable = !!CONNECTOR_URL && grants !== null;
+
+  // From a silent key row: with sign-in available, the steps at the top need
+  // no key; without it, a fresh key is the only way to see connection details.
+  const howToConnect = (k: UserApiKey) => {
+    if (signInAvailable) {
+      document.getElementById('ai-connect')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      setRegenKey(k);
+    }
+  };
 
   return (
     <div className="md:ml-4 pb-8">
@@ -492,7 +669,19 @@ export function AiAssistants() {
           does not report one. */}
       <EmailVerification />
 
-      {MCP_URL ? (
+      {signInAvailable ? (
+        <div id="ai-connect" className="mb-8">
+          <p className="font-sans text-regular font-semibold mb-1">
+            {t('userSettingsAi.connectHeading')}
+          </p>
+          <div className="text-gray-500 font-sans text-[12px] mb-3">
+            {t('userSettingsAi.connectHint')}
+          </div>
+          <ClientPicker value={connectClient} onChange={setConnectClient} t={t} />
+          <SignInSteps client={connectClient} t={t} />
+          <StarterPrompts t={t} />
+        </div>
+      ) : MCP_URL ? (
         <>
           <Snippet label={t('userSettingsAi.endpointLabel')} value={MCP_URL} />
           <StarterPrompts t={t} />
@@ -521,23 +710,13 @@ export function AiAssistants() {
               <div className="text-gray-500 font-sans text-[12px] mb-3">
                 {t('userSettingsAi.pickClientHint')}
               </div>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {CLIENTS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setClient(c)}
-                    className={
-                      c === client
-                        ? 'py-[8px] px-4 rounded-xl bg-brand-500 text-white text-[13px]'
-                        : 'py-[8px] px-4 rounded-xl bg-gray-100 text-[13px] hover:bg-brand-hover'
-                    }
-                  >
-                    {t(`userSettingsAi.client.${c}`)}
-                  </button>
-                ))}
-              </div>
-              <ClientSteps client={client} token={created.token} t={t} />
+              <ClientPicker value={client} onChange={setClient} t={t} />
+              <ClientSteps
+                client={client}
+                token={created.token}
+                signInAvailable={signInAvailable}
+                t={t}
+              />
             </>
           )}
 
@@ -628,7 +807,13 @@ export function AiAssistants() {
                 <tr key={k.id} className="border-t border-gray-200">
                   <td className="py-2 pr-4 break-all">{k.name || '-'}</td>
                   <td className="py-2 pr-4">
-                    <UsageStatus lastUsedAt={k.lastUsedAt} lastUsedBy={k.lastUsedBy} t={t} />
+                    <UsageStatus
+                      lastUsedAt={k.lastUsedAt}
+                      lastUsedBy={k.lastUsedBy}
+                      createdAt={k.createdAt}
+                      onHowToConnect={MCP_URL ? () => howToConnect(k) : undefined}
+                      t={t}
+                    />
                   </td>
                   <td className="py-2 pr-4 whitespace-nowrap">{formatDate(k.createdAt)}</td>
                   <td className="py-2 pr-4 whitespace-nowrap">{formatDate(k.expiresAt)}</td>
