@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 // IconInfo intentionally retained for the disabled DLT-disclaimer block
@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 // import { IconInfo } from '../../components/Icons/IconInfo';
 import { Loading } from '../../components/Loading';
 import { SubmitModal } from '../../components/modal/SubmitModal';
-import { deleteMe, getExportMyData } from '../../http';
+import { deleteMe, getExportMyData, httpGetBilling } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -16,6 +16,24 @@ export function ManageData() {
   const [warning, setWarning] = useState(false);
   const navigate = useNavigate();
   const doClearState = useAppStore((s) => s.doClearState);
+  const billingEnabled = useAppStore((s) => s.billingEnabled);
+  // A paid self-serve plan on any App this person owns: deleting the account
+  // cancels its Stripe subscription (API: billingCancel.service). Enterprise
+  // is invoiced by hand and is not part of this.
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
+  useEffect(() => {
+    if (!warning || !billingEnabled) return;
+    let alive = true;
+    httpGetBilling()
+      .then(({ data }) => {
+        const apps = data?.result?.apps || [];
+        if (alive) setHasPaidPlan(apps.some((a) => a.plan === 'ai_assistant' || a.plan === 'small_business'));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [warning, billingEnabled]);
 
   const onDownloadMyData = () => {
     setLoading(true);
@@ -110,6 +128,11 @@ export function ManageData() {
           <p className="font-sans text-[14px] mb-8">
             {t('userSettingsManageData.modalConfirm')}
           </p>
+          {hasPaidPlan && (
+            <p className="font-sans text-[14px] mb-8 font-semibold" data-testid="delete-paid-plan-notice">
+              {t('userSettingsManageData.paidPlanNotice')}
+            </p>
+          )}
           <div className="flex gap-8">
             <button
               onClick={() => setWarning(false)}

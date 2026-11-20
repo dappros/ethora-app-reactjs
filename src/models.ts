@@ -244,6 +244,9 @@ export interface ModelApp {
   // Empty falls back server-side to the parent app's value, then the install
   // default.
   supportContact?: string;
+  // Hosted-service plan (modules/billing on the API; only meaningful with
+  // billingEnabled). See pages/AppSettings/CustomDomainPlanNote.tsx.
+  billing?: { plan?: string | null; status?: string | null } | null;
   // Sign-ups (email, first-time social sign-in) whose email domain matches
   // one of these patterns are refused with 403 SIGNUP_EMAIL_DOMAIN_BLOCKED.
   // `example.org` also matches its subdomains; `*` matches one DNS label.
