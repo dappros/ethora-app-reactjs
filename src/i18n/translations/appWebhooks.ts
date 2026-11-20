@@ -8,6 +8,8 @@ export const appWebhooks = {
     'appEmailReports.title': 'Email reports',
     'appEmailReports.text': 'A summary of your Apps by email (daily, weekly or monthly) and an email when a website conversation is completed. They are set per person: each admin turns on their own in Account > Email reports, and they go only to that person\'s own address.',
     'appEmailReports.open': 'Open Email reports',
+    'appEmailReports.colleagues': 'A colleague gets these emails for this App once they are invited to it as an admin.',
+    'appEmailReports.invite': 'Invite a colleague as admin',
     'appWebhooks.heading': 'Webhooks',
     'appWebhooks.intro':
       'Ethora POSTs a JSON event to each webhook below when something happens in this app, e.g. a new chat message. Failed deliveries are retried for about an hour.',
@@ -75,6 +77,8 @@ export const appWebhooks = {
     'appEmailReports.title': 'Rapports par e-mail',
     'appEmailReports.text': 'Un résumé de vos applications par e-mail (quotidien, hebdomadaire ou mensuel) et un e-mail quand une conversation sur le site est terminée. Ils se règlent par personne : chaque administrateur active les siens dans Compte > Rapports par e-mail, et ils ne sont envoyés qu’à sa propre adresse.',
     'appEmailReports.open': 'Ouvrir les rapports par e-mail',
+    'appEmailReports.colleagues': 'Un collègue reçoit ces e-mails pour cette application dès qu’il y est invité comme administrateur.',
+    'appEmailReports.invite': 'Inviter un collègue comme administrateur',
     'appWebhooks.heading': 'Webhooks',
     'appWebhooks.intro':
       "Ethora envoie un événement JSON (POST) à chaque webhook ci-dessous lorsqu'il se passe quelque chose dans cette application, par ex. un nouveau message. Les envois échoués sont réessayés pendant environ une heure.",
@@ -142,6 +146,8 @@ export const appWebhooks = {
     'appEmailReports.title': 'Informes por correo',
     'appEmailReports.text': 'Un resumen de sus aplicaciones por correo (diario, semanal o mensual) y un correo cuando se completa una conversación en el sitio. Se configuran por persona: cada administrador activa los suyos en Cuenta > Informes por correo, y solo se envían a su propia dirección.',
     'appEmailReports.open': 'Abrir informes por correo',
+    'appEmailReports.colleagues': 'Un compañero recibe estos correos de esta aplicación en cuanto se le invita a ella como administrador.',
+    'appEmailReports.invite': 'Invitar a un compañero como administrador',
     'appWebhooks.heading': 'Webhooks',
     'appWebhooks.intro':
       'Ethora envía un evento JSON (POST) a cada webhook de abajo cuando ocurre algo en esta aplicación, p. ej. un mensaje nuevo en un chat. Los envíos fallidos se reintentan durante aproximadamente una hora.',

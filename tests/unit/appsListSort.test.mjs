@@ -2,7 +2,7 @@
 // remembered per user, and an address naming a sorting wins.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULT_APPS_SORT, readAppsSort, resolveAppsSort, saveAppsSort } from '../../src/utils/appsListSort.ts';
+import { DEFAULT_APPS_SORT, readAppsSort, resolveAppsSort, saveAppsSort, showAppsSorting } from '../../src/utils/appsListSort.ts';
 
 function memoryStorage() {
   const m = new Map();
@@ -42,4 +42,21 @@ test('no user or no storage: nothing remembered, nothing thrown', () => {
   const throwing = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
   assert.equal(readAppsSort('u1', throwing), null);
   saveAppsSort('u1', { orderBy: 'createdAt', order: 'desc' }, throwing);
+});
+
+test('every account gets the sorting control once its list has more than one App', () => {
+  assert.equal(showAppsSorting({ listTotal: 2 }), true);
+  assert.equal(showAppsSorting({ listTotal: 40 }), true);
+});
+
+test('the control stays hidden for one App or none, and while the count is loading', () => {
+  assert.equal(showAppsSorting({ listTotal: 1 }), false);
+  assert.equal(showAppsSorting({ listTotal: 0 }), false);
+  assert.equal(showAppsSorting({ listTotal: null }), false);
+});
+
+test('a search or a platform admin always shows it', () => {
+  assert.equal(showAppsSorting({ listTotal: 1, searching: true }), true);
+  assert.equal(showAppsSorting({ listTotal: 0, isSuperAdmin: true }), true);
+  assert.equal(showAppsSorting({ listTotal: null, isSuperAdmin: true }), true);
 });

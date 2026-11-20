@@ -58,6 +58,18 @@ export function saveAppsSort(userId: string | null | undefined, sort: AppsListSo
   }
 }
 
+/**
+ * Whether the Apps list shows its sorting control. Every account gets it; it
+ * stays hidden only where it cannot change anything: an account whose list
+ * (the open Active or Archived tab) has one App or none, while no search is
+ * typed. Platform admins always see it. A count that has not loaded yet
+ * (null) hides it for a normal account, so it does not flash for one App.
+ */
+export function showAppsSorting(opts: { isSuperAdmin?: boolean; listTotal: number | null; searching?: boolean }): boolean {
+  if (opts.isSuperAdmin || opts.searching) return true;
+  return (opts.listTotal ?? 0) > 1;
+}
+
 /** The sorting to show: the address's when it names a valid one, else the remembered one, else newest first. */
 export function resolveAppsSort(params: URLSearchParams, remembered: AppsListSort | null): AppsListSort & { fromUrl: boolean } {
   const orderBy = params.get('orderBy');

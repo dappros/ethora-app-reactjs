@@ -1215,6 +1215,17 @@ export default function AppUsers() {
       {deciding && <div className="pt-4 text-sm text-gray-500" data-testid="users-deciding">{t('aiWidgetConversations.loading')}</div>}
       {visitorsTab && appId && !deciding && (
         <div className="overflow-hidden pt-4">
+          {/* The toolbar (and its invite button) is hidden on this tab, and a
+              website App opens here: keep inviting a colleague one click away. */}
+          <div className="flex justify-end mb-3">
+            <button
+              onClick={() => setShowInviteModal(true)}
+              data-testid="visitors-invite-colleague"
+              className="flex items-center justify-center h-[40px] rounded-xl border border-brand-500 text-brand-500 hover:bg-brand-hover text-sm font-varela px-4 whitespace-nowrap"
+            >
+              {t('appUsers.inviteColleague')}
+            </button>
+          </div>
           <VisitorsTable appId={appId} onTotalChange={setVisitorsTotal} />
         </div>
       )}

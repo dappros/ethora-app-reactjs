@@ -32,7 +32,7 @@ function digest(over: Record<string, unknown> = {}) {
   };
 }
 
-async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>; csvStatus?: number } = {}) {
+async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>; csvStatus?: number; apps?: number } = {}) {
   const puts: Record<string, unknown>[] = [];
   const appsQueries: Record<string, string>[] = [];
   let state = digest(opts.digest);
@@ -49,7 +49,10 @@ async function fakeBackend(page: Page, opts: { digest?: Record<string, unknown>;
       if (pathname === '/v1/users/me') return json(route, me);
       if (pathname === '/v1/apps') {
         appsQueries.push(Object.fromEntries(url.searchParams));
-        return json(route, { apps: [app], total: 1 });
+        const n = opts.apps ?? 1;
+        const stats = { totalRegistered: 0, totalSessions: 0, totalApiCalls: 0, totalFiles: 0, totalTransactions: 0, totalChats: 0, totalTokens: 0, lastActivityAt: null };
+        const list = Array.from({ length: n }, (_, i) => ({ ...app, stats, ...(i ? { _id: `${APP_ID.slice(0, -2)}${String(i + 1).padStart(2, '0')}`, displayName: `E2E App ${i + 1}` } : {}) }));
+        return json(route, { apps: list, total: n });
       }
       if (pathname === `/v1/apps/${APP_ID}`) return json(route, { result: app });
       if (pathname === '/v2/owner-digest/settings' && method === 'GET') return json(route, state);
@@ -179,6 +182,48 @@ test('Apps list: newest first at first; a chosen sorting is kept when coming bac
   expect(appsQueries[0]).toMatchObject({ orderBy: 'displayName', order: 'asc' });
 });
 
+test('Apps list: a normal account with several Apps sorts its list too', async ({ page }) => {
+  const { appsQueries } = await fakeBackend(page, { apps: 3 });
+  await page.goto('/app/admin/apps');
+  const sorting = page.getByTestId('apps-sorting');
+  await expect(sorting).toBeVisible();
+  await expect(sorting).toContainText('Date');
+  await sorting.getByRole('button').first().click();
+  // (The radios are zero-size; the label text is what a person clicks.)
+  await page.getByText('Display Name', { exact: true }).click();
+  await expect.poll(() => appsQueries.some((q) => q.orderBy === 'displayName')).toBe(true);
+  await expect(page).toHaveURL(/orderBy=displayName/);
+});
+
+test('Apps list: no sorting control for an account with one App', async ({ page }) => {
+  const { appsQueries } = await fakeBackend(page, { apps: 1 });
+  await page.goto('/app/admin/apps');
+  await expect.poll(() => appsQueries.length).toBeGreaterThan(1);
+  await expect(page.getByText('E2E App', { exact: true }).first()).toBeVisible();
+  await expect(page.getByTestId('apps-sorting')).toHaveCount(0);
+});
+
+test.describe('Apps list on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test('the toolbar with the sorting control fits the width', async ({ page }) => {
+    await fakeBackend(page, { apps: 3 });
+    await page.goto('/app/admin/apps');
+    const sorting = page.getByTestId('apps-sorting');
+    await expect(sorting).toBeVisible();
+    const box = await sorting.boundingBox();
+    expect(box && box.x >= 0 && box.x + box.width <= 390).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  });
+});
+
+test('Users: inviting a colleague is one click away from the Visitors tab', async ({ page }) => {
+  await fakeBackend(page);
+  await page.goto(`/app/admin/apps/${APP_ID}/users?access=visitors`);
+  await page.getByTestId('visitors-invite-colleague').click();
+  await expect(page.getByRole('dialog', { name: 'Invite a colleague' })).toBeVisible();
+  await expect(page.getByText('Manages everything in this app; can get its email reports')).toBeVisible();
+});
+
 async function boxes(page: Page) {
   const controls = page.getByTestId('stat-controls');
   await expect(page.getByTestId('stat-email-reports')).toBeVisible();
@@ -221,18 +266,27 @@ test('Settings: Email reports under Webhooks opens Account > Email reports', asy
   await expect(entry).toContainText('set per person');
   // (Not clicked: the fake App leaves the settings form "unsaved", which holds navigation.)
   await expect(entry.getByTestId('app-email-reports-open')).toHaveAttribute('href', '/app/account?tab=Email%20reports');
+  await expect(entry.getByTestId('app-email-reports-colleagues')).toContainText('invited to it as an admin');
+  await expect(entry.getByTestId('app-email-reports-invite')).toHaveAttribute('href', `/app/admin/apps/${APP_ID}/users?access=admin`);
   await page.goto('/app/account?tab=Email%20reports');
   await expect(page.getByTestId('email-reports-personal')).toContainText('yours only');
+  await expect(page.getByTestId('email-reports-colleagues')).toContainText('Users > Admins > Invite a colleague');
 });
 
 test.describe('Settings entry in French and Spanish', () => {
-  for (const [locale, text] of [['fr-FR', 'Ils se règlent par personne'], ['es-ES', 'Se configuran por persona']] as const) {
+  for (const [locale, text, colleagues, account] of [
+    ['fr-FR', 'Ils se règlent par personne', 'Inviter un collègue comme administrateur', 'Utilisateurs > Admins > Inviter un collègue'],
+    ['es-ES', 'Se configuran por persona', 'Invitar a un compañero como administrador', 'Usuarios > Admins > Invitar a un compañero'],
+  ] as const) {
     test.describe(locale, () => {
       test.use({ locale });
       test(`Email reports entry (${locale})`, async ({ page }) => {
         await fakeBackend(page);
         await page.goto(`/app/admin/apps/${APP_ID}/settings?tab=Email%20reports`);
         await expect(page.getByTestId('app-email-reports')).toContainText(text);
+        await expect(page.getByTestId('app-email-reports-invite')).toHaveText(colleagues);
+        await page.goto('/app/account?tab=Email%20reports');
+        await expect(page.getByTestId('email-reports-colleagues')).toContainText(account);
       });
     });
   }
