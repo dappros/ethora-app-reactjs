@@ -17,6 +17,7 @@ import { IconInfo } from '../../components/Icons/IconInfo';
 import { RadioButton } from '../../components/RadioButton';
 import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
 import { useTranslation } from '../../i18n/useTranslation';
+import { CustomDomainPlanNote } from './CustomDomainPlanNote';
 import { ModelAIbot, ModelAppDefaulRooom } from '../../models';
 
 import { env } from '../../config/env';
@@ -164,12 +165,11 @@ export function WebApp({
             .com
           </label>
         </div>
-        <div className="flex items-center">
-          <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300 dark:text-gray-500">
-            {t('appSettingsWebApp.upgradeToBusinessButton')}
-          </button>
-          <span>{t('appSettingsWebApp.toUnlockText')}</span>
-        </div>
+        <CustomDomainPlanNote
+          appId={appId}
+          legacyButtonKey="appSettingsWebApp.upgradeToBusinessButton"
+          legacyUnlockKey="appSettingsWebApp.toUnlockText"
+        />
       </div>
 
       <p className="font-sans text-base font-semibold mb-2">

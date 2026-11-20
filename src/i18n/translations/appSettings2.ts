@@ -7,6 +7,12 @@ import type { UiLanguageCode } from '../../constants/languageOptionsConstants';
 // edited independently of other translation dictionaries.
 export const appSettings2 = {
   en: {
+    // src/pages/AppSettings/CustomDomainPlanNote.tsx (billing on)
+    'appSettingsCustomDomain.upgradeTo': 'Upgrade to {plan}',
+    'appSettingsCustomDomain.toUnlock': 'to unlock a custom domain',
+    'appSettingsCustomDomain.ownerCanUpgrade': "The App's owner can upgrade to {plan} to unlock a custom domain.",
+    'appSettingsCustomDomain.included': 'Included in your plan:',
+    'appSettingsCustomDomain.contactSupport': 'contact support to connect your domain',
     // src/pages/AppSettings/SignonOptions.tsx (MFA)
     'appSettingsSignonOptions.mfaHeading': 'Two-step verification',
     'appSettingsSignonOptions.mfaDescription': 'Any user can turn on two-step verification (authenticator app) under Account > Security. This policy applies to people who manage this app.',
@@ -365,6 +371,12 @@ export const appSettings2 = {
       'This is where your User can manage their visibility and privacy settings, as well as download their data or delete their account (GDPR and CCPA compliance requirement).',
   },
   fr: {
+    // src/pages/AppSettings/CustomDomainPlanNote.tsx (billing on)
+    'appSettingsCustomDomain.upgradeTo': 'Passer au plan {plan}',
+    'appSettingsCustomDomain.toUnlock': 'pour utiliser votre propre domaine',
+    'appSettingsCustomDomain.ownerCanUpgrade': "Le propriétaire de l'App peut passer au plan {plan} pour utiliser votre propre domaine.",
+    'appSettingsCustomDomain.included': 'Inclus dans votre plan :',
+    'appSettingsCustomDomain.contactSupport': 'contactez le support pour connecter votre domaine',
     // src/pages/AppSettings/SignonOptions.tsx (MFA)
     'appSettingsSignonOptions.mfaHeading': 'Vérification en deux étapes',
     'appSettingsSignonOptions.mfaDescription': 'Tout utilisateur peut activer la vérification en deux étapes (application d\'authentification) dans Compte > Sécurité. Cette règle s\'applique aux personnes qui gèrent cette application.',
@@ -733,6 +745,12 @@ export const appSettings2 = {
       'C’est ici que votre Utilisateur peut gérer ses paramètres de visibilité et de confidentialité, ainsi que télécharger ses données ou supprimer son compte (exigence de conformité RGPD et CCPA).',
   },
   es: {
+    // src/pages/AppSettings/CustomDomainPlanNote.tsx (billing on)
+    'appSettingsCustomDomain.upgradeTo': 'Actualizar a {plan}',
+    'appSettingsCustomDomain.toUnlock': 'para usar su propio dominio',
+    'appSettingsCustomDomain.ownerCanUpgrade': 'El propietario de la App puede actualizar a {plan} para usar su propio dominio.',
+    'appSettingsCustomDomain.included': 'Incluido en su plan:',
+    'appSettingsCustomDomain.contactSupport': 'contacte con soporte para conectar su dominio',
     // src/pages/AppSettings/SignonOptions.tsx (MFA)
     'appSettingsSignonOptions.mfaHeading': 'Verificación en dos pasos',
     'appSettingsSignonOptions.mfaDescription': 'Cualquier usuario puede activar la verificación en dos pasos (aplicación de autenticación) en Cuenta > Seguridad. Esta política se aplica a quienes administran esta aplicación.',

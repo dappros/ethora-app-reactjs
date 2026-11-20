@@ -269,6 +269,8 @@ export const userSettings = {
     'userSettingsManageData.modalTitle': 'Delete Account',
     'userSettingsManageData.modalConfirm':
       'Are you sure you want to delete all your data from the platform?',
+    'userSettingsManageData.paidPlanNotice':
+      'You have a paid plan. Deleting your account cancels its subscription now: the current period ends today, there is no further charge and no automatic refund.',
     'userSettingsManageData.cancelButton': 'Cancel',
     'userSettingsManageData.submitButton': 'Submit',
     'userSettingsManageData.toastSuccess': 'Success',
@@ -665,6 +667,8 @@ export const userSettings = {
     'userSettingsManageData.modalTitle': 'Supprimer le compte',
     'userSettingsManageData.modalConfirm':
       'Êtes-vous sûr de vouloir supprimer toutes vos données de la plateforme ?',
+    'userSettingsManageData.paidPlanNotice':
+      "Vous avez un plan payant. La suppression de votre compte annule son abonnement immédiatement : la période en cours s'arrête aujourd'hui, sans nouveau prélèvement ni remboursement automatique.",
     'userSettingsManageData.cancelButton': 'Annuler',
     'userSettingsManageData.submitButton': 'Confirmer',
     'userSettingsManageData.toastSuccess': 'Succès',
@@ -1066,6 +1070,8 @@ export const userSettings = {
     'userSettingsManageData.modalTitle': 'Eliminar cuenta',
     'userSettingsManageData.modalConfirm':
       '¿Estás seguro de que quieres eliminar todos tus datos de la plataforma?',
+    'userSettingsManageData.paidPlanNotice':
+      'Tienes un plan de pago. Al eliminar tu cuenta se cancela su suscripción de inmediato: el periodo actual termina hoy, sin más cargos ni reembolso automático.',
     'userSettingsManageData.cancelButton': 'Cancelar',
     'userSettingsManageData.submitButton': 'Confirmar',
     'userSettingsManageData.toastSuccess': 'Éxito',

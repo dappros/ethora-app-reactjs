@@ -8,9 +8,11 @@ import { IconInfo } from '../../components/Icons/IconInfo';
 import { IconUpload } from '../../components/Icons/IconUpload';
 import CopyButtonText from '../../components/UI/Buttons/CopyButtonText';
 import { useTranslation } from '../../i18n/useTranslation';
+import { CustomDomainPlanNote } from './CustomDomainPlanNote';
 
 import { env } from '../../config/env';
 interface Props {
+  appId: string;
   domainName: string;
   setDomainName: (s: string) => void;
   firebaseWebConfigString: string;
@@ -24,6 +26,7 @@ interface Props {
 }
 
 export function WebMobileApp({
+  appId,
   domainName,
   setDomainName,
   firebaseWebConfigString,
@@ -126,12 +129,11 @@ export function WebMobileApp({
             .com
           </label>
         </div>
-        <div className="flex items-center">
-          <button className="text-brand-500 font-varela text-[16px] mr-[20px] pointer-events-none text-gray-300 dark:text-gray-500">
-            {t('appSettingsWebMobileApp.upgradeToBusinessButton')}
-          </button>
-          <span>{t('appSettingsWebMobileApp.toUnlockText')}</span>
-        </div>
+        <CustomDomainPlanNote
+          appId={appId}
+          legacyButtonKey="appSettingsWebMobileApp.upgradeToBusinessButton"
+          legacyUnlockKey="appSettingsWebMobileApp.toUnlockText"
+        />
       </div>
 
       <p className="font-sans text-base font-semibold mb-2">
