@@ -8,6 +8,7 @@ import { actionCreateAgent, actionCreateApp, actionInviteAgentToChat, actionSetB
 import { httpAgentDocsUpload, httpAgentSiteCrawl, httpPrepareWidgetAgent, httpUpdateApp } from '../http';
 import { ModelAgent, ModelApp } from '../models';
 import { phCapture } from '../posthog';
+import { isAccountIncompleteError } from './createAppError'
 
 export type WebsiteAssistantStage = 'creatingApp' | 'creatingAgent' | 'connecting' | 'addingWebsite' | 'uploadingDocs';
 
@@ -106,6 +107,7 @@ export async function createWebsiteAssistant(
     return { app: progress.app as ModelApp, agent, jobId, crawlError };
   } catch (e) {
     if (e instanceof WebsiteAssistantError) throw e;
+    if (isAccountIncompleteError(e)) throw new WebsiteAssistantError('accountIncomplete');
     const err = e as { message?: string; response?: { data?: { error?: string } } };
     throw new WebsiteAssistantError(err.response?.data?.error || err.message || 'failed', step !== 'other' && !err.response);
   }
