@@ -40,6 +40,7 @@ import {
 import { env } from './config/env';
 import { attachRestartRetry } from './utils/serverRestart';
 import { suspensionFromError } from './utils/suspension';
+import { rewriteAccountIncompleteError } from './utils/createAppError';
 export const httpTokens = {
   appJwt: '',
   _token: localStorage.getItem('token-538') || '',
@@ -206,6 +207,7 @@ function attachAuthInterceptors(client: AxiosInstance) {
   }, null);
 
   client.interceptors.response.use(null, async (error) => {
+    rewriteAccountIncompleteError(error);
     // 403 USER_SUSPENDED: the account is suspended. Never retried or
     // refreshed (the refresh endpoint answers the same). For a signed-in call,
     // the token refresh included, the session is torn down through the normal
