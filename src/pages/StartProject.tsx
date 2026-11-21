@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { actionCreateApp } from '../actions';
+import { isAccountIncompleteError } from '../utils/createAppError';
 import { GoalIllustration } from '../components/GoalIllustration';
 import { BookACallModal } from '../components/modal/BookACallModal';
 import { env } from '../config/env';
@@ -140,6 +141,10 @@ export default function StartProject() {
     } catch (e) {
       const err = e as WebsiteAssistantError;
       if (err.uncertain) setUncertain(true);
+      if (err.message === 'accountIncomplete') {
+        setError(t('startProject.accountIncomplete'));
+        return;
+      }
       const key = `onboarding.error.${err.message}`;
       const translated = t(key);
       setError(translated === key ? err.message : translated);
@@ -166,7 +171,11 @@ export default function StartProject() {
       finishOnboarding();
       navigate(`/app/admin/apps/${app._id}`, { state: { justCreated: true } });
     } catch (e) {
-      setError((e as { response?: { data?: { error?: string } } })?.response?.data?.error || t('startProject.createFailed'));
+      setError(
+        isAccountIncompleteError(e)
+          ? t('startProject.accountIncomplete')
+          : (e as { response?: { data?: { error?: string } } })?.response?.data?.error || t('startProject.createFailed')
+      );
     } finally {
       setBusy(false);
       setStage('');

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { actionCreateApp } from '../../actions';
+import { isAccountIncompleteError } from '../../utils/createAppError';
 import { CopyButton } from '../../components/CopyButton';
 import { httpGetSiteCrawlJob, httpTryCreate, httpTryPrepare, TryDemo } from '../../http';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -90,7 +91,7 @@ export default function TryStart() {
       };
       void poll();
     } catch (e) {
-      setError(apiError(e, t('tryDemo.error.generic')));
+      setError(isAccountIncompleteError(e) ? t('startProject.accountIncomplete') : apiError(e, t('tryDemo.error.generic')));
       setPhase('error');
     }
   };
