@@ -7,5 +7,9 @@ export function isForbidden(error: unknown): boolean {
 }
 
 export function accessErrorMessage(error: unknown, t: TFn): string {
-  return isForbidden(error) ? t('accessError.noPermission') : apiError(error).message;
+  const info = apiError(error);
+  // An incomplete account (see utils/createAppError.ts) is not a permission
+  // matter: the API client already put the readable message in place.
+  if (info.code === 'ACCOUNT_INCOMPLETE') return info.message;
+  return isForbidden(error) ? t('accessError.noPermission') : info.message;
 }
