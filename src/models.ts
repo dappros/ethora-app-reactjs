@@ -1035,7 +1035,15 @@ export interface ServerStatus {
   services: Array<{ key: string; label: string; ok: boolean | null; detail?: string | null }>;
   disk: { totalBytes: number; freeBytes: number } | null;
   certificates: Array<{ host: string; validTo: string | null; daysLeft: number | null; error?: string | null }>;
-  license: { state: string | null; tier: string | null; lastContactAt: string | null; lastContactStatus: string | null };
+  license: {
+    state: string | null;
+    tier: string | null;
+    lastContactAt: string | null;
+    lastContactStatus: string | null;
+    // 'aws-marketplace' when the licence is billed through AWS Marketplace (older APIs omit it).
+    channel?: LicenseChannel | null;
+    aws?: { instanceId: string; accountId: string | null; region: string | null } | null;
+  };
   checkedAt: string;
   // How long the server and each part have been up (older APIs omit it).
   uptime?: {
@@ -1136,6 +1144,14 @@ export interface ServerSettingsResponse {
 export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
 // Edition the install runs as. core = Ethora Core, unregistered (no key).
 export type LicenseTier = 'core' | 'core-registered' | 'trial' | 'enterprise';
+// How the licence is billed; only AWS Marketplace keys have a channel today.
+export type LicenseChannel = 'aws-marketplace';
+// AWS Marketplace keys: the EC2 instance the key is bound to.
+export interface LicenseAwsClaim {
+  instanceId: string;
+  accountId: string | null;
+  region: string | null;
+}
 
 export interface LicenseStatus {
   state: LicenseState;
@@ -1147,8 +1163,21 @@ export interface LicenseStatus {
     | 'domain_mismatch'
     | 'not_yet_valid'
     | 'expired'
-    | 'call_home_overdue';
+    | 'call_home_overdue'
+    | 'aws_instance_mismatch'
+    | 'aws_instance_unverified';
   source: 'env' | 'stored' | 'none';
+  // 'aws-marketplace' for keys issued through AWS Marketplace; older APIs omit it.
+  channel?: LicenseChannel | null;
+  // AWS Marketplace keys: the bound instance and the last instance metadata check.
+  aws?: (LicenseAwsClaim & {
+    check: {
+      status: 'pending' | 'match' | 'mismatch' | 'unreachable' | 'disabled';
+      verifiedAt: string | null;
+      checkedAt: string | null;
+      observedInstanceId: string | null;
+    };
+  }) | null;
   checkedAt: string;
   installedAt: string;
   graceEndsAt: string | null;
@@ -1171,6 +1200,7 @@ export interface LicenseStatus {
     features: string[];
     limits: Record<string, number>;
     offline: boolean;
+    aws?: LicenseAwsClaim | null;
   } | null;
   keyError: { reason: string; mismatchedHosts: string[] } | null;
   // Pull credential for the private Enterprise module images (Docker Hub),
