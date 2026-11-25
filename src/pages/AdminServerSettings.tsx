@@ -946,6 +946,7 @@ export default function AdminServerSettings() {
               <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('serverSettings.status.license')}</div>
               <div className="text-gray-800">
                 {licenseLabel(st.license.tier, st.license.state)}
+                {st.license.channel === 'aws-marketplace' && <span>{`, ${t('serverSettings.status.licenseAws')}`}</span>}
                 <span className="text-gray-500">
                   {' '}{t('serverSettings.status.lastContact').replace('{when}', relTime(st.license.lastContactAt))}
                   {st.license.lastContactStatus && st.license.lastContactAt ? ` (${st.license.lastContactStatus})` : ''}

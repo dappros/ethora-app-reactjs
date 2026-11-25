@@ -41,6 +41,10 @@ export default function AdminLicense() {
 
   const isCore = status?.tier === 'core' || status?.tier === 'core-registered';
   const unregistered = status?.tier === 'core';
+  // Licensed through AWS Marketplace: the key comes with the paid AMI and is
+  // renewed by the license server, so there is no key to enter while it holds.
+  const aws = status?.channel === 'aws-marketplace' && status.aws ? status.aws : null;
+  const awsActive = Boolean(aws) && !status?.keyError;
 
   const submit = async () => {
     const trimmed = key.replace(/\s+/g, '');
@@ -141,7 +145,16 @@ export default function AdminLicense() {
     if (!status) return '-';
     if (status.tier === 'core') return t('adminLicense.notApplicable');
     if (status.tier === 'core-registered') return t('adminLicense.neverExpires');
+    if (aws) return `${fmtDate(status.license?.expiresAt)} (${t('adminLicense.awsRenews')})`;
     return fmtDate(status.license?.expiresAt);
+  };
+
+  const awsInstanceText = () => {
+    if (!aws) return '-';
+    const check = t(`adminLicense.awsCheck.${aws.check.status}`)
+      .replace('{date}', fmtDate(aws.check.verifiedAt))
+      .replace('{observed}', aws.check.observedInstanceId || '?');
+    return `${aws.instanceId} (${check})`;
   };
 
   const supportText = () => {
@@ -165,6 +178,12 @@ export default function AdminLicense() {
         [t('adminLicense.rowCustomer'), status.license?.customer || '-'],
         [t('adminLicense.rowDomain'), status.license?.domain || '-'],
         [t('adminLicense.rowSupport'), supportText()],
+        ...(aws
+          ? [
+              [t('adminLicense.rowBilling'), t('adminLicense.billingAws')] as [string, string],
+              [t('adminLicense.rowAwsInstance'), awsInstanceText()] as [string, string],
+            ]
+          : []),
         [t('adminLicense.rowSource'), t(`licenseSource.${status.source}${status.source === 'env' ? kind : ''}`)],
         [t('adminLicense.rowInstalled'), fmtDate(status.installedAt)],
         [t('adminLicense.rowHosts'), status.hosts.join(', ') || '-'],
@@ -210,6 +229,18 @@ export default function AdminLicense() {
                   {status.keyError.mismatchedHosts.length > 0 && (
                     <div className="mt-1 text-xs">{t('adminLicense.mismatchedHosts')}: {status.keyError.mismatchedHosts.join(', ')}</div>
                   )}
+                </div>
+              )}
+
+              {aws && awsActive && (
+                <div className="mb-6 rounded-xl bg-green-50 border border-green-200 text-green-900 dark:bg-green-950/30 dark:border-green-900/60 dark:text-green-300 p-4 text-sm">
+                  <div className="font-semibold">
+                    {t('adminLicense.awsLicensed')
+                      .replace('{instance}', aws.instanceId)
+                      .replace('{account}', aws.accountId || '-')
+                      .replace('{region}', aws.region || '-')}
+                  </div>
+                  <div className="mt-1">{t('adminLicense.awsBilling')}</div>
                 </div>
               )}
 
@@ -296,47 +327,49 @@ export default function AdminLicense() {
             </div>
           )}
 
-          <div className="rounded-2xl bg-gray-50 p-6 md:p-8">
-            <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.installHeading')}</h3>
-            <p className="font-sans text-sm text-gray-600 mb-4">
-              {canEdit ? t('adminLicense.installBody') : t('adminLicense.adminOnly')}
-            </p>
-            <textarea
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-              disabled={!canEdit || busy}
-              rows={4}
-              spellCheck={false}
-              placeholder="ETHORA1...."
-              className="w-full rounded-xl border border-gray-300 p-3 font-mono text-xs mb-3 disabled:opacity-60"
-            />
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={submit}
-                disabled={!canEdit || busy || !key.trim()}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm disabled:opacity-50"
-              >
-                {t('adminLicense.apply')}
-              </button>
-              {canEdit && status?.source === 'stored' && (
+          {!awsActive && (
+            <div className="rounded-2xl bg-gray-50 p-6 md:p-8">
+              <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.installHeading')}</h3>
+              <p className="font-sans text-sm text-gray-600 mb-4">
+                {canEdit ? t('adminLicense.installBody') : t('adminLicense.adminOnly')}
+              </p>
+              <textarea
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                disabled={!canEdit || busy}
+                rows={4}
+                spellCheck={false}
+                placeholder="ETHORA1...."
+                className="w-full rounded-xl border border-gray-300 p-3 font-mono text-xs mb-3 disabled:opacity-60"
+              />
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={remove}
-                  disabled={busy}
-                  className="text-sm text-gray-600 underline disabled:opacity-50"
+                  onClick={submit}
+                  disabled={!canEdit || busy || !key.trim()}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-darker font-sans text-sm disabled:opacity-50"
                 >
-                  {t('adminLicense.remove')}
+                  {t('adminLicense.apply')}
                 </button>
-              )}
-              {message && !unregistered && (
-                <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
+                {canEdit && status?.source === 'stored' && (
+                  <button
+                    type="button"
+                    onClick={remove}
+                    disabled={busy}
+                    className="text-sm text-gray-600 underline disabled:opacity-50"
+                  >
+                    {t('adminLicense.remove')}
+                  </button>
+                )}
+                {message && !unregistered && (
+                  <span className={cn('text-sm', message.kind === 'ok' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>{message.text}</span>
+                )}
+              </div>
+              {status?.source === 'env' && (
+                <p className="mt-4 text-xs text-gray-500">{t(`adminLicense.envKeyNote${kind}`)}</p>
               )}
             </div>
-            {status?.source === 'env' && (
-              <p className="mt-4 text-xs text-gray-500">{t(`adminLicense.envKeyNote${kind}`)}</p>
-            )}
-          </div>
+          )}
 
           <p className="mt-6 text-xs text-gray-500">
             <a href={LICENSE_TEXT_URL} target="_blank" rel="noreferrer" className="underline">{t('adminLicense.licenseTextLink')}</a>
