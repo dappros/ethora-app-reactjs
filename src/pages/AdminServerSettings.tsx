@@ -747,13 +747,20 @@ export default function AdminServerSettings() {
       (state === 'pending' || state === 'skipped') && 'bg-gray-300',
     );
 
+  // A rollback is possible whenever the updater knows an earlier build and it
+  // is not the one running, whatever happened to the last job (a cancelled
+  // rollback leaves the same choice as before it started).
+  const runningBuild = update?.updater?.running || update?.current || null;
+  const rollbackTarget =
+    canEdit && update?.updater?.previous && update.updater.previous !== runningBuild ? update.updater.previous : null;
+
   // Progress of an update / rollback, then its outcome.
   const renderJob = (j: UpdaterJob) => {
     const active = isJobActive(j);
     const previous = update?.updater?.previous || null;
     const notBefore = j.notBefore ? Date.parse(j.notBefore) : NaN;
     const countdown = active && Number.isFinite(notBefore) && notBefore > now ? formatCountdown(notBefore - now) : null;
-    const canRollBack = canEdit && !active && (j.state === 'succeeded' || j.state === 'failed') && Boolean(previous) && previous !== j.target;
+    const canRollBack = !active && rollbackTarget !== null;
     return (
       <div
         role="status"
@@ -868,6 +875,13 @@ export default function AdminServerSettings() {
               )}
               {st.update.checked && !st.update.available && <div className="mt-1 text-green-700">{t('serverSettings.status.upToDate')}</div>}
               {job && hiddenJob !== job.id && renderJob(job)}
+              {rollbackTarget && !isJobActive(job) && (!job || hiddenJob === job.id) && (
+                <div className="mt-2">
+                  <button type="button" onClick={() => openUpdate('rollback')} disabled={updateBusy || restartRunning} className="text-sm text-brand-500 underline disabled:opacity-50">
+                    {fill(t('serverSettings.update.rollback'), { previous: rollbackTarget })}
+                  </button>
+                </div>
+              )}
               {!st.update.checked && (
                 <div className="mt-1 text-gray-500">{st.update.reason === 'offline' ? t('serverSettings.status.updateOff') : t('serverSettings.status.updateUnknown')}</div>
               )}
