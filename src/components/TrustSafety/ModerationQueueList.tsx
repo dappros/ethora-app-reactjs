@@ -51,9 +51,13 @@ function scoreEntries(item: ModerationItem) {
   return { chips, lists };
 }
 
-const roomLabel = (item: ModerationItem) => {
+// A private room is `${appId}_${a}-${appId}_${b}`.
+const isPrivateRoom = (room?: string | null) => /^[a-f0-9]{24}_[a-f0-9]{24}-[a-f0-9]{24}_[a-f0-9]{24}$/i.test(String(room || '').split('@')[0]);
+
+const roomLabel = (item: ModerationItem, privateLabel = '') => {
   if (item.roomTitle) return item.roomTitle;
   if (!item.room) return '';
+  if (privateLabel && isPrivateRoom(item.room)) return privateLabel;
   return item.room.split('@')[0];
 };
 
@@ -262,10 +266,10 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
               )}
             </div>
           )}
-          {roomLabel(item) && (
+          {roomLabel(item, t('trustSafetyModeration.privateChat')) && (
             <div>
               <span className="text-gray-500">{t('trustSafetyModeration.col.room')}: </span>
-              <span className="break-all">{roomLabel(item)}</span>
+              <span className="break-all" title={item.room || ''}>{roomLabel(item, t('trustSafetyModeration.privateChat'))}</span>
             </div>
           )}
           <div>
@@ -311,7 +315,7 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
               onClick={onSuspend}
               className="ml-auto rounded-xl px-3 py-1.5 text-sm border border-red-400 bg-red-400 text-white hover:bg-red-300 disabled:opacity-50"
             >
-              {t('trustSafetyModeration.suspendSender')}
+              {t(item.kind === 'room' ? 'trustSafetyModeration.suspendReported' : 'trustSafetyModeration.suspendSender')}
             </button>
           )}
         </div>
