@@ -1040,9 +1040,11 @@ export interface ServerStatus {
     tier: string | null;
     lastContactAt: string | null;
     lastContactStatus: string | null;
-    // 'aws-marketplace' when the licence is billed through AWS Marketplace (older APIs omit it).
+    // 'aws-marketplace' / 'azure-marketplace' when the licence is billed through
+    // that cloud's Marketplace (older APIs omit it).
     channel?: LicenseChannel | null;
     aws?: { instanceId: string; accountId: string | null; region: string | null } | null;
+    azure?: LicenseAzureClaim | null;
   };
   checkedAt: string;
   // How long the server and each part have been up (older APIs omit it).
@@ -1144,13 +1146,18 @@ export interface ServerSettingsResponse {
 export type LicenseState = 'licensed' | 'grace' | 'unlicensed';
 // Edition the install runs as. core = Ethora Core, unregistered (no key).
 export type LicenseTier = 'core' | 'core-registered' | 'trial' | 'enterprise';
-// How the licence is billed; only AWS Marketplace keys have a channel today.
-export type LicenseChannel = 'aws-marketplace';
+// How the licence is billed; only cloud Marketplace keys have a channel today.
+export type LicenseChannel = 'aws-marketplace' | 'azure-marketplace';
 // AWS Marketplace keys: the EC2 instance the key is bound to.
 export interface LicenseAwsClaim {
   instanceId: string;
   accountId: string | null;
   region: string | null;
+}
+// Azure Marketplace keys: the Azure VM the key is bound to.
+export interface LicenseAzureClaim {
+  vmId: string;
+  subscriptionId: string | null;
 }
 
 export interface LicenseStatus {
@@ -1165,9 +1172,12 @@ export interface LicenseStatus {
     | 'expired'
     | 'call_home_overdue'
     | 'aws_instance_mismatch'
-    | 'aws_instance_unverified';
+    | 'aws_instance_unverified'
+    | 'azure_instance_mismatch'
+    | 'azure_instance_unverified';
   source: 'env' | 'stored' | 'none';
-  // 'aws-marketplace' for keys issued through AWS Marketplace; older APIs omit it.
+  // 'aws-marketplace' / 'azure-marketplace' for keys issued through that
+  // cloud's Marketplace; older APIs omit it.
   channel?: LicenseChannel | null;
   // AWS Marketplace keys: the bound instance and the last instance metadata check.
   aws?: (LicenseAwsClaim & {
@@ -1176,6 +1186,15 @@ export interface LicenseStatus {
       verifiedAt: string | null;
       checkedAt: string | null;
       observedInstanceId: string | null;
+    };
+  }) | null;
+  // Azure Marketplace keys: the bound VM and the last instance metadata check.
+  azure?: (LicenseAzureClaim & {
+    check: {
+      status: 'pending' | 'match' | 'mismatch' | 'unreachable' | 'disabled';
+      verifiedAt: string | null;
+      checkedAt: string | null;
+      observedVmId: string | null;
     };
   }) | null;
   checkedAt: string;
@@ -1201,6 +1220,7 @@ export interface LicenseStatus {
     limits: Record<string, number>;
     offline: boolean;
     aws?: LicenseAwsClaim | null;
+    azure?: LicenseAzureClaim | null;
   } | null;
   keyError: { reason: string; mismatchedHosts: string[] } | null;
   // Pull credential for the private Enterprise module images (Docker Hub),

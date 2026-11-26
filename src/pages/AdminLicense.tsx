@@ -44,7 +44,9 @@ export default function AdminLicense() {
   // Licensed through AWS Marketplace: the key comes with the paid AMI and is
   // renewed by the license server, so there is no key to enter while it holds.
   const aws = status?.channel === 'aws-marketplace' && status.aws ? status.aws : null;
-  const awsActive = Boolean(aws) && !status?.keyError;
+  // The same for Azure Marketplace (paid Azure VM image).
+  const azure = status?.channel === 'azure-marketplace' && status.azure ? status.azure : null;
+  const marketplaceActive = Boolean(aws || azure) && !status?.keyError;
 
   const submit = async () => {
     const trimmed = key.replace(/\s+/g, '');
@@ -146,6 +148,7 @@ export default function AdminLicense() {
     if (status.tier === 'core') return t('adminLicense.notApplicable');
     if (status.tier === 'core-registered') return t('adminLicense.neverExpires');
     if (aws) return `${fmtDate(status.license?.expiresAt)} (${t('adminLicense.awsRenews')})`;
+    if (azure) return `${fmtDate(status.license?.expiresAt)} (${t('adminLicense.azureRenews')})`;
     return fmtDate(status.license?.expiresAt);
   };
 
@@ -155,6 +158,15 @@ export default function AdminLicense() {
       .replace('{date}', fmtDate(aws.check.verifiedAt))
       .replace('{observed}', aws.check.observedInstanceId || '?');
     return `${aws.instanceId} (${check})`;
+  };
+
+  // The check texts are cloud neutral, so the Azure row reuses them.
+  const azureVmText = () => {
+    if (!azure) return '-';
+    const check = t(`adminLicense.awsCheck.${azure.check.status}`)
+      .replace('{date}', fmtDate(azure.check.verifiedAt))
+      .replace('{observed}', azure.check.observedVmId || '?');
+    return `${azure.vmId} (${check})`;
   };
 
   const supportText = () => {
@@ -182,6 +194,13 @@ export default function AdminLicense() {
           ? [
               [t('adminLicense.rowBilling'), t('adminLicense.billingAws')] as [string, string],
               [t('adminLicense.rowAwsInstance'), awsInstanceText()] as [string, string],
+            ]
+          : []),
+        ...(azure
+          ? [
+              [t('adminLicense.rowBilling'), t('adminLicense.billingAzure')] as [string, string],
+              [t('adminLicense.rowAzureVm'), azureVmText()] as [string, string],
+              [t('adminLicense.rowAzureSubscription'), azure.subscriptionId || '-'] as [string, string],
             ]
           : []),
         [t('adminLicense.rowSource'), t(`licenseSource.${status.source}${status.source === 'env' ? kind : ''}`)],
@@ -232,7 +251,7 @@ export default function AdminLicense() {
                 </div>
               )}
 
-              {aws && awsActive && (
+              {aws && marketplaceActive && (
                 <div className="mb-6 rounded-xl bg-green-50 border border-green-200 text-green-900 dark:bg-green-950/30 dark:border-green-900/60 dark:text-green-300 p-4 text-sm">
                   <div className="font-semibold">
                     {t('adminLicense.awsLicensed')
@@ -241,6 +260,17 @@ export default function AdminLicense() {
                       .replace('{region}', aws.region || '-')}
                   </div>
                   <div className="mt-1">{t('adminLicense.awsBilling')}</div>
+                </div>
+              )}
+
+              {azure && marketplaceActive && (
+                <div className="mb-6 rounded-xl bg-green-50 border border-green-200 text-green-900 dark:bg-green-950/30 dark:border-green-900/60 dark:text-green-300 p-4 text-sm">
+                  <div className="font-semibold">
+                    {t('adminLicense.azureLicensed')
+                      .replace('{vm}', azure.vmId)
+                      .replace('{subscription}', azure.subscriptionId || '-')}
+                  </div>
+                  <div className="mt-1">{t('adminLicense.azureBilling')}</div>
                 </div>
               )}
 
@@ -327,7 +357,7 @@ export default function AdminLicense() {
             </div>
           )}
 
-          {!awsActive && (
+          {!marketplaceActive && (
             <div className="rounded-2xl bg-gray-50 p-6 md:p-8">
               <h3 className="font-varela text-[18px] md:text-[20px] mb-3">{t('adminLicense.installHeading')}</h3>
               <p className="font-sans text-sm text-gray-600 mb-4">
