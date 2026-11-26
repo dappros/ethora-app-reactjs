@@ -272,7 +272,7 @@ export const SUSPENSION_NAME_MODES: SuspensionNameMode[] = ['keep', 'suspended']
 // ---- Moderation queue ----
 
 // `custom` = an install rule matched (T&S > Rules); the item keeps the rule's name.
-export const MODERATION_CATEGORIES = ['nudity', 'revealing', 'toxicity', 'severe', 'pii', 'phi', 'custom', 'suspension'];
+export const MODERATION_CATEGORIES = ['nudity', 'revealing', 'toxicity', 'severe', 'pii', 'phi', 'custom', 'suspension', 'spam', 'violence', 'sexual', 'drugs', 'other'];
 
 /** The name of the rule behind a `custom` item, when the API sends it. */
 export function ruleNameOf(item: Pick<ModerationItem, 'category' | 'ruleName' | 'rule' | 'scores'>): string {
@@ -308,6 +308,9 @@ const itemIsHidden = (i: ModerationItem) => ['hide', 'hidden', 'hold', 'block', 
  * items that were hidden or blurred can be restored.
  */
 export function moderationActionsFor(item: ModerationItem): ModerationAction[] {
+  // A reported room (section 18): resolve (approve) or dismiss; acting on the
+  // people involved goes through suspension.
+  if (item.kind === 'room') return item.status === 'open' ? ['approve', 'dismiss'] : [];
   if (item.status !== 'open') {
     return item.status === 'removed' || itemIsHidden(item) || item.action === 'blur' ? ['restore'] : [];
   }

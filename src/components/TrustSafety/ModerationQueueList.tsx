@@ -59,6 +59,9 @@ const roomLabel = (item: ModerationItem) => {
 
 const idOf = (item: ModerationItem) => item._id || item.id || '';
 
+const personName = (p?: { firstName?: string; lastName?: string; email?: string } | null) =>
+  `${p?.firstName || ''} ${p?.lastName || ''}`.trim() || p?.email || '';
+
 const formatTime = (iso?: string | null) => {
   if (!iso) return '';
   const d = DateTime.fromISO(iso);
@@ -97,6 +100,8 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
   const { chips, lists } = scoreEntries(item);
   const signals = mediaSignalsOf(item);
   const actions = moderationActionsFor(item);
+  // A reported room's approve means "resolved" (section 18).
+  const actionKey = (a: string) => (item.kind === 'room' && a === 'approve' ? 'resolve' : a);
   const categoryKey = `trustSafetyModeration.category.${item.category}`;
   const categoryLabel = item.category ? (t(categoryKey) === categoryKey ? item.category : t(categoryKey)) : '';
   const ruleName = ruleNameOf(item);
@@ -237,13 +242,26 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
               </Link>
             </div>
           )}
-          <div>
-            <span className="text-gray-500">{t('trustSafetyModeration.col.sender')}: </span>
-            <span className="text-gray-800 break-words">{senderName()}</span>
-            {item.sender?.email && senderName() !== item.sender.email && (
-              <span className="block text-gray-500 break-all">{item.sender.email}</span>
-            )}
-          </div>
+          {item.kind === 'room' && (
+            <div>
+              <span className="text-gray-500">{t('trustSafetyModeration.col.reporter')}: </span>
+              <span className="text-gray-800 break-words">{personName(item.reporter) || item.reporterUserId || t('trustSafetyModeration.unknownSender')}</span>
+              {item.reporter?.email && personName(item.reporter) !== item.reporter.email && (
+                <span className="block text-gray-500 break-all">{item.reporter.email}</span>
+              )}
+            </div>
+          )}
+          {(item.kind !== 'room' || item.senderUserId) && (
+            <div>
+              <span className="text-gray-500">
+                {t(item.kind === 'room' ? 'trustSafetyModeration.col.reportedUser' : 'trustSafetyModeration.col.sender')}:{' '}
+              </span>
+              <span className="text-gray-800 break-words">{senderName()}</span>
+              {item.sender?.email && senderName() !== item.sender.email && (
+                <span className="block text-gray-500 break-all">{item.sender.email}</span>
+              )}
+            </div>
+          )}
           {roomLabel(item) && (
             <div>
               <span className="text-gray-500">{t('trustSafetyModeration.col.room')}: </span>
@@ -272,7 +290,7 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
               key={a}
               type="button"
               disabled={busy}
-              title={t(`trustSafetyModeration.action.${a}Title`)}
+              title={t(`trustSafetyModeration.action.${actionKey(a)}Title`)}
               onClick={() => onAction(a)}
               className={cn(
                 'rounded-xl px-3 py-1.5 text-sm border disabled:opacity-50',
@@ -283,7 +301,7 @@ export function ModerationItemCard({ item, busy, showApp, onAction, onSuspend }:
                     : 'border-gray-300 text-gray-800 hover:bg-gray-50'
               )}
             >
-              {t(`trustSafetyModeration.action.${a}`)}
+              {t(`trustSafetyModeration.action.${actionKey(a)}`)}
             </button>
           ))}
           {item.senderUserId && onSuspend && (
@@ -450,6 +468,7 @@ export function ModerationFilterBar({ status, kind, category, onChange, children
         <option value="">{t('trustSafetyModeration.kind.all')}</option>
         <option value="message">{t('trustSafetyModeration.kind.message')}</option>
         <option value="media">{t('trustSafetyModeration.kind.media')}</option>
+        <option value="room">{t('trustSafetyModeration.kind.room')}</option>
       </select>
       <select
         aria-label={t('trustSafetyModeration.filter.category')}
