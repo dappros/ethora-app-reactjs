@@ -66,7 +66,7 @@ test('nothing to report: low, no check on record, a failed check', () => {
 });
 
 test('another category decided without image signals', () => {
-  assert.deepEqual(sum({ status: 'held', category: 'violence', score: 80, labels: [], signals: null }), ['Flagged as violence 80%']);
+  assert.deepEqual(sum({ status: 'held', category: 'violence', score: 80, labels: [], signals: null }), ['Flagged as Violence 80%']);
 });
 
 test('label words: known codes mapped, unknown ones readable', () => {
