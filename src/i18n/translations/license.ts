@@ -72,6 +72,16 @@ export const license = {
     'adminLicense.awsCheck.mismatch': 'this server is {observed}',
     'adminLicense.awsCheck.unreachable': 'metadata service unreachable, last confirmed {date}',
     'adminLicense.awsCheck.disabled': 'check turned off',
+    'licenseReason.azure_instance_mismatch':
+      'This Azure Marketplace license was activated on another Azure VM. It only works on that VM: run the license step of the setup on this VM, or install another key.',
+    'licenseReason.azure_instance_unverified':
+      'This Azure VM could not be confirmed through the Azure instance metadata service for more than 72 hours. Check that the server can reach 169.254.169.254.',
+    'adminLicense.azureLicensed': 'Licensed through Azure Marketplace (VM {vm}, subscription {subscription})',
+    'adminLicense.azureBilling': 'Billed by Azure with your VM; manage it in the Azure portal under SaaS/Marketplace purchases.',
+    'adminLicense.azureRenews': 'renewed automatically while the VM runs',
+    'adminLicense.billingAzure': 'Azure Marketplace',
+    'adminLicense.rowAzureVm': 'Azure VM',
+    'adminLicense.rowAzureSubscription': 'Azure subscription',
 
     'licenseSource.env': 'deploy.yml (environment)',
     'licenseSource.env.compose': '.env (ETHORA_LICENSE_KEY)',
@@ -199,6 +209,16 @@ export const license = {
     'adminLicense.awsCheck.mismatch': 'ce serveur est {observed}',
     'adminLicense.awsCheck.unreachable': 'service de métadonnées injoignable, dernière confirmation le {date}',
     'adminLicense.awsCheck.disabled': 'vérification désactivée',
+    'licenseReason.azure_instance_mismatch':
+      "Cette licence Azure Marketplace a été activée sur une autre VM Azure. Elle ne fonctionne que sur cette VM : lancez l'étape licence de l'installation sur cette VM, ou installez une autre clé.",
+    'licenseReason.azure_instance_unverified':
+      "Cette VM Azure n'a pas pu être confirmée par le service de métadonnées d'instance Azure depuis plus de 72 heures. Vérifiez que le serveur peut joindre 169.254.169.254.",
+    'adminLicense.azureLicensed': 'Licence via Azure Marketplace (VM {vm}, abonnement {subscription})',
+    'adminLicense.azureBilling': "Facturé par Azure avec votre VM ; gérez-le dans le portail Azure sous SaaS/Marketplace purchases.",
+    'adminLicense.azureRenews': 'renouvelée automatiquement tant que la VM tourne',
+    'adminLicense.billingAzure': 'Azure Marketplace',
+    'adminLicense.rowAzureVm': 'VM Azure',
+    'adminLicense.rowAzureSubscription': 'Abonnement Azure',
 
     'licenseSource.env': 'deploy.yml (environnement)',
     'licenseSource.env.compose': '.env (ETHORA_LICENSE_KEY)',
@@ -326,6 +346,16 @@ export const license = {
     'adminLicense.awsCheck.mismatch': 'este servidor es {observed}',
     'adminLicense.awsCheck.unreachable': 'servicio de metadatos inaccesible, última confirmación el {date}',
     'adminLicense.awsCheck.disabled': 'comprobación desactivada',
+    'licenseReason.azure_instance_mismatch':
+      'Esta licencia de Azure Marketplace se activó en otra VM de Azure. Solo funciona en esa VM: ejecute el paso de licencia de la instalación en esta VM o instale otra clave.',
+    'licenseReason.azure_instance_unverified':
+      'No se ha podido confirmar esta VM de Azure mediante el servicio de metadatos de instancia de Azure durante más de 72 horas. Compruebe que el servidor puede acceder a 169.254.169.254.',
+    'adminLicense.azureLicensed': 'Licencia a través de Azure Marketplace (VM {vm}, suscripción {subscription})',
+    'adminLicense.azureBilling': 'Azure lo factura junto con su VM; gestiónelo en el portal de Azure en SaaS/Marketplace purchases.',
+    'adminLicense.azureRenews': 'se renueva automáticamente mientras la VM está en marcha',
+    'adminLicense.billingAzure': 'Azure Marketplace',
+    'adminLicense.rowAzureVm': 'VM de Azure',
+    'adminLicense.rowAzureSubscription': 'Suscripción de Azure',
 
     'licenseSource.env': 'deploy.yml (entorno)',
     'licenseSource.env.compose': '.env (ETHORA_LICENSE_KEY)',
