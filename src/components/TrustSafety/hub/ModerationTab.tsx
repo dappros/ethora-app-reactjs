@@ -22,7 +22,7 @@ export function ModerationTab() {
   const [searchParams, setSearchParams] = useSearchParams();
   const status: ModerationStatusFilter = searchParams.get('status') === 'resolved' ? 'resolved' : 'open';
   const kindParam = searchParams.get('kind') || '';
-  const kind = kindParam === 'message' || kindParam === 'media' ? kindParam : '';
+  const kind = kindParam === 'message' || kindParam === 'media' || kindParam === 'room' ? kindParam : '';
   const categoryParam = searchParams.get('category') || '';
   const category = MODERATION_CATEGORIES.includes(categoryParam) ? categoryParam : '';
   const appId = (searchParams.get('appId') || '').trim();

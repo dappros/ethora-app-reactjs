@@ -475,7 +475,8 @@ export interface MyAge {
   canDeclareAdult: boolean;
 }
 
-export type ModerationItemKind = 'message' | 'media';
+// 'room': a user's report of a chat room (section 18).
+export type ModerationItemKind = 'message' | 'media' | 'room';
 export type ModerationItemStatus = 'open' | 'approved' | 'removed' | 'dismissed';
 export type ModerationAction = 'dismiss' | 'approve' | 'blur' | 'hide' | 'delete' | 'restore';
 
@@ -510,6 +511,10 @@ export interface ModerationItem {
   originId?: string | null;
   fileId?: string | null;
   senderUserId?: string | null;
+  // User reports (section 18): who reported, and the category they picked.
+  reporterUserId?: string | null;
+  reporter?: { _id?: string; firstName?: string; lastName?: string; email?: string } | null;
+  reportCategory?: string | null;
   // Sender details, when the API resolves them.
   sender?: { _id?: string; firstName?: string; lastName?: string; email?: string; profileImage?: string } | null;
   category?: string | null;
