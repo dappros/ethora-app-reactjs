@@ -81,9 +81,12 @@ function buildE2eeConfig(
     enabled: env.VITE_E2EE_ENABLED === 'true' && Boolean(appE2eeEnabled),
   };
 }
+export const PUSH_CLICK_PATH = '/app/chat';
+
 const webNotificationsConfig: NonNullable<ChatConfig['pushNotifications']> = {
   enabled: true,
   vapidPublicKey: env.VITE_VAPID_PUBLIC_KEY,
+  clickPath: PUSH_CLICK_PATH,
   permissionBanner: {
     enabled: true,
     showWhenBlocked: true,
