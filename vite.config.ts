@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 import { cspPlugin } from './vite-plugin-csp';
 import { wellKnownPlugin } from './vite-plugin-well-known';
+import { pushWorkerPlugin } from './vite-plugin-push-worker';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -10,7 +11,7 @@ export default defineConfig(({ mode }) => {
   return ({
   // cspPlugin is build-only (see vite-plugin-csp.ts) — the dev server
   // keeps working exactly as before.
-  plugins: [react(), cspPlugin(env), wellKnownPlugin(env)],
+  plugins: [react(), cspPlugin(env), wellKnownPlugin(env), pushWorkerPlugin()],
   css: {
     preprocessorOptions: {
       scss: {

@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 import { actionGetConfig } from './actions';
 import { Loading } from './components/Loading';
 import { ReconnectingBanner } from './components/ReconnectingBanner';
-import { buildPushNotificationsConfig } from './config/chatBootstrap';
+import { buildPushNotificationsConfig, PUSH_CLICK_PATH } from './config/chatBootstrap';
 import { useCaptureParams } from './hooks/useCaptureParams';
 import { useTrackUrl } from './hooks/useTrackUrl';
 import { withTracking } from './hooks/withTracking';
@@ -76,6 +76,7 @@ function App() {
     () => ({
       enabled: pushConfig.enabled,
       softAsk: pushConfig.softAsk,
+      clickPath: PUSH_CLICK_PATH,
       firebaseConfig: pushConfig.firebaseConfig,
       vapidPublicKey: env.VITE_VAPID_PUBLIC_KEY,
     }),
